@@ -5,9 +5,30 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(245, 245, 245);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+#root {
+  margin: 5%;
+  width: 90%;
+  height: 100%;
+}
+
+.imageViewer {
+  position: relative;
+}
+
+.action-overlay {
+  position: absolute;
+  opacity: 0.25;
+  overflow: visible;
+}
+
+.action-overlay:hover {
+  opacity: 0.5;
 }
