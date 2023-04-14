@@ -9,7 +9,7 @@ import {
 } from "react-grid-dnd";
 import { ImageViewer, Encoding, TransportLayer } from 'rosreact';
 import {useRef} from 'react';
-import { NavDriveForward, NavDriveBackward, NavRotateLeft, NavRotateRight } from './overlays'
+import { OverheadNavActionOverlay } from './overlays'
 
 // Navigation overhead fisheye videostream
 export const OverheadComponent = () => {
@@ -39,10 +39,7 @@ export const OverheadComponent = () => {
         <Card sx={{ maxWidth: 1000, transform: "rotate(90deg)" }}>
             <CardContent>
                     <div ref={contentRef} className="imageViewer" >
-                        <NavDriveForward width={width} height={height}/>
-                        <NavDriveBackward width={width} height={height}/>
-                        <NavRotateLeft width={width} height={height}/>
-                        <NavRotateRight width={width} height={height}/>
+                        <OverheadNavActionOverlay width={width} height={height}/>
                         <ImageViewer 
                             topic="/navigation_camera/image_raw" 
                             encoding={Encoding.ros} 

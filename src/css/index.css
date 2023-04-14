@@ -32,3 +32,11 @@ code {
 .action-overlay:hover {
   opacity: 0.5;
 }
+
+svg {
+  pointer-events: none;
+}
+
+path {
+  pointer-events: auto;
+}
