@@ -49,6 +49,6 @@ module.exports = {
     allowedHosts: ['slinky.hcrlab.cs.washington.edu'],
     static: path.join(__dirname, "dist"),
     compress: true,
-    port: 4000,
+    port: 3000,
   },
 };
