@@ -4,14 +4,17 @@ import { ROSJointState, ValidJoints } from '../util/util';
 import ROSLIB, { Message, Ros } from "roslib";
 
 var trajectoryClient: ROSLIB.ActionClient;
-var cmdVelTopic: ROSLIB.Topic
+var cmdVelTopic: ROSLIB.Topic;
+var switchToNavigationService: ROSLIB.Service;
+var switchToPositionService: ROSLIB.Service;
+export var robotMode: "navigation" | "position" = "position"
 
 export const Connect = () => {
     const [trigger, setTrigger] = useState(false);
     return (
         <div>
             <RosConnection url={"wss://localhost:9090"} autoConnect>
-            <TopicListProvider
+                <TopicListProvider
                     trigger={trigger} 
                     failedCallback={(e) => {console.log(e)}}
                 >
@@ -19,6 +22,8 @@ export const Connect = () => {
                 <SubscribeToJointState/>
                 <TrajectoryClient/>
                 <CmdVelTopic/>
+                <SwitchToNavigationService/>
+                <SwitchToPositionService/>
             </RosConnection>
         </div>
     );
@@ -34,7 +39,7 @@ const SubscribeToJointState = () => {
             messageType: 'sensor_msgs/JointState'
         });
     
-        jointStateTopic.subscribe(msg => {
+        jointStateTopic.subscribe((msg: Message) => {
             setJointState(msg);
         });
     }, []);
@@ -62,6 +67,44 @@ const CmdVelTopic = () => {
     });
 
     return (<></>)
+}
+
+const SwitchToNavigationService = () => {
+    const ros = useRos();
+    switchToNavigationService = new ROSLIB.Service({
+        ros: ros,
+        name: '/switch_to_navigation_mode',
+        serviceType: 'std_srvs/Trigger'
+    });
+
+    return(<></>)
+}
+
+const SwitchToPositionService = () => {
+    const ros = useRos();
+    switchToPositionService = new ROSLIB.Service({
+        ros: ros,
+        name: '/switch_to_position_mode',
+        serviceType: 'std_srvs/Trigger'
+    });
+
+    return(<></>)
+}
+
+export const SwitchToNavigationMode = () => {
+    var request = new ROSLIB.ServiceRequest({});
+    switchToNavigationService.callService(request, () => {
+        robotMode = "navigation"
+        console.log("Switched to navigation mode")
+    });
+}
+
+export const SwitchToPositionMode = () => {
+    var request = new ROSLIB.ServiceRequest({});
+    switchToPositionService.callService(request, () => {
+        robotMode = "position"
+        console.log("Switched to position mode")
+    });
 }
 
 export const ExecuteBaseVelocity = (props: {linVel: number, angVel: number}): void => {

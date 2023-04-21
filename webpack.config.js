@@ -21,7 +21,9 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
-              presets: ['@babel/preset-env', ["@babel/preset-react", {"runtime": "automatic"}], '@babel/preset-typescript', "module:metro-react-native-babel-preset",],
+              presets: [
+                ['@babel/preset-env', {'loose': true}], 
+                ["@babel/preset-react", {"runtime": "automatic"}], '@babel/preset-typescript', "module:metro-react-native-babel-preset",],
             },
           },
         ],
@@ -44,8 +46,9 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
   },
   devServer: {
+    allowedHosts: ['slinky.hcrlab.cs.washington.edu'],
     static: path.join(__dirname, "dist"),
     compress: true,
-    port: 3000,
+    port: 4000,
   },
 };
