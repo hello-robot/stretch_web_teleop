@@ -5,6 +5,7 @@ Create a new catkin workspace and clone the following packages:
 git clone https://github.com/hcrlab/hcrl_gazebo.git
 git clone https://github.com/hcrlab/stretch_ros.git
 git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git
+git clone 
 ```
 
 Run `rosdep install --from-paths . --ignore-src -y -r` in the workspace `src` folder to get all the package dependencies then build the workspace.
@@ -16,14 +17,18 @@ Run the following commands in separate terminals:
 ```
 roslaunch hcrl_gazebo house_simulation_stretch.launch
 roslaunch stretch-web-interface web_interface_simulation.launch
-rosrun web_video_server web_video_server
 ```
 
 These commands launch the simulation environment, rosbridge websocket and stream videos respectively.
 
-Run `npm run start` in the `stretch-web-interface` directory. A webpage will automatically open and you will see all video streams from navigation camera, realsense and gripper camera.
+Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:3000` in your web browser to see the interface.
 
-## Running the interface on the real robot
+## Installing the interface on the real robot
+Create a new catkin workspace and clone the following packages:
+```
+git clone https://github.com/hcrlab/stretch_ros.git
+```
+
 Run the following commands in separate terminals **on the robot**:
 ```
 roslaunch stretch-web-interface web_interface_simulation.launch
