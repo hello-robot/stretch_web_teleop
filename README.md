@@ -19,7 +19,7 @@ roslaunch hcrl_gazebo house_simulation_stretch.launch
 roslaunch stretch-web-interface web_interface_simulation.launch
 ```
 
-These commands launch the simulation environment, rosbridge websocket and stream videos respectively.
+These commands launch the simulation environment, rosbridge websocket respectively.
 
 Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:3000` in your web browser to see the interface.
 
