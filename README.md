@@ -41,7 +41,8 @@ roslaunch stretch-web-interface web_interface_simulation.launch
 
 These commands launch the simulation environment, rosbridge websocket respectively.
 
-Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:3000` in your web browser to see the interface.
+Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:3000` in **google chrome** to see the interface.
+
 
 ## Running the interface on the real robot
 Run the following commands in separate terminals **on the robot**:
@@ -55,4 +56,4 @@ On your **local machine** configure your `ROS_IP` to you IP address and the `ROS
 
 Run `rosrun web_video_server web_video_server` on your **local machine**.
 
-Enter the robot's IP address in your web browser to open the interface.
+Enter the robot's IP address in **google chrome** to open the interface. You might need to enable invalid certificates for resources loaded from localhost in order for this to work (currently trying to fix this): `chrome://flags/#allow-insecure-localhost`
