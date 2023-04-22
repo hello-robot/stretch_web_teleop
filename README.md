@@ -47,8 +47,9 @@ Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:30
 Run the following commands in separate terminals **on the robot**:
 ```
 roslaunch stretch-web-interface web_interface.launch
-npm run start
+npm run start 
 ```
+Make sure `npm run start` is running in the `stretch-web-interface` directory
 
 On your **local machine** configure your `ROS_IP` to you IP address and the `ROS_MASTER_URI` to the robot's ros master. If your `ROS_IP` and `ROS_MASTER_URI` are not configured correctly you will no be able to see the video streams. 
 
