@@ -1,9 +1,15 @@
 <launch>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+<<<<<<< HEAD
       <arg name="port" value="9000" />
       <arg name="ssl" value="true" />
       <arg name="certfile" value="$(find stretch-web-interface)/certificates/slinky.hcrlab.cs.washington.edu+6.pem" />
       <arg name="keyfile" value="$(find stretch-web-interface)/certificates/slinky.hcrlab.cs.washington.edu+6-key.pem" />
+=======
+      <arg name="ssl" value="true" />
+      <arg name="certfile" value="$(find stretch_web_interface)/certificates/slinky.hcrlab.cs.washington.edu+6.pem" />
+      <arg name="keyfile" value="$(find stretch_web_interface)/certificates/slinky.hcrlab.cs.washington.edu+6-key.pem" />
+>>>>>>> 53f59110e8cfeb04f1481170acfcae16da6bd806
   </include>
   <node name="web_video_server" pkg="web_video_server" type="web_video_server">
     <param name="port" value="8080" />

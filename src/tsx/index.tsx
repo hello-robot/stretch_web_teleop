@@ -8,7 +8,10 @@ import { ImageViewer, Encoding, TransportLayer } from 'rosreact';
 import { Connect } from './robot'
 
 // Connect to ROS
-<Connect/>
+ReactDOM.render(
+<Connect/>,
+document.getElementById('jointStates')
+);
 
 // Stream video streams
 ReactDOM.render(

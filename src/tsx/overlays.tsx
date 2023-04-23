@@ -1,10 +1,11 @@
 import * as React from "react";
 import { Polygon } from 'react-svg-path'
 import { StringLiteralType } from "typescript";
-import { ExecuteBaseVelocity } from './robot'
+import { ExecuteBaseVelocity, SwitchToNavigationMode, robotMode, SwitchToPositionMode } from './robot'
 import * as ROSLIB from 'roslib';
 import { useRos } from 'rosreact'
 import { ROSJointState } from '../util/util'
+import { resolveObjectURL } from "buffer";
 
 interface OverlayProps {
     width: number; // width of videostream
@@ -29,13 +30,25 @@ const createPolygon = (points: number[][], regionName: string) => {
 
 const callback = (regionName: string) => {
     if (regionName == 'navDriveForward') {
+        setMode("navigation");
         ExecuteBaseVelocity({linVel: 0.5, angVel: 0})
     } else if (regionName == 'navDriveBackward') {
-        ExecuteBaseVelocity({linVel: -0.1, angVel: 0})
+        setMode("navigation");
+        ExecuteBaseVelocity({linVel: -0.5, angVel: 0})
     } else if (regionName == 'navRotateRight') {
-        ExecuteBaseVelocity({linVel: 0, angVel: 0.1})
+        setMode("navigation");
+        ExecuteBaseVelocity({linVel: 0, angVel: 0.5})
     } else if (regionName == 'navRotateLeft') {
-        ExecuteBaseVelocity({linVel: 0, angVel: -0.1})
+        setMode("navigation");
+        ExecuteBaseVelocity({linVel: 0, angVel: -0.5})
+    }
+}
+
+const setMode = (mode: "position" | "navigation") => {
+    if (robotMode == "position" && mode == "navigation") {
+        SwitchToNavigationMode();
+    } else if (robotMode == "navigation" && mode == "position") {
+        SwitchToPositionMode();
     }
 }
 
