@@ -20,7 +20,7 @@ curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 sudo apt-get install libnss3-tools
-rosccd stretch-web-interface/certificates && CAROOT=`pwd` mkcert --install
+roscd stretch-web-interface/certificates && CAROOT=`pwd` mkcert --install
 ```
 
 To make your own certificates for your robot run (this example uses our robot slinky):
