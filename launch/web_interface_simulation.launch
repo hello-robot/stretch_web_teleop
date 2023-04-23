@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-      <arg name="port" value="9000" />
+      <arg name="port" value="9090" />
       <arg name="ssl" value="true" />
       <arg name="certfile" value="$(find stretch-web-interface)/certificates/slinky.hcrlab.cs.washington.edu+6.pem" />
       <arg name="keyfile" value="$(find stretch-web-interface)/certificates/slinky.hcrlab.cs.washington.edu+6-key.pem" />
