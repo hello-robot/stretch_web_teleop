@@ -12,10 +12,9 @@ interface OverlayProps {
     height: number; // height of videostream
 }
 
-const createPolygon = (points: number[][], regionName: string) => {
-    console.log('polygon')
+const createRegion = (points: number[][], mode: "navigation" | "position", regionName: string) => {
     return (
-        <div onClick={() => {callback(regionName)}}>
+        <div onClick={() => {executeCommand(mode, regionName)}}>
             <svg xmlns="http://www.w3.org/2000/svg" className="action-overlay" id={regionName}>
                 <Polygon
                     points={points}
@@ -28,19 +27,18 @@ const createPolygon = (points: number[][], regionName: string) => {
     )
 }
 
-const callback = (regionName: string) => {
-    if (regionName == 'navDriveForward') {
-        setMode("navigation");
-        ExecuteBaseVelocity({linVel: 0.5, angVel: 0})
-    } else if (regionName == 'navDriveBackward') {
-        setMode("navigation");
-        ExecuteBaseVelocity({linVel: -0.5, angVel: 0})
-    } else if (regionName == 'navRotateRight') {
-        setMode("navigation");
-        ExecuteBaseVelocity({linVel: 0, angVel: 0.5})
-    } else if (regionName == 'navRotateLeft') {
-        setMode("navigation");
-        ExecuteBaseVelocity({linVel: 0, angVel: -0.5})
+const executeCommand = (mode: "navigation" | "position", regionName: string) => {
+    setMode(mode);
+
+    switch (regionName) {
+        case 'navDriveForward':
+            ExecuteBaseVelocity({linVel: 0.5, angVel: 0})
+        case 'navDriveBackward':
+            ExecuteBaseVelocity({linVel: -0.5, angVel: 0})
+        case 'navRotateRight':
+            ExecuteBaseVelocity({linVel: 0, angVel: 0.5})
+        case 'navRotateLeft':
+            ExecuteBaseVelocity({linVel: 0, angVel: -0.5})
     }
 }
 
@@ -60,7 +58,7 @@ const NavDriveForward = (props: OverlayProps) => {
         [props.height/2.1, props.width/2.75], 
         [0, 10] // 10px is padding to keep overlay inline with videostream
     ]
-    return createPolygon(points, 'navDriveForward')
+    return createRegion(points, 'navigation', 'navDriveForward')
 };
 
 // Button for driving backward on the navigation overhead fisheye camera
@@ -71,7 +69,7 @@ const NavDriveBackward = (props: OverlayProps) => {
         [props.height/1.5, props.width/2.75], 
         [props.height, 10]
     ]
-    return createPolygon(points, 'navDriveBackward')
+    return createRegion(points, 'navigation', 'navDriveBackward')
 };
 
 // Button for rotating left on the navigation overhead fisheye camera
@@ -82,7 +80,7 @@ const NavRotateLeft = (props: OverlayProps) => {
         [props.height/1.5, props.width/1.5], 
         [props.height/2.1, props.width/1.5]
     ]
-    return createPolygon(points, 'navRotateLeft')
+    return createRegion(points, 'navigation', 'navRotateLeft')
 };
 
 // Button for rotating right on the navigation overhead fisheye camera
@@ -93,7 +91,7 @@ const NavRotateRight = (props: OverlayProps) => {
         [props.height/1.5, props.width/3 + 10], 
         [props.height/2.1, props.width/3 + 10]
     ]
-    return createPolygon(points, 'navRotateRight')
+    return createRegion(points, 'navigation', 'navRotateRight')
 };
 
 export const OverheadNavActionOverlay = (props: OverlayProps) => {

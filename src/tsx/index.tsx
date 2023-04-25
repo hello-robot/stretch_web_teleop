@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import '../css/index.css'
 
-import { VideoStreamGrid, OverheadComponent } from './videostreams';
+import { VideoStreams, OverheadComponent } from './videostreams';
 import { ImageViewer, Encoding, TransportLayer } from 'rosreact';
 import { Connect } from './robot'
+import { WebRTCConnections } from './webrtcconnections'
 
 // Connect to ROS
 ReactDOM.render(
@@ -15,7 +16,7 @@ document.getElementById('jointStates')
 
 // Stream video streams
 ReactDOM.render(
-    <VideoStreamGrid/>,
+    <VideoStreams/>,
     document.getElementById('root')
 );
 

@@ -11,6 +11,12 @@ export interface ROSJointState extends Message {
     velocity: [number],
 }
 
+export interface ROSCompressedImage extends Message {
+    header: string,
+    format: "jpeg" | "png",
+    data: string
+}
+
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.0, .518],
     "joint_wrist_yaw": [-1.38, 4.45],

@@ -1,29 +1,50 @@
-import React, { useEffect, useState } from 'react'
-import { RosConnection, TopicListProvider, useRos, Subscriber, useMsg } from 'rosreact'
-import { ROSJointState, ValidJoints } from '../util/util';
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { RosConnection, useRos } from 'rosreact'
+import { ROSJointState, ROSCompressedImage, ValidJoints } from '../util/util';
 import ROSLIB, { Message, Ros } from "roslib";
+import { navigationVideoStream, realsenseVideoStream, gripperVideoStream } from './videostreams';
 
 var trajectoryClient: ROSLIB.ActionClient;
 var cmdVelTopic: ROSLIB.Topic;
 var switchToNavigationService: ROSLIB.Service;
 var switchToPositionService: ROSLIB.Service;
+var videoTopics: [ROSLIB.Topic];
+
 export var robotMode: "navigation" | "position" = "position"
 
+interface VideoProps {
+    topicName: string,
+    callback: (message: ROSCompressedImage) => {}
+}
+
 export const Connect = () => {
-    const [trigger, setTrigger] = useState(false);
+    
+    const subscribeToRealsenseProps = {
+        topicName: "/camera/color/image_raw/compressed",
+        callback: realsenseVideoStream.updateImage.bind(realsenseVideoStream)
+    }
+    
+    const subscribeToNavigationProps = {
+        topicName: "/navigation_camera/image_raw/compressed",
+        callback: navigationVideoStream.updateImage.bind(navigationVideoStream)
+    }
+
+    const subscribeToGripperProps = {
+        topicName: "/gripper_camera/image_raw/compressed",
+        callback: gripperVideoStream.updateImage.bind(gripperVideoStream)
+    }
+
     return (
         <div>
             <RosConnection url={"wss://localhost:9090"} autoConnect>
-                <TopicListProvider
-                    trigger={trigger} 
-                    failedCallback={(e) => {console.log(e)}}
-                >
-                </TopicListProvider>
                 <SubscribeToJointState/>
                 <TrajectoryClient/>
                 <CmdVelTopic/>
                 <SwitchToNavigationService/>
                 <SwitchToPositionService/>
+                <SubscribeToVideo {...subscribeToRealsenseProps}/>
+                <SubscribeToVideo {...subscribeToNavigationProps}/>
+                <SubscribeToVideo {...subscribeToGripperProps}/>
             </RosConnection>
         </div>
     );
@@ -44,8 +65,22 @@ const SubscribeToJointState = () => {
         });
     }, []);
     
-    return (<div></div>);
+    return (<></>);
 };
+
+export const SubscribeToVideo = (props: VideoProps) => {
+    const ros = useRos();
+    useEffect(() => {
+        let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
+            ros: ros,
+            name: props.topicName,
+            messageType: 'sensor_msgs/CompressedImage'
+        });
+        topic.subscribe(props.callback)
+    }, []);
+
+    return ( <></> )
+}
 
 const TrajectoryClient = () => {
     const ros = useRos();
