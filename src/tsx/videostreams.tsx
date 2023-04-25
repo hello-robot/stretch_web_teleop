@@ -7,9 +7,83 @@ import {
     GridItem,
     swap
 } from "react-grid-dnd";
-import { ImageViewer, Encoding, TransportLayer } from 'rosreact';
 import {useRef} from 'react';
 import { OverheadNavActionOverlay } from './overlays'
+import { ROSCompressedImage } from "../util/util";
+
+export class VideoStream extends React.Component {
+    canvas = React.createRef<HTMLCanvasElement>();
+    img: HTMLImageElement;
+    video: HTMLVideoElement;
+    width: number;
+    height: number;
+    fps: number;
+
+    constructor(props) {
+        super(props);
+        this.width = props.width;
+        this.height = props.height;
+        this.fps = props.fps;
+        this.img = document.createElement("img");
+        this.video = document.createElement("video");
+        this.video.style.display = "block";
+        this.video.setAttribute("width", this.width.toString());
+        this.video.setAttribute("height", this.height.toString());
+    }
+
+    get imageReceived() {
+        return this.img.src != null;
+    }
+
+    renderVideo() {
+        if (!this.imageReceived) {
+            return;
+        }
+        this.canvas.current?.getContext('2d')?.drawImage(this.img, 0, 0, this.width, this.height)
+    }
+
+    updateImage(message: ROSCompressedImage) {
+        this.img.src = 'data:image/jpg;base64,' + message.data;
+    }
+
+    drawVideo() {
+        this.renderVideo();
+        requestAnimationFrame(this.drawVideo.bind(this));
+    }
+
+    start() {
+        let outputVideoStream = this.canvas.current?.captureStream(this.fps);
+        this.video.srcObject = outputVideoStream as MediaProvider;
+        this.drawVideo();
+    }
+
+    render() {
+        return (
+            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%", paddingTop: "10px"}}></canvas>
+        )
+    }
+}
+
+const navigationProps = {
+    width: 1024,
+    height: 768,
+    fps: 6.0
+}
+export const navigationVideoStream = new VideoStream(navigationProps)
+
+const realsenseProps = {
+    width: 640,
+    height: 360,
+    fps: 6.0
+}
+export const realsenseVideoStream = new VideoStream(realsenseProps)
+
+const gripperProps = {
+    width: 1024,
+    height: 768,
+    fps: 6.0
+}
+export const gripperVideoStream = new VideoStream(gripperProps)
 
 // Navigation overhead fisheye videostream
 export const OverheadComponent = () => {
@@ -40,12 +114,7 @@ export const OverheadComponent = () => {
             <CardContent>
                     <div ref={contentRef} className="imageViewer" >
                         <OverheadNavActionOverlay width={width} height={height}/>
-                        <ImageViewer 
-                            topic="/navigation_camera/image_raw" 
-                            encoding={Encoding.ros} 
-                            transportLayer={TransportLayer.compressed}
-                            imageStyle={style}
-                        />   
+                        {navigationVideoStream.render()}
                     </div>
             </CardContent>
         </Card>
@@ -63,12 +132,7 @@ export const RealsenseComponent = () => {
     return (
         <Card sx={{ maxWidth: 1000, maxHeight: 1000, transform: "rotate(90deg)" }}>
             <CardContent>
-                <ImageViewer 
-                    topic="/camera/color/image_raw" 
-                    encoding={Encoding.ros} 
-                    transportLayer={TransportLayer.compressed} 
-                    imageStyle={style}
-                />
+                {realsenseVideoStream.render()}
             </CardContent>
         </Card>
     );
@@ -84,12 +148,7 @@ export const GripperComponent = () => {
     return (
         <Card sx={{ maxWidth: 1000 }}>
             <CardContent>
-                <ImageViewer 
-                    topic="/gripper_camera/image_raw" 
-                    encoding={Encoding.ros} 
-                    transportLayer={TransportLayer.compressed}
-                    imageStyle={style}
-                />
+                {gripperVideoStream.render()}
             </CardContent>
         </Card>
     );
@@ -97,6 +156,9 @@ export const GripperComponent = () => {
 
 // Creates a grid of video streams
 export const VideoStreams = () => {
+    realsenseVideoStream.start()
+    navigationVideoStream.start()
+    gripperVideoStream.start()
     return (
         <Grid container alignItems="stretch">
             <Grid item xs>
@@ -141,4 +203,3 @@ export const VideoStreamGrid = () => {
         </GridContextProvider>
     )
 }
-
