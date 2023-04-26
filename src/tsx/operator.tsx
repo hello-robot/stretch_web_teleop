@@ -36,7 +36,7 @@ export class Operator extends React.Component<any, OperatorState> {
                         onChange={this.speedChange}
                     />
                 </div>
-                <div style={{flex: "1 1 auto", border: "3px solid pink"}}>
+                <div style={{flex: "1 1 auto"}}>
                     <VideoStreams />
                 </div>
             </main>

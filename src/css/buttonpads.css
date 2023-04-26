@@ -1,0 +1,11 @@
+svg {
+    width: 100%;
+    height: auto;
+}
+
+path {
+    stroke-width: 3px;
+    stroke: red;
+    fill-opacity: 10%;
+    fill: orange;
+}

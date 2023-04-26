@@ -50,8 +50,22 @@ main {
 
 .video-viewer {
     width: 32%;
-    /* flex: 1 0 30%; */
     height: 100%;
     border: 1px dotted orange;
+    position: relative;
+}
+
+.video-stream {
+    z-index: 1;
+    position: absolute;
+}
+
+.video-button-pad {
+    border: 2px dotted orange;
+    z-index: 2;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
 }
 
