@@ -1,0 +1,57 @@
+#root {
+    margin: 1rem;
+    width: 95%;
+}
+
+main {
+    position: relative;
+}
+
+#velocity-control-wrapper {
+    /* clear: both; */
+    /* display: inline-block; */
+    float: right;
+}
+
+.velocity-radio-button {
+    position: absolute;
+    float:left;
+    opacity: 0;
+}
+
+.velocity-label {
+    float: left;
+    padding: .5em 1em;
+    cursor: pointer;
+    border: 1px solid hsl(200, 60%, 60%);
+    margin-right: -1px;
+    background-color: hsl(200, 60%, 75%);
+}
+
+.velocity-label:first-of-type {
+    border-radius: .7em 0 0 .7em;
+}
+
+.velocity-label:last-of-type {
+    border-radius: 0 .7em .7em 0;
+}
+
+.velocity-radio-button:checked + label{
+    background-color:  hsl(200, 80%, 50%);
+}
+
+#video-stream-container {
+    display: flex;
+    justify-content: space-between;
+    clear: both;
+    border: 1px dotted red;
+    height: 100%;
+}
+
+.video-viewer {
+    width: 32%;
+    /* flex: 1 0 30%; */
+    height: 100%;
+    border: 1px dotted orange;
+}
+

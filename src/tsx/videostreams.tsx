@@ -1,6 +1,4 @@
 import * as React from "react";
-import { Card, CardContent } from '@mui/material';
-import Grid from '@mui/material/Grid'
 import {
     GridContextProvider,
     GridDropZone,
@@ -10,7 +8,11 @@ import {
 import {useRef} from 'react';
 import { OverheadNavActionOverlay } from './overlays'
 import { ROSCompressedImage } from "../util/util";
+import "../css/operator.css"
 
+/** Displays a single camera view, contains some of the more complex backend
+ * logic for retrieving the stream.
+ */
 export class VideoStream extends React.Component {
     canvas = React.createRef<HTMLCanvasElement>();
     img: HTMLImageElement;
@@ -59,11 +61,14 @@ export class VideoStream extends React.Component {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%", paddingTop: "10px"}}></canvas>
+            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%"}}></canvas>
         )
     }
 }
 
+/*
+ * Initialize the video stream objects.
+ */
 const navigationProps = {
     width: 1024,
     height: 768,
@@ -85,121 +90,71 @@ const gripperProps = {
 }
 export const gripperVideoStream = new VideoStream(gripperProps)
 
-// Navigation overhead fisheye videostream
-export const OverheadComponent = () => {
-    const style = {
-        width: "100%",
-        height: "auto",
-        paddingTop: "10px"
-    }
+/** Displays a single videostream and the button pad */
+const VideoViewer = (props: any) => {
+    /** The video stream to display */
+    const videoStream: VideoStream = props.videoStream;
 
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [height, setHeight] = React.useState(0)
-    const [width, setWidth] = React.useState(0)
+    /** Refrence to the outermost parent div */
+    const parentDivRef = useRef<HTMLDivElement>(null);
 
-    // Update height and width variables as window is resized 
-    React.useEffect(() => {
-        if (contentRef.current) {
+    /** Style object for the child div containing the stream element */
+    const [streamStyle, setStreamStyle] = React.useState({});
+
+    // This handles resizing the video stream object to fit inside of the 
+    if (props.rotate) {
+        const heightRatio = videoStream.props.width / videoStream.props.height;
+        React.useEffect(() => {
             const observer = new ResizeObserver(entries => {
-                setWidth(entries[0].contentRect.height)
-                setHeight(entries[0].contentRect.width)
-            })
-            observer.observe(contentRef.current)
-            return () => contentRef.current && observer.unobserve(contentRef.current)
-        }
-    }, []);
-
-    return (
-        <Card sx={{ maxWidth: 1000, transform: "rotate(90deg)" }}>
-            <CardContent>
-                    <div ref={contentRef} className="imageViewer" >
-                        <OverheadNavActionOverlay width={width} height={height}/>
-                        {navigationVideoStream.render()}
-                    </div>
-            </CardContent>
-        </Card>
-    );
-};
-
-// Realsense video stream 
-export const RealsenseComponent = () => {
-    const style = {
-        width: "100%",
-        height: "auto",
-        paddingTop: "10px"
+                const { width, height } = entries[0].contentRect;
+                const calculatedHeight = width * heightRatio;
+                let newHeight: number;
+                let newWidth: number;
+                if (calculatedHeight < height) {
+                    newHeight = calculatedHeight;
+                    newWidth = width;
+                } else {
+                    newHeight = height;
+                    newWidth = height / heightRatio;
+                }
+                const down = (newHeight - newWidth) / 2;
+                const left = -(newHeight - width) / 2;
+                const transform = `translate(${left}px, ${down}px) rotate(90deg)`
+                const newStyle = props.rotate ? {
+                    width: newHeight,
+                    height: newWidth,
+                    border: "1px dotted blue",
+                    transform: transform,
+                } : {};
+                setStreamStyle(newStyle)
+            });
+        
+            observer.observe(parentDivRef.current);
+        
+            return () => observer.disconnect();
+        }, []);
     }
+    // end of rotated resizing logic
 
     return (
-        <Card sx={{ maxWidth: 1000, maxHeight: 1000, transform: "rotate(90deg)" }}>
-            <CardContent>
-                {realsenseVideoStream.render()}
-            </CardContent>
-        </Card>
-    );
-};
-
-// Gripper video stream
-export const GripperComponent = () => {
-    const style = {
-        width: "100%",
-        height: "auto",
-    }
-
-    return (
-        <Card sx={{ maxWidth: 1000 }}>
-            <CardContent>
-                {gripperVideoStream.render()}
-            </CardContent>
-        </Card>
-    );
-};
-
-// Creates a grid of video streams
-export const VideoStreams = () => {
-    realsenseVideoStream.start()
-    navigationVideoStream.start()
-    gripperVideoStream.start()
-    return (
-        <Grid container alignItems="stretch">
-            <Grid item xs>
-                <OverheadComponent/>
-            </Grid>
-            <Grid item xs>
-                <RealsenseComponent/>
-            </Grid>
-            <Grid item xs>
-                <GripperComponent/>
-            </Grid>
-        </Grid>
-    );
+        <div className="video-viewer" ref={parentDivRef} >
+            {props.buttonPad}
+            <div style={streamStyle}>
+                {videoStream.render()}
+            </div>
+        </div>
+    )
 }
 
-// Creates a grid of rearrangeable video streams
-export const VideoStreamGrid = () => {
-    const [items, setItems] = React.useState([
-        {position: 1, component: <OverheadComponent/>},
-        {position: 2, component: <RealsenseComponent/>},
-        {position: 3, component: <GripperComponent/>},
-    ]);
-
-    function onChange(sourceId: string, sourceIndex: any, targetIndex: any, targetId?: string) {
-        const nextState = swap(items, sourceIndex, targetIndex);
-        setItems(nextState);
-    }
-
+/** Displays the video streams arranges horizontally. */
+export const VideoStreams = () => {
+    const streams = [realsenseVideoStream, navigationVideoStream, gripperVideoStream]
+    streams.forEach((value) => value.start())
     return (
-        <GridContextProvider onChange={onChange}>
-            <GridDropZone
-                id="items"
-                boxesPerRow={3}
-                rowHeight={500}
-                style={{ width: "100%", height: "100%" }}>
-                {items.map((item) => (
-                    <GridItem key={item.position}>
-                        {item.component}
-                    </GridItem>
-                ))}
-            </GridDropZone>
-        </GridContextProvider>
+        <div id="video-stream-container">
+            {streams.map((stream, i) => (
+                <VideoViewer key={i} videoStream={stream} rotate={stream ==navigationVideoStream || stream==realsenseVideoStream}/>
+            ))}
+        </div>
     )
 }

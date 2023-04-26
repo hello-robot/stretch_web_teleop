@@ -7,6 +7,7 @@ import { VideoStreams, OverheadComponent } from './videostreams';
 import { ImageViewer, Encoding, TransportLayer } from 'rosreact';
 import { Connect } from './robot'
 import { WebRTCConnections } from './webrtcconnections'
+import { Operator } from './operator'
 
 // Connect to ROS
 ReactDOM.render(
@@ -16,7 +17,7 @@ document.getElementById('jointStates')
 
 // Stream video streams
 ReactDOM.render(
-    <VideoStreams/>,
+    <Operator />,
     document.getElementById('root')
 );
 

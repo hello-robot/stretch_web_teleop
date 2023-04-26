@@ -8,6 +8,13 @@ body {
   background-color: rgb(245, 245, 245);
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
