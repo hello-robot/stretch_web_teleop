@@ -9,4 +9,5 @@
     <param name="port" value="8080" />
   </node> -->
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"></node>
+  <node name="rotate_video_stream" pkg="stretch-web-interface" type="rotate_video_stream" output="screen"/>
 </launch>

@@ -65,15 +65,15 @@ export class VideoStream extends React.Component {
 }
 
 const navigationProps = {
-    width: 1024,
-    height: 768,
+    width: 768,
+    height: 1024,
     fps: 6.0
 }
 export const navigationVideoStream = new VideoStream(navigationProps)
 
 const realsenseProps = {
-    width: 640,
-    height: 360,
+    width: 360,
+    height: 640,
     fps: 6.0
 }
 export const realsenseVideoStream = new VideoStream(realsenseProps)
@@ -110,7 +110,7 @@ export const OverheadComponent = () => {
     }, []);
 
     return (
-        <Card sx={{ maxWidth: 1000, transform: "rotate(90deg)" }}>
+        <Card sx={{ maxWidth: 1000 }}>
             <CardContent>
                     <div ref={contentRef} className="imageViewer" >
                         <OverheadNavActionOverlay width={width} height={height}/>
@@ -130,7 +130,7 @@ export const RealsenseComponent = () => {
     }
 
     return (
-        <Card sx={{ maxWidth: 1000, maxHeight: 1000, transform: "rotate(90deg)" }}>
+        <Card sx={{ maxWidth: 1000, maxHeight: 1000 }}>
             <CardContent>
                 {realsenseVideoStream.render()}
             </CardContent>

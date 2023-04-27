@@ -20,12 +20,12 @@ interface VideoProps {
 export const Connect = () => {
     
     const subscribeToRealsenseProps = {
-        topicName: "/camera/color/image_raw/compressed",
+        topicName: "/rotatedCamera/compressed",
         callback: realsenseVideoStream.updateImage.bind(realsenseVideoStream)
     }
     
     const subscribeToNavigationProps = {
-        topicName: "/navigation_camera/image_raw/compressed",
+        topicName: "/rotatedNavCamera/compressed",
         callback: navigationVideoStream.updateImage.bind(navigationVideoStream)
     }
 
