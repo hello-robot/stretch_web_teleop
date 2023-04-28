@@ -1,8 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { RosConnection, useRos } from 'rosreact'
-import { ROSJointState, ROSCompressedImage, ValidJoints } from '../util/util';
+import React from 'react'
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from '../util/util';
 import ROSLIB, { Message, Ros } from "roslib";
-import { navigationVideoStream, realsenseVideoStream, gripperVideoStream } from './videostreams';
 
 var trajectoryClient: ROSLIB.ActionClient;
 var cmdVelTopic: ROSLIB.Topic;
@@ -11,135 +9,118 @@ var switchToPositionService: ROSLIB.Service;
 var videoTopics: [ROSLIB.Topic];
 
 export var robotMode: "navigation" | "position" = "position"
+export var rosConnected = false;
 
-interface VideoProps {
-    topicName: string,
-    callback: (message: ROSCompressedImage) => {}
-}
-
-export const Connect = () => {
+export class Robot extends React.Component {
+    ros!: ROSLIB.Ros
     
-    const subscribeToRealsenseProps = {
-        topicName: "/camera/color/image_raw/compressed",
-        callback: realsenseVideoStream.updateImage.bind(realsenseVideoStream)
-    }
-    
-    const subscribeToNavigationProps = {
-        topicName: "/navigation_camera/image_raw/compressed",
-        callback: navigationVideoStream.updateImage.bind(navigationVideoStream)
+    constructor(props) {
+        super(props);
+        this.state = {
+            jointState: new Message({})
+        }
     }
 
-    const subscribeToGripperProps = {
-        topicName: "/gripper_camera/image_raw/compressed",
-        callback: gripperVideoStream.updateImage.bind(gripperVideoStream)
+    async connect(): Promise<void> {
+        let ros = new ROSLIB.Ros({
+            url: 'wss://localhost:9090'
+        });
+
+        return new Promise<void>((resolve, reject) => {
+            ros.on('connection', async () => {
+                await this.onConnect(ros);
+                resolve()
+            })
+            ros.on('error', (error) => {
+                reject(error)
+            });
+
+            ros.on('close', () => {
+                reject('Connection to websocket has been closed.')
+            });
+        });
     }
 
-    return (
-        <div>
-            <RosConnection url={"wss://localhost:9090"} autoConnect>
-                <SubscribeToJointState/>
-                <TrajectoryClient/>
-                <CmdVelTopic/>
-                <SwitchToNavigationService/>
-                <SwitchToPositionService/>
-                <SubscribeToVideo {...subscribeToRealsenseProps}/>
-                <SubscribeToVideo {...subscribeToNavigationProps}/>
-                <SubscribeToVideo {...subscribeToGripperProps}/>
-            </RosConnection>
-        </div>
-    );
-}
+    async onConnect(ros: ROSLIB.Ros) {
+        this.ros = ros
+        this.subscribeToJointState()
+        this.trajectoryClient()
+        this.cmdVelTopic()
+        this.switchToNavigationService()
+        this.switchToPositionService()
 
-const SubscribeToJointState = () => {
-    const [jointState, setJointState] = useState(new Message({}));
-    const ros = useRos();
-    useEffect(() => {
+        return Promise.resolve()
+    }
+
+    subscribeToJointState() {
         const jointStateTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: '/stretch/joint_states/',
             messageType: 'sensor_msgs/JointState'
         });
     
         jointStateTopic.subscribe((msg: Message) => {
-            setJointState(msg);
+            this.state['jointState'] = msg;
         });
-    }, []);
+    };
     
-    return (<></>);
-};
-
-export const SubscribeToVideo = (props: VideoProps) => {
-    const ros = useRos();
-    useEffect(() => {
+    subscribeToVideo(props: VideoProps) {
         let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: props.topicName,
             messageType: 'sensor_msgs/CompressedImage'
         });
         topic.subscribe(props.callback)
-    }, []);
-
-    return ( <></> )
-}
-
-const TrajectoryClient = () => {
-    const ros = useRos();
-    trajectoryClient = new ROSLIB.ActionClient({
-        ros: useRos(),
-        serverName: '/stretch_controller/follow_joint_trajectory',
-        actionName: 'control_msgs/FollowJointTrajectoryAction',
-        timeout: 100
-    });
-    return (<></>)
-}
-
-const CmdVelTopic = () => {
-    const ros = useRos();
-    cmdVelTopic = new ROSLIB.Topic({
-        ros: ros,
-        name: '/stretch/cmd_vel',
-        messageType: 'geometry_msgs/Twist'
-    });
-
-    return (<></>)
-}
-
-const SwitchToNavigationService = () => {
-    const ros = useRos();
-    switchToNavigationService = new ROSLIB.Service({
-        ros: ros,
-        name: '/switch_to_navigation_mode',
-        serviceType: 'std_srvs/Trigger'
-    });
-
-    return(<></>)
-}
-
-const SwitchToPositionService = () => {
-    const ros = useRos();
-    switchToPositionService = new ROSLIB.Service({
-        ros: ros,
-        name: '/switch_to_position_mode',
-        serviceType: 'std_srvs/Trigger'
-    });
-
-    return(<></>)
-}
-
-export const SwitchToNavigationMode = () => {
-    var request = new ROSLIB.ServiceRequest({});
-    switchToNavigationService.callService(request, () => {
-        robotMode = "navigation"
-        console.log("Switched to navigation mode")
-    });
-}
-
-export const SwitchToPositionMode = () => {
-    var request = new ROSLIB.ServiceRequest({});
-    switchToPositionService.callService(request, () => {
-        robotMode = "position"
-        console.log("Switched to position mode")
-    });
+    }
+    
+    trajectoryClient() {
+        trajectoryClient = new ROSLIB.ActionClient({
+            ros: this.ros,
+            serverName: '/stretch_controller/follow_joint_trajectory',
+            actionName: 'control_msgs/FollowJointTrajectoryAction',
+            timeout: 100
+        });
+    }
+    
+    cmdVelTopic() {
+        cmdVelTopic = new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/stretch/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+    }
+    
+    switchToNavigationService() {
+        switchToNavigationService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/switch_to_navigation_mode',
+            serviceType: 'std_srvs/Trigger'
+        });
+    }
+    
+    switchToPositionService() {
+        switchToPositionService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/switch_to_position_mode',
+            serviceType: 'std_srvs/Trigger'
+        });
+    }
+    
+    switchToNavigationMode() {
+        var request = new ROSLIB.ServiceRequest({});
+        switchToNavigationService.callService(request, () => {
+            robotMode = "navigation"
+            console.log("Switched to navigation mode")
+        });
+    }
+    
+    switchToPositionMode = () => {
+        var request = new ROSLIB.ServiceRequest({});
+        switchToPositionService.callService(request, () => {
+            robotMode = "position"
+            console.log("Switched to position mode")
+        });
+    }
 }
 
 export const ExecuteBaseVelocity = (props: {linVel: number, angVel: number}): void => {

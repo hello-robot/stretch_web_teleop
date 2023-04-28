@@ -17,6 +17,16 @@ export interface ROSCompressedImage extends Message {
     data: string
 }
 
+export interface CameraInfo {
+    [key: string]: string
+}
+
+export interface SignallingMessage {
+    candidate?: RTCIceCandidate,
+    sessionDescription?: RTCSessionDescription,
+    cameraInfo?: CameraInfo
+}
+
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.0, .518],
     "joint_wrist_yaw": [-1.38, 4.45],
@@ -36,6 +46,29 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "joint_wrist_yaw": .1,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .1
+}
+
+export const navigationProps = {
+    width: 768,
+    height: 1024,
+    fps: 6.0
+}
+
+export const realsenseProps = {
+    width: 360,
+    height: 640,
+    fps: 6.0
+}
+
+export const gripperProps = {
+    width: 1024,
+    height: 768,
+    fps: 6.0
+}
+
+export interface VideoProps {
+    topicName: string,
+    callback: (message: ROSCompressedImage) => {}
 }
 
 // export type GoalMessage =  NavGoalMessage | PoseGoalMessage;

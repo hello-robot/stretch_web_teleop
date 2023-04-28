@@ -1,13 +1,9 @@
 import * as React from "react";
-import "../css/operator.css"
-import {useRef} from 'react';
+import { Card, CardContent } from '@mui/material';
+import Grid from '@mui/material/Grid'
+import { OverheadNavActionOverlay } from './overlays'
 import { ROSCompressedImage } from "../util/util";
 
-import {OverheadButtonPad} from "../tsx/buttonpads"
-
-/** Displays a single camera view, contains some of the more complex backend
- * logic for retrieving the stream.
- */
 export class VideoStream extends React.Component {
     canvas = React.createRef<HTMLCanvasElement>();
     img: HTMLImageElement;
@@ -15,6 +11,7 @@ export class VideoStream extends React.Component {
     width: number;
     height: number;
     fps: number;
+    outputVideoStream?: MediaStream
 
     constructor(props) {
         super(props);
@@ -49,130 +46,32 @@ export class VideoStream extends React.Component {
     }
 
     start() {
-        let outputVideoStream = this.canvas.current?.captureStream(this.fps);
-        this.video.srcObject = outputVideoStream as MediaProvider;
+        this.outputVideoStream = this.canvas.current?.captureStream(this.fps);
+        this.video.srcObject = this.outputVideoStream as MediaProvider;
         this.drawVideo();
     }
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%"}}></canvas>
+            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%", paddingTop: "10px"}}></canvas>
         )
     }
 }
 
-/*
- * Initialize the video stream objects.
- */
-const navigationProps = {
-    width: 1024,
-    height: 768,
-    fps: 6.0
-}
-export const navigationVideoStream = new VideoStream(navigationProps)
-
-const realsenseProps = {
-    width: 640,
-    height: 360,
-    fps: 6.0
-}
-export const realsenseVideoStream = new VideoStream(realsenseProps)
-
-const gripperProps = {
-    width: 1024,
-    height: 768,
-    fps: 6.0
-}
-export const gripperVideoStream = new VideoStream(gripperProps)
-
-/** Displays a single videostream and the button pad */
-const VideoViewer = (props: any) => {
-    /** The video stream to display */
-    const videoStream: VideoStream = props.videoStream;
-
-    /** Refrence to an indicator div which fills the available space to indicate
-     * how to resize the image and button pad.
-     */
-    const indicatorDivRef = useRef<HTMLDivElement>(null);
-
-    /** Style object for the child div containing the stream element */
-    const [streamStyle, setStreamStyle] = React.useState({});
-    const [displayWidth, setDisplayWidth] = React.useState(0);
-    const [displayHeight, setDisplayHeight] = React.useState(0)
-
-    // This handles resizing the video stream object to fit inside of the 
-    if (props.rotate) {
-        const heightRatio = videoStream.props.width / videoStream.props.height;
-        const observer = new ResizeObserver(entries => {
-            const { width, height } = entries[0].contentRect;
-            const calculatedHeight = width * heightRatio;
-            let newHeight: number;
-            let newWidth: number;
-            if (calculatedHeight < height) {
-                newHeight = calculatedHeight;
-                newWidth = width;
-            } else {
-                newHeight = height;
-                newWidth = height / heightRatio;
-            }
-            const down = (newHeight - newWidth) / 2;
-            const left = -(newHeight - width) / 2;
-            const transform = `translate(${left}px, ${down}px) rotate(90deg)`
-            const newStyle = {
-                width: newHeight,
-                height: newWidth,
-                border: "1px dotted blue",
-                transform: transform
-            };
-            setStreamStyle(newStyle);
-            setDisplayWidth(newWidth);
-            setDisplayHeight(newHeight);
-        });
-        React.useEffect(() => {
-            if (!indicatorDivRef?.current) return;
-            observer.observe(indicatorDivRef.current);
-            return () => observer.disconnect();
-        }, []);
-    }
-    // end of rotated resizing logic
-
+// Gripper video stream
+export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
+    console.log(props.streams)
     return (
-        <div className="video-viewer">
-            <div className="video-stream" style={streamStyle}>
-                {videoStream.render()}
-            </div>
-            <div className="video-button-pad" style={{width: displayWidth, height: displayHeight}}>
-                {props.buttonPad}
-            </div>
-            <div style={{width: "100%", height: "100%", background: "green"}} ref={indicatorDivRef}></div>
-        </div>
-    )
-}
-
-/** Displays the video streams arranges horizontally. */
-export const VideoStreams = () => {
-    const streams = [realsenseVideoStream, navigationVideoStream, gripperVideoStream]
-    const rotations = [true, true, false];
-    const buttonPads = [undefined, <OverheadButtonPad />, undefined];
-    streams.forEach((value) => value.start())
-
-    /** Mapping from video stream to video viewer objects */
-    const mapFunc = (stream: VideoStream, i: number) => {
-        const rotate = rotations[i];
-        const buttonPad = buttonPads[i];
-        return (
-            <VideoViewer 
-                key={i} 
-                videoStream={stream} 
-                rotate={rotate}
-                buttonPad={buttonPad}
-            />
-        );
-    }
-
-    return (
-        <div id="video-stream-container">
-            {streams.map(mapFunc)}
-        </div>
-    )
-}
+        <Grid container alignItems="stretch">
+            {props.streams.map((stream, i) => 
+                <Grid item xs key={i}>
+                    <Card sx={{ maxWidth: 1000 }}>
+                        <CardContent>
+                            {stream.render()}
+                        </CardContent>
+                    </Card>
+                </Grid>
+            )}
+        </Grid>
+    );
+};
