@@ -3,10 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: { main: './src/tsx/index.tsx' },
-  // externals: {
-  //   "react-native": true,
-  //   "react": true
-  // },
   node: {
     __dirname: false,
   },
@@ -23,7 +19,7 @@ module.exports = {
             options: {
               presets: [
                 ['@babel/preset-env', {'loose': true}], 
-                ["@babel/preset-react", {"runtime": "automatic"}], '@babel/preset-typescript', "module:metro-react-native-babel-preset",],
+                ["@babel/preset-react", {"runtime": "automatic"}], '@babel/preset-typescript'],
             },
           },
         ],
@@ -37,9 +33,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    alias: {
-      'react-native': 'react-native-web',
-    },
   },
   output: {
     filename: 'bundle.js',
