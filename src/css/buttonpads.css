@@ -1,11 +1,20 @@
-svg {
-    width: 100%;
-    height: auto;
+path {
+    stroke-width: 1px;
+    stroke: hsl(200, 20%, 70%);
+    stroke-opacity: 40%;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill-opacity: 0;
+    fill: hsl(200, 50%, 70%);
+    /* fill: orange; */
 }
 
-path {
-    stroke-width: 3px;
-    stroke: red;
+path:hover {
     fill-opacity: 10%;
-    fill: orange;
+    cursor: pointer;
+}
+
+/* When a button is clicked*/
+path:active {
+    fill-opacity: 40%;
 }

@@ -30,7 +30,7 @@ code {
   position: relative;
 }
 
-.action-overlay {
+/* .action-overlay {
   position: absolute;
   opacity: 0.25;
   overflow: visible;
@@ -46,4 +46,4 @@ svg {
 
 path {
   pointer-events: auto;
-}
+} */

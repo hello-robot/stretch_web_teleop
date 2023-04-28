@@ -1,8 +1,10 @@
-import * as React from "react";
+import React from "react";
 import { Card, CardContent } from '@mui/material';
 import Grid from '@mui/material/Grid'
-import { OverheadNavActionOverlay } from './overlays'
 import { ROSCompressedImage } from "../util/util";
+import * as Bp from "./buttonpads"
+import { isUndefined } from "util";
+import "../css/operator.css"
 
 export class VideoStream extends React.Component {
     canvas = React.createRef<HTMLCanvasElement>();
@@ -53,7 +55,7 @@ export class VideoStream extends React.Component {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%", paddingTop: "10px"}}></canvas>
+            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%"}}></canvas>
         )
     }
 }
@@ -61,13 +63,20 @@ export class VideoStream extends React.Component {
 // Gripper video stream
 export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
     console.log(props.streams)
+    const overheadButtonPad = <Bp.ExampleOverheadButtonPad />
+    const buttonPads = [overheadButtonPad, undefined, undefined];
     return (
         <Grid container alignItems="stretch">
             {props.streams.map((stream, i) => 
                 <Grid item xs key={i}>
                     <Card sx={{ maxWidth: 1000 }}>
                         <CardContent>
-                            {stream.render()}
+                            <div style={{position: "relative"}}>
+                                <div className="video-button-pad">
+                                    {buttonPads[i]}
+                                </div>
+                                {stream.render()}
+                            </div>
                         </CardContent>
                     </Card>
                 </Grid>
