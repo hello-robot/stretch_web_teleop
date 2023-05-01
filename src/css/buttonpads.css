@@ -1,20 +1,22 @@
-path {
+svg {
     stroke-width: 1px;
     stroke: hsl(200, 20%, 70%);
-    stroke-opacity: 40%;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill-opacity: 0;
     fill: hsl(200, 50%, 70%);
-    /* fill: orange; */
+    /*set opacity for entire svg rather than paths to avoid weird effect
+    when paths overlap*/
+    opacity: 40%;
 }
 
-path:hover {
+/*When hovering over a child element of an svg*/
+svg > *:hover {
     fill-opacity: 10%;
     cursor: pointer;
 }
 
-/* When a button is clicked*/
-path:active {
+/*When a button is clicked*/
+svg > *:active {
     fill-opacity: 40%;
 }

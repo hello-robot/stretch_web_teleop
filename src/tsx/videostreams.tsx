@@ -63,8 +63,7 @@ export class VideoStream extends React.Component {
 // Gripper video stream
 export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
     console.log(props.streams)
-    const overheadButtonPad = <Bp.ExampleOverheadButtonPad />
-    const buttonPads = [overheadButtonPad, undefined, undefined];
+    const buttonPads = Bp.ExampleButtonPads;
     return (
         <Grid container alignItems="stretch">
             {props.streams.map((stream, i) => 

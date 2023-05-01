@@ -53,6 +53,38 @@ export const OVERHEAD_DEFAULT_BOX_POSITION = {
     width: 15
 }
 
+/**Creates the SVG path for a rectangle
+ * @param x left edge location
+ * @param y top edge location
+ * @param width the width
+ * @param height the height
+*/
+function rect(x: number, y: number, width: number, height: number) {
+    return `M ${x} ${y} ${x+width} ${y} ${x+width} ${y+height} ${x} ${y+height} Z`;
+}
+
+/**Creates an SVG containing all the paths with the corresponding button properties.
+ * @param paths the string description of the path
+ * @param buttonsProps the properties of each button
+ * @note paths and buttonsProps must be the same length, path object corresponds 
+ * to ButtonProps object at same index in array
+ */
+function createButtonPad(paths: string[], buttonsProps: ButtonProps[]) {
+    if (paths.length > buttonsProps.length) {
+        console.error(`paths length: ${paths.length}, buttonsProps length: ${buttonsProps.length}`);
+        return <b style={{color: "red"}}>ERROR</b>;
+    }
+    return (
+        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {paths.map((path, i) => 
+                <path d={path} onClick={buttonsProps[i].onClick}>
+                    <title>{buttonsProps[i].label}</title>
+                </path>
+            )}
+        </svg>
+    );
+}
+
 /** Directional button pad made up of four trapazoids around a box in the 
  * center of the button pad.
  * @note buttonProps are interpreted in this order: top, right, bottom, left
@@ -71,16 +103,65 @@ export const DirectionalButtonPad = (props: DirectionalButtonPadProps) => {
     const pathLft = `M 0 0 0 100 ${lft} ${bot} ${lft} ${top} Z`
 
     const paths = [pathTop, pathRgt, pathBot, pathLft]
-    return (
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            {paths.map((path, i) => 
-                <path d={path} onClick={props.buttonsProps[i].onClick}/>
-            )}
-        </svg>
-    );
+    return createButtonPad(paths, props.buttonsProps);
+}
+
+/**Button pad for the realsense camera in manipulation mode from the 
+ * default study interface. 
+ * @todo rename this component to be more universal and convey its purpose,
+ *       maybe "10 button interface"
+ */
+export const RealsenseMaipButtonPad = (props: ButtonPadProps) => {
+    /**Number of button layers from top to bottom in the display*/
+    const numVerticalLayers = 6;
+    /**How tall each layer of buttons should be.*/
+    const height = 100 / numVerticalLayers;
+    const centerWidth = 30
+    const centerLeft = (100 - centerWidth) / 2;
+    const centerRight = centerLeft + centerWidth;
+    const paths = [
+        // Top two buttons
+        rect(0, 0, 50, height),
+        rect(50, 0, 50, height),
+        // Center directional trapezoid buttons
+        `M 0 ${height} 100 ${height} ${centerRight} ${height*2} ${centerLeft} ${height*2} Z`,
+        `M 0 ${height*5} 100 ${height*5} ${centerRight},${height*4} ${centerLeft},${height*4} Z`,
+        `M 0 ${height} 0 ${height*5} ${centerLeft},${height*4} ${centerLeft},${height*2} Z`,
+        `M 100 ${height} 100 ${height*5} ${centerRight},${height*4} ${centerRight},${height*2} Z`,
+        // // Center two rectangle buttons
+        rect(centerLeft, height*2, centerWidth, height),
+        rect(centerLeft, height*3, centerWidth, height),
+        // // Bottom two buttons
+        rect(0, height*5, 50, height),
+        rect(50, height*5, 50, height)
+    ]
+    return createButtonPad(paths, props.buttonsProps);
+}
+
+/**Button pad for gripper camera in manipulation mode for the default study
+ * interface.
+ */
+export const GripperButtonPad = (props: ButtonPadProps) => {
+    /**Number of button layers from top to bottom in the display*/
+    const numLayers = 5;
+    /**How tall each layer of buttons should be.*/
+    const margin = 100 / numLayers;
+    // const centerWidth = 30
+    // const centerLeft = (100 - centerWidth) / 2;
+    // const centerRight = centerLeft + centerWidth;
+    const paths = [
+        rect(0, 0, 100, margin),  // top
+        rect(0, 100-margin, 100, margin),  // bottom
+        rect(0, margin, margin, margin*3),  // left
+        rect(100-margin, margin, margin, margin*3), // right
+        rect(margin, margin, margin*3, margin*3),  // gripper open
+        rect(margin*2, margin*2, margin, margin)  // gripper close
+    ]
+    return createButtonPad(paths, props.buttonsProps);
 }
 
 /*************************************************************************
+ * ***********************************************************************
  * This is example code about how to create a button pad. this logic
  * should be moved somewhere central to make it easier to dynamically 
  * create button pads.
@@ -115,9 +196,59 @@ const EXAMPLE_OVERHEAD_BUTTONS: ButtonProps[] = [
 ]
 
 /** Example of creating a button pad */
-export const ExampleOverheadButtonPad = () => (
+const ExampleOverheadButtonPad = () => (
     <DirectionalButtonPad 
         boxPosition={OVERHEAD_DEFAULT_BOX_POSITION} 
         buttonsProps={EXAMPLE_OVERHEAD_BUTTONS}
     />
 );
+
+/** Example of creating a button pad */
+const ExampleRealsenseMaipButtonPad = () => {
+    const buttons: string[] = [
+        "gripper in",
+        "gripper out",
+        "extend arm",
+        "retract arm",
+        "base forward",
+        "base backward",
+        "lift arm",
+        "lower arm",
+        "close gripper",
+        "open gripper" 
+    ]
+    const mapFunc = (text: string) => (
+        {label: text, onClick: (() => (console.log(text)))}
+    );
+    return (
+        <RealsenseMaipButtonPad 
+            buttonsProps={buttons.map(mapFunc)}
+        />
+    );
+};
+
+/** Example of creating a button pad */
+const ExampleGripperButtonPad = () => {
+    const buttons: string[] = [
+        "lift arm",
+        "lower arm",
+        "gripper in",
+        "gripper out",
+        "open gripper",
+        "close gripper"
+    ]
+    const mapFunc = (text: string) => (
+        {label: text, onClick: (() => (console.log(text)))}
+    );
+    return (
+        <GripperButtonPad 
+            buttonsProps={buttons.map(mapFunc)}
+        />
+    );
+};
+
+export const ExampleButtonPads = [
+    <ExampleOverheadButtonPad />,
+    <ExampleRealsenseMaipButtonPad />,
+    <ExampleGripperButtonPad />
+]
