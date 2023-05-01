@@ -54,3 +54,4 @@ ReactDOM.render(
     <VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>,
     document.getElementById('root')
 );
+
