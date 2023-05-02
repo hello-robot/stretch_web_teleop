@@ -27,6 +27,22 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
+export type WebRTCMessage = SensorMessage | JointStateMessage;
+
+export interface SensorMessage {
+    type: "sensor",
+    subtype: string,
+    name: "effort" | "transform" | "value",
+    value: number | ROSLIB.Transform
+}
+
+export type RobotPose = { [key in ValidJoints]?: number }
+
+export interface JointStateMessage {
+    type: "jointState",
+    jointState: RobotPose
+}
+
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.0, .518],
     "joint_wrist_yaw": [-1.38, 4.45],
@@ -69,6 +85,33 @@ export const gripperProps = {
 export interface VideoProps {
     topicName: string,
     callback: (message: ROSCompressedImage) => {}
+}
+
+////////////////////////////////////////////////////////////
+// safelyParseJSON code copied from
+// https://stackoverflow.com/questions/29797946/handling-bad-json-parse-in-node-safely
+// on August 18, 2017
+export function safelyParseJSON<T = any>(json: string): T {
+    // This function cannot be optimized, it's best to
+    // keep it small!
+    let parsed;
+
+    try {
+        parsed = JSON.parse(json);
+    } catch (e) {
+        console.warn(e);
+    }
+
+    return parsed; // Could be undefined!
+}
+
+export type uuid = string;
+// From: https://stackoverflow.com/a/2117523/6454085
+export function generateUUID(): uuid {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 // export type GoalMessage =  NavGoalMessage | PoseGoalMessage;
