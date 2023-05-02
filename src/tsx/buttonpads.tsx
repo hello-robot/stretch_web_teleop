@@ -1,4 +1,5 @@
 import React from "react";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE } from "../util/svg";
 import "../css/buttonpads.css"
 
 /** Properties for a single button in a button pad */
@@ -37,20 +38,10 @@ interface DirectionalButtonPadProps extends ButtonPadProps {
  * of 10%
  */
 const DEFAULT_POSITION = {
-    centerX: 50,
-    centerY: 50,
-    height: 10,
-    width: 10
-}
-
-/** Default position for the box in the directional button pad for the
- * overhead display, such that the box is around the base of the robot
- */
-export const OVERHEAD_DEFAULT_BOX_POSITION = {
-    centerX: 55,
-    centerY: 55,
-    height: 12,
-    width: 15
+    centerX: percent2Pixel(50),
+    centerY: percent2Pixel(50),
+    height: percent2Pixel(10),
+    width: percent2Pixel(10)
 }
 
 /**Creates the SVG path for a rectangle
@@ -75,7 +66,11 @@ function createButtonPad(paths: string[], buttonsProps: ButtonProps[]) {
         return <b style={{color: "red"}}>ERROR</b>;
     }
     return (
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg 
+            viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`} 
+            preserveAspectRatio="none"
+            className="button-pads"
+        >
             {paths.map((path, i) => 
                 <path d={path} onClick={buttonsProps[i].onClick}>
                     <title>{buttonsProps[i].label}</title>
@@ -97,10 +92,10 @@ export const DirectionalButtonPad = (props: DirectionalButtonPadProps) => {
     const lft = centerX - width / 2
     const rgt = centerX + width / 2
 
-    const pathTop = `M 0 0 100 0 ${rgt} ${top} ${lft} ${top} Z`
-    const pathRgt = `M 100 0 100 100 ${rgt} ${bot} ${rgt} ${top} Z`
-    const pathBot = `M 0 100 100 100 ${rgt} ${bot} ${lft} ${bot} Z`
-    const pathLft = `M 0 0 0 100 ${lft} ${bot} ${lft} ${top} Z`
+    const pathTop = `M 0 0 ${SVG_RESOLUTION} 0 ${rgt} ${top} ${lft} ${top} Z`
+    const pathRgt = `M ${SVG_RESOLUTION} 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION} ${rgt} ${bot} ${rgt} ${top} Z`
+    const pathBot = `M 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION} ${SVG_RESOLUTION} ${rgt} ${bot} ${lft} ${bot} Z`
+    const pathLft = `M 0 0 0 ${SVG_RESOLUTION} ${lft} ${bot} ${lft} ${top} Z`
 
     const paths = [pathTop, pathRgt, pathBot, pathLft]
     return createButtonPad(paths, props.buttonsProps);
@@ -115,25 +110,26 @@ export const RealsenseMaipButtonPad = (props: ButtonPadProps) => {
     /**Number of button layers from top to bottom in the display*/
     const numVerticalLayers = 6;
     /**How tall each layer of buttons should be.*/
-    const height = 100 / numVerticalLayers;
-    const centerWidth = 30
-    const centerLeft = (100 - centerWidth) / 2;
+    const height = SVG_RESOLUTION / numVerticalLayers;
+    const centerWidth = percent2Pixel(30);
+    const centerLeft = (SVG_RESOLUTION - centerWidth) / 2;
     const centerRight = centerLeft + centerWidth;
+    const center = percent2Pixel(50);
     const paths = [
         // Top two buttons
-        rect(0, 0, 50, height),
-        rect(50, 0, 50, height),
+        rect(0, 0, center, height),
+        rect(center, 0, center, height),
         // Center directional trapezoid buttons
-        `M 0 ${height} 100 ${height} ${centerRight} ${height*2} ${centerLeft} ${height*2} Z`,
-        `M 0 ${height*5} 100 ${height*5} ${centerRight},${height*4} ${centerLeft},${height*4} Z`,
+        `M 0 ${height} ${SVG_RESOLUTION} ${height} ${centerRight} ${height*2} ${centerLeft} ${height*2} Z`,
+        `M 0 ${height*5} ${SVG_RESOLUTION} ${height*5} ${centerRight},${height*4} ${centerLeft},${height*4} Z`,
         `M 0 ${height} 0 ${height*5} ${centerLeft},${height*4} ${centerLeft},${height*2} Z`,
-        `M 100 ${height} 100 ${height*5} ${centerRight},${height*4} ${centerRight},${height*2} Z`,
+        `M ${SVG_RESOLUTION} ${height} ${SVG_RESOLUTION} ${height*5} ${centerRight},${height*4} ${centerRight},${height*2} Z`,
         // // Center two rectangle buttons
         rect(centerLeft, height*2, centerWidth, height),
         rect(centerLeft, height*3, centerWidth, height),
         // // Bottom two buttons
-        rect(0, height*5, 50, height),
-        rect(50, height*5, 50, height)
+        rect(0, height*5, center, height),
+        rect(center, height*5, center, height)
     ]
     return createButtonPad(paths, props.buttonsProps);
 }
@@ -145,15 +141,12 @@ export const GripperButtonPad = (props: ButtonPadProps) => {
     /**Number of button layers from top to bottom in the display*/
     const numLayers = 5;
     /**How tall each layer of buttons should be.*/
-    const margin = 100 / numLayers;
-    // const centerWidth = 30
-    // const centerLeft = (100 - centerWidth) / 2;
-    // const centerRight = centerLeft + centerWidth;
+    const margin = SVG_RESOLUTION / numLayers;
     const paths = [
-        rect(0, 0, 100, margin),  // top
-        rect(0, 100-margin, 100, margin),  // bottom
+        rect(0, 0, SVG_RESOLUTION, margin),  // top
+        rect(0, SVG_RESOLUTION-margin, SVG_RESOLUTION, margin),  // bottom
         rect(0, margin, margin, margin*3),  // left
-        rect(100-margin, margin, margin, margin*3), // right
+        rect(SVG_RESOLUTION-margin, margin, margin, margin*3), // right
         rect(margin, margin, margin*3, margin*3),  // gripper open
         rect(margin*2, margin*2, margin, margin)  // gripper close
     ]
@@ -198,7 +191,7 @@ const EXAMPLE_OVERHEAD_BUTTONS: ButtonProps[] = [
 /** Example of creating a button pad */
 const ExampleOverheadButtonPad = () => (
     <DirectionalButtonPad 
-        boxPosition={OVERHEAD_DEFAULT_BOX_POSITION} 
+        boxPosition={OVERHEAD_ROBOT_BASE} 
         buttonsProps={EXAMPLE_OVERHEAD_BUTTONS}
     />
 );

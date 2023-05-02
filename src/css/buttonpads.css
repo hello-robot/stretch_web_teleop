@@ -1,9 +1,8 @@
-svg {
-    stroke-width: 1px;
+.button-pads {
+    stroke-width: 3px;
     stroke: hsl(200, 20%, 70%);
     stroke-linecap: round;
     stroke-linejoin: round;
-    fill-opacity: 0;
     fill: hsl(200, 50%, 70%);
     /*set opacity for entire svg rather than paths to avoid weird effect
     when paths overlap*/
@@ -11,12 +10,12 @@ svg {
 }
 
 /*When hovering over a child element of an svg*/
-svg > *:hover {
+.button-pads > *:hover {
     fill-opacity: 10%;
     cursor: pointer;
 }
 
 /*When a button is clicked*/
-svg > *:active {
+.button-pads > *:active {
     fill-opacity: 40%;
 }

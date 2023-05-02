@@ -3,10 +3,17 @@ import { Card, CardContent } from '@mui/material';
 import Grid from '@mui/material/Grid'
 import { ROSCompressedImage } from "../util/util";
 import * as Bp from "./buttonpads"
+import { PredictiveDisplay } from "./predictivedisplay";
 import { isUndefined } from "util";
 import "../css/operator.css"
 
-export class VideoStream extends React.Component {
+type VideoStreamProps = {
+    width: number,
+    height: number,
+    fps: number
+}
+
+export class VideoStream extends React.Component<VideoStreamProps> {
     canvas = React.createRef<HTMLCanvasElement>();
     img: HTMLImageElement;
     video: HTMLVideoElement;
@@ -15,7 +22,7 @@ export class VideoStream extends React.Component {
     fps: number;
     outputVideoStream?: MediaStream
 
-    constructor(props) {
+    constructor(props: VideoStreamProps) {
         super(props);
         this.width = props.width;
         this.height = props.height;
@@ -63,7 +70,9 @@ export class VideoStream extends React.Component {
 // Gripper video stream
 export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
     console.log(props.streams)
-    const buttonPads = Bp.ExampleButtonPads;
+    let buttonPads = Bp.ExampleButtonPads;
+    // Replace the overhead button pad with predictive display
+    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
     return (
         <Grid container alignItems="stretch">
             {props.streams.map((stream, i) => 
