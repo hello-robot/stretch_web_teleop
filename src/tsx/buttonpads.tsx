@@ -72,7 +72,7 @@ function createButtonPad(paths: string[], buttonsProps: ButtonProps[]) {
             className="button-pads"
         >
             {paths.map((path, i) => 
-                <path d={path} onClick={buttonsProps[i].onClick}>
+                <path key={i} d={path} onClick={buttonsProps[i].onClick}>
                     <title>{buttonsProps[i].label}</title>
                 </path>
             )}
