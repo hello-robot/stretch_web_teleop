@@ -1,9 +1,3 @@
-#root {
-    margin: 1rem;
-    width: 95%;
-    border: 1px red;
-}
-
 main {
     position: relative;
 }
@@ -39,34 +33,5 @@ main {
 
 .velocity-radio-button:checked + label{
     background-color:  hsl(200, 80%, 50%);
-}
-
-/* #video-stream-container {
-    display: flex;
-    justify-content: space-between;
-    clear: both;
-    border: 1px dotted red;
-    height: 100%;
-} */
-
-/* .video-viewer {
-    width: 32%;
-    height: 100%;
-    border: 1px dotted orange;
-    position: relative;
-} */
-
-/* .video-stream {
-    z-index: 1;
-    position: absolute;
-} */
-
-/* Overlays the button pad on top of the video stream*/
-.video-button-pad {
-    z-index: 2;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    /* border: 1px dotted orange; */
 }
 

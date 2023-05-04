@@ -1,5 +1,5 @@
 /**Resolution of SVG components */
-export const SVG_RESOLUTION = 300;
+export const SVG_RESOLUTION = 500;
 
 /**
  * Takes a percentage value and returns the real pixel location on 

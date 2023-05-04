@@ -5,7 +5,7 @@ import { ROSCompressedImage } from "../util/util";
 import * as Bp from "./buttonpads"
 import { PredictiveDisplay } from "./predictivedisplay";
 import { isUndefined } from "util";
-import "../css/operator.css"
+import "../css/videostreams.css"
 
 type VideoStreamProps = {
     width: number,
@@ -71,24 +71,21 @@ export class VideoStream extends React.Component<VideoStreamProps> {
 export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
     console.log(props.streams)
     let buttonPads = Bp.ExampleButtonPads;
+    // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
-    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
+    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
+    const widths = ["34%", "20%", "40%"];
     return (
-        <Grid container alignItems="stretch">
-            {props.streams.map((stream, i) => 
-                <Grid item xs key={i}>
-                    <Card sx={{ maxWidth: 1000 }}>
-                        <CardContent>
-                            <div style={{position: "relative"}}>
-                                <div className="video-button-pad">
-                                    {buttonPads[i]}
-                                </div>
-                                {stream.render()}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Grid>
+        <div id="video-stream-container">
+            {props.streams.map((stream, i) => (
+                <div key={i} className="video-stream" style={{width: widths[i]}}>
+                    <div className="video-button-pad">
+                        {buttonPads[i]}
+                    </div>
+                    {stream.render()}
+                </div>
+            )
             )}
-        </Grid>
+        </div>
     );
 };

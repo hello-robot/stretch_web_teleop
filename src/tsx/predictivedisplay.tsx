@@ -215,7 +215,7 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
                 preserveAspectRatio="none"
                 ref={this.svgRef}
                 onMouseMove={this.onMouseMove}
-                onMouseLeave={() => {this.onMouseLeave}}
+                onMouseLeave={this.onMouseLeave}
                 className="predictive-display"
                 onClick={(e) => this.onMouseMove(e, true)}
             >
