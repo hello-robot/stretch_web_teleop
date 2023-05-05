@@ -84,7 +84,7 @@ export const gripperProps = {
 
 export interface VideoProps {
     topicName: string,
-    callback: (message: ROSCompressedImage) => {}
+    callback: (message: ROSCompressedImage) => void
 }
 
 ////////////////////////////////////////////////////////////

@@ -32,6 +32,8 @@ export class VideoStream extends React.Component<VideoStreamProps> {
         this.video.style.display = "block";
         this.video.setAttribute("width", this.width.toString());
         this.video.setAttribute("height", this.height.toString());
+
+        this.updateImage = this.updateImage.bind(this);
     }
 
     get imageReceived() {
@@ -62,19 +64,19 @@ export class VideoStream extends React.Component<VideoStreamProps> {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{width: "100%"}}></canvas>
+            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{ width: "100%" }}></canvas>
         )
     }
 }
 
 // Gripper video stream
-export const VideoStreamComponent = (props: {streams: VideoStream[]}) => {
+export const VideoStreamComponent = (props: { streams: VideoStream[] }) => {
     console.log(props.streams)
     let buttonPads = Bp.ExampleButtonPads;
     // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
-    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
-    const widths = ["34%", "20%", "40%"];
+    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
+    const widths = ["30%", "22.5%", "45%"];
     return (
         <div id="video-stream-container">
             {props.streams.map((stream, i) => (
