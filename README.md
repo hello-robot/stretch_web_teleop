@@ -10,9 +10,9 @@ git clone https://github.com/vinitha910/stretch-web-interface.git
 
 Run `rosdep install --from-paths . --ignore-src -y -r` in the workspace `src` folder to get all the package dependencies then build and source the workspace.
 
-Then install the package dependencies for `stretch-web-interface` but running `npm install` in that directory.
+Then install the package dependencies for `stretch-web-interface` by running `npm install` in that directory.
 
-Browser features like the camera and microphone access require that the page be running in an SSL context, so we need certificates in order to serve the interface and enable SSL for the rosburdge websocket (see the launch files). We are going to use  [`mkcert`](https://github.com/FiloSottile/mkcert) to manage a set of certificates accross the development machines and Stretch. 
+Browser features like the camera and microphone access require that the page be running in an SSL context, so we need certificates in order to serve the interface and enable SSL for the rosbridge websocket (see the launch files). We are going to use  [`mkcert`](https://github.com/FiloSottile/mkcert) to manage a set of certificates accross the development machines and Stretch. 
 
 Download the `mkcert` pre-built binaries and install `mkcert`:
 ```
@@ -41,19 +41,16 @@ roslaunch stretch-web-interface web_interface_simulation.launch
 
 These commands launch the simulation environment, rosbridge websocket respectively.
 
-Run `npm run start` in the `stretch-web-interface` directory. Open `localhost:3000` in **google chrome** to see the interface.
-
+Run `./start_web_server.sh` in the `stretch-web-interface` directory. Open `localhost:3000` in **google chrome** to see the interface.
 
 ## Running the interface on the real robot
 Run the following commands in separate terminals **on the robot**:
 ```
 roslaunch stretch-web-interface web_interface.launch
-npm run start 
+./start_web_server.sh
 ```
-Make sure `npm run start` is running in the `stretch-web-interface` directory
+Make sure `./start_web_server.sh` is running in the `stretch-web-interface` directory
 
 On your **local machine** configure your `ROS_IP` to you IP address and the `ROS_MASTER_URI` to the robot's ros master. If your `ROS_IP` and `ROS_MASTER_URI` are not configured correctly you will no be able to see the video streams. 
-
-Run `rosrun web_video_server web_video_server` on your **local machine**.
 
 Enter the robot's IP address in **google chrome** to open the interface. You might need to enable invalid certificates for resources loaded from localhost in order for this to work (currently trying to fix this): `chrome://flags/#allow-insecure-localhost`

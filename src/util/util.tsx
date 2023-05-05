@@ -77,7 +77,7 @@ export const realsenseProps = {
 }
 
 export const gripperProps = {
-    width: 1024,
+    width: 900,
     height: 768,
     fps: 6.0
 }
