@@ -22,4 +22,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+<<<<<<< HEAD
 package-lock.json
+=======
+# individual certificates
+mkcert*
+>>>>>>> remotes/origin/noah/dev

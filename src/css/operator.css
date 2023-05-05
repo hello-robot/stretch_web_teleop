@@ -1,0 +1,37 @@
+main {
+    position: relative;
+}
+
+#velocity-control-wrapper {
+    /* clear: both; */
+    /* display: inline-block; */
+    float: right;
+}
+
+.velocity-radio-button {
+    position: absolute;
+    float:left;
+    opacity: 0;
+}
+
+.velocity-label {
+    float: left;
+    padding: .5em 1em;
+    cursor: pointer;
+    border: 1px solid hsl(200, 60%, 60%);
+    margin-right: -1px;
+    background-color: hsl(200, 60%, 75%);
+}
+
+.velocity-label:first-of-type {
+    border-radius: .7em 0 0 .7em;
+}
+
+.velocity-label:last-of-type {
+    border-radius: 0 .7em .7em 0;
+}
+
+.velocity-radio-button:checked + label{
+    background-color:  hsl(200, 80%, 50%);
+}
+

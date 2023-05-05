@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import '../css/index.css'
 
 import { Robot } from './robot'
@@ -75,8 +75,7 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
     allRemoteStreams.set(streamName, { 'track': track, 'stream': stream });
 }
 
-ReactDOM.render(
-    <VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>,
-    document.getElementById('root')
-);
-
+// New method of rendering in react 18
+const container = document.getElementById('root');
+const root = createRoot(container!); // createRoot(container!) if you use TypeScript
+root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);

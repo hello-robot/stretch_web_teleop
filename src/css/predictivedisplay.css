@@ -1,0 +1,16 @@
+.predictive-display {
+    width: 100%;
+    height: 100%;
+    stroke: gray;
+    /* cursor: none; */
+}
+
+.predictive-display path {
+    stroke-width: 3;
+    stroke: blue;
+    /* stroke-linecap: round; */
+}
+
+.predictive-display:active path{
+    stroke: red;
+}
