@@ -1,6 +1,6 @@
 import React from "react";
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE } from "../util/svg";
-import "../css/buttonpads.css"
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE } from "utils/svg";
+import "operator/css/buttonpads.css"
 
 /** Properties for a single button in a button pad */
 export type ButtonProps = {

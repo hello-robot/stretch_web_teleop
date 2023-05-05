@@ -1,11 +1,10 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import '../css/index.css'
-
-import { Robot } from './robot'
-import { WebRTCConnection } from './webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage } from '../util/util'
-import { VideoStreamComponent, VideoStream } from './videostreams';
+import 'robot/css/index.css';
+import { Robot } from 'robot/tsx/robot'
+import { WebRTCConnection } from 'shared/webrtcconnections'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage } from 'utils/util'
+import { VideoStreamComponent, VideoStream } from 'operator/tsx/videostreams';
 
 export const robot = new Robot({})
 export let connection: WebRTCConnection;
@@ -36,7 +35,7 @@ robot.connect().then(() => {
     connection = new WebRTCConnection({
         peerName: 'ROBOT',
         onConnectionStart: handleSessionStart,
-        onTrackAdded: handleRemoteTrackAdded,
+        // onTrackAdded: handleRemoteTrackAdded,
         onMessage: handleMessage
     });
     connection.connectToRobot('ROBOT')
@@ -78,4 +77,4 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
 // New method of rendering in react 18
 const container = document.getElementById('root');
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript
-root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]} />);
+root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);

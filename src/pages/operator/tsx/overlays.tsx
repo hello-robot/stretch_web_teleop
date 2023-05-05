@@ -1,11 +1,6 @@
 import * as React from "react";
 import { Polygon } from 'react-svg-path'
-import { StringLiteralType } from "typescript";
-import { ExecuteBaseVelocity, SwitchToNavigationMode, robotMode, SwitchToPositionMode } from './robot'
-import * as ROSLIB from 'roslib';
-import { useRos } from 'rosreact'
-import { ROSJointState } from '../util/util'
-import { resolveObjectURL } from "buffer";
+import { ExecuteBaseVelocity, switchToNavigationMode, robotMode, switchToPositionMode } from 'robot/tsx/robot'
 
 interface OverlayProps {
     width: number; // width of videostream
@@ -44,9 +39,9 @@ const executeCommand = (mode: "navigation" | "position", regionName: string) => 
 
 const setMode = (mode: "position" | "navigation") => {
     if (robotMode == "position" && mode == "navigation") {
-        SwitchToNavigationMode();
+        switchToNavigationMode();
     } else if (robotMode == "navigation" && mode == "position") {
-        SwitchToPositionMode();
+        switchToPositionMode();
     }
 }
 

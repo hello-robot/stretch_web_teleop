@@ -1,11 +1,8 @@
 import React from "react";
-import { Card, CardContent } from '@mui/material';
-import Grid from '@mui/material/Grid'
-import { ROSCompressedImage } from "../util/util";
-import * as Bp from "./buttonpads"
-import { PredictiveDisplay } from "./predictivedisplay";
-import { isUndefined } from "util";
-import "../css/videostreams.css"
+import { ROSCompressedImage } from "utils/util";
+import * as Bp from "operator/tsx/buttonpads"
+import { PredictiveDisplay } from "operator/tsx/predictivedisplay";
+import "operator/css/videostreams.css"
 
 type VideoStreamProps = {
     width: number,

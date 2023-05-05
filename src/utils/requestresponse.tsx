@@ -1,5 +1,5 @@
 import ROSLIB from "roslib";
-import { uuid } from "./util";
+import { uuid } from "utils/util";
 
 export type Responder = () => Promise<{}>;
 

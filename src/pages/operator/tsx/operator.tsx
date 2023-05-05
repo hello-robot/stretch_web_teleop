@@ -1,6 +1,6 @@
 import React from "react";
-import { VelocityControl, DEFAULT_SPEED } from "./velocitycontrol"
-import { VideoStreams } from "./videostreams";
+import { VelocityControl, DEFAULT_SPEED } from "operator/tsx/velocitycontrol"
+import { VideoStreams } from "operator/tsx/videostreams";
 
 /** Internal state of Operator */
 interface OperatorState {
