@@ -5,8 +5,7 @@ import '../css/index.css'
 import { Robot } from './robot'
 import { WebRTCConnection } from './webrtcconnections'
 import { navigationProps, realsenseProps, gripperProps, WebRTCMessage } from '../util/util'
-import { VideoStreamComponent, VideoStream } from './videostreams';
-import { LayoutArea } from './layoutarea';
+import { AllVideoStreamComponent, VideoStream } from './videostreams';
 
 export const robot = new Robot({})
 export let connection: WebRTCConnection;
@@ -79,5 +78,4 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
 // New method of rendering in react 18
 const container = document.getElementById('root');
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript
-// root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]} />);
-root.render(<LayoutArea />)
+root.render(<AllVideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]} />);

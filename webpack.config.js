@@ -3,13 +3,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack')
 
 module.exports = {
-  entry: { main: './src/tsx/index.tsx' },
+  entry: { main: './src/pages/robot/tsx/index.tsx' },
   node: {
     __dirname: false,
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/html/index.html'
+      template: './src/pages/operator/html/index.html'
     }),
     // Work around for Buffer is undefined:
     // https://github.com/webpack/changelog-v5/issues/10
@@ -61,7 +61,13 @@ module.exports = {
       "timers": false,
       "os": false,
       "stream": require.resolve("stream-browserify"),
-    } 
+    },
+    alias: {
+      "shared": path.resolve(__dirname, './src/shared/'),
+      "utils": path.resolve(__dirname, './src/utils/'),
+      "operator": path.resolve(__dirname, './src/pages/operator/'),
+      "robot": path.resolve(__dirname, './src/pages/robot/'),
+    }
   },
   output: {
     filename: 'bundle.js',

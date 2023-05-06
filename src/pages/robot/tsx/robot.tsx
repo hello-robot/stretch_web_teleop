@@ -1,12 +1,11 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from '../util/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'utils/util';
 import ROSLIB, { Message, Ros } from "roslib";
 
 var trajectoryClient: ROSLIB.ActionClient;
 var cmdVelTopic: ROSLIB.Topic;
 var switchToNavigationService: ROSLIB.Service;
 var switchToPositionService: ROSLIB.Service;
-var videoTopics: [ROSLIB.Topic];
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;

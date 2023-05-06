@@ -1,5 +1,5 @@
 import React from "react"
-import { VideoStream } from "./videostreams"
+import { VideoStream } from "operator/tsx/videostreams"
 
 type VideoViewerProps = {
     /** The video stream object to display */
