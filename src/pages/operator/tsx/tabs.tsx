@@ -1,8 +1,7 @@
 import React from "react";
-import classNames from "classnames";
-import { SingleTabDef, TabsDef } from "./interfacecomponents"
+import { SingleTabDef, TabsDef } from "./componentdefinitions"
+import { renderComponentList } from "./render";
 import "../css/tabs.css"
-import { renderComponentList } from "./layoutarea";
 
 type TabsProps = {
     tabsDef: TabsDef
@@ -32,7 +31,7 @@ export class Tabs extends React.Component<TabsProps, TabsState> {
                             <button
                                 key={`${tabDef.label}-${idx}`}
                                 className={"tab-button" + (isActive ? " active" : "")}
-                                onClick={() => this.setState({active: idx})}
+                                onClick={() => this.setState({ active: idx })}
                             >
                                 {tabDef.label}
                             </button>

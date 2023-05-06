@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack')
 
 module.exports = {
+  // entry: { main: './src/pages/operator/tsx/index.tsx' },
   entry: { main: './src/pages/robot/tsx/index.tsx' },
   node: {
     __dirname: false,

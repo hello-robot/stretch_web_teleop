@@ -1,8 +1,6 @@
 /**
- * Definitions to describe different components to render
+ * @summary Definitions to describe different components to render
  */
-
-
 
 /**
  * High-level type of the component
@@ -61,7 +59,7 @@ export interface TabsDef extends CompDef {
 /**
  * Definition for a button pad component
  */
-export interface ButtonPadDef extends CompDef {}
+export interface ButtonPadDef extends CompDef { }
 
 /**
  * Definition for a video stream component
