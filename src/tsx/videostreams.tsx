@@ -64,30 +64,63 @@ export class VideoStream extends React.Component<VideoStreamProps> {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{ width: "100%" }}></canvas>
+            <canvas ref={this.canvas!} width={this.width} height={this.height}></canvas>
         )
     }
 }
 
-// Gripper video stream
-export const VideoStreamComponent = (props: { streams: VideoStream[] }) => {
-    console.log(props.streams)
-    let buttonPads = Bp.ExampleButtonPads;
-    // let buttonPads = [undefined, undefined, undefined];
-    // Replace the overhead button pad with predictive display
-    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
-    const widths = ["30%", "22.5%", "45%"];
+/**
+ * Displays a video stream with an optional button pad overlay
+ * @param props properties
+ * @returns a video stream component
+ */
+export const VideoStreamComponent = (props: { stream: VideoStream, buttonPad?: React.ReactNode }) => {
+    const [streamHeight, setStreamHeight] = React.useState(0);
+    const streamRef = props.stream.canvas;  // refrence to the canvas element from the stream
+    const resizeObserver = new ResizeObserver(entries => {
+        const { height } = entries[0].contentRect;
+        setStreamHeight(height);
+    });
+    React.useEffect(() => {
+        if (!streamRef?.current) return;
+        resizeObserver.observe(streamRef.current);
+        return () => resizeObserver.disconnect();
+    }, []);
     return (
-        <div id="video-stream-container">
-            {props.streams.map((stream, i) => (
-                <div key={i} className="video-stream" style={{width: widths[i]}}>
-                    <div className="video-button-pad">
-                        {buttonPads[i]}
-                    </div>
-                    {stream.render()}
-                </div>
-            )
-            )}
+        <div className="video-stream">
+            {
+                props.buttonPad ?
+                    <div
+                        className="video-button-pad"
+                        style={{ height: streamHeight }}
+                    >
+                        {props.buttonPad}
+                    </div> : undefined
+            }
+            {props.stream.render()}
         </div>
     );
-};
+}
+
+// Gripper video stream
+// export const VideoStreamComponent = (props: { streams: VideoStream[] }) => {
+//     console.log(props.streams)
+//     let buttonPads = Bp.ExampleButtonPads;
+//     // let buttonPads = [undefined, undefined, undefined];
+//     // Replace the overhead button pad with predictive display
+//     buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
+//     const widths = ["30%", "22.5%", "45%"];
+//     return (
+//         <div id="video-stream-container">
+//             {props.streams.map((stream, i) => (
+//                 <div key={i} className="video-stream" style={{ width: widths[i] }}>
+//                     <div className="video-button-pad">
+//                         {buttonPads[i]}
+//                     </div>
+//                     {stream.render()}
+//                 </div>
+//             )
+//             )}
+//         </div>
+//     );
+// };

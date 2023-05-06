@@ -1,0 +1,42 @@
+.tabs-component {
+    /* border: 1px dotted red; */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-header {
+    display: inline-block;
+}
+
+.tab-button {
+    border: none;
+    background-color: hsl(200, 20%, 80%);
+    font-size: 1.5rem;
+}
+
+.tab-button:hover {
+    background-color: hsl(200, 60%, 80%);
+}
+
+.tab-button.active {
+    background-color: hsl(200, 90%, 70%);
+}
+
+.tab-button:first-of-type {
+    border-top-left-radius: .2em;
+}
+
+.tab-button:last-of-type {
+    border-top-right-radius: .2em;
+}
+
+.tabs-content {
+    /* background-color: green; */
+    border: 0.5rem solid hsl(200, 90%, 70%);
+    height: 95%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    
+}
