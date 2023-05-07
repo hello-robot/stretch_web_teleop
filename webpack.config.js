@@ -2,15 +2,30 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack')
 
+const pages = ['robot', 'operator'];
+
 module.exports = {
-  entry: { main: './src/pages/robot/tsx/index.tsx' },
+  mode: 'development',
+    entry: pages.reduce((config, page) => {
+        config[page] = `./src/pages/${page}/tsx/index.tsx`;
+        return config;
+    }, {}),
+    output: {
+      filename: "[name]/bundle.js",
+      path: path.resolve(__dirname, "dist"),
+  },
+  optimization: {
+      splitChunks: {
+          chunks: "all",
+      },
+  },
   node: {
     __dirname: false,
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/pages/operator/html/index.html'
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: './src/pages/operator/html/index.html'
+    // }),
     // Work around for Buffer is undefined:
     // https://github.com/webpack/changelog-v5/issues/10
     new webpack.ProvidePlugin({
@@ -19,7 +34,17 @@ module.exports = {
     new webpack.ProvidePlugin({
         process: 'process/browser',
     }),
-  ],
+  ].concat(
+    pages.map(
+        (page) =>
+            new HtmlWebpackPlugin({
+                inject: true,
+                template: `./src/pages/${page}/html/index.html`,
+                filename: `${page}/index.html`,
+                chunks: [page],
+            })
+    )
+  ),
   module: {
     rules: [
       {
@@ -69,10 +94,10 @@ module.exports = {
       "robot": path.resolve(__dirname, './src/pages/robot/'),
     }
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
+  // output: {
+  //   filename: 'bundle.js',
+  //   path: path.resolve(__dirname, 'dist'),
+  // },
   devServer: {
     allowedHosts: ['slinky.hcrlab.cs.washington.edu', "localhost:3000"],
     headers: {

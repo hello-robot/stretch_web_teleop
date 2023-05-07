@@ -16,27 +16,42 @@ io.on("connect_error", (err) => {
 
 io.on('connection', function(socket) {
     console.log('new socket.io connection');
-    console.log('socket.handshake = ');
-    console.log(socket.handshake);
-
-    var robot_operator_room = 'none';
+    // console.log('socket.handshake = ');
+    // console.log(socket.handshake);
 
     socket.on('join', function (room) {
         console.log('Received request to join room ' + room);
-        // io.sockets.in(room).emit('join', room);
-        socket.join(room);
-        socket.emit('joined', room, socket.id);
-        // io.sockets.in(room).emit('ready');
-        // socket.emit('full', room);
-        robot_operator_room = room
-
+        if (!io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2) { 
+            socket.join(room);
+            socket.emit('joined', room, socket.id);
+        } else {
+            console.log('room full')
+            socket.emit('full', room)
+        }
+        console.log(io.sockets.adapter.rooms)
     });
-    
+
+    socket.on('is robot available', () => {
+        if (io.sockets.adapter.rooms.get('robot')) {
+            // console.log(io.sockets.adapter.rooms.get('operator'))
+            console.log('robot is available')
+            io.in('operator').emit('robot available', true)
+            io.in('robot').emit('join', 'robot');
+        } else {
+            console.log('robot not available')
+            io.in('operator').emit('robot available', false)
+        }
+    })
+
     socket.on('signalling', function (message) {
-        if (robot_operator_room !== 'none') {
-            io.in(robot_operator_room).emit('signalling', message);
+        if (io.sockets.adapter.rooms.get('robot')) {
+            io.in('robot').emit('signalling', message);
         } else {
             console.log('robot_operator_room is none, so there is nobody to send the WebRTC message to');
         }
+    });
+
+    socket.on('disconnect', function(){
+        socket.to('robot').emit('bye');
     });
 });

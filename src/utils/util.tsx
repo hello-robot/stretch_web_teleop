@@ -4,6 +4,8 @@ export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_
 
 export type VelocityGoalArray = [{[key in ValidJoints]?: number}, {[key in ValidJoints]?: number}]
 
+export type cmd = {}
+
 export interface ROSJointState extends Message {
     name: [ValidJoints?],
     position: [number],
@@ -27,7 +29,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = SensorMessage | JointStateMessage;
+export type WebRTCMessage = SensorMessage | JointStateMessage | cmd;
 
 export interface SensorMessage {
     type: "sensor",

@@ -3,6 +3,7 @@ import { CameraInfo, SignallingMessage, WebRTCMessage } from "utils/util";
 import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'utils/util'
 import type { Request, Response, Responder } from "utils/requestresponse";
+import { AvailableRobots } from 'utils/socketio';
 
 const peerConstraints = {
     iceServers: [{
@@ -14,39 +15,82 @@ const peerConstraints = {
     iceCandidatePoolSize: 10,
 };
 
+interface WebRTCProps {
+    peerName: string;
+    polite: boolean;
+    onTrackAdded?: (ev: RTCTrackEvent) => void;
+    onMessage: (message: WebRTCMessage | WebRTCMessage[]) => void;
+    onRobotConnectionStart?: () => void;
+    onMessageChannelOpen?: () => void;
+    onAvailableRobotsChanged?: (available_robots: AvailableRobots) => void;
+
+}
+
 export class WebRTCConnection extends React.Component {
     private socket: Socket;
     private peerConnection?: RTCPeerConnection
     private peerName: string
+    private polite: boolean
     private makingOffer = false
     private ignoreOffer: boolean = false
     private isSettingRemoteAnswerPending = false
     cameraInfo: CameraInfo = {}
-
-    private onTrackAdded: (ev: RTCTrackEvent) => void
 
     private messageChannel?: RTCDataChannel
     private requestChannel?: RTCDataChannel
     private requestResponders: Map<string, Responder> = new Map()
     private pendingRequests: Map<string, (response: any) => void> = new Map()
 
+    private onTrackAdded?: (ev: RTCTrackEvent) => void
     private onMessage: (obj: WebRTCMessage | WebRTCMessage[]) => void
-    private onConnectionStart: () => void 
+    private onRobotConnectionStart?: () => void 
+    private onMessageChannelOpen?: () => void
 
-    constructor(props) {
+    constructor(props: WebRTCProps) {
         super(props);
-        this.onConnectionStart = props.onConnectionStart
+        this.peerName = props.peerName
+        this.polite = props.polite
+        this.onRobotConnectionStart = props.onRobotConnectionStart
         this.onMessage = props.onMessage
         this.onTrackAdded = props.onTrackAdded
-        this.peerName = props.peerName
+        this.onMessageChannelOpen = props.onMessageChannelOpen
+
         this.createPeerConnection()
 
         this.socket = io('http://localhost:5000', {transports: ["websocket"]});
 
-        this.socket.on('connect', () => {console.log("socket connected")})
+        this.socket.on('connect', () => {
+            console.log("socket connected")
+        })
+
+        this.socket.on('join', (room: string) => {
+            console.log('Another peer made a request to join room ' + room);
+            console.log('I am ' + this.peerName + '!');
+            if (this.onRobotConnectionStart) {
+                this.onRobotConnectionStart()
+            } 
+        });
+
+        // This is only sent to the operator room
+        this.socket.on('available robot', (robot: string) => {
+            console.log('available robot: ', robot)
+            this.joinRoom(robot)
+        })
+
+        this.socket.on('robot available', (available: boolean) => {
+            if (available) {
+                this.joinRobotRoom()
+            } else {
+                console.warn('no robot available')
+            }
+        })
+
+        this.socket.on('bye', () => {
+            console.log('Session terminated.');
+            this.stop();
+        })
 
         this.socket.on('joined', (room: String) => {
-            if (this.onConnectionStart) this.onConnectionStart()
             console.log('joined: ' + room);
         });
 
@@ -64,7 +108,9 @@ export class WebRTCConnection extends React.Component {
                 const readyForOffer =
                     !this.makingOffer &&
                     (this.peerConnection.signalingState === "stable" || this.isSettingRemoteAnswerPending);
-                this.ignoreOffer = sessionDescription.type === "offer" && !readyForOffer;
+                const offerCollision = sessionDescription.type === "offer" && !readyForOffer;
+
+                this.ignoreOffer = !this.polite && offerCollision;
 
                 if (this.ignoreOffer) {
                     console.error("Ignoring offer")
@@ -74,8 +120,8 @@ export class WebRTCConnection extends React.Component {
 
                 this.peerConnection.setRemoteDescription(sessionDescription).then(async () => {
                     this.isSettingRemoteAnswerPending = false;
+                    if (!this.peerConnection) throw 'peerConnection is undefined';
                     if (sessionDescription?.type === "offer") {
-                        if (!this.peerConnection) throw 'peerConnection is undefined';
                         return this.peerConnection.setLocalDescription();
                     } else {
                         return false;
@@ -121,8 +167,8 @@ export class WebRTCConnection extends React.Component {
                     candidate: event.candidate!
                 });
             };
-
-            this.peerConnection.ontrack = this.onTrackAdded
+            
+            this.peerConnection.ontrack = this.onTrackAdded!
             
             this.peerConnection.ondatachannel = event => {
                 // The remote has opened a data channel. We'll set up different handlers for the different channels.
@@ -133,6 +179,9 @@ export class WebRTCConnection extends React.Component {
                         if (!this.messageChannel) throw 'messageChannel is undefined';
                         const readyState = this.messageChannel.readyState;
                         console.log('Data channel state is: ' + readyState);
+                        if (readyState === 'open') {
+                            if (this.onMessageChannelOpen) this.onMessageChannelOpen();
+                        }
                     }
                     this.messageChannel.onopen = onDataChannelStateChange;
                     this.messageChannel.onclose = onDataChannelStateChange;
@@ -142,7 +191,6 @@ export class WebRTCConnection extends React.Component {
                 } else {
                     console.error("Unknown channel opened:", event.channel.label)
                 }
-
             };
 
             this.peerConnection.onnegotiationneeded = async () => {
@@ -176,24 +224,52 @@ export class WebRTCConnection extends React.Component {
                 if (this.peerConnection.connectionState === "failed" || this.peerConnection.connectionState === "disconnected") {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
                     this.createPeerConnection()
+                    if (this.peerName == "OPERATOR") {
+                        this.hangup()
+                    }
                 }
             }
+
         } catch (e: any) {
             console.error('Failed to create PeerConnection, exception: ' + e.message);
             return;
         }
     }
     
-    connectToRobot(robot: string) {
-        console.log('attempting to connect to robot =');
-        console.log(robot);
+    joinRobotRoom() {
+        console.log('attempting to join room = robot');
         this.socket.emit('join', 'robot')
+    }
+
+    joinOperatorRoom() {
+        console.log('attempting to join room = operator');
+        this.socket.emit('join', 'operator')
+        this.socket.emit('is robot available');
+    }
+
+    joinRoom(room: string) {
+        console.log('attempting to join room =');
+        console.log(room);
+        this.socket.emit('join', room)
     }
 
     addTrack(track: MediaStreamTrack, stream: MediaStream, streamName: string) { 
         this.cameraInfo[stream.id] = streamName   
         this.peerConnection?.addTrack(track, stream);
         console.log("added track")
+    }
+
+    hangup() {
+        // Tell the other end that we're ending the call so they can stop, and get us kicked out of the robot room
+        console.warn("Hanging up")
+        this.socket.emit('bye');
+        if (!this.peerConnection) throw 'pc is undefined';
+        if (this.peerConnection.connectionState === "new") {
+            // Don't reset PCs that don't have any state to reset
+            return;
+        }
+        console.log('Hanging up.');
+        this.stop();
     }
 
     stop() {

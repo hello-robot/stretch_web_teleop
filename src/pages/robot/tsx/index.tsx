@@ -11,7 +11,6 @@ export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
-export let allRemoteStreams = new Map()
 
 robot.connect().then(() => {
     robot.subscribeToVideo({
@@ -34,14 +33,18 @@ robot.connect().then(() => {
 
     connection = new WebRTCConnection({
         peerName: 'ROBOT',
-        onConnectionStart: handleSessionStart,
-        // onTrackAdded: handleRemoteTrackAdded,
+        polite: false,
+        onRobotConnectionStart: handleSessionStart,
         onMessage: handleMessage
     });
-    connection.connectToRobot('ROBOT')
+    connection.joinRobotRoom()
 })
 
 function handleSessionStart() {
+    connection.openDataChannels()
+
+    console.log('adding local media stream to peer connection');
+
     let stream: MediaStream = navigationStream.outputVideoStream!;
     stream.getTracks().forEach(track => connection.addTrack(track, stream, "navigation"))
 
@@ -59,20 +62,6 @@ function handleMessage(message: WebRTCMessage) {
     }
     console.log(message)
 };
-
-function handleRemoteTrackAdded(event: RTCTrackEvent) {
-    console.log('Remote track added.');
-    const track = event.track;
-    const stream = event.streams[0];
-    console.log('got track id=' + track.id, track);
-    if (stream) {
-        console.log('stream id=' + stream.id, stream);
-    }
-    console.log('OPERATOR: adding remote tracks');
-
-    let streamName = connection.cameraInfo[stream.id]
-    allRemoteStreams.set(streamName, { 'track': track, 'stream': stream });
-}
 
 // New method of rendering in react 18
 const container = document.getElementById('root');
