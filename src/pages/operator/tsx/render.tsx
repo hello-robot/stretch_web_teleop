@@ -2,6 +2,7 @@
  * @summary Functions for rendering components based on their definitions.
  */
 import React from "react";
+// TODO: these streams need to be accessed through webrtc
 import { navigationStream, realsenseStream, gripperStream } from "robot/tsx";
 import { ExampleButtonPads } from "./buttonpads";
 import { CompDef, TabsDef, ButtonPadId, VideoStreamDef, VideoStreamId, ComponentType, ButtonPadDef } from "./componentdefinitions";

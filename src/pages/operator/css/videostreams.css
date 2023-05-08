@@ -1,11 +1,11 @@
-/* #video-stream-container {
+#video-stream-container {
     margin: 1%;
     width: auto;
     height: 95%;
     display: flex;
     justify-content: space-between;
     clear: both;
-} */
+}
 
 .video-stream {
     position: relative;

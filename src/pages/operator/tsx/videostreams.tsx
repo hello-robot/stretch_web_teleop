@@ -99,21 +99,18 @@ export const VideoStreamComponent = (props: { stream: VideoStream, buttonPad?: R
     );
 }
 
-// Gripper video stream
+/** Renders all three video streams side by side */
 export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
     console.log(props.streams)
-    let buttonPads = Bp.ExampleButtonPads;
+    // let buttonPads = Bp.ExampleButtonPads;
     // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
-    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
+    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
     const widths = ["30%", "22.5%", "45%"];
     return (
         <div id="video-stream-container">
             {props.streams.map((stream, i) => (
                 <div key={i} className="video-stream" style={{ width: widths[i] }}>
-                    <div className="video-button-pad">
-                        {buttonPads[i]}
-                    </div>
                     {stream.render()}
                 </div>
             )
