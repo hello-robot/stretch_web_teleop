@@ -5,7 +5,7 @@ import React from "react";
 // TODO: these streams need to be accessed through webrtc
 import { navigationStream, realsenseStream, gripperStream } from "robot/tsx";
 import { ExampleButtonPads } from "./buttonpads";
-import { CompDef, TabsDef, ButtonPadId, VideoStreamDef, VideoStreamId, ComponentType, ButtonPadDef } from "./componentdefinitions";
+import { ComponentDef, TabsDef, ButtonPadId, VideoStreamDef, VideoStreamId, ComponentType, ButtonPadDef } from "./componentdefinitions";
 import { Tabs } from "./tabs";
 import { VideoStream, VideoStreamComponent } from "./videostreams";
 
@@ -53,7 +53,7 @@ function renderVideoStream(videoDef: VideoStreamDef): React.ReactNode {
  * @param comp component definition to render
  * @returns rendered component
  */
-export function renderComponent(comp: CompDef): React.ReactNode {
+export function renderComponent(comp: ComponentDef): React.ReactNode {
     switch (comp.type) {
         case ComponentType.Tabs:
             return renderTabs(comp as TabsDef)
@@ -67,8 +67,8 @@ export function renderComponent(comp: CompDef): React.ReactNode {
     }
 }
 
-export function renderComponentList(comps: CompDef[], path?: string) {
-    return comps.map((comp: CompDef, index: number) => {
+export function renderComponentList(comps: ComponentDef[], path?: string) {
+    return comps.map((comp: ComponentDef, index: number) => {
         const curPath = (path ? path + "-" : "") + `${index}`;
         return (
             <React.Fragment key={`${comp.id}-${index}`} >

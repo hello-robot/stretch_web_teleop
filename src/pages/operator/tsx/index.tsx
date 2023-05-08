@@ -1,10 +1,10 @@
 import { createRoot } from 'react-dom/client';
-import { AllVideoStreamComponent } from 'operator/tsx/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage } from 'utils/util';
 import { RemoteRobot } from 'robot/tsx/remoterobot';
 import { cmd } from 'utils/util';
-import { LayoutArea } from './layoutarea';
+import { Operator } from './operator';
+import "operator/css/index.css"
 
 let allRemoteStreams = new Map()
 let remoteRobot: RemoteRobot;
@@ -46,4 +46,4 @@ function configureRobot() {
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
-root.render(<LayoutArea/>);
+root.render(<Operator/>);

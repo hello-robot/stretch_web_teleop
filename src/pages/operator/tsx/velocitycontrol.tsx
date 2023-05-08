@@ -1,5 +1,5 @@
-import React from "react";
-import "operator/css/operator.css";
+import React, { useState } from "react";
+import "operator/css/velocitycontrol.css";
 
 /**Details of a velocity setting */
 type velocityDetails = {
@@ -11,8 +11,13 @@ type velocityDetails = {
 
 /**Props for VelocityControl */
 type velocityControlProps = {
-    currentSpeed: number;
-    onChange: React.ChangeEventHandler<HTMLInputElement>;
+    /** Initial speed when interface first loaded. */
+    initialSpeed: number;
+    /**
+     * Callback function when a new speed is selected.
+     * @param newSpeed the new selected speed
+     */
+    onChange: (newSpeed: number) => void;
 }
 
 /**The different velocity settings to display. */
@@ -28,7 +33,17 @@ const VELOCITY_SPEEDS: velocityDetails[] = [
 export const DEFAULT_SPEED: number = VELOCITY_SPEEDS[2].speed;
 
 /** The velocity control buttons. */
-export const VelocityControl = ({currentSpeed, onChange}: velocityControlProps) => {
+export const VelocityControl = ({initialSpeed, onChange}: velocityControlProps) => {
+    const [currentSpeed, setCurrentSpeed] = React.useState(initialSpeed);
+
+    /** When a velocity button is clicked */
+    const changeFunc = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newSpeed = +e.target.value;
+        setCurrentSpeed(newSpeed);
+        onChange(newSpeed);
+    }
+
+    /** Maps the velocity labels and speeds to radio buttons */
     const mapFunc = ({label, speed}: velocityDetails, index: number) => {
         const checked = speed == currentSpeed;
         const id = `speed-${index}`;
@@ -42,7 +57,7 @@ export const VelocityControl = ({currentSpeed, onChange}: velocityControlProps) 
                     value={speed}
                     className="velocity-radio-button"
                     checked={checked}
-                    onChange={onChange}
+                    onChange={changeFunc}
                 />
                 <label key={`label-${index}`} htmlFor={id} className="velocity-label">{label}</label>
             </>

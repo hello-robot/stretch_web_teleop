@@ -1,4 +1,10 @@
 #layout-area {
-    height: 95%;
+    height: 100%;
     margin: 1%;
+}
+
+#layout-area,
+.tabs-content {
+    display: flex;
+    justify-content: space-evenly;
 }

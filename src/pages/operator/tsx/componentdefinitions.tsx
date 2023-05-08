@@ -33,7 +33,7 @@ export enum ButtonPadId {
  * Definition for any interface component. Any video stream, button pad, 
  * tabs, etc. definition will have these fields.
  */
-export interface CompDef {
+export interface ComponentDef {
     type: ComponentType;
     id: any;
 }
@@ -45,13 +45,13 @@ export interface SingleTabDef {
     /** The label that appears at the top of the tabs object. */
     label: string;
     /** List of definitions for what's in this tab */
-    contents: CompDef[];
+    contents: ComponentDef[];
 }
 
 /**
  * Definition for a tabs component
  */
-export interface TabsDef extends CompDef {
+export interface TabsDef extends ComponentDef {
     /** List of definitions for individual tabs */
     tabs: SingleTabDef[];
 }
@@ -59,12 +59,12 @@ export interface TabsDef extends CompDef {
 /**
  * Definition for a button pad component
  */
-export interface ButtonPadDef extends CompDef { }
+export interface ButtonPadDef extends ComponentDef { }
 
 /**
  * Definition for a video stream component
  */
-export interface VideoStreamDef extends CompDef {
+export interface VideoStreamDef extends ComponentDef {
     /** The button pad to overlay, if undefined then no overlay. */
     buttonPadDef?: ButtonPadDef;
 }

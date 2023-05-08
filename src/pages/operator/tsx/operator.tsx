@@ -1,45 +1,69 @@
 import React from "react";
 import { VelocityControl, DEFAULT_SPEED } from "operator/tsx/velocitycontrol"
-import { VideoStreams } from "operator/tsx/videostreams";
+import { LayoutArea } from "./layoutarea";
+import { ActionMode, ActionModeButton } from "operator/tsx/actionmodebutton"
+import "operator/css/operator.css"
 
 /** Internal state of Operator */
 interface OperatorState {
     /** Current speed of the robot */
-    speed: number;
+    // speed: number;
+    customizing: boolean;
+}
+
+type CustomizeButtonProps = {
+    customizing: boolean;
+    onClick: () => void;
+}
+
+// Uses icons from https://fonts.google.com/icons
+const CustomizeButton = (props: CustomizeButtonProps) => {
+    const icon = props.customizing ? "check_circle" : "build_circle";
+    return (
+        <span
+            className="material-icons"
+            style={{ fontSize: "36px", cursor: "pointer" }}
+            onClick={props.onClick}
+        >
+            {icon}
+        </span>
+    )
 }
 
 /** Operator internface webpage */
 export class Operator extends React.Component<any, OperatorState> {
+    speed: number;
+    actionMode: ActionMode;
+
     constructor(props: {}) {
         super(props);
+        this.speed = DEFAULT_SPEED;
+        this.actionMode = ActionMode.StepActions;
         this.state = {
-            speed: DEFAULT_SPEED,
+            customizing: false
         }
 
-        this.speedChange = this.speedChange.bind(this);
-    }
-    
-    /**
-     * Records the new speed
-     * @param e the change event when a new speed is clicked
-     */
-    speedChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({speed: +e.target.value});
     }
 
     render() {
         return (
-            <main style={{display: "flex", flexFlow: "column", height: "95%"}}>
-                <div style={{width: "100%", flex: "0 1 auto"}}>
-                    <VelocityControl 
-                        currentSpeed={this.state.speed} 
-                        onChange={this.speedChange}
+            <div id="operator-body">
+                <div id="operator-header">
+                    <ActionModeButton
+                        default={this.actionMode}
+                        onChange={(newAm) => this.actionMode = newAm}
+                    />
+                    <VelocityControl
+                        initialSpeed={this.speed}
+                        onChange={(newSpeed) => this.speed = newSpeed}
+                    />
+                    <CustomizeButton
+                        customizing={this.state.customizing}
+                        onClick={() => this.setState({ customizing: !this.state.customizing })}
                     />
                 </div>
-                <div style={{flex: "1 1 auto"}}>
-                    <VideoStreams />
-                </div>
-            </main>
+                < LayoutArea />
+            </div>
         )
     }
 }
