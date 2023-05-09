@@ -40,14 +40,6 @@ export const DEFAULT_LAYOUT: ComponentDef[] = [
         {
             label: 'Navigation',
             contents: [
-        {
-                    type: ComponentType.VideoStream,
-                    id: VideoStreamId.overhead
-                } as VideoStreamDef,
-                {
-                    type: ComponentType.VideoStream,
-                    id: VideoStreamId.realsense
-                } as VideoStreamDef,
             ]
         }]
     } as TabsDef,

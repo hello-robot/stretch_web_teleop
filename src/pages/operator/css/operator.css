@@ -1,4 +1,4 @@
-#operator-body {
+#operator {
     height: 100%;
     display: flex;
     flex-flow: column;
@@ -13,4 +13,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex: 0 0 auto;
+}
+
+#operator-body {
+    display: flex;
+    flex-flow: row;
+    flex: 1;
+}
+
+#sidebar {
+    flex: 0 0 20rem;
+    height: 100%;
+    background-color: lightgray;
 }

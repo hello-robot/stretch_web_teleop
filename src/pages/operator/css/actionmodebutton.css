@@ -10,6 +10,10 @@
     width: 10rem;
 }
 
+#action-mode-button .material-icons {
+    margin: -0.25rem;
+}
+
 #action-mode-popup {
     position: absolute;
     z-index: 3;

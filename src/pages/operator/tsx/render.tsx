@@ -1,35 +1,84 @@
 /**
  * @summary Functions for rendering components based on their definitions.
  */
+
 import React from "react";
 // TODO: these streams need to be accessed through webrtc
 import { navigationStream, realsenseStream, gripperStream } from "robot/tsx";
-import { ExampleButtonPads } from "./buttonpads";
-import { ComponentDef, TabsDef, ButtonPadId, VideoStreamDef, VideoStreamId, ComponentType, ButtonPadDef } from "./componentdefinitions";
+import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./buttonpads";
 import { Tabs } from "./tabs";
 import { VideoStream, VideoStreamComponent } from "./videostreams";
+import { CustomizableComponentProps } from "./customizablecomponent";
+import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentType, ComponentDef } from "./componentdefinitions";
+import { FunctionProvider } from "./functionprovider";
 
 
-function renderTabs(tabsDef: TabsDef): React.ReactNode {
-    return <Tabs tabsDef={tabsDef} />
+function renderTabs(props: CustomizableComponentProps) {
+    return (
+        <Tabs {...props} />
+    );
 }
 
-function renderButtonPad(buttonPadDef: ButtonPadDef): React.ReactNode {
-    switch (buttonPadDef.id) {
+function renderButtonPad(cProps: CustomizableComponentProps, videoStreamParent?: VideoStreamDef) {
+    let functions: BF[];
+    let shape: ButtonPadShape;
+    switch (cProps.definition.id) {
         case ButtonPadId.overhead:
-            return ExampleButtonPads[0];
+            functions = [
+                BF.BaseForward,
+                BF.BaseRotateRight,
+                BF.BaseReverse,
+                BF.BaseRotateLeft
+            ];
+            shape = ButtonPadShape.Directional;
+            break;
         case ButtonPadId.realsense:
-            return ExampleButtonPads[1];
+            functions = [
+                BF.WristRotateIn,
+                BF.WristRotateOut,
+                BF.ArmExtend,
+                BF.ArmRetract,
+                BF.BaseForward,
+                BF.BaseReverse,
+                BF.ArmLift,
+                BF.ArmLower,
+                BF.GripperClose,
+                BF.GripperOpen
+            ]
+            shape = ButtonPadShape.Realsense;
+            break;
         case ButtonPadId.gripper:
-            return ExampleButtonPads[2];
+            functions = [
+                BF.ArmLift,
+                BF.ArmLower,
+                BF.WristRotateIn,
+                BF.WristRotateOut,
+                BF.GripperOpen,
+                BF.GripperClose,
+            ]
+            shape = ButtonPadShape.Gripper;
+            break;
         default:
-            return <div>ERROR</div>;
+            throw new Error(`unknow video stream id: ${cProps.definition.id}`);
     }
+    const buttonsProps = functions.map((funct: BF) => {
+        return {
+            ...cProps.functionProvider(funct),
+            label: "" + funct
+        } as ButtonProps;
+    })
+    const props: ButtonPadProps = {
+        ...cProps,
+        buttonsProps: buttonsProps,
+        buttonPadShape: shape,
+        videoStreamParent: videoStreamParent
+    }
+    return <ButtonPad {...props} />
 }
 
-function renderVideoStream(videoDef: VideoStreamDef): React.ReactNode {
+function renderVideoStream(props: CustomizableComponentProps) {
     let stream: VideoStream;
-    switch (videoDef.id as VideoStreamId) {
+    switch (props.definition.id as VideoStreamId) {
         case VideoStreamId.overhead:
             stream = navigationStream;
             break;
@@ -40,10 +89,16 @@ function renderVideoStream(videoDef: VideoStreamDef): React.ReactNode {
             stream = gripperStream;
             break;
         default:
-            return <div>ERROR</div>
+            throw new Error(`unknow video stream id: ${props.definition.id}`);
     }
-    const buttonPadDef = videoDef.buttonPadDef;
-    const buttonPad = buttonPadDef ? renderButtonPad(buttonPadDef) : undefined;
+    const buttonPadDef = props.definition;
+    const buttonPadProps: CustomizableComponentProps = {
+        definition: buttonPadDef,
+        customizing: props.customizing,
+        path: props.path + '-0',
+        functionProvider: props.functionProvider
+    }
+    const buttonPad = buttonPadDef ? renderButtonPad(buttonPadProps, props.definition) : undefined;
     return <VideoStreamComponent stream={stream} buttonPad={buttonPad} />
 }
 
@@ -53,27 +108,40 @@ function renderVideoStream(videoDef: VideoStreamDef): React.ReactNode {
  * @param comp component definition to render
  * @returns rendered component
  */
-export function renderComponent(comp: ComponentDef): React.ReactNode {
-    switch (comp.type) {
+export function renderComponent(props: CustomizableComponentProps) {
+    switch (props.definition.type) {
         case ComponentType.Tabs:
-            return renderTabs(comp as TabsDef)
+            return renderTabs(props)
         case ComponentType.ButtonPad:
-            return renderButtonPad(comp as ButtonPadDef);
+            return renderButtonPad(props);
         case ComponentType.VideoStream:
-            return renderVideoStream(comp as VideoStreamDef);
+            return renderVideoStream(props);
         default:
-            console.error(`unknow component type: ${comp.type}`)
-            return <div>ERROR</div>;
+            throw new Error(`unknow component type: ${props.definition.type}`);
     }
 }
 
-export function renderComponentList(comps: ComponentDef[], path?: string) {
-    return comps.map((comp: ComponentDef, index: number) => {
+/**
+ * Renders a list of component definitions horizontally
+ * @param comps list of component definitions to render
+ * @param customizing if the interface is in customization mode
+ * @param functionProvider see {@link FunctionProvider}
+ * @param path 
+ * @returns 
+ */
+export function renderComponentList(comps: ComponentDef[], customizing: boolean, functionProvider: FunctionProvider, path?: string) {
+    return comps.map((compDef: ComponentDef, index: number) => {
         const curPath = (path ? path + "-" : "") + `${index}`;
+        const props: CustomizableComponentProps = {
+            definition: compDef,
+            customizing: customizing,
+            path: curPath,
+            functionProvider: functionProvider
+        }
         return (
-            <React.Fragment key={`${comp.id}-${index}`} >
-                {/* <DropZone /> */}
-                {renderComponent(comp)}
+            <React.Fragment key={`${compDef.id}-${index}`} >
+                {/* <DropZone/> */}
+                {renderComponent(props)}
             </React.Fragment>
         );
     });

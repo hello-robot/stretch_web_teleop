@@ -21,3 +21,14 @@ export const OVERHEAD_ROBOT_BASE = {
     height: percent2Pixel(11),
     width: percent2Pixel(15)
 }
+
+/**Creates the SVG path for a rectangle
+ * @param x left edge location
+ * @param y top edge location
+ * @param width the width
+ * @param height the height
+*/
+export function rect(x: number, y: number, width: number, height: number) {
+    return `M ${x} ${y} ${x + width} ${y} ${x + width} ${y + height} 
+                ${x} ${y + height} Z`;
+}

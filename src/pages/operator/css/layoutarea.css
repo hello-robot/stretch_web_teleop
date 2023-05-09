@@ -1,6 +1,6 @@
 #layout-area {
-    height: 100%;
     margin: 1%;
+    flex: 1;
 }
 
 #layout-area,
