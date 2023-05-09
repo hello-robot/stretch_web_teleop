@@ -1,8 +1,9 @@
 import React from "react";
-import { ROSCompressedImage } from "utils/util";
+import { ROSCompressedImage, className } from "utils/util";
 import * as Bp from "operator/tsx/buttonpads"
 import { PredictiveDisplay } from "operator/tsx/predictivedisplay";
 import "operator/css/videostreams.css"
+import { CustomizableComponentProps } from "./customizablecomponent";
 
 type VideoStreamProps = {
     width: number,
@@ -66,12 +67,17 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 }
 
+export type VideoStreamComponentProps = CustomizableComponentProps & {
+    stream: VideoStream,
+    buttonPad: React.ReactNode,
+}
+
 /**
  * Displays a video stream with an optional button pad overlay
  * @param props properties
  * @returns a video stream component
  */
-export const VideoStreamComponent = (props: { stream: VideoStream, buttonPad?: React.ReactNode }) => {
+export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
     const [streamHeight, setStreamHeight] = React.useState(0);
     const streamRef = props.stream.canvas;  // refrence to the canvas element from the stream
     const resizeObserver = new ResizeObserver(entries => {
@@ -83,8 +89,16 @@ export const VideoStreamComponent = (props: { stream: VideoStream, buttonPad?: R
         resizeObserver.observe(streamRef.current);
         return () => resizeObserver.disconnect();
     }, []);
+
+    const { customizing, onSelect } = props.sharedState;
+
+    const active = props.path === props.sharedState.activePath;
+
     return (
-        <div className="video-stream">
+        <div
+            className={className("video-stream", { customizing, active })}
+            onClick={() => onSelect(props.path, props.definition)}
+        >
             {
                 props.buttonPad ?
                     <div

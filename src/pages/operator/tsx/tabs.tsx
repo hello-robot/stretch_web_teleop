@@ -1,16 +1,19 @@
 import React from "react";
 import { SingleTabDef, TabsDef } from "./componentdefinitions"
-import { renderComponentList } from "./render";
+import { ComponentList, ComponentListProps } from "./render";
 import "../css/tabs.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
 
-interface TabsProps extends CustomizableComponentProps {}
-
-export const Tabs = (props: TabsProps) => {
+export const Tabs = (props: CustomizableComponentProps) => {
     // Index of the active tab
     const [active, setActive] = React.useState(0);
     const definition = props.definition as TabsDef;
-    const contents = renderComponentList(definition.tabs[active].contents, props.customizing, props.functionProvider, props.path)
+    const componentListProps: ComponentListProps = {
+        path: props.path,
+        components: definition.tabs[active].contents,
+        sharedState: props.sharedState,
+        parentDef: props.definition
+    }
     return (
         <div className="tabs-component" >
             <div className="tabs-header">
@@ -29,7 +32,7 @@ export const Tabs = (props: TabsProps) => {
                 }
             </div>
             <div className="tabs-content">
-                {contents}
+                <ComponentList {...componentListProps}/>
             </div>
         </div>
     )

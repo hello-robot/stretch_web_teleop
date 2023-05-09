@@ -12,6 +12,14 @@
     margin: auto 0.5rem;
 }
 
+.video-stream.customizing {
+    opacity: 50%;
+}
+
+.video-stream.active {
+    box-shadow: 0 0 1rem 1rem #0ff;;
+}
+
 /* Overlays the button pad on top of the video stream*/
 .video-button-pad {
     z-index: 2;

@@ -1,25 +1,27 @@
 import React from "react";
 import "../css/layoutarea.css"
 import { ComponentDef } from 'operator/tsx/componentdefinitions'
-import { renderComponentList } from "./render";
-import { DEFAULT_LAYOUT } from "./defaultlayout"
-import { FunctionProvider } from "./functionprovider";
+import { ComponentList, ComponentListProps } from "./render";
+import { SharedState } from "./customizablecomponent";
 
 /** Properties for {@link LayoutArea} */
-interface LayoutAreaProps {
-    /** If the interface is in customization mode */
-    customizing: boolean;
+type LayoutAreaProps = {
     /** Layout structure to render */
-    layout?: ComponentDef[];
-    functionProvider: FunctionProvider;
+    layout: ComponentDef[];
+    sharedState: SharedState;
 }
 
 /** Main area of the interface where the user can add, remove, or rearrange elements. */
 export const LayoutArea = (props: LayoutAreaProps) => {
-    const layout: ComponentDef[] = props.layout || DEFAULT_LAYOUT;
+    const layout: ComponentDef[] = props.layout;
+    const componentListProps: ComponentListProps = {
+        components: layout,
+        path: "",
+        sharedState: props.sharedState
+    }
     return (
         <div id="layout-area" >
-            {renderComponentList(layout, props.customizing, props.functionProvider)}
+            <ComponentList {...componentListProps} />
         </div>
     )
 }
