@@ -18,6 +18,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     width: number;
     height: number;
     fps: number;
+    className?: string;
     outputVideoStream?: MediaStream
 
     constructor(props: VideoStreamProps) {
@@ -62,7 +63,12 @@ export class VideoStream extends React.Component<VideoStreamProps> {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height}></canvas>
+            <canvas
+                ref={this.canvas!}
+                width={this.width}
+                height={this.height}
+                className={this.className}
+            />
         )
     }
 }
@@ -78,11 +84,11 @@ export type VideoStreamComponentProps = CustomizableComponentProps & {
  * @returns a video stream component
  */
 export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
-    const [streamHeight, setStreamHeight] = React.useState(0);
+    const [streamStyle, setStreamStyle] = React.useState({});
     const streamRef = props.stream.canvas;  // refrence to the canvas element from the stream
     const resizeObserver = new ResizeObserver(entries => {
-        const { height } = entries[0].contentRect;
-        setStreamHeight(height);
+        const { height, width } = entries[0].contentRect;
+        setStreamStyle({ height, width });
     });
     React.useEffect(() => {
         if (!streamRef?.current) return;
@@ -93,17 +99,18 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
     const { customizing, onSelect } = props.sharedState;
 
     const active = props.path === props.sharedState.activePath;
+    props.stream.className = className("video-canvas", { customizing, active })
 
     return (
         <div
-            className={className("video-stream", { customizing, active })}
+            className='video-stream'
             onClick={() => onSelect(props.path, props.definition)}
         >
             {
                 props.buttonPad ?
                     <div
                         className="video-button-pad"
-                        style={{ height: streamHeight }}
+                        style={streamStyle}
                     >
                         {props.buttonPad}
                     </div> : undefined

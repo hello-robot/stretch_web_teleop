@@ -1,54 +1,60 @@
-import { ComponentDef, ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef } from "./componentdefinitions";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition, ComponentDefinition } from "./componentdefinitions";
 
 /**
  * Default layout to load on start
  */
-export const DEFAULT_LAYOUT: ComponentDef[] = [
-    // Video stream tabs
-    {
+export const DEFAULT_LAYOUT: ParentComponentDefinition = {
+    type: ComponentType.Layout,
+    children: [{
         type: ComponentType.Tabs,
-        id: 'tabs',
-        tabs: [{
+        children: [{
+            type: ComponentType.SingleTab,
             label: 'Manipulation',
-            contents: [
-                {
-                    type: ComponentType.VideoStream,
-                    id: VideoStreamId.overhead,
-                    buttonPadDef: {
+            children: [{
+                type: ComponentType.VideoStream,
+                id: VideoStreamId.overhead,
+                children: [
+                    {
                         type: ComponentType.ButtonPad,
                         id: ButtonPadId.overhead
                     }
-                } as VideoStreamDef,
-                {
-                    type: ComponentType.VideoStream,
-                    id: VideoStreamId.realsense,
-                    buttonPadDef: {
+                ]
+            } as VideoStreamDef,
+            {
+                type: ComponentType.VideoStream,
+                id: VideoStreamId.realsense,
+                children: [
+                    {
                         type: ComponentType.ButtonPad,
                         id: ButtonPadId.realsense,
                     } as ButtonPadDef
-                } as VideoStreamDef,
-                {
-                    type: ComponentType.VideoStream,
-                    id: VideoStreamId.gripper,
-                    buttonPadDef: {
+                ]
+            } as VideoStreamDef,
+            {
+                type: ComponentType.VideoStream,
+                id: VideoStreamId.gripper,
+                children: [
+                    {
                         type: ComponentType.ButtonPad,
-                        id: ButtonPadId.gripper,
-                    } as ButtonPadDef
-                } as VideoStreamDef,
+                        id: ButtonPadId.gripper
+                    }
+                ]
+            } as VideoStreamDef,
             ]
-        },
+        } as SingleTabDef,
         {
+            type: ComponentType.SingleTab,
             label: 'Navigation',
-            contents: [
+            children: [
             ]
         }]
     } as TabsDef,
     {
         type: ComponentType.Tabs,
-        id: 'tabs',
-        tabs: [{
+        children: [{
+            type: ComponentType.SingleTab,
             label: 'Tab1',
-            contents: [
+            children: [
                 // {
                 //     type: ComponentType.VideoStream,
                 //     id: VideoStreamId.overhead,
@@ -76,8 +82,16 @@ export const DEFAULT_LAYOUT: ComponentDef[] = [
             ]
         },
         {
+            type: ComponentType.SingleTab,
             label: 'Tab2',
-            contents: []
+            children: [{
+                type: ComponentType.VideoStream,
+                id: VideoStreamId.gripper,
+                children: [{
+                    type: ComponentType.ButtonPad,
+                    id: ButtonPadId.gripper,
+                } as ButtonPadDef]
+            } as VideoStreamDef]
         }]
-    } as TabsDef
-]
+    } as TabsDef]
+}

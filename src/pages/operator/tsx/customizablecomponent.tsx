@@ -1,4 +1,4 @@
-import { ComponentDef, ComponentType } from "./componentdefinitions";
+import { ComponentDefinition, ComponentType } from "./componentdefinitions";
 import { DropZoneState } from "./dropzone";
 import { FunctionProvider } from "./functionprovider";
 import { renderButtonPad, renderVideoStream } from "./render";
@@ -8,7 +8,7 @@ import { Tabs } from "./tabs";
 export type SharedState = {
     customizing: boolean,
     /** Called when user clicks on a component */
-    onSelect: (path: string, def: ComponentDef) => void,
+    onSelect: (path: string, def: ComponentDefinition) => void,
     /** Gives function based on user input type */
     functionProvider: FunctionProvider,
     /** State required for all dropzones */
@@ -22,7 +22,7 @@ export type SharedState = {
  */
 export type CustomizableComponentProps = {
     path: string,
-    definition: ComponentDef;
+    definition: ComponentDefinition;
     sharedState: SharedState,
 }
 
@@ -32,6 +32,9 @@ export type CustomizableComponentProps = {
  * @returns rendered component
  */
 export const CustomizableComponent = (props: CustomizableComponentProps) => {
+    if (!props.definition.type) {
+        throw new Error(`Component at ${props.path} is missing type`);
+    }
     switch (props.definition.type) {
         case ComponentType.Tabs:
             return <Tabs {...props} />

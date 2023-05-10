@@ -8,7 +8,7 @@ import { navigationStream, realsenseStream, gripperStream } from "robot/tsx";
 import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./buttonpads";
 import { VideoStream, VideoStreamComponent } from "./videostreams";
 import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./customizablecomponent";
-import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDef } from "./componentdefinitions";
+import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./componentdefinitions";
 import { DropZone } from "./dropzone";
 
 export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamParent?: VideoStreamDef) {
@@ -83,13 +83,26 @@ export function renderVideoStream(props: CustomizableComponentProps) {
         default:
             throw new Error(`unknow video stream id: ${props.definition.id}`);
     }
-    const buttonPadDef = props.definition;
-    const buttonPadProps: CustomizableComponentProps = {
-        definition: buttonPadDef,
-        path: props.path + '-0',
-        sharedState: props.sharedState
+
+    // Render button pad overlay
+    const videoStreamDef = props.definition as VideoStreamDef;
+    
+    // Check video stream has at most one child
+    if (videoStreamDef.children.length > 1) throw new Error(`VideoStream definition should not have more than one child`);
+    let buttonPad: JSX.Element | undefined = undefined;
+    if (videoStreamDef.children.length > 0) {
+        const buttonPadDef = (props.definition as VideoStreamDef).children[0];
+        
+        // Check video stream child is of type button pad
+        if (buttonPadDef.type != ComponentType.ButtonPad) throw new Error(`VideoStream component cannot have component type ${buttonPadDef.type} as a child`);
+        const buttonPadProps: CustomizableComponentProps = {
+            definition: buttonPadDef,
+            path: props.path + '-0',
+            sharedState: props.sharedState
+        }
+        buttonPad = renderButtonPad(buttonPadProps, props.definition as VideoStreamDef);
     }
-    const buttonPad = buttonPadDef ? renderButtonPad(buttonPadProps, props.definition) : undefined;
+
     return (
         <VideoStreamComponent
             stream={stream}
@@ -101,16 +114,16 @@ export function renderVideoStream(props: CustomizableComponentProps) {
 
 export type ComponentListProps = {
     path: string,
-    components: ComponentDef[],
     sharedState: SharedState,
-    parentDef?: ComponentDef
+    definition: ParentComponentDefinition
 }
 
 export const ComponentList = (props: ComponentListProps) => {
-    const { path, components } = props;
+    const { path } = props;
+    const components = props.definition.children;
     return (
         <>
-            {components.map((compDef: ComponentDef, index: number) => {
+            {components.map((compDef: ComponentDefinition, index: number) => {
                 const curPath = (path ? path + "-" : "") + `${index}`;
                 const cProps: CustomizableComponentProps = {
                     definition: compDef,
@@ -118,11 +131,11 @@ export const ComponentList = (props: ComponentListProps) => {
                     sharedState: props.sharedState
                 }
                 return (
-                    <React.Fragment key={`${compDef.id}-${index}`} >
+                    <React.Fragment key={`${index}`} >
                         <DropZone
                             path={curPath}
                             sharedState={props.sharedState}
-                            parentDef={props.parentDef}
+                            parentDef={props.definition}
                         />
                         <CustomizableComponent {...cProps} />
                     </React.Fragment>
@@ -131,7 +144,7 @@ export const ComponentList = (props: ComponentListProps) => {
             <DropZone
                 path={(path ? path + "-" : "") + components.length}
                 sharedState={props.sharedState}
-                parentDef={props.parentDef}
+                parentDef={props.definition}
             />
         </>
     )

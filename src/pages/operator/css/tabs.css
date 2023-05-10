@@ -10,7 +10,7 @@
 .tabs-content {
     /* background-color: green; */
     border: 0.5rem solid hsl(200, 90%, 70%);
-    height: 100%;
+    flex: 1 1 0;
 }
 
 .tabs-header {

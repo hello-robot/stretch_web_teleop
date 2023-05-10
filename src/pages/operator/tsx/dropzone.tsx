@@ -1,17 +1,17 @@
 import React from "react";
 import "operator/css/dropzone.css"
-import { ComponentDef, ComponentType } from "./componentdefinitions";
+import { ComponentDefinition, ComponentType } from "./componentdefinitions";
 import { SharedState } from "./customizablecomponent";
 
 /** State required for drop zones */
 export type DropZoneState = {
     onDrop: DropHandler,
-    activeDef?: ComponentDef
+    activeDef?: ComponentDefinition
 }
 
 export type DropZoneProps = {
     path: string,
-    parentDef?: ComponentDef,
+    parentDef?: ComponentDefinition,
     sharedState: SharedState
 }
 

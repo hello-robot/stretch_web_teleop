@@ -19,7 +19,7 @@
 #operator-body {
     display: flex;
     flex-flow: row;
-    flex: 1;
+    flex: 1 1 0;
 }
 
 #sidebar {
