@@ -19,10 +19,12 @@
     "debug": "^4.3.4",
     "eslint-config-react-app": "^7.0.1",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "http": "^0.0.1-security",
     "http-browserify": "^1.7.0",
     "node": "^19.8.1",
     "nodejs": "^0.0.0",
+    "playwright": "^1.33.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-svg-path": "^1.14.0",
@@ -40,7 +42,7 @@
     "webpack-dev-server": "^4.13.2"
   },
   "scripts": {
-    "start": "webpack-dev-server --mode development"
+    "start": "webpack --mode development"
   },
   "eslintConfig": {
     "extends": [

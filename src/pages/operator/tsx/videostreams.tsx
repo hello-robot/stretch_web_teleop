@@ -1,4 +1,4 @@
-import React from "react";
+import React, { VideoHTMLAttributes, useEffect, useRef } from "react";
 import { ROSCompressedImage } from "utils/util";
 import * as Bp from "operator/tsx/buttonpads"
 import { PredictiveDisplay } from "operator/tsx/predictivedisplay";
@@ -29,6 +29,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
         this.video.style.display = "block";
         this.video.setAttribute("width", this.width.toString());
         this.video.setAttribute("height", this.height.toString());
+        this.outputVideoStream = new MediaStream();
 
         this.updateImage = this.updateImage.bind(this);
     }
@@ -54,8 +55,9 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 
     start() {
-        this.outputVideoStream = this.canvas.current?.captureStream(this.fps);
-        this.video.srcObject = this.outputVideoStream as MediaProvider;
+        if (!this.canvas.current) throw 'Video stream canvas null'
+        this.outputVideoStream = this.canvas.current.captureStream(this.fps);
+        this.video.srcObject = this.outputVideoStream;
         this.drawVideo();
     }
 
@@ -65,6 +67,80 @@ export class VideoStream extends React.Component<VideoStreamProps> {
         )
     }
 }
+
+export class VideoControl extends React.Component<{ stream: MediaStream }, {}> {
+    private videoRef: React.RefObject<HTMLVideoElement>;
+  
+    constructor(props: { stream: MediaStream }) {
+      super(props);
+      this.videoRef = React.createRef<HTMLVideoElement>();
+      this.state = {
+        stream: null
+      }
+    }
+  
+    componentDidMount() {
+      if (this.videoRef.current) {
+        console.log("component mounted")
+        this.videoRef.current.srcObject = this.props.stream;
+        this.setState({stream: this.props.stream})
+      }
+    }
+  
+    componentDidUpdate() {
+      if (this.videoRef.current) {
+        console.log("component updates")
+        this.videoRef.current.srcObject = this.props.stream;
+        console.log(this.videoRef.current?.srcObject.getTracks()[0].readyState)
+    }
+    }
+  
+    render() {
+        console.log(this.videoRef.current?.srcObject )
+      return (
+        <div key={this.props.stream.id}>
+            <video ref={this.videoRef} autoPlay muted={true}/>
+        </div>
+      )
+    }
+  }
+  
+
+type VideoControlPropsType = VideoHTMLAttributes<HTMLVideoElement> & {
+    srcObject: MediaStream;
+  };
+  
+  export default function Video({ srcObject, ...props }: VideoControlPropsType) {
+    const refVideo = useRef<HTMLVideoElement>(null);
+    const [srcObjectSet, setSrcObjectSet] = React.useState(false);
+  
+    useEffect(() => {
+      if (refVideo.current && srcObject) {
+        refVideo.current.srcObject = srcObject;
+        refVideo.current.onloadedmetadata = function(e) {
+            refVideo.current!.play();
+            };
+        setSrcObjectSet(true);
+      }
+    }, [srcObject]);
+
+    console.log("Video element:", refVideo.current);
+    return <video ref={refVideo} {...props} autoPlay  playsInline muted />;
+  }
+  
+  export const VideoControlComponent = (props: { streams: MediaStream[] }) => {
+    let test= <Video key={0} srcObject={props.streams[0]} />
+    console.log(test)
+    return (
+      <div>
+        <button>test</button>
+        {props.streams.map((stream, i) => (
+            <Video key={i} srcObject={stream} />
+        ))}
+      </div>
+    );
+  };
+  
 
 // Gripper video stream
 export const VideoStreamComponent = (props: { streams: VideoStream[] }) => {

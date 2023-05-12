@@ -1,12 +1,19 @@
 import { createRoot } from 'react-dom/client';
-import { VideoStreamComponent, VideoStream } from 'operator/tsx/videostreams';
+import { VideoStreamComponent, VideoStream, VideoControlComponent, VideoControl } from 'operator/tsx/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage } from 'utils/util';
 import { RemoteRobot } from 'robot/tsx/remoterobot';
 import { cmd } from 'utils/util';
+import ReactDOM from 'react-dom';
+import { navigationStream } from 'robot/tsx/index'
 
-let allRemoteStreams = new Map()
+type RemoteStream = {
+    stream: MediaStream;
+    track: MediaStreamTrack
+}
+let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
+let mediaStreams: MediaStream[] = []
 
 let connection = new WebRTCConnection({
     peerName: "OPERATOR",
@@ -14,9 +21,12 @@ let connection = new WebRTCConnection({
     onMessage: handleMessage,
     onTrackAdded: handleRemoteTrackAdded,   
     onMessageChannelOpen: configureRobot,
+    onConnectionEnd: disconnectFromRobot
 });
 
 connection.joinOperatorRoom()
+
+// const button = document.getElementById('video')?.addEventListener('click', e => connection.joinOperatorRoom());
 
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');
@@ -41,10 +51,39 @@ function configureRobot() {
         robotChannel: (message: cmd) => connection.sendData(message)
     });
     console.log("message channel open")
+    allRemoteStreams.forEach((values, keys) => {
+        mediaStreams.push(values.stream)
+    })
+    console.log('connection ', connection.connectionState())
+
+    const button = document.getElementById('video')?.addEventListener('click', e => renderVideos());
+
+    console.log("remote streams ", allRemoteStreams)
+    // overhead.addRemoteStream(allRemoteStreams.get("overhead").stream)
+    // realsense.addRemoteStream(allRemoteStreams.get("realsense").stream)
+    // gripper.addRemoteStream(allRemoteStreams.get("gripper").stream)
+    // root.render(<VideoControlComponent streams={mediaStreams}/>);
 }
 
-// console.log(allRemoteStreams.keys())
-// // New method of rendering in react 18
-// const container = document.getElementById('root');
-// const root = createRoot(container!); // createRoot(container!) if you use TypeScript
+function disconnectFromRobot() {
+    connection.hangup()
+    // for (const stream in mediaStreams) {
+    //     this.controls[control].removeRemoteStream()
+    // }
+}
+
+function renderVideos() {
+    const container = document.getElementById("root");
+    const root = createRoot(container!);
+
+    const videoControls = Array.from(allRemoteStreams.values()).map(
+      (remoteStream) => (
+        <VideoControl key={remoteStream.stream.id} stream={remoteStream.stream} />
+    ));
+
+    console.log(videoControls)
+
+    root.render(<div>{videoControls}</div>);
+  }
+  
 // // root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);

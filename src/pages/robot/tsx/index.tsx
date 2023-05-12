@@ -36,23 +36,23 @@ robot.connect().then(() => {
         polite: false,
         onRobotConnectionStart: handleSessionStart,
         onMessage: handleMessage
-    });
+    })
     connection.joinRobotRoom()
 })
 
 function handleSessionStart() {
-    connection.openDataChannels()
-
     console.log('adding local media stream to peer connection');
 
     let stream: MediaStream = navigationStream.outputVideoStream!;
-    stream.getTracks().forEach(track => connection.addTrack(track, stream, "navigation"))
+    stream.getTracks().forEach(track => connection.addTrack(track, stream, "overhead"))
 
     stream = realsenseStream.outputVideoStream!;
     stream.getTracks().forEach(track => connection.addTrack(track, stream, "realsense"))
 
     stream = gripperStream.outputVideoStream!;
     stream.getTracks().forEach(track => connection.addTrack(track, stream, "gripper"))
+
+    connection.openDataChannels()
 }
 
 function handleMessage(message: WebRTCMessage) {

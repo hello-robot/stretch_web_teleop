@@ -1,14 +1,51 @@
-const http = require('http');
+var fs = require('fs');
+
+var options = {
+	key: fs.readFileSync('certificates/localhost-key.pem'),
+	cert: fs.readFileSync('certificates/localhost.pem')
+};
+
+// const http = require('http');
+// const socket = require('socket.io');
+// const server = http.createServer(options);
+// const port = 5000;
+// const io = socket(server, {
+//     allowEIO3: true
+// });
+
+// server.listen(port, () => {
+//     console.log('listening on *:' + port);
+// });
+
 const socket = require('socket.io');
-const server = http.createServer();
-const port = 5000;
-const io = socket(server, {
+var express = require('express')
+var app = express();
+app.all('*', ensureSecure); // at top of routing calls
+
+function ensureSecure(req, res, next){
+    // console.log('https://' + req.hostname + req.url)
+    if(!req.secure){
+        // handle port numbers if you need non defaults
+        res.redirect('https://' + req.hostname + req.url); 
+    }
+
+    return next();
+};
+
+var server = require('http').Server(app);
+var secure_server = require('https').Server(options, app);
+const io = socket(secure_server, {
     allowEIO3: true
 });
+app.enable('trust proxy')
+app.set('port', 443);
+server.listen(80);
+secure_server.listen(443);
 
-server.listen(port, () => {
-    console.log('listening on *:' + port);
-});
+var path = require('path')
+app.use('/', express.static(path.join(__dirname, 'dist')));
+
+app.listen(process.env.port)
 
 io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
@@ -28,7 +65,6 @@ io.on('connection', function(socket) {
             console.log('room full')
             socket.emit('full', room)
         }
-        console.log(io.sockets.adapter.rooms)
     });
 
     socket.on('is robot available', () => {
@@ -45,7 +81,7 @@ io.on('connection', function(socket) {
 
     socket.on('signalling', function (message) {
         if (io.sockets.adapter.rooms.get('robot')) {
-            io.in('robot').emit('signalling', message);
+            socket.to('robot').emit('signalling', message);
         } else {
             console.log('robot_operator_room is none, so there is nobody to send the WebRTC message to');
         }

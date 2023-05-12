@@ -9,10 +9,8 @@ const peerConstraints = {
     iceServers: [{
         urls: [
             'stun:stun1.l.google.com:19302',
-            'stun:stun2.l.google.com:19302',
         ],
-    }],
-    iceCandidatePoolSize: 10,
+    }]
 };
 
 interface WebRTCProps {
@@ -23,7 +21,7 @@ interface WebRTCProps {
     onRobotConnectionStart?: () => void;
     onMessageChannelOpen?: () => void;
     onAvailableRobotsChanged?: (available_robots: AvailableRobots) => void;
-
+    onConnectionEnd?: () => void;
 }
 
 export class WebRTCConnection extends React.Component {
@@ -34,6 +32,8 @@ export class WebRTCConnection extends React.Component {
     private makingOffer = false
     private ignoreOffer: boolean = false
     private isSettingRemoteAnswerPending = false
+    private pendingIceCandidates: RTCIceCandidate[]
+
     cameraInfo: CameraInfo = {}
 
     private messageChannel?: RTCDataChannel
@@ -45,6 +45,7 @@ export class WebRTCConnection extends React.Component {
     private onMessage: (obj: WebRTCMessage | WebRTCMessage[]) => void
     private onRobotConnectionStart?: () => void 
     private onMessageChannelOpen?: () => void
+    private onConnectionEnd?: () => void
 
     constructor(props: WebRTCProps) {
         super(props);
@@ -54,10 +55,12 @@ export class WebRTCConnection extends React.Component {
         this.onMessage = props.onMessage
         this.onTrackAdded = props.onTrackAdded
         this.onMessageChannelOpen = props.onMessageChannelOpen
+        this.onConnectionEnd = props.onConnectionEnd
+        this.pendingIceCandidates = []
 
         this.createPeerConnection()
 
-        this.socket = io('http://localhost:5000', {transports: ["websocket"]});
+        this.socket = io();
 
         this.socket.on('connect', () => {
             console.log("socket connected")
@@ -133,6 +136,7 @@ export class WebRTCConnection extends React.Component {
             } else if (candidate !== undefined && this.peerConnection) {
                 // Note that the last candidate will be null, so we check whether
                 // the candidate variable is defined at all versus being truthy.
+                // if (this.peerConnection.remoteDescription !== null) {
                 this.peerConnection.addIceCandidate(candidate).catch(e => {
                     if (!this.ignoreOffer) {
                         console.log("Failure during addIceCandidate(): " + e.name);
@@ -151,8 +155,10 @@ export class WebRTCConnection extends React.Component {
      * in which case the necessary event handlers will be installed in `createPeerConnection` during `ondatachannel`.
      */
      openDataChannels() {
-        this.messageChannel = this.peerConnection!.createDataChannel('messages');
-        this.requestChannel = this.peerConnection!.createDataChannel('requestresponse');
+        console.log("opened data channels")
+        if (!this.peerConnection) throw 'peerConnection undefined'
+        this.messageChannel = this.peerConnection.createDataChannel('messages');
+        this.requestChannel = this.peerConnection.createDataChannel('requestresponse');
 
         this.messageChannel.onmessage = this.onReceiveMessageCallback.bind(this);
         this.requestChannel.onmessage = this.processRequestResponse.bind(this);
@@ -220,22 +226,30 @@ export class WebRTCConnection extends React.Component {
             };
 
             this.peerConnection.onconnectionstatechange = () => {
-                if (!this.peerConnection) throw 'peerConnection is undefined';
+                if (!this.peerConnection) throw 'pc is undefined';
                 if (this.peerConnection.connectionState === "failed" || this.peerConnection.connectionState === "disconnected") {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
                     this.createPeerConnection()
-                    if (this.peerName == "OPERATOR") {
-                        this.hangup()
-                    }
+                    if (this.onConnectionEnd) this.onConnectionEnd();
                 }
-            }
+                console.log(this.peerConnection.connectionState)
+            };
 
+            this.peerConnection.onicecandidateerror = (event) => {
+                console.error('ICE candidate gathering error:', event.errorCode);
+            };
+
+            console.log('Created RTCPeerConnection');
         } catch (e: any) {
             console.error('Failed to create PeerConnection, exception: ' + e.message);
             return;
         }
     }
     
+    connectionState() {
+        return this.peerConnection?.iceConnectionState
+    }
+
     joinRobotRoom() {
         console.log('attempting to join room = robot');
         this.socket.emit('join', 'robot')
@@ -255,7 +269,8 @@ export class WebRTCConnection extends React.Component {
 
     addTrack(track: MediaStreamTrack, stream: MediaStream, streamName: string) { 
         this.cameraInfo[stream.id] = streamName   
-        this.peerConnection?.addTrack(track, stream);
+        if (!this.peerConnection) throw 'pc is undefined';
+        this.peerConnection.addTrack(track, stream);
         console.log("added track")
     }
 
