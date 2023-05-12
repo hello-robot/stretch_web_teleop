@@ -3,7 +3,6 @@ import { CameraInfo, SignallingMessage, WebRTCMessage } from "utils/util";
 import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'utils/util'
 import type { Request, Response, Responder } from "utils/requestresponse";
-import { AvailableRobots } from 'utils/socketio';
 
 const peerConstraints = {
     iceServers: [{
