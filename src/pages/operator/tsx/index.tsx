@@ -1,11 +1,11 @@
 import { createRoot } from 'react-dom/client';
-import { VideoStreamComponent, VideoStream, VideoControlComponent, VideoControl } from 'operator/tsx/videostreams';
+import { VideoControl } from 'operator/tsx/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage } from 'utils/util';
 import { RemoteRobot } from 'robot/tsx/remoterobot';
 import { cmd } from 'utils/util';
-import ReactDOM from 'react-dom';
-import { navigationStream } from 'robot/tsx/index'
+import { Operator } from './operator';
+import "operator/css/index.css"
 
 type RemoteStream = {
     stream: MediaStream;
@@ -87,3 +87,6 @@ function renderVideos() {
   }
   
 // // root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);
+const container = document.getElementById('root');
+const root = createRoot(container!);
+root.render(<Operator/>);

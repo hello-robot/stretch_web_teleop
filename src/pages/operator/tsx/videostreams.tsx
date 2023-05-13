@@ -1,8 +1,7 @@
 import React, { VideoHTMLAttributes, useEffect, useRef } from "react";
-import { ROSCompressedImage } from "utils/util";
-import * as Bp from "operator/tsx/buttonpads"
-import { PredictiveDisplay } from "operator/tsx/predictivedisplay";
+import { ROSCompressedImage, className } from "utils/util";
 import "operator/css/videostreams.css"
+import { CustomizableComponentProps } from "./customizablecomponent";
 
 type VideoStreamProps = {
     width: number,
@@ -17,6 +16,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     width: number;
     height: number;
     fps: number;
+    className?: string;
     outputVideoStream?: MediaStream
 
     constructor(props: VideoStreamProps) {
@@ -63,7 +63,12 @@ export class VideoStream extends React.Component<VideoStreamProps> {
 
     render() {
         return (
-            <canvas ref={this.canvas!} width={this.width} height={this.height} style={{ width: "100%" }}></canvas>
+            <canvas
+                ref={this.canvas!}
+                width={this.width}
+                height={this.height}
+                className={this.className}
+            />
         )
     }
 }
@@ -72,36 +77,33 @@ export class VideoControl extends React.Component<{ stream: MediaStream }, {}> {
     private videoRef: React.RefObject<HTMLVideoElement>;
   
     constructor(props: { stream: MediaStream }) {
-      super(props);
-      this.videoRef = React.createRef<HTMLVideoElement>();
-      this.state = {
-        stream: null
-      }
+        super(props);
+        this.videoRef = React.createRef<HTMLVideoElement>();
+        this.state = {
+            stream: null
+        }
     }
   
     componentDidMount() {
-      if (this.videoRef.current) {
-        console.log("component mounted")
-        this.videoRef.current.srcObject = this.props.stream;
-        this.setState({stream: this.props.stream})
-      }
+        if (this.videoRef.current) {
+            this.videoRef.current.srcObject = this.props.stream;
+            this.setState({stream: this.props.stream})
+        }
     }
   
     componentDidUpdate() {
-      if (this.videoRef.current) {
-        console.log("component updates")
-        this.videoRef.current.srcObject = this.props.stream;
-        console.log(this.videoRef.current?.srcObject.getTracks()[0].readyState)
-    }
+        if (this.videoRef.current) {
+            this.videoRef.current.srcObject = this.props.stream;
+        }
     }
   
     render() {
         console.log(this.videoRef.current?.srcObject )
-      return (
-        <div key={this.props.stream.id}>
-            <video ref={this.videoRef} autoPlay muted={true}/>
-        </div>
-      )
+        return (
+            <div key={this.props.stream.id}>
+                <video ref={this.videoRef} autoPlay muted={true}/>
+            </div>
+        )
     }
   }
   
@@ -119,7 +121,7 @@ type VideoControlPropsType = VideoHTMLAttributes<HTMLVideoElement> & {
         refVideo.current.srcObject = srcObject;
         refVideo.current.onloadedmetadata = function(e) {
             refVideo.current!.play();
-            };
+        };
         setSrcObjectSet(true);
       }
     }, [srcObject]);
@@ -132,31 +134,74 @@ type VideoControlPropsType = VideoHTMLAttributes<HTMLVideoElement> & {
     let test= <Video key={0} srcObject={props.streams[0]} />
     console.log(test)
     return (
-      <div>
-        <button>test</button>
-        {props.streams.map((stream, i) => (
-            <Video key={i} srcObject={stream} />
-        ))}
-      </div>
+        <div>
+            <button>test</button>
+            {props.streams.map((stream, i) => (
+                <Video key={i} srcObject={stream} />
+            ))}
+        </div>
     );
   };
-  
 
-// Gripper video stream
-export const VideoStreamComponent = (props: { streams: VideoStream[] }) => {
+export type VideoStreamComponentProps = CustomizableComponentProps & {
+    stream: VideoStream,
+    buttonPad: React.ReactNode,
+}
+
+/**
+ * Displays a video stream with an optional button pad overlay
+ * @param props properties
+ * @returns a video stream component
+ */
+export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
+    const [streamStyle, setStreamStyle] = React.useState({});
+    const streamRef = props.stream.canvas;  // refrence to the canvas element from the stream
+    const resizeObserver = new ResizeObserver(entries => {
+        const { height, width } = entries[0].contentRect;
+        setStreamStyle({ height, width });
+    });
+    React.useEffect(() => {
+        if (!streamRef?.current) return;
+        resizeObserver.observe(streamRef.current);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    const { customizing, onSelect } = props.sharedState;
+
+    const active = props.path === props.sharedState.activePath;
+    props.stream.className = className("video-canvas", { customizing, active })
+
+    return (
+        <div
+            className='video-stream'
+            onClick={() => onSelect(props.path, props.definition)}
+        >
+            {
+                props.buttonPad ?
+                    <div
+                        className="video-button-pad"
+                        style={streamStyle}
+                    >
+                        {props.buttonPad}
+                    </div> : undefined
+            }
+            {props.stream.render()}
+        </div>
+    );
+}
+
+/** Renders all three video streams side by side */
+export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
     console.log(props.streams)
-    let buttonPads = Bp.ExampleButtonPads;
+    // let buttonPads = Bp.ExampleButtonPads;
     // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
-    buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)}/>;
+    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
     const widths = ["30%", "22.5%", "45%"];
     return (
         <div id="video-stream-container">
             {props.streams.map((stream, i) => (
-                <div key={i} className="video-stream" style={{width: widths[i]}}>
-                    <div className="video-button-pad">
-                        {buttonPads[i]}
-                    </div>
+                <div key={i} className="video-stream" style={{ width: widths[i] }}>
                     {stream.render()}
                 </div>
             )

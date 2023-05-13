@@ -1,0 +1,23 @@
+:root {
+    --btn-bg-color: hsl(200, 60%, 75%);
+    --btn-bg-color-hover: hsl(200, 70%, 65%);
+    --btn-bg-color-click: hsl(200, 80%, 50%);
+    --btn-brdr: 1px solid var(--btn-bg-color-click);
+    --radius: 0.7rem;
+    --btn-padding: .5em 1em;
+}
+
+* {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+}
+
+button {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+button:hover {
+    cursor: pointer;
+}

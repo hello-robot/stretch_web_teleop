@@ -27,27 +27,3 @@ code {
 .imageViewer {
   position: relative;
 }
-
-svg {
-  width: 100%;
-  height: 100%;
-  fill-opacity: 0;
-}
-
-/* .action-overlay {
-  position: absolute;
-  opacity: 0.25;
-  overflow: visible;
-}
-
-.action-overlay:hover {
-  opacity: 0.5;
-}
-
-svg {
-  pointer-events: none;
-}
-
-path {
-  pointer-events: auto;
-} */

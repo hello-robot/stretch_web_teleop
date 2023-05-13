@@ -131,3 +131,21 @@ export function generateUUID(): uuid {
 //     status: "success" | "failure",
 //     value: PoseGoalCommand
 // }
+
+/**
+ * Creates a class name string based on a base class name and additional flags
+ * to include.
+ * 
+ * @param baseName base name of the class
+ * @param flags additional flags to append to the class name
+ * @returns returns a string for the class name
+ */
+export function className(baseName: string, flags: {}): string {
+    let className = baseName;
+    for (const [k, b] of Object.entries(flags)) {
+        if (b) {
+            className += " " + k;
+        }
+    }
+    return className;
+}

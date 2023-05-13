@@ -1,0 +1,11 @@
+.drop-zone {
+    background-color: lightgray;
+    opacity: 80%;
+    flex: 0 0 2rem;
+    margin: 1rem 0;
+    cursor: pointer;
+}
+
+.drop-zone:hover {
+    opacity: 100%;
+}

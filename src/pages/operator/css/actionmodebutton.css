@@ -1,0 +1,45 @@
+
+#action-mode-button {
+    border-radius: var(--radius);
+    border: var(--btn-brdr);
+    padding: var(--btn-padding);
+    background-color: var(--btn-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 10rem;
+}
+
+#action-mode-button .material-icons {
+    margin: -0.25rem;
+}
+
+#action-mode-popup {
+    position: absolute;
+    z-index: 3;
+}
+
+.action-mode-option {
+    background-color: var(--btn-bg-color);
+    padding: var(--btn-padding);
+    border: var(--btn-brdr);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.action-mode-option.active {
+    background-color: var(--btn-bg-color-click);
+}
+
+
+.action-mode-option:first-of-type {
+    border-radius: var(--radius) var(--radius) 0 0 ;
+}
+
+.action-mode-option:last-of-type {
+    border-radius: 0 0 var(--radius) var(--radius) ;
+}
+
+.action-mode-option:hover {
+    background-color: var(--btn-bg-color-hover);
+}
