@@ -3,7 +3,7 @@ import { VelocityControl, DEFAULT_SPEED } from "operator/tsx/velocitycontrol"
 import { LayoutArea } from "./layoutarea";
 import { ActionMode, ActionModeButton } from "operator/tsx/actionmodebutton"
 import "operator/css/operator.css"
-import { mockFunctionProvider } from "./functionprovider";
+import { ButtonFunctionProvider } from "./functionprovider";
 import { UserInteractionFunction } from "./buttonpads";
 import { CustomizeButton } from "./customizebutton";
 import { Sidebar } from "./sidebar";
@@ -105,6 +105,8 @@ export const Operator = (props: {
     let remoteRobot = props.remoteRobot
     let remoteStreams = props.remoteStreams
     
+    let btnFnProvider = new ButtonFunctionProvider({actionMode: actionMode, remoteRobot: remoteRobot})
+
     /**
      * Callback when the user clicks on a drop zone, moves the active component
      * into the drop zone
@@ -149,7 +151,7 @@ export const Operator = (props: {
         customizing: customizing,
         onSelect: handleSelect,
         remoteStreams: remoteStreams,
-        functionProvider: (bf: UserInteractionFunction) => mockFunctionProvider(actionMode, bf, remoteRobot),
+        functionProvider: (bf: UserInteractionFunction) => btnFnProvider.provideFunctions(bf),
         activePath: activePath,
         dropZoneState: {
             onDrop: handleDrop,
@@ -162,7 +164,7 @@ export const Operator = (props: {
             <div id="operator-header">
                 <ActionModeButton
                     default={actionMode}
-                    onChange={(newAm) => (actionMode = newAm)}
+                    onChange={(newAm) => btnFnProvider.handleActionModeUpdate(newAm)}
                 />
                 <VelocityControl
                     initialSpeed={speed}

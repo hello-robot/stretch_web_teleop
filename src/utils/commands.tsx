@@ -1,10 +1,12 @@
-export type cmd = GeneralCommand | VelocityCommand
+export type cmd = DriveCommand
+
+export interface VelocityCommand { stop: () => void }
 
 interface GeneralCommand {
     msg: string
 }
 
-export interface VelocityCommand {
+export interface DriveCommand {
     type: "driveBase",
     modifier: {
         linVel: number,

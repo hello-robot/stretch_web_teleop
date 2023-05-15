@@ -5,6 +5,7 @@
 # kill $(lsof -t -i:3000)
 
 sudo kill -9 $(sudo lsof -t -i:80)
+sudo pkill -f "node ./node_modules/.bin/nodemon server.js"
 
 export NODE_EXTRA_CA_CERTS="$(readlink -f ./certificates)/rootCA.pem"
 
