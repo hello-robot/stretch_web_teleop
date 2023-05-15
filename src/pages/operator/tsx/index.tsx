@@ -1,16 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { VideoControl } from 'operator/tsx/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage } from 'utils/util';
+import { WebRTCMessage, RemoteStream } from 'utils/util';
 import { RemoteRobot } from 'robot/tsx/remoterobot';
-import { cmd } from 'utils/util';
+import { cmd } from 'utils/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
 
-type RemoteStream = {
-    stream: MediaStream;
-    track: MediaStreamTrack
-}
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 let mediaStreams: MediaStream[] = []
@@ -43,12 +39,13 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
 }
 
 function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
-    console.log("received message")
+    console.log(message)
 }
 
 function configureRobot() {
     remoteRobot = new RemoteRobot({
-        robotChannel: (message: cmd) => connection.sendData(message)
+        robotChannel: (message: cmd) => connection.sendData(message),
+        // remoteStreams: allRemoteStreams
     });
     console.log("message channel open")
     allRemoteStreams.forEach((values, keys) => {
@@ -63,6 +60,10 @@ function configureRobot() {
     // realsense.addRemoteStream(allRemoteStreams.get("realsense").stream)
     // gripper.addRemoteStream(allRemoteStreams.get("gripper").stream)
     // root.render(<VideoControlComponent streams={mediaStreams}/>);
+
+    const container = document.getElementById('root');
+    const root = createRoot(container!);
+    root.render(<Operator remoteRobot={remoteRobot} remoteStreams={allRemoteStreams}/>);
 }
 
 function disconnectFromRobot() {
@@ -87,6 +88,3 @@ function renderVideos() {
   }
   
 // // root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);
-const container = document.getElementById('root');
-const root = createRoot(container!);
-root.render(<Operator/>);

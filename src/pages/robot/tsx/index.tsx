@@ -60,6 +60,11 @@ function handleMessage(message: WebRTCMessage) {
         console.error("Malformed message:", message)
         return
     }
+    
+    console.log(message)
+    switch (message.type) {
+        case "driveBase": robot.executeBaseVelocity(message.modifier)
+    }
     console.log(message)
 };
 

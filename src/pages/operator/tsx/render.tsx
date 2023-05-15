@@ -3,10 +3,8 @@
  */
 
 import React from "react";
-// TODO: these streams need to be accessed through webrtc
-import { navigationStream, realsenseStream, gripperStream } from "robot/tsx";
 import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./buttonpads";
-import { VideoStream, VideoStreamComponent } from "./videostreams";
+import { VideoControl, VideoStream, VideoStreamComponent } from "./videostreams";
 import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./componentdefinitions";
 import { DropZone } from "./dropzone";
@@ -69,16 +67,16 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
 }
 
 export function renderVideoStream(props: CustomizableComponentProps) {
-    let stream: VideoStream;
+    let stream: MediaStream;
     switch (props.definition.id as VideoStreamId) {
         case VideoStreamId.overhead:
-            stream = navigationStream;
+            stream = props.sharedState.remoteStreams.get('overhead')!.stream;
             break;
         case VideoStreamId.realsense:
-            stream = realsenseStream;
+            stream = props.sharedState.remoteStreams.get('realsense')!.stream;
             break;
         case VideoStreamId.gripper:
-            stream = gripperStream;
+            stream = props.sharedState.remoteStreams.get('gripper')!.stream;
             break;
         default:
             throw new Error(`unknow video stream id: ${props.definition.id}`);
@@ -103,9 +101,10 @@ export function renderVideoStream(props: CustomizableComponentProps) {
         buttonPad = renderButtonPad(buttonPadProps, props.definition as VideoStreamDef);
     }
 
+    let videoStream = <VideoControl key={stream.id} stream={stream}/>
     return (
         <VideoStreamComponent
-            stream={stream}
+            stream={videoStream}
             buttonPad={buttonPad}
             {...props}
         />

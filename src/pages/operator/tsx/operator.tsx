@@ -10,7 +10,8 @@ import { Sidebar } from "./sidebar";
 import { SharedState } from "./customizablecomponent";
 import { ComponentDefinition, ParentComponentDefinition } from "./componentdefinitions";
 import { DEFAULT_LAYOUT } from "./defaultlayout";
-
+import { RemoteRobot } from "robot/tsx/remoterobot";
+import { RemoteStream } from "utils/util";
 
 const getParent = (splitPath: string[], layout: ParentComponentDefinition): ParentComponentDefinition => {
     let pathIdx = 0;
@@ -89,7 +90,10 @@ const moveInLayout = (oldPath: string, newPath: string, layout: ParentComponentD
 }
 
 /** Operator interface webpage */
-export const Operator = () => {
+export const Operator = (props: {
+        remoteRobot: RemoteRobot,
+        remoteStreams: Map<string, RemoteStream> 
+    }) => {
     /** Speed of the robot. */
     let speed = DEFAULT_SPEED;
     let actionMode = ActionMode.StepActions;
@@ -98,6 +102,9 @@ export const Operator = () => {
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
 
+    let remoteRobot = props.remoteRobot
+    let remoteStreams = props.remoteStreams
+    
     /**
      * Callback when the user clicks on a drop zone, moves the active component
      * into the drop zone
@@ -141,7 +148,8 @@ export const Operator = () => {
     const sharedState: SharedState = {
         customizing: customizing,
         onSelect: handleSelect,
-        functionProvider: (bf: UserInteractionFunction) => mockFunctionProvider(actionMode, bf),
+        remoteStreams: remoteStreams,
+        functionProvider: (bf: UserInteractionFunction) => mockFunctionProvider(actionMode, bf, remoteRobot),
         activePath: activePath,
         dropZoneState: {
             onDrop: handleDrop,

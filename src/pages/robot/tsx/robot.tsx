@@ -120,22 +120,22 @@ export class Robot extends React.Component {
             console.log("Switched to position mode")
         });
     }
-}
 
-export const ExecuteBaseVelocity = (props: {linVel: number, angVel: number}): void => {
-    let twist = new ROSLIB.Message({
-        linear: {
-            x: props.linVel,
-            y: 0,
-            z: 0
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: props.angVel
-        }
-    });
-    cmdVelTopic.publish(twist)
+    executeBaseVelocity = (props: {linVel: number, angVel: number}): void => {
+        let twist = new ROSLIB.Message({
+            linear: {
+                x: props.linVel,
+                y: 0,
+                z: 0
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: props.angVel
+            }
+        });
+        cmdVelTopic.publish(twist)
+    }
 }
 
 export const GetJointValue = (props: { jointStateMessage: ROSJointState, jointName: ValidJoints }): number => {

@@ -3,12 +3,15 @@ import { DropZoneState } from "./dropzone";
 import { FunctionProvider } from "./functionprovider";
 import { renderButtonPad, renderVideoStream } from "./render";
 import { Tabs } from "./tabs";
+import { RemoteStream } from "utils/util";
 
 /** State required for all elements */
 export type SharedState = {
     customizing: boolean,
     /** Called when user clicks on a component */
     onSelect: (path: string, def: ComponentDefinition) => void,
+    /** Remote robot video streams */
+    remoteStreams: Map<string, RemoteStream>
     /** Gives function based on user input type */
     functionProvider: FunctionProvider,
     /** State required for all dropzones */
