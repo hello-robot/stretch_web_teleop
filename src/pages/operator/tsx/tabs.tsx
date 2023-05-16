@@ -3,8 +3,10 @@ import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from 
 import { ComponentList, ComponentListProps } from "./render";
 import "../css/tabs.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
+import { Tab, Tabs, Card } from 'react-bootstrap';
+import "bootstrap/dist/css/bootstrap.min.css";
 
-export const Tabs = (props: CustomizableComponentProps) => {
+export const InterfaceTabs = (props: CustomizableComponentProps) => {
     // Index of the active tab
     const [active, setActive] = React.useState(0);
     const definition = props.definition as TabsDef;
@@ -20,25 +22,41 @@ export const Tabs = (props: CustomizableComponentProps) => {
         definition: activeTabDef
     }
     return (
-        <div className="tabs-component" style={{flex: `${flex} ${flex} 0`}}>
-            <div className="tabs-header">
-                {definition.children.map((tabDef: SingleTabDef, idx: number) => {
-                    const isActive = active === idx;
-                    return (
-                        <button
-                            key={`${tabDef.label}-${idx}`}
-                            className={"tab-button" + (isActive ? " active" : "")}
-                            onClick={() => setActive(idx)}
-                        >
-                            {tabDef.label}
-                        </button>
-                    );
-                })
-                }
-            </div>
-            <div className="tabs-content">
-                <ComponentList {...componentListProps} />
-            </div>
-        </div>
+        <Card border="light">
+            <Tabs defaultActiveKey="Manipulation" justify>
+                    {definition.children.map((tabDef: SingleTabDef, idx: number) => {
+                        const isActive = active === idx;
+                        return (
+                            // <Card border="light" style={{ width: '18rem' }}>
+                            <Tab eventKey={`${tabDef.label}`} title={tabDef.label}>
+                                <div className="tabs-content">
+                                    <ComponentList {...componentListProps} />
+                                </div>
+                            </Tab>
+                            // </Card>
+                        )
+                    })}
+            </Tabs>
+        </Card>
+        // <div className="tabs-z" style={{flex: `${flex} ${flex} 0`}}>
+        //     <div className="tabs-header">
+        //         {definition.children.map((tabDef: SingleTabDef, idx: number) => {
+        //             const isActive = active === idx;
+        //             return (
+        //                 <button
+        //                     key={`${tabDef.label}-${idx}`}
+        //                     className={"tab-button" + (isActive ? " active" : "")}
+        //                     onClick={() => setActive(idx)}
+        //                 >
+        //                     {tabDef.label}
+        //                 </button>
+        //             );
+        //         })
+        //         }
+        //     </div>
+        //     <div className="tabs-content">
+        //         <ComponentList {...componentListProps} />
+        //     </div>
+        // </div>
     )
 }

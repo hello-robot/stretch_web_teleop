@@ -2,7 +2,7 @@ import { ComponentDefinition, ComponentType } from "./componentdefinitions";
 import { DropZoneState } from "./dropzone";
 import { FunctionProvider } from "./functionprovider";
 import { renderButtonPad, renderVideoStream } from "./render";
-import { Tabs } from "./tabs";
+import { InterfaceTabs } from "./tabs";
 import { RemoteStream } from "utils/util";
 
 /** State required for all elements */
@@ -40,7 +40,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
     }
     switch (props.definition.type) {
         case ComponentType.Tabs:
-            return <Tabs {...props} />
+            return <InterfaceTabs {...props} />
         case ComponentType.ButtonPad:
             return renderButtonPad(props);
         case ComponentType.VideoStream:

@@ -9,8 +9,28 @@
 
 .tabs-content {
     /* background-color: green; */
-    border: 0.5rem solid hsl(200, 90%, 70%);
+    /* border: 0.5rem solid hsl(200, 90%, 70%); */
     flex: 1 1 0;
+    padding: 10px;
+    border-left: 2px solid #ddd;
+    border-right: 2px solid #ddd;
+    border-bottom: 2px solid #ddd;
+    /* border-top-right-radius: 1em; */
+    /* border-top-left-radius: .2em; */
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.nav-tabs { 
+    border-width: 2px !important;
+    border-color: #ddd !important;
+}
+
+.nav-tabs .nav-link.active {
+    margin-bottom: -2px !important;
+    border-left: 2px solid #ddd;
+    border-right: 2px solid #ddd;
+    border-top: 2px solid #ddd;
 }
 
 .tabs-header {
