@@ -16,7 +16,7 @@ interface WebRTCProps {
     peerName: string;
     polite: boolean;
     onTrackAdded?: (ev: RTCTrackEvent) => void;
-    onMessage: (message: WebRTCMessage | WebRTCMessage[]) => void;
+    onMessage: (message: WebRTCMessage) => void;
     onRobotConnectionStart?: () => void;
     onMessageChannelOpen?: () => void;
     onAvailableRobotsChanged?: (available_robots: AvailableRobots) => void;

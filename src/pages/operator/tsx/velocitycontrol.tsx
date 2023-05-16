@@ -12,7 +12,7 @@ type velocityDetails = {
 /**Props for VelocityControl */
 type velocityControlProps = {
     /** Initial speed when interface first loaded. */
-    initialSpeed: number;
+    initialVelocityScale: number;
     /**
      * Callback function when a new speed is selected.
      * @param newSpeed the new selected speed
@@ -21,20 +21,20 @@ type velocityControlProps = {
 }
 
 /**The different velocity settings to display. */
-const VELOCITY_SPEEDS: velocityDetails[] = [
-    {label: "Slowest", speed: 0.2},
-    {label: "Slow",    speed: 0.4},
-    {label: "Medium",  speed: 0.5},
-    {label: "Fast",    speed: 0.6},
-    {label: "Fastest", speed: 0.8}
+const VELOCITY_SCALE: velocityDetails[] = [
+    {label: "Slowest", speed: 0.25},
+    {label: "Slow",    speed: 0.5},
+    {label: "Medium",  speed: 1.0},
+    {label: "Fast",    speed: 1.5},
+    {label: "Fastest", speed: 2.0}
 ]
 
 /**The speed the interface should initialize with */
-export const DEFAULT_SPEED: number = VELOCITY_SPEEDS[2].speed;
+export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].speed;
 
 /** The velocity control buttons. */
-export const VelocityControl = ({initialSpeed, onChange}: velocityControlProps) => {
-    const [currentSpeed, setCurrentSpeed] = React.useState(initialSpeed);
+export const VelocityControl = ({initialVelocityScale, onChange}: velocityControlProps) => {
+    const [currentSpeed, setCurrentSpeed] = React.useState(initialVelocityScale);
 
     /** When a velocity button is clicked */
     const changeFunc = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +66,7 @@ export const VelocityControl = ({initialSpeed, onChange}: velocityControlProps) 
 
     return (
         <div id="velocity-control-wrapper">
-            {VELOCITY_SPEEDS.map(mapFunc)}
+            {VELOCITY_SCALE.map(mapFunc)}
         </div>
     );
 }

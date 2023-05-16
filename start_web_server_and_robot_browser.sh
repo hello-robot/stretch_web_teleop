@@ -11,5 +11,5 @@ export NODE_EXTRA_CA_CERTS="$(readlink -f ./certificates)/rootCA.pem"
 
 npm run start &
 sudo --preserve-env ./node_modules/.bin/nodemon server.js &
-./start_robot_browser.js
+./node_modules/.bin/nodemon start_robot_browser.js
 set +x

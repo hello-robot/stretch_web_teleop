@@ -1,12 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot } from 'robot/tsx/robot'
+import { Robot, GetJointValue } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage } from 'utils/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, RobotPose, ROSJointState } from 'utils/util'
 import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/videostreams';
 
-export const robot = new Robot({})
+export const robot = new Robot({ jointStateCallback: forwardJointStates })
 export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
@@ -37,7 +37,18 @@ robot.connect().then(() => {
         onRobotConnectionStart: handleSessionStart,
         onMessage: handleMessage
     })
+
     connection.joinRobotRoom()
+    
+    // connection.registerRequestResponder("jointState", async () => {
+    //     let processedJointPositions: {[key in ValidJoints]?: number} = {};
+    //     AllJoints.forEach((key, _) => {
+    //         if (robot.jointState) {
+    //             processedJointPositions[key] = GetJointValue({jointStateMessage: robot.jointState, jointName: key})
+    //         }
+    //     });
+    //     return processedJointPositions
+    // });
 })
 
 function handleSessionStart() {
@@ -55,17 +66,36 @@ function handleSessionStart() {
     connection.openDataChannels()
 }
 
+function forwardJointStates(jointState: ROSJointState) {
+    let values: RobotPose = {}
+    jointState.name.forEach(name => {
+        values[name!] = GetJointValue({ jointStateMessage: jointState, jointName: name! });
+    })
+
+    connection.sendData({
+        type: 'jointState',
+        jointState: values
+    });
+}
+
 function handleMessage(message: WebRTCMessage) {
     if (!("type" in message)) {
         console.error("Malformed message:", message)
         return
     }
-    
+
     console.log(message)
     switch (message.type) {
-        case "driveBase": robot.executeBaseVelocity(message.modifier)
+        case "driveBase": 
+            robot.executeBaseVelocity(message.modifier)
+            break;
+        case "incrementalMove":
+            robot.executeIncrementalMove(message.jointName, message.increment)
+            break
+        case "stop":
+            robot.stopExecution()
+            break
     }
-    console.log(message)
 };
 
 // New method of rendering in react 18

@@ -1,5 +1,5 @@
 import React from "react";
-import { VelocityControl, DEFAULT_SPEED } from "operator/tsx/velocitycontrol"
+import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/velocitycontrol"
 import { LayoutArea } from "./layoutarea";
 import { ActionMode, ActionModeButton } from "operator/tsx/actionmodebutton"
 import "operator/css/operator.css"
@@ -95,7 +95,7 @@ export const Operator = (props: {
         remoteStreams: Map<string, RemoteStream> 
     }) => {
     /** Speed of the robot. */
-    let speed = DEFAULT_SPEED;
+    let velocityScale = DEFAULT_VELOCITY_SCALE;
     let actionMode = ActionMode.StepActions;
     const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
@@ -105,7 +105,11 @@ export const Operator = (props: {
     let remoteRobot = props.remoteRobot
     let remoteStreams = props.remoteStreams
     
-    let btnFnProvider = new ButtonFunctionProvider({actionMode: actionMode, remoteRobot: remoteRobot})
+    let btnFnProvider = new ButtonFunctionProvider({
+        actionMode: actionMode, 
+        velocityScale: velocityScale, 
+        remoteRobot: remoteRobot
+    })
 
     /**
      * Callback when the user clicks on a drop zone, moves the active component
@@ -167,8 +171,8 @@ export const Operator = (props: {
                     onChange={(newAm) => btnFnProvider.handleActionModeUpdate(newAm)}
                 />
                 <VelocityControl
-                    initialSpeed={speed}
-                    onChange={(newSpeed) => (speed = newSpeed)}
+                    initialVelocityScale={velocityScale}
+                    onChange={(newVelocityScale) => btnFnProvider.handleVelocityScaleUpdate(newVelocityScale)}
                 />
                 <CustomizeButton
                     customizing={customizing}

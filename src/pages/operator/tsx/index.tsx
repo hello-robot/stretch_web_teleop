@@ -9,7 +9,6 @@ import "operator/css/index.css"
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
-let mediaStreams: MediaStream[] = []
 
 let connection = new WebRTCConnection({
     peerName: "OPERATOR",
@@ -21,8 +20,6 @@ let connection = new WebRTCConnection({
 });
 
 connection.joinOperatorRoom()
-
-// const button = document.getElementById('video')?.addEventListener('click', e => connection.joinOperatorRoom());
 
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');
@@ -39,27 +36,23 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
 }
 
 function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
-    console.log(message)
+    if (message instanceof Array) {
+        for (const subMessage of message) {
+            handleMessage(subMessage)
+        }
+        return
+    }
+    switch (message.type) {
+        case 'jointState':
+            remoteRobot.sensors.setJointState(message.jointState);
+            break;
+    }
 }
 
 function configureRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
-        // remoteStreams: allRemoteStreams
     });
-    console.log("message channel open")
-    allRemoteStreams.forEach((values, keys) => {
-        mediaStreams.push(values.stream)
-    })
-    console.log('connection ', connection.connectionState())
-
-    const button = document.getElementById('video')?.addEventListener('click', e => renderVideos());
-
-    console.log("remote streams ", allRemoteStreams)
-    // overhead.addRemoteStream(allRemoteStreams.get("overhead").stream)
-    // realsense.addRemoteStream(allRemoteStreams.get("realsense").stream)
-    // gripper.addRemoteStream(allRemoteStreams.get("gripper").stream)
-    // root.render(<VideoControlComponent streams={mediaStreams}/>);
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
@@ -87,4 +80,3 @@ function renderVideos() {
     root.render(<div>{videoControls}</div>);
   }
   
-// // root.render(<VideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);
