@@ -1,4 +1,4 @@
-import React, { VideoHTMLAttributes, useEffect, useRef } from "react";
+import React from "react";
 import { ROSCompressedImage, className } from "utils/util";
 import "operator/css/videostreams.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
@@ -73,49 +73,49 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 }
 
+
+// Dead code
 export class VideoControl extends React.Component<{ stream: MediaStream }, {}> {
     videoRef: React.RefObject<HTMLVideoElement>;
-  
+
     constructor(props: { stream: MediaStream }) {
         super(props);
         this.videoRef = React.createRef<HTMLVideoElement>();
-        this.state = {
-            stream: null
-        }
+        // this.state = {
+        //     stream: null
+        // }
     }
-  
+
     componentDidMount() {
         if (this.videoRef.current) {
             this.videoRef.current.srcObject = this.props.stream;
-            this.setState({stream: this.props.stream})
+            // this.setState({stream: this.props.stream})
         }
     }
-  
-    componentDidUpdate() {
-        if (this.videoRef.current) {
-            this.videoRef.current.srcObject = this.props.stream;
-        }
-    }
-  
+
+    // componentDidUpdate() {
+    //     if (this.videoRef.current) {
+    //         this.videoRef.current.srcObject = this.props.stream;
+    //     }
+    // }
+
     render() {
-        console.log("videocontrol ", this.videoRef.current?.srcObject )
+        // console.log("videocontrol ", this.videoRef.current?.srcObject)
         return (
-            <div key={this.props.stream.id} className={"video-canvas"}>
-                <video ref={this.videoRef} autoPlay muted={true}/>
-            </div>
+            <video ref={this.videoRef} autoPlay muted={true} className="video-canvas" />
         )
     }
-  }
-  
+}
+
 
 // type VideoControlPropsType = VideoHTMLAttributes<HTMLVideoElement> & {
 //     srcObject: MediaStream;
 //   };
-  
+
 //   export default function Video({ srcObject, ...props }: VideoControlPropsType) {
 //     const refVideo = useRef<HTMLVideoElement>(null);
 //     const [srcObjectSet, setSrcObjectSet] = React.useState(false);
-  
+
 //     useEffect(() => {
 //       if (refVideo.current && srcObject) {
 //         refVideo.current.srcObject = srcObject;
@@ -129,7 +129,7 @@ export class VideoControl extends React.Component<{ stream: MediaStream }, {}> {
 //     console.log("Video element:", refVideo.current);
 //     return <video ref={refVideo} {...props} autoPlay  playsInline muted />;
 //   }
-  
+
 //   export const VideoControlComponent = (props: { streams: MediaStream[] }) => {
 //     let test= <Video key={0} srcObject={props.streams[0]} />
 //     console.log(test)
@@ -144,7 +144,7 @@ export class VideoControl extends React.Component<{ stream: MediaStream }, {}> {
 //   };
 
 export type VideoStreamComponentProps = CustomizableComponentProps & {
-    stream: React.ReactElement<VideoControl>,
+    stream: MediaStream,
     buttonPad: React.ReactNode,
 }
 
@@ -155,21 +155,25 @@ export type VideoStreamComponentProps = CustomizableComponentProps & {
  */
 export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
     const [streamStyle, setStreamStyle] = React.useState({});
-    const streamRef = props.stream.props.videoRef;  // refrence to the canvas element from the stream
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    // const streamRef = props.stream.props.videoRef;  // refrence to the canvas element from the stream
     const resizeObserver = new ResizeObserver(entries => {
         const { height, width } = entries[0].contentRect;
         setStreamStyle({ height, width });
     });
     React.useEffect(() => {
-        if (!streamRef?.current) return;
-        resizeObserver.observe(streamRef.current);
+        console.log("hook stream", props.stream)
+        if (!videoRef?.current) return;
+        videoRef.current.srcObject = props.stream;
+        resizeObserver.observe(videoRef.current);
         return () => resizeObserver.disconnect();
-    }, []);
+    }, [props.stream]);
+    console.log('stream comp id', props.definition.id, "stream", props.stream)
 
     const { customizing, onSelect } = props.sharedState;
 
     const active = props.path === props.sharedState.activePath;
-    // props.stream.className = className("video-canvas", { customizing, active })
+    const videoClass = className("video-canvas", { customizing, active })
 
     return (
         <div
@@ -185,7 +189,7 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
                         {props.buttonPad}
                     </div> : undefined
             }
-            {props.stream}
+            <video ref={videoRef} autoPlay muted={true} className={videoClass} />
         </div>
     );
 }
