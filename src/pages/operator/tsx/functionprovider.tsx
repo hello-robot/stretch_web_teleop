@@ -29,7 +29,7 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
     private actionMode: ActionMode;
     private velocityScale: number;
     private remoteRobot: RemoteRobot;
-    
+
     constructor(props: FunctionProviderProps) {
         super(props)
         this.actionMode = props.actionMode,
@@ -44,7 +44,7 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
         console.log(newActionMode)
         this.actionMode = newActionMode
     }
-    
+
     handleVelocityScaleUpdate(newVelocityScale: number) {
         this.velocityScale = newVelocityScale
     }
@@ -83,77 +83,75 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
         switch (this.actionMode) {
             case ActionMode.StepActions:
                 switch (interactionFn) {
-                    case UserInteractionFunction.BaseForward: 
-                        return { 
-                            onClick: () => {this.activeVelocityAction = 
-                                this.remoteRobot.driveBase(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0)
-                        console.log("step actions")
-                    },
-                            onLeave: () => this.stopCurrentAction()
+                    case UserInteractionFunction.BaseForward:
+                        return {
+                            onClick: () => this.activeVelocityAction =
+                                this.remoteRobot.driveBase(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
+                            onLeave: () => this.activeVelocityAction?.stop()
                         }
-                    case UserInteractionFunction.BaseReverse: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.BaseReverse:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.driveBase(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.BaseRotateLeft: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.BaseRotateLeft:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.driveBase(0.0, JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.BaseRotateRight: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.BaseRotateRight:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.driveBase(0.0, -1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.ArmLower: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.ArmLower:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.ArmLift: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.ArmLift:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.ArmExtend: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.ArmExtend:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.ArmRetract: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.ArmRetract:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.WristRotateIn: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.WristRotateIn:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.WristRotateOut: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.WristRotateOut:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.GripperOpen: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.GripperOpen:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
-                    case UserInteractionFunction.GripperOpen: 
-                        return { 
-                            onClick: () => this.activeVelocityAction = 
+                    case UserInteractionFunction.GripperOpen:
+                        return {
+                            onClick: () => this.activeVelocityAction =
                                 this.remoteRobot.incrementalMove("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
@@ -187,13 +185,13 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
                         }
                     case UserInteractionFunction.ArmLower: 
                         return { 
-                            onClick: () => this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onClick: () => this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
                             onRelease: () => this.stopCurrentAction(), 
                             onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.ArmLift: 
                         return { 
-                            onClick: () => this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onClick: () => this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
                             onRelease: () => this.stopCurrentAction(), 
                             onLeave: () => this.stopCurrentAction()
                         }

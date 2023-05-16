@@ -13,7 +13,7 @@ const ActionModes = Object.values(ActionMode) as ActionMode[];
 
 /** Props for {@link ActionModeButton} */
 type ActionModeButtonProps = {
-    default: ActionMode,
+    actionMode: ActionMode,
     onChange: (am: ActionMode) => void
 }
 
@@ -21,9 +21,9 @@ type ActionModeButtonProps = {
  * Button and dropdown for changing the action mode.
  */
 export const ActionModeButton = (props: ActionModeButtonProps) => {
-    const [actionMode, setActionMode] = React.useState(props.default);
     const [showModes, setShowModes] = React.useState(false);
     const inputRef = React.useRef<HTMLDivElement>(null);
+    const actionMode = props.actionMode;
 
     // Handler to close dropdown when click outside z
     React.useEffect(() => {
@@ -48,7 +48,6 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
             <div
                 key={`action-mode-option-${am}`}
                 onClick={() => {
-                    setActionMode(am);
                     setShowModes(false);
                     props.onChange(am);
                 }}

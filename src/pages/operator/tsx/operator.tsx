@@ -8,95 +8,20 @@ import { UserInteractionFunction } from "./buttonpads";
 import { CustomizeButton } from "./customizebutton";
 import { Sidebar } from "./sidebar";
 import { SharedState } from "./customizablecomponent";
-import { ComponentDefinition, ParentComponentDefinition } from "./componentdefinitions";
+import { ComponentDefinition } from "./componentdefinitions";
 import { DEFAULT_LAYOUT } from "./defaultlayout";
 import { RemoteRobot } from "robot/tsx/remoterobot";
 import { RemoteStream } from "utils/util";
-
-const getParent = (splitPath: string[], layout: ParentComponentDefinition): ParentComponentDefinition => {
-    let pathIdx = 0;
-    let parent: ParentComponentDefinition = layout;
-    while (pathIdx < splitPath.length - 1) {
-        const childIdx = +splitPath[pathIdx];
-        parent = parent.children[childIdx] as ParentComponentDefinition;
-        pathIdx++;
-    }
-    return parent!;
-}
-
-const getChildFromParent = (parent: ParentComponentDefinition, childIdx: number): ComponentDefinition => {
-    return parent.children[childIdx];
-}
-
-const putChildInParent = (parent: ParentComponentDefinition, child: ComponentDefinition, childIdx: number) => {
-    parent.children.splice(childIdx, 0, child);
-}
-
-const removeChildFromParent = (parent: ParentComponentDefinition, childIdx: number) => {
-    parent.children.splice(childIdx, 1);
-}
-
-const moveInLayout = (oldPath: string, newPath: string, layout: ParentComponentDefinition): string => {
-    // Get the child and its old parent
-    console.log('old path', oldPath);
-    console.log('newpath', newPath);
-    const oldPathSplit = oldPath.split('-');
-    const oldParent = getParent(oldPathSplit, layout);
-    console.log('old parent', oldParent);
-    let oldChildIdx = +oldPathSplit.slice(-1);
-    console.log('old child index', oldChildIdx);
-    const temp = getChildFromParent(oldParent, oldChildIdx);
-    console.log('temp', temp)
-
-    // Get the new parent
-    let newPathSplit = newPath.split('-');
-    const newChildIdx = +newPathSplit.slice(-1);
-    console.log('newChildIdx', newChildIdx)
-    const newParent = getParent(newPathSplit, layout);
-    console.log('newparent', newParent)
-
-    // Put the child into the new parent
-    putChildInParent(newParent, temp, newChildIdx);
-    console.log('after adding child', newParent.children);
-
-    if (oldParent === newParent && oldChildIdx > newChildIdx)
-        oldChildIdx++;
-
-    // Remove the child from the old parent
-    removeChildFromParent(oldParent, oldChildIdx);
-
-    // Check if removing the old path changes the new path
-    // note: this happens when the old path was a sibling with a lower index to
-    //       any node in the 
-    if (newPathSplit.length < oldPathSplit.length)
-        return newPath;
-
-    const oldPathLastIdx = oldPathSplit.length - 1;
-    const oldPrefix = oldPathSplit.slice(0, oldPathLastIdx);
-    const newPrefix = newPathSplit.slice(0, oldPathLastIdx)
-    const sameParent = oldPrefix.every((val, index) => val === newPrefix[index])
-
-    if (!sameParent)
-        return newPath;
-
-    // index of new sibling node
-    const newCorrespondingIdx = +newPathSplit[oldPathLastIdx];
-    if (oldChildIdx < newCorrespondingIdx) {
-        // decrease new path index since the old path is deleted
-        newPathSplit[oldPathLastIdx] = "" + (+newPathSplit[oldPathLastIdx] - 1);
-        console.log('updated path', newPathSplit.join('-'))
-    }
-    return newPathSplit.join('-');
-}
+import { moveInLayout } from "utils/layouthelpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {
-        remoteRobot: RemoteRobot,
-        remoteStreams: Map<string, RemoteStream> 
-    }) => {
+    remoteRobot: RemoteRobot,
+    remoteStreams: Map<string, RemoteStream>
+}) => {
     /** Speed of the robot. */
     let velocityScale = DEFAULT_VELOCITY_SCALE;
-    let actionMode = ActionMode.PressRelease;
+    const [actionMode, setActionMode] = React.useState(ActionMode.StepActions);
     const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
@@ -104,10 +29,10 @@ export const Operator = (props: {
 
     let remoteRobot = props.remoteRobot
     let remoteStreams = props.remoteStreams
-    
+
     let btnFnProvider = new ButtonFunctionProvider({
-        actionMode: actionMode, 
-        velocityScale: velocityScale, 
+        actionMode: actionMode,
+        velocityScale: velocityScale,
         remoteRobot: remoteRobot
     })
 
@@ -167,8 +92,8 @@ export const Operator = (props: {
         <div id="operator">
             <div id="operator-header">
                 <ActionModeButton
-                    default={actionMode}
-                    onChange={(newAm) => btnFnProvider.handleActionModeUpdate(newAm)}
+                    actionMode={actionMode}
+                    onChange={(am) => {setActionMode(am); btnFnProvider.handleActionModeUpdate(am)}}
                 />
                 <VelocityControl
                     initialVelocityScale={velocityScale}

@@ -69,7 +69,11 @@ export const ButtonPad = (props: ButtonPadProps) => {
             className="button-pads"
         >
             {paths.map((path, i) =>
-                <path key={i} d={path} onClick={props.buttonsProps[i].onClick}>
+                <path key={i} d={path}
+                    onMouseDown={props.buttonsProps[i].onClick}
+                    onMouseUp={props.buttonsProps[i].onRelease}
+                    onMouseLeave={props.buttonsProps[i].onLeave}
+                >
                     <title>{props.buttonsProps[i].label}</title>
                 </path>
             )}

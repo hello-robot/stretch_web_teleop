@@ -1,8 +1,8 @@
 var fs = require('fs');
 
 var options = {
-	key: fs.readFileSync('certificates/localhost-key.pem'),
-	cert: fs.readFileSync('certificates/localhost.pem')
+	key: fs.readFileSync('certificates/slinky.hcrlab.cs.washington.edu+6-key.pem'),
+	cert: fs.readFileSync('certificates/slinky.hcrlab.cs.washington.edu+6.pem')
 };
 
 // const http = require('http');
