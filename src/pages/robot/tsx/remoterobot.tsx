@@ -46,6 +46,14 @@ export class RemoteRobot extends React.Component {
             }
         }
     }
+
+    setRobotMode(mode: "position" | "navigation") {
+        let cmd: cmd = {
+            type: "setRobotMode",
+            modifier: mode
+        }
+        this.robotChannel(cmd)
+    }
 }
 
 class RobotSensors extends React.Component {
