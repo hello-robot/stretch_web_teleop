@@ -101,10 +101,10 @@ export function renderVideoStream(props: CustomizableComponentProps) {
         buttonPad = renderButtonPad(buttonPadProps, props.definition as VideoStreamDef);
     }
 
-    let videoStream = <VideoControl key={stream.id} stream={stream}/>
+    // let videoStream = <VideoControl key={stream.id} stream={stream}/>
     return (
         <VideoStreamComponent
-            stream={videoStream}
+            stream={stream}
             buttonPad={buttonPad}
             {...props}
         />
