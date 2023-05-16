@@ -3,7 +3,7 @@ import { RemoteRobot } from "robot/tsx/remoterobot"
 import { VelocityCommand } from 'utils/commands'
 import { ActionMode } from "./actionmodebutton"
 import { UserInteractionFunction, ButtonFunctionProps } from "./buttonpads"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS }from 'utils/util'
+import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'utils/util'
 
 interface FunctionProviderState {
     actionMode: ActionMode
@@ -41,11 +41,42 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
     }
 
     handleActionModeUpdate(newActionMode: ActionMode) {
+        console.log(newActionMode)
         this.actionMode = newActionMode
     }
     
     handleVelocityScaleUpdate(newVelocityScale: number) {
         this.velocityScale = newVelocityScale
+    }
+
+    continuousBaseDrive(linVel: number, angVel: number) {
+        this.activeVelocityAction = 
+            this.remoteRobot.driveBase(linVel, angVel),
+        this.velocityExecutionHeartbeat = window.setInterval(() => {
+            this.activeVelocityAction = 
+                this.remoteRobot!.driveBase(linVel, angVel)
+        }, 150);
+    }
+
+    continuousArmMovement(jointName: ValidJoints, increment: number) {
+        this.activeVelocityAction = 
+            this.remoteRobot.incrementalMove(jointName, increment)
+        this.velocityExecutionHeartbeat = window.setInterval(() => {
+            this.activeVelocityAction = 
+                this.remoteRobot.incrementalMove(jointName, increment)
+        }, 150);
+    }
+
+    stopCurrentAction() {
+        if (this.activeVelocityAction) {
+            // No matter what region this is, stop the currently running action
+            this.activeVelocityAction.stop()
+            this.activeVelocityAction = undefined
+            clearInterval(this.velocityExecutionHeartbeat)
+            this.velocityExecutionHeartbeat = undefined
+            // clearTimeout(this.activeVelocityActionTimeout)
+            // this.activeVelocityActionTimeout = undefined
+        }
     }
 
     provideFunctions(interactionFn: UserInteractionFunction): ButtonFunctionProps {
@@ -54,80 +85,232 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
                 switch (interactionFn) {
                     case UserInteractionFunction.BaseForward: 
                         return { 
-                            onClick: () => this.activeVelocityAction = 
-                                this.remoteRobot.driveBase(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
-                            onLeave: () => this.activeVelocityAction?.stop() 
+                            onClick: () => {this.activeVelocityAction = 
+                                this.remoteRobot.driveBase(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0)
+                        console.log("step actions")
+                    },
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.BaseReverse: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.driveBase(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.BaseRotateLeft: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.driveBase(0.0, JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.BaseRotateRight: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.driveBase(0.0, -1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.ArmLower: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.ArmLift: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.ArmExtend: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.ArmRetract: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.WristRotateIn: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.WristRotateOut: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.GripperOpen: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                     case UserInteractionFunction.GripperOpen: 
                         return { 
                             onClick: () => this.activeVelocityAction = 
                                 this.remoteRobot.incrementalMove("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
-                            onLeave: () => this.activeVelocityAction?.stop()
+                            onLeave: () => this.stopCurrentAction()
                         }
                 }
                 break;
             case ActionMode.PressRelease:
+                switch (interactionFn) {
+                    case UserInteractionFunction.BaseForward: 
+                        return { 
+                            onClick: () => this.continuousBaseDrive(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.BaseReverse: 
+                    return { 
+                        onClick: () => this.continuousBaseDrive(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
+                        onRelease: () => this.stopCurrentAction(), 
+                        onLeave: () => this.stopCurrentAction()
+                    }
+                    case UserInteractionFunction.BaseRotateLeft: 
+                        return { 
+                            onClick: () => this.continuousBaseDrive(0.0, JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.BaseRotateRight: 
+                        return { 
+                            onClick: () => this.continuousBaseDrive(0.0, -1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmLower: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmLift: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmExtend: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmRetract: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("wrist_extension", -1*JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.WristRotateIn: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.WristRotateOut: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.GripperOpen: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.GripperOpen: 
+                        return { 
+                            onClick: () => this.continuousArmMovement("joint_gripper_finger_left", -1*JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
+                            onRelease: () => this.stopCurrentAction(), 
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                }
+                break;
             case ActionMode.ClickClick:
+                switch (interactionFn) {
+                    case UserInteractionFunction.BaseForward: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousBaseDrive(JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.BaseReverse: 
+                    return { 
+                        onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                            this.continuousBaseDrive(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale, 0.0),
+                        onLeave: () => this.stopCurrentAction()
+                    }
+                    case UserInteractionFunction.BaseRotateLeft: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousBaseDrive(0.0, JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.BaseRotateRight: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousBaseDrive(0.0, -1 * JOINT_VELOCITIES["translate_mobile_base"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmLower: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmLift: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmExtend: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.ArmRetract: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() : 
+                                this.continuousArmMovement("wrist_extension", -1*JOINT_INCREMENTS["wrist_extension"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.WristRotateIn: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() : 
+                                this.continuousArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.WristRotateOut: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.GripperOpen: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                    case UserInteractionFunction.GripperOpen: 
+                        return { 
+                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
+                                this.continuousArmMovement("joint_gripper_finger_left", -1*JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
+                            onLeave: () => this.stopCurrentAction()
+                        }
+                }
+                break;
         }
 
         // throw 'Functions do not exist for: ' + interactionFn

@@ -96,7 +96,7 @@ export const Operator = (props: {
     }) => {
     /** Speed of the robot. */
     let velocityScale = DEFAULT_VELOCITY_SCALE;
-    let actionMode = ActionMode.StepActions;
+    let actionMode = ActionMode.PressRelease;
     const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
