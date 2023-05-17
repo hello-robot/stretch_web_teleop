@@ -50,10 +50,11 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
             shape = ButtonPadShape.Gripper;
             break;
         case ButtonPadId.PredictiveDisplay:
+            const interactionFunctions = cProps.sharedState.functionProvider(UserInteractionFunction.PredictiveDisplay);
             return (
             <PredictiveDisplay 
                 {...cProps}
-                onClick={(len, ang) => console.log('length', len, 'angle', ang) }
+                functions={interactionFunctions}
             />
             )
         default:
