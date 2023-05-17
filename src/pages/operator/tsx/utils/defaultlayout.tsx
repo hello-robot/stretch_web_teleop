@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition, ComponentDefinition } from "./componentdefinitions";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition } from "./componentdefinitions";
 
 /**
  * Default layout to load on start

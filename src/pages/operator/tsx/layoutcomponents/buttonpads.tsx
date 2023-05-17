@@ -1,9 +1,9 @@
 import React from "react";
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE } from "utils/svg";
 import "operator/css/buttonpads.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
-import { VideoStreamDef, VideoStreamId } from "./componentdefinitions";
-import { rect } from "utils/svg"
+import { VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { className } from "shared/util";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE, rect } from "shared/svg";
 
 // TODO: this should probably be moved to utils
 /** All the possible button functions */
@@ -58,26 +58,161 @@ export interface ButtonPadProps extends CustomizableComponentProps {
 
 /** Button pad which can be overlaid as a child of a video stream or lonestanding */
 export const ButtonPad = (props: ButtonPadProps) => {
+    /** Reference to the SVG which makes up the button pad */
+    const svgRef = React.useRef<SVGSVGElement>(null);
+    const [contextMenu, setContextMenu] = React.useState<React.ReactElement | null>(null);
+    /** List of path shapes for each button on the button pad */
     const paths: string[] = getPathsFromShape(props.buttonPadShape);
+    const { customizing } = props.sharedState;
+    const selected = props.path === props.sharedState.activePath;
+    const overlay = props.videoStreamParent !== undefined;
     if (paths.length !== props.buttonsProps.length) {
         throw new Error(`paths length: ${paths.length}, buttonsProps length: ${props.buttonsProps.length}`);
     }
+
+    /** Creates the buttons on the button pad */
+    const mapPaths = (path: string, i: number) => {
+        const buttonProps = props.buttonsProps[i]
+        const clickProps = customizing ? {} : {
+            onMouseDown: buttonProps.onClick,
+            onMouseUp: buttonProps.onRelease,
+            onMouseLeave: buttonProps.onLeave
+        }
+        const title = buttonProps.label;
+        return (
+            <path key={i} d={path} {...clickProps}>
+                <title>{title}</title>
+            </path>
+        )
+    }
+
+    /** Call the shared onSelect function on this button pad component */
+    const selectSelf = () => {
+        props.sharedState.onSelect(props.definition, props.path);
+        setContextMenu(null);
+    }
+
+    /** Call the shared onSelect fucntion for the parent video stream  */
+    const selectParent = () => {
+        const parentPath = props.path.split('-').slice(0, -1).join('-');
+        props.sharedState.onSelect(props.videoStreamParent!, parentPath);
+        setContextMenu(null);
+    }
+
+    /** Callback when SVG is clicked during customize mode */
+    const onSelect = (event: React.MouseEvent<SVGSVGElement>) => {
+        // Make sure the container of the button pad doesn't get selected
+        event.stopPropagation();
+
+        // If button pad is not overlaid on a video stream then select itself
+        if (!overlay) {
+            selectSelf();
+            return;
+        }
+
+        // Open context menu to ask the user if they want to select the overlaid 
+        // button pad or its parent video stream
+        const { clientX, clientY } = event;
+        const { left, top } = svgRef.current!.getBoundingClientRect();
+        const x = clientX - left;
+        const y = clientY - top;
+        setContextMenu(
+            <SelectContexMenu
+                x={x}
+                y={y}
+                selectSelf={selectSelf}
+                selectParent={selectParent}
+                clickOut={() => setContextMenu(null)}
+            />
+        );
+    }
+
+    // In customizing state add onClick callback to button pad SVG element
+    const selectProp = customizing ? {
+        "onClick": onSelect
+    } : {};
+
     return (
-        <svg
-            viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
-            preserveAspectRatio="none"
-            className="button-pads"
+        <>
+            <svg
+                ref={svgRef}
+                viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
+                preserveAspectRatio="none"
+                className={className("button-pads", { live: !customizing, selected, overlay })}
+                {...selectProp}
+            >
+                {paths.map(mapPaths)}
+            </svg>
+            {contextMenu}
+        </>
+    );
+}
+
+/** Props for {@link SelectContexMenu} */
+type SelectContexMenuProps = {
+    /** X location to render the context menu popup */
+    x: number;
+    /** Y location to render the context menu popup */
+    y: number;
+    /** Callback to select the button pad */
+    selectSelf: () => void;
+    /** Callback to select the parent video stream */
+    selectParent: () => void;
+    /** Callback to hide the context menu popup when click outside */
+    clickOut: () => void;
+}
+
+/**
+ * Creates a context menu popup when user clicks on the button pad during 
+ * customization mode so the user can choose between the button pad and its 
+ * parent video stream
+ * @param props {@link SelectContexMenuProps}
+ * @returns the context menu component
+ */
+const SelectContexMenu = (props: SelectContexMenuProps) => {
+    const ref = React.useRef<HTMLUListElement>(null);
+
+    // Handler to close dropdown when click outside
+    React.useEffect(() => {
+
+        /** Closes context menu if user clicks outside */
+        const handler = (e: any) => {
+            // If didn't click inside the context menu or the existing SVG, then
+            // hide the popup
+            if (ref.current && !ref.current.contains(e.target)) {
+                props.clickOut();
+                console.log('clicked')
+            }
+        };
+        window.addEventListener("click", handler, true);
+        return () => {
+            window.removeEventListener("click", handler);
+        };
+    }, []);
+
+    /**
+     * Handles when the user clicks on one of the context menu options
+     * @param e mouse event of the click
+     * @param self if true selects itself (a button pad), if false selects its 
+     * parent (the video stream)
+     */
+    function handleClick(e: React.MouseEvent<HTMLLIElement>, self: boolean) {
+        self ? props.selectSelf() : props.selectParent();
+
+        // Make sure background elements don't receive a click
+        e.stopPropagation();
+    }
+
+    return (
+
+        <ul aria-label="Select"
+            ref={ref}
+            className="button-pad-context-menu"
+            style={{ top: `${props.y}px`, left: `${props.x}px` }}
         >
-            {paths.map((path, i) =>
-                <path key={i} d={path}
-                    onMouseDown={props.buttonsProps[i].onClick}
-                    onMouseUp={props.buttonsProps[i].onRelease}
-                    onMouseLeave={props.buttonsProps[i].onLeave}
-                >
-                    <title>{props.buttonsProps[i].label}</title>
-                </path>
-            )}
-        </svg>
+            <li onClick={(e) => handleClick(e, true)}>Button Pad</li>
+            <li onClick={(e) => handleClick(e, false)}>Video Stream</li>
+        </ul>
     );
 }
 

@@ -1,9 +1,9 @@
 import React from 'react'
-import { RemoteRobot } from "robot/tsx/remoterobot"
-import { VelocityCommand } from 'utils/commands'
-import { ActionMode } from "./actionmodebutton"
-import { UserInteractionFunction, ButtonFunctionProps } from "./buttonpads"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'utils/util'
+import { RemoteRobot } from "shared/remoterobot"
+import { VelocityCommand } from 'shared/commands'
+import { ActionMode } from "../staticcomponents/actionmodebutton"
+import { UserInteractionFunction, ButtonFunctionProps } from "../layoutcomponents/buttonpads"
+import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'shared/util'
 
 interface FunctionProviderState {
     actionMode: ActionMode

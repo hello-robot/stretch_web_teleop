@@ -1,7 +1,8 @@
 import React from "react";
 import "operator/css/dropzone.css"
-import { ComponentDefinition, ComponentType } from "./componentdefinitions";
+import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
 import { SharedState } from "./customizablecomponent";
+import { className } from "shared/util";
 
 /** State required for drop zones */
 export type DropZoneState = {
@@ -11,7 +12,7 @@ export type DropZoneState = {
 
 export type DropZoneProps = {
     path: string,
-    parentDef?: ComponentDefinition,
+    parentDef: ComponentDefinition,
     sharedState: SharedState
 }
 
@@ -19,7 +20,7 @@ export type DropHandler = (path: string) => void
 
 /** Area where the user can click to move the selected component to a new place. */
 export const DropZone = (props: DropZoneProps) => {
-    const canDrop = (): boolean => {
+    function canDrop(): boolean {
         const { path, parentDef } = props;
         const { activePath } = props.sharedState;
         const { activeDef } = props.sharedState.dropZoneState;
@@ -28,15 +29,26 @@ export const DropZone = (props: DropZoneProps) => {
             return false;
         }
 
-        // Can place anything at the top level of the heiarchy
-        if (!parentDef) {
-            return true;
-        }
-
-        // Tab -> any other object is not allowed
-        if (activeDef.type === ComponentType.Tabs) {
+        // Tabs can only go into layout
+        if (activeDef.type === ComponentType.Tabs && parentDef.type !== ComponentType.Layout) {
             return false;
         }
+
+        // Single tab can only go into tabs
+        if (activeDef.type === ComponentType.SingleTab && parentDef.type !== ComponentType.Tabs) {
+            return false;
+        }
+
+        // Only single tab can go into tabs
+        if (activeDef.type !== ComponentType.SingleTab && parentDef.type === ComponentType.Tabs) {
+            return false;
+        }
+
+        // Only button pad can go into video stream
+        if (activeDef.type !== ComponentType.ButtonPad && parentDef.type === ComponentType.VideoStream) {
+            return false;
+        }
+
 
         // Paths cannot be adjacent
         const splitItemPath = activePath.split('-');
@@ -56,19 +68,24 @@ export const DropZone = (props: DropZoneProps) => {
         return true;
     }
 
-    const handleClick = () => {
+    /** Calls onDrop function from Operator with the path of this dropzone */
+    function handleClick (e: React.MouseEvent<HTMLSpanElement>) {
         if (!props.sharedState.customizing) return;
         props.sharedState.dropZoneState.onDrop(props.path);
+        e.stopPropagation();
     }
 
     const isActive = props.sharedState.customizing && canDrop();
+    const inTab = props.parentDef.type === ComponentType.Tabs;
+    const overlay = props.parentDef.type === ComponentType.VideoStream;
+    const standard = !(inTab || overlay);
     return (
-        <div 
-            className="drop-zone"
+        <span
+            className={className("drop-zone material-icons", {tab: inTab, overlay, standard})}
             hidden={!isActive}
             onClick={handleClick}
         >
-
-        </div>
+            vertical_align_bottom
+        </span>
     )
 }

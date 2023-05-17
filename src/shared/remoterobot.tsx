@@ -1,6 +1,6 @@
 import React from 'react'
-import { cmd } from 'utils/commands';
-import { ValidJoints, SensorData, RobotPose } from 'utils/util';
+import { cmd } from 'shared/commands';
+import { ValidJoints, SensorData, RobotPose } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void; 
 

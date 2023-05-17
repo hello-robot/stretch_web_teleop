@@ -1,7 +1,8 @@
 import React from "react"
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "utils/svg";
-import { navigationProps } from "utils/util";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "shared/svg";
+import { className, navigationProps } from "shared/util";
 import "operator/css/predictivedisplay.css"
+import { CustomizableComponentProps } from "./customizablecomponent";
 
 /**
  * Scales height values to fit in the navigation camera
@@ -36,7 +37,7 @@ function makeArc(startX: number, startY: number, radius: number, sweepFlag: bool
 }
 
 /** Properties for the PredictiveDisplay component */
-interface PredictiveDisplayProps {
+type PredictiveDisplayProps = CustomizableComponentProps & {
     /** Callback function when mouse is clicked in predicitive display area */
     onClick: (length: number, angle: number) => void;
     /** Callback function when cursor is moved in predictive display area */
@@ -216,15 +217,19 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
     }
 
     render() {
+        const customizing = this.props.sharedState.customizing;
+        const controlProps = customizing ? {} : {
+            onMouseMove: this.onMouseMove,
+            onMouseLeave: this.onMouseLeave,
+            onClick: (e) => this.onMouseMove(e, true)
+        };
         return (
             <svg
                 viewBox={`0 0 ${SVG_RESOLUTION} ${resolution_height}`}
                 preserveAspectRatio="none"
                 ref={this.svgRef}
-                onMouseMove={this.onMouseMove}
-                onMouseLeave={this.onMouseLeave}
-                className="predictive-display"
-                onClick={(e) => this.onMouseMove(e, true)}
+                className={className("predictive-display", { customizing })}
+                {...controlProps}
             >
                 {this.state.trajectory}
             </svg>
