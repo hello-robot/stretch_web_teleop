@@ -28,7 +28,8 @@ export enum VideoStreamId {
 export enum ButtonPadId {
     overhead = "Overhead",
     realsense = "Realsense",
-    gripper = "Gripper"
+    gripper = "Gripper",
+    PredictiveDisplay = "Predictive Display"
 }
 
 /**

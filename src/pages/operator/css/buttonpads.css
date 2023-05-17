@@ -4,12 +4,18 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: hsl(200, 50%, 60%);
-    width: 100%;
-    height: 100%;
     fill-opacity: 0;
     /*set opacity for entire svg rather than paths to avoid weird effect
     when paths overlap*/
     opacity: 60%;
+    /* TODO: this should be more dynamic */
+    width: 25%;
+    height: 25%;
+}
+
+.button-pads.overlay {
+    width: 100%;
+    height: 100%;
 }
 
 /*When hovering over a child element of an svg*/
@@ -24,7 +30,13 @@
 }
 
 .button-pads.selected {
-    box-shadow: 0 0 1rem 1rem #0ff;;
+    opacity: 100%;
+    stroke:hsl(200, 100%, 69%);
+    opacity: 100%;
+    border: 1px solid hsl(200, 100%, 69%);
+    stroke: hsl(200, 100%, 69%);
+    stroke-width: 5px;
+    box-shadow: 0 0 1rem 1rem #0ff;
 }
 
 /* Context menu popup on button pad *******************************************/

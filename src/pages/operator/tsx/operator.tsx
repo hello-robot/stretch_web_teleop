@@ -36,6 +36,12 @@ export const Operator = (props: {
         remoteRobot: remoteRobot
     })
 
+    /** Rerenders the layout */
+    function updateLayout() {
+        console.log('update layout');
+        setLayout(layout);
+    }
+
     /**
      * Callback when the user clicks on a drop zone, moves the active component
      * into the drop zone
@@ -53,7 +59,7 @@ export const Operator = (props: {
         }
         setActivePath(newPath);
         console.log('new active path', newPath)
-        setLayout(layout);
+        updateLayout();
     }
 
     /**
@@ -77,7 +83,7 @@ export const Operator = (props: {
     const handleDelete = () => {
         if (!activePath) throw Error('handleDelete called when activePath is undefined');
         removeFromLayout(activePath, layout);
-        setLayout(layout);
+        updateLayout();
         setActivePath(undefined);
         setActiveDef(undefined);
     }
@@ -109,7 +115,7 @@ export const Operator = (props: {
             <div id="operator-header">
                 <ActionModeButton
                     actionMode={actionMode}
-                    onChange={(am) => {setActionMode(am); btnFnProvider.handleActionModeUpdate(am)}}
+                    onChange={(am) => { setActionMode(am); btnFnProvider.handleActionModeUpdate(am) }}
                 />
                 <VelocityControl
                     initialVelocityScale={velocityScale}
@@ -125,7 +131,12 @@ export const Operator = (props: {
                     layout={layout}
                     sharedState={sharedState}
                 />
-                <Sidebar hidden={!customizing} onDelete={handleDelete} activeDef={activeDef}/>
+                <Sidebar
+                    hidden={!customizing}
+                    onDelete={handleDelete}
+                    activeDef={activeDef}
+                    updateLayout={updateLayout}
+                />
             </div>
         </div>
     )

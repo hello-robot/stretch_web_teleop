@@ -29,13 +29,23 @@ export const DropZone = (props: DropZoneProps) => {
             return false;
         }
 
-        // Only tabs -> layout is allowed
+        // Tabs can only go into layout
         if (activeDef.type === ComponentType.Tabs && parentDef.type !== ComponentType.Layout) {
             return false;
         }
 
-        // Only single tab -> tab is allowed
+        // Single tab can only go into tabs
         if (activeDef.type === ComponentType.SingleTab && parentDef.type !== ComponentType.Tabs) {
+            return false;
+        }
+
+        // Only single tab can go into tabs
+        if (activeDef.type !== ComponentType.SingleTab && parentDef.type === ComponentType.Tabs) {
+            return false;
+        }
+
+        // Only button pad can go into video stream
+        if (activeDef.type !== ComponentType.ButtonPad && parentDef.type === ComponentType.VideoStream) {
             return false;
         }
 
@@ -59,16 +69,19 @@ export const DropZone = (props: DropZoneProps) => {
     }
 
     /** Calls onDrop function from Operator with the path of this dropzone */
-    const handleClick = () => {
+    function handleClick (e: React.MouseEvent<HTMLSpanElement>) {
         if (!props.sharedState.customizing) return;
         props.sharedState.dropZoneState.onDrop(props.path);
+        e.stopPropagation();
     }
 
     const isActive = props.sharedState.customizing && canDrop();
     const inTab = props.parentDef.type === ComponentType.Tabs;
+    const overlay = props.parentDef.type === ComponentType.VideoStream;
+    const standard = !(inTab || overlay);
     return (
         <span
-            className={className("drop-zone material-icons", {tab: inTab})}
+            className={className("drop-zone material-icons", {tab: inTab, overlay, standard})}
             hidden={!isActive}
             onClick={handleClick}
         >

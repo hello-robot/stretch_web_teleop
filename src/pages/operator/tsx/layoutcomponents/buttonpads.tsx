@@ -65,6 +65,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const paths: string[] = getPathsFromShape(props.buttonPadShape);
     const { customizing } = props.sharedState;
     const selected = props.path === props.sharedState.activePath;
+    const overlay = props.videoStreamParent !== undefined;
     if (paths.length !== props.buttonsProps.length) {
         throw new Error(`paths length: ${paths.length}, buttonsProps length: ${props.buttonsProps.length}`);
     }
@@ -104,8 +105,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
         event.stopPropagation();
 
         // If button pad is not overlaid on a video stream then select itself
-        if (!props.videoStreamParent) {
-            selectSelf;
+        if (!overlay) {
+            selectSelf();
             return;
         }
 
@@ -137,7 +138,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
-                className={className("button-pads", { live: !customizing, selected })}
+                className={className("button-pads", { live: !customizing, selected, overlay })}
                 {...selectProp}
             >
                 {paths.map(mapPaths)}

@@ -28,6 +28,10 @@ button:hover {
     cursor: pointer;
 }
 
+button {
+    border: none;
+}
+
 html,
 body,
 #root {

@@ -47,3 +47,21 @@
 #delete-button.active:hover {
     background-color: red;
 }
+
+/* Options ********************************************************************/
+
+.options-element {
+    display: inline-block;
+    margin: 1rem;
+}
+
+.toggle-button {
+    background-color: rgb(255, 157, 157);
+    margin-right: 1rem;
+    width: 4rem;
+    height: 3rem;
+}
+
+.toggle-button.on {
+    background-color: rgb(162, 255, 157);
+}
