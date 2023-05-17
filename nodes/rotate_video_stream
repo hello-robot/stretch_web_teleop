@@ -11,17 +11,17 @@ from cv_bridge import CvBridge
 
 class RotateVideoStream:
     def __init__(self):
-        self.loop_rate = rospy.Rate(1)
+        self.loop_rate = rospy.Rate(20)
 
         self.realsense_rgb_image = None
         self.nav_camera_rgb_image = None
         self.cv_bridge = CvBridge()
 
-        self.publisher_realsense = rospy.Publisher('/rotatedCamera', Image, queue_size=10)
-        self.publisher_realsense_cmp = rospy.Publisher('/rotatedCamera/compressed', CompressedImage, queue_size=10)
+        self.publisher_realsense = rospy.Publisher('/camera/color/image_raw/rotated', Image, queue_size=10)
+        self.publisher_realsense_cmp = rospy.Publisher('/camera/color/image_raw/rotated/compressed', CompressedImage, queue_size=10)
 
-        self.publisher_nav = rospy.Publisher('/rotatedNavCamera', Image, queue_size=10)
-        self.publisher_nav_cmp = rospy.Publisher('/rotatedNavCamera/compressed', CompressedImage, queue_size=10)
+        self.publisher_nav = rospy.Publisher('/navigation_camera/image_raw/rotated', Image, queue_size=10)
+        self.publisher_nav_cmp = rospy.Publisher('/navigation_camera/image_raw/rotated/compressed', CompressedImage, queue_size=10)
 
         self.camera_rgb_subscriber = message_filters.Subscriber(f'/camera/color/image_raw', Image)
         self.nav_camera_rgb_subscriber = message_filters.Subscriber(f'/navigation_camera/image_raw', Image)
@@ -57,7 +57,7 @@ class RotateVideoStream:
                 msg.data = np.array(cv2.imencode('.jpg', self.nav_camera_rgb_image)[1]).tobytes()
                 self.publisher_nav_cmp.publish(msg)
 
-            self.loop_rate.sleep()
+            rospy.sleep(0.025)
 
 
 if __name__ == '__main__':
