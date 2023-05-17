@@ -31,14 +31,14 @@ export enum ButtonPadShape {
 }
 
 /** Functions called when the user interacts with the buttons. */
-export type ButtonFunctionProps = {
+export type ButtonFunctions = {
     onClick: () => void,
     onRelease?: () => void,
     onLeave?: () => void
 }
 
 /** Properties for a single button on a button pad */
-export type ButtonProps = ButtonFunctionProps & {
+export type ButtonProps = ButtonFunctions & {
     /** The name of the button (acts as a tooltip) */
     label: string,
     icon?: object  // TODO: figure out how to put an icon on a button
