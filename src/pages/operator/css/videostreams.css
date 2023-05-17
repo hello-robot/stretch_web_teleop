@@ -36,6 +36,6 @@
     opacity: 50%;
 }
 
-.video-canvas.active {
+.video-canvas.selected {
     box-shadow: 0 0 1rem 1rem #0ff;;
 }

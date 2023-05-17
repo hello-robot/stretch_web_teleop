@@ -13,12 +13,44 @@
 }
 
 /*When hovering over a child element of an svg*/
-.button-pads>*:hover {
+.button-pads.live>*:hover {
     fill-opacity: 10%;
     cursor: pointer;
 }
 
 /*When a button is clicked*/
-.button-pads>*:active {
+.button-pads.live>*:active {
     fill-opacity: 40%;
+}
+
+.button-pads.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;;
+}
+
+/* Context menu popup on button pad *******************************************/
+.button-pad-context-menu {
+    list-style-type: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgray;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    padding-top: 0.5rem;
+}
+
+
+.button-pad-context-menu li {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.button-pad-context-menu li:hover {
+    background-color: var(--btn-bg-color-hover);
+}
+
+.button-pad-context-menu::before {
+    content: attr(aria-label);
+    font-weight: bold;
+    padding: 0.5rem;
 }

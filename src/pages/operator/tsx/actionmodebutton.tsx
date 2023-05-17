@@ -26,7 +26,7 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
     const inputRef = React.useRef<HTMLDivElement>(null);
     const actionMode = props.actionMode;
 
-    // Handler to close dropdown when click outside z
+    // Handler to close dropdown when click outside
     React.useEffect(() => {
         const handler = (e: any) => {
             if (inputRef.current && !inputRef.current.contains(e.target)) {

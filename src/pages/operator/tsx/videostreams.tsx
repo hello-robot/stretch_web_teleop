@@ -172,13 +172,12 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
 
     const { customizing, onSelect } = props.sharedState;
 
-    const active = props.path === props.sharedState.activePath;
-    const videoClass = className("video-canvas", { customizing, active })
+    const selected = props.path === props.sharedState.activePath;
+    const videoClass = className("video-canvas", { customizing, selected })
 
     return (
         <div
             className='video-stream'
-            onClick={() => onSelect(props.definition, props.path)}
         >
             {
                 props.buttonPad ?
@@ -189,7 +188,9 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
                         {props.buttonPad}
                     </div> : undefined
             }
-            <video ref={videoRef} autoPlay muted={true} className={videoClass} />
+            <video ref={videoRef} autoPlay muted={true} className={videoClass}
+                onClick={() => onSelect(props.definition, props.path)}
+            />
         </div>
     );
 }
