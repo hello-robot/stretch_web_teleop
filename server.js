@@ -17,6 +17,8 @@ var options = {
 //     console.log('listening on *:' + port);
 // });
 
+require('dotenv').config();
+
 const socket = require('socket.io');
 var express = require('express')
 var app = express();
@@ -27,6 +29,7 @@ function ensureSecure(req, res, next){
     if(!req.secure){
         // handle port numbers if you need non defaults
         res.redirect('https://' + req.hostname + req.url); 
+        // res.redirect(`https://${req.hostname}${process.env.NGROK_URL}`);
     }
 
     return next();

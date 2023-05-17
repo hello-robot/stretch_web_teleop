@@ -5,7 +5,7 @@ const logId = 'start_robot_browser.js';
 
 // You may want to change this to test that the
 // robot is using certificates that are valid for its real hostname
-let robotHostname = "localhost";
+let robotHostname = "localhost" // or NGROK_URL
 if (process.argv.length > 2) {
 	robotHostname = process.argv[2]
 }
@@ -34,7 +34,7 @@ if (process.argv.length > 2) {
             '--ignore-certificate-errors']
         });
 	const page = await browser.newPage();
-
+	
 	while (try_again) {
 		try {
 			await page.goto(`https://${robotHostname}/robot`);
