@@ -9,7 +9,7 @@ import { RemoteStream } from "utils/util";
 export type SharedState = {
     customizing: boolean,
     /** Called when user clicks on a component */
-    onSelect: (path: string, def: ComponentDefinition) => void,
+    onSelect: (def: ComponentDefinition, path?: string) => void,
     /** Remote robot video streams */
     remoteStreams: Map<string, RemoteStream>
     /** Gives function based on user input type */

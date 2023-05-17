@@ -77,6 +77,7 @@ export const moveInLayout = (oldPath: string, newPath: string, layout: ParentCom
     putChildInParent(newParent, temp, newChildIdx);
     console.log('after adding child', newParent.children);
 
+    // Same parent and moved to lower index, previous position index is now higher
     if (oldParent === newParent && oldChildIdx > newChildIdx)
         oldChildIdx++;
 
@@ -105,4 +106,21 @@ export const moveInLayout = (oldPath: string, newPath: string, layout: ParentCom
         console.log('updated path', newPathSplit.join('-'))
     }
     return newPathSplit.join('-');
+}
+
+/**
+ * Adds a new component to the layout
+ * @param activeDef definition of the component to add into the layout
+ * @param newPath path where to add the new component
+ * @param layout the entire layout structure
+ */
+export const addToLayout = (
+    activeDef: ComponentDefinition,
+    newPath: string,
+    layout: ParentComponentDefinition
+) => {
+    let newPathSplit = newPath.split('-');
+    const newChildIdx = +newPathSplit.slice(-1);
+    const newParent = getParent(newPathSplit, layout);
+    putChildInParent(newParent, activeDef, newChildIdx);
 }

@@ -162,13 +162,13 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
         setStreamStyle({ height, width });
     });
     React.useEffect(() => {
-        console.log("hook stream", props.stream)
+        // console.log("hook stream", props.stream)
         if (!videoRef?.current) return;
         videoRef.current.srcObject = props.stream;
         resizeObserver.observe(videoRef.current);
         return () => resizeObserver.disconnect();
     }, [props.stream]);
-    console.log('stream comp id', props.definition.id, "stream", props.stream)
+    // console.log('stream comp id', props.definition.id, "stream", props.stream)
 
     const { customizing, onSelect } = props.sharedState;
 
@@ -178,7 +178,7 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
     return (
         <div
             className='video-stream'
-            onClick={() => onSelect(props.path, props.definition)}
+            onClick={() => onSelect(props.definition, props.path)}
         >
             {
                 props.buttonPad ?

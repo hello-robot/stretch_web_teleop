@@ -12,7 +12,7 @@ import { ComponentDefinition } from "./componentdefinitions";
 import { DEFAULT_LAYOUT } from "./defaultlayout";
 import { RemoteRobot } from "robot/tsx/remoterobot";
 import { RemoteStream } from "utils/util";
-import { moveInLayout } from "utils/layouthelpers";
+import { addToLayout, moveInLayout } from "utils/layouthelpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -43,7 +43,14 @@ export const Operator = (props: {
      */
     const handleDrop = (path: string) => {
         console.log("handleDrop", path);
-        const newPath = moveInLayout(activePath!, path, layout);
+        if (!activeDef) throw Error('Active definition undefined on drop event')
+        let newPath: string = path;
+        if (!activePath) {
+            // New element not already in the layout
+            addToLayout(activeDef, path, layout);
+        } else {
+            newPath = moveInLayout(activePath, path, layout);
+        }
         setActivePath(newPath);
         console.log('new active path', newPath)
         setLayout(layout);
@@ -54,10 +61,10 @@ export const Operator = (props: {
      * @param path path to the selected component
      * @param def definition of the selected component
      */
-    const handleSelect = (path: string, def: ComponentDefinition) => {
-        console.log('selected', path)
+    const handleSelect = (def: ComponentDefinition, path?: string) => {
+        console.log('selected', path);
         if (!customizing) return;
-        if (activePath == path) {
+        if (activePath && activePath == path) {
             setActiveDef(undefined);
             setActivePath(undefined);
             return;
