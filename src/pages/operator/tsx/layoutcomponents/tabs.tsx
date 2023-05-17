@@ -1,8 +1,8 @@
 import React from "react";
-import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "./componentdefinitions"
-import { ComponentList, ComponentListProps } from "./render";
-import "../css/tabs.css"
-import { CustomizableComponentProps } from "./customizablecomponent";
+import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/componentdefinitions"
+import { ComponentList, ComponentListProps } from "../render";
+import "operator/css/tabs.css"
+import { CustomizableComponentProps } from "operator/tsx/layoutcomponents/customizablecomponent";
 import { ChangeEvent } from "react";
 
 export const Tabs = (props: CustomizableComponentProps) => {

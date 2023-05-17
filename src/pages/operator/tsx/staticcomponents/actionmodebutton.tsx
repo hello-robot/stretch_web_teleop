@@ -1,6 +1,6 @@
 import React from "react";
 import "operator/css/actionmodebutton.css"
-import { className } from "utils/util";
+import { className } from "shared/util";
 
 /** Enumerator for the possible action modes */
 export enum ActionMode {

@@ -1,10 +1,9 @@
 import React from "react";
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE } from "utils/svg";
 import "operator/css/buttonpads.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
-import { VideoStreamDef, VideoStreamId } from "./componentdefinitions";
-import { rect } from "utils/svg"
-import { className } from "utils/util";
+import { VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { className } from "shared/util";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE, rect } from "shared/svg";
 
 // TODO: this should probably be moved to utils
 /** All the possible button functions */

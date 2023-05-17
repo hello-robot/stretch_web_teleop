@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { VideoControl } from 'operator/tsx/videostreams';
+import { VideoControl } from 'operator/tsx/layoutcomponents/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream } from 'utils/util';
-import { RemoteRobot } from 'robot/tsx/remoterobot';
-import { cmd } from 'utils/commands';
+import { WebRTCMessage, RemoteStream } from 'shared/util';
+import { RemoteRobot } from 'shared/remoterobot';
+import { cmd } from 'shared/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
 

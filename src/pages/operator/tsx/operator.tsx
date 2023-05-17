@@ -1,18 +1,18 @@
 import React from "react";
-import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/velocitycontrol"
+import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/staticcomponents/velocitycontrol"
 import { LayoutArea } from "./layoutarea";
-import { ActionMode, ActionModeButton } from "operator/tsx/actionmodebutton"
+import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
 import "operator/css/operator.css"
-import { ButtonFunctionProvider } from "./functionprovider";
-import { UserInteractionFunction } from "./buttonpads";
-import { CustomizeButton } from "./customizebutton";
-import { Sidebar } from "./sidebar";
-import { SharedState } from "./customizablecomponent";
-import { ComponentDefinition } from "./componentdefinitions";
-import { DEFAULT_LAYOUT } from "./defaultlayout";
-import { RemoteRobot } from "robot/tsx/remoterobot";
-import { RemoteStream } from "utils/util";
-import { addToLayout, moveInLayout, removeFromLayout } from "utils/layouthelpers";
+import { ButtonFunctionProvider } from "./utils/functionprovider";
+import { UserInteractionFunction } from "./layoutcomponents/buttonpads";
+import { CustomizeButton } from "./staticcomponents/customizebutton";
+import { Sidebar } from "./staticcomponents/sidebar";
+import { SharedState } from "./layoutcomponents/customizablecomponent";
+import { ComponentDefinition } from "./utils/componentdefinitions";
+import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
+import { RemoteRobot } from "shared/remoterobot";
+import { RemoteStream } from "shared/util";
+import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {

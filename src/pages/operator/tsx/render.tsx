@@ -3,11 +3,11 @@
  */
 
 import React from "react";
-import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./buttonpads";
-import { VideoControl, VideoStream, VideoStreamComponent } from "./videostreams";
-import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./customizablecomponent";
-import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./componentdefinitions";
-import { DropZone } from "./dropzone";
+import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./layoutcomponents/buttonpads";
+import { VideoControl, VideoStream, VideoStreamComponent } from "./layoutcomponents/videostreams";
+import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./layoutcomponents/customizablecomponent";
+import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./utils/componentdefinitions";
+import { DropZone } from "./layoutcomponents/dropzone";
 
 export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamParent?: VideoStreamDef) {
     let functions: BF[];

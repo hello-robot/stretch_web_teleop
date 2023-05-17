@@ -1,6 +1,6 @@
 import "operator/css/sidebar.css"
-import { className } from "utils/util";
-import { ComponentDefinition, ComponentType, SingleTabDef } from "./componentdefinitions";
+import { className } from "shared/util";
+import { ComponentDefinition, ComponentType, SingleTabDef } from "../utils/componentdefinitions";
 
 type SidebarProps = {
     hidden: boolean;

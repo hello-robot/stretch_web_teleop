@@ -1,6 +1,6 @@
 import React from "react"
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "utils/svg";
-import { navigationProps } from "utils/util";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "shared/svg";
+import { navigationProps } from "shared/util";
 import "operator/css/predictivedisplay.css"
 
 /**

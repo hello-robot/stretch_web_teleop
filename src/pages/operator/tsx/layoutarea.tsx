@@ -1,8 +1,8 @@
 import React from "react";
-import "../css/layoutarea.css"
-import { ParentComponentDefinition } from 'operator/tsx/componentdefinitions'
+import "operator/css/layoutarea.css"
+import { ParentComponentDefinition } from 'operator/tsx/utils/componentdefinitions'
 import { ComponentList, ComponentListProps } from "./render";
-import { SharedState } from "./customizablecomponent";
+import { SharedState } from "./layoutcomponents/customizablecomponent";
 
 /** Properties for {@link LayoutArea} */
 type LayoutAreaProps = {

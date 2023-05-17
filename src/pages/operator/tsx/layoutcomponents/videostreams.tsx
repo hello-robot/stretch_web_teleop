@@ -1,5 +1,5 @@
 import React from "react";
-import { ROSCompressedImage, className } from "utils/util";
+import { ROSCompressedImage, className } from "shared/util";
 import "operator/css/videostreams.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
 

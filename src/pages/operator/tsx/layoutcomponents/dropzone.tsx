@@ -1,6 +1,6 @@
 import React from "react";
 import "operator/css/dropzone.css"
-import { ComponentDefinition, ComponentType } from "./componentdefinitions";
+import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
 import { SharedState } from "./customizablecomponent";
 
 /** State required for drop zones */

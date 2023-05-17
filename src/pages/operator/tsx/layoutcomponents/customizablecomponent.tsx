@@ -1,9 +1,9 @@
-import { ComponentDefinition, ComponentType } from "./componentdefinitions";
+import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
 import { DropZoneState } from "./dropzone";
-import { FunctionProvider } from "./functionprovider";
-import { renderButtonPad, renderVideoStream } from "./render";
+import { FunctionProvider } from "../utils/functionprovider";
+import { renderButtonPad, renderVideoStream } from "../render";
 import { Tabs } from "./tabs";
-import { RemoteStream } from "utils/util";
+import { RemoteStream } from "shared/util";
 
 /** State required for all elements */
 export type SharedState = {
