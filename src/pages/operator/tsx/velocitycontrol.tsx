@@ -22,11 +22,11 @@ type velocityControlProps = {
 
 /**The different velocity settings to display. */
 const VELOCITY_SCALE: velocityDetails[] = [
-    {label: "Slowest", speed: 0.25},
-    {label: "Slow",    speed: 0.5},
-    {label: "Medium",  speed: 1.0},
-    {label: "Fast",    speed: 1.5},
-    {label: "Fastest", speed: 2.0}
+    {label: "Slowest", speed: 0.2},
+    {label: "Slow",    speed: 0.4},
+    {label: "Medium",  speed: 0.8},
+    {label: "Fast",    speed: 1.2},
+    {label: "Fastest", speed: 1.6}
 ]
 
 /**The speed the interface should initialize with */
