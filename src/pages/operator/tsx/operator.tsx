@@ -12,7 +12,7 @@ import { ComponentDefinition } from "./componentdefinitions";
 import { DEFAULT_LAYOUT } from "./defaultlayout";
 import { RemoteRobot } from "robot/tsx/remoterobot";
 import { RemoteStream } from "utils/util";
-import { addToLayout, moveInLayout } from "utils/layouthelpers";
+import { addToLayout, moveInLayout, removeFromLayout } from "utils/layouthelpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -73,6 +73,15 @@ export const Operator = (props: {
         setActivePath(path);
     }
 
+    /** Callback when the delete button in the sidebar is clicked */
+    const handleDelete = () => {
+        if (!activePath) throw Error('handleDelete called when activePath is undefined');
+        removeFromLayout(activePath, layout);
+        setLayout(layout);
+        setActivePath(undefined);
+        setActiveDef(undefined);
+    }
+
     /**
      * Callback when the customization button is clicked.
      */
@@ -116,7 +125,7 @@ export const Operator = (props: {
                     layout={layout}
                     sharedState={sharedState}
                 />
-                <Sidebar hidden={!customizing} />
+                <Sidebar hidden={!customizing} onDelete={handleDelete} activeDef={activeDef}/>
             </div>
         </div>
     )

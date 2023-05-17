@@ -1,0 +1,48 @@
+#sidebar {
+    flex: 0 0 20rem;
+    height: 100%;
+    background-color: lightgray;
+    display: grid;
+    grid-template-rows: 5rem auto 7rem;
+}
+
+#sidebar[hidden] {
+    display: none;
+}
+
+#sidebar-header {
+    background-color: gray;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+#sidebar-body {
+    /* background-color: teal; */
+}
+
+#sidebar-footer {
+    background-color: gray;
+}
+
+#delete-button {
+    font-size: 3rem;
+    padding: 1rem;
+    border-radius: var(--radius);
+    background-color: lightgray;
+    border: none;
+    /* Center it */
+    display: block;
+    width: 90%;
+    margin: 0.5rem auto;
+    cursor: help;
+}
+
+#delete-button.active {
+    background-color: rgb(255, 157, 157);
+    cursor: pointer;
+}
+
+#delete-button.active:hover {
+    background-color: red;
+}

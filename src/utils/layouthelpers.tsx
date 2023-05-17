@@ -124,3 +124,18 @@ export const addToLayout = (
     const newParent = getParent(newPathSplit, layout);
     putChildInParent(newParent, activeDef, newChildIdx);
 }
+
+/**
+ * Deletes a component from the layout
+ * @param path path to the component to delete
+ * @param layout the entire layout structure
+ */
+export const removeFromLayout = (
+    path: string,
+    layout: ParentComponentDefinition
+) => {
+    const splitPath = path.split('-');
+    const childIdx = +splitPath.slice(-1);
+    const parent = getParent(splitPath, layout);
+    removeChildFromParent(parent, childIdx)
+}

@@ -9,26 +9,26 @@ export enum ComponentType {
     Layout,
     Tabs,
     SingleTab,
-    VideoStream,
-    ButtonPad
+    VideoStream = "Video Stream",
+    ButtonPad = "Button Pad"
 }
 
 /**
  * ID for the video stream, one for each of the cameras
  */
 export enum VideoStreamId {
-    overhead,
-    realsense,
-    gripper
+    overhead = "Overhead",
+    realsense = "Realsense",
+    gripper = "Gripper"
 }
 
 /**
  * ID for a button pad, describes the shape of the button pad
  */
 export enum ButtonPadId {
-    overhead,
-    realsense,
-    gripper
+    overhead = "Overhead",
+    realsense = "Realsense",
+    gripper = "Gripper"
 }
 
 /**

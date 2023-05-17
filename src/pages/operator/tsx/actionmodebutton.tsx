@@ -1,5 +1,6 @@
 import React from "react";
 import "operator/css/actionmodebutton.css"
+import { className } from "utils/util";
 
 /** Enumerator for the possible action modes */
 export enum ActionMode {
@@ -43,7 +44,7 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
 
     /** Maps action modes into selections the user can click on. */
     const mapFunc = (am: any) => {
-        const isActive = actionMode === am;
+        const active = actionMode === am;
         return (
             <div
                 key={`action-mode-option-${am}`}
@@ -51,7 +52,7 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
                     setShowModes(false);
                     props.onChange(am);
                 }}
-                className={"action-mode-option" + (isActive ? " active" : "")}
+                className={className("action-mode-option", { active })}
             >
                 {am}
             </div>

@@ -23,8 +23,8 @@
     background-color: var(--btn-bg-color);
     padding: var(--btn-padding);
     border: var(--btn-brdr);
-    font-size: 1.2rem;
     cursor: pointer;
+    width: 10rem;
 }
 
 .action-mode-option.active {
