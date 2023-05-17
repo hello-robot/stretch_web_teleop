@@ -11,10 +11,22 @@
     /* background-color: green; */
     border: 0.5rem solid hsl(200, 90%, 70%);
     flex: 1 1 0;
+    background-color: var(--background-color);
+}
+
+.tab-button.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;
 }
 
 .tabs-header {
     display: inline-block;
+}
+
+.tabs-header>.material-icons {
+    /* Handle different size icon than text */
+    vertical-align: bottom;
+    padding-top: 2px;
+    padding-bottom: 3px;
 }
 
 .tab-button {
@@ -23,7 +35,6 @@
     font-size: 1.5rem;
     border-top-right-radius: .2em;
     border-top-left-radius: .2em;
-    padding: 0 1fr;
 }
 
 .tab-button:hover {
@@ -32,4 +43,68 @@
 
 .tab-button.active {
     background-color: hsl(200, 90%, 70%);
+}
+
+.tabs-content.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;;
+}
+
+/* Popup for adding a new tab *************************************************/
+#new-tab-modal {
+    position: fixed;
+    border-radius: var(--radius);
+    background-color: lightgray;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem;
+    z-index: 3;
+    height: 20rem;
+    width: 30rem;
+    font-size: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 100%;
+
+}
+
+#new-tab-modal label {
+    font-size: 1.5em;
+}
+
+#new-tab-modal input {
+    width: 100%;
+    padding: 0.5em;
+}
+
+#new-tab-modal #bottom-buttons {
+    width: 100%;
+}
+
+#new-tab-modal #bottom-buttons #accept{
+    background-color: hsl(115, 100%, 83%);
+}
+
+#new-tab-modal #bottom-buttons #cancel{
+    background-color: hsl(0, 100%, 83%);
+}
+
+#new-tab-modal #bottom-buttons button {
+    width: 45%;
+    border: none;
+    padding: .5em;
+    border-radius: var(--radius);
+}
+
+/* Dark background behind popup */
+#popup-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: 40%;
 }

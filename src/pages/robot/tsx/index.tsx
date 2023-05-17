@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, GetJointValue } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, RobotPose, ROSJointState } from 'utils/util'
-import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/videostreams';
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, RobotPose, ROSJointState } from 'shared/util'
+import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/layoutcomponents/videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
 export let connection: WebRTCConnection;

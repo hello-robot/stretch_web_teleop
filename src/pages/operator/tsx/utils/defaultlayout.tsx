@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition, ComponentDefinition } from "./componentdefinitions";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition } from "./componentdefinitions";
 
 /**
  * Default layout to load on start
@@ -16,7 +16,8 @@ export const DEFAULT_LAYOUT: ParentComponentDefinition = {
                 children: [
                     {
                         type: ComponentType.ButtonPad,
-                        id: ButtonPadId.overhead
+                        // id: ButtonPadId.overhead
+                        id: ButtonPadId.PredictiveDisplay
                     }
                 ]
             } as VideoStreamDef,

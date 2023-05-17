@@ -2,7 +2,12 @@
     width: 100%;
     height: 100%;
     stroke: gray;
-    /* cursor: none; */
+    cursor: crosshair;
+    fill:none;
+}
+
+.predictive-display.customizing {
+    cursor: default;
 }
 
 .predictive-display path {
@@ -13,4 +18,12 @@
 
 .predictive-display:active path{
     stroke: red;
+}
+
+.predictive-display {
+    width: 100%;
+    height: 100%;
+    stroke: gray;
+    cursor: crosshair;
+    fill:none;
 }

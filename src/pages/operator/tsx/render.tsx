@@ -3,11 +3,12 @@
  */
 
 import React from "react";
-import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps } from "./buttonpads";
-import { VideoControl, VideoStream, VideoStreamComponent } from "./videostreams";
-import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./customizablecomponent";
-import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./componentdefinitions";
-import { DropZone } from "./dropzone";
+import { UserInteractionFunction as BF, ButtonPad, ButtonPadProps, ButtonPadShape, ButtonProps, UserInteractionFunction } from "./layoutcomponents/buttonpads";
+import { VideoStreamComponent } from "./layoutcomponents/videostreams";
+import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./layoutcomponents/customizablecomponent";
+import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./utils/componentdefinitions";
+import { DropZone } from "./layoutcomponents/dropzone";
+import { PredictiveDisplay } from "./layoutcomponents/predictivedisplay";
 
 export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamParent?: VideoStreamDef) {
     let functions: BF[];
@@ -48,6 +49,14 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
             ]
             shape = ButtonPadShape.Gripper;
             break;
+        case ButtonPadId.PredictiveDisplay:
+            const interactionFunctions = cProps.sharedState.functionProvider(UserInteractionFunction.PredictiveDisplay);
+            return (
+            <PredictiveDisplay 
+                {...cProps}
+                functions={interactionFunctions}
+            />
+            )
         default:
             throw new Error(`unknow video stream id: ${cProps.definition.id}`);
     }

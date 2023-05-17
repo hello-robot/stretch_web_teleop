@@ -21,9 +21,3 @@
     flex-flow: row;
     flex: 1 1 0;
 }
-
-#sidebar {
-    flex: 0 0 20rem;
-    height: 100%;
-    background-color: lightgray;
-}

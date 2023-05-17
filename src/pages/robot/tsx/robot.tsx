@@ -1,7 +1,7 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'utils/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'shared/util';
 import ROSLIB, { Message, Ros } from "roslib";
-import { JOINT_LIMITS, Pose2D, GoalMessage } from 'utils/util';
+import { JOINT_LIMITS, Pose2D, GoalMessage } from 'shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;

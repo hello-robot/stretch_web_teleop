@@ -1,8 +1,8 @@
 import React from 'react'
-import { CameraInfo, SignallingMessage, WebRTCMessage } from "utils/util";
+import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
 import io, { Socket } from 'socket.io-client';
-import { safelyParseJSON, generateUUID } from 'utils/util'
-import type { Request, Response, Responder } from "utils/requestresponse";
+import { safelyParseJSON, generateUUID } from 'shared/util'
+import type { Request, Response, Responder } from "shared/requestresponse";
 
 const peerConstraints = {
     iceServers: [{

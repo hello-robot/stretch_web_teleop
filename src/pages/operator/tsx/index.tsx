@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { VideoControl } from 'operator/tsx/videostreams';
+// import { VideoControl } from 'operator/tsx/layoutcomponents/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream } from 'utils/util';
-import { RemoteRobot } from 'robot/tsx/remoterobot';
-import { cmd } from 'utils/commands';
+import { WebRTCMessage, RemoteStream } from 'shared/util';
+import { RemoteRobot } from 'shared/remoterobot';
+import { cmd } from 'shared/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
 
@@ -14,7 +14,7 @@ let connection = new WebRTCConnection({
     peerName: "OPERATOR",
     polite: true,
     onMessage: handleMessage,
-    onTrackAdded: handleRemoteTrackAdded,   
+    onTrackAdded: handleRemoteTrackAdded,
     onMessageChannelOpen: configureRobot,
     onConnectionEnd: disconnectFromRobot
 });
@@ -56,7 +56,7 @@ function configureRobot() {
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
-    root.render(<Operator remoteRobot={remoteRobot} remoteStreams={allRemoteStreams}/>);
+    root.render(<Operator remoteRobot={remoteRobot} remoteStreams={allRemoteStreams} />);
 }
 
 function disconnectFromRobot() {
@@ -66,17 +66,17 @@ function disconnectFromRobot() {
     // }
 }
 
-function renderVideos() {
-    const container = document.getElementById("root");
-    const root = createRoot(container!);
+// function renderVideos() {
+//     const container = document.getElementById("root");
+//     const root = createRoot(container!);
 
-    const videoControls = Array.from(allRemoteStreams.values()).map(
-      (remoteStream) => (
-        <VideoControl key={remoteStream.stream.id} stream={remoteStream.stream} />
-    ));
+//     const videoControls = Array.from(allRemoteStreams.values()).map(
+//         (remoteStream) => (
+//             <VideoControl key={remoteStream.stream.id} stream={remoteStream.stream} />
+//         ));
 
-    console.log(videoControls)
+//     console.log(videoControls)
 
-    root.render(<div>{videoControls}</div>);
-  }
-  
+//     root.render(<div>{videoControls}</div>);
+// }
+

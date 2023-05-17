@@ -1,18 +1,18 @@
 import React from "react";
-import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/velocitycontrol"
+import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/staticcomponents/velocitycontrol"
 import { LayoutArea } from "./layoutarea";
-import { ActionMode, ActionModeButton } from "operator/tsx/actionmodebutton"
+import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
 import "operator/css/operator.css"
-import { ButtonFunctionProvider } from "./functionprovider";
-import { UserInteractionFunction } from "./buttonpads";
-import { CustomizeButton } from "./customizebutton";
-import { Sidebar } from "./sidebar";
-import { SharedState } from "./customizablecomponent";
-import { ComponentDefinition } from "./componentdefinitions";
-import { DEFAULT_LAYOUT } from "./defaultlayout";
-import { RemoteRobot } from "robot/tsx/remoterobot";
-import { RemoteStream } from "utils/util";
-import { moveInLayout } from "utils/layouthelpers";
+import { ButtonFunctionProvider } from "./utils/functionprovider";
+import { UserInteractionFunction } from "./layoutcomponents/buttonpads";
+import { CustomizeButton } from "./staticcomponents/customizebutton";
+import { Sidebar } from "./staticcomponents/sidebar";
+import { SharedState } from "./layoutcomponents/customizablecomponent";
+import { ComponentDefinition } from "./utils/componentdefinitions";
+import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
+import { RemoteRobot } from "shared/remoterobot";
+import { RemoteStream } from "shared/util";
+import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -36,6 +36,12 @@ export const Operator = (props: {
         remoteRobot: remoteRobot
     })
 
+    /** Rerenders the layout */
+    function updateLayout() {
+        console.log('update layout');
+        setLayout(layout);
+    }
+
     /**
      * Callback when the user clicks on a drop zone, moves the active component
      * into the drop zone
@@ -43,10 +49,17 @@ export const Operator = (props: {
      */
     const handleDrop = (path: string) => {
         console.log("handleDrop", path);
-        const newPath = moveInLayout(activePath!, path, layout);
+        if (!activeDef) throw Error('Active definition undefined on drop event')
+        let newPath: string = path;
+        if (!activePath) {
+            // New element not already in the layout
+            addToLayout(activeDef, path, layout);
+        } else {
+            newPath = moveInLayout(activePath, path, layout);
+        }
         setActivePath(newPath);
         console.log('new active path', newPath)
-        setLayout(layout);
+        updateLayout();
     }
 
     /**
@@ -54,16 +67,25 @@ export const Operator = (props: {
      * @param path path to the selected component
      * @param def definition of the selected component
      */
-    const handleSelect = (path: string, def: ComponentDefinition) => {
-        console.log('selected', path)
+    const handleSelect = (def: ComponentDefinition, path?: string) => {
+        console.log('selected', path);
         if (!customizing) return;
-        if (activePath == path) {
+        if (activePath && activePath == path) {
             setActiveDef(undefined);
             setActivePath(undefined);
             return;
         }
         setActiveDef(def);
         setActivePath(path);
+    }
+
+    /** Callback when the delete button in the sidebar is clicked */
+    const handleDelete = () => {
+        if (!activePath) throw Error('handleDelete called when activePath is undefined');
+        removeFromLayout(activePath, layout);
+        updateLayout();
+        setActivePath(undefined);
+        setActiveDef(undefined);
     }
 
     /**
@@ -93,7 +115,7 @@ export const Operator = (props: {
             <div id="operator-header">
                 <ActionModeButton
                     actionMode={actionMode}
-                    onChange={(am) => {setActionMode(am); btnFnProvider.handleActionModeUpdate(am)}}
+                    onChange={(am) => { setActionMode(am); btnFnProvider.handleActionModeUpdate(am) }}
                 />
                 <VelocityControl
                     initialVelocityScale={velocityScale}
@@ -109,7 +131,12 @@ export const Operator = (props: {
                     layout={layout}
                     sharedState={sharedState}
                 />
-                <Sidebar hidden={!customizing} />
+                <Sidebar
+                    hidden={!customizing}
+                    onDelete={handleDelete}
+                    activeDef={activeDef}
+                    updateLayout={updateLayout}
+                />
             </div>
         </div>
     )

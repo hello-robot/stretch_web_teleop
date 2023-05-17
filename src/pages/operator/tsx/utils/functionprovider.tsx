@@ -1,9 +1,10 @@
 import React from 'react'
-import { RemoteRobot } from "robot/tsx/remoterobot"
-import { VelocityCommand } from 'utils/commands'
-import { ActionMode } from "./actionmodebutton"
-import { UserInteractionFunction, ButtonFunctionProps } from "./buttonpads"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'utils/util'
+import { RemoteRobot } from "shared/remoterobot"
+import { VelocityCommand } from 'shared/commands'
+import { ActionMode } from "../staticcomponents/actionmodebutton"
+import { UserInteractionFunction, ButtonFunctions } from "../layoutcomponents/buttonpads"
+import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'shared/util'
+import { PredictiveDisplayFunctions } from '../layoutcomponents/predictivedisplay'
 
 interface FunctionProviderState {
     actionMode: ActionMode
@@ -20,7 +21,7 @@ interface FunctionProviderProps {
  * Function that takes a button function enum and returns the
  * corresponding button function props.
  */
-export type FunctionProvider = (funct: UserInteractionFunction) => ButtonFunctionProps
+export type FunctionProvider = (funct: UserInteractionFunction) => ButtonFunctions
 
 export class ButtonFunctionProvider extends React.Component<FunctionProviderProps, FunctionProviderState> {
     private activeVelocityAction?: VelocityCommand;
@@ -88,7 +89,7 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
         }
     }
 
-    provideFunctions(interactionFn: UserInteractionFunction): ButtonFunctionProps {
+    provideFunctions(interactionFn: UserInteractionFunction): ButtonFunctions | PredictiveDisplayFunctions {
         switch (this.actionMode) {
             case ActionMode.StepActions:
                 switch (interactionFn) {
@@ -152,6 +153,12 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
                             onClick: () => this.incrementalArmMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * this.velocityScale),
                             onLeave: () => this.stopCurrentAction()
                         }
+                    case UserInteractionFunction.PredictiveDisplay:
+                        return {
+                            onClick: (length: number, angle: number) => console.log('predictive display click, length:', length, "angle:", angle),
+                            onMove: (length: number, angle: number) => console.log('predictive display move, length:', length, "angle:", angle),
+                            onRelease: () => console.log("predictive display on release")
+                        } as PredictiveDisplayFunctions;
                 }
                 break;
             case ActionMode.PressRelease:

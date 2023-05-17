@@ -1,7 +1,8 @@
 import React from "react"
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "utils/svg";
-import { navigationProps } from "utils/util";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "shared/svg";
+import { className, navigationProps } from "shared/util";
 import "operator/css/predictivedisplay.css"
+import { CustomizableComponentProps } from "./customizablecomponent";
 
 /**
  * Scales height values to fit in the navigation camera
@@ -35,19 +36,23 @@ function makeArc(startX: number, startY: number, radius: number, sweepFlag: bool
     return `M ${startX},${startY} A ${radius} ${radius} 0 0 ${sweep} ${endX},${endY}`
 }
 
-/** Properties for the PredictiveDisplay component */
-interface PredictiveDisplayProps {
+export type PredictiveDisplayFunctions = {
     /** Callback function when mouse is clicked in predicitive display area */
     onClick: (length: number, angle: number) => void;
     /** Callback function when cursor is moved in predictive display area */
     onMove?: (length: number, angle: number) => void;
-    /** Callback function for release, also called when the user exits the 
-     * predictive display area
-     */
+    /** Callback function for release */
     onRelease?: () => void;
+    /** Callback function for leaving predictive display area */
+    onLeave?: () => void;
 }
 
-/** State for the PredicitiveDisplay component */
+/** Properties for the {@link PredictiveDisplay} component */
+type PredictiveDisplayProps = CustomizableComponentProps & {
+    functions: PredictiveDisplayFunctions;
+}
+
+/** State for the {@link PredicitiveDisplay} component */
 interface PredictiveDisplayState {
     /** Components to render to display the trajectory. */
     trajectory: React.ReactNode;
@@ -81,18 +86,28 @@ const rightArrowPath: string = makeArrowPath(false);
 
 export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, PredictiveDisplayState> {
     svgRef: React.RefObject<SVGSVGElement>;
+    length: number;
+    angle: number;
+    holding: boolean
 
     constructor(props: PredictiveDisplayProps) {
         super(props);
         this.state = {
-            trajectory: undefined
+            trajectory: undefined,
         }
+
+        this.length = 0;
+        this.angle = 0;
+        this.holding = false;
+
         this.svgRef = React.createRef();
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseLeave = this.onMouseLeave.bind(this);
         this.drawForwardTraj = this.drawForwardTraj.bind(this);
         this.drawRotate = this.drawRotate.bind(this);
         this.drawBackward = this.drawBackward.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleLeave = this.handleLeave.bind(this);
+        this.handleMove = this.handleMove.bind(this);
+        this.handleRelease = this.handleRelease.bind(this);
     }
 
     /**
@@ -176,7 +191,7 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
     }
 
     /** Updates the trajectory display and calls callback.*/
-    onMouseMove(event: React.MouseEvent<SVGSVGElement>, click?: boolean) {
+    drawTrajectory(event: React.MouseEvent<SVGSVGElement>) {
         const { clientX, clientY } = event;
         const svg = this.svgRef.current;
         if (!svg) return;
@@ -198,33 +213,53 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
         }
 
         const [length, angle] = ret;
-        // Call the passed in move callback function
-        if (!click && this.props.onMove) {
-            this.props.onMove(length, angle);
-            // Or call the passed in click callback
-        } else if (click && this.props.onClick) {
-            this.props.onClick(length, angle);
+        this.length = length;
+        this.angle = angle;
+    }
+
+    handleLeave() {
+        this.setState({ trajectory: undefined });
+        if (this.props.functions.onLeave) {
+            this.props.functions.onLeave()
         }
     }
 
-    /**Executed when the mouse leaves the predictive display. */
-    onMouseLeave() {
-        this.setState({ trajectory: undefined });
-        if (this.props.onRelease) {
-            this.props.onRelease()
+    handleClick(e) {
+        this.holding = true;
+        if (this.props.functions.onClick) {
+            this.props.functions.onClick(this.length, this.angle);
+        }
+    }
+
+    handleRelease(e) {
+        this.holding = false;
+        if (this.props.functions.onRelease) {
+            this.props.functions.onRelease()
+        }
+    }
+
+    handleMove(e) {
+        this.drawTrajectory(e);
+        if (this.holding && this.props.functions.onMove) {
+            this.props.functions.onMove(this.length, this.angle);
         }
     }
 
     render() {
+        const customizing = this.props.sharedState.customizing;
+        const controlProps = customizing ? {} : {
+            onMouseMove: this.handleMove,
+            onMouseLeave: this.handleLeave,
+            onMouseDown: this.handleClick,
+            onMouseUp: this.handleRelease
+        };
         return (
             <svg
                 viewBox={`0 0 ${SVG_RESOLUTION} ${resolution_height}`}
                 preserveAspectRatio="none"
                 ref={this.svgRef}
-                onMouseMove={this.onMouseMove}
-                onMouseLeave={this.onMouseLeave}
-                className="predictive-display"
-                onClick={(e) => this.onMouseMove(e, true)}
+                className={className("predictive-display", { customizing })}
+                {...controlProps}
             >
                 {this.state.trajectory}
             </svg>
