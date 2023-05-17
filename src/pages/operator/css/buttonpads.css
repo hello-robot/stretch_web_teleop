@@ -31,8 +31,8 @@
 .button-pad-context-menu {
     list-style-type: none;
     position: absolute;
-    background-color: white;
-    border: 1px solid lightgray;
+    background-color: var(--background-color);
+    border: var(--btn-brdr);
     margin: 0;
     padding: 0;
     white-space: nowrap;

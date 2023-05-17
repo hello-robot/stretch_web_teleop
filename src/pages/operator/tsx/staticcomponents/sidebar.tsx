@@ -47,7 +47,7 @@ const componentDescription = (definition: ComponentDefinition): string => {
         case(ComponentType.Tabs):
             return "Tabs";
         case(ComponentType.SingleTab):
-            return `Tab ${(definition as SingleTabDef).label}`;
+            return `${(definition as SingleTabDef).label} Tab`;
         default:
             throw Error(`Cannot get description for component type ${definition.type}`)
     }

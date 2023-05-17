@@ -33,9 +33,10 @@
 }
 
 .video-canvas.customizing {
-    opacity: 50%;
+    filter: brightness(0.6);
 }
 
 .video-canvas.selected {
+    filter: none;
     box-shadow: 0 0 1rem 1rem #0ff;;
 }

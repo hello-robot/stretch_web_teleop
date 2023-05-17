@@ -100,10 +100,17 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     /** Callback when SVG is clicked during customize mode */
     const onSelect = (event: React.MouseEvent<SVGSVGElement>) => {
+        // Make sure the container of the button pad doesn't get selected
+        event.stopPropagation();
+
+        // If button pad is not overlaid on a video stream then select itself
         if (!props.videoStreamParent) {
             selectSelf;
             return;
         }
+
+        // Open context menu to ask the user if they want to select the overlaid 
+        // button pad or its parent video stream
         const { clientX, clientY } = event;
         const { left, top } = svgRef.current!.getBoundingClientRect();
         const x = clientX - left;
@@ -166,7 +173,8 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
 
     // Handler to close dropdown when click outside
     React.useEffect(() => {
-        console.log('click handler')
+
+        /** Closes context menu if user clicks outside */
         const handler = (e: any) => {
             // If didn't click inside the context menu or the existing SVG, then
             // hide the popup
@@ -181,6 +189,18 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
         };
     }, []);
 
+    /**
+     * Handles when the user clicks on one of the context menu options
+     * @param e mouse event of the click
+     * @param self if true selects itself (a button pad), if false selects its 
+     * parent (the video stream)
+     */
+    function handleClick(e: React.MouseEvent<HTMLLIElement>, self: boolean) {
+        self ? props.selectSelf() : props.selectParent();
+
+        // Make sure background elements don't receive a click
+        e.stopPropagation();
+    }
 
     return (
 
@@ -189,8 +209,8 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
             className="button-pad-context-menu"
             style={{ top: `${props.y}px`, left: `${props.x}px` }}
         >
-            <li onClick={props.selectSelf}>Button Pad</li>
-            <li onClick={props.selectParent}>Video Stream</li>
+            <li onClick={(e) => handleClick(e, true)}>Button Pad</li>
+            <li onClick={(e) => handleClick(e, false)}>Video Stream</li>
         </ul>
     );
 }

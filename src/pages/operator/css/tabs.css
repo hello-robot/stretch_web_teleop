@@ -11,10 +11,22 @@
     /* background-color: green; */
     border: 0.5rem solid hsl(200, 90%, 70%);
     flex: 1 1 0;
+    background-color: var(--background-color);
+}
+
+.tab-button.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;;
 }
 
 .tabs-header {
     display: inline-block;
+}
+
+.tabs-header>.material-icons {
+    /* Handle different size icon than text */
+    vertical-align: bottom;
+    padding-top: 2px;
+    padding-bottom: 3px;
 }
 
 .tab-button {
@@ -33,12 +45,8 @@
     background-color: hsl(200, 90%, 70%);
 }
 
-/* Add tab button */
-.tab-button.material-icons {
-    /* Handle different size icon than text */
-    vertical-align: bottom;
-    padding-top: 2px;
-    padding-bottom: 3px;
+.tabs-content.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;;
 }
 
 /* Popup for adding a new tab *************************************************/

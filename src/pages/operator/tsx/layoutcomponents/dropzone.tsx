@@ -2,6 +2,7 @@ import React from "react";
 import "operator/css/dropzone.css"
 import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
 import { SharedState } from "./customizablecomponent";
+import { className } from "shared/util";
 
 /** State required for drop zones */
 export type DropZoneState = {
@@ -11,7 +12,7 @@ export type DropZoneState = {
 
 export type DropZoneProps = {
     path: string,
-    parentDef?: ComponentDefinition,
+    parentDef: ComponentDefinition,
     sharedState: SharedState
 }
 
@@ -19,7 +20,7 @@ export type DropHandler = (path: string) => void
 
 /** Area where the user can click to move the selected component to a new place. */
 export const DropZone = (props: DropZoneProps) => {
-    const canDrop = (): boolean => {
+    function canDrop(): boolean {
         const { path, parentDef } = props;
         const { activePath } = props.sharedState;
         const { activeDef } = props.sharedState.dropZoneState;
@@ -28,15 +29,16 @@ export const DropZone = (props: DropZoneProps) => {
             return false;
         }
 
-        // Can place anything at the top level of the heiarchy
-        if (!parentDef) {
-            return true;
-        }
-
-        // Tab -> any other object is not allowed
-        if (activeDef.type === ComponentType.Tabs) {
+        // Only tabs -> layout is allowed
+        if (activeDef.type === ComponentType.Tabs && parentDef.type !== ComponentType.Layout) {
             return false;
         }
+
+        // Only single tab -> tab is allowed
+        if (activeDef.type === ComponentType.SingleTab && parentDef.type !== ComponentType.Tabs) {
+            return false;
+        }
+
 
         // Paths cannot be adjacent
         const splitItemPath = activePath.split('-');
@@ -56,19 +58,21 @@ export const DropZone = (props: DropZoneProps) => {
         return true;
     }
 
+    /** Calls onDrop function from Operator with the path of this dropzone */
     const handleClick = () => {
         if (!props.sharedState.customizing) return;
         props.sharedState.dropZoneState.onDrop(props.path);
     }
 
     const isActive = props.sharedState.customizing && canDrop();
+    const inTab = props.parentDef.type === ComponentType.Tabs;
     return (
-        <div 
-            className="drop-zone"
+        <span
+            className={className("drop-zone material-icons", {tab: inTab})}
             hidden={!isActive}
             onClick={handleClick}
         >
-
-        </div>
+            vertical_align_bottom
+        </span>
     )
 }

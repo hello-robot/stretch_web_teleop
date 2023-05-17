@@ -6,9 +6,9 @@
  * High-level type of the component
  */
 export enum ComponentType {
-    Layout,
-    Tabs,
-    SingleTab,
+    Layout = "Layout",
+    Tabs = "Tabs",
+    SingleTab = "Single Tab",
     VideoStream = "Video Stream",
     ButtonPad = "Button Pad"
 }
