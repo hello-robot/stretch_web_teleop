@@ -50,7 +50,6 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
             shape = ButtonPadShape.Gripper;
             break;
         case ButtonPadId.PredictiveDisplay:
-            const functions = cProps.sharedState.functionProvider(UserInteractionFunction.PredictiveDisplay)
             return (
             <PredictiveDisplay 
                 {...cProps}
