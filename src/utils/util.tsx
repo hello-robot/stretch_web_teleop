@@ -105,7 +105,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "joint_lift": .04,
     "joint_wrist_yaw": .1,
     "translate_mobile_base": .1,
-    "rotate_mobile_base": .1
+    "rotate_mobile_base": .3
 }
 
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {

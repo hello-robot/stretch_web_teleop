@@ -100,7 +100,7 @@ export const Operator = (props: {
             <div id="operator-header">
                 <ActionModeButton
                     actionMode={actionMode}
-                    onChange={(am) => setActionMode(am)}
+                    onChange={(am) => {setActionMode(am); btnFnProvider.handleActionModeUpdate(am)}}
                 />
                 <VelocityControl
                     initialVelocityScale={velocityScale}

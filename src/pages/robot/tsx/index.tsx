@@ -95,6 +95,8 @@ function handleMessage(message: WebRTCMessage) {
         case "stop":
             robot.stopExecution()
             break
+        case "setRobotMode":
+            message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
     }
 };
 
