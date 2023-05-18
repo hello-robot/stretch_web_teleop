@@ -14,19 +14,19 @@ export let gripperStream = new VideoStream(gripperProps);
 
 robot.connect().then(() => {
     robot.subscribeToVideo({
-        topicName: "/rotatedNavCamera/compressed",
+        topicName: "/navigation_camera/image_raw/rotated/compressed",
         callback: navigationStream.updateImage
     })
     navigationStream.start()
 
     robot.subscribeToVideo({
-        topicName: "/rotatedCamera/compressed",
+        topicName: "/camera/color/image_raw/rotated/compressed",
         callback: realsenseStream.updateImage
     })
     realsenseStream.start()
 
     robot.subscribeToVideo({
-        topicName: "/gripper_camera/image_raw/compressed",
+        topicName: "/gripper_camera/image_raw/cropped/compressed",
         callback: gripperStream.updateImage
     })
     gripperStream.start()

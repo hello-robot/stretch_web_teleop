@@ -121,7 +121,7 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
 
 export const navigationProps = {
     width: 768,
-    height: 1024,
+    height: 768, // 1024
     fps: 6.0
 }
 
@@ -132,7 +132,7 @@ export const realsenseProps = {
 }
 
 export const gripperProps = {
-    width: 900,
+    width: 768, // 1024
     height: 768,
     fps: 6.0
 }

@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+
+import rospy
+import message_filters
+import numpy as np
+import cv2
+import yaml
+import sys
+
+from sensor_msgs.msg import Image, CameraInfo, CompressedImage
+from cv_bridge import CvBridge
+   
+class ConfigureVideoStreams:
+    def __init__(self, params_file):
+        with open(params_file, 'r') as params:
+            self.image_params = yaml.safe_load(params)
+
+        # Loaded params for each video stream
+        self.overhead_params = self.image_params["overhead"] if "overhead" in self.image_params else None
+        self.realsense_params = self.image_params["realsense"] if "realsense" in self.image_params else None
+        self.gripper_params = self.image_params["gripper"] if "gripper" in self.image_params else None
+
+        # Stores all the images created using the loaded params
+        self.overhead_images = {}
+        self.realsense_images = {}
+        self.gripper_images = {}
+
+        self.loop_rate = rospy.Rate(20)
+
+        self.realsense_rgb_image = None
+        self.overhead_camera_rgb_image = None
+        self.gripper_camera_rgb_image = None
+        self.cv_bridge = CvBridge()
+
+        self.publisher_realsense_cmp = rospy.Publisher('/camera/color/image_raw/rotated/compressed', CompressedImage, queue_size=10)
+        self.publisher_overhead_cmp = rospy.Publisher('/navigation_camera/image_raw/rotated/compressed', CompressedImage, queue_size=10)
+        self.publisher_gripper_cmp = rospy.Publisher('/gripper_camera/image_raw/cropped/compressed', CompressedImage, queue_size=10)
+
+        self.camera_rgb_subscriber = message_filters.Subscriber(f'/camera/color/image_raw', Image)
+        self.overhead_camera_rgb_subscriber = message_filters.Subscriber(f'/navigation_camera/image_raw', Image)
+        self.gripper_camera_rgb_subscriber = message_filters.Subscriber(f'/gripper_camera/image_raw', Image)
+
+        self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
+            self.camera_rgb_subscriber, self.overhead_camera_rgb_subscriber, self.gripper_camera_rgb_subscriber], 10, 1)
+        self.camera_synchronizer.registerCallback(self.camera_callback)
+
+    def create_circular_mask(self, h, w, center=None, radius=None):
+        if center is None: # use the middle of the image
+            center = (int(w/2), int(h/2))
+        if radius is None: # use the smallest distance between the center and image walls
+            radius = min(center[0], center[1], w-center[0], h-center[1])
+
+        Y, X = np.ogrid[:h, :w]
+        dist_from_center = np.sqrt((X - center[0])**2 + (Y-center[1])**2)
+
+        mask = dist_from_center <= radius
+        return mask
+
+    def rotate_image(self, image, value):
+        if value == 'ROTATE_90_CLOCKWISE':
+            return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        elif value == "ROTATE_180":
+            return cv2.rotate(image, cv2.ROTATE_180)
+        elif value == "ROTATE_90_COUNTERCLOCKWISE":
+            return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            raise ValueError("Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE")
+
+    def mask_image(self, image, params):
+        if params["width"] is None: raise ValueError("Mask width is not defined!") 
+        if params["height"] is None: raise ValueError("Mask height is not defined!")
+
+        w = params["width"]
+        h = params["height"]
+        center = (params["center"]["x"], params["center"]["y"]) if params["center"] else None
+        radius = params["radius"]
+
+        mask = self.create_circular_mask(h, w, center, radius)
+        img = image.copy()
+        img[~mask] = 200
+        return img
+
+    def crop_image(self, image, params):
+        if params["x_min"] is None: raise ValueError("Crop x_min is not defined!")
+        if params["x_max"] is None: raise ValueError("Crop x_max is not defined!") 
+        if params["y_min"] is None: raise ValueError("Crop y_min is not defined!") 
+        if params["y_max"] is None: raise ValueError("Crop y_max is not defined!") 
+
+        x_min = params["x_min"]
+        x_max = params["x_max"]
+        y_min = params["y_min"]
+        y_max = params["y_max"]
+
+        return image[x_min:x_max, y_min:y_max]
+
+    def configure_images(self, ros_image, params):
+        rgb_image = self.cv_bridge.imgmsg_to_cv2(ros_image)
+        rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
+        if params:
+            if params['crop']:
+                rgb_image = self.crop_image(rgb_image, params['crop'])
+            if params['mask']:
+                rgb_image = self.mask_image(rgb_image, params['mask'])
+            if params['rotate']:
+                rgb_image = self.rotate_image(rgb_image, params['rotate'])
+        return rgb_image
+
+    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image):
+        for image_config_name in self.realsense_params:
+            self.realsense_images[image_config_name] = \
+                self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
+        for image_config_name in self.overhead_params:
+            self.overhead_images[image_config_name] = \
+                self.configure_images(ros_overhead_rgb_image, self.overhead_params[image_config_name])
+        for image_config_name in self.gripper_params:
+            self.gripper_images[image_config_name] = \
+                self.configure_images(ros_gripper_rgb_image, self.gripper_params[image_config_name])
+        
+        self.realsense_rgb_image = self.realsense_images['default']
+        self.overhead_camera_rgb_image = self.overhead_images['default']
+        self.gripper_camera_rgb_image = self.gripper_images['default']
+
+    def publish_compressed_msg(self, image, publisher):
+        msg = CompressedImage()
+        msg.header.stamp = rospy.Time.now()
+        msg.format = "jpeg"
+        msg.data = np.array(cv2.imencode('.jpg', image)[1]).tobytes()
+        publisher.publish(msg)
+
+    def start(self):
+        print("Publishing configured video stream")
+        while not rospy.is_shutdown():
+            if self.overhead_camera_rgb_image is not None: \
+                self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
+            if self.realsense_rgb_image is not None: \
+                self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
+            if self.gripper_camera_rgb_image is not None: \
+                self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
+
+            rospy.sleep(0.025)
+
+if __name__ == '__main__':
+    rospy.init_node('configure_video_streams')
+    node = ConfigureVideoStreams(sys.argv[1])
+    node.start()
