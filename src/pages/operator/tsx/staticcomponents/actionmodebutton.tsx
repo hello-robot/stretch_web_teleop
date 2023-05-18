@@ -9,6 +9,8 @@ export enum ActionMode {
     ClickClick = 'Click-Click'
 }
 
+export const DEFAULT_ACTION_MODE: ActionMode = ActionMode.StepActions;
+
 /** Turns {@link ActionMode} enum into an array */
 const ActionModes = Object.values(ActionMode) as ActionMode[];
 

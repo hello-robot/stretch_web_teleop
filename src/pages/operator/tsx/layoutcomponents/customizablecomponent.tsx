@@ -13,7 +13,7 @@ export type SharedState = {
     /** Remote robot video streams */
     remoteStreams: Map<string, RemoteStream>
     /** Gives function based on user input type */
-    functionProvider: FunctionProvider,
+    // functionProvider: FunctionProvider,
     /** State required for all dropzones */
     dropZoneState: DropZoneState,
     /** Path to the active component */

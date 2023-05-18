@@ -6,9 +6,16 @@ import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
+import { FunctionProvider, ButtonFunctionProvider } from './utils/functionprovider';
+import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
+import { DEFAULT_ACTION_MODE } from './staticcomponents/actionmodebutton';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
+export var btnFnProvider = new ButtonFunctionProvider({
+    actionMode: DEFAULT_ACTION_MODE,
+    velocityScale: DEFAULT_VELOCITY_SCALE,
+})
 
 let connection = new WebRTCConnection({
     peerName: "OPERATOR",
@@ -43,8 +50,8 @@ function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
         return
     }
     switch (message.type) {
-        case 'jointState':
-            remoteRobot.sensors.setJointState(message.jointState);
+        case 'inJointLimits':
+            remoteRobot.sensors.setInJointLimits(message.jointsInLimits);
             break;
     }
 }
@@ -53,10 +60,12 @@ function configureRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
     });
+    remoteRobot.setRobotMode("navigation")
+    FunctionProvider.addRemoteRobot(remoteRobot)
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
-    root.render(<Operator remoteRobot={remoteRobot} remoteStreams={allRemoteStreams} />);
+    root.render(<Operator remoteStreams={allRemoteStreams} />);
 }
 
 function disconnectFromRobot() {

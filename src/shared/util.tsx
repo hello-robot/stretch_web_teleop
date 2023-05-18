@@ -35,7 +35,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = SensorMessage | JointStateMessage | StopMessage | cmd;
+export type WebRTCMessage = SensorMessage | JointLimitsMessage | StopMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -60,9 +60,9 @@ export type Sensor = {
 
 export type RobotPose = { [key in ValidJoints]?: number }
 
-export interface JointStateMessage {
-    type: "jointState",
-    jointState: RobotPose
+export interface JointLimitsMessage {
+    type: "inJointLimits",
+    jointsInLimits: { [key in ValidJoints]? : [boolean, boolean] }
 }
 
 export type GoalMessage =  NavGoalMessage | PoseGoalMessage;

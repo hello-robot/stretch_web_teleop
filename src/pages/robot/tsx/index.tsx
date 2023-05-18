@@ -1,9 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot, GetJointValue } from 'robot/tsx/robot'
+import { Robot, inJointLimits } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, RobotPose, ROSJointState } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJoints, ROSJointState } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/layoutcomponents/videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
@@ -67,14 +67,15 @@ function handleSessionStart() {
 }
 
 function forwardJointStates(jointState: ROSJointState) {
-    let values: RobotPose = {}
-    jointState.name.forEach(name => {
-        values[name!] = GetJointValue({ jointStateMessage: jointState, jointName: name! });
+    let values: { [key in ValidJoints]?: [boolean, boolean] } = {}
+    jointState.name.forEach((name?: ValidJoints) => {
+        let inLimits = inJointLimits({ jointStateMessage: jointState, jointName: name! });
+        if (inLimits) values[name!] = inLimits;
     })
 
     connection.sendData({
-        type: 'jointState',
-        jointState: values
+        type: "inJointLimits",
+        jointsInLimits: values
     });
 }
 
@@ -84,7 +85,6 @@ function handleMessage(message: WebRTCMessage) {
         return
     }
 
-    console.log(message)
     switch (message.type) {
         case "driveBase": 
             robot.executeBaseVelocity(message.modifier)

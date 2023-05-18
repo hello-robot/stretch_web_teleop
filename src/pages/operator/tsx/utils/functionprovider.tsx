@@ -6,40 +6,41 @@ import { UserInteractionFunction, ButtonFunctions } from "../layoutcomponents/bu
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints }from 'shared/util'
 import { PredictiveDisplayFunctions } from '../layoutcomponents/predictivedisplay'
 
-interface FunctionProviderState {
-    actionMode: ActionMode
-    velocityScale: number
-}
-
-interface FunctionProviderProps {
+interface ButtonFunctionProviderProps {
     actionMode: ActionMode;
     velocityScale: number;
-    remoteRobot: RemoteRobot;
 }
 
 /**
  * Function that takes a button function enum and returns the
  * corresponding button function props.
  */
-export type FunctionProvider = (funct: UserInteractionFunction) => ButtonFunctions
+// export type FunctionProvider = (funct: UserInteractionFunction) => ButtonFunctions
+export class FunctionProvider {
+    protected static remoteRobot?: RemoteRobot;
+    constructor(props: {}) {}
 
-export class ButtonFunctionProvider extends React.Component<FunctionProviderProps, FunctionProviderState> {
+    static addRemoteRobot(remoteRobot: RemoteRobot) {
+        FunctionProvider.remoteRobot = remoteRobot;
+    }
+}
+
+export class ButtonFunctionProvider extends FunctionProvider {
     private activeVelocityAction?: VelocityCommand;
     private velocityExecutionHeartbeat?: number // ReturnType<typeof setInterval>
 
     private actionMode: ActionMode;
     private velocityScale: number;
-    private remoteRobot: RemoteRobot;
+    // private remoteRobot: RemoteRobot;
 
-    constructor(props: FunctionProviderProps) {
+    constructor(props: ButtonFunctionProviderProps) {
         super(props)
         this.actionMode = props.actionMode,
         this.velocityScale = props.velocityScale
-        this.remoteRobot = props.remoteRobot
+        // FunctionProvider.remoteRobot = props.remoteRobot
         this.provideFunctions = this.provideFunctions.bind(this)
         this.handleActionModeUpdate = this.handleActionModeUpdate.bind(this)
         this.handleVelocityScaleUpdate = this.handleVelocityScaleUpdate.bind(this)
-        this.remoteRobot.setRobotMode("navigation")
     }
 
     handleActionModeUpdate(newActionMode: ActionMode) {
@@ -52,28 +53,28 @@ export class ButtonFunctionProvider extends React.Component<FunctionProviderProp
     }
 
     incrementalBaseDrive(linVel: number, angVel: number) {
-        this.activeVelocityAction = this.remoteRobot.driveBase(linVel, angVel)
+        this.activeVelocityAction = FunctionProvider.remoteRobot?.driveBase(linVel, angVel)
     }
 
     incrementalArmMovement(jointName: ValidJoints, increment: number) {
-        this.activeVelocityAction = this.remoteRobot.incrementalMove(jointName, increment)
+        this.activeVelocityAction = FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
     }
 
     continuousBaseDrive(linVel: number, angVel: number) {
         this.activeVelocityAction = 
-            this.remoteRobot.driveBase(linVel, angVel),
+            FunctionProvider.remoteRobot?.driveBase(linVel, angVel),
         this.velocityExecutionHeartbeat = window.setInterval(() => {
             this.activeVelocityAction = 
-                this.remoteRobot!.driveBase(linVel, angVel)
+                FunctionProvider.remoteRobot?.driveBase(linVel, angVel)
         }, 150);
     }
 
     continuousArmMovement(jointName: ValidJoints, increment: number) {
         this.activeVelocityAction = 
-            this.remoteRobot.incrementalMove(jointName, increment)
+            FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
         this.velocityExecutionHeartbeat = window.setInterval(() => {
             this.activeVelocityAction = 
-                this.remoteRobot.incrementalMove(jointName, increment)
+                FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
         }, 150);
     }
 

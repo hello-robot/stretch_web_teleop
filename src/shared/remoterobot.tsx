@@ -59,6 +59,7 @@ export class RemoteRobot extends React.Component {
 class RobotSensors extends React.Component {
     private sensors: { [sensorName: string]: SensorData }
     private jointState?: RobotPose;
+    private inJointLimits?: { [key in ValidJoints]?: [boolean, boolean] }
 
     constructor(props: {}) {
         super(props)
@@ -72,7 +73,8 @@ class RobotSensors extends React.Component {
         }
     }
 
-    setJointState(state: RobotPose) {
-        this.jointState = state;
+    setInJointLimits(values: { [key in ValidJoints]?: [boolean, boolean] }) {
+        this.inJointLimits = values;
+        console.log(this.inJointLimits)
     }
 }

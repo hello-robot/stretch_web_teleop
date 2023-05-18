@@ -9,6 +9,7 @@ import { CustomizableComponent, CustomizableComponentProps, SharedState } from "
 import { ButtonPadId, VideoStreamDef, VideoStreamId, ComponentDefinition, ParentComponentDefinition, ComponentType } from "./utils/componentdefinitions";
 import { DropZone } from "./layoutcomponents/dropzone";
 import { PredictiveDisplay } from "./layoutcomponents/predictivedisplay";
+import { btnFnProvider } from "./index";
 
 export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamParent?: VideoStreamDef) {
     let functions: BF[];
@@ -50,7 +51,7 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
             shape = ButtonPadShape.Gripper;
             break;
         case ButtonPadId.PredictiveDisplay:
-            const interactionFunctions = cProps.sharedState.functionProvider(UserInteractionFunction.PredictiveDisplay);
+            const interactionFunctions = btnFnProvider.provideFunctions(UserInteractionFunction.PredictiveDisplay);
             return (
             <PredictiveDisplay 
                 {...cProps}
@@ -62,7 +63,7 @@ export function renderButtonPad(cProps: CustomizableComponentProps, videoStreamP
     }
     const buttonsProps = functions.map((funct: BF) => {
         return {
-            ...cProps.sharedState.functionProvider(funct),
+            ...btnFnProvider.provideFunctions(funct),
             label: "" + funct
         } as ButtonProps;
     })

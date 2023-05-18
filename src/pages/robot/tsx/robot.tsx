@@ -249,3 +249,15 @@ export const GetJointValue = (props: { jointStateMessage: ROSJointState, jointNa
     let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
     return props.jointStateMessage.position[jointIndex]
 }
+
+export function inJointLimits(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
+    let jointValue = GetJointValue(props)
+    let jointLimits = JOINT_LIMITS[props.jointName]
+    if (!jointLimits) return;
+
+    var eps = 0.03
+    let inLimits: [boolean, boolean] = [true, true]
+    inLimits[0] = jointValue - eps >= jointLimits[0]
+    inLimits[1] = jointValue + eps <= jointLimits[1]
+    return inLimits
+}

@@ -10,13 +10,12 @@ import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
-import { RemoteRobot } from "shared/remoterobot";
 import { RemoteStream } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
+import { btnFnProvider } from ".";
 
 /** Operator interface webpage */
 export const Operator = (props: {
-    remoteRobot: RemoteRobot,
     remoteStreams: Map<string, RemoteStream>
 }) => {
     /** Speed of the robot. */
@@ -27,14 +26,12 @@ export const Operator = (props: {
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
 
-    let remoteRobot = props.remoteRobot
     let remoteStreams = props.remoteStreams
 
-    let btnFnProvider = new ButtonFunctionProvider({
-        actionMode: actionMode,
-        velocityScale: velocityScale,
-        remoteRobot: remoteRobot
-    })
+    // let btnFnProvider = new ButtonFunctionProvider({
+    //     actionMode: actionMode,
+    //     velocityScale: velocityScale,
+    // })
 
     /** Rerenders the layout */
     function updateLayout() {
@@ -102,7 +99,7 @@ export const Operator = (props: {
         customizing: customizing,
         onSelect: handleSelect,
         remoteStreams: remoteStreams,
-        functionProvider: (bf: UserInteractionFunction) => btnFnProvider.provideFunctions(bf),
+        // functionProvider: (bf: UserInteractionFunction) => btnFnProvider.provideFunctions(bf),
         activePath: activePath,
         dropZoneState: {
             onDrop: handleDrop,
