@@ -9,6 +9,7 @@ import "operator/css/index.css"
 import { FunctionProvider, ButtonFunctionProvider } from './utils/functionprovider';
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import { DEFAULT_ACTION_MODE } from './staticcomponents/actionmodebutton';
+import React from 'react'
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -65,7 +66,11 @@ function configureRobot() {
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
-    root.render(<Operator remoteStreams={allRemoteStreams} />);
+    console.log(remoteRobot.sensors)
+    root.render(<Operator 
+        setJointLimitsCallback={remoteRobot.sensors.setOperatorCallback} 
+        remoteStreams={allRemoteStreams} 
+    />);
 }
 
 function disconnectFromRobot() {

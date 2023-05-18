@@ -7,7 +7,7 @@ export type robotMessageChannel = (message: cmd) => void;
 export class RemoteRobot extends React.Component {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
-
+    
     constructor(props: {robotChannel: robotMessageChannel}) {
         super(props);
         this.robotChannel = props.robotChannel
@@ -60,6 +60,7 @@ class RobotSensors extends React.Component {
     private sensors: { [sensorName: string]: SensorData }
     private jointState?: RobotPose;
     private inJointLimits?: { [key in ValidJoints]?: [boolean, boolean] }
+    private operaterCallback?: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void
 
     constructor(props: {}) {
         super(props)
@@ -71,10 +72,24 @@ class RobotSensors extends React.Component {
             "head": {},
             "base": {}
         }
+        this.operaterCallback = () => {}
+        this.setOperatorCallback = this.setOperatorCallback.bind(this)
     }
 
     setInJointLimits(values: { [key in ValidJoints]?: [boolean, boolean] }) {
+        let isTheSame = this.inJointLimits && Object.keys(values).every((key, index) => 
+            values[key as ValidJoints]![0] == this.inJointLimits![key as ValidJoints]![0] &&
+            values[key as ValidJoints]![1] == this.inJointLimits![key as ValidJoints]![1]
+        )
         this.inJointLimits = values;
-        console.log(this.inJointLimits)
+        if (!isTheSame && this.operaterCallback) {
+            this.operaterCallback(this.inJointLimits)
+        }
+    }
+
+    setOperatorCallback(operaterCallback: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void) {
+        console.log(this)
+        console.log(this.operaterCallback)
+        this.operaterCallback = operaterCallback;
     }
 }

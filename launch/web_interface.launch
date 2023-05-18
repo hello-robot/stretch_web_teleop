@@ -32,4 +32,5 @@
   <arg name="params" value="$(find stretch_web_interface_react)/nodes/configure_video_streams_params.yaml"/>
   <node name="configure_video_streams" pkg="stretch_web_interface_react" type="configure_video_streams" args="$(arg params)" output="screen"/>
   <!-- -->
+  
 </launch>

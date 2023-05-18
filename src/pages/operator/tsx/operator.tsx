@@ -10,13 +10,14 @@ import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
-import { RemoteStream } from "shared/util";
+import { RemoteStream, ValidJoints } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 import { btnFnProvider } from ".";
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>
+    setJointLimitsCallback: (callbackfn: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void) => void
 }) => {
     /** Speed of the robot. */
     let velocityScale = DEFAULT_VELOCITY_SCALE;
@@ -106,6 +107,11 @@ export const Operator = (props: {
             activeDef: activeDef
         }
     }
+
+    const updateJointLimitsState = (inJointLimits: {[key in ValidJoints]?: [boolean, boolean]}) => {
+        console.log(inJointLimits)
+    }
+    props.setJointLimitsCallback(updateJointLimitsState)
 
     return (
         <div id="operator">
