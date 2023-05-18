@@ -89,7 +89,7 @@ module.exports = {
     },
     alias: {
       "shared": path.resolve(__dirname, './src/shared/'),
-      "utils": path.resolve(__dirname, './src/utils/'),
+      // "utils": path.resolve(__dirname, './src/utils/'),
       "operator": path.resolve(__dirname, './src/pages/operator/'),
       "robot": path.resolve(__dirname, './src/pages/robot/'),
     }

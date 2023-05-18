@@ -9,7 +9,8 @@ import sys
 
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage
 from cv_bridge import CvBridge
-   
+from stretch_web_interface_react.srv import ImageView
+
 class ConfigureVideoStreams:
     def __init__(self, params_file):
         with open(params_file, 'r') as params:
@@ -44,6 +45,35 @@ class ConfigureVideoStreams:
             self.camera_rgb_subscriber, self.overhead_camera_rgb_subscriber, self.gripper_camera_rgb_subscriber], 10, 1)
         self.camera_synchronizer.registerCallback(self.camera_callback)
 
+        self.image_view_service = rospy.Service('image_view', ImageView, self.image_view_callback)
+        self.image_view = {"overhead": "nav", "realsense": "default", "gripper": "default"}
+        self.overhead_image_view = 'nav'
+        self.realsense_image_view = 'default'
+        self.gripper_image_view = 'default'
+
+    def image_view_callback(self, req):
+        if req.camera not in self.image_view: 
+            raise ValueError("ImageView.srv camera must be overhead, realsense or gripper") 
+        
+        try: 
+            self.image_view[req.camera] = req.view
+            return True
+        except:
+            return False
+            
+    def crop_image(self, image, params):
+        if params["x_min"] is None: raise ValueError("Crop x_min is not defined!")
+        if params["x_max"] is None: raise ValueError("Crop x_max is not defined!") 
+        if params["y_min"] is None: raise ValueError("Crop y_min is not defined!") 
+        if params["y_max"] is None: raise ValueError("Crop y_max is not defined!") 
+
+        x_min = params["x_min"]
+        x_max = params["x_max"]
+        y_min = params["y_min"]
+        y_max = params["y_max"]
+
+        return image[x_min:x_max, y_min:y_max]
+
     def create_circular_mask(self, h, w, center=None, radius=None):
         if center is None: # use the middle of the image
             center = (int(w/2), int(h/2))
@@ -55,16 +85,6 @@ class ConfigureVideoStreams:
 
         mask = dist_from_center <= radius
         return mask
-
-    def rotate_image(self, image, value):
-        if value == 'ROTATE_90_CLOCKWISE':
-            return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-        elif value == "ROTATE_180":
-            return cv2.rotate(image, cv2.ROTATE_180)
-        elif value == "ROTATE_90_COUNTERCLOCKWISE":
-            return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        else:
-            raise ValueError("Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE")
 
     def mask_image(self, image, params):
         if params["width"] is None: raise ValueError("Mask width is not defined!") 
@@ -80,18 +100,15 @@ class ConfigureVideoStreams:
         img[~mask] = 200
         return img
 
-    def crop_image(self, image, params):
-        if params["x_min"] is None: raise ValueError("Crop x_min is not defined!")
-        if params["x_max"] is None: raise ValueError("Crop x_max is not defined!") 
-        if params["y_min"] is None: raise ValueError("Crop y_min is not defined!") 
-        if params["y_max"] is None: raise ValueError("Crop y_max is not defined!") 
-
-        x_min = params["x_min"]
-        x_max = params["x_max"]
-        y_min = params["y_min"]
-        y_max = params["y_max"]
-
-        return image[x_min:x_max, y_min:y_max]
+    def rotate_image(self, image, value):
+        if value == 'ROTATE_90_CLOCKWISE':
+            return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        elif value == "ROTATE_180":
+            return cv2.rotate(image, cv2.ROTATE_180)
+        elif value == "ROTATE_90_COUNTERCLOCKWISE":
+            return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            raise ValueError("Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE")
 
     def configure_images(self, ros_image, params):
         rgb_image = self.cv_bridge.imgmsg_to_cv2(ros_image)
@@ -116,9 +133,9 @@ class ConfigureVideoStreams:
             self.gripper_images[image_config_name] = \
                 self.configure_images(ros_gripper_rgb_image, self.gripper_params[image_config_name])
         
-        self.realsense_rgb_image = self.realsense_images['default']
-        self.overhead_camera_rgb_image = self.overhead_images['default']
-        self.gripper_camera_rgb_image = self.gripper_images['default']
+        self.overhead_camera_rgb_image = self.overhead_images[self.image_view["overhead"]]
+        self.realsense_rgb_image = self.realsense_images[self.image_view["realsense"]]
+        self.gripper_camera_rgb_image = self.gripper_images[self.image_view["gripper"]]
 
     def publish_compressed_msg(self, image, publisher):
         msg = CompressedImage()

@@ -2,7 +2,7 @@
     # Images published to /navigation_camera/image_raw
     # Image size is 768 x 1024
     "overhead": {
-        "default": {
+        "nav": {
             # The mask contain params to make a circular mask over the image
             # Pass "mask": null to not create mask
             "mask": {

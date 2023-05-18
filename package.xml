@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>stretch-web-interface</name>
+  <name>stretch_web_interface_react</name>
   <version>0.0.0</version>
   <description>The stretch-web-interface package</description>
 
