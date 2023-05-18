@@ -1,3 +1,4 @@
+import "operator/css/customizebutton.css"
 
 type CustomizeButtonProps = {
     /** If the interface is in customization mode */
@@ -9,15 +10,13 @@ type CustomizeButtonProps = {
 
 /** Button to toggle customization mode. */
 export const CustomizeButton = (props: CustomizeButtonProps) => {
-    const icon = props.customizing ? "check_circle" : "build_circle";
+    const icon = props.customizing ? "check" : "build";
+    const text = props.customizing ? "Done" : "Customize";
     return (
-        <span
-            className="material-icons"
-            style={{ fontSize: "36px", cursor: "pointer" }}
-            onClick={props.onClick}
-        >
-            {icon}
-        </span>
+        <button onClick={props.onClick} id="customize-button">
+            <span className="material-icons">{icon}</span>
+            {text}
+        </button>
     )
 }
 // Uses icons from https://fonts.google.com/icons

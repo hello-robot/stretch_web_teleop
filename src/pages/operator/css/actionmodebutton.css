@@ -1,7 +1,5 @@
 
 #action-mode-button {
-    border-radius: var(--radius);
-    border: var(--btn-brdr);
     padding: var(--btn-padding);
     background-color: var(--btn-bg-color);
     display: flex;
@@ -33,11 +31,11 @@
 
 
 .action-mode-option:first-of-type {
-    border-radius: var(--radius) var(--radius) 0 0 ;
+    border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0 ;
 }
 
 .action-mode-option:last-of-type {
-    border-radius: 0 0 var(--radius) var(--radius) ;
+    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;
 }
 
 .action-mode-option:hover {

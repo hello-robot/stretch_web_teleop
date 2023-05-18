@@ -5,7 +5,7 @@
 }
 
 #operator-header {
-    background-color: hsl(200, 10%, 86%);
+    background-color: var(--gray-bg);
     height: 3rem;
     width: 100%;
     box-sizing: border-box;

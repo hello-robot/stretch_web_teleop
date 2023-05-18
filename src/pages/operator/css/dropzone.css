@@ -1,10 +1,13 @@
 .drop-zone {
     background-color: hsl(0, 0%, 83%);
-    opacity: 80%;
+    opacity: 100%;
     flex: 0 0 2rem;
     margin: 1rem 0.5rem;
     cursor: pointer;
     text-align: center;
+    transition-property: opacity, flex, width;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-out;
 }
 
 /* Drop zone in layout or tab content*/
@@ -18,9 +21,7 @@
 /* Dropzone is a tab in a tabs component header */
 .drop-zone.tab {
     margin: 0;
-    width: 3rem;
-    border-top-right-radius: 0.2em;
-    border-top-left-radius: 0.2em;
+    width: 5rem;
 }
 
 /* Dropzone is an overlay in a video stream*/
@@ -31,7 +32,11 @@
 }
 
 .drop-zone[hidden] {
-    display: none;
+    flex: 0;
+    width: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .drop-zone:hover {

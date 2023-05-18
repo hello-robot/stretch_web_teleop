@@ -1,0 +1,12 @@
+#customize-button {
+    padding: var(--btn-padding);
+    background-color: var(--btn-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    width: 10rem;
+}
+
+#customize-button span {
+    margin-right: 2rem;
+}

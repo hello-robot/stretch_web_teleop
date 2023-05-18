@@ -5,36 +5,49 @@
     flex-direction: column;
     flex: 1 1 0;
     margin: 0 0.5rem;
+    box-shadow: 3px 3px 2px var(--shadow-color);
+
+    --radius: .3rem;
+    border-radius: var(--radius) var(--radius) 0px 0px;
+
 }
 
 .tabs-content {
     /* background-color: green; */
-    border: 0.5rem solid hsl(200, 90%, 70%);
+    border: 3px solid hsl(200, 90%, 70%);
     flex: 1 1 0;
     background-color: var(--background-color);
+    /* box-shadow: 3px 2px 3px 3px var(--shadow-color); */
+    z-index: 2;
 }
 
-.tab-button.selected {
-    box-shadow: 0 0 1rem 1rem #0ff;
-}
+/* Header *********************************************************************/
 
 .tabs-header {
-    display: inline-block;
+    display: flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+    border-radius: var(--radius) var(--radius) 0px 0px;
 }
 
+/* Apply to all the tabs in the header */
+.tabs-header>* {
+    flex: 1 0 auto;
+    background-color: hsl(200, 20%, 80%);
+    border-radius: var(--radius) var(--radius) 0px 0px;
+}
+
+/* Format tabs with icons */
 .tabs-header>.material-icons {
-    /* Handle different size icon than text */
     vertical-align: bottom;
-    padding-top: 2px;
+    padding-top: 3px;
     padding-bottom: 3px;
 }
 
 .tab-button {
     border: none;
-    background-color: hsl(200, 20%, 80%);
     font-size: 1.5rem;
-    border-top-right-radius: .2em;
-    border-top-left-radius: .2em;
+    z-index: 0;
 }
 
 .tab-button:hover {
@@ -43,22 +56,33 @@
 
 .tab-button.active {
     background-color: hsl(200, 90%, 70%);
+    z-index: 2;
+    box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
+}
+
+
+.tab-button.selected {
+    box-shadow: 0 0 1rem 1rem #0ff;
 }
 
 .tabs-content.selected {
     box-shadow: 0 0 1rem 1rem #0ff;;
 }
 
+.add-tab:hover {
+    background-color: var(--btn-green);
+}
+
 /* Popup for adding a new tab *************************************************/
 #new-tab-modal {
     position: fixed;
-    border-radius: var(--radius);
-    background-color: lightgray;
+    border-radius: var(--btn-brdr-radius);
+    background-color: var(--background-color);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 1rem;
-    z-index: 3;
+    z-index: 4;
     height: 20rem;
     width: 30rem;
     font-size: 24px;
@@ -67,7 +91,6 @@
     align-items: center;
     justify-content: space-between;
     opacity: 100%;
-
 }
 
 #new-tab-modal label {
@@ -83,19 +106,11 @@
     width: 100%;
 }
 
-#new-tab-modal #bottom-buttons #accept{
-    background-color: hsl(115, 100%, 83%);
-}
-
-#new-tab-modal #bottom-buttons #cancel{
-    background-color: hsl(0, 100%, 83%);
-}
-
 #new-tab-modal #bottom-buttons button {
     width: 45%;
     border: none;
     padding: .5em;
-    border-radius: var(--radius);
+    border-radius: var(--btn-brdr-radius);
 }
 
 /* Dark background behind popup */
@@ -107,4 +122,5 @@
     width: 100%;
     background-color: black;
     opacity: 40%;
+    z-index: 3;
 }

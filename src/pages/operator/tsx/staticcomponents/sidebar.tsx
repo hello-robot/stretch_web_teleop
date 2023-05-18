@@ -12,8 +12,8 @@ type SidebarProps = {
 
 /** Popup on the right side of the screen while in customization mode. */
 export const Sidebar = (props: SidebarProps) => {
-    const deleteActive = props.activeDef != undefined;
-    const deleteTooltip = deleteActive ? "Delete element" : "You must select an element before you can delete it"
+    const deleteDisabled = props.activeDef === undefined;
+    const deleteTooltip = deleteDisabled ? "You must select an element before you can delete it" : "";
     const selectedDescription = props.activeDef ? componentDescription(props.activeDef) : "none";
     return (
         <div id="sidebar" hidden={props.hidden}>
@@ -29,9 +29,10 @@ export const Sidebar = (props: SidebarProps) => {
             </div>
             <div id="sidebar-footer">
                 <button id="delete-button"
+                    disabled={deleteDisabled}
                     title={deleteTooltip}
-                    className={className("material-icons", { active: deleteActive })}
-                    onClick={deleteActive ? () => props.onDelete() : undefined}
+                    className={className("material-icons btn-red", {})}
+                    onClick={deleteDisabled ? undefined : () => props.onDelete() }
                 >
                     delete_forever
                 </button>
@@ -112,10 +113,11 @@ type ToggleButtonProps = {
 
 const ToggleButton = (props: ToggleButtonProps) => {
     const text = props.on ? "on" : "off";
+    const colorClass = props.on ? "btn-green" : "btn-red";
     return (
         <div className="options-element">
             <button
-                className={className("toggle-button", { on: props.on })}
+                className={"toggle-button " + colorClass}
                 onClick={props.onClick}
             >
                 {text}

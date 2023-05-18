@@ -36,7 +36,6 @@
     filter: brightness(0.6);
 }
 
-.video-canvas.selected {
+.video-canvas.customizing.selected {
     filter: none;
-    box-shadow: 0 0 1rem 1rem #0ff;;
 }

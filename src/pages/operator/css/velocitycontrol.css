@@ -23,11 +23,11 @@
 }
 
 .velocity-label:first-of-type {
-    border-radius: var(--radius) 0 0 var(--radius);
+    border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }
 
 .velocity-label:last-of-type {
-    border-radius: 0 var(--radius) var(--radius) 0;
+    border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
 }
 
 .velocity-radio-button:checked + label{
