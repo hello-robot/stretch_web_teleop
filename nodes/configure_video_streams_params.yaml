@@ -1,0 +1,74 @@
+{
+    # Images published to /navigation_camera/image_raw
+    # Image size is 768 x 1024
+    "overhead": {
+        "default": {
+            # The mask contain params to make a circular mask over the image
+            # Pass "mask": null to not create mask
+            "mask": {
+                "width": 768,
+                "height": 768,
+                "radius": null,
+                "center": null # Pass "center": {"x": __, "y": __} to define center
+            },
+            # The crop contain params to crop the image
+            # x_max - x_min = mask_width and y_max - y_min = mask_height
+            # Pass "crop": null to not crop image
+            "crop": {
+                "x_min": 0,
+                "x_max": 768,
+                "y_min": 128,
+                "y_max": 896
+            },
+            # Number of degress to rotate video stream clockwise
+            # Pass "rotate": null to not rotate
+            "rotate": 'ROTATE_90_CLOCKWISE'
+        },
+        "manip": {
+            "mask": {
+                "width": 500,
+                "height": 500,
+                "radius": null,
+                "center": null
+            },
+            "crop": {
+                "x_min": 75,
+                "x_max": 575,
+                "y_min": 380,
+                "y_max": 880
+            },
+            "rotate": null
+        }
+    },
+    "realsense": {
+        "default": {
+            "mask": null,
+            "crop": null,
+            "rotate": 'ROTATE_90_CLOCKWISE'
+        }
+    },
+    # Images published to /gripper_camera/image_raw
+    # Image size is 768 x 1024
+    "gripper": {
+        "default": {
+            # The mask contain params to make a circular mask over the image
+            # Pass "mask": null to not create mask
+            "mask": {
+                "width": 768,
+                "height": 768,
+                "radius": null,
+                "center": null
+            },
+            # The crop contain params to crop the image
+            # x_max - x_min = mask_width and y_max - y_min = mask_height
+            # Pass "crop": null to not crop image
+            "crop": {
+                "x_min": 0,
+                "x_max": 768,
+                "y_min": 128,
+                "y_max": 896
+            },
+            "rotate": null
+        },
+    }
+}

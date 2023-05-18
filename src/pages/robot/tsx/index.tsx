@@ -26,7 +26,7 @@ robot.connect().then(() => {
     realsenseStream.start()
 
     robot.subscribeToVideo({
-        topicName: "/gripper_camera/image_raw/compressed",
+        topicName: "/gripper_camera/image_raw/cropped/compressed",
         callback: gripperStream.updateImage
     })
     gripperStream.start()

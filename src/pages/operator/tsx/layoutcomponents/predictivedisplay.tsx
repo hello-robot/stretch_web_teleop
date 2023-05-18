@@ -167,7 +167,7 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
             <path d={path} />
         );
         this.setState({ trajectory })
-        return [0, -1]  // TODO: map rotate click to angular velocity
+        return [0, rotateLeft ? 1 : -1]  // TODO: map rotate click to angular velocity
     }
 
     /**
