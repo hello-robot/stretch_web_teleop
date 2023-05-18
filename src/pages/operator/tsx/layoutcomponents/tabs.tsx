@@ -165,7 +165,7 @@ export const Tabs = (props: CustomizableComponentProps) => {
                     // In customization mode show an extra plus to add a new tab
                     props.sharedState.customizing ?
                         <button
-                            className="tab-button material-icons"
+                            className="tab-button add-tab material-icons"
                             onClick={() => setShowTabModal(true)}
                         >
                             add_circle
@@ -210,8 +210,8 @@ const NewTabModal = (props: {
                     placeholder="label for the new tab"
                 />
                 <div id="bottom-buttons">
-                    <button id="cancel" onClick={() => props.setShow(false)}>Cancel</button>
-                    <button id="accept" onClick={onAccept} style={{ float: "right" }}>Accept</button>
+                    <button className="btn-red" onClick={() => props.setShow(false)}>Cancel</button>
+                    <button className="btn-green" onClick={onAccept} style={{ float: "right" }}>Accept</button>
                 </div>
             </div>
             <div onClick={() => props.setShow(false)} id="popup-background"></div>

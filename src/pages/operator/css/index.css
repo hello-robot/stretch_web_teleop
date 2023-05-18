@@ -3,9 +3,18 @@
     --btn-bg-color-hover: hsl(200, 70%, 65%);
     --btn-bg-color-click: hsl(200, 80%, 50%);
     --btn-brdr: 1px solid var(--btn-bg-color-click);
-    --radius: 0.7rem;
+    --btn-brdr-radius: 0.2rem;
     --btn-padding: .5em 1em;
-    --background-color: rgb(248, 248, 248);
+
+    --selected-color: rgb(111, 248, 255);
+    --btn-blue: hsl(200, 60%, 75%);
+    --btn-green: rgb(129, 218, 129);
+    --btn-red: hsl(0, 70%, 70%);
+
+    --shadow-color: rgba(112, 112, 112, 0.196);
+
+    --background-color: hsl(0, 0%, 98%);
+    --gray-bg: hsl(0, 0%, 88%);
 }
 
 * {
@@ -24,12 +33,17 @@ body {
     background-color: var(--background-color);
 }
 
+button {
+    border: none;
+    border-radius: var(--btn-brdr-radius);
+}
+
 button:hover {
     cursor: pointer;
 }
 
-button {
-    border: none;
+button .material-icons {
+    margin: -0.25rem;
 }
 
 html,
@@ -37,4 +51,52 @@ body,
 #root {
     height: 100%;
     margin: 0;
+}
+
+/* In customization mode add hidden shadow after each element, to be shown when
+the element is selected */
+.customizing::after {
+    content: "";
+    position: absolute;
+
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    left: 0;
+    top: 0;
+
+    box-shadow: 0 0 1rem 1rem var(--selected-color);
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+}
+
+.customizing.selected::after {
+    opacity: 1;
+}
+
+/* Button colors **************************************************************/
+
+.btn-green {
+    background-color: var(--btn-green);
+}
+
+.btn-red {
+    background-color: var(--btn-red);
+}
+
+.btn-blue {
+    background-color: var(--btn-blue);
+}
+
+.btn-green:hover {
+    background-color: color-mix(in srgb, var(--btn-green) 95%, black);
+}
+
+.btn-red:hover {
+    background-color: color-mix(in srgb, var(--btn-red) 95%, black);
+}
+
+.btn-blue:hover {
+    background-color: color-mix(in srgb, var(--btn-blue) 95%, black);
 }

@@ -1,51 +1,56 @@
 #sidebar {
     flex: 0 0 20rem;
     height: 100%;
-    background-color: lightgray;
+    background-color: var(--gray-bg);
     display: grid;
     grid-template-rows: 5rem auto 7rem;
+    transition: flex 0.5s ease-out;
+    /* Darken the gray background color from index.css */
+    --header-bg: color-mix(in srgb, var(--gray-bg) 90%, black);
 }
 
 #sidebar[hidden] {
-    display: none;
+    flex: 0;
 }
 
 #sidebar-header {
-    background-color: gray;
+    background-color: var(--header-bg);
     padding: 1rem;
     display: flex;
     align-items: center;
     font-size: 18px;
+    white-space: nowrap;
 }
 
 #sidebar-body {
-    /* background-color: teal; */
 }
 
+/* Footer *********************************************************************/
+
 #sidebar-footer {
-    background-color: gray;
+    background-color: var(--header-bg);
 }
 
 #delete-button {
     font-size: 3rem;
     padding: 1rem;
-    border-radius: var(--radius);
-    background-color: lightgray;
-    border: none;
     /* Center it */
     display: block;
     width: 90%;
-    margin: 0.5rem auto;
-    cursor: help;
+    margin: 0.8rem auto;
 }
 
 #delete-button.active {
-    background-color: rgb(255, 157, 157);
+    background-color: var(--btn-lightred);
     cursor: pointer;
 }
 
 #delete-button.active:hover {
-    background-color: red;
+    background-color: var(--btn-red);
+}
+
+#delete-button:disabled {
+    background-color: lightgray;
 }
 
 /* Options ********************************************************************/
@@ -56,12 +61,13 @@
 }
 
 .toggle-button {
-    background-color: rgb(255, 157, 157);
+    background-color: var(--btn-lightred);
     margin-right: 1rem;
-    width: 4rem;
-    height: 3rem;
+    width: 7rem;
+    height: 5rem;
+    border-radius: var(--btn-brdr-radius);
 }
 
 .toggle-button.on {
-    background-color: rgb(162, 255, 157);
+    background-color: var(--btn-lightgreen);
 }

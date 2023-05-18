@@ -112,7 +112,11 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
 
     return (
         <div className='video-stream'>
-            <div className="video-button-pad" style={streamStyle} onClick={handleClick}>
+            <div
+                className={className("video-button-pad", { customizing, selected })}
+                style={streamStyle}
+                onClick={handleClick}
+            >
                 {props.buttonPad ? props.buttonPad :
                     <DropZone
                         path={props.path + "-0"}
@@ -121,9 +125,7 @@ export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
                     />}
             </div>
 
-            <video ref={videoRef} autoPlay muted={true} className={videoClass}
-                
-            />
+            <video ref={videoRef} autoPlay muted={true} className={videoClass} />
         </div>
     );
 }

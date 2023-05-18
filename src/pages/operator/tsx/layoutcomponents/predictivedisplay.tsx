@@ -224,21 +224,21 @@ export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, P
         }
     }
 
-    handleClick(e) {
+    handleClick() {
         this.holding = true;
         if (this.props.functions.onClick) {
             this.props.functions.onClick(this.length, this.angle);
         }
     }
 
-    handleRelease(e) {
+    handleRelease() {
         this.holding = false;
         if (this.props.functions.onRelease) {
             this.props.functions.onRelease()
         }
     }
 
-    handleMove(e) {
+    handleMove(e: React.MouseEvent<SVGSVGElement>) {
         this.drawTrajectory(e);
         if (this.holding && this.props.functions.onMove) {
             this.props.functions.onMove(this.length, this.angle);
