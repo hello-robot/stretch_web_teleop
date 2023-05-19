@@ -6,8 +6,12 @@ import numpy as np
 import cv2
 import yaml
 import sys
+import ros_numpy 
+import pcl 
+import tf2_ros 
 
-from sensor_msgs.msg import Image, CameraInfo, CompressedImage
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2
 from cv_bridge import CvBridge
 from stretch_web_interface_react.srv import ImageView
 
@@ -16,6 +20,9 @@ class ConfigureVideoStreams:
         with open(params_file, 'r') as params:
             self.image_params = yaml.safe_load(params)
 
+        self.tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(12))
+        tf2_ros.TransformListener(self.tf_buffer)
+        
         # Loaded params for each video stream
         self.overhead_params = self.image_params["overhead"] if "overhead" in self.image_params else None
         self.realsense_params = self.image_params["realsense"] if "realsense" in self.image_params else None
@@ -40,9 +47,10 @@ class ConfigureVideoStreams:
         self.camera_rgb_subscriber = message_filters.Subscriber(f'/camera/color/image_raw', Image)
         self.overhead_camera_rgb_subscriber = message_filters.Subscriber(f'/navigation_camera/image_raw', Image)
         self.gripper_camera_rgb_subscriber = message_filters.Subscriber(f'/gripper_camera/image_raw', Image)
+        self.point_cloud_subscriber = message_filters.Subscriber("/camera/depth/color/points", PointCloud2)
 
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
-            self.camera_rgb_subscriber, self.overhead_camera_rgb_subscriber, self.gripper_camera_rgb_subscriber], 10, 1)
+            self.camera_rgb_subscriber, self.overhead_camera_rgb_subscriber, self.gripper_camera_rgb_subscriber, self.point_cloud_subscriber ], 10, 1)
         self.camera_synchronizer.registerCallback(self.camera_callback)
 
         self.image_view_service = rospy.Service('image_view', ImageView, self.image_view_callback)
@@ -51,6 +59,34 @@ class ConfigureVideoStreams:
         self.realsense_image_view = 'default'
         self.gripper_image_view = 'default'
 
+    def pc_callback(self, data, img):
+        try:
+            transform = self.tf_buffer.lookup_transform('base_link', 'camera_color_optical_frame', 
+                            rospy.Time(0),
+                            rospy.Duration(5.0))
+        except tf2_ros.TransformException as e:
+            print(e)
+            return img
+        
+        width = data.width
+        cloud_out = do_transform_cloud(data, transform)
+        pc_np = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(cloud_out, remove_nans=False)
+        pc_np = np.nan_to_num(pc_np)
+        dist = np.sqrt(pc_np[:,0]*pc_np[:,0] + pc_np[:,1]*pc_np[:,1])
+        indices = np.where((dist > 0.5) & (dist < 2))[0]
+        x_idx = (indices / width).astype(int)
+        y_idx = (indices % width)
+        if img is not None:
+            img[y_idx, x_idx, 0] = 255
+            img[y_idx, x_idx, 1] = 191
+            img[y_idx, x_idx, 2] = 0
+            img[y_idx, x_idx, 3] = 0
+        return img
+        
+        # pc_pcl = pcl.PointCloud(np.array(pc_np, dtype=np.float32))
+        # newpc = ros_numpy.point_cloud2.get_xyz_points(data.data)
+        # print(data.width, x_idx.shape, y_idx.shape)
+        
     def image_view_callback(self, req):
         if req.camera not in self.image_view: 
             raise ValueError("ImageView.srv camera must be overhead, realsense or gripper") 
@@ -122,10 +158,12 @@ class ConfigureVideoStreams:
                 rgb_image = self.rotate_image(rgb_image, params['rotate'])
         return rgb_image
 
-    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image):
+    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image, pc_msg):
         for image_config_name in self.realsense_params:
-            self.realsense_images[image_config_name] = \
-                self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
+            img = self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+            img = self.pc_callback(pc_msg, img)
+            self.realsense_images[image_config_name] = img
         for image_config_name in self.overhead_params:
             self.overhead_images[image_config_name] = \
                 self.configure_images(ros_overhead_rgb_image, self.overhead_params[image_config_name])

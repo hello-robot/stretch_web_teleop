@@ -55,7 +55,7 @@
   <build_export_depend>tf2_web_republisher</build_export_depend>
   <exec_depend>rosbridge_server</exec_depend>
   <exec_depend>tf2_web_republisher</exec_depend>
-  <exec_depend>web_video_server</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>compressed_image_transport</exec_depend>
 
