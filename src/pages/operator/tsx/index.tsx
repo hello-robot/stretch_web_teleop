@@ -51,8 +51,11 @@ function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
         return
     }
     switch (message.type) {
-        case 'inJointLimits':
-            remoteRobot.sensors.setInJointLimits(message.jointsInLimits);
+        case 'validJointState':
+            remoteRobot.sensors.checkValidJointState(
+                message.jointsInLimits, 
+                message.jointsInCollision
+            );
             break;
     }
 }
@@ -66,11 +69,12 @@ function configureRobot() {
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
-    console.log(remoteRobot.sensors)
-    root.render(<Operator 
-        setJointLimitsCallback={remoteRobot.sensors.setOperatorCallback} 
-        remoteStreams={allRemoteStreams} 
-    />);
+    root.render(
+        <Operator 
+            setJointLimitsCallback={remoteRobot.sensors.setOperatorCallback} 
+            remoteStreams={allRemoteStreams} 
+        />
+    );
 }
 
 function disconnectFromRobot() {

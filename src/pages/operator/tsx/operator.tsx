@@ -3,21 +3,19 @@ import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/staticcomp
 import { LayoutArea } from "./layoutarea";
 import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
 import "operator/css/operator.css"
-import { ButtonFunctionProvider } from "./utils/functionprovider";
-import { UserInteractionFunction } from "./layoutcomponents/buttonpads";
 import { CustomizeButton } from "./staticcomponents/customizebutton";
 import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
-import { RemoteStream, ValidJoints } from "shared/util";
-import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
-import { btnFnProvider } from ".";
+import { RemoteStream, AllJoints, ValidJointStateDict } from "shared/util";
+import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers"; 
+import { btnFnProvider } from "./index";
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>
-    setJointLimitsCallback: (callbackfn: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void) => void
+    setJointLimitsCallback: (callbackfn: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) => void
 }) => {
     /** Speed of the robot. */
     let velocityScale = DEFAULT_VELOCITY_SCALE;
@@ -26,13 +24,10 @@ export const Operator = (props: {
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
-
+    const [inJointLimits, setInJointLimits] = React.useState<ValidJointStateDict | undefined>();
+    const [inCollision, setInCollision] = React.useState<ValidJointStateDict | undefined>();
+    
     let remoteStreams = props.remoteStreams
-
-    // let btnFnProvider = new ButtonFunctionProvider({
-    //     actionMode: actionMode,
-    //     velocityScale: velocityScale,
-    // })
 
     /** Rerenders the layout */
     function updateLayout() {
@@ -100,18 +95,22 @@ export const Operator = (props: {
         customizing: customizing,
         onSelect: handleSelect,
         remoteStreams: remoteStreams,
-        // functionProvider: (bf: UserInteractionFunction) => btnFnProvider.provideFunctions(bf),
         activePath: activePath,
         dropZoneState: {
             onDrop: handleDrop,
             activeDef: activeDef
-        }
+        },
+        inJointLimits: inJointLimits,
+        inCollision: inCollision
     }
 
-    const updateJointLimitsState = (inJointLimits: {[key in ValidJoints]?: [boolean, boolean]}) => {
-        console.log(inJointLimits)
+    const updateJointLimitsandEffortsState = (
+        inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => 
+    {
+        setInJointLimits(inJointLimits)
+        setInCollision(inCollision)
     }
-    props.setJointLimitsCallback(updateJointLimitsState)
+    props.setJointLimitsCallback(updateJointLimitsandEffortsState)
 
     return (
         <div id="operator">

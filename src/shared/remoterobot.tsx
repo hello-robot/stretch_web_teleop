@@ -1,6 +1,6 @@
 import React from 'react'
 import { cmd } from 'shared/commands';
-import { ValidJoints, SensorData, RobotPose } from 'shared/util';
+import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void; 
 
@@ -59,8 +59,9 @@ export class RemoteRobot extends React.Component {
 class RobotSensors extends React.Component {
     private sensors: { [sensorName: string]: SensorData }
     private jointState?: RobotPose;
-    private inJointLimits?: { [key in ValidJoints]?: [boolean, boolean] }
-    private operaterCallback?: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void
+    private inJointLimits?: ValidJointStateDict
+    private inCollision?: ValidJointStateDict
+    private operaterCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void
 
     constructor(props: {}) {
         super(props)
@@ -76,20 +77,26 @@ class RobotSensors extends React.Component {
         this.setOperatorCallback = this.setOperatorCallback.bind(this)
     }
 
-    setInJointLimits(values: { [key in ValidJoints]?: [boolean, boolean] }) {
-        let isTheSame = this.inJointLimits && Object.keys(values).every((key, index) => 
-            values[key as ValidJoints]![0] == this.inJointLimits![key as ValidJoints]![0] &&
-            values[key as ValidJoints]![1] == this.inJointLimits![key as ValidJoints]![1]
-        )
-        this.inJointLimits = values;
+    checkValidJointState(jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
+        let isTheSame = 
+            this.inJointLimits && 
+            Object.keys(jointValues).every((key, index) => 
+                jointValues[key as ValidJoints]![0] == this.inJointLimits![key as ValidJoints]![0] &&
+                jointValues[key as ValidJoints]![1] == this.inJointLimits![key as ValidJoints]![1]
+            ) &&
+            this.inCollision &&
+            Object.keys(effortValues).every((key, index) => 
+                effortValues[key as ValidJoints]![0] == this.inCollision![key as ValidJoints]![0] &&
+                effortValues[key as ValidJoints]![1] == this.inCollision![key as ValidJoints]![1]
+            )
+        this.inJointLimits = jointValues;
+        this.inCollision = effortValues;
         if (!isTheSame && this.operaterCallback) {
-            this.operaterCallback(this.inJointLimits)
+            this.operaterCallback(this.inJointLimits, this.inCollision)
         }
     }
 
-    setOperatorCallback(operaterCallback: (inJointLimits: { [key in ValidJoints]?: [boolean, boolean] }) => void) {
-        console.log(this)
-        console.log(this.operaterCallback)
+    setOperatorCallback(operaterCallback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
         this.operaterCallback = operaterCallback;
     }
 }

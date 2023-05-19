@@ -1,9 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot, inJointLimits } from 'robot/tsx/robot'
+import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJoints, ROSJointState } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/layoutcomponents/videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
@@ -67,15 +67,19 @@ function handleSessionStart() {
 }
 
 function forwardJointStates(jointState: ROSJointState) {
-    let values: { [key in ValidJoints]?: [boolean, boolean] } = {}
+    let jointValues: ValidJointStateDict = {}
+    let effortValues: ValidJointStateDict = {}
     jointState.name.forEach((name?: ValidJoints) => {
         let inLimits = inJointLimits({ jointStateMessage: jointState, jointName: name! });
-        if (inLimits) values[name!] = inLimits;
+        let collision = inCollision({ jointStateMessage: jointState, jointName: name! });
+        if (inLimits) jointValues[name!] = inLimits;
+        if (collision) effortValues[name!] = collision;
     })
 
     connection.sendData({
-        type: "inJointLimits",
-        jointsInLimits: values
+        type: "validJointState",
+        jointsInLimits: jointValues,
+        jointsInCollision: effortValues
     });
 }
 

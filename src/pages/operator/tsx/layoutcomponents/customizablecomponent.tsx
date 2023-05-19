@@ -3,7 +3,7 @@ import { DropZoneState } from "./dropzone";
 import { FunctionProvider } from "../utils/functionprovider";
 import { renderButtonPad, renderVideoStream } from "../render";
 import { Tabs } from "./tabs";
-import { RemoteStream } from "shared/util";
+import { RemoteStream, ValidJointStateDict } from "shared/util";
 
 /** State required for all elements */
 export type SharedState = {
@@ -12,12 +12,14 @@ export type SharedState = {
     onSelect: (def: ComponentDefinition, path?: string) => void,
     /** Remote robot video streams */
     remoteStreams: Map<string, RemoteStream>
-    /** Gives function based on user input type */
-    // functionProvider: FunctionProvider,
     /** State required for all dropzones */
     dropZoneState: DropZoneState,
     /** Path to the active component */
     activePath?: string,
+    /** Whether joints are in limits */
+    inJointLimits?: ValidJointStateDict
+    /** Whether joints are in collision */
+    inCollision?: ValidJointStateDict
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

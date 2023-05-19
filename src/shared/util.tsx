@@ -10,7 +10,9 @@ export type RemoteStream = {
     track: MediaStreamTrack
 }
 
-export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base", 'gripper_aperture'];
+export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
+
+export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }
 
 export interface ROSJointState extends Message {
     name: [ValidJoints?],
@@ -35,7 +37,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = SensorMessage | JointLimitsMessage | StopMessage | cmd;
+export type WebRTCMessage = SensorMessage | ValidJointStateMessage | StopMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -60,9 +62,10 @@ export type Sensor = {
 
 export type RobotPose = { [key in ValidJoints]?: number }
 
-export interface JointLimitsMessage {
-    type: "inJointLimits",
+export interface ValidJointStateMessage {
+    type: "validJointState",
     jointsInLimits: { [key in ValidJoints]? : [boolean, boolean] }
+    jointsInCollision: { [key in ValidJoints]? : [boolean, boolean] }
 }
 
 export type GoalMessage =  NavGoalMessage | PoseGoalMessage;

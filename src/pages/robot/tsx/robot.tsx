@@ -15,7 +15,7 @@ export class Robot extends React.Component {
     cmdVelTopic?: ROSLIB.Topic;
     switchToNavigationService?: ROSLIB.Service;
     switchToPositionService?: ROSLIB.Service;
-
+    
     constructor(props: {jointStateCallback: (jointState: ROSJointState) => void}) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -140,7 +140,7 @@ export class Robot extends React.Component {
         this.cmdVelTopic.publish(twist)
     }
 
-    makeIncrementalMoveGoal(jointName: ValidJoints, jointValueInc: number): ROSLIB.Goal {
+    makeIncrementalMoveGoal(jointName: ValidJoints, jointValueInc: number): ROSLIB.Goal | undefined {
         if (!this.jointState) throw 'jointState is undefined';
         let newJointValue = GetJointValue({ jointStateMessage: this.jointState, jointName: jointName })
         // Paper over Hello's fake joints
@@ -148,17 +148,22 @@ export class Robot extends React.Component {
             // These imaginary joints are floating, always have 0 as their reference
             newJointValue = 0
         } 
+
+        let collision = inCollision({ jointStateMessage: this.jointState, jointName: jointName })
+        // Negative joint increment is for lower/retract/rotate out
+        // Positive joint increment is for lift/extend/rotate in
+        let index = jointValueInc < 0 ? 0 : 1 
+        // If request to move the joint in the direction of collision, cancel movement
+        if (collision[index]) return;
+
         newJointValue = newJointValue + jointValueInc
 
         // Make sure new joint value is within limits
         if (jointName in JOINT_LIMITS) {
-            let minJointVal: number = JOINT_LIMITS[jointName]![0];
-            let maxJointVal: number = JOINT_LIMITS[jointName]![1]
-            if (newJointValue > maxJointVal) {
-                newJointValue = maxJointVal;
-            } else if (newJointValue < minJointVal) {
-                newJointValue = minJointVal;
-            }
+            let inLimits = inJointLimits({ jointStateMessage: this.jointState, jointName: jointName })
+            if (!inLimits) throw 'invalid joint name'
+            if (!inLimits[0]) newJointValue = JOINT_LIMITS[jointName]![0]
+            if (!inLimits[1]) newJointValue = JOINT_LIMITS[jointName]![1]
         }
 
         let pose = { [jointName]: newJointValue }
@@ -213,6 +218,10 @@ export class Robot extends React.Component {
         // this.moveBaseClient?.cancel();
         this.trajectoryClient?.cancel();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
+        if (!this.poseGoal) {
+            console.log("Joint in collision!")
+            return;
+        }
         this.poseGoal.send()
         // this.affirmExecution()
     }
@@ -233,7 +242,6 @@ export class Robot extends React.Component {
         }
     }
 }
-
 
 export const GetJointValue = (props: { jointStateMessage: ROSJointState, jointName: ValidJoints }): number => {
     // Paper over Hello's fake joint implementation
@@ -257,7 +265,19 @@ export function inJointLimits(props: { jointStateMessage: ROSJointState, jointNa
 
     var eps = 0.03
     let inLimits: [boolean, boolean] = [true, true]
-    inLimits[0] = jointValue - eps >= jointLimits[0]
-    inLimits[1] = jointValue + eps <= jointLimits[1]
+    inLimits[0] = jointValue - eps >= jointLimits[0] // Lower joint limit
+    inLimits[1] = jointValue + eps <= jointLimits[1] // Upper joint limit
     return inLimits
+}
+
+export function inCollision(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
+    let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
+    let inCollision: [boolean, boolean] = [false, false]
+
+    // In collision if joint is applying more than 50% effort when moving downward/inward/backward
+    inCollision[0] = props.jointStateMessage.effort[jointIndex] < -50
+    // In collision if joint is applying more than 50% effort when moving upward/outward/forward
+    inCollision[1] = props.jointStateMessage.effort[jointIndex] > 50
+
+    return inCollision
 }
