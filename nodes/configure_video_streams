@@ -9,9 +9,10 @@ import sys
 import ros_numpy 
 import pcl 
 import tf2_ros 
+import compressed_image_transport 
 
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
-from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2
+from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
 from cv_bridge import CvBridge
 from stretch_web_interface_react.srv import ImageView
 
@@ -33,13 +34,14 @@ class ConfigureVideoStreams:
         self.realsense_images = {}
         self.gripper_images = {}
 
-        self.loop_rate = rospy.Rate(20)
+        self.loop_rate = rospy.Rate(1)
 
         self.realsense_rgb_image = None
         self.overhead_camera_rgb_image = None
         self.gripper_camera_rgb_image = None
         self.cv_bridge = CvBridge()
 
+        # self.publisher = rospy.Publisher('/camera/color/image_raw/rotated', Image, queue_size=1)
         self.publisher_realsense_cmp = rospy.Publisher('/camera/color/image_raw/rotated/compressed', CompressedImage, queue_size=10)
         self.publisher_overhead_cmp = rospy.Publisher('/navigation_camera/image_raw/rotated/compressed', CompressedImage, queue_size=10)
         self.publisher_gripper_cmp = rospy.Publisher('/gripper_camera/image_raw/cropped/compressed', CompressedImage, queue_size=10)
@@ -47,7 +49,9 @@ class ConfigureVideoStreams:
         self.camera_rgb_subscriber = message_filters.Subscriber(f'/camera/color/image_raw', Image)
         self.overhead_camera_rgb_subscriber = message_filters.Subscriber(f'/navigation_camera/image_raw', Image)
         self.gripper_camera_rgb_subscriber = message_filters.Subscriber(f'/gripper_camera/image_raw', Image)
-        self.point_cloud_subscriber = message_filters.Subscriber("/camera/depth/color/points", PointCloud2)
+        self.point_cloud_subscriber = message_filters.Subscriber("/voxel_grid/output", PointCloud2)
+        self.camera_info_subscriber = rospy.Subscriber("/camera/aligned_depth_to_color/camera_info", CameraInfo, callback=self.save_proj_matrix)
+        # self.point_cloud_subscriber = message_filters.Subscriber("/camera/depth_registered/points", PointCloud2)
 
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, self.overhead_camera_rgb_subscriber, self.gripper_camera_rgb_subscriber, self.point_cloud_subscriber ], 10, 1)
@@ -59,28 +63,47 @@ class ConfigureVideoStreams:
         self.realsense_image_view = 'default'
         self.gripper_image_view = 'default'
 
-    def pc_callback(self, data, img):
+    def save_proj_matrix(self, msg):
+        self.P =  np.array(msg.P).reshape(3,4)
+        # print(msg.height, msg.width)
+
+    def pc_callback(self, msg, img):
         try:
             transform = self.tf_buffer.lookup_transform('base_link', 'camera_color_optical_frame', 
-                            rospy.Time(0),
-                            rospy.Duration(5.0))
+                            rospy.Time(0))
         except tf2_ros.TransformException as e:
             print(e)
             return img
         
-        width = data.width
-        cloud_out = do_transform_cloud(data, transform)
-        pc_np = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(cloud_out, remove_nans=False)
-        pc_np = np.nan_to_num(pc_np)
-        dist = np.sqrt(pc_np[:,0]*pc_np[:,0] + pc_np[:,1]*pc_np[:,1])
-        indices = np.where((dist > 0.5) & (dist < 2))[0]
-        x_idx = (indices / width).astype(int)
-        y_idx = (indices % width)
+        pc_in_base_link_msg = do_transform_cloud(msg, transform)
+        pc_in_base_link = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
+        dist = np.sqrt(np.power(pc_in_base_link[:,0], 2) + np.power(pc_in_base_link[:,1], 2))
+        filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
+
+        # N x 3
+        pc_in_camera = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
+        pts_in_range = pc_in_camera[filtered_indices, :]
+        pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0],1))))
+
+        # 3 x N
+        coords = np.matmul(self.P, np.transpose(pts_in_range))
+        x_idx = (coords[0,:]/coords[2,:]).astype(int)
+        y_idx = (coords[1,:]/coords[2,:]).astype(int)
+        # print(np.min(x_idx), np.max(x_idx), np.min(y_idx), np.max(y_idx))
+        # pc_np = np.nan_to_num(pc_np)
+        # dist = np.sqrt(pc_np[:,0]*pc_np[:,0] + pc_np[:,1]*pc_np[:,1])
+        # indices = np.where((dist > 0.25) & (dist < 1))[0]
+        # x_idx = (indices / width).astype(int)
+        # y_idx = (indices % width)
+        # filtered_indices = np.where((y_idx < img.shape[0]) & (x_idx < img.shape[1]))
+        # x_idx = x_idx[filtered_indices]
+        # y_idx = y_idx[filtered_indices]
+        # print(len(filtered_indices))
         if img is not None:
-            img[y_idx, x_idx, 0] = 255
-            img[y_idx, x_idx, 1] = 191
-            img[y_idx, x_idx, 2] = 0
-            img[y_idx, x_idx, 3] = 0
+            img[x_idx, img.shape[1] - 1 - y_idx, 0] = 255
+            img[x_idx, img.shape[1] - 1 - y_idx, 1] = 191
+            img[x_idx, img.shape[1] - 1 - y_idx, 2] = 0
+            # img[y_idx, x_idx, 3] = 0
         return img
         
         # pc_pcl = pcl.PointCloud(np.array(pc_np, dtype=np.float32))
@@ -161,8 +184,8 @@ class ConfigureVideoStreams:
     def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image, pc_msg):
         for image_config_name in self.realsense_params:
             img = self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
-            img = self.pc_callback(pc_msg, img)
+            # img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+            # img = self.pc_callback(pc_msg, img)
             self.realsense_images[image_config_name] = img
         for image_config_name in self.overhead_params:
             self.overhead_images[image_config_name] = \
@@ -185,14 +208,15 @@ class ConfigureVideoStreams:
     def start(self):
         print("Publishing configured video stream")
         while not rospy.is_shutdown():
-            if self.overhead_camera_rgb_image is not None: \
+            if self.overhead_camera_rgb_image is not None: 
                 self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
-            if self.realsense_rgb_image is not None: \
+            if self.realsense_rgb_image is not None: 
+                # self.publisher.publish(self.cv_bridge.cv2_to_imgmsg(self.realsense_rgb_image))
                 self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
-            if self.gripper_camera_rgb_image is not None: \
+            if self.gripper_camera_rgb_image is not None: 
                 self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
 
-            rospy.sleep(0.025)
+            rospy.sleep(0.1)
 
 if __name__ == '__main__':
     rospy.init_node('configure_video_streams')

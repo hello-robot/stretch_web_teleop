@@ -2,7 +2,23 @@
   
   <!-- REALSENSE D435i -->
   <include file="$(find stretch_core)/launch/d435i_low_resolution.launch"></include>
+  <!-- <include file="$(find stretch_web_interface_react)/launch/d435i.launch"></include> -->
   <!-- -->
+
+  <!-- Start a nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+
+  <!-- Run a VoxelGrid filter to clean NaNs and downsample the data -->
+  <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+    <remap from="~input" to="/camera/depth/color/points" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.01
+      filter_limit_max: 1.5
+      filter_limit_negative: False
+      leaf_size: 0.005
+    </rosparam>
+  </node>
 
   <!-- GRIPPER CAMERA -->
   <include file="$(find stretch_web_interface_react)/launch/gripper_camera.launch"></include>
