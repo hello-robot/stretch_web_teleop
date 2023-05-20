@@ -58,6 +58,7 @@ add_service_files(
   srv
   FILES
   ImageView.srv
+  DepthAR.srv
 )
 
 ## Generate actions in the 'action' folder
