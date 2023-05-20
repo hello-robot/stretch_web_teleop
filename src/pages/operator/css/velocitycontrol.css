@@ -1,6 +1,7 @@
 #velocity-control-wrapper {
     /* clear: both; */
     /* display: inline-block; */
+    display: flex;
 }
 
 .velocity-radio-button {

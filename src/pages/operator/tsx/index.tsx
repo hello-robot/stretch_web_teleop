@@ -84,17 +84,6 @@ function disconnectFromRobot() {
     // }
 }
 
-// function renderVideos() {
-//     const container = document.getElementById("root");
-//     const root = createRoot(container!);
-
-//     const videoControls = Array.from(allRemoteStreams.values()).map(
-//         (remoteStream) => (
-//             <VideoControl key={remoteStream.stream.id} stream={remoteStream.stream} />
-//         ));
-
-//     console.log(videoControls)
-
-//     root.render(<div>{videoControls}</div>);
-// }
-
+window.onbeforeunload = () => {
+    connection.hangup()
+};

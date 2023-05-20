@@ -90,7 +90,10 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on('disconnect', function(){
+    socket.on('bye', message => {
         socket.to('robot').emit('bye');
-    });
+        console.log('Attempting to have the operator leave the robot room.');
+        console.log('');
+        socket.leave('robot');
+    })
 });

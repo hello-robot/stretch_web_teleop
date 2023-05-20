@@ -48,7 +48,7 @@ export const VelocityControl = ({initialVelocityScale, onChange}: velocityContro
         const checked = speed == currentSpeed;
         const id = `speed-${index}`;
         return (
-            <>
+            <div key={`input-${index}`}>
                 <input 
                     type="radio" 
                     name="velocity" 
@@ -60,7 +60,7 @@ export const VelocityControl = ({initialVelocityScale, onChange}: velocityContro
                     onChange={changeFunc}
                 />
                 <label key={`label-${index}`} htmlFor={id} className="velocity-label">{label}</label>
-            </>
+            </div>
         )
     }
 

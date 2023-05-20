@@ -2,7 +2,6 @@ import React from 'react'
 import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
 import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'shared/util'
-import type { Request, Response, Responder } from "shared/requestresponse";
 
 const peerConstraints = {
     iceServers: [{
@@ -19,7 +18,6 @@ interface WebRTCProps {
     onMessage: (message: WebRTCMessage) => void;
     onRobotConnectionStart?: () => void;
     onMessageChannelOpen?: () => void;
-    onAvailableRobotsChanged?: (available_robots: AvailableRobots) => void;
     onConnectionEnd?: () => void;
 }
 
@@ -36,9 +34,6 @@ export class WebRTCConnection extends React.Component {
     cameraInfo: CameraInfo = {}
 
     private messageChannel?: RTCDataChannel
-    private requestChannel?: RTCDataChannel
-    private requestResponders: Map<string, Responder> = new Map()
-    private pendingRequests: Map<string, (response: any) => void> = new Map()
 
     private onTrackAdded?: (ev: RTCTrackEvent) => void
     private onMessage: (obj: WebRTCMessage | WebRTCMessage[]) => void
@@ -157,10 +152,7 @@ export class WebRTCConnection extends React.Component {
         console.log("opened data channels")
         if (!this.peerConnection) throw 'peerConnection undefined'
         this.messageChannel = this.peerConnection.createDataChannel('messages');
-        this.requestChannel = this.peerConnection.createDataChannel('requestresponse');
-
         this.messageChannel.onmessage = this.onReceiveMessageCallback.bind(this);
-        this.requestChannel.onmessage = this.processRequestResponse.bind(this);
     }
 
     createPeerConnection() {
@@ -190,9 +182,6 @@ export class WebRTCConnection extends React.Component {
                     }
                     this.messageChannel.onopen = onDataChannelStateChange;
                     this.messageChannel.onclose = onDataChannelStateChange;
-                } else if (event.channel.label === "requestresponse") {
-                    this.requestChannel = event.channel
-                    this.requestChannel.onmessage = this.processRequestResponse.bind(this);
                 } else {
                     console.error("Unknown channel opened:", event.channel.label)
                 }
@@ -317,53 +306,5 @@ export class WebRTCConnection extends React.Component {
     onReceiveMessageCallback(event: { data: string }) {
         const obj: WebRTCMessage | WebRTCMessage[] = safelyParseJSON(event.data);
         if (this.onMessage) this.onMessage(obj)
-    }
-
-    makeRequest<response>(type: string): Promise<response> {
-        return new Promise((resolve, reject) => {
-            let id = generateUUID();
-            this.requestChannel!.send(JSON.stringify({
-                type: "request",
-                id: id,
-                requestType: type
-            }));
-
-            this.pendingRequests.set(id, (responseData: response) => {
-                resolve(responseData);
-                this.pendingRequests.delete(id);
-            });
-
-        });
-    }
-
-    registerRequestResponder(requestType: string, responder: Responder) {
-        this.requestResponders.set(requestType, responder);
-    }
-
-    processRequestResponse(ev: MessageEvent<string>): void {
-        const message = safelyParseJSON<Request | Response>(ev.data);
-        if (message.type === "request") {
-            let response: Response = {
-                type: "response",
-                id: message.id,
-                requestType: message.requestType
-            }
-            if (this.requestResponders.has(message.requestType)) {
-                this.requestResponders.get(message.requestType)!().then((data) => {
-                    response.data = data;
-                    this.requestChannel!.send(JSON.stringify(response));
-                });
-            } else {
-                console.error("Heard request with no responder")
-                // Send a response so the other side can error out
-                this.requestChannel!.send(JSON.stringify(response))
-            }
-        } else if (message.type == "response") {
-            if (this.pendingRequests.has(message.id)) {
-                this.pendingRequests.get(message.id)!(message.data);
-            } else {
-                console.error("Heard response for request we didn't send")
-            }
-        }
     }
 }
