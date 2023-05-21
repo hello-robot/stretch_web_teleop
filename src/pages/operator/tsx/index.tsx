@@ -13,7 +13,7 @@ let remoteRobot: RemoteRobot;
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 
 let connection = new WebRTCConnection({
-    peerName: "OPERATOR",
+    peerRole: "operator",
     polite: true,
     onMessage: handleMessage,
     onTrackAdded: handleRemoteTrackAdded,

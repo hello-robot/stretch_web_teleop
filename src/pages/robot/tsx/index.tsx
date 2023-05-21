@@ -32,7 +32,7 @@ robot.connect().then(() => {
     gripperStream.start()
 
     connection = new WebRTCConnection({
-        peerName: 'ROBOT',
+        peerRole: 'robot',
         polite: false,
         onRobotConnectionStart: handleSessionStart,
         onMessage: handleMessage
