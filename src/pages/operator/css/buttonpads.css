@@ -41,31 +41,3 @@
     border: 1px solid var(--selected-color);
     stroke-width: 5px;
 }
-
-/* Context menu popup on button pad *******************************************/
-.button-pad-context-menu {
-    list-style-type: none;
-    position: absolute;
-    background-color: var(--background-color);
-    border: var(--btn-brdr);
-    margin: 0;
-    padding: 0;
-    white-space: nowrap;
-    padding-top: 0.5rem;
-}
-
-
-.button-pad-context-menu li {
-    padding: 0.5rem;
-    cursor: pointer;
-}
-
-.button-pad-context-menu li:hover {
-    background-color: var(--btn-bg-color-hover);
-}
-
-.button-pad-context-menu::before {
-    content: attr(aria-label);
-    font-weight: bold;
-    padding: 0.5rem;
-}

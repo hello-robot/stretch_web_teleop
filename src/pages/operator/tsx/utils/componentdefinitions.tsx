@@ -33,12 +33,20 @@ export enum ButtonPadId {
 }
 
 /**
+ * Identifier for the subtype of the component 
+ * (e.g. which video stream camera, or which button pad)
+ */
+export type ComponentId = VideoStreamId | ButtonPadId;
+
+/**
  * Definition for any interface component. Any video stream, button pad, 
  * tabs, etc. definition will have these fields.
  */
 export type ComponentDefinition = {
     /** Indicates the type of the component */
     type: ComponentType;
+    /** Indicates the identifier for the sub-type of the component */
+    id?: ComponentId;
 }
 
 /**

@@ -1,71 +1,53 @@
-import React, { useState } from "react";
+import React from "react";
 import "operator/css/velocitycontrol.css";
 
 /**Details of a velocity setting */
-type velocityDetails = {
+type VelocityDetails = {
     /**Name of the setting to display on the button */
-    label: string, 
+    label: string,
     /**The speed of this setting */
-    speed: number
+    scale: number
 };
 
 /**Props for VelocityControl */
-type velocityControlProps = {
+type VelocityControlProps = {
     /** Initial speed when interface first loaded. */
-    initialVelocityScale: number;
+    scale: number;
     /**
      * Callback function when a new speed is selected.
      * @param newSpeed the new selected speed
      */
-    onChange: (newSpeed: number) => void;
+    onChange: (newScale: number) => void;
 }
 
 /**The different velocity settings to display. */
-const VELOCITY_SCALE: velocityDetails[] = [
-    {label: "Slowest", speed: 0.2},
-    {label: "Slow",    speed: 0.4},
-    {label: "Medium",  speed: 0.8},
-    {label: "Fast",    speed: 1.2},
-    {label: "Fastest", speed: 1.6}
+const VELOCITY_SCALE: VelocityDetails[] = [
+    { label: "Slowest", scale: 0.2 },
+    { label: "Slow", scale: 0.4 },
+    { label: "Medium", scale: 0.8 },
+    { label: "Fast", scale: 1.2 },
+    { label: "Fastest", scale: 1.6 }
 ]
 
 /**The speed the interface should initialize with */
-export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].speed;
+export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].scale;
 
 /** The velocity control buttons. */
-export const VelocityControl = ({initialVelocityScale, onChange}: velocityControlProps) => {
-    const [currentSpeed, setCurrentSpeed] = React.useState(initialVelocityScale);
-
-    /** When a velocity button is clicked */
-    const changeFunc = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newSpeed = +e.target.value;
-        setCurrentSpeed(newSpeed);
-        onChange(newSpeed);
-    }
-
+export const VelocityControl = (props: VelocityControlProps) => {
     /** Maps the velocity labels and speeds to radio buttons */
-    const mapFunc = ({label, speed}: velocityDetails, index: number) => {
-        const checked = speed == currentSpeed;
-        const id = `speed-${index}`;
+    const mapFunc = ({ scale, label }: VelocityDetails) => {
+        const active = scale === props.scale;
         return (
-            <div key={`input-${index}`}>
-                <input 
-                    type="radio" 
-                    name="velocity" 
-                    id={id}
-                    key={`input-${index}`}
-                    value={speed}
-                    className="velocity-radio-button"
-                    checked={checked}
-                    onChange={changeFunc}
-                />
-                <label key={`label-${index}`} htmlFor={id} className="velocity-label">{label}</label>
-            </div>
+            <button
+                key={label}
+                className={active ? "active" : ""}
+                onClick={() => props.onChange(scale)}
+            >{label}</button>
         )
     }
 
     return (
-        <div id="velocity-control-wrapper">
+        <div id="velocity-control-container">
             {VELOCITY_SCALE.map(mapFunc)}
         </div>
     );

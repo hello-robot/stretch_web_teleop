@@ -17,7 +17,7 @@
 }
 
 /* Overlays the button pad on top of the video stream*/
-.video-button-pad {
+.video-overlay-container {
     z-index: 1;
     position: absolute;
     width: 100%;
@@ -43,4 +43,36 @@
 
 .video-canvas.customizing.selected {
     filter: none;
+}
+
+
+/* Context menu popup *********************************************************/
+.video-context-menu {
+    list-style-type: none;
+    position: absolute;
+    background-color: var(--background-color);
+    /* border: var(--btn-brdr); */
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+
+    --padding: 1rem;
+
+    padding-top: var(--padding);
+}
+
+
+.video-context-menu li {
+    padding: var(--padding);
+    cursor: pointer;
+}
+
+.video-context-menu li:hover {
+    background-color: var(--btn-bg-color-hover);
+}
+
+.video-context-menu::before {
+    content: attr(aria-label);
+    font-weight: bold;
+    padding: var(--padding);
 }

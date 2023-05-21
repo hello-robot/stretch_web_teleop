@@ -1,4 +1,4 @@
-import { ParentComponentDefinition, ComponentDefinition } from "operator/tsx/utils/componentdefinitions";
+import { ParentComponentDefinition, ComponentDefinition, ComponentType } from "operator/tsx/utils/componentdefinitions";
 
 /**
  * Gets the parent definition for the given child path
@@ -137,5 +137,13 @@ export const removeFromLayout = (
     const splitPath = path.split('-');
     const childIdx = +splitPath.slice(-1);
     const parent = getParent(splitPath, layout);
+
+    // If this is the last tab in a tabs component, then delete the entire tabs
+    if (parent.type === ComponentType.Tabs && parent.children.length === 1) {
+        const parentIdx = +splitPath.slice(-2, -1);
+        // note: since tabs cannot be nested, we can assume the layout is the 
+        //       is the parent of the tabs component
+        removeChildFromParent(layout, parentIdx);
+    }
     removeChildFromParent(parent, childIdx)
 }

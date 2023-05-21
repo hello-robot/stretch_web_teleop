@@ -39,14 +39,16 @@ export const DropZone = (props: DropZoneProps) => {
         const { activeDef } = props.sharedState.dropZoneState;
 
         // If no active object selected
-        if (!activePath || !activeDef) {
+        if (!activeDef) {
             return false;
         }
 
         // Must pass drop zone rules about which components can go where
         if (!dropzoneRules(activeDef.type, parentDef.type)) return false;
 
-        if (props.path == "0-0-1") console.log('hello')
+        // Don't need to check if dropzone is adjacent if the active component
+        // is coming from the sidebar component provider
+        if (!activePath) return true;
 
         // Can't drop if dropzone is right next to the active element
         // (that wouldn't move the active element at all)

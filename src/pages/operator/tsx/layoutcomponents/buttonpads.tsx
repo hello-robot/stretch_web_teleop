@@ -4,7 +4,7 @@ import { CustomizableComponentProps } from "./customizablecomponent";
 import { ButtonPadDef, ButtonPadId, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE, rect } from "shared/svg";
-import { btnFnProvider } from "..";
+import { buttonFunctionProvider } from "operator/tsx/index";
 
 /** All the possible button functions */
 export enum ButtonPadFunction {
@@ -61,7 +61,6 @@ type ButtonPadProps = CustomizableComponentProps & {
 export const ButtonPad = (props: ButtonPadProps) => {
     /** Reference to the SVG which makes up the button pad */
     const svgRef = React.useRef<SVGSVGElement>(null);
-    const [contextMenu, setContextMenu] = React.useState<React.ReactElement | null>(null);
     /** List of path shapes for each button on the button pad */
     const definition = props.definition as ButtonPadDef;
     const id: ButtonPadId = definition.id;
@@ -69,7 +68,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const [shape, functions] = getShapeAndFunctionsFromId(definition.id);
     const buttonsProps = functions.map((funct: ButtonPadFunction) => {
         return {
-            ...btnFnProvider.provideFunctions(funct),
+            ...buttonFunctionProvider.provideFunctions(funct),
             label: "" + funct
         } as ButtonProps;
     });
@@ -125,7 +124,6 @@ export const ButtonPad = (props: ButtonPadProps) => {
             >
                 {paths.map(mapPaths)}
             </svg>
-            {contextMenu}
         </>
     );
 }

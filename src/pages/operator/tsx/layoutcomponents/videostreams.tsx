@@ -90,6 +90,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
 
     const definition = props.definition as VideoStreamDef;
+    if (!definition.children) throw Error('Video Stream definition should have children');
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
 
     // Create the overlay
@@ -147,7 +148,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     return (
         <div className='video-stream'>
             <div
-                className={className("video-button-pad", { customizing, selected })}
+                className={className("video-overlay-container", { customizing, selected })}
                 style={streamStyle}
                 onClick={customizing ? handleClick : undefined}
             >
@@ -306,7 +307,7 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
 
         <ul aria-label="Select"
             ref={ref}
-            className="button-pad-context-menu"
+            className="video-context-menu"
             style={{ top: `${y}px`, left: `${x}px` }}
         >
             <li onClick={(e) => handleClick(e, false)}>Button Pad</li>

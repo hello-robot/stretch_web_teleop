@@ -1,6 +1,4 @@
-
 #action-mode-button {
-    padding: var(--btn-padding);
     background-color: var(--btn-bg-color);
     display: flex;
     align-items: center;
@@ -8,8 +6,18 @@
     width: 10rem;
 }
 
-#action-mode-button .material-icons {
-    margin: -0.25rem;
+#action-mode-button.expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Flip the dropdown arrow when active */
+#action-mode-button span {
+    transition: transform 0.2s linear;
+}
+
+#action-mode-button.expanded span{
+    transform: scaleY(-1);
 }
 
 #action-mode-popup {
@@ -20,7 +28,6 @@
 .action-mode-option {
     background-color: var(--btn-bg-color);
     padding: var(--btn-padding);
-    border: var(--btn-brdr);
     cursor: pointer;
     width: 10rem;
 }
@@ -30,9 +37,9 @@
 }
 
 
-.action-mode-option:first-of-type {
+/* .action-mode-option:first-of-type {
     border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0 ;
-}
+} */
 
 .action-mode-option:last-of-type {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;

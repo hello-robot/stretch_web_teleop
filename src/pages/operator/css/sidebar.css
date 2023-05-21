@@ -7,6 +7,7 @@
     transition: flex 0.5s ease-out;
     /* Darken the gray background color from index.css */
     --header-bg: color-mix(in srgb, var(--gray-bg) 90%, black);
+    white-space: nowrap;
 }
 
 #sidebar[hidden] {
@@ -19,10 +20,10 @@
     display: flex;
     align-items: center;
     font-size: 18px;
-    white-space: nowrap;
 }
 
 #sidebar-body {
+    padding: 1rem;
 }
 
 /* Footer *********************************************************************/
@@ -57,7 +58,6 @@
 
 .options-element {
     display: inline-block;
-    margin: 1rem;
 }
 
 .toggle-button {
@@ -70,4 +70,40 @@
 
 .toggle-button.on {
     background-color: var(--btn-lightgreen);
+}
+
+/* Component Provider *********************************************************/
+
+.provider-tab button {
+    width: 100%;
+    text-align: left;
+    padding: var(--btn-padding);
+    display: flex;
+    align-items: center;
+    height: 3rem;
+}
+
+.id-button {
+    transition: height 0.2s ease-out;
+}
+
+.provider-tab .active {
+    background-color: var(--selected-color);
+}
+
+.provider-tab button span {
+    width: 2rem;
+    transition: transform 0.2s linear;
+}
+
+.provider-tab button.expanded {
+    filter: brightness(95%)
+}
+
+.provider-tab button.expanded span {
+    transform: scaleY(-1);
+}
+
+.provider-tab button.id-button {
+    padding-left: 3rem;
 }

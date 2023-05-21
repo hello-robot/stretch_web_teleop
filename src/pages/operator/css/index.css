@@ -3,7 +3,7 @@
     --btn-bg-color-hover: hsl(200, 70%, 65%);
     --btn-bg-color-click: hsl(200, 80%, 50%);
     --btn-brdr: 1px solid var(--btn-bg-color-click);
-    --btn-brdr-radius: 0.2rem;
+    --btn-brdr-radius: 0.4rem;
     --btn-padding: .5em 1em;
 
     --selected-color: rgb(111, 248, 255);
@@ -67,6 +67,7 @@ the element is selected */
 button {
     border: none;
     border-radius: var(--btn-brdr-radius);
+    padding: var(--btn-padding);
 }
 
 button:hover {

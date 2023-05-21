@@ -1,5 +1,5 @@
 import React from "react";
-import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/staticcomponents/velocitycontrol"
+import { VelocityControl } from "operator/tsx/staticcomponents/velocitycontrol"
 import { LayoutArea } from "./staticcomponents/layoutarea";
 import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
 import { CustomizeButton } from "./staticcomponents/customizebutton";
@@ -7,26 +7,27 @@ import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
-import { RemoteStream, AllJoints, ValidJointStateDict } from "shared/util";
+import { RemoteStream, ValidJointStateDict } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
-import { btnFnProvider } from "./index";
 
 import "operator/css/operator.css"
+import { FunctionProvider } from "./utils/functionprovider";
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>
     setJointLimitsCallback: (callbackfn: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) => void
 }) => {
-    /** Speed of the robot. */
-    let velocityScale = DEFAULT_VELOCITY_SCALE;
-    const [actionMode, setActionMode] = React.useState(ActionMode.StepActions);
     const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
     const [inJointLimits, setInJointLimits] = React.useState<ValidJointStateDict | undefined>();
     const [inCollision, setInCollision] = React.useState<ValidJointStateDict | undefined>();
+
+    // Store as state to cause rerender when velocity scale or action mode are changed
+    const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
+    const [actionMode, setActionMode] = React.useState<ActionMode>(FunctionProvider.actionMode);
 
     let remoteStreams = props.remoteStreams
 
@@ -64,11 +65,18 @@ export const Operator = (props: {
     const handleSelect = (def: ComponentDefinition, path?: string) => {
         console.log('selected', path);
         if (!customizing) return;
-        if (activePath && activePath == path) {
+
+        // If reselected the same component at the same path, or the same component
+        // without a path from the sidebar, then unactivate it
+        const pathsMatch = activePath && activePath == path;
+        const defsMatch = !activePath && def.type === activeDef?.type && def.id === activeDef?.id;
+        if (pathsMatch || defsMatch) {
             setActiveDef(undefined);
             setActivePath(undefined);
             return;
         }
+
+        // Activate the selected component
         setActiveDef(def);
         setActivePath(path);
     }
@@ -106,8 +114,7 @@ export const Operator = (props: {
     }
 
     const updateJointLimitsandEffortsState = (
-        inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => 
-    {
+        inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => {
         setInJointLimits(inJointLimits)
         setInCollision(inCollision)
     }
@@ -118,11 +125,11 @@ export const Operator = (props: {
             <div id="operator-header">
                 <ActionModeButton
                     actionMode={actionMode}
-                    onChange={(am) => { setActionMode(am); btnFnProvider.handleActionModeUpdate(am) }}
+                    onChange={(am) => { setActionMode(am); FunctionProvider.actionMode = am; }}
                 />
                 <VelocityControl
-                    initialVelocityScale={velocityScale}
-                    onChange={(newVelocityScale) => btnFnProvider.handleVelocityScaleUpdate(newVelocityScale)}
+                    scale={velocityScale}
+                    onChange={(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
                 <CustomizeButton
                     customizing={customizing}
@@ -138,6 +145,7 @@ export const Operator = (props: {
                     hidden={!customizing}
                     onDelete={handleDelete}
                     activeDef={activeDef}
+                    activePath={activePath}
                     updateLayout={updateLayout}
                     onSelect={handleSelect}
                 />
