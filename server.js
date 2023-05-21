@@ -61,6 +61,7 @@ io.on('connection', function(socket) {
 
     socket.on('join', function (room) {
         console.log('Received request to join room ' + room);
+        // A room can have atmost two clients
         if (!io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2) { 
             socket.join(room);
             socket.emit('joined', room, socket.id);
@@ -71,14 +72,14 @@ io.on('connection', function(socket) {
     });
 
     socket.on('is robot available', () => {
-        if (io.sockets.adapter.rooms.get('robot')) {
-            // console.log(io.sockets.adapter.rooms.get('operator'))
+        // The robot room is only available if another operator is not connected to it
+        if (io.sockets.adapter.rooms.get('robot') && io.sockets.adapter.rooms.get('robot').size < 2) {
             console.log('robot is available')
-            io.in('operator').emit('robot available', true)
+            socket.emit('robot available', true)
             io.in('robot').emit('join', 'robot');
         } else {
             console.log('robot not available')
-            io.in('operator').emit('robot available', false)
+            socket.emit('robot available', false)
         }
     })
 
@@ -90,10 +91,12 @@ io.on('connection', function(socket) {
         }
     });
 
-    socket.on('bye', message => {
-        socket.to('robot').emit('bye');
-        console.log('Attempting to have the operator leave the robot room.');
-        console.log('');
-        socket.leave('robot');
+    socket.on('bye', role => {
+        if (socket.rooms.has('robot')) {
+            socket.to('robot').emit('bye');
+            console.log('Attempting to have the ' + role + ' leave the robot room.');
+            console.log('');
+            socket.leave('robot');
+        }
     })
 });

@@ -12,7 +12,7 @@ const peerConstraints = {
 };
 
 interface WebRTCProps {
-    peerName: string;
+    peerRole: "operator" | "robot";
     polite: boolean;
     onTrackAdded?: (ev: RTCTrackEvent) => void;
     onMessage: (message: WebRTCMessage) => void;
@@ -24,7 +24,7 @@ interface WebRTCProps {
 export class WebRTCConnection extends React.Component {
     private socket: Socket;
     private peerConnection?: RTCPeerConnection
-    private peerName: string
+    private peerRole: string
     private polite: boolean
     private makingOffer = false
     private ignoreOffer: boolean = false
@@ -43,7 +43,7 @@ export class WebRTCConnection extends React.Component {
 
     constructor(props: WebRTCProps) {
         super(props);
-        this.peerName = props.peerName
+        this.peerRole = props.peerRole
         this.polite = props.polite
         this.onRobotConnectionStart = props.onRobotConnectionStart
         this.onMessage = props.onMessage
@@ -62,10 +62,8 @@ export class WebRTCConnection extends React.Component {
 
         this.socket.on('join', (room: string) => {
             console.log('Another peer made a request to join room ' + room);
-            console.log('I am ' + this.peerName + '!');
-            if (this.onRobotConnectionStart) {
-                this.onRobotConnectionStart()
-            } 
+            console.log('I am ' + this.peerRole + '!');
+            if (this.onRobotConnectionStart) this.onRobotConnectionStart()
         });
 
         // This is only sent to the operator room
@@ -88,7 +86,7 @@ export class WebRTCConnection extends React.Component {
         })
 
         this.socket.on('joined', (room: String) => {
-            console.log('joined: ' + room);
+            console.log('joined: ' + room); 
         });
 
         this.socket.on('signalling', (message: SignallingMessage) => {
@@ -265,7 +263,7 @@ export class WebRTCConnection extends React.Component {
     hangup() {
         // Tell the other end that we're ending the call so they can stop, and get us kicked out of the robot room
         console.warn("Hanging up")
-        this.socket.emit('bye');
+        this.socket.emit('bye', this.peerRole);
         if (!this.peerConnection) throw 'pc is undefined';
         if (this.peerConnection.connectionState === "new") {
             // Don't reset PCs that don't have any state to reset
