@@ -19,24 +19,27 @@
 }
 
 /*When hovering over a child element of an svg*/
-.button-pads.live>*:hover {
+.button-pads>*:hover {
     fill-opacity: 10%;
     cursor: pointer;
 }
 
 /*When a button is clicked*/
-.button-pads.live>*:active {
+.button-pads>*:active {
     fill-opacity: 40%;
+}
+
+/* Disable hover actions */
+.button-pads.customizing>* {
+    fill-opacity: 0%;
 }
 
 .button-pads.selected {
     opacity: 100%;
-    stroke:hsl(200, 100%, 69%);
+    stroke: var(--selected-color);
     opacity: 100%;
-    border: 1px solid hsl(200, 100%, 69%);
-    stroke: hsl(200, 100%, 69%);
+    border: 1px solid var(--selected-color);
     stroke-width: 5px;
-    box-shadow: 0 0 1rem 1rem #0ff;
 }
 
 /* Context menu popup on button pad *******************************************/

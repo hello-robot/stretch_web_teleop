@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/componentdefinitions"
-import { ComponentList, ComponentListProps } from "../render";
+import { ComponentList, ComponentListProps } from "operator/tsx/layoutcomponents/componentlist";
 import "operator/css/tabs.css"
 import { CustomizableComponentProps } from "operator/tsx/layoutcomponents/customizablecomponent";
 import { ChangeEvent } from "react";
@@ -29,8 +29,8 @@ export const Tabs = (props: CustomizableComponentProps) => {
 
     // Handle case where active tab was moved or deleted, just use last remaining tab
     if (activeTab >= countChildren) {
-        setActiveTab(countChildren-1);
-        activeTab = countChildren-1;
+        setActiveTab(countChildren - 1);
+        activeTab = countChildren - 1;
     }
 
     const activeTabDef = definition.children[activeTab] as ParentComponentDefinition;
@@ -153,7 +153,10 @@ export const Tabs = (props: CustomizableComponentProps) => {
     const thisSelected = childTabSelected === -1;
 
     return (
-        <div className="tabs-component" style={{ flex: `${flex} ${flex} 0` }}>
+        <div
+            className={className("tabs-component", { customizing: props.sharedState.customizing, selected: thisSelected })}
+            style={{ flex: `${flex} ${flex} 0` }}
+        >
             <div className="tabs-header">
                 {definition.children.map(mapTabLabels)}
                 <DropZone
@@ -172,7 +175,7 @@ export const Tabs = (props: CustomizableComponentProps) => {
                         </button> : undefined
                 }
             </div>
-            <div className={className("tabs-content", { selected: thisSelected })} {...selectProp}>
+            <div className="tabs-content" {...selectProp}>
                 <ComponentList {...componentListProps} />
             </div>
             {showTabModal ?

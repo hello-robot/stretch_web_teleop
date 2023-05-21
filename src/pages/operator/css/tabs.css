@@ -6,10 +6,14 @@
     flex: 1 1 0;
     margin: 0 0.5rem;
     box-shadow: 3px 3px 2px var(--shadow-color);
+    position: relative;
 
     --radius: .3rem;
     border-radius: var(--radius) var(--radius) 0px 0px;
+}
 
+.tabs-component.customizing.selected::after {
+    background-color: var(--selected-color);
 }
 
 .tabs-content {
@@ -18,7 +22,6 @@
     flex: 1 1 0;
     background-color: var(--background-color);
     /* box-shadow: 3px 2px 3px 3px var(--shadow-color); */
-    z-index: 2;
 }
 
 /* Header *********************************************************************/
@@ -66,7 +69,7 @@
 }
 
 .tabs-content.selected {
-    box-shadow: 0 0 1rem 1rem #0ff;;
+    box-shadow: 0 0 1rem 1rem #0ff;
 }
 
 .add-tab:hover {

@@ -37,14 +37,15 @@ export enum ButtonPadId {
  * tabs, etc. definition will have these fields.
  */
 export type ComponentDefinition = {
+    /** Indicates the type of the component */
     type: ComponentType;
-    id?: any;
 }
 
 /**
  * Definition for a button pad component
  */
 export type ButtonPadDef = ComponentDefinition & {
+    /** Indicates the shape and functions on the button pad*/
     id: ButtonPadId;
 }
 
@@ -72,6 +73,7 @@ export type TabsDef = ParentComponentDefinition & {
  * Definition for a video stream component
  */
 export type VideoStreamDef = ComponentDefinition & {
+    /** Indicates the camera video of the video stream */
     id: VideoStreamId;
     /** The button pad to overlay, if undefined then no overlay. */
     children: ButtonPadDef[];

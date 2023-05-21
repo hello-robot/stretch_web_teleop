@@ -138,6 +138,7 @@ export const Operator = (props: {
                     onDelete={handleDelete}
                     activeDef={activeDef}
                     updateLayout={updateLayout}
+                    onSelect={handleSelect}
                 />
             </div>
         </div>

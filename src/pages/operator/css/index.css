@@ -33,24 +33,12 @@ body {
     background-color: var(--background-color);
 }
 
-button {
-    border: none;
-    border-radius: var(--btn-brdr-radius);
-}
-
-button:hover {
-    cursor: pointer;
-}
-
-button .material-icons {
-    margin: -0.25rem;
-}
-
 html,
 body,
 #root {
     height: 100%;
     margin: 0;
+    overflow: hidden;
 }
 
 /* In customization mode add hidden shadow after each element, to be shown when
@@ -66,8 +54,7 @@ the element is selected */
     left: 0;
     top: 0;
 
-    box-shadow: 0 0 1rem 1rem var(--selected-color);
-    opacity: 0;
+    box-shadow: 0 0 1rem 0.5rem var(--selected-color);
     transition: opacity 0.25s ease-in-out;
 }
 
@@ -76,6 +63,20 @@ the element is selected */
 }
 
 /* Button colors **************************************************************/
+
+button {
+    border: none;
+    border-radius: var(--btn-brdr-radius);
+}
+
+button:hover {
+    cursor: pointer;
+    filter: brightness(90%);
+}
+
+button .material-icons {
+    margin: -0.25rem;
+}
 
 .btn-green {
     background-color: var(--btn-green);
@@ -87,16 +88,4 @@ the element is selected */
 
 .btn-blue {
     background-color: var(--btn-blue);
-}
-
-.btn-green:hover {
-    background-color: color-mix(in srgb, var(--btn-green) 95%, black);
-}
-
-.btn-red:hover {
-    background-color: color-mix(in srgb, var(--btn-red) 95%, black);
-}
-
-.btn-blue:hover {
-    background-color: color-mix(in srgb, var(--btn-blue) 95%, black);
 }

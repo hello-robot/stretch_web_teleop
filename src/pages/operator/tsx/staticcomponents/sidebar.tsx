@@ -1,12 +1,13 @@
 import React from "react"
 import "operator/css/sidebar.css"
 import { className } from "shared/util";
-import { ButtonPadId, ComponentDefinition, ComponentType, SingleTabDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentType, SingleTabDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 
 type SidebarProps = {
     hidden: boolean;
     onDelete: () => void;
     updateLayout: () => void;
+    onSelect: (def: ComponentDefinition, path?: string) => void;
     activeDef?: ComponentDefinition;
 }
 
@@ -25,7 +26,11 @@ export const Sidebar = (props: SidebarProps) => {
                     <SidebarOptions
                         activeDef={props.activeDef}
                         updateLayout={props.updateLayout}
-                    /> : undefined}
+                    /> : 
+                    <SidebarProvider 
+                        onSelect={props.onSelect}
+                    />
+                    }
             </div>
             <div id="sidebar-footer">
                 <button id="delete-button"
@@ -50,7 +55,7 @@ function componentDescription(definition: ComponentDefinition): string {
     switch (definition.type) {
         case (ComponentType.ButtonPad):
         case (ComponentType.VideoStream):
-            return `${definition.id} ${definition.type}`
+            return `${(definition as VideoStreamDef | ButtonPadDef).id} ${definition.type}`
         case (ComponentType.Tabs):
             return "Tabs";
         case (ComponentType.SingleTab):
@@ -68,13 +73,13 @@ type OptionsProps = {
 const SidebarOptions = (props: OptionsProps) => {
     switch (props.activeDef.type) {
         case (ComponentType.VideoStream):
-            switch (props.activeDef.id!) {
+            switch ((props.activeDef as VideoStreamDef).id!) {
                 case (VideoStreamId.overhead):
                     return <OverheadVideoStreamOptions {...props} />;
             }
-        default:
-            return <></>;
+            break;
     }
+    return <></>
 }
 
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
@@ -125,4 +130,16 @@ const ToggleButton = (props: ToggleButtonProps) => {
             <span>{props.label}</span>
         </div>
     );
+}
+
+type SidebarProviderProps = {
+    onSelect: (def: ComponentDefinition, path?: string) => void;
+}
+
+const SidebarProvider = (props: SidebarProviderProps) => {
+    return (
+        <div>
+            Sidebar Provider
+        </div>
+    )
 }

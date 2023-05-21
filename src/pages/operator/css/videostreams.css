@@ -18,7 +18,7 @@
 
 /* Overlays the button pad on top of the video stream*/
 .video-button-pad {
-    z-index: 2;
+    z-index: 1;
     position: absolute;
     width: 100%;
     height: 100%;
@@ -30,6 +30,11 @@
     max-height: 100%;
     /* This is to fix the 3px bleeding outside the bottom of the video. */
     /* margin-bottom: -3px; */
+}
+
+/* Don't display selected highlight on video canvas element */
+.video-canvas.customizing::after {
+    content: none;
 }
 
 .video-canvas.customizing {
