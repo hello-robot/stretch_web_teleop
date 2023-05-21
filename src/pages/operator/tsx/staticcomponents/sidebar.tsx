@@ -61,7 +61,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case (ComponentType.Tabs):
             return "Tabs";
         case (ComponentType.SingleTab):
-            return `${(definition as SingleTabDef).label} Tab`;
+            return `\"${(definition as SingleTabDef).label}\" Tab`;
         default:
             throw Error(`Cannot get description for component type ${definition.type}`)
     }
@@ -227,9 +227,9 @@ const ProviderTab = (props: ProviderTabProps) => {
                 <span className="material-icons">{props.ids ? "expand_more" : ""}</span>
                 {props.type}
             </button>
-            <div className={className("provider-tab-dropdown", { expanded: props.expanded })}>
+            <div className="provider-tab-dropdown" hidden={!props.expanded}>
                 {
-                    props.expanded && props.ids ?
+                    props.ids ?
                         props.ids.map(mapIds) : undefined
                 }
             </div>

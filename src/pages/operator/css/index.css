@@ -15,6 +15,8 @@
 
     --background-color: hsl(0, 0%, 98%);
     --gray-bg: hsl(0, 0%, 88%);
+
+    --shadow: 3px 3px 2px var(--shadow-color);
 }
 
 * {
@@ -68,11 +70,13 @@ button {
     border: none;
     border-radius: var(--btn-brdr-radius);
     padding: var(--btn-padding);
+    box-shadow: var(--shadow);
 }
 
 button:hover {
     cursor: pointer;
     filter: brightness(90%);
+    box-shadow: none;
 }
 
 button .material-icons {

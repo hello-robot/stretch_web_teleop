@@ -14,6 +14,8 @@
     align-items: center;
     justify-content: space-between;
     flex: 0 0 auto;
+
+    --header-btn-width: 10rem;
 }
 
 /* Make all the components in the header fill the avaliable height */
