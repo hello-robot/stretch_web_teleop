@@ -1,11 +1,12 @@
 import React from "react";
 import { ROSCompressedImage, className } from "shared/util";
 import "operator/css/videostreams.css"
-import { CustomizableComponentProps } from "./customizablecomponent";
+import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
-import { VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { ComponentDefinition, ComponentType, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { RemoteStream } from "shared/util"
 import { ButtonPad } from "./buttonpads";
+import { PredictiveDisplay } from "./predictivedisplay";
 
 type VideoStreamProps = {
     width: number,
@@ -91,16 +92,9 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const definition = props.definition as VideoStreamDef;
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
 
-    // Create the button pad overlay
-    const buttonPadDef = definition.children.length > 0 ? definition.children[0] : undefined;
-    const buttonPadProps = buttonPadDef ? {
-        definition: buttonPadDef,
-        path: props.path + "-0",
-        sharedState: props.sharedState
-    } as CustomizableComponentProps : undefined;
-    const buttonPad = buttonPadProps ?
-        <ButtonPad {...buttonPadProps} overlay={true} /> : undefined;
-
+    // Create the overlay
+    const overlayDefinition = definition.children.length > 0 ? definition.children[0] : undefined;
+    const overlay = createOverlay(overlayDefinition, props.path, props.sharedState);
 
     // Record the height and width of the video component on resize
     const resizeObserver = new ResizeObserver(entries => {
@@ -127,7 +121,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 
     /** Mark the button pad child as selected */
     function selectChild() {
-        props.sharedState.onSelect(buttonPadDef!, props.path + '-0');
+        props.sharedState.onSelect(overlayDefinition!, props.path + '-0');
         setClickXY(null);
     }
 
@@ -136,7 +130,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
         event.stopPropagation();
 
         // If no button pad overlay then select self and return
-        if (!buttonPadDef) {
+        if (!overlayDefinition || overlayDefinition.type !== ComponentType.ButtonPad) {
             selectSelf();
             return;
         }
@@ -157,13 +151,17 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
                 style={streamStyle}
                 onClick={customizing ? handleClick : undefined}
             >
-                {buttonPad ? buttonPad :
-                    <DropZone
-                        path={props.path + "-0"}
-                        sharedState={props.sharedState}
-                        parentDef={props.definition}
-                    />}
                 {
+                    // Display overlay on top of video stream
+                    overlay ? overlay :
+                        <DropZone
+                            path={props.path + "-0"}
+                            sharedState={props.sharedState}
+                            parentDef={props.definition}
+                        />
+                }
+                {
+                    // When clickXY is set, display context menu
                     clickXY ? <SelectContexMenu
                         clickXY={clickXY}
                         selectSelf={selectSelf}
@@ -175,6 +173,33 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
             <video ref={videoRef} autoPlay muted={true} className={videoClass} />
         </div>
     );
+}
+
+/**
+ * Creates an overlay element for the video stream
+ * 
+ * @param overlayDefinition definition for the component to overlay on the video stream
+ * @param path path to the parent video stream component
+ * @param sharedState {@link SharedState}
+ * @returns overlay element, or undefined if video stream doesn't have an overlay
+ */
+function createOverlay(overlayDefinition: ComponentDefinition | undefined, path: string, sharedState: SharedState): JSX.Element | undefined {
+    if (!overlayDefinition) return undefined;
+
+    const overlayProps = {
+        definition: overlayDefinition,
+        path: path + "-0",
+        sharedState: sharedState
+    } as CustomizableComponentProps;
+
+    switch (overlayDefinition?.type) {
+        case (ComponentType.ButtonPad):
+            return <ButtonPad {...overlayProps} overlay />
+        case (ComponentType.PredictiveDisplay):
+            return <PredictiveDisplay {...overlayProps} />
+        default:
+            throw Error('Video stream at path ' + path + ' cannot overlay child ' + overlayDefinition);
+    }
 }
 
 /**

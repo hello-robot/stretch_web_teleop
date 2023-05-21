@@ -9,7 +9,7 @@ import { CustomizableComponentProps } from "./customizablecomponent";
  * @param y the number to scale
  * @returns scaled number
  */
-const scaleToNavAspectRatio = (y: number) => {
+function scaleToNavAspectRatio(y: number) {
     return y / navigationProps.width * navigationProps.height;
 }
 
@@ -30,12 +30,7 @@ const baseRight = BASE.centerX + BASE.width / 2;
 /**Radius around the base of the rotation arrows */
 const rotateArcRadius = percent2Pixel(10);
 
-/**Formats the SVG path arc string. */
-function makeArc(startX: number, startY: number, radius: number, sweepFlag: boolean, endX: number, endY: number) {
-    const sweep = sweepFlag ? 1 : 0;
-    return `M ${startX},${startY} A ${radius} ${radius} 0 0 ${sweep} ${endX},${endY}`
-}
-
+/** Functions required for predictive display */
 export type PredictiveDisplayFunctions = {
     /** Callback function when mouse is clicked in predicitive display area */
     onClick: (length: number, angle: number) => void;
@@ -47,23 +42,164 @@ export type PredictiveDisplayFunctions = {
     onLeave?: () => void;
 }
 
-/** Properties for the {@link PredictiveDisplay} component */
-type PredictiveDisplayProps = CustomizableComponentProps & {
-    functions: PredictiveDisplayFunctions;
+// TODO: implement predictive display function provider
+const mockFunctions = {
+    onClick: (length: number, angle: number) => { console.log('click length', length, "angle", angle) },
+    onMove: (length: number, angle: number) => { console.log('move length', length, "angle", angle) },
+    onRelease: () => { console.log('release') },
+    onLeave: () => { console.log('leave') },
 }
 
-/** State for the {@link PredicitiveDisplay} component */
-interface PredictiveDisplayState {
-    /** Components to render to display the trajectory. */
-    trajectory: React.ReactNode;
+/**
+ * Overlay for overhead video stream where a curved path follows the cursor, 
+ * and clicking translates and/or rotates the robot base.
+ * 
+ * @param props {@link CustomizableComponentProps}
+ */
+export const PredictiveDisplay = (props: CustomizableComponentProps) => {
+    const svgRef = React.useRef<SVGSVGElement>(null);
+    const [trajectory, setTrajectory] = React.useState<JSX.Element | undefined>(undefined);
+    const functions = mockFunctions; // TODO: implement predictive display function provider
+    const length = React.useRef<number>(0);
+    const angle = React.useRef<number>(0);
+    const holding = React.useRef<boolean>(false);
+
+    function handleLeave() {
+        setTrajectory(undefined);
+        if (functions.onLeave) {
+            functions.onLeave()
+        }
+    }
+
+    function handleClick() {
+        holding.current = true;
+        if (functions.onClick) {
+            functions.onClick(length.current, angle.current);
+        }
+    }
+
+    function handleRelease() {
+        holding.current = false;
+        if (functions.onRelease) {
+            functions.onRelease()
+        }
+    }
+
+    /** Rerenders the trajectory based on the cursor location */
+    function handleMove(event: React.MouseEvent<SVGSVGElement>) {
+        const { clientX, clientY } = event;
+        const svg = svgRef.current;
+        if (!svg) return;
+
+        // Get x and y in terms of the SVG element
+        const rect = svg.getBoundingClientRect();
+        const x = (clientX - rect.left) / rect.width * SVG_RESOLUTION;
+        const pixelY = (clientY - rect.top) / rect.height;
+        const y = scaleToNavAspectRatio(pixelY * SVG_RESOLUTION);
+        const ret = drawTrajectory(x, y);
+
+        length.current = ret[0];
+        angle.current = ret[1];
+        setTrajectory(ret[2]);
+
+        if (holding && functions.onMove) {
+            functions.onMove(length.current, angle.current);
+        }
+    }
+
+    const customizing = props.sharedState.customizing;
+    const controlProps = customizing ? {} : {
+        onMouseMove: handleMove,
+        onMouseLeave: handleLeave,
+        onMouseDown: handleClick,
+        onMouseUp: handleRelease
+    };
+
+    return (
+        <svg
+            viewBox={`0 0 ${SVG_RESOLUTION} ${resolution_height}`}
+            preserveAspectRatio="none"
+            ref={svgRef}
+            className={className("predictive-display", { customizing })}
+            {...controlProps}
+        >
+            {trajectory}
+        </svg>
+    )
+}
+
+/**
+ * Creates a trajectory based on the cursor location
+ * 
+ * @param x horizontal position of the cursor
+ * @param y vertical position of the cursor
+ * @returns the linear distance, the angle, and the trajectory element
+ */
+function drawTrajectory(x: number, y: number): [number, number, JSX.Element] {
+    let ret: [number, number, JSX.Element];
+    if (y < baseFront) {
+        ret = drawForwardTraj(x, y)
+    } else if (y < baseBack) {
+        // Next to base, draw rotate trajectory
+        ret = drawRotate(x < BASE.centerX);
+    } else {
+        // Move backward
+        ret = drawBackward(y);
+    }
+    return ret;
+}
+
+/**
+ * Draws an arc from the base to the cursor, such that the arc is normal
+ * to the base.
+ * 
+ * @param x horizontal position of the cursor
+ * @param y vertical position of the cursor
+ * @returns the linear distance, the angle, and the trajectory element
+ */
+function drawForwardTraj(x: number, y: number): [number, number, JSX.Element] {
+    const dx = BASE.centerX - x;
+    const dy = baseFront - y;
+    const heading = Math.atan2(-dx, dy)
+    const sweepFlag = dx < 0;
+
+    const distance = Math.sqrt(dx * dx + dy * dy)  // length from base to cursor
+    const radius = distance / (2 * Math.sin(heading))  // radius of the center curve
+    const centerPath = makeArc(BASE.centerX, baseFront, radius, sweepFlag, x, y);
+
+    const leftEndX = x - BASE.width / 2 * Math.cos(2 * heading)
+    const leftEndY = y - BASE.width / 2 * Math.sin(2 * heading)
+    const leftRadius = radius + BASE.width / 2
+    const leftPath = makeArc(baseLeft, baseFront, leftRadius, sweepFlag, leftEndX, leftEndY);
+
+    const rightEndX = x + BASE.width / 2 * Math.cos(2 * heading)
+    const rightEndY = y + BASE.width / 2 * Math.sin(2 * heading)
+    const rightRadius = radius - BASE.width / 2
+    const rightPath = makeArc(baseRight, baseFront, rightRadius, sweepFlag, rightEndX, rightEndY);
+
+    const trajectory = (
+        <>
+            <path d={centerPath} style={{ strokeDasharray: strokeDasharray }} />
+            <path d={leftPath} />
+            <path d={rightPath} />
+        </>
+    );
+    
+    // Normalize the distance 
+    const maxX = SVG_RESOLUTION / 2;
+    const maxY = baseFront;
+    const maxDistance = Math.sqrt(maxX * maxX + maxY * maxY);
+    const normalizedDistance = distance / maxDistance;
+    return [normalizedDistance, heading, trajectory];
 }
 
 /**
  * Creates the SVG path elements for circular arrows around the base.
+ * 
  * @param rotateLeft if true draws a path counter-clockwise, otherwise clockwise
  * @returns SVG path string description of the arrows
  */
-const makeArrowPath = (rotateLeft: boolean) => {
+function makeArrowPath(rotateLeft: boolean) {
     const arrowLength = percent2Pixel(2.5);
     const top = baseCenterY - rotateArcRadius;
     const bottom = baseCenterY + rotateArcRadius;
@@ -84,185 +220,46 @@ const leftArrowPath: string = makeArrowPath(true);
 /** Path to draw for turning right in place */
 const rightArrowPath: string = makeArrowPath(false);
 
-export class PredictiveDisplay extends React.Component<PredictiveDisplayProps, PredictiveDisplayState> {
-    svgRef: React.RefObject<SVGSVGElement>;
-    length: number;
-    angle: number;
-    holding: boolean
+/**
+ * Draws circular arrows around the base for rotating in place
+ * 
+ * @param rotateLeft if true draws counterclockwise arrow, if false draws 
+ * clockwise
+ *  @returns the linear distance, the angle, and the trajectory element
+ */
+function drawRotate(rotateLeft: boolean): [number, number, JSX.Element] {
+    const path = rotateLeft ? leftArrowPath : rightArrowPath;
+    const trajectory = (
+        <path d={path} />
+    );
+    return [0, rotateLeft ? 1 : -1, trajectory] 
+}
 
-    constructor(props: PredictiveDisplayProps) {
-        super(props);
-        this.state = {
-            trajectory: undefined,
-        }
+/**
+ * Draws a straight path backward from the base to the y position of the mouse
+ * 
+ * @param y y position of the mouse on the SVG canvas
+ * @returns the linear distance, the angle, and the trajectory element
+ */
+function drawBackward(y: number): [number, number, JSX.Element] {
+    const leftPath = `M ${baseLeft} ${baseBack} ${baseLeft} ${y}`
+    const rightPath = `M ${baseRight} ${baseBack} ${baseRight} ${y}`
+    const centerPath = `M ${BASE.centerX} ${baseBack} ${BASE.centerX} ${y}`
+    const trajectory = (
+        <>
+            <path d={centerPath} style={{ strokeDasharray: strokeDasharray }} />
+            <path d={leftPath} />
+            <path d={rightPath} />
+        </>
+    );
 
-        this.length = 0;
-        this.angle = 0;
-        this.holding = false;
+    const distance = baseBack - y;
+    const maxDistance = resolution_height - baseBack;
+    return [distance / maxDistance, 0, trajectory];
+}
 
-        this.svgRef = React.createRef();
-        this.drawForwardTraj = this.drawForwardTraj.bind(this);
-        this.drawRotate = this.drawRotate.bind(this);
-        this.drawBackward = this.drawBackward.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-        this.handleLeave = this.handleLeave.bind(this);
-        this.handleMove = this.handleMove.bind(this);
-        this.handleRelease = this.handleRelease.bind(this);
-    }
-
-    /**
-     * Draws an arc from the base to the cursor, such that the arc is normal
-     * to the base.
-     * @param x horizontal position of the cursor
-     * @param y vertical position of the cursor
-     */
-    drawForwardTraj(x: number, y: number): [number, number] {
-        const dx = BASE.centerX - x;
-        const dy = baseFront - y;
-        const heading = Math.atan2(-dx, dy)
-        const sweepFlag = dx < 0;
-
-        const c = Math.sqrt(dx * dx + dy * dy)  // length from base to cursor
-        const radius = c / (2 * Math.sin(heading))  // radius of the center curve
-        const centerPath = makeArc(BASE.centerX, baseFront, radius, sweepFlag, x, y);
-
-        // Next to base, draw rotate trajectory. 
-        // note: this handles the case where the cursor is too close to the base
-        // of the robot for the robot to achieve that position with only forward
-        // wheel spin
-        if (Math.abs(radius) < BASE.width / 2) {
-            return this.drawRotate(x < BASE.centerX);
-        }
-
-        const leftEndX = x - BASE.width / 2 * Math.cos(2 * heading)
-        const leftEndY = y - BASE.width / 2 * Math.sin(2 * heading)
-        const leftRadius = radius + BASE.width / 2
-        const leftPath = makeArc(baseLeft, baseFront, leftRadius, sweepFlag, leftEndX, leftEndY);
-
-        const rightEndX = x + BASE.width / 2 * Math.cos(2 * heading)
-        const rightEndY = y + BASE.width / 2 * Math.sin(2 * heading)
-        const rightRadius = radius - BASE.width / 2
-        const rightPath = makeArc(baseRight, baseFront, rightRadius, sweepFlag, rightEndX, rightEndY);
-
-        const trajectory = (
-            <>
-                <path d={centerPath} style={{ strokeDasharray: strokeDasharray }} />
-                <path d={leftPath} />
-                <path d={rightPath} />
-            </>
-        );
-        this.setState({ trajectory });
-        const arcLength = 2 * radius * heading;
-        return [arcLength, heading];
-    }
-
-    /**
-     * Draws circular arrows around the base for rotating in place
-     * @param rotateLeft if true draws counterclockwise arrow, if false draws 
-     * clockwise
-     */
-    drawRotate(rotateLeft: boolean): [number, number] {
-        const path = rotateLeft ? leftArrowPath : rightArrowPath;
-        const trajectory = (
-            <path d={path} />
-        );
-        this.setState({ trajectory })
-        return [0, rotateLeft ? 1 : -1]  // TODO: map rotate click to angular velocity
-    }
-
-    /**
-     * Draws a straigh path backward from the base to the y position of the mouse
-     * @param y y position of the mouse on the SVG canvas
-     * @returns length and angle of the click
-     */
-    drawBackward(y: number): [number, number] {
-        const leftPath = `M ${baseLeft} ${baseBack} ${baseLeft} ${y}`
-        const rightPath = `M ${baseRight} ${baseBack} ${baseRight} ${y}`
-        const centerPath = `M ${BASE.centerX} ${baseBack} ${BASE.centerX} ${y}`
-        const trajectory = (
-            <>
-                <path d={centerPath} style={{ strokeDasharray: strokeDasharray }} />
-                <path d={leftPath} />
-                <path d={rightPath} />
-            </>
-        );
-        this.setState({ trajectory })
-        return [baseBack - y, 0];
-    }
-
-    /** Updates the trajectory display and calls callback.*/
-    drawTrajectory(event: React.MouseEvent<SVGSVGElement>) {
-        const { clientX, clientY } = event;
-        const svg = this.svgRef.current;
-        if (!svg) return;
-        const rect = svg.getBoundingClientRect();
-        // Get x and y in terms of the SVG element
-        const x = (clientX - rect.left) / rect.width * SVG_RESOLUTION;
-        const pixelY = (clientY - rect.top) / rect.height;
-        const y = scaleToNavAspectRatio(pixelY * SVG_RESOLUTION);
-
-        let ret: [number, number];
-        if (y < baseFront) {
-            ret = this.drawForwardTraj(x, y)
-        } else if (y < baseBack) {
-            // Next to base, draw rotate trajectory
-            ret = this.drawRotate(x < BASE.centerX);
-        } else {
-            // Move backward
-            ret = this.drawBackward(y);
-        }
-
-        const [length, angle] = ret;
-        this.length = length;
-        this.angle = angle;
-    }
-
-    handleLeave() {
-        this.setState({ trajectory: undefined });
-        if (this.props.functions.onLeave) {
-            this.props.functions.onLeave()
-        }
-    }
-
-    handleClick() {
-        this.holding = true;
-        if (this.props.functions.onClick) {
-            this.props.functions.onClick(this.length, this.angle);
-        }
-    }
-
-    handleRelease() {
-        this.holding = false;
-        if (this.props.functions.onRelease) {
-            this.props.functions.onRelease()
-        }
-    }
-
-    handleMove(e: React.MouseEvent<SVGSVGElement>) {
-        this.drawTrajectory(e);
-        if (this.holding && this.props.functions.onMove) {
-            this.props.functions.onMove(this.length, this.angle);
-        }
-    }
-
-    render() {
-        const customizing = this.props.sharedState.customizing;
-        const controlProps = customizing ? {} : {
-            onMouseMove: this.handleMove,
-            onMouseLeave: this.handleLeave,
-            onMouseDown: this.handleClick,
-            onMouseUp: this.handleRelease
-        };
-        return (
-            <svg
-                viewBox={`0 0 ${SVG_RESOLUTION} ${resolution_height}`}
-                preserveAspectRatio="none"
-                ref={this.svgRef}
-                className={className("predictive-display", { customizing })}
-                {...controlProps}
-            >
-                {this.state.trajectory}
-            </svg>
-        )
-    }
+/**Formats the SVG path arc string. */
+function makeArc(startX: number, startY: number, radius: number, sweepFlag: boolean, endX: number, endY: number) {
+    const sweep = sweepFlag ? 1 : 0;
+    return `M ${startX},${startY} A ${radius} ${radius} 0 0 ${sweep} ${endX},${endY}`
 }

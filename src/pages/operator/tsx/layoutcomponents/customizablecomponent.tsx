@@ -4,6 +4,7 @@ import { Tabs } from "./tabs";
 import { RemoteStream, ValidJointStateDict } from "shared/util";
 import { ButtonPad } from "./buttonpads";
 import { VideoStreamComponent } from "./videostreams";
+import { PredictiveDisplay } from "./predictivedisplay";
 
 /** State required for all elements */
 export type SharedState = {
@@ -59,6 +60,8 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <ButtonPad {...props} />;
         case ComponentType.VideoStream:
             return <VideoStreamComponent {...props} />;
+        case ComponentType.PredictiveDisplay:
+            return <PredictiveDisplay {...props}/>;
         default:
             throw Error(`unknow component type: ${props.definition.type}`);
     }

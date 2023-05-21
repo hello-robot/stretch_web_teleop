@@ -1,16 +1,17 @@
 import React from "react";
 import { VelocityControl, DEFAULT_VELOCITY_SCALE } from "operator/tsx/staticcomponents/velocitycontrol"
-import { LayoutArea } from "./layoutarea";
+import { LayoutArea } from "./staticcomponents/layoutarea";
 import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
-import "operator/css/operator.css"
 import { CustomizeButton } from "./staticcomponents/customizebutton";
 import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
 import { RemoteStream, AllJoints, ValidJointStateDict } from "shared/util";
-import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers"; 
+import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 import { btnFnProvider } from "./index";
+
+import "operator/css/operator.css"
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -26,7 +27,7 @@ export const Operator = (props: {
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
     const [inJointLimits, setInJointLimits] = React.useState<ValidJointStateDict | undefined>();
     const [inCollision, setInCollision] = React.useState<ValidJointStateDict | undefined>();
-    
+
     let remoteStreams = props.remoteStreams
 
     /** Rerenders the layout */

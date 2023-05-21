@@ -64,6 +64,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const [contextMenu, setContextMenu] = React.useState<React.ReactElement | null>(null);
     /** List of path shapes for each button on the button pad */
     const definition = props.definition as ButtonPadDef;
+    const id: ButtonPadId = definition.id;
+    if (!id) throw Error("Undefined button pad ID at path " + props.path);
     const [shape, functions] = getShapeAndFunctionsFromId(definition.id);
     const buttonsProps = functions.map((funct: ButtonPadFunction) => {
         return {
@@ -177,7 +179,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             shape = ButtonPadShape.Gripper;
             break;
         default:
-            throw new Error(`unknow video stream id: ${id}`);
+            throw new Error(`unknow button pad id: ${id}`);
     }
 
     return [shape, functions];

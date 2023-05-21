@@ -84,16 +84,14 @@ const SidebarOptions = (props: OptionsProps) => {
 
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.activeDef as VideoStreamDef;
-    const pd = definition.children.length > 0 && definition.children[0].id == ButtonPadId.PredictiveDisplay;
+    const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     function togglePredictiveDisplay() {
         const newPdOn = !predictiveDisplayOn;
         setPredictiveDisplayOn(newPdOn);
         if (newPdOn) {
             // Add predictive display to the stream
-            definition.children = [
-                {type: ComponentType.ButtonPad, id: ButtonPadId.PredictiveDisplay}
-            ];
+            definition.children = [{type: ComponentType.PredictiveDisplay}];
         } else {
             definition.children = [];
         }
