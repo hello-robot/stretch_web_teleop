@@ -10,7 +10,8 @@ export enum ComponentType {
     Tabs = "Tabs",
     SingleTab = "Single Tab",
     VideoStream = "Video Stream",
-    ButtonPad = "Button Pad"
+    ButtonPad = "Button Pad",
+    PredictiveDisplay = "Predictive Display"
 }
 
 /**
@@ -28,23 +29,31 @@ export enum VideoStreamId {
 export enum ButtonPadId {
     overhead = "Overhead",
     realsense = "Realsense",
-    gripper = "Gripper",
-    PredictiveDisplay = "Predictive Display"
+    gripper = "Gripper"
 }
+
+/**
+ * Identifier for the subtype of the component 
+ * (e.g. which video stream camera, or which button pad)
+ */
+export type ComponentId = VideoStreamId | ButtonPadId;
 
 /**
  * Definition for any interface component. Any video stream, button pad, 
  * tabs, etc. definition will have these fields.
  */
 export type ComponentDefinition = {
+    /** Indicates the type of the component */
     type: ComponentType;
-    id?: any;
+    /** Indicates the identifier for the sub-type of the component */
+    id?: ComponentId;
 }
 
 /**
  * Definition for a button pad component
  */
 export type ButtonPadDef = ComponentDefinition & {
+    /** Indicates the shape and functions on the button pad*/
     id: ButtonPadId;
 }
 
@@ -71,8 +80,7 @@ export type TabsDef = ParentComponentDefinition & {
 /**
  * Definition for a video stream component
  */
-export type VideoStreamDef = ComponentDefinition & {
+export type VideoStreamDef = ParentComponentDefinition & {
+    /** Indicates the camera video of the video stream */
     id: VideoStreamId;
-    /** The button pad to overlay, if undefined then no overlay. */
-    children: ButtonPadDef[];
 }

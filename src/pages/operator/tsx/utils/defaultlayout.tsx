@@ -15,9 +15,9 @@ export const DEFAULT_LAYOUT: ParentComponentDefinition = {
                 id: VideoStreamId.overhead,
                 children: [
                     {
-                        type: ComponentType.ButtonPad,
+                        type: ComponentType.PredictiveDisplay,
+                        // type: ComponentType.ButtonPad,
                         // id: ButtonPadId.overhead
-                        id: ButtonPadId.PredictiveDisplay
                     }
                 ]
             } as VideoStreamDef,

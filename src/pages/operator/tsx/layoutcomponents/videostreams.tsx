@@ -1,8 +1,12 @@
 import React from "react";
 import { ROSCompressedImage, className } from "shared/util";
 import "operator/css/videostreams.css"
-import { CustomizableComponentProps } from "./customizablecomponent";
+import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
+import { ComponentDefinition, ComponentType, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { RemoteStream } from "shared/util"
+import { ButtonPad } from "./buttonpads";
+import { PredictiveDisplay } from "./predictivedisplay";
 
 type VideoStreamProps = {
     width: number,
@@ -74,60 +78,154 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 }
 
-export type VideoStreamComponentProps = CustomizableComponentProps & {
-    stream: MediaStream,
-    buttonPad: React.ReactNode,
-}
-
 /**
  * Displays a video stream with an optional button pad overlay
  * @param props properties
  * @returns a video stream component
  */
-export const VideoStreamComponent = (props: VideoStreamComponentProps) => {
+export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const [streamStyle, setStreamStyle] = React.useState({});
     const videoRef = React.useRef<HTMLVideoElement>(null);
+
+    const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
+
+    const definition = props.definition as VideoStreamDef;
+    if (!definition.children) throw Error('Video Stream definition should have children');
+    const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
+
+    // Create the overlay
+    const overlayDefinition = definition.children.length > 0 ? definition.children[0] : undefined;
+    const overlay = createOverlay(overlayDefinition, props.path, props.sharedState);
 
     // Record the height and width of the video component on resize
     const resizeObserver = new ResizeObserver(entries => {
         const { height, width } = entries[0].contentRect;
         setStreamStyle({ height, width });
     });
+
     React.useEffect(() => {
         if (!videoRef?.current) return;
-        videoRef.current.srcObject = props.stream;
+        videoRef.current.srcObject = stream;
         resizeObserver.observe(videoRef.current);
         return () => resizeObserver.disconnect();
-    }, [props.stream]);
+    }, [stream]);
 
     const { customizing } = props.sharedState;
     const selected = props.path === props.sharedState.activePath;
     const videoClass = className("video-canvas", { customizing, selected })
 
-    function handleClick(e: React.MouseEvent<HTMLDivElement>) {
-        console.log('click on video stream')
-        e.stopPropagation();
+    /** Mark this video stream as selected */
+    function selectSelf() {
         props.sharedState.onSelect(props.definition, props.path);
+        setClickXY(null);
+    }
+
+    /** Mark the button pad child as selected */
+    function selectChild() {
+        props.sharedState.onSelect(overlayDefinition!, props.path + '-0');
+        setClickXY(null);
+    }
+
+    /** Opens a popup  */
+    function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+        event.stopPropagation();
+
+        // If no button pad overlay then select self and return
+        if (!overlayDefinition || overlayDefinition.type !== ComponentType.ButtonPad) {
+            selectSelf();
+            return;
+        }
+
+        // Create context menu popup where user can choose between selecting 
+        // the button pad or the video stream
+        const { clientX, clientY } = event;
+        const { left, top } = videoRef.current!.getBoundingClientRect();
+        const x = clientX - left;
+        const y = clientY - top;
+        setClickXY([x, y]);
     }
 
     return (
         <div className='video-stream'>
             <div
-                className={className("video-button-pad", { customizing, selected })}
+                className={className("video-overlay-container", { customizing, selected })}
                 style={streamStyle}
-                onClick={handleClick}
+                onClick={customizing ? handleClick : undefined}
             >
-                {props.buttonPad ? props.buttonPad :
-                    <DropZone
-                        path={props.path + "-0"}
-                        sharedState={props.sharedState}
-                        parentDef={props.definition}
-                    />}
+                {
+                    // Display overlay on top of video stream
+                    overlay ? overlay :
+                        <DropZone
+                            path={props.path + "-0"}
+                            sharedState={props.sharedState}
+                            parentDef={props.definition}
+                        />
+                }
+                {
+                    // When clickXY is set, display context menu
+                    clickXY ? <SelectContexMenu
+                        clickXY={clickXY}
+                        selectSelf={selectSelf}
+                        selectChild={selectChild}
+                        clickOut={() => setClickXY(null)}
+                    /> : undefined
+                }
             </div>
-
             <video ref={videoRef} autoPlay muted={true} className={videoClass} />
         </div>
     );
+}
+
+/**
+ * Creates an overlay element for the video stream
+ * 
+ * @param overlayDefinition definition for the component to overlay on the video stream
+ * @param path path to the parent video stream component
+ * @param sharedState {@link SharedState}
+ * @returns overlay element, or undefined if video stream doesn't have an overlay
+ */
+function createOverlay(overlayDefinition: ComponentDefinition | undefined, path: string, sharedState: SharedState): JSX.Element | undefined {
+    if (!overlayDefinition) return undefined;
+
+    const overlayProps = {
+        definition: overlayDefinition,
+        path: path + "-0",
+        sharedState: sharedState
+    } as CustomizableComponentProps;
+
+    switch (overlayDefinition?.type) {
+        case (ComponentType.ButtonPad):
+            return <ButtonPad {...overlayProps} overlay />
+        case (ComponentType.PredictiveDisplay):
+            return <PredictiveDisplay {...overlayProps} />
+        default:
+            throw Error('Video stream at path ' + path + ' cannot overlay child ' + overlayDefinition);
+    }
+}
+
+/**
+ * Gets the stream based on the identifier
+ * 
+ * @param id identifier for the video stream
+ * @param remoteStreams map of {@link RemoteStream}
+ * @returns the corresponding stream
+ */
+function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>): MediaStream {
+    let streamName: string;
+    switch (id) {
+        case VideoStreamId.overhead:
+            streamName = "overhead";
+            break;
+        case VideoStreamId.realsense:
+            streamName = "realsense";
+            break;
+        case VideoStreamId.gripper:
+            streamName = "gripper";
+            break;
+        default:
+            throw Error(`unknow video stream id: ${id}`);
+    }
+    return remoteStreams.get(streamName)!.stream;
 }
 
 /** Renders all three video streams side by side */
@@ -149,3 +247,71 @@ export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
         </div>
     );
 };
+
+
+/** Props for {@link SelectContexMenu} */
+type SelectContexMenuProps = {
+    /** x and y location to render the context menu popup */
+    clickXY: [number, number];
+    /** Callback to select the video stream */
+    selectSelf: () => void;
+    /** Callback to select the child button pad */
+    selectChild: () => void;
+    /** Callback to hide the context menu popup when click outside */
+    clickOut: () => void;
+}
+
+/**
+ * Creates a context menu popup when user clicks during 
+ * customization mode so the user can choose between the button pad and its 
+ * parent video stream.
+ * 
+ * @param props {@link SelectContexMenuProps}
+ */
+const SelectContexMenu = (props: SelectContexMenuProps) => {
+    const ref = React.useRef<HTMLUListElement>(null);
+    const [x, y] = props.clickXY;
+
+    // Handler to close dropdown when click outside
+    React.useEffect(() => {
+
+        /** Closes context menu if user clicks outside */
+        const handler = (e: any) => {
+            // If didn't click inside the context menu or the existing SVG, then
+            // hide the popup
+            if (ref.current && !ref.current.contains(e.target)) {
+                props.clickOut();
+                console.log('clicked')
+            }
+        };
+        window.addEventListener("click", handler, true);
+        return () => {
+            window.removeEventListener("click", handler);
+        };
+    }, []);
+
+    /**
+     * Handles when the user clicks on one of the context menu options
+     * @param e mouse event of the click
+     * @param self if true selects itself (a button pad), if false selects its 
+     * parent (the video stream)
+     */
+    function handleClick(e: React.MouseEvent<HTMLLIElement>, self: boolean) {
+        self ? props.selectSelf() : props.selectChild();
+
+        // Make sure background elements don't receive a click
+        e.stopPropagation();
+    }
+
+    return (
+
+        <ul aria-label="Select"
+            ref={ref}
+            className="video-context-menu"
+            style={{ top: `${y}px`, left: `${x}px` }}
+        >
+            <li onClick={(e) => handleClick(e, false)}>Button Pad</li>
+            <li onClick={(e) => handleClick(e, true)}>Video Stream</li>
+        </ul>
+    );
+}

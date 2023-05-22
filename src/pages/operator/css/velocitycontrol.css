@@ -1,36 +1,17 @@
-#velocity-control-wrapper {
-    /* clear: both; */
-    /* display: inline-block; */
-    display: flex;
-}
-
-.velocity-radio-button {
-    position: absolute;
-    float:left;
-    opacity: 0;
-}
-
-.velocity-label {
-    float: left;
-    padding: var(--btn-padding);
-    cursor: pointer;
-    border: var(--btn-brdr);
-    margin-right: -1px;
-    background-color: var(--btn-bg-color)
-}
-
-.velocity-label:hover {
-    background-color: var(--btn-bg-color-hover);
-}
-
-.velocity-label:first-of-type {
+#velocity-control-container button:first-of-type {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }
 
-.velocity-label:last-of-type {
+#velocity-control-container button:last-of-type {
     border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
 }
 
-.velocity-radio-button:checked + label{
-    background-color: var(--btn-bg-color-click)
+#velocity-control-container button {
+    border-radius: 0;
+    /* Make buttons wider than default */
+    width: 8rem;
+}
+
+#velocity-control-container button.active {
+    background-color: var(--btn-bg-color);
 }

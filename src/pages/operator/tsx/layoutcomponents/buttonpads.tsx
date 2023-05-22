@@ -1,13 +1,13 @@
 import React from "react";
 import "operator/css/buttonpads.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
-import { VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { ButtonPadDef, ButtonPadId, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE, rect } from "shared/svg";
+import { buttonFunctionProvider } from "operator/tsx/index";
 
-// TODO: this should probably be moved to utils
 /** All the possible button functions */
-export enum UserInteractionFunction {
+export enum ButtonPadFunction {
     BaseForward,
     BaseReverse,
     BaseRotateRight,
@@ -23,14 +23,16 @@ export enum UserInteractionFunction {
     PredictiveDisplay
 }
 
-/** Possible shapes for the button pad */
+/** Possible layouts for the button pad (i.e. the shape and arrangement of the 
+ * buttons)
+ */
 export enum ButtonPadShape {
     Directional,
     Realsense,
     Gripper
 }
 
-/** Functions called when the user interacts with the buttons. */
+/** Which functions called when the user interacts with buttons. */
 export type ButtonFunctions = {
     onClick: () => void,
     onRelease?: () => void,
@@ -44,35 +46,47 @@ export type ButtonProps = ButtonFunctions & {
     icon?: object  // TODO: figure out how to put an icon on a button
 }
 
-/** Properties for an entire button pad */
-export interface ButtonPadProps extends CustomizableComponentProps {
-    /** List of properties for the buttons in this button pad
-     * @length should be equal to number of buttons on the pad
-     */
-    buttonsProps: ButtonProps[];
-    /** The shape of the button pad */
-    buttonPadShape: ButtonPadShape;
-    /** If defined, the parent video stream which contains this button pad. */
-    videoStreamParent?: VideoStreamDef;
+/** Properties for {@link ButtonPad} */
+type ButtonPadProps = CustomizableComponentProps & {
+    /* If the button pad is overlaid on a video stream */
+    overlay?: boolean;
 }
 
-/** Button pad which can be overlaid as a child of a video stream or lonestanding */
+/**
+ * A set of buttons which can be overlaid as a child of a video stream or 
+ * lonestanding.
+ * 
+ * @param props {@link ButtonPadProps}
+ */
 export const ButtonPad = (props: ButtonPadProps) => {
     /** Reference to the SVG which makes up the button pad */
     const svgRef = React.useRef<SVGSVGElement>(null);
-    const [contextMenu, setContextMenu] = React.useState<React.ReactElement | null>(null);
     /** List of path shapes for each button on the button pad */
-    const paths: string[] = getPathsFromShape(props.buttonPadShape);
-    const { customizing } = props.sharedState;
-    const selected = props.path === props.sharedState.activePath;
-    const overlay = props.videoStreamParent !== undefined;
-    if (paths.length !== props.buttonsProps.length) {
-        throw new Error(`paths length: ${paths.length}, buttonsProps length: ${props.buttonsProps.length}`);
+    const definition = props.definition as ButtonPadDef;
+    const id: ButtonPadId = definition.id;
+    if (!id) throw Error("Undefined button pad ID at path " + props.path);
+    const [shape, functions] = getShapeAndFunctionsFromId(definition.id);
+    const buttonsProps = functions.map((funct: ButtonPadFunction) => {
+        return {
+            ...buttonFunctionProvider.provideFunctions(funct),
+            label: "" + funct
+        } as ButtonProps;
+    });
+    const paths: string[] = getPathsFromShape(shape);
+
+    // Paths and functions should be the same length
+    if (paths.length !== functions.length) {
+        throw Error(`paths length: ${paths.length}, functions length: ${functions.length}`);
     }
 
-    /** Creates the buttons on the button pad */
+    const { customizing } = props.sharedState;
+    const { overlay } = props;
+    const selected = props.path === props.sharedState.activePath;
+
+    /** Uses the paths and buttonsProps to create the buttons */
     const mapPaths = (path: string, i: number) => {
-        const buttonProps = props.buttonsProps[i]
+        const buttonProps = buttonsProps[i]
+        // Buttons will not function during customization mode
         const clickProps = customizing ? {} : {
             onMouseDown: buttonProps.onClick,
             onMouseUp: buttonProps.onRelease,
@@ -86,49 +100,16 @@ export const ButtonPad = (props: ButtonPadProps) => {
         )
     }
 
-    /** Call the shared onSelect function on this button pad component */
-    const selectSelf = () => {
-        props.sharedState.onSelect(props.definition, props.path);
-        setContextMenu(null);
-    }
-
-    /** Call the shared onSelect fucntion for the parent video stream  */
-    const selectParent = () => {
-        const parentPath = props.path.split('-').slice(0, -1).join('-');
-        props.sharedState.onSelect(props.videoStreamParent!, parentPath);
-        setContextMenu(null);
-    }
-
     /** Callback when SVG is clicked during customize mode */
     const onSelect = (event: React.MouseEvent<SVGSVGElement>) => {
         // Make sure the container of the button pad doesn't get selected
         event.stopPropagation();
-
-        // If button pad is not overlaid on a video stream then select itself
-        if (!overlay) {
-            selectSelf();
-            return;
-        }
-
-        // Open context menu to ask the user if they want to select the overlaid 
-        // button pad or its parent video stream
-        const { clientX, clientY } = event;
-        const { left, top } = svgRef.current!.getBoundingClientRect();
-        const x = clientX - left;
-        const y = clientY - top;
-        setContextMenu(
-            <SelectContexMenu
-                x={x}
-                y={y}
-                selectSelf={selectSelf}
-                selectParent={selectParent}
-                clickOut={() => setContextMenu(null)}
-            />
-        );
+        props.sharedState.onSelect(props.definition, props.path);;
     }
 
     // In customizing state add onClick callback to button pad SVG element
-    const selectProp = customizing ? {
+    // note: if overlaid on a video stream, let the parent video stream handle the click
+    const selectProp = customizing && !overlay ? {
         "onClick": onSelect
     } : {};
 
@@ -138,82 +119,89 @@ export const ButtonPad = (props: ButtonPadProps) => {
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
-                className={className("button-pads", { live: !customizing, selected, overlay })}
+                className={className("button-pads", { customizing, selected, overlay })}
                 {...selectProp}
             >
                 {paths.map(mapPaths)}
             </svg>
-            {contextMenu}
         </>
     );
 }
 
-/** Props for {@link SelectContexMenu} */
-type SelectContexMenuProps = {
-    /** X location to render the context menu popup */
-    x: number;
-    /** Y location to render the context menu popup */
-    y: number;
-    /** Callback to select the button pad */
-    selectSelf: () => void;
-    /** Callback to select the parent video stream */
-    selectParent: () => void;
-    /** Callback to hide the context menu popup when click outside */
-    clickOut: () => void;
-}
-
 /**
- * Creates a context menu popup when user clicks on the button pad during 
- * customization mode so the user can choose between the button pad and its 
- * parent video stream
- * @param props {@link SelectContexMenuProps}
- * @returns the context menu component
+ * Provides the shape and fuctions for a button pad based on the identifier
+ * 
+ * @param id the identifier of the button pad
+ * @returns the shape of the button pad {@link ButtonPadShape} and a list of 
+ * {@link ButtonPadFunction} where each element informs the function of
+ * the corresponding button on the button pad
  */
-const SelectContexMenu = (props: SelectContexMenuProps) => {
-    const ref = React.useRef<HTMLUListElement>(null);
-
-    // Handler to close dropdown when click outside
-    React.useEffect(() => {
-
-        /** Closes context menu if user clicks outside */
-        const handler = (e: any) => {
-            // If didn't click inside the context menu or the existing SVG, then
-            // hide the popup
-            if (ref.current && !ref.current.contains(e.target)) {
-                props.clickOut();
-                console.log('clicked')
-            }
-        };
-        window.addEventListener("click", handler, true);
-        return () => {
-            window.removeEventListener("click", handler);
-        };
-    }, []);
-
-    /**
-     * Handles when the user clicks on one of the context menu options
-     * @param e mouse event of the click
-     * @param self if true selects itself (a button pad), if false selects its 
-     * parent (the video stream)
-     */
-    function handleClick(e: React.MouseEvent<HTMLLIElement>, self: boolean) {
-        self ? props.selectSelf() : props.selectParent();
-
-        // Make sure background elements don't receive a click
-        e.stopPropagation();
+function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPadFunction[]] {
+    let shape: ButtonPadShape;
+    let functions: ButtonPadFunction[];
+    const BF = ButtonPadFunction;
+    switch (id) {
+        case ButtonPadId.overhead:
+            functions = [
+                BF.BaseForward,
+                BF.BaseRotateRight,
+                BF.BaseReverse,
+                BF.BaseRotateLeft
+            ];
+            shape = ButtonPadShape.Directional;
+            break;
+        case ButtonPadId.realsense:
+            functions = [
+                BF.WristRotateIn,
+                BF.WristRotateOut,
+                BF.ArmExtend,
+                BF.ArmRetract,
+                BF.BaseForward,
+                BF.BaseReverse,
+                BF.ArmLift,
+                BF.ArmLower,
+                BF.GripperClose,
+                BF.GripperOpen
+            ]
+            shape = ButtonPadShape.Realsense;
+            break;
+        case ButtonPadId.gripper:
+            functions = [
+                BF.ArmLift,
+                BF.ArmLower,
+                BF.WristRotateIn,
+                BF.WristRotateOut,
+                BF.GripperOpen,
+                BF.GripperClose,
+            ]
+            shape = ButtonPadShape.Gripper;
+            break;
+        default:
+            throw new Error(`unknow button pad id: ${id}`);
     }
 
-    return (
+    return [shape, functions];
+}
 
-        <ul aria-label="Select"
-            ref={ref}
-            className="button-pad-context-menu"
-            style={{ top: `${props.y}px`, left: `${props.x}px` }}
-        >
-            <li onClick={(e) => handleClick(e, true)}>Button Pad</li>
-            <li onClick={(e) => handleClick(e, false)}>Video Stream</li>
-        </ul>
-    );
+/******************************************************************************/
+/* Logic to draw the paths for the buttons on each button pad                 */
+/******************************************************************************/
+
+/**
+ * Gets a list of path string descriptions for each button based on the {@link ButtonPadShape}
+ * 
+ * @param shape {@link ButtonPadShape} enum representing the shape of the button pad
+ * @returns a list of strings where each string is a path description for the shape of a single button
+ */
+function getPathsFromShape(shape: ButtonPadShape): string[] {
+    switch (shape) {
+        case (ButtonPadShape.Directional):
+            return getDirectionalPaths();
+        case (ButtonPadShape.Realsense):
+            return getRealsenseManipPaths();
+        case (ButtonPadShape.Gripper):
+            return getGripperPaths();
+    }
 }
 
 /** Represents the position and size of a box */
@@ -222,18 +210,6 @@ type BoxPosition = {
     centerY: number,
     height: number,
     width: number
-}
-
-function getPathsFromShape(shape: ButtonPadShape, videoStreamParent?: VideoStreamDef) {
-    switch (shape) {
-        case (ButtonPadShape.Directional):
-            const onRobot: boolean = videoStreamParent ? videoStreamParent.id == VideoStreamId.overhead : false;
-            return getDirectionalPaths(onRobot);
-        case (ButtonPadShape.Realsense):
-            return getRealsenseManipPaths();
-        case (ButtonPadShape.Gripper):
-            return getGripperPaths();
-    }
 }
 
 /** Default box position with the box centered and a height and width 
@@ -249,9 +225,10 @@ const DEFAULT_POSITION = {
 /**
  * Directional button pad made up of four trapazoids around a box in the 
  * center of the button pad.
+ * 
  * @param onRobot if the square should be around the robot, centered if false
  */
-function getDirectionalPaths(onRobot: boolean) {
+function getDirectionalPaths(onRobot: boolean = true) {
     const boxPosition: BoxPosition = onRobot ? OVERHEAD_ROBOT_BASE : DEFAULT_POSITION;
     const { centerX, centerY, height, width } = boxPosition;
     const top = centerY - height / 2

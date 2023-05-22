@@ -1,37 +1,45 @@
-
 #action-mode-button {
-    padding: var(--btn-padding);
     background-color: var(--btn-bg-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 10rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    width: var(--header-btn-width);
 }
 
-#action-mode-button .material-icons {
-    margin: -0.25rem;
+#action-mode-button.expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Flip the dropdown arrow when active */
+#action-mode-button span {
+    transition: transform 0.2s linear;
+}
+
+#action-mode-button.expanded span {
+    transform: scaleY(-1);
 }
 
 #action-mode-popup {
     position: absolute;
     z-index: 3;
+    box-shadow: var(--shadow);
+    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
 }
 
 .action-mode-option {
     background-color: var(--btn-bg-color);
     padding: var(--btn-padding);
-    border: var(--btn-brdr);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     cursor: pointer;
-    width: 10rem;
+    width: var(--header-btn-width);
 }
 
 .action-mode-option.active {
     background-color: var(--btn-bg-color-click);
-}
-
-
-.action-mode-option:first-of-type {
-    border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0 ;
 }
 
 .action-mode-option:last-of-type {

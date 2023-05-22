@@ -6,7 +6,7 @@
 
 #operator-header {
     background-color: var(--gray-bg);
-    height: 3rem;
+    height: 4rem;
     width: 100%;
     box-sizing: border-box;
     padding: 0.5rem;
@@ -14,6 +14,14 @@
     align-items: center;
     justify-content: space-between;
     flex: 0 0 auto;
+
+    --header-btn-width: 10rem;
+}
+
+/* Make all the components in the header fill the avaliable height */
+#operator-header > *,
+#operator-header button {
+    height: 100%;
 }
 
 #operator-body {

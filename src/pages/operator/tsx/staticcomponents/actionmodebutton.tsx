@@ -9,14 +9,14 @@ export enum ActionMode {
     ClickClick = 'Click-Click'
 }
 
-export const DEFAULT_ACTION_MODE: ActionMode = ActionMode.StepActions;
-
 /** Turns {@link ActionMode} enum into an array */
 const ActionModes = Object.values(ActionMode) as ActionMode[];
 
 /** Props for {@link ActionModeButton} */
 type ActionModeButtonProps = {
+    /** The current action mode */
     actionMode: ActionMode,
+    /** Callback function when a new action mode is selected */
     onChange: (am: ActionMode) => void
 }
 
@@ -26,14 +26,12 @@ type ActionModeButtonProps = {
 export const ActionModeButton = (props: ActionModeButtonProps) => {
     const [showModes, setShowModes] = React.useState(false);
     const inputRef = React.useRef<HTMLDivElement>(null);
-    const actionMode = props.actionMode;
 
     // Handler to close dropdown when click outside
     React.useEffect(() => {
         const handler = (e: any) => {
             if (inputRef.current && !inputRef.current.contains(e.target)) {
                 setShowModes(false);
-                console.log('clicked')
             }
         };
         if (showModes) {
@@ -45,26 +43,31 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
     });
 
     /** Maps action modes into selections the user can click on. */
-    const mapFunc = (am: any) => {
-        const active = actionMode === am;
+    const mapFunc = (thisActionMode: ActionMode) => {
+        const active = props.actionMode === thisActionMode;
         return (
             <div
-                key={`action-mode-option-${am}`}
+                key={`action-mode-option-${thisActionMode}`}
                 onClick={() => {
                     setShowModes(false);
-                    props.onChange(am);
+                    // Only record change if selected is different from already active
+                    if (!active) props.onChange(thisActionMode);
                 }}
                 className={className("action-mode-option", { active })}
             >
-                {am}
+                {thisActionMode}
             </div>
         )
     }
 
     return (
         <div ref={inputRef}>
-            <button id="action-mode-button" onClick={() => setShowModes(!showModes)}>
-                {actionMode}
+            <button
+                id="action-mode-button"
+                className={showModes ? "expanded" : ""}
+                onClick={() => setShowModes(!showModes)}
+            >
+                {props.actionMode}
                 <span className="material-icons">expand_more</span>
             </button>
             <div hidden={!showModes} id="action-mode-popup">

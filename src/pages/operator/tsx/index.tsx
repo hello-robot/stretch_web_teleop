@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client';
-// import { VideoControl } from 'operator/tsx/layoutcomponents/videostreams';
 import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage, RemoteStream } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
@@ -7,16 +6,11 @@ import { cmd } from 'shared/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
 import { FunctionProvider, ButtonFunctionProvider } from './utils/functionprovider';
-import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
-import { DEFAULT_ACTION_MODE } from './staticcomponents/actionmodebutton';
 import React from 'react'
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
-export var btnFnProvider = new ButtonFunctionProvider({
-    actionMode: DEFAULT_ACTION_MODE,
-    velocityScale: DEFAULT_VELOCITY_SCALE,
-})
+export var buttonFunctionProvider = new ButtonFunctionProvider();
 
 let connection = new WebRTCConnection({
     peerRole: "operator",
@@ -65,6 +59,7 @@ function configureRobot() {
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     remoteRobot.setRobotMode("navigation")
+    FunctionProvider.initialize();
     FunctionProvider.addRemoteRobot(remoteRobot)
 
     const container = document.getElementById('root');
