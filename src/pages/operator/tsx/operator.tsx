@@ -11,6 +11,7 @@ import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
 import { RemoteStream, AllJoints, ValidJointStateDict } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers"; 
 import { btnFnProvider } from "./index";
+import { VoiceCommands } from "./staticcomponents/voicecommands";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -123,6 +124,7 @@ export const Operator = (props: {
                     initialVelocityScale={velocityScale}
                     onChange={(newVelocityScale) => btnFnProvider.handleVelocityScaleUpdate(newVelocityScale)}
                 />
+                <VoiceCommands/>
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleCustomize}

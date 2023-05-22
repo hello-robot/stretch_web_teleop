@@ -1,0 +1,7 @@
+#microphone-button {
+    padding: var(--btn-padding);
+    background-color: var(--btn-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
