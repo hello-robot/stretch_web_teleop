@@ -21,14 +21,10 @@
     "jsx": "preserve",  
     "baseUrl": "./",
     "paths": {
-      // "utils/*": ["src/utils/*"],
       "shared/*": ["src/shared/*"],
       "operator/*": ["src/pages/operator/*"],
       "robot/*": ["src/pages/robot/*"]
     },
   },
   "exclude": ["node_modules", "dist"]
-  // "include": [
-  //   "src"
-  // ],
 }
