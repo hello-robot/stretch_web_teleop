@@ -1,12 +1,13 @@
 import { Pose2D, RobotPose, uuid } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand
+export type cmd = DriveCommand | IncrementalMove | StopCommand | setRobotModeCommand
 
-export interface VelocityCommand { stop: () => void }
+export interface StopCommand { type: "stop" }
 
-interface GeneralCommand {
-    msg: string
+export interface VelocityCommand {
+    stop: () => void,
+    affirm?: () => void
 }
 
 export interface DriveCommand {
