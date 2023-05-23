@@ -11,7 +11,7 @@ import { VoiceCommands } from "./staticcomponents/voicecommands";
 import { RemoteStream, ValidJointStateDict } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 import "operator/css/operator.css"
-import { FunctionProvider } from "./utils/functionprovider";
+import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider";
 
 /** Operator interface webpage */
 export const Operator = (props: {
