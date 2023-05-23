@@ -4,8 +4,12 @@ import { WebRTCMessage, RemoteStream } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './operator';
+import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider';
+import { ButtonFunctionProvider } from 'operator/tsx/functionprovider/buttonpads'
+import { PredictiveDisplayFunctionProvider } from 'operator/tsx/functionprovider/predictivedisplay'
+import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
 import "operator/css/index.css"
-import { FunctionProvider, ButtonFunctionProvider, VoiceFunctionProvider, PredictiveDisplayFunctionProvider } from './utils/functionprovider';
+
 import React from 'react'
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()

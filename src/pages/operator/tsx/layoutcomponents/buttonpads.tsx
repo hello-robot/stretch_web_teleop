@@ -20,7 +20,6 @@ export enum ButtonPadFunction {
     GripperClose,
     WristRotateIn,
     WristRotateOut,
-    PredictiveDisplay
 }
 
 /** Possible layouts for the button pad (i.e. the shape and arrangement of the 
