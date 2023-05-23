@@ -3,6 +3,7 @@ import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "shar
 import { className, navigationProps } from "shared/util";
 import "operator/css/predictivedisplay.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
+import { predicitiveDisplayFunctionProvider } from "operator/tsx/index";
 
 /**
  * Scales height values to fit in the navigation camera
@@ -42,14 +43,6 @@ export type PredictiveDisplayFunctions = {
     onLeave?: () => void;
 }
 
-// TODO: implement predictive display function provider
-const mockFunctions = {
-    onClick: (length: number, angle: number) => { console.log('click length', length, "angle", angle) },
-    onMove: (length: number, angle: number) => { console.log('move length', length, "angle", angle) },
-    onRelease: () => { console.log('release') },
-    onLeave: () => { console.log('leave') },
-}
-
 /**
  * Overlay for overhead video stream where a curved path follows the cursor, 
  * and clicking translates and/or rotates the robot base.
@@ -59,7 +52,7 @@ const mockFunctions = {
 export const PredictiveDisplay = (props: CustomizableComponentProps) => {
     const svgRef = React.useRef<SVGSVGElement>(null);
     const [trajectory, setTrajectory] = React.useState<JSX.Element | undefined>(undefined);
-    const functions = mockFunctions; // TODO: implement predictive display function provider
+    const functions = predicitiveDisplayFunctionProvider.provideFunctions(); 
     const length = React.useRef<number>(0);
     const angle = React.useRef<number>(0);
     const holding = React.useRef<boolean>(false);
@@ -190,7 +183,7 @@ function drawForwardTraj(x: number, y: number): [number, number, JSX.Element] {
     const maxY = baseFront;
     const maxDistance = Math.sqrt(maxX * maxX + maxY * maxY);
     const normalizedDistance = distance / maxDistance;
-    return [normalizedDistance, heading, trajectory];
+    return [normalizedDistance, -1 * heading, trajectory];
 }
 
 /**
