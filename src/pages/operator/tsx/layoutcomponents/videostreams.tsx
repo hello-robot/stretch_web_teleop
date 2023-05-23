@@ -1,5 +1,5 @@
 import React from "react";
-import { ROSCompressedImage, className } from "shared/util";
+import { ROSCompressedImage, className, gripperProps, navigationProps, realsenseProps } from "shared/util";
 import "operator/css/videostreams.css"
 import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
@@ -84,30 +84,44 @@ export class VideoStream extends React.Component<VideoStreamProps> {
  * @returns a video stream component
  */
 export const VideoStreamComponent = (props: CustomizableComponentProps) => {
-    const [streamStyle, setStreamStyle] = React.useState({});
+    // Dimensions for the overlay so its the same width and height as the video
+    const [overlayDimensions, setOverlayDimensions] = React.useState({});
+    // Reference to the video element
     const videoRef = React.useRef<HTMLVideoElement>(null);
-
+    // X and Y position of the cursor when user clicks on the video
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
-
     const definition = props.definition as VideoStreamDef;
     if (!definition.children) throw Error('Video Stream definition should have children');
+    // Get the stream to display in the video
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
 
     // Create the overlay
     const overlayDefinition = definition.children.length > 0 ? definition.children[0] : undefined;
     const overlay = createOverlay(overlayDefinition, props.path, props.sharedState);
 
-    // Record the height and width of the video component on resize
-    const resizeObserver = new ResizeObserver(entries => {
-        const { height, width } = entries[0].contentRect;
-        setStreamStyle({ height, width });
-    });
+    const videoAspectRatio = getVideoAspectRatio(definition);
 
+    // Record the height and width of the video component on resize to set the 
+    // size of the overlay
+    React.useEffect(() => {
+        const resizeObserver = new ResizeObserver(entries => {
+            let { height, width } = entries[0].contentRect;
+
+            // Set the width based on the video aspect
+            if (width / height > videoAspectRatio) {
+                width = height * videoAspectRatio;
+            }
+            setOverlayDimensions({ height, width });
+        });
+        if (!videoRef?.current) return;
+        resizeObserver.observe(videoRef.current);
+        return () => resizeObserver.disconnect();
+    })
+
+    // Update the source of the video stream 
     React.useEffect(() => {
         if (!videoRef?.current) return;
         videoRef.current.srcObject = stream;
-        resizeObserver.observe(videoRef.current);
-        return () => resizeObserver.disconnect();
     }, [stream]);
 
     const { customizing } = props.sharedState;
@@ -146,10 +160,10 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     }
 
     return (
-        <div className='video-stream'>
+        <div className='video-stream' draggable={false}>
             <div
                 className={className("video-overlay-container", { customizing, selected })}
-                style={streamStyle}
+                style={overlayDimensions}
                 onClick={customizing ? handleClick : undefined}
             >
                 {
@@ -174,6 +188,26 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
             <video ref={videoRef} autoPlay muted={true} className={videoClass} />
         </div>
     );
+}
+
+
+/**
+ * Get the aspect ratio of the video based on the definition
+ * 
+ * @param definition definition of the video stream
+ * @returns aspect ratio of the video stream
+ */
+function getVideoAspectRatio(definition: VideoStreamDef): number {
+    switch (definition.id) {
+        case (VideoStreamId.gripper):
+            return gripperProps.width / gripperProps.height;
+        case (VideoStreamId.overhead):
+            return navigationProps.width / navigationProps.height;
+        case (VideoStreamId.realsense):
+            return realsenseProps.width / realsenseProps.height;
+        default:
+            throw Error(`undefined aspect ratio for ${definition.type}`)
+    }
 }
 
 /**

@@ -61,7 +61,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
         case ComponentType.VideoStream:
             return <VideoStreamComponent {...props} />;
         case ComponentType.PredictiveDisplay:
-            return <PredictiveDisplay {...props}/>;
+            return <PredictiveDisplay {...props} />;
         default:
             throw Error(`unknow component type: ${props.definition.type}`);
     }

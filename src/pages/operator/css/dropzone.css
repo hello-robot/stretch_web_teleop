@@ -10,6 +10,10 @@
     transition-timing-function: ease-out;
 }
 
+.drop-zone.standard {
+    height: 90%;
+}
+
 /* Drop zone in layout or tab content*/
 .drop-zone.standard,
 .drop-zone.overlay {
