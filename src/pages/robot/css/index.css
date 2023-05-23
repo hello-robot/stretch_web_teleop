@@ -27,3 +27,12 @@ code {
 .imageViewer {
   position: relative;
 }
+
+#video-stream-container {
+  margin: 1%;
+  width: auto;
+  height: 95%;
+  display: flex;
+  justify-content: space-between;
+  clear: both;
+}

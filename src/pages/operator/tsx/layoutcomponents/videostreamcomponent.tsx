@@ -1,87 +1,21 @@
 import React from "react";
-import { ROSCompressedImage, className, gripperProps, navigationProps, realsenseProps } from "shared/util";
-import "operator/css/videostreams.css"
+import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
+import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition } from "../utils/componentdefinitions";
+import { ButtonPad } from "./buttonpads";
 import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
-import { ComponentDefinition, ComponentType, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
-import { RemoteStream } from "shared/util"
-import { ButtonPad } from "./buttonpads";
 import { PredictiveDisplay } from "./predictivedisplay";
+import "operator/css/videostreamcomponent.css"
 
-type VideoStreamProps = {
-    width: number,
-    height: number,
-    fps: number
-}
-
-export class VideoStream extends React.Component<VideoStreamProps> {
-    canvas = React.createRef<HTMLCanvasElement>();
-    img: HTMLImageElement;
-    video: HTMLVideoElement;
-    width: number;
-    height: number;
-    fps: number;
-    className?: string;
-    outputVideoStream?: MediaStream
-
-    constructor(props: VideoStreamProps) {
-        super(props);
-        this.width = props.width;
-        this.height = props.height;
-        this.fps = props.fps;
-        this.img = document.createElement("img");
-        this.video = document.createElement("video");
-        this.video.style.display = "block";
-        this.video.setAttribute("width", this.width.toString());
-        this.video.setAttribute("height", this.height.toString());
-        this.outputVideoStream = new MediaStream();
-
-        this.updateImage = this.updateImage.bind(this);
-    }
-
-    get imageReceived() {
-        return this.img.src != null;
-    }
-
-    renderVideo() {
-        if (!this.imageReceived) {
-            return;
-        }
-        this.canvas.current?.getContext('2d')?.drawImage(this.img, 0, 0, this.width, this.height)
-    }
-
-    updateImage(message: ROSCompressedImage) {
-        this.img.src = 'data:image/jpg;base64,' + message.data;
-    }
-
-    drawVideo() {
-        this.renderVideo();
-        requestAnimationFrame(this.drawVideo.bind(this));
-    }
-
-    start() {
-        if (!this.canvas.current) throw 'Video stream canvas null'
-        this.outputVideoStream = this.canvas.current.captureStream(this.fps);
-        this.video.srcObject = this.outputVideoStream;
-        this.drawVideo();
-    }
-
-    render() {
-        return (
-            <canvas
-                ref={this.canvas!}
-                width={this.width}
-                height={this.height}
-                className={this.className}
-            />
-        )
-    }
-}
+/** Array of the different directions for the pan tilt buttons */
+const panTiltButtonDirections: string[] = ['up', 'down', 'left', 'right'];
+/** Type to specify the different directions for the pan tilt buttons */
+export type PanTiltButtonDirection = typeof panTiltButtonDirections[number];
 
 /**
  * Displays a video stream with an optional button pad overlay
+ * 
  * @param props properties
- * @returns a video stream component
  */
 export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     // Dimensions for the overlay so its the same width and height as the video
@@ -185,103 +119,107 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
                     /> : undefined
                 }
             </div>
-            <video ref={videoRef} autoPlay muted={true} className={videoClass} />
+            <SubVideoComponent {...{ definition, videoRef, videoClass }} />
         </div>
     );
 }
 
-
-/**
- * Get the aspect ratio of the video based on the definition
- * 
- * @param definition definition of the video stream
- * @returns aspect ratio of the video stream
- */
-function getVideoAspectRatio(definition: VideoStreamDef): number {
-    switch (definition.id) {
-        case (VideoStreamId.gripper):
-            return gripperProps.width / gripperProps.height;
-        case (VideoStreamId.overhead):
-            return navigationProps.width / navigationProps.height;
-        case (VideoStreamId.realsense):
-            return realsenseProps.width / realsenseProps.height;
-        default:
-            throw Error(`undefined aspect ratio for ${definition.type}`)
-    }
+/** Properties for {@link SubVideoComponent} */
+type SubVideoComponentProps = {
+    definition: VideoStreamDef,
+    videoRef: HTMLVideoElement,
+    videoClass: string;
 }
 
 /**
- * Creates an overlay element for the video stream
+ * The actual video element, either a plain HTML video element or a div with 
+ * the pan tilt controls for the realsense if the video stream is of the realsense
  * 
- * @param overlayDefinition definition for the component to overlay on the video stream
- * @param path path to the parent video stream component
- * @param sharedState {@link SharedState}
- * @returns overlay element, or undefined if video stream doesn't have an overlay
+ * @param props {@link SubVideoComponentProps}
  */
-function createOverlay(overlayDefinition: ComponentDefinition | undefined, path: string, sharedState: SharedState): JSX.Element | undefined {
-    if (!overlayDefinition) return undefined;
+const SubVideoComponent = (props: any) => {
+    const buttons = panTiltButtonDirections.map(dir => <PanTiltButton direction={dir} key={dir} />)
 
-    const overlayProps = {
-        definition: overlayDefinition,
-        path: path + "-0",
-        sharedState: sharedState
-    } as CustomizableComponentProps;
-
-    switch (overlayDefinition?.type) {
-        case (ComponentType.ButtonPad):
-            return <ButtonPad {...overlayProps} overlay />
-        case (ComponentType.PredictiveDisplay):
-            return <PredictiveDisplay {...overlayProps} />
-        default:
-            throw Error('Video stream at path ' + path + ' cannot overlay child ' + overlayDefinition);
+    if (props.definition.id === VideoStreamId.realsense) {
+        return (
+            <div className="realsense-pan-tilt-grid">
+                {buttons}
+                <video
+                    style={{ gridRow: 2, gridColumn: 2 }}
+                    ref={props.videoRef}
+                    autoPlay
+                    muted={true}
+                    className={props.videoClass}
+                />
+            </div>
+        )
+    } else {
+        return (
+            <video
+                ref={props.videoRef}
+                autoPlay
+                muted={true}
+                className={props.videoClass}
+            />
+        )
     }
+}
+
+
+// TODO: implement video stream pan tilt function provider
+const mockFunctionProvider = (direction: PanTiltButtonDirection): () => void => {
+    return () => console.log('clicked pan tilt button', direction)
 }
 
 /**
- * Gets the stream based on the identifier
+ * Creates a single button for controlling the pan or tilt of the realsense camera
  * 
- * @param id identifier for the video stream
- * @param remoteStreams map of {@link RemoteStream}
- * @returns the corresponding stream
+ * @param props the direction of the button {@link PanTiltButtonDirection}
  */
-function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>): MediaStream {
-    let streamName: string;
-    switch (id) {
-        case VideoStreamId.overhead:
-            streamName = "overhead";
+const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
+    let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
+    let rotation: string;  // how to rotate the arrow icon to point in the correct direction
+    const onClick = mockFunctionProvider(props.direction);  // TODO: implement video stream pan tilt function provider
+
+    // Specify button details based on the direction
+    switch (props.direction) {
+        case ('up'):
+            gridPosition = { gridRow: 1, gridColumn: 2 };
+            rotation = "-90";
             break;
-        case VideoStreamId.realsense:
-            streamName = "realsense";
+        case ('down'):
+            gridPosition = { gridRow: 3, gridColumn: 2 };
+            rotation = "90";
             break;
-        case VideoStreamId.gripper:
-            streamName = "gripper";
+        case ('left'):
+            gridPosition = { gridRow: 2, gridColumn: 1 };
+            rotation = "180";
+            break;
+        case ('right'):
+            gridPosition = { gridRow: 2, gridColumn: 3 };
+            rotation = "0";  // by default the arrow icon points right
             break;
         default:
-            throw Error(`unknow video stream id: ${id}`);
+            throw Error(`unknown pan tilt button direction ${props.direction}`)
     }
-    return remoteStreams.get(streamName)!.stream;
-}
 
-/** Renders all three video streams side by side */
-export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
-    console.log(props.streams)
-    // let buttonPads = Bp.ExampleButtonPads;
-    // let buttonPads = [undefined, undefined, undefined];
-    // Replace the overhead button pad with predictive display
-    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
-    const widths = ["30%", "22.5%", "45%"];
     return (
-        <div id="video-stream-container">
-            {props.streams.map((stream, i) => (
-                <div key={i} className="video-stream" style={{ width: widths[i] }}>
-                    {stream.render()}
-                </div>
-            )
-            )}
-        </div>
-    );
-};
+        <button
+            style={gridPosition}
+            className={props.direction}
+            onClick={onClick}
+        >
+            <span
+                className="material-icons"
+                style={{ transform: `rotate(${rotation}deg)` }}
+            >arrow_right</span>
+        </button>
+    )
+}
 
+/******************************************************************************
+ * Select context menu 
+ **************************************************************************** */
 
 /** Props for {@link SelectContexMenu} */
 type SelectContexMenuProps = {
@@ -348,4 +286,83 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
             <li onClick={(e) => handleClick(e, true)}>Video Stream</li>
         </ul>
     );
+}
+
+/*******************************************************************************
+ * Helper functions
+ ******************************************************************************/
+
+/**
+ * Get the aspect ratio of the video based on the definition
+ * 
+ * @param definition definition of the video stream
+ * @returns aspect ratio of the video stream
+ */
+function getVideoAspectRatio(definition: VideoStreamDef): number {
+    switch (definition.id) {
+        case (VideoStreamId.gripper):
+            return gripperProps.width / gripperProps.height;
+        case (VideoStreamId.overhead):
+            return navigationProps.width / navigationProps.height;
+        case (VideoStreamId.realsense):
+            return realsenseProps.width / realsenseProps.height;
+        default:
+            throw Error(`undefined aspect ratio for ${definition.type}`)
+    }
+}
+
+/**
+ * Creates an overlay element for the video stream
+ * 
+ * @param overlayDefinition definition for the component to overlay on the video stream
+ * @param path path to the parent video stream component
+ * @param sharedState {@link SharedState}
+ * @returns overlay element, or undefined if video stream doesn't have an overlay
+ */
+function createOverlay(
+    overlayDefinition: ComponentDefinition | undefined,
+    path: string,
+    sharedState: SharedState): JSX.Element | undefined {
+    // If overlay definition is undefined then there's no overlay for this stream
+    if (!overlayDefinition) return undefined;
+
+    const overlayProps = {
+        definition: overlayDefinition,
+        path: path + "-0",
+        sharedState: sharedState
+    } as CustomizableComponentProps;
+
+    switch (overlayDefinition?.type) {
+        case (ComponentType.ButtonPad):
+            return <ButtonPad {...overlayProps} overlay />
+        case (ComponentType.PredictiveDisplay):
+            return <PredictiveDisplay {...overlayProps} />
+        default:
+            throw Error('Video stream at path ' + path + ' cannot overlay child ' + overlayDefinition);
+    }
+}
+
+/**
+ * Gets the stream based on the identifier
+ * 
+ * @param id identifier for the video stream
+ * @param remoteStreams map of {@link RemoteStream}
+ * @returns the corresponding stream
+ */
+function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>): MediaStream {
+    let streamName: string;
+    switch (id) {
+        case VideoStreamId.overhead:
+            streamName = "overhead";
+            break;
+        case VideoStreamId.realsense:
+            streamName = "realsense";
+            break;
+        case VideoStreamId.gripper:
+            streamName = "gripper";
+            break;
+        default:
+            throw Error(`unknow video stream id: ${id}`);
+    }
+    return remoteStreams.get(streamName)!.stream;
 }

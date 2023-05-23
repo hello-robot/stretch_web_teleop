@@ -3,7 +3,7 @@ import { DropZoneState } from "./dropzone";
 import { Tabs } from "./tabs";
 import { RemoteStream, ValidJointStateDict } from "shared/util";
 import { ButtonPad } from "./buttonpads";
-import { VideoStreamComponent } from "./videostreams";
+import { VideoStreamComponent } from "./videostreamcomponent";
 import { PredictiveDisplay } from "./predictivedisplay";
 
 /** State required for all elements */
