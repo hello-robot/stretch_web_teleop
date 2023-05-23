@@ -5,12 +5,14 @@ import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './operator';
 import "operator/css/index.css"
-import { FunctionProvider, ButtonFunctionProvider } from './utils/functionprovider';
+import { FunctionProvider, ButtonFunctionProvider, VoiceFunctionProvider, PredictiveDisplayFunctionProvider } from './utils/functionprovider';
 import React from 'react'
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 export var buttonFunctionProvider = new ButtonFunctionProvider();
+export var voiceFunctionProvider = new VoiceFunctionProvider();
+export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 
 let connection = new WebRTCConnection({
     peerRole: "operator",

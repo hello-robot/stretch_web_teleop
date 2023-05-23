@@ -1,5 +1,5 @@
 import React from 'react'
-import { cmd } from 'shared/commands';
+import { cmd, VelocityCommand } from 'shared/commands';
 import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void; 
@@ -14,7 +14,7 @@ export class RemoteRobot extends React.Component {
         this.sensors = new RobotSensors({})
     }
 
-    driveBase(linVel: number, angVel: number) {
+    driveBase(linVel: number, angVel: number): VelocityCommand {
         let cmd: cmd = {
             type: "driveBase",
             modifier: { linVel: linVel, angVel: angVel }
@@ -28,11 +28,18 @@ export class RemoteRobot extends React.Component {
                     modifier: { linVel: 0, angVel: 0 }
                 }
                 this.robotChannel(stopEvent)
+            },
+            "affirm": () => {
+                let affirmEvent: cmd = {
+                    type: "driveBase",
+                    modifier: { linVel: linVel, angVel: angVel }
+                }
+                this.robotChannel(affirmEvent)
             }
         }
     }
 
-    incrementalMove(jointName: ValidJoints, increment: number) {
+    incrementalMove(jointName: ValidJoints, increment: number): VelocityCommand {
         let cmd: cmd = { 
             type: "incrementalMove", 
             jointName: jointName, 

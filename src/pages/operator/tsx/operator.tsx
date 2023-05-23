@@ -7,9 +7,9 @@ import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
+import { VoiceCommands } from "./staticcomponents/voicecommands";
 import { RemoteStream, ValidJointStateDict } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
-
 import "operator/css/operator.css"
 import { FunctionProvider } from "./utils/functionprovider";
 
@@ -131,6 +131,7 @@ export const Operator = (props: {
                     scale={velocityScale}
                     onChange={(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
+                <VoiceCommands/>
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleCustomize}
