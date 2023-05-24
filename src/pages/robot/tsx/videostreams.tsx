@@ -83,7 +83,7 @@ export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
     return (
         <div id="video-stream-container">
             {props.streams.map((stream, i) => (
-                <div key={i} className="video-stream" style={{ width: widths[i] }}>
+                <div key={i} className="video-container" style={{ width: widths[i] }}>
                     {stream.render()}
                 </div>
             )

@@ -20,8 +20,10 @@ export type PanTiltButtonDirection = typeof panTiltButtonDirections[number];
 export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     // Dimensions for the overlay so its the same width and height as the video
     const [overlayDimensions, setOverlayDimensions] = React.useState({});
+    const [videoWidth, setVideoWidth] = React.useState(100);
     // Reference to the video element
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    const overlayContainerRef = React.useRef<HTMLDivElement>(null);
     // X and Y position of the cursor when user clicks on the video
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
     const definition = props.definition as VideoStreamDef;
@@ -34,23 +36,6 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const overlay = createOverlay(overlayDefinition, props.path, props.sharedState);
 
     const videoAspectRatio = getVideoAspectRatio(definition);
-
-    // Record the height and width of the video component on resize to set the 
-    // size of the overlay
-    React.useEffect(() => {
-        const resizeObserver = new ResizeObserver(entries => {
-            let { height, width } = entries[0].contentRect;
-
-            // Set the width based on the video aspect
-            if (width / height > videoAspectRatio) {
-                width = height * videoAspectRatio;
-            }
-            setOverlayDimensions({ height, width });
-        });
-        if (!videoRef?.current) return;
-        resizeObserver.observe(videoRef.current);
-        return () => resizeObserver.disconnect();
-    })
 
     // Update the source of the video stream 
     React.useEffect(() => {
@@ -93,33 +78,40 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
         setClickXY([x, y]);
     }
 
+    const overlayContainer = (
+        <div
+            className={className("video-overlay-container", { customizing, selected })}
+            // style={overlayDimensions}
+            ref={overlayContainerRef}
+            onClick={customizing ? handleClick : undefined}
+        >
+            {
+                // Display overlay on top of video stream
+                overlay ? overlay :
+                    <DropZone
+                        path={props.path + "-0"}
+                        sharedState={props.sharedState}
+                        parentDef={props.definition}
+                    />
+            }
+            {
+                // When clickXY is set, display context menu
+                clickXY ? <SelectContexMenu
+                    clickXY={clickXY}
+                    selectSelf={selectSelf}
+                    selectChild={selectChild}
+                    clickOut={() => setClickXY(null)}
+                /> : undefined
+            }
+        </div>
+    )
+
     return (
-        <div className='video-stream' draggable={false}>
-            <div
-                className={className("video-overlay-container", { customizing, selected })}
-                style={overlayDimensions}
-                onClick={customizing ? handleClick : undefined}
-            >
-                {
-                    // Display overlay on top of video stream
-                    overlay ? overlay :
-                        <DropZone
-                            path={props.path + "-0"}
-                            sharedState={props.sharedState}
-                            parentDef={props.definition}
-                        />
-                }
-                {
-                    // When clickXY is set, display context menu
-                    clickXY ? <SelectContexMenu
-                        clickXY={clickXY}
-                        selectSelf={selectSelf}
-                        selectChild={selectChild}
-                        clickOut={() => setClickXY(null)}
-                    /> : undefined
-                }
+        <div className='video-container' draggable={false}>
+            <SubVideoComponent {...{ videoWidth, definition, videoRef, videoClass, overlayContainer }} />
+            <div className="under-video-area">
+                {getUnderVideoButtons(definition)}
             </div>
-            <SubVideoComponent {...{ definition, videoRef, videoClass }} />
         </div>
     );
 }
@@ -127,8 +119,10 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 /** Properties for {@link SubVideoComponent} */
 type SubVideoComponentProps = {
     definition: VideoStreamDef,
-    videoRef: HTMLVideoElement,
-    videoClass: string;
+    videoRef: React.RefObject<HTMLVideoElement>,
+    videoWidth: number,
+    videoClass: string,
+    overlayContainer: JSX.Element
 }
 
 /**
@@ -137,30 +131,65 @@ type SubVideoComponentProps = {
  * 
  * @param props {@link SubVideoComponentProps}
  */
-const SubVideoComponent = (props: any) => {
+const SubVideoComponent = (props: SubVideoComponentProps) => {
+    const videoAreaRef = React.useRef<HTMLDivElement>(null);
+    const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
+    const videoRef = props.videoRef;
     const buttons = panTiltButtonDirections.map(dir => <PanTiltButton direction={dir} key={dir} />)
+
+    // Constrain the width or height when the stream gets too large
+    React.useEffect(() => {
+        console.log('use effect')
+        const resizeObserver = new ResizeObserver(entries => {
+            console.log('resize function')
+
+            // height and width of overlay container
+            const { height, width } = entries[0].contentRect;
+
+            // height and width of video stream
+            if (!videoRef?.current) return;
+            const videoRect = videoRef.current.getBoundingClientRect();
+            
+            if (videoRect.height > height) {
+                setConstrainedHeight(true);
+                return;
+            } 
+            if (videoRect.width > width) {
+                setConstrainedHeight(false);
+            }
+        });
+        if (!videoAreaRef?.current) return;
+        resizeObserver.observe(videoAreaRef.current);
+        return () => resizeObserver.disconnect();
+    }, []);
 
     if (props.definition.id === VideoStreamId.realsense) {
         return (
-            <div className="realsense-pan-tilt-grid">
+            <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
                 {buttons}
-                <video
-                    style={{ gridRow: 2, gridColumn: 2 }}
-                    ref={props.videoRef}
-                    autoPlay
-                    muted={true}
-                    className={props.videoClass}
-                />
+
+                <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
+                    <video
+                        ref={props.videoRef}
+                        autoPlay
+                        muted={true}
+                        className={className(props.videoClass, { constrainedHeight })}
+                    />
+                    {props.overlayContainer}
+                </div>
             </div>
         )
     } else {
         return (
-            <video
-                ref={props.videoRef}
-                autoPlay
-                muted={true}
-                className={props.videoClass}
-            />
+            <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
+                <video
+                    ref={props.videoRef}
+                    autoPlay
+                    muted={true}
+                    className={className(props.videoClass, { constrainedHeight })}
+                />
+                {props.overlayContainer}
+            </div>
         )
     }
 }
@@ -173,9 +202,9 @@ const mockFunctionProvider = (direction: PanTiltButtonDirection): () => void => 
 
 /**
  * Creates a single button for controlling the pan or tilt of the realsense camera
- * 
+ *
  * @param props the direction of the button {@link PanTiltButtonDirection}
- */
+                */
 const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
@@ -218,7 +247,7 @@ const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
 }
 
 /******************************************************************************
- * Select context menu 
+ * Select context menu
  **************************************************************************** */
 
 /** Props for {@link SelectContexMenu} */
@@ -234,12 +263,12 @@ type SelectContexMenuProps = {
 }
 
 /**
- * Creates a context menu popup when user clicks during 
- * customization mode so the user can choose between the button pad and its 
+ * Creates a context menu popup when user clicks during
+ * customization mode so the user can choose between the button pad and its
  * parent video stream.
- * 
+ *
  * @param props {@link SelectContexMenuProps}
- */
+                */
 const SelectContexMenu = (props: SelectContexMenuProps) => {
     const ref = React.useRef<HTMLUListElement>(null);
     const [x, y] = props.clickXY;
@@ -313,12 +342,12 @@ function getVideoAspectRatio(definition: VideoStreamDef): number {
 
 /**
  * Creates an overlay element for the video stream
- * 
+ *
  * @param overlayDefinition definition for the component to overlay on the video stream
  * @param path path to the parent video stream component
  * @param sharedState {@link SharedState}
- * @returns overlay element, or undefined if video stream doesn't have an overlay
- */
+                        * @returns overlay element, or undefined if video stream doesn't have an overlay
+                        */
 function createOverlay(
     overlayDefinition: ComponentDefinition | undefined,
     path: string,
@@ -344,11 +373,11 @@ function createOverlay(
 
 /**
  * Gets the stream based on the identifier
- * 
+ *
  * @param id identifier for the video stream
  * @param remoteStreams map of {@link RemoteStream}
- * @returns the corresponding stream
- */
+                        * @returns the corresponding stream
+                        */
 function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>): MediaStream {
     let streamName: string;
     switch (id) {
@@ -365,4 +394,72 @@ function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>):
             throw Error(`unknow video stream id: ${id}`);
     }
     return remoteStreams.get(streamName)!.stream;
+}
+
+function getUnderVideoButtons(definition: VideoStreamDef): JSX.Element | undefined {
+    let buttons: JSX.Element | undefined;
+    switch (definition.id) {
+        case (VideoStreamId.gripper):
+            buttons = undefined;
+            break;
+        case (VideoStreamId.overhead):
+            buttons = getOverheadButtons();
+            break;
+        case (VideoStreamId.realsense):
+            buttons = getRealsenseButtons();
+            break;
+        default:
+            throw Error(`unknow video stream id: ${definition.id}`);
+    }
+    return buttons;
+}
+
+function getOverheadButtons() {
+    return (
+        <React.Fragment >
+            <button>Crop to arm</button>
+            <button>Remove crop</button>
+        </React.Fragment>
+    )
+}
+
+function getRealsenseButtons() {
+    return (
+        <React.Fragment >
+            <button>Look at gripper</button>
+            <button>Look at base</button>
+            <ToggleFollowGripperButton />
+        </React.Fragment>
+    )
+}
+
+const ToggleFollowGripperButton = () => {
+    const [followGripper, setFollowGripper] = React.useState<boolean>(false);
+    return (
+        <CheckToggleButton
+            checked={followGripper}
+            onClick={() => setFollowGripper(!followGripper)}
+            label={"Follow gripper"}
+        />
+    )
+}
+
+type CheckToggleButtonProps = {
+    checked: boolean,
+    onClick: () => void,
+    label: string,
+}
+
+const CheckToggleButton = (props: CheckToggleButtonProps) => {
+    const { checked } = props;
+    const icon = checked ? "check_box" : "check_box_outline_blank";
+    return (
+        <button
+            className={className("check-toggle-button", { checked })}
+            onClick={props.onClick}
+        >
+            <span className={"material-icons"}>{icon}</span>
+            Follow gripper
+        </button>
+    )
 }
