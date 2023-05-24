@@ -17,7 +17,8 @@ export enum VoiceCommandFunction {
     GripperClose,
     WristRotateIn,
     WristRotateOut,
-    Stop
+    Stop,
+    SetSpeed
 }
 
 /** Defining keyword and associated callback. */
@@ -25,8 +26,15 @@ export type VoiceCommandFunctions = {
     command: string,
     callback: (speed?: string) => void
 }
+type VoiceCommandsProps = {
+     /**
+     * Callback function when a new speed is selected.
+     * @param newScale the new selected speed
+     */
+      onUpdateVelocityScale: (newScale: number) => void;
+}
 
-export const VoiceCommands = () => {
+export const VoiceCommands = (props: VoiceCommandsProps) => {
     const { transcript, resetTranscript } = useSpeechRecognition({ commands: createCommands() });
     const [isListening, setIsListening] = useState(false);
     const microphoneRef = useRef<HTMLButtonElement>(null);
@@ -45,12 +53,13 @@ export const VoiceCommands = () => {
             VoiceCommandFunction.GripperClose,
             VoiceCommandFunction.WristRotateIn,
             VoiceCommandFunction.WristRotateOut,
-            VoiceCommandFunction.Stop
+            VoiceCommandFunction.Stop,
+            VoiceCommandFunction.SetSpeed
         ]
     
         let commands: VoiceCommandFunctions[] = functions.map((funct: VoiceCommandFunction) => {
             return {
-                ...voiceFunctionProvider.provideFunctions(funct) as VoiceCommandFunctions,
+                ...voiceFunctionProvider.provideFunctions(funct, props.onUpdateVelocityScale) as VoiceCommandFunctions,
             };
         });
         return commands
