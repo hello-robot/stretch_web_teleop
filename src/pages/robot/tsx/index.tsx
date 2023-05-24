@@ -52,6 +52,8 @@ robot.connect().then(() => {
 })
 
 function handleSessionStart() {
+    connection.removeTracks()
+
     console.log('adding local media stream to peer connection');
 
     let stream: MediaStream = navigationStream.outputVideoStream!;

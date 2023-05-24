@@ -41,6 +41,7 @@ module.exports = {
           template: `./src/pages/${page}/html/index.html`,
           filename: `${page}/index.html`,
           chunks: [page],
+          cache: false
       })
     )
   ),

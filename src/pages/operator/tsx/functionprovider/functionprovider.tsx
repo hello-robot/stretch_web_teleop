@@ -2,7 +2,7 @@ import { RemoteRobot } from "shared/remoterobot"
 import { VelocityCommand } from 'shared/commands'
 import { ActionMode } from "../staticcomponents/actionmodebutton"
 import { DEFAULT_VELOCITY_SCALE } from "../staticcomponents/velocitycontrol"
-
+import { ValidJoints } from 'shared/utils'
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the 
  * interface

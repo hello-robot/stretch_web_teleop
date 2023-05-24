@@ -29,6 +29,10 @@ let connection = new WebRTCConnection({
 
 connection.joinOperatorRoom()
 
+// Create root once when index is loaded
+const container = document.getElementById('root');
+const root = createRoot(container!);
+
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');
     const track = event.track;
@@ -68,8 +72,6 @@ function configureRobot() {
     FunctionProvider.initialize();
     FunctionProvider.addRemoteRobot(remoteRobot)
 
-    const container = document.getElementById('root');
-    const root = createRoot(container!);
     root.render(
         <Operator 
             setJointLimitsCallback={remoteRobot.sensors.setOperatorCallback} 
@@ -80,9 +82,6 @@ function configureRobot() {
 
 function disconnectFromRobot() {
     connection.hangup()
-    // for (const stream in mediaStreams) {
-    //     this.controls[control].removeRemoteStream()
-    // }
 }
 
 window.onbeforeunload = () => {
