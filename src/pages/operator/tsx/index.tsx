@@ -53,7 +53,7 @@ function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
     switch (message.type) {
         case 'validJointState':
             remoteRobot.sensors.checkValidJointState(
-                message.jointsInLimits, 
+                message.jointsInLimits,
                 message.jointsInCollision
             );
             break;
@@ -64,16 +64,18 @@ function configureRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
     });
-    remoteRobot.setRobotMode("navigation")
+    remoteRobot.setRobotMode("navigation");
+    remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
+    
     FunctionProvider.initialize();
-    FunctionProvider.addRemoteRobot(remoteRobot)
+    FunctionProvider.addRemoteRobot(remoteRobot);
+
 
     const container = document.getElementById('root');
     const root = createRoot(container!);
     root.render(
-        <Operator 
-            setJointLimitsCallback={remoteRobot.sensors.setOperatorCallback} 
-            remoteStreams={allRemoteStreams} 
+        <Operator
+            remoteStreams={allRemoteStreams}
         />
     );
 }

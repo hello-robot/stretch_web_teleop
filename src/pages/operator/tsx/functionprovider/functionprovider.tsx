@@ -2,6 +2,7 @@ import { RemoteRobot } from "shared/remoterobot"
 import { VelocityCommand } from 'shared/commands'
 import { ActionMode } from "../staticcomponents/actionmodebutton"
 import { DEFAULT_VELOCITY_SCALE } from "../staticcomponents/velocitycontrol"
+import { ValidJoints } from "shared/util";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the 
@@ -12,7 +13,7 @@ export abstract class FunctionProvider {
     public static velocityScale: number;
     public static actionMode: ActionMode;
     public activeVelocityAction?: VelocityCommand;
-    public velocityExecutionHeartbeat?: number // ReturnType<typeof setInterval>
+    public velocityExecutionHeartbeat?: number;
 
     /**
      * Adds a remote robot instance to this function provider. This must be called

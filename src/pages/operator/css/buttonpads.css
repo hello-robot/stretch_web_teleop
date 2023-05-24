@@ -7,10 +7,11 @@
     fill-opacity: 0;
     /*set opacity for entire svg rather than paths to avoid weird effect
     when paths overlap*/
-    opacity: 60%;
+    /* opacity: 60%; */
     /* TODO: this should be more dynamic */
     width: 25%;
     height: 25%;
+    cursor: pointer;
 }
 
 .button-pads.overlay {
@@ -18,20 +19,38 @@
     height: 100%;
 }
 
+/* Settings for the buttons on the button pad *********************************/
+
 /*When hovering over a child element of an svg*/
-.button-pads>*:hover {
-    fill-opacity: 10%;
-    cursor: pointer;
+.button-pads path:hover {
+    fill-opacity: 30%;
 }
 
-/*When a button is clicked*/
-.button-pads>*:active {
+.button-pads image {
+    pointer-events: none;
+}
+
+.button-pads path.inactive:hover+image {
+    filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg);
+}
+
+.button-pads path.active {
+    fill-opacity: 60%;
+    fill: green;
+}
+
+.button-pads path.collision {
+    fill: orange;
     fill-opacity: 40%;
 }
 
+.button-pads path.limit {
+    fill: red;
+    fill-opacity: 40%;
+}
 /* Disable hover actions */
-.button-pads.customizing>* {
-    fill-opacity: 0%;
+.button-pads.customizing path {
+    pointer-events: none;
 }
 
 .button-pads.selected {
