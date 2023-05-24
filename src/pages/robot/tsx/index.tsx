@@ -4,7 +4,7 @@ import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
 import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints } from 'shared/util'
-import { AllVideoStreamComponent, VideoStream } from 'operator/tsx/layoutcomponents/videostreams';
+import { AllVideoStreamComponent, VideoStream } from './videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
 export let connection: WebRTCConnection;

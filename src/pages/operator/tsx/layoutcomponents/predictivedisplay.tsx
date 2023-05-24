@@ -1,9 +1,9 @@
 import React from "react"
-import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "shared/svg";
 import { className, navigationProps } from "shared/util";
 import "operator/css/predictivedisplay.css"
 import { CustomizableComponentProps } from "./customizablecomponent";
 import { predicitiveDisplayFunctionProvider } from "operator/tsx/index";
+import { SVG_RESOLUTION, percent2Pixel, OVERHEAD_ROBOT_BASE as BASE } from "../utils/svg";
 
 /**
  * Scales height values to fit in the navigation camera
