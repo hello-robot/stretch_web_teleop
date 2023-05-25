@@ -5,3 +5,13 @@
     align-items: center;
     justify-content: left;
 }
+
+#voice-command-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#record-icon {
+    color: red;
+}

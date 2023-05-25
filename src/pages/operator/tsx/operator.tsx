@@ -131,13 +131,15 @@ export const Operator = (props: {
                     scale={velocityScale}
                     onChange={(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
-                <VoiceCommands
-                    onUpdateVelocityScale= 
-                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
-                />
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleCustomize}
+                />
+            </div>
+            <div id="operator-voice">
+                <VoiceCommands
+                    onUpdateVelocityScale= 
+                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
             </div>
             <div id="operator-body">
