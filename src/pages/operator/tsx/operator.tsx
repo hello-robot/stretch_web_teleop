@@ -41,10 +41,10 @@ export const Operator = (props: {
 
     let remoteStreams = props.remoteStreams;
 
-    /** Rerenders the layout */
+    /** Rerenders the operator */
     function updateLayout() {
         console.log('update layout');
-        setLayout(layout);
+        setButtonStateMapRerender(!buttonStateMapRerender);
     }
 
     /**

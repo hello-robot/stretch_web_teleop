@@ -43,6 +43,12 @@ export type PredictiveDisplayFunctions = {
     onLeave?: () => void;
 }
 
+/** 
+ * Example trajectory to display while in customizing mode so the user can see
+ * the predictive display overlay on the overhead camera.
+ */
+const customizingTrajectory = drawForwardTraj(106, 161)[2];
+
 /**
  * Overlay for overhead video stream where a curved path follows the cursor, 
  * and clicking translates and/or rotates the robot base.
@@ -51,8 +57,9 @@ export type PredictiveDisplayFunctions = {
  */
 export const PredictiveDisplay = (props: CustomizableComponentProps) => {
     const svgRef = React.useRef<SVGSVGElement>(null);
+    const { customizing } = props.sharedState;
     const [trajectory, setTrajectory] = React.useState<JSX.Element | undefined>(undefined);
-    const functions = predicitiveDisplayFunctionProvider.provideFunctions(); 
+    const functions = predicitiveDisplayFunctionProvider.provideFunctions();
     const length = React.useRef<number>(0);
     const angle = React.useRef<number>(0);
     const holding = React.useRef<boolean>(false);
@@ -100,7 +107,7 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
         }
     }
 
-    const customizing = props.sharedState.customizing;
+    // If customizing, disable all user interaction
     const controlProps = customizing ? {} : {
         onMouseMove: handleMove,
         onMouseLeave: handleLeave,
@@ -116,7 +123,7 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
             className={className("predictive-display", { customizing })}
             {...controlProps}
         >
-            {trajectory}
+            {customizing ? customizingTrajectory : trajectory}
         </svg>
     )
 }
@@ -177,7 +184,7 @@ function drawForwardTraj(x: number, y: number): [number, number, JSX.Element] {
             <path d={rightPath} />
         </>
     );
-    
+
     // Normalize the distance 
     const maxX = SVG_RESOLUTION / 2;
     const maxY = baseFront;
@@ -225,7 +232,7 @@ function drawRotate(rotateLeft: boolean): [number, number, JSX.Element] {
     const trajectory = (
         <path d={path} />
     );
-    return [0, rotateLeft ? 1 : -1, trajectory] 
+    return [0, rotateLeft ? 1 : -1, trajectory]
 }
 
 /**

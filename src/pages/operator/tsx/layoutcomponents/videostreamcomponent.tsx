@@ -82,7 +82,6 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     React.useEffect(() => {
         console.log('use effect')
         const resizeObserver = new ResizeObserver(entries => {
-            console.log('resize function')
 
             // height and width of area around the video stream
             const { height, width } = entries[0].contentRect;
