@@ -2,6 +2,8 @@
     height: 100%;
     display: flex;
     flex-flow: column;
+
+    --screen-padding: 0.5rem;
 }
 
 #operator-header {
@@ -9,7 +11,7 @@
     height: 4rem;
     width: 100%;
     box-sizing: border-box;
-    padding: 0.5rem;
+    padding: var(--screen-padding);
     display: flex;
     align-items: center;
     justify-content: space-between;

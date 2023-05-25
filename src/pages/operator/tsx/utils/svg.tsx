@@ -1,4 +1,3 @@
-import { ButtonPadFunction } from "../layoutcomponents/buttonpads";
 
 import armDown from "operator/icons/Arm_Down.svg"
 import armExtend from "operator/icons/Arm_Extend.svg"
@@ -10,6 +9,9 @@ import gripClose from "operator/icons/Grip_Close.svg"
 import gripLeft from "operator/icons/Grip_Left.svg"
 import gripOpen from "operator/icons/Grip_Open.svg"
 import gripRight from "operator/icons/Grip_Right.svg"
+import driveForward from "operator/icons/Drive_FWD.svg"
+import driveReverse from "operator/icons/Drive_RVS.svg"
+import { ButtonPadButton } from "../functionprovider/buttonpads"
 
 
 /**Resolution of SVG components */
@@ -88,9 +90,9 @@ export function getDirectionalPaths(onRobot: boolean = true): [string[], { x: nu
     const paths = [pathTop, pathRgt, pathBot, pathLft]
     const iconPositions = [
         { x: centerX, y: top / 2 },
-        { x: (SVG_RESOLUTION + rgt) / 2, y: (SVG_RESOLUTION) / 2 },
+        { x: (SVG_RESOLUTION + rgt) / 2, y: centerY },
         { x: centerX, y: (SVG_RESOLUTION + bot) / 2 },
-        { x: (lft) / 2, y: (SVG_RESOLUTION) / 2 }
+        { x: (lft) / 2, y: centerY}
     ]
     return [paths, iconPositions];
 }
@@ -174,33 +176,39 @@ export function getGripperPaths(): [string[], { x: number, y: number }[]] {
     return [paths, iconPositions];
 }
 
-export function getIcon(funct: ButtonPadFunction) {
-    switch (funct) {
-        case (ButtonPadFunction.BaseForward):
-            return "";
-        case (ButtonPadFunction.BaseReverse):
-            return "";
-        case (ButtonPadFunction.BaseRotateRight):
+/**
+ * Gets the icon corresponding to a button in a button pad.
+ * 
+ * @param buttonPadButton 
+ * @returns icon source
+ */
+export function getIcon(buttonPadButton: ButtonPadButton) {
+    switch (buttonPadButton) {
+        case (ButtonPadButton.BaseForward):
+            return driveForward;
+        case (ButtonPadButton.BaseReverse):
+            return driveReverse;
+        case (ButtonPadButton.BaseRotateRight):
             return driveRight;
-        case (ButtonPadFunction.BaseRotateLeft):
+        case (ButtonPadButton.BaseRotateLeft):
             return driveLeft;
-        case (ButtonPadFunction.ArmLift):
+        case (ButtonPadButton.ArmLift):
             return armUp;
-        case (ButtonPadFunction.ArmLower):
+        case (ButtonPadButton.ArmLower):
             return armDown;
-        case (ButtonPadFunction.ArmExtend):
+        case (ButtonPadButton.ArmExtend):
             return armExtend;
-        case (ButtonPadFunction.ArmRetract):
+        case (ButtonPadButton.ArmRetract):
             return armRetract;
-        case (ButtonPadFunction.GripperOpen):
+        case (ButtonPadButton.GripperOpen):
             return gripOpen;
-        case (ButtonPadFunction.GripperClose):
+        case (ButtonPadButton.GripperClose):
             return gripClose;
-        case (ButtonPadFunction.WristRotateIn):
+        case (ButtonPadButton.WristRotateIn):
             return gripLeft;
-        case (ButtonPadFunction.WristRotateOut):
+        case (ButtonPadButton.WristRotateOut):
             return gripRight
         default:
-            throw Error('unknown button pad function ' + funct);
+            throw Error(`unknown button pad button\t${buttonPadButton}`);
     }
 }

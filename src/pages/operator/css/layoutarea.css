@@ -1,6 +1,14 @@
 #layout-area {
-    margin: 1%;
+    padding: var(--screen-padding);
     flex: 1 1 0;
+}
+
+/* Remove margin for elements at edges of the layout area */
+#layout-area > *:first-of-type{
+    margin-left: 0;
+}
+#layout-area > *:last-of-type{
+    margin-right: 0;
 }
 
 #layout-area,

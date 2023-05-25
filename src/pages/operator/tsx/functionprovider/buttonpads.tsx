@@ -1,15 +1,145 @@
-import { ButtonPadFunction, ButtonFunctions } from "../layoutcomponents/buttonpads"
 import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider'
 import { ActionMode } from "operator/tsx/staticcomponents/actionmodebutton"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints } from 'shared/util'
+import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints, ValidJointStateDict } from 'shared/util'
+
+/** 
+ * Each of the possible buttons which could be on a button pad. The string is 
+ * the label of the button which appears in the tooltip.
+ */
+export enum ButtonPadButton {
+    BaseForward = "Base Forward",
+    BaseReverse = "Base Reverse",
+    BaseRotateRight = "Base rotate right",
+    BaseRotateLeft = "Base rotate left",
+    ArmLift = "Arm lift",
+    ArmLower = "Arm lower",
+    ArmExtend = "Arm extend",
+    ArmRetract = "Arm retract",
+    GripperOpen = "Gripper open",
+    GripperClose = "Gripper close",
+    WristRotateIn = "Wrist rotate in",
+    WristRotateOut = "Wrist rotate out"
+}
+
+/** Button functions which require moving a joint in the negative direction. */
+const negativeButtonPadFunctions = new Set<ButtonPadButton>([
+    ButtonPadButton.BaseReverse,
+    ButtonPadButton.BaseRotateLeft,
+    ButtonPadButton.ArmLower,
+    ButtonPadButton.ArmRetract,
+    ButtonPadButton.GripperClose,
+    ButtonPadButton.WristRotateOut
+])
+
+/** Functions called when the user interacts with a button. */
+export type ButtonFunctions = {
+    onClick: () => void,
+    onRelease?: () => void,
+    onLeave?: () => void
+}
+
+/** State for a single button on a button pad. */
+export enum ButtonState {
+    Inactive = "inactive",
+    Active = "active",
+    Collision = "collision",
+    Limit = "limit"
+}
+
+/** Mapping from each type of button pad button to the state for that button */
+export type ButtonStateMap = Map<ButtonPadButton, ButtonState>;
 
 /**
  * Provides functions for the button pads
  */
- export class ButtonFunctionProvider extends FunctionProvider {
+export class ButtonFunctionProvider extends FunctionProvider {
+    private buttonStateMap: ButtonStateMap = new Map<ButtonPadButton, ButtonState>();
+
+    /** 
+     * Callback function to update the button state map in the operator so it 
+     * can rerender the button pads.
+     */
+    private operatorCallback?: (buttonStateMap: ButtonStateMap) => void = undefined;
+
     constructor() {
         super()
-        this.provideFunctions = this.provideFunctions.bind(this)
+        this.provideFunctions = this.provideFunctions.bind(this);
+        this.updateJointStates = this.updateJointStates.bind(this);
+        this.setButtonActiveState = this.setButtonActiveState.bind(this);
+        this.setButtonInactiveState = this.setButtonInactiveState.bind(this);
+    }
+
+    /**
+     * Takes joint states and updates the button state map based on which joints
+     * are in collision or at their limit.
+     * 
+     * @param atJointLimits dictionary of joints whose limit booleans have changed
+     * @param inCollision dictionary of joints whose collision booleans have changed
+     */
+    public updateJointStates(atJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) {
+        Object.keys(inCollision).forEach((k: string) => {
+            const key = k as ValidJoints;
+            const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
+            const buttons = getButtonsFromJointName(key);
+            if (!buttons) return;
+            const [buttonNeg, buttonPos] = buttons;
+            this.buttonStateMap.set(buttonNeg, inCollisionNeg ? ButtonState.Collision : ButtonState.Inactive);
+            this.buttonStateMap.set(buttonPos, inCollisionPos ? ButtonState.Collision : ButtonState.Inactive);
+        });
+
+        Object.keys(atJointLimits).forEach((k: string) => {
+            const key = k as ValidJoints;
+            const [inLimitNeg, inLimitPos] = atJointLimits[key]!;
+            const buttons = getButtonsFromJointName(key);
+            if (!buttons) return;
+            const [buttonNeg, buttonPos] = buttons;
+            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Collision : ButtonState.Inactive);
+            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Collision : ButtonState.Inactive);
+        });
+
+        if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
+    }
+
+    /**
+     * Sets the local pointer to the operator's callback function, to be called 
+     * whenever the button state map updates.
+     * 
+     * @param callback operator's callback function to update the button state map
+     */
+    public setOperatorCallback(callback: (buttonStateMap: ButtonStateMap) => void) {
+        this.operatorCallback = callback;
+    }
+
+    /**
+     * Sets a type of a button pad button to active.
+     * 
+     * @param buttonType the button pad button to set active
+     */
+    private setButtonActiveState(buttonType: ButtonPadButton) {
+        const currentState = this.buttonStateMap.get(buttonType);
+
+        // Don't set to active if in collision or at it's limit
+        if (currentState === ButtonState.Collision || currentState === ButtonState.Limit)
+            return;
+
+        this.buttonStateMap.set(buttonType, ButtonState.Active);
+        if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
+    }
+
+    /**
+     * Sets a type of a button pad button to inactive.
+     * 
+     * @param buttonType the button pad button to set active
+     */
+    private setButtonInactiveState(buttonType: ButtonPadButton) {
+        const currentState = this.buttonStateMap.get(buttonType);
+
+        // Don't set to inactive if in collision or at it's limit
+        if (currentState === ButtonState.Collision || currentState === ButtonState.Limit || currentState === ButtonState.Inactive)
+            return;
+
+        this.buttonStateMap.set(buttonType, ButtonState.Inactive);
+        if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
     }
 
     /**
@@ -17,227 +147,162 @@ import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints } from 'shared/util'
      * base forward, lift arm), and returns a set of functions to execute when 
      * the user interacts with the button.
      * 
-     * @param buttonPadFunction the {@link ButtonPadFunction}
+     * @param buttonPadFunction the {@link ButtonPadButton}
      * @returns the {@link ButtonFunctions} for the button
      */
-    public provideFunctions(buttonPadFunction: ButtonPadFunction): ButtonFunctions {
+    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions {
+        let action: () => void;
+        const onLeave = () => {
+            this.stopCurrentAction();
+            this.setButtonInactiveState(buttonPadFunction)
+        };
+
+        const jointName: ValidJoints = getJointNameFromButtonFunction(buttonPadFunction);
+        const multiplier: number = negativeButtonPadFunctions.has(buttonPadFunction) ? -1 : 1;
+        const velocity = multiplier * JOINT_VELOCITIES[jointName]! * FunctionProvider.velocityScale;
+        const increment = multiplier * JOINT_INCREMENTS[jointName]! * FunctionProvider.velocityScale;
+
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 switch (buttonPadFunction) {
-                    case ButtonPadFunction.BaseForward:
-                        return {
-                            onClick: () => this.incrementalBaseDrive(JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onLeave: () => this.activeVelocityAction?.stop()
-                        }
-                    case ButtonPadFunction.BaseReverse:
-                        return {
-                            onClick: () => this.incrementalBaseDrive(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateLeft:
-                        return {
-                            onClick: () => this.incrementalBaseDrive(0.0, JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateRight:
-                        return {
-                            onClick: () => this.incrementalBaseDrive(0.0, -1 * JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLower:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLift:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmExtend:
-                        return {
-                            onClick: () => this.incrementalArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmRetract:
-                        return {
-                            onClick: () => this.incrementalArmMovement("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateIn:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateOut:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperOpen:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperClose:
-                        return {
-                            onClick: () => this.incrementalArmMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
+                    case ButtonPadButton.BaseForward:
+                    case ButtonPadButton.BaseReverse:
+                        action = () => this.incrementalBaseDrive(velocity, 0.0);
+                        break;
+                    case ButtonPadButton.BaseRotateLeft:
+                    case ButtonPadButton.BaseRotateRight:
+                        action = () => this.incrementalBaseDrive(0.0, velocity);
+                        break;
+                    case ButtonPadButton.ArmLower:
+                    case ButtonPadButton.ArmLift:
+                    case ButtonPadButton.ArmExtend:
+                    case ButtonPadButton.ArmRetract:
+                    case ButtonPadButton.WristRotateIn:
+                    case ButtonPadButton.WristRotateOut:
+                    case ButtonPadButton.GripperOpen:
+                    case ButtonPadButton.GripperClose:
+                        action = () => this.incrementalArmMovement(jointName, increment);
+                        break;
                 }
-                break;
+                return {
+                    onClick: () => {
+                        action();
+                        this.setButtonActiveState(buttonPadFunction);
+                    },
+                    onLeave: onLeave
+                };
             case ActionMode.PressRelease:
-                switch (buttonPadFunction) {
-                    case ButtonPadFunction.BaseForward:
-                        return {
-                            onClick: () => this.continuousBaseDrive(JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseReverse:
-                        return {
-                            onClick: () => this.continuousBaseDrive(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateLeft:
-                        return {
-                            onClick: () => this.continuousBaseDrive(0.0, JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateRight:
-                        return {
-                            onClick: () => this.continuousBaseDrive(0.0, -1 * JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLower:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLift:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmExtend:
-                        return {
-                            onClick: () => this.continuousArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmRetract:
-                        return {
-                            onClick: () => this.continuousArmMovement("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateIn:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateOut:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperOpen:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperClose:
-                        return {
-                            onClick: () => this.continuousArmMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onRelease: () => this.stopCurrentAction(),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                }
-                break;
             case ActionMode.ClickClick:
                 switch (buttonPadFunction) {
-                    case ButtonPadFunction.BaseForward:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousBaseDrive(JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseReverse:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousBaseDrive(-1 * JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale, 0.0),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateLeft:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousBaseDrive(0.0, JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.BaseRotateRight:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousBaseDrive(0.0, -1 * JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLift:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmLower:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmExtend:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.ArmRetract:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateIn:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.WristRotateOut:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperOpen:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
-                    case ButtonPadFunction.GripperClose:
-                        return {
-                            onClick: () => this.activeVelocityAction ? this.stopCurrentAction() :
-                                this.continuousArmMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale),
-                            onLeave: () => this.stopCurrentAction()
-                        }
+                    case ButtonPadButton.BaseForward:
+                    case ButtonPadButton.BaseReverse:
+                        action = () => this.continuousBaseDrive(velocity, 0.0);
+                        break;
+                    case ButtonPadButton.BaseRotateLeft:
+                    case ButtonPadButton.BaseRotateRight:
+                        action = () => this.continuousBaseDrive(0.0, velocity);
+                        break;
+
+                    case ButtonPadButton.ArmLower:
+                    case ButtonPadButton.ArmLift:
+                    case ButtonPadButton.ArmExtend:
+                    case ButtonPadButton.ArmRetract:
+                    case ButtonPadButton.WristRotateIn:
+                    case ButtonPadButton.WristRotateOut:
+                    case ButtonPadButton.GripperOpen:
+                    case ButtonPadButton.GripperClose:
+                        action = () => this.continuousArmMovement(jointName, increment);
+                        break;
                 }
-                break;
+
+                return (FunctionProvider.actionMode === ActionMode.PressRelease) ? {
+                    onClick: () => {
+                        action();
+                        this.setButtonActiveState(buttonPadFunction);
+                    },
+                    // For press-release, stop when button released
+                    onRelease: () => {
+                        this.stopCurrentAction();
+                        this.setButtonInactiveState(buttonPadFunction)
+                    },
+                    onLeave: onLeave
+                } : {
+                    // For click-click, stop if button already active
+                    onClick: () => {
+                        if (this.activeVelocityAction) {
+                            this.stopCurrentAction();
+                            this.setButtonInactiveState(buttonPadFunction);
+                        } else {
+                            action();
+                            this.setButtonActiveState(buttonPadFunction)
+                        }
+                    },
+                    onLeave: onLeave
+                }
         }
+    }
+}
+
+/**
+ * Uses the name of a joint on the robot to get the two related button pad buttons.
+ * 
+ * @param jointName the name of the joint
+ * @returns both of the corresponding button types (for moving the joint in the
+ * negative or positive direction respectively)
+ */
+function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, ButtonPadButton] | undefined {
+    switch (jointName) {
+        case ('joint_gripper_finger_left'):
+            return [ButtonPadButton.GripperClose, ButtonPadButton.GripperOpen]
+        case ('wrist_extension'):
+            return [ButtonPadButton.ArmRetract, ButtonPadButton.ArmExtend]
+        case ('joint_lift'):
+            return [ButtonPadButton.ArmLower, ButtonPadButton.ArmLift]
+        case ('joint_wrist_yaw'):
+            return [ButtonPadButton.WristRotateIn, ButtonPadButton.WristRotateOut]
+        case ("translate_mobile_base"):
+            return [ButtonPadButton.BaseForward, ButtonPadButton.BaseReverse];
+        case ("rotate_mobile_base"):
+            return [ButtonPadButton.BaseRotateLeft, ButtonPadButton.BaseRotateRight];
+        default:
+            return undefined;
+    }
+}
+
+/**
+ * Uses the type of a button pad button to get the corresponding joint name.
+ * 
+ * @param buttonType the type of button in a button pad
+ * @returns the name of the corresponding joint
+ */
+function getJointNameFromButtonFunction(buttonType: ButtonPadButton): ValidJoints {
+    switch (buttonType) {
+
+        case (ButtonPadButton.BaseReverse):
+        case (ButtonPadButton.BaseForward):
+            return "translate_mobile_base";
+
+        case (ButtonPadButton.BaseRotateLeft):
+        case (ButtonPadButton.BaseRotateRight):
+            return "rotate_mobile_base";
+
+        case (ButtonPadButton.ArmLower):
+        case (ButtonPadButton.ArmLift):
+            return "joint_lift";
+
+        case (ButtonPadButton.ArmRetract):
+        case (ButtonPadButton.ArmExtend):
+            return "wrist_extension";
+
+        case (ButtonPadButton.GripperClose):
+        case (ButtonPadButton.GripperOpen):
+            return "joint_gripper_finger_left";
+
+        case (ButtonPadButton.WristRotateIn):
+        case (ButtonPadButton.WristRotateOut):
+            return "joint_wrist_yaw";
+
+        default:
+            throw Error('unknow button pad function' + buttonType);
     }
 }

@@ -1,10 +1,11 @@
 import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
 import { DropZoneState } from "./dropzone";
 import { Tabs } from "./tabs";
-import { RemoteStream, ValidJointStateDict } from "shared/util";
+import { RemoteStream } from "shared/util";
 import { ButtonPad } from "./buttonpads";
 import { VideoStreamComponent } from "./videostreamcomponent";
 import { PredictiveDisplay } from "./predictivedisplay";
+import { ButtonStateMap } from "../functionprovider/buttonpads";
 
 /** State required for all elements */
 export type SharedState = {
@@ -17,10 +18,8 @@ export type SharedState = {
     dropZoneState: DropZoneState,
     /** Path to the active component */
     activePath?: string,
-    /** Whether joints are in limits */
-    inJointLimits?: ValidJointStateDict
-    /** Whether joints are in collision */
-    inCollision?: ValidJointStateDict
+    /** Mapping of each button pad function to a {@link ButtonState} */
+    buttonStateMap?: ButtonStateMap
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

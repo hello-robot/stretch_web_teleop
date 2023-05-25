@@ -8,28 +8,37 @@ import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ComponentDefinition } from "./utils/componentdefinitions";
 import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
 import { VoiceCommands } from "./staticcomponents/voicecommands";
-import { RemoteStream, ValidJointStateDict } from "shared/util";
+import { RemoteStream } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 import "operator/css/operator.css"
 import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider";
+import { buttonFunctionProvider } from ".";
+import { ButtonStateMap } from "./functionprovider/buttonpads";
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>
-    setJointLimitsCallback: (callbackfn: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) => void
 }) => {
     const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
-    const [inJointLimits, setInJointLimits] = React.useState<ValidJointStateDict | undefined>();
-    const [inCollision, setInCollision] = React.useState<ValidJointStateDict | undefined>();
+
+    // Just used as a flag to force the operator to rerender when the button state map
+    // has been updated
+    const [buttonStateMapRerender, setButtonStateMapRerender] = React.useState<boolean>(false);
+    const buttonStateMap = React.useRef<ButtonStateMap>();
+    function operatorCallback(bsm: ButtonStateMap) {
+        buttonStateMap.current = bsm;
+        setButtonStateMapRerender(!buttonStateMapRerender);
+    }
+    buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
     // Store as state to cause rerender when velocity scale or action mode are changed
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const [actionMode, setActionMode] = React.useState<ActionMode>(FunctionProvider.actionMode);
 
-    let remoteStreams = props.remoteStreams
+    let remoteStreams = props.remoteStreams;
 
     /** Rerenders the layout */
     function updateLayout() {
@@ -109,16 +118,8 @@ export const Operator = (props: {
             onDrop: handleDrop,
             activeDef: activeDef
         },
-        inJointLimits: inJointLimits,
-        inCollision: inCollision
+        buttonStateMap: buttonStateMap.current
     }
-
-    const updateJointLimitsandEffortsState = (
-        inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => {
-        setInJointLimits(inJointLimits)
-        setInCollision(inCollision)
-    }
-    props.setJointLimitsCallback(updateJointLimitsandEffortsState)
 
     return (
         <div id="operator">

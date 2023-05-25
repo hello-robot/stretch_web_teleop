@@ -2,13 +2,13 @@ import React from 'react'
 import { cmd, VelocityCommand } from 'shared/commands';
 import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
 
-export type robotMessageChannel = (message: cmd) => void; 
+export type robotMessageChannel = (message: cmd) => void;
 
 export class RemoteRobot extends React.Component {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
-    
-    constructor(props: {robotChannel: robotMessageChannel}) {
+
+    constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
         this.robotChannel = props.robotChannel
         this.sensors = new RobotSensors({})
@@ -20,7 +20,7 @@ export class RemoteRobot extends React.Component {
             modifier: { linVel: linVel, angVel: angVel }
         };
         this.robotChannel(cmd);
-        
+
         return {
             "stop": () => {
                 let stopEvent: cmd = {
@@ -40,9 +40,9 @@ export class RemoteRobot extends React.Component {
     }
 
     incrementalMove(jointName: ValidJoints, increment: number): VelocityCommand {
-        let cmd: cmd = { 
-            type: "incrementalMove", 
-            jointName: jointName, 
+        let cmd: cmd = {
+            type: "incrementalMove",
+            jointName: jointName,
             increment: increment
         }
         this.robotChannel(cmd);
@@ -66,9 +66,9 @@ export class RemoteRobot extends React.Component {
 class RobotSensors extends React.Component {
     private sensors: { [sensorName: string]: SensorData }
     private jointState?: RobotPose;
-    private inJointLimits?: ValidJointStateDict
-    private inCollision?: ValidJointStateDict
-    private operaterCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void
+    private inJointLimits: ValidJointStateDict = {};
+    private inCollision: ValidJointStateDict = {};
+    private functionProviderCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void;
 
     constructor(props: {}) {
         super(props)
@@ -80,30 +80,63 @@ class RobotSensors extends React.Component {
             "head": {},
             "base": {}
         }
-        this.operaterCallback = () => {}
-        this.setOperatorCallback = this.setOperatorCallback.bind(this)
+        this.functionProviderCallback = () => { }
+        this.setFunctionProviderCallback = this.setFunctionProviderCallback.bind(this)
     }
 
+    /**
+     * Handler for joint state messages with information about if individual 
+     * joints are in collision or at their limit.
+     * 
+     * @param jointValues mapping of joint name to a pair of booleans for 
+     *                    [joint is at lower limit, joint is at upper limit]
+     * @param effortValues mapping for joint name to pair of booleans for 
+     *                     [joint in collision at lower end, joint is in 
+     *                     collision at upper end]
+     */
     checkValidJointState(jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
-        let isTheSame = 
-            this.inJointLimits && 
-            Object.keys(jointValues).every((key, index) => 
-                jointValues[key as ValidJoints]![0] == this.inJointLimits![key as ValidJoints]![0] &&
-                jointValues[key as ValidJoints]![1] == this.inJointLimits![key as ValidJoints]![1]
-            ) &&
-            this.inCollision &&
-            Object.keys(effortValues).every((key, index) => 
-                effortValues[key as ValidJoints]![0] == this.inCollision![key as ValidJoints]![0] &&
-                effortValues[key as ValidJoints]![1] == this.inCollision![key as ValidJoints]![1]
-            )
-        this.inJointLimits = jointValues;
-        this.inCollision = effortValues;
-        if (!isTheSame && this.operaterCallback) {
-            this.operaterCallback(this.inJointLimits, this.inCollision)
+        // Remove existing values from list
+        let change = false;
+        Object.keys(jointValues).forEach((k) => {
+            const key = k as ValidJoints;
+
+            const same = key in this.inJointLimits ?
+                jointValues[key]![0] == this.inJointLimits[key]![0] &&
+                jointValues[key]![1] == this.inJointLimits[key]![1] : false;
+            // If same value, remove from dict so not passed to callback
+            if (same) delete jointValues[key];
+            else {
+                change = true;
+                this.inJointLimits[key] = jointValues[key];
+            }
+        })
+        Object.keys(effortValues).forEach((k) => {
+            const key = k as ValidJoints;
+            const same = key in this.inCollision ?
+                effortValues[key]![0] == this.inCollision[key]![0] &&
+                effortValues[key]![1] == this.inCollision[key]![1] : false;
+            // If same value, remove from dict so not passed to callback
+            if (same) delete effortValues[key];
+            else {
+                change = true;
+                this.inCollision[key] = effortValues[key];
+            }
+        })
+
+        // Only callback when value has changed
+        if (change && this.functionProviderCallback) {
+            console.log(jointValues, effortValues);
+            this.functionProviderCallback(jointValues, effortValues);
         }
     }
 
-    setOperatorCallback(operaterCallback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
-        this.operaterCallback = operaterCallback;
+    /**
+     * Records a callback from the function provider. The callback is called 
+     * whenever a joint state "at limit" or "in collision" changes.
+     * 
+     * @param callback callback to function provider
+     */
+    setFunctionProviderCallback(callback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
+        this.functionProviderCallback = callback;
     }
 }

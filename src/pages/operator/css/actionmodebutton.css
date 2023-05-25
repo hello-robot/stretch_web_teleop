@@ -1,5 +1,4 @@
 #action-mode-button {
-    background-color: var(--btn-bg-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -30,22 +29,18 @@
 }
 
 .action-mode-option {
-    background-color: var(--btn-bg-color);
-    padding: var(--btn-padding);
     padding-top: 1rem;
     padding-bottom: 1rem;
     cursor: pointer;
     width: var(--header-btn-width);
+    display: block;
+    border-radius: 0;
 }
 
 .action-mode-option.active {
-    background-color: var(--btn-bg-color-click);
+    filter: brightness(80%);
 }
 
 .action-mode-option:last-of-type {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;
-}
-
-.action-mode-option:hover {
-    background-color: var(--btn-bg-color-hover);
 }

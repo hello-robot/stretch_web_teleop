@@ -5,22 +5,7 @@ import { ButtonPadDef, ButtonPadId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { getIcon, getDirectionalPaths, getRealsenseManipPaths, getGripperPaths, SVG_RESOLUTION } from "../utils/svg";
-
-/** All the possible button functions */
-export enum ButtonPadFunction {
-    BaseForward,
-    BaseReverse,
-    BaseRotateRight,
-    BaseRotateLeft,
-    ArmLift,
-    ArmLower,
-    ArmExtend,
-    ArmRetract,
-    GripperOpen,
-    GripperClose,
-    WristRotateIn,
-    WristRotateOut,
-}
+import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
 
 /** Possible layouts for the button pad (i.e. the shape and arrangement of the 
  * buttons)
@@ -29,13 +14,6 @@ export enum ButtonPadShape {
     Directional,
     Realsense,
     Gripper
-}
-
-/** Functions called when the user interacts with buttons. */
-export type ButtonFunctions = {
-    onClick: () => void,
-    onRelease?: () => void,
-    onLeave?: () => void
 }
 
 /** Properties for {@link ButtonPad} */
@@ -113,7 +91,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
 /** Properties for a single button on a button pad */
 export type SingleButtonProps = {
     svgPath: string,
-    funct: ButtonPadFunction,
+    funct: ButtonPadButton,
     sharedState: SharedState,
     iconPosition: { x: number, y: number }
 }
@@ -125,6 +103,7 @@ const SingleButton = (props: SingleButtonProps) => {
         onMouseUp: functs.onRelease,
         onMouseLeave: functs.onLeave
     }
+    const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
     const height = 50;
@@ -133,10 +112,10 @@ const SingleButton = (props: SingleButtonProps) => {
     const y = props.iconPosition.y - height / 2;
     return (
         <React.Fragment >
-            <path d={props.svgPath} {...clickProps}>
+            <path d={props.svgPath} {...clickProps} className={buttonState}>
                 <title>{title}</title>
             </path>
-            <image x={x} y={y} height={height} width={width} href={icon} />
+            <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
         </React.Fragment>
     )
 }
@@ -146,13 +125,13 @@ const SingleButton = (props: SingleButtonProps) => {
  * 
  * @param id the identifier of the button pad
  * @returns the shape of the button pad {@link ButtonPadShape} and a list of 
- * {@link ButtonPadFunction} where each element informs the function of
+ * {@link ButtonPadButton} where each element informs the function of
  * the corresponding button on the button pad
  */
-function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPadFunction[]] {
+function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
-    let functions: ButtonPadFunction[];
-    const BF = ButtonPadFunction;
+    let functions: ButtonPadButton[];
+    const BF = ButtonPadButton;
     switch (id) {
         case ButtonPadId.overhead:
             functions = [

@@ -148,10 +148,11 @@
 .video-context-menu li {
     padding: var(--padding);
     cursor: pointer;
+    background-color: inherit;
 }
 
 .video-context-menu li:hover {
-    background-color: var(--btn-bg-color-hover);
+    filter: brightness(90%);
 }
 
 .video-context-menu::before {

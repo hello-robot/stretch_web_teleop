@@ -11,7 +11,3 @@
     /* Make buttons wider than default */
     width: 8rem;
 }
-
-#velocity-control-container button.active {
-    background-color: var(--btn-bg-color);
-}
