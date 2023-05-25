@@ -2,20 +2,23 @@ import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider
 import { ActionMode } from "operator/tsx/staticcomponents/actionmodebutton"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints, ValidJointStateDict } from 'shared/util'
 
-/** Each of the possible buttons which could be on a button pad. */
+/** 
+ * Each of the possible buttons which could be on a button pad. The string is 
+ * the label of the button which appears in the tooltip.
+ */
 export enum ButtonPadButton {
-    BaseForward,
-    BaseReverse,
-    BaseRotateRight,
-    BaseRotateLeft,
-    ArmLift,
-    ArmLower,
-    ArmExtend,
-    ArmRetract,
-    GripperOpen,
-    GripperClose,
-    WristRotateIn,
-    WristRotateOut,
+    BaseForward = "Base Forward",
+    BaseReverse = "Base Reverse",
+    BaseRotateRight = "Base rotate right",
+    BaseRotateLeft = "Base rotate left",
+    ArmLift = "Arm lift",
+    ArmLower = "Arm lower",
+    ArmExtend = "Arm extend",
+    ArmRetract = "Arm retract",
+    GripperOpen = "Gripper open",
+    GripperClose = "Gripper close",
+    WristRotateIn = "Wrist rotate in",
+    WristRotateOut = "Wrist rotate out"
 }
 
 /** Button functions which require moving a joint in the negative direction. */
@@ -283,7 +286,7 @@ function getJointNameFromButtonFunction(buttonType: ButtonPadButton): ValidJoint
         case (ButtonPadButton.BaseRotateRight):
             return "rotate_mobile_base";
 
-        case (ButtonPadButton.ArmLower | ButtonPadButton.ArmLift):
+        case (ButtonPadButton.ArmLower):
         case (ButtonPadButton.ArmLift):
             return "joint_lift";
 

@@ -1,12 +1,10 @@
 :root {
-    --btn-bg-color: hsl(200, 60%, 75%);
-    --btn-bg-color-hover: hsl(200, 70%, 65%);
-    --btn-bg-color-click: hsl(200, 80%, 50%);
-    --btn-brdr: 1px solid var(--btn-bg-color-click);
     --btn-brdr-radius: 0.4rem;
     --btn-padding: .5em 1em;
 
-    --selected-color: rgb(111, 248, 255);
+    --selected-color: hsl(33, 95%, 63%);
+
+    --btn-gray: #f0f0f0;
     --btn-blue: hsl(200, 60%, 75%);
     --btn-green: rgb(129, 218, 129);
     --btn-red: hsl(0, 70%, 70%);
@@ -17,6 +15,8 @@
     --gray-bg: hsl(0, 0%, 88%);
 
     --shadow: 3px 3px 2px var(--shadow-color);
+
+    --tab-inactive: hsl(200, 20%, 85%);
 }
 
 * {
@@ -67,14 +67,15 @@ the element is selected */
 /* Button colors **************************************************************/
 
 button {
+    background-color: var(--btn-gray);
     border: none;
     border-radius: var(--btn-brdr-radius);
     padding: var(--btn-padding);
     box-shadow: var(--shadow);
+    cursor: pointer;
 }
 
 button:hover {
-    cursor: pointer;
     filter: brightness(90%);
     box-shadow: none;
 }

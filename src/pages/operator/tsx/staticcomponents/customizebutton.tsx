@@ -13,7 +13,11 @@ export const CustomizeButton = (props: CustomizeButtonProps) => {
     const icon = props.customizing ? "check" : "build";
     const text = props.customizing ? "Done" : "Customize";
     return (
-        <button onClick={props.onClick} id="customize-button">
+        <button
+            onClick={props.onClick}
+            id="customize-button"
+            className={props.customizing ? "btn-green" : undefined}
+        >
             <span className="material-icons">{icon}</span>
             {text}
         </button>

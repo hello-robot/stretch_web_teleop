@@ -46,7 +46,7 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
     const mapFunc = (thisActionMode: ActionMode) => {
         const active = props.actionMode === thisActionMode;
         return (
-            <div
+            <button
                 key={`action-mode-option-${thisActionMode}`}
                 onClick={() => {
                     setShowModes(false);
@@ -56,7 +56,7 @@ export const ActionModeButton = (props: ActionModeButtonProps) => {
                 className={className("action-mode-option", { active })}
             >
                 {thisActionMode}
-            </div>
+            </button>
         )
     }
 

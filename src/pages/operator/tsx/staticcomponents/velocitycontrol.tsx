@@ -40,7 +40,7 @@ export const VelocityControl = (props: VelocityControlProps) => {
         return (
             <button
                 key={label}
-                className={active ? "active" : ""}
+                className={active ? "btn-blue" : ""}
                 onClick={() => props.onChange(scale)}
             >{label}</button>
         )

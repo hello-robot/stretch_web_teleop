@@ -209,6 +209,6 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
         case (ButtonPadButton.WristRotateOut):
             return gripRight
         default:
-            throw Error('unknown button pad function ' + buttonPadButton);
+            throw Error(`unknown button pad button\t${buttonPadButton}`);
     }
 }
