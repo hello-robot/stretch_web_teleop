@@ -27,11 +27,14 @@ export abstract class FunctionProvider {
     }
 
     /**
-     * Sets the initial values for velocity scale and action mode.
+     * Sets the initial values for the velocity scale and action mode
+     * 
+     * @param velocityScale initial velocity scale
+     * @param actionMode initial action mode
      */
-    static initialize() {
-        this.velocityScale = DEFAULT_VELOCITY_SCALE;
-        this.actionMode = ActionMode.StepActions;
+    static initialize(velocityScale: number, actionMode: ActionMode) {
+        this.velocityScale = velocityScale;
+        this.actionMode = actionMode;
     }
 
     public incrementalBaseDrive(linVel: number, angVel: number) {

@@ -2,6 +2,8 @@
  * @summary Definitions to describe different components to render
  */
 
+import { ActionMode } from "../staticcomponents/actionmodebutton";
+
 /**
  * High-level type of the component
  */
@@ -59,6 +61,11 @@ export type ButtonPadDef = ComponentDefinition & {
 
 export type ParentComponentDefinition = ComponentDefinition & {
     children: ComponentDefinition[];
+}
+
+export type LayoutDefinition = ParentComponentDefinition & {
+    displayVoiceControl: boolean;
+    actionMode: ActionMode;
 }
 
 /**

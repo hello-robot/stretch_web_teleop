@@ -1,10 +1,13 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, ParentComponentDefinition } from "./componentdefinitions";
+import { ActionMode } from "../staticcomponents/actionmodebutton";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition } from "./componentdefinitions";
 
 /**
  * Default layout to load on start
  */
-export const DEFAULT_LAYOUT: ParentComponentDefinition = {
+export const DEFAULT_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
+    displayVoiceControl: false,
+    actionMode: ActionMode.ClickClick,
     children: [{
         type: ComponentType.Tabs,
         children: [{

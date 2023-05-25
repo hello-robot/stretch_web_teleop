@@ -5,8 +5,7 @@ import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/acti
 import { CustomizeButton } from "./staticcomponents/customizebutton";
 import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
-import { ComponentDefinition } from "./utils/componentdefinitions";
-import { DEFAULT_LAYOUT } from "./utils/defaultlayout";
+import { ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
 import { VoiceCommands } from "./staticcomponents/voicecommands";
 import { RemoteStream } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
@@ -17,13 +16,13 @@ import { ButtonStateMap } from "./functionprovider/buttonpads";
 
 /** Operator interface webpage */
 export const Operator = (props: {
-    remoteStreams: Map<string, RemoteStream>
+    remoteStreams: Map<string, RemoteStream>,
+    layout: LayoutDefinition
 }) => {
-    const [layout, setLayout] = React.useState(DEFAULT_LAYOUT);
     const [customizing, setCustomizing] = React.useState(false);
-    const [activePath, setActivePath] = React.useState<string | undefined>();
-    const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
-    const [displayVoiceControl, setDisplayVoiceControl] = React.useState<boolean>(true);
+    const [activePath, setActivePath] = React.useState<string | undefined>(undefined);
+    const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>(undefined);
+    const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
@@ -35,16 +34,33 @@ export const Operator = (props: {
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
-    // Store as state to cause rerender when velocity scale or action mode are changed
-    const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
-    const [actionMode, setActionMode] = React.useState<ActionMode>(FunctionProvider.actionMode);
-
     let remoteStreams = props.remoteStreams;
 
     /** Rerenders the operator */
     function updateLayout() {
         console.log('update layout');
         setButtonStateMapRerender(!buttonStateMapRerender);
+    }
+
+    /** 
+     * Updates the action mode in the layout (visually) and in the fuction
+     * provider (functionally).
+     */
+    function setActionMode(actionMode: ActionMode) {
+        props.layout.actionMode = actionMode;
+        FunctionProvider.actionMode = actionMode;
+        updateLayout();
+    }
+
+    /**
+     * Sets the voice control component to display or hidden.
+     * 
+     * @param displayVoiceControl if the voice control component at the 
+     *                            top of the operator body should be displayed
+     */
+    function setDisplayVoiceControl(displayVoiceControl: boolean) {
+        props.layout.displayVoiceControl = displayVoiceControl;
+        updateLayout();
     }
 
     /**
@@ -58,9 +74,9 @@ export const Operator = (props: {
         let newPath: string = path;
         if (!activePath) {
             // New element not already in the layout
-            addToLayout(activeDef, path, layout);
+            addToLayout(activeDef, path, props.layout);
         } else {
-            newPath = moveInLayout(activePath, path, layout);
+            newPath = moveInLayout(activePath, path, props.layout);
         }
         setActivePath(newPath);
         console.log('new active path', newPath)
@@ -94,7 +110,7 @@ export const Operator = (props: {
     /** Callback when the delete button in the sidebar is clicked */
     const handleDelete = () => {
         if (!activePath) throw Error('handleDelete called when activePath is undefined');
-        removeFromLayout(activePath, layout);
+        removeFromLayout(activePath, props.layout);
         updateLayout();
         setActivePath(undefined);
         setActiveDef(undefined);
@@ -126,8 +142,8 @@ export const Operator = (props: {
         <div id="operator">
             <div id="operator-header">
                 <ActionModeButton
-                    actionMode={actionMode}
-                    onChange={(am) => { setActionMode(am); FunctionProvider.actionMode = am; }}
+                    actionMode={props.layout.actionMode}
+                    onChange={(am) => { setActionMode(am); }}
                 />
                 <VelocityControl
                     scale={velocityScale}
@@ -138,7 +154,7 @@ export const Operator = (props: {
                     onClick={handleCustomize}
                 />
             </div>
-            <div id="operator-voice" hidden={!displayVoiceControl}>
+            <div id="operator-voice" hidden={!props.layout.displayVoiceControl}>
                 <VoiceCommands
                     onUpdateVelocityScale=
                     {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
@@ -146,7 +162,7 @@ export const Operator = (props: {
             </div>
             <div id="operator-body">
                 <LayoutArea
-                    layout={layout}
+                    layout={props.layout}
                     sharedState={sharedState}
                 />
             </div>
@@ -157,7 +173,7 @@ export const Operator = (props: {
                 activePath={activePath}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
-                displayVoiceControl={displayVoiceControl}
+                displayVoiceControl={props.layout.displayVoiceControl}
                 setDisplayVoiceControl={setDisplayVoiceControl}
             />
         </div>
