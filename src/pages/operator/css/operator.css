@@ -26,6 +26,20 @@
     height: 100%;
 }
 
+#operator-voice {
+    background-color: whitesmoke;
+    box-shadow: var(--shadow);
+    height: 4rem;
+    width: 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    align-self: center;
+    border-radius: 200px;
+    margin-top: 10px;
+}
+
 #operator-body {
     display: flex;
     flex-flow: row;

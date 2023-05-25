@@ -37,6 +37,7 @@ type VoiceCommandsProps = {
 export const VoiceCommands = (props: VoiceCommandsProps) => {
     const { transcript, resetTranscript } = useSpeechRecognition({ commands: createCommands() });
     const [isListening, setIsListening] = useState(false);
+    const [display, setDisplay] = useState("Microphone off");
     const microphoneRef = useRef<HTMLButtonElement>(null);
 
     function createCommands(): VoiceCommandFunctions[] {
@@ -59,7 +60,11 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
     
         let commands: VoiceCommandFunctions[] = functions.map((funct: VoiceCommandFunction) => {
             return {
-                ...voiceFunctionProvider.provideFunctions(funct, props.onUpdateVelocityScale) as VoiceCommandFunctions,
+                ...voiceFunctionProvider.provideFunctions(
+                    funct, 
+                    props.onUpdateVelocityScale, 
+                    (command: string) => setDisplay(command)
+                ) as VoiceCommandFunctions,
             };
         });
         return commands
@@ -68,12 +73,14 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
     const listenHandle = () => {
         if (!isListening) {
             setIsListening(true);
+            setDisplay("Listening...")
             microphoneRef.current?.classList.add("listening");
             SpeechRecognition.startListening({
                 continuous: true,
             });
         } else {
             setIsListening(false);
+            setDisplay("Microphone off");
             microphoneRef.current?.classList.remove("listening");
             SpeechRecognition.stopListening();
             resetTranscript();
@@ -88,16 +95,23 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
         );
     } else {
         return (
-            <button
-                id="microphone-button"
-                ref={microphoneRef}
-                onClick={listenHandle}
-            >
+            <div id="voice-command-container">
                 {isListening
-                    ? <span className="material-icons">mic</span>
-                    : <span className="material-icons">mic_off</span>
+                    ? <span className="material-icons" id="record-icon">radio_button_checked</span>
+                    : <></>
                 }
-            </button>
+                <button
+                    id="microphone-button"
+                    ref={microphoneRef}
+                    onClick={listenHandle}
+                >
+                    {isListening
+                        ? <span className="material-icons">mic</span>
+                        : <span className="material-icons">mic_off</span>
+                    }
+                </button>
+                <p>{display}</p>
+            </div>
         );
     }
 }
