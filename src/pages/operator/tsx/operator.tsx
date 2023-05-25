@@ -23,6 +23,7 @@ export const Operator = (props: {
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>();
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>();
+    const [displayVoiceControl, setDisplayVoiceControl] = React.useState<boolean>(true);
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
@@ -137,7 +138,7 @@ export const Operator = (props: {
                     onClick={handleCustomize}
                 />
             </div>
-            <div id="operator-voice">
+            <div id="operator-voice" hidden={!displayVoiceControl}>
                 <VoiceCommands
                     onUpdateVelocityScale=
                     {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
@@ -156,6 +157,8 @@ export const Operator = (props: {
                 activePath={activePath}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
+                displayVoiceControl={displayVoiceControl}
+                setDisplayVoiceControl={setDisplayVoiceControl}
             />
         </div>
     )

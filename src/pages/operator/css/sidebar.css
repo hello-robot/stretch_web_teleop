@@ -27,6 +27,10 @@
 #sidebar-body {
     padding: 1rem;
     box-shadow: inset 0 0 3px 0px var(--shadow-color);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Footer *********************************************************************/
