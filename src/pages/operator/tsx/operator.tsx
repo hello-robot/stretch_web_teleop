@@ -139,8 +139,8 @@ export const Operator = (props: {
             </div>
             <div id="operator-voice">
                 <VoiceCommands
-                    onUpdateVelocityScale= 
-                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
+                    onUpdateVelocityScale=
+                    {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
             </div>
             <div id="operator-body">
@@ -148,15 +148,15 @@ export const Operator = (props: {
                     layout={layout}
                     sharedState={sharedState}
                 />
-                <Sidebar
-                    hidden={!customizing}
-                    onDelete={handleDelete}
-                    activeDef={activeDef}
-                    activePath={activePath}
-                    updateLayout={updateLayout}
-                    onSelect={handleSelect}
-                />
             </div>
+            <Sidebar
+                hidden={!customizing}
+                onDelete={handleDelete}
+                activeDef={activeDef}
+                activePath={activePath}
+                updateLayout={updateLayout}
+                onSelect={handleSelect}
+            />
         </div>
     )
 }
