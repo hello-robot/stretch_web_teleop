@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack')
 
 const pages = ['robot', 'operator'];
@@ -24,7 +23,6 @@ module.exports = {
   //   __dirname: false,
   // },
   plugins: [
-    new CleanWebpackPlugin(),
     // Work around for Buffer is undefined:
     // https://github.com/webpack/changelog-v5/issues/10
     new webpack.ProvidePlugin({
@@ -41,7 +39,6 @@ module.exports = {
           template: `./src/pages/${page}/html/index.html`,
           filename: `${page}/index.html`,
           chunks: [page],
-          cache: false
       })
     )
   ),

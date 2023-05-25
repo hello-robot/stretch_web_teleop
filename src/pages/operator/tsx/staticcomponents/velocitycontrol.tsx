@@ -21,7 +21,7 @@ type VelocityControlProps = {
 }
 
 /**The different velocity settings to display. */
-const VELOCITY_SCALE: VelocityDetails[] = [
+export const VELOCITY_SCALE: VelocityDetails[] = [
     { label: "Slowest", scale: 0.2 },
     { label: "Slow", scale: 0.4 },
     { label: "Medium", scale: 0.8 },

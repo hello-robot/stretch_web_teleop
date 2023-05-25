@@ -1,8 +1,7 @@
 import { FunctionProvider } from "./functionprovider"
 import { VoiceCommandFunction, VoiceCommandFunctions } from "../staticcomponents/voicecommands"
-import { ActionMode } from "../staticcomponents/actionmodebutton"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints } from 'shared/util'
-
+import { JOINT_VELOCITIES, JOINT_INCREMENTS } from 'shared/util'
+import { VELOCITY_SCALE } from "../staticcomponents/velocitycontrol"
 export class VoiceFunctionProvider extends FunctionProvider {
     constructor() {
         super()
@@ -17,7 +16,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
     * @param voiceCommandFunction the {@link VoiceCommandFunction}
     * @returns the {@link VoiceCommandFunctions} for the spoken command
     */
-    public provideFunctions(voiceCommandFunction: VoiceCommandFunction): VoiceCommandFunctions {
+    public provideFunctions(voiceCommandFunction: VoiceCommandFunction, onUpdateVelocityScale: (newScale: number) => void): VoiceCommandFunctions {
         switch (voiceCommandFunction) {
             case VoiceCommandFunction.BaseForward:
                 return {
@@ -83,6 +82,15 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "stop",
                     callback: () => this.stopCurrentAction()
+                }
+            case VoiceCommandFunction.SetSpeed:
+                return {
+                    command: "set speed to *",
+                    callback: (speed) => {
+                        const speeds = ["slowest", "slow", "medium", "fast", "fastest"]
+                        if (!speeds.includes(speed as string)) return;
+                        onUpdateVelocityScale(VELOCITY_SCALE[speeds.indexOf(speed as string)].scale)
+                    }
                 }
         }
     }
