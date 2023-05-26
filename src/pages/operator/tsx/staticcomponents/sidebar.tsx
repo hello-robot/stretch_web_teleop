@@ -10,6 +10,8 @@ type SidebarProps = {
     onSelect: (def: ComponentDefinition, path?: string) => void;
     activeDef?: ComponentDefinition;
     activePath?: string;
+    displayVoiceControl: boolean;
+    setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
 }
 
 /** Popup on the right side of the screen while in customization mode. */
@@ -28,10 +30,17 @@ export const Sidebar = (props: SidebarProps) => {
                         activeDef={props.activeDef!}
                         updateLayout={props.updateLayout}
                     /> :
-                    <SidebarComponentProvider
-                        activeDef={props.activeDef}
-                        onSelect={props.onSelect}
-                    />
+                    <React.Fragment>
+                        <SidebarComponentProvider
+                            activeDef={props.activeDef}
+                            onSelect={props.onSelect}
+                        />
+                        <SidebarGlobalOptions
+                            displayVoiceControl={props.displayVoiceControl}
+                            setDisplayVoiceControl={props.setDisplayVoiceControl}
+                        />
+
+                    </React.Fragment>
                 }
             </div>
             <div id="sidebar-footer">
@@ -70,6 +79,24 @@ function componentDescription(definition: ComponentDefinition): string {
 type OptionsProps = {
     activeDef: ComponentDefinition;
     updateLayout: () => void;
+}
+
+type SidebarGlobalOptionsProps = {
+    displayVoiceControl: boolean;
+    setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+}
+
+const SidebarGlobalOptions = (props: SidebarGlobalOptionsProps) => {
+    return (
+        <div>
+            <p>Global settings:</p>
+            <ToggleButton
+                on={props.displayVoiceControl}
+                onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
+                label="Display voice control"
+            />
+        </div>
+    )
 }
 
 const SidebarOptions = (props: OptionsProps) => {
@@ -179,7 +206,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             onExpand: () => setExpandedType(expanded ? undefined : outline.type),
             onSelect: (id?: ComponentId) => handleSelect(outline.type, id)
         }
-        return <ProviderTab {...tabProps} key={outline.type}/>
+        return <ProviderTab {...tabProps} key={outline.type} />
     }
 
     return (

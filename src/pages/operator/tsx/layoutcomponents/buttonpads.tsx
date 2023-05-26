@@ -4,7 +4,7 @@ import { CustomizableComponentProps, SharedState } from "./customizablecomponent
 import { ButtonPadDef, ButtonPadId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
-import { getIcon, getDirectionalPaths, getRealsenseManipPaths, getGripperPaths, SVG_RESOLUTION } from "../utils/svg";
+import { getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
 
 /** Possible layouts for the button pad (i.e. the shape and arrangement of the 
@@ -18,8 +18,10 @@ export enum ButtonPadShape {
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {
-    /* If the button pad is overlaid on a video stream */
+    /* If the button pad is overlaid on a video stream. */
     overlay?: boolean;
+    /* Aspect ratio of the button pad */
+    aspectRatio?: number;
 }
 
 /**
@@ -36,7 +38,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const id: ButtonPadId = definition.id;
     if (!id) throw Error("Undefined button pad ID at path " + props.path);
     const [shape, functions] = getShapeAndFunctionsFromId(definition.id);
-    const [paths, iconPositions] = getPathsFromShape(shape);
+    const [paths, iconPositions] = getPathsFromShape(shape, props.aspectRatio);
 
     // Paths and functions should be the same length
     if (paths.length !== functions.length) {
@@ -76,7 +78,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
         <>
             <svg
                 ref={svgRef}
-                viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
+                viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
                 className={className("button-pads", { customizing, selected, overlay })}
                 {...selectProp}
@@ -173,25 +175,4 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
     }
 
     return [shape, functions];
-}
-
-/******************************************************************************/
-/* Logic to draw the paths for the buttons on each button pad                 */
-/******************************************************************************/
-
-/**
- * Gets a list of path string descriptions for each button based on the {@link ButtonPadShape}
- * 
- * @param shape {@link ButtonPadShape} enum representing the shape of the button pad
- * @returns a list of strings where each string is a path description for the shape of a single button
- */
-function getPathsFromShape(shape: ButtonPadShape): [string[], { x: number, y: number }[]] {
-    switch (shape) {
-        case (ButtonPadShape.Directional):
-            return getDirectionalPaths();
-        case (ButtonPadShape.Realsense):
-            return getRealsenseManipPaths();
-        case (ButtonPadShape.Gripper):
-            return getGripperPaths();
-    }
 }

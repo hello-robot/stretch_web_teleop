@@ -18,24 +18,24 @@ export type PanTiltButtonDirection = typeof panTiltButtonDirections[number];
  * @param props properties
  */
 export const VideoStreamComponent = (props: CustomizableComponentProps) => {
-    // Dimensions for the overlay so its the same width and height as the video
-    const [overlayDimensions, setOverlayDimensions] = React.useState({});
-    const [videoWidth, setVideoWidth] = React.useState(100);
     // Reference to the video element
     const videoRef = React.useRef<HTMLVideoElement>(null);
-    const overlayContainerRef = React.useRef<HTMLDivElement>(null);
     // X and Y position of the cursor when user clicks on the video
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
     const definition = props.definition as VideoStreamDef;
     if (!definition.children) throw Error('Video Stream definition should have children');
-    // Get the stream to display in the video
+    // Get the stream to display inside the video
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
+    // Refrence to the div immediately around the video element
+    const videoAreaRef = React.useRef<HTMLDivElement>(null);
+    // Boolean representing if the video stream needs to be constrained by height
+    // (constrained by width otherwise)
+    const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
 
     // Create the overlay
     const overlayDefinition = definition.children.length > 0 ? definition.children[0] : undefined;
-    const overlay = createOverlay(overlayDefinition, props.path, props.sharedState);
-
     const videoAspectRatio = getVideoAspectRatio(definition);
+    const overlay = createOverlay(overlayDefinition, props.path, props.sharedState, videoAspectRatio);
 
     // Update the source of the video stream 
     React.useEffect(() => {
@@ -78,11 +78,36 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
         setClickXY([x, y]);
     }
 
+    // Constrain the width or height when the stream gets too large
+    React.useEffect(() => {
+        console.log('use effect')
+        const resizeObserver = new ResizeObserver(entries => {
+
+            // height and width of area around the video stream
+            const { height, width } = entries[0].contentRect;
+
+            // height and width of video stream
+            if (!videoRef?.current) return;
+            const videoRect = videoRef.current.getBoundingClientRect();
+
+            if (videoRect.height > height) {
+                setConstrainedHeight(true);
+                return;
+            }
+            if (videoRect.width > width) {
+                setConstrainedHeight(false);
+            }
+        });
+        if (!videoAreaRef?.current) return;
+        resizeObserver.observe(videoAreaRef.current);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+
     const overlayContainer = (
         <div
             className={className("video-overlay-container", { customizing, selected })}
             // style={overlayDimensions}
-            ref={overlayContainerRef}
             onClick={customizing ? handleClick : undefined}
         >
             {
@@ -105,95 +130,45 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
             }
         </div>
     )
+    // If the video is from the Realsense camera then include the pan-tilt 
+    // buttons around the video, otherwise return the video
+    const videoComponent = (props.definition.id === VideoStreamId.realsense) ?
+        (
+            <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                {panTiltButtonDirections.map(dir => <PanTiltButton direction={dir} key={dir} />)}
+                <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        muted={true}
+                        className={className(videoClass, { constrainedHeight })}
+                    />
+                    {overlayContainer}
+                </div>
+            </div>
+        )
+        :
+        (
+            <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    muted={true}
+                    className={className(videoClass, { constrainedHeight })}
+                />
+                {overlayContainer}
+            </div>
+        )
 
     return (
         <div className='video-container' draggable={false}>
-            <SubVideoComponent {...{ videoWidth, definition, videoRef, videoClass, overlayContainer }} />
+            {videoComponent}
             <div className="under-video-area">
                 {getUnderVideoButtons(definition)}
             </div>
         </div>
     );
 }
-
-/** Properties for {@link SubVideoComponent} */
-type SubVideoComponentProps = {
-    definition: VideoStreamDef,
-    videoRef: React.RefObject<HTMLVideoElement>,
-    videoWidth: number,
-    videoClass: string,
-    overlayContainer: JSX.Element
-}
-
-/**
- * The actual video element, either a plain HTML video element or a div with 
- * the pan tilt controls for the realsense if the video stream is of the realsense
- * 
- * @param props {@link SubVideoComponentProps}
- */
-const SubVideoComponent = (props: SubVideoComponentProps) => {
-    const videoAreaRef = React.useRef<HTMLDivElement>(null);
-    const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
-    const videoRef = props.videoRef;
-    const buttons = panTiltButtonDirections.map(dir => <PanTiltButton direction={dir} key={dir} />)
-
-    // Constrain the width or height when the stream gets too large
-    React.useEffect(() => {
-        console.log('use effect')
-        const resizeObserver = new ResizeObserver(entries => {
-            console.log('resize function')
-
-            // height and width of overlay container
-            const { height, width } = entries[0].contentRect;
-
-            // height and width of video stream
-            if (!videoRef?.current) return;
-            const videoRect = videoRef.current.getBoundingClientRect();
-            
-            if (videoRect.height > height) {
-                setConstrainedHeight(true);
-                return;
-            } 
-            if (videoRect.width > width) {
-                setConstrainedHeight(false);
-            }
-        });
-        if (!videoAreaRef?.current) return;
-        resizeObserver.observe(videoAreaRef.current);
-        return () => resizeObserver.disconnect();
-    }, []);
-
-    if (props.definition.id === VideoStreamId.realsense) {
-        return (
-            <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                {buttons}
-
-                <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
-                    <video
-                        ref={props.videoRef}
-                        autoPlay
-                        muted={true}
-                        className={className(props.videoClass, { constrainedHeight })}
-                    />
-                    {props.overlayContainer}
-                </div>
-            </div>
-        )
-    } else {
-        return (
-            <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
-                <video
-                    ref={props.videoRef}
-                    autoPlay
-                    muted={true}
-                    className={className(props.videoClass, { constrainedHeight })}
-                />
-                {props.overlayContainer}
-            </div>
-        )
-    }
-}
-
 
 // TODO: implement video stream pan tilt function provider
 const mockFunctionProvider = (direction: PanTiltButtonDirection): () => void => {
@@ -351,7 +326,8 @@ function getVideoAspectRatio(definition: VideoStreamDef): number {
 function createOverlay(
     overlayDefinition: ComponentDefinition | undefined,
     path: string,
-    sharedState: SharedState): JSX.Element | undefined {
+    sharedState: SharedState,
+    aspectRatio: number): JSX.Element | undefined {
     // If overlay definition is undefined then there's no overlay for this stream
     if (!overlayDefinition) return undefined;
 
@@ -363,7 +339,7 @@ function createOverlay(
 
     switch (overlayDefinition?.type) {
         case (ComponentType.ButtonPad):
-            return <ButtonPad {...overlayProps} overlay />
+            return <ButtonPad {...overlayProps} overlay aspectRatio={aspectRatio}/>
         case (ComponentType.PredictiveDisplay):
             return <PredictiveDisplay {...overlayProps} />
         default:
