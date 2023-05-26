@@ -25,6 +25,9 @@ export enum ButtonPadButton {
     CameraPanRight = "Camera pan right"
 }
 
+/** Array of the pan tilt buttons */
+export const panTiltButtons: ButtonPadButton[] = [ButtonPadButton.CameraTiltUp, ButtonPadButton.CameraTiltDown, ButtonPadButton.CameraPanLeft, ButtonPadButton.CameraPanRight];
+
 /** Button functions which require moving a joint in the negative direction. */
 const negativeButtonPadFunctions = new Set<ButtonPadButton>([
     ButtonPadButton.BaseReverse,
@@ -32,7 +35,9 @@ const negativeButtonPadFunctions = new Set<ButtonPadButton>([
     ButtonPadButton.ArmLower,
     ButtonPadButton.ArmRetract,
     ButtonPadButton.GripperClose,
-    ButtonPadButton.WristRotateOut
+    ButtonPadButton.WristRotateOut,
+    ButtonPadButton.CameraTiltDown,
+    ButtonPadButton.CameraPanRight
 ])
 
 /** Functions called when the user interacts with a button. */
@@ -154,18 +159,22 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @param buttonPadFunction the {@link ButtonPadButton}
      * @returns the {@link ButtonFunctions} for the button
      */
-    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions | undefined {
+    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions {
         let action: () => void;
         const onLeave = () => {
             this.stopCurrentAction();
             this.setButtonInactiveState(buttonPadFunction)
         };
 
+
         const jointName: ValidJoints = getJointNameFromButtonFunction(buttonPadFunction);
         const multiplier: number = negativeButtonPadFunctions.has(buttonPadFunction) ? -1 : 1;
         const velocity = multiplier * JOINT_VELOCITIES[jointName]! * FunctionProvider.velocityScale;
         const increment = multiplier * JOINT_INCREMENTS[jointName]! * FunctionProvider.velocityScale;
 
+        if (panTiltButtons.includes(buttonPadFunction)) {
+            return { onClick: () => this.incrementalJointMovement(jointName, increment) };
+        }
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 switch (buttonPadFunction) {
@@ -185,6 +194,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
+                    case (ButtonPadButton.CameraTiltUp):
+                    case (ButtonPadButton.CameraTiltDown):
+                    case (ButtonPadButton.CameraPanLeft):
+                    case (ButtonPadButton.CameraPanRight):
                         action = () => this.incrementalJointMovement(jointName, increment);
                         break;
                 }
@@ -215,6 +228,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
+                    case (ButtonPadButton.CameraTiltUp):
+                    case (ButtonPadButton.CameraTiltDown):
+                    case (ButtonPadButton.CameraPanLeft):
+                    case (ButtonPadButton.CameraPanRight):
                         action = () => this.continuousJointMovement(jointName, increment);
                         break;
                 }
@@ -305,6 +322,14 @@ function getJointNameFromButtonFunction(buttonType: ButtonPadButton): ValidJoint
         case (ButtonPadButton.WristRotateIn):
         case (ButtonPadButton.WristRotateOut):
             return "joint_wrist_yaw";
+
+        case (ButtonPadButton.CameraTiltUp):
+        case (ButtonPadButton.CameraTiltDown):
+            return "joint_head_tilt";
+
+        case (ButtonPadButton.CameraPanLeft):
+        case (ButtonPadButton.CameraPanRight):
+            return "joint_head_pan";
 
         default:
             throw Error('unknow button pad function' + buttonType);

@@ -6,17 +6,8 @@ import { CustomizableComponentProps, SharedState } from "./customizablecomponent
 import { DropZone } from "./dropzone";
 import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
-import { pantiltFunctionProvider } from "..";
-
-/** Array of the different directions for the pan tilt buttons */
-const panTiltButtonDirections: string[] = ['up', 'down', 'left', 'right'];
-/** Type to specify the different directions for the pan tilt buttons */
-export type PanTiltButtonDirection = typeof panTiltButtonDirections[number];
-
-export type PanTitleButtonFunctions = {
-    onClick: () => void
-}
-
+import { buttonFunctionProvider } from "..";
+import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
 /** Array of different views for the overhead camera */
 const overheadButtons: string[] = ['Drive View', 'Gripper View']
 /** Type to specify the different overhead camera views */
@@ -145,7 +136,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const videoComponent = (props.definition.id === VideoStreamId.realsense) ?
         (
             <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                {panTiltButtonDirections.map(dir => <PanTiltButton direction={dir} key={dir} />)}
+                {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
                 <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
                     <video
                         ref={videoRef}
@@ -183,28 +174,28 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 /**
  * Creates a single button for controlling the pan or tilt of the realsense camera
  *
- * @param props the direction of the button {@link PanTiltButtonDirection}
+ * @param props the direction of the button {@link PanTiltButton}
                 */
-const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
+const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
-    const onClick = pantiltFunctionProvider.provideFunctions(props.direction)!.onClick(); 
+    const onClick = buttonFunctionProvider.provideFunctions(props.direction).onClick; 
 
     // Specify button details based on the direction
     switch (props.direction) {
-        case ('up'):
+        case (ButtonPadButton.CameraTiltUp):
             gridPosition = { gridRow: 1, gridColumn: 2 };
             rotation = "-90";
             break;
-        case ('down'):
+        case (ButtonPadButton.CameraTiltDown):
             gridPosition = { gridRow: 3, gridColumn: 2 };
             rotation = "90";
             break;
-        case ('left'):
+        case (ButtonPadButton.CameraPanLeft):
             gridPosition = { gridRow: 2, gridColumn: 1 };
             rotation = "180";
             break;
-        case ('right'):
+        case (ButtonPadButton.CameraPanRight):
             gridPosition = { gridRow: 2, gridColumn: 3 };
             rotation = "0";  // by default the arrow icon points right
             break;

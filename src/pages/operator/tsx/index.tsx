@@ -12,7 +12,6 @@ import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecomman
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
 import { LocalStorageHandler } from './utils/storageHandler';
-import { PantiltFunctionProvider } from './functionprovider/pantilt';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -22,7 +21,6 @@ let root: Root;
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
-export var pantiltFunctionProvider = new PantiltFunctionProvider();
 
 // if (process.env.STYLEGUIDIST == 'false') {
 connection = new WebRTCConnection({
