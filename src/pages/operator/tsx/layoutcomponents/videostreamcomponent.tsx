@@ -13,6 +13,10 @@ const panTiltButtonDirections: string[] = ['up', 'down', 'left', 'right'];
 /** Type to specify the different directions for the pan tilt buttons */
 export type PanTiltButtonDirection = typeof panTiltButtonDirections[number];
 
+export type PanTitleButtonFunctions = {
+    onClick: () => void
+}
+
 /** Array of different views for the overhead camera */
 const overheadButtons: string[] = ['Drive View', 'Gripper View']
 /** Type to specify the different overhead camera views */
@@ -184,7 +188,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
-    const onClick = pantiltFunctionProvider.provideFunctions(props.direction)!; 
+    const onClick = pantiltFunctionProvider.provideFunctions(props.direction)!.onClick(); 
 
     // Specify button details based on the direction
     switch (props.direction) {
@@ -394,9 +398,9 @@ function getUnderVideoButtons(definition: VideoStreamDef): JSX.Element | undefin
 const getOverheadButtons = () => {
     return (
         <React.Fragment >
-            {/* <button>Drive View</button>
-            <button>Gripper View</button> */}
-            {overheadButtons.map(view => <OverheadButton view={view} key={view} />)}
+            <button>Drive View</button>
+            <button>Gripper View</button>
+            {/* {overheadButtons.map(view => <OverheadButton view={view} key={view} />)} */}
         </React.Fragment>
     )
 }
