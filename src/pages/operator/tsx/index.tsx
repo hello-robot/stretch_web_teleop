@@ -24,22 +24,22 @@ export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var pantiltFunctionProvider = new PantiltFunctionProvider();
 
-if (process.env.STYLEGUIDIST == 'false') {
-    connection = new WebRTCConnection({
-        peerRole: "operator",
-        polite: true,
-        onMessage: handleMessage,
-        onTrackAdded: handleRemoteTrackAdded,
-        onMessageChannelOpen: configureRobot,
-        onConnectionEnd: disconnectFromRobot
-    });
+// if (process.env.STYLEGUIDIST == 'false') {
+connection = new WebRTCConnection({
+    peerRole: "operator",
+    polite: true,
+    onMessage: handleMessage,
+    onTrackAdded: handleRemoteTrackAdded,
+    onMessageChannelOpen: configureRobot,
+    onConnectionEnd: disconnectFromRobot
+});
 
-    connection.joinOperatorRoom()
+connection.joinOperatorRoom()
 
-    // Create root once when index is loaded
-    const container = document.getElementById('root');
-    root = createRoot(container!);
-}
+// Create root once when index is loaded
+const container = document.getElementById('root');
+root = createRoot(container!);
+// }
 
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');
