@@ -6,6 +6,7 @@ import { CustomizableComponentProps, SharedState } from "./customizablecomponent
 import { DropZone } from "./dropzone";
 import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
+import { pantiltFunctionProvider } from "..";
 
 /** Array of the different directions for the pan tilt buttons */
 const panTiltButtonDirections: string[] = ['up', 'down', 'left', 'right'];
@@ -170,11 +171,6 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     );
 }
 
-// TODO: implement video stream pan tilt function provider
-const mockFunctionProvider = (direction: PanTiltButtonDirection): () => void => {
-    return () => console.log('clicked pan tilt button', direction)
-}
-
 /**
  * Creates a single button for controlling the pan or tilt of the realsense camera
  *
@@ -183,7 +179,7 @@ const mockFunctionProvider = (direction: PanTiltButtonDirection): () => void => 
 const PanTiltButton = (props: { direction: PanTiltButtonDirection }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
-    const onClick = mockFunctionProvider(props.direction);  // TODO: implement video stream pan tilt function provider
+    const onClick = pantiltFunctionProvider.provideFunctions(props.direction); 
 
     // Specify button details based on the direction
     switch (props.direction) {
