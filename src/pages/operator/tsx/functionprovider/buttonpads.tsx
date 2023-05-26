@@ -150,7 +150,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @param buttonPadFunction the {@link ButtonPadButton}
      * @returns the {@link ButtonFunctions} for the button
      */
-    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions {
+    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions | undefined {
         let action: () => void;
         const onLeave = () => {
             this.stopCurrentAction();
@@ -181,7 +181,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
-                        action = () => this.incrementalArmMovement(jointName, increment);
+                        action = () => this.incrementalJointMovement(jointName, increment);
                         break;
                 }
                 return {
@@ -211,7 +211,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
-                        action = () => this.continuousArmMovement(jointName, increment);
+                        action = () => this.continuousJointMovement(jointName, increment);
                         break;
                 }
 
