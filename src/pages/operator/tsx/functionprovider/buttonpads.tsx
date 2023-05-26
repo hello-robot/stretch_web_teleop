@@ -1,6 +1,6 @@
 import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider'
-import { ActionMode } from "operator/tsx/staticcomponents/actionmodebutton"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints, ValidJointStateDict } from 'shared/util'
+import { ActionMode } from '../utils/componentdefinitions'
 
 /** 
  * Each of the possible buttons which could be on a button pad. The string is 
@@ -18,7 +18,11 @@ export enum ButtonPadButton {
     GripperOpen = "Gripper open",
     GripperClose = "Gripper close",
     WristRotateIn = "Wrist rotate in",
-    WristRotateOut = "Wrist rotate out"
+    WristRotateOut = "Wrist rotate out",
+    CameraTiltUp = "Camera tilt up",
+    CameraTiltDown = "Camera tilt down",
+    CameraPanLeft = "Camera pan left",
+    CameraPanRight = "Camera pan right"
 }
 
 /** Button functions which require moving a joint in the negative direction. */

@@ -16,6 +16,13 @@
     width: 0;
 }
 
+
+#sidebar p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+
 #sidebar-header {
     background-color: var(--header-bg);
     padding: 1rem;
@@ -63,12 +70,12 @@
 
 /* Options ********************************************************************/
 
-.options-element {
+.toggle-button-div {
     display: inline-block;
 }
 
 .toggle-button {
-    background-color: var(--btn-lightred);
+    display: inline-block;
     margin-right: 1rem;
     width: 7rem;
     height: 5rem;
@@ -80,14 +87,25 @@
 }
 
 /* Component Provider *********************************************************/
-
-.provider-tab {
-    margin-bottom: 0.4rem;
-    border-radius: var(--btn-brdr-radius);
-    box-shadow: var(--shadow);
+#sidebar-component-provider {
+    margin-bottom: 2rem;
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr;
 }
 
-.provider-tab button {
+#components-set {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.provider-tab {
+    border-radius: var(--btn-brdr-radius);
+    box-shadow: var(--shadow);
+    margin-right: 0.5rem;
+}
+
+#sidebar-component-provider button {
     width: 100%;
     text-align: left;
     padding: var(--btn-padding);
@@ -128,4 +146,31 @@
 .id-button:last-of-type {
     border-bottom-left-radius: var(--btn-brdr-radius);
     border-bottom-right-radius: var(--btn-brdr-radius);
+}
+
+/* Global settings area *******************************************************/
+#global-settings>button {
+    display: block;
+}
+
+#global-settings button {
+    height: 3rem;
+}   
+
+#global-settings>* {
+    width: 100%;
+}
+
+#global-settings>*,
+.provider-tab
+{
+    margin-bottom: 0.4rem;
+}
+
+#load-saved-layout-modal .dropdown {
+    width: 90%;
+}
+
+.select-selected {
+    background-color: dodgerblue;
 }

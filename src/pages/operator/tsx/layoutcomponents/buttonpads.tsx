@@ -4,17 +4,8 @@ import { CustomizableComponentProps, SharedState } from "./customizablecomponent
 import { ButtonPadDef, ButtonPadId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
-import { getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
+import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
-
-/** Possible layouts for the button pad (i.e. the shape and arrangement of the 
- * buttons)
- */
-export enum ButtonPadShape {
-    Directional,
-    Realsense,
-    Gripper
-}
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {
@@ -133,42 +124,89 @@ const SingleButton = (props: SingleButtonProps) => {
 function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
     let functions: ButtonPadButton[];
-    const BF = ButtonPadButton;
+    const B = ButtonPadButton;
     switch (id) {
-        case ButtonPadId.overhead:
+        case ButtonPadId.Drive:
             functions = [
-                BF.BaseForward,
-                BF.BaseRotateRight,
-                BF.BaseReverse,
-                BF.BaseRotateLeft
+                B.BaseForward,
+                B.BaseRotateRight,
+                B.BaseReverse,
+                B.BaseRotateLeft
             ];
             shape = ButtonPadShape.Directional;
             break;
-        case ButtonPadId.realsense:
+        case ButtonPadId.ManipRealsense:
             functions = [
-                BF.WristRotateIn,
-                BF.WristRotateOut,
-                BF.ArmExtend,
-                BF.ArmRetract,
-                BF.BaseForward,
-                BF.BaseReverse,
-                BF.ArmLift,
-                BF.ArmLower,
-                BF.GripperClose,
-                BF.GripperOpen
+                B.WristRotateIn,
+                B.WristRotateOut,
+                B.ArmExtend,
+                B.ArmRetract,
+                B.BaseForward,
+                B.BaseReverse,
+                B.ArmLift,
+                B.ArmLower,
+                B.GripperClose,
+                B.GripperOpen
             ]
-            shape = ButtonPadShape.Realsense;
+            shape = ButtonPadShape.ManipRealsense;
             break;
-        case ButtonPadId.gripper:
+        case ButtonPadId.Gripper:
             functions = [
-                BF.ArmLift,
-                BF.ArmLower,
-                BF.WristRotateIn,
-                BF.WristRotateOut,
-                BF.GripperOpen,
-                BF.GripperClose,
+                B.ArmLift,
+                B.ArmLower,
+                B.WristRotateIn,
+                B.WristRotateOut,
+                B.GripperOpen,
+                B.GripperClose,
             ]
             shape = ButtonPadShape.Gripper;
+            break;
+        case ButtonPadId.ManipOverhead:
+            functions = [
+                B.ArmExtend,
+                B.ArmRetract,
+                B.WristRotateIn,
+                B.WristRotateOut,
+                B.BaseForward,
+                B.BaseReverse
+            ];
+            shape = ButtonPadShape.ManipOverhead;
+            break;
+        case ButtonPadId.Base:
+            functions = [
+                B.BaseForward,
+                B.BaseReverse,
+                B.BaseRotateLeft,
+                B.BaseRotateRight
+            ];
+            shape = ButtonPadShape.SimpleButtonPad;
+            break;
+        case ButtonPadId.Camera:
+            functions = [
+                B.CameraTiltUp,
+                B.CameraTiltDown,
+                B.CameraPanLeft,
+                B.CameraPanRight
+            ];
+            shape = ButtonPadShape.SimpleButtonPad;
+            break;
+        case ButtonPadId.Wrist:
+            functions = [
+                B.GripperOpen,
+                B.GripperClose,
+                B.WristRotateIn,
+                B.WristRotateOut
+            ];
+            shape = ButtonPadShape.SimpleButtonPad;
+            break;
+        case ButtonPadId.Arm:
+            functions = [
+                B.ArmLift,
+                B.ArmLower,
+                B.ArmExtend,
+                B.ArmRetract
+            ];
+            shape = ButtonPadShape.SimpleButtonPad;
             break;
         default:
             throw new Error(`unknow button pad id: ${id}`);

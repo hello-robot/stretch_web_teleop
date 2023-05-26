@@ -330,6 +330,11 @@ function createOverlay(
     aspectRatio: number): JSX.Element | undefined {
     // If overlay definition is undefined then there's no overlay for this stream
     if (!overlayDefinition) return undefined;
+    if (!overlayDefinition.type) {
+        console.warn(`Video stream at path ${path} has child with undefined type:`)
+        console.warn(overlayDefinition);
+        return undefined;
+    }
 
     const overlayProps = {
         definition: overlayDefinition,
@@ -337,13 +342,13 @@ function createOverlay(
         sharedState: sharedState
     } as CustomizableComponentProps;
 
-    switch (overlayDefinition?.type) {
+    switch (overlayDefinition.type) {
         case (ComponentType.ButtonPad):
             return <ButtonPad {...overlayProps} overlay aspectRatio={aspectRatio}/>
         case (ComponentType.PredictiveDisplay):
             return <PredictiveDisplay {...overlayProps} />
         default:
-            throw Error('Video stream at path ' + path + ' cannot overlay child ' + overlayDefinition);
+            throw Error('Video stream at path ' + path + ' cannot overlay child of type' + overlayDefinition.type);
     }
 }
 

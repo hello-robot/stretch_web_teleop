@@ -1,10 +1,9 @@
-import { ActionMode } from "../staticcomponents/actionmodebutton";
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition } from "./componentdefinitions";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode } from "../utils/componentdefinitions";
 
 /**
  * Default layout to load on start
  */
-export const DEFAULT_LAYOUT: LayoutDefinition = {
+export const TEST_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: false,
     actionMode: ActionMode.ClickClick,
@@ -30,7 +29,7 @@ export const DEFAULT_LAYOUT: LayoutDefinition = {
                 children: [
                     {
                         type: ComponentType.ButtonPad,
-                        id: ButtonPadId.realsense,
+                        id: ButtonPadId.ManipRealsense,
                     } as ButtonPadDef
                 ]
             } as VideoStreamDef,
@@ -40,7 +39,7 @@ export const DEFAULT_LAYOUT: LayoutDefinition = {
                 children: [
                     {
                         type: ComponentType.ButtonPad,
-                        id: ButtonPadId.gripper
+                        id: ButtonPadId.Gripper
                     }
                 ]
             } as VideoStreamDef,
@@ -93,7 +92,7 @@ export const DEFAULT_LAYOUT: LayoutDefinition = {
                 id: VideoStreamId.gripper,
                 children: [{
                     type: ComponentType.ButtonPad,
-                    id: ButtonPadId.gripper,
+                    id: ButtonPadId.Gripper,
                 } as ButtonPadDef]
             } as VideoStreamDef]
         }]

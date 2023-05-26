@@ -9,9 +9,9 @@ import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider
 import { ButtonFunctionProvider } from 'operator/tsx/functionprovider/buttonpads'
 import { PredictiveDisplayFunctionProvider } from 'operator/tsx/functionprovider/predictivedisplay'
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
-import { DEFAULT_LAYOUT } from './utils/defaultlayout';
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
+import { LocalStorageHandler } from './utils/storageHandler';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -71,14 +71,18 @@ function configureRobot() {
     });
     remoteRobot.setRobotMode("navigation");
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
-    
-    FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, DEFAULT_LAYOUT.actionMode);
+
+    const storageHandler = new LocalStorageHandler();
+    const layout = storageHandler.loadLayout();
+
+    FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
     FunctionProvider.addRemoteRobot(remoteRobot);
 
     root.render(
         <Operator
             remoteStreams={allRemoteStreams}
-            layout={DEFAULT_LAYOUT}
+            layout={layout}
+            storageHandler={storageHandler}
         />
     );
 }

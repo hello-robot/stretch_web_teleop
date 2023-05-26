@@ -1,22 +1,31 @@
+/* Stand-alone button pad *****************************************************/
+
 .button-pads {
-    stroke-width: 3px;
-    stroke: hsl(200, 0%, 60%);
+    /* Shared style */
     stroke-linecap: round;
     stroke-linejoin: round;
-    fill: hsl(200, 50%, 60%);
-    fill-opacity: 0;
-    /*set opacity for entire svg rather than paths to avoid weird effect
-    when paths overlap*/
-    /* opacity: 60%; */
-    /* TODO: this should be more dynamic */
-    width: 25%;
-    height: 25%;
     cursor: pointer;
+
+    /* Style for standalone version (not overlay */
+    fill-opacity: 100%;
+    stroke-width: 6px;
+    stroke: var(--background-color);
+    fill: darkgray;
+    flex: 1 1 0;
+    padding: 0.4rem;
 }
 
+/* Overlay ********************************************************************/
+
 .button-pads.overlay {
+    stroke-width: 3px;
+    fill: hsl(200, 50%, 60%);
+    fill-opacity: 0;
+    stroke: hsl(200, 0%, 60%);
+
     width: 100%;
     height: 100%;
+    padding: 0;
 }
 
 /* Settings for the buttons on the button pad *********************************/
@@ -48,6 +57,7 @@
     fill: red;
     fill-opacity: 40%;
 }
+
 /* Disable hover actions */
 .button-pads.customizing path {
     pointer-events: none;

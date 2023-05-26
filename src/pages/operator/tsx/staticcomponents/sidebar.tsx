@@ -2,6 +2,8 @@ import React from "react"
 import "operator/css/sidebar.css"
 import { className } from "shared/util";
 import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { PopupModal } from "../basic_components/popup_modal";
+import { Dropdown } from "../basic_components/dropdown";
 
 type SidebarProps = {
     hidden: boolean;
@@ -12,6 +14,8 @@ type SidebarProps = {
     activePath?: string;
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+    defaultLayouts: string[],
+    loadLayout: (layoutName: string) => void,
 }
 
 /** Popup on the right side of the screen while in customization mode. */
@@ -38,6 +42,8 @@ export const Sidebar = (props: SidebarProps) => {
                         <SidebarGlobalOptions
                             displayVoiceControl={props.displayVoiceControl}
                             setDisplayVoiceControl={props.setDisplayVoiceControl}
+                            defaultLayouts={props.defaultLayouts}
+                            loadLayout={props.loadLayout}
                         />
 
                     </React.Fragment>
@@ -84,18 +90,62 @@ type OptionsProps = {
 type SidebarGlobalOptionsProps = {
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+    defaultLayouts: string[],
+    loadLayout: (layoutName: string) => void,
 }
 
 const SidebarGlobalOptions = (props: SidebarGlobalOptionsProps) => {
+    const [showLoadSavedLayoutModal, setShowLoadSavedLayoutModal] = React.useState<boolean>(false);
+
     return (
-        <div>
-            <p>Global settings:</p>
-            <ToggleButton
-                on={props.displayVoiceControl}
-                onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
-                label="Display voice control"
+        <React.Fragment>
+            <div id="global-settings">
+                <p>Global settings:</p>
+                <ToggleButton
+                    on={props.displayVoiceControl}
+                    onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
+                    label="Display voice control"
+                />
+                <button
+                    onClick={() => setShowLoadSavedLayoutModal(true)}
+                >
+                    Load saved layout</button>
+            </div>
+            <LoadSavedLayoutModal
+                defaultLayouts={props.defaultLayouts}
+                loadLayout={props.loadLayout}
+                setShow={setShowLoadSavedLayoutModal}
+                show={showLoadSavedLayoutModal}
             />
-        </div>
+        </React.Fragment>
+    )
+}
+
+const LoadSavedLayoutModal = (props: {
+    defaultLayouts: string[],
+    loadLayout: (layoutName: string) => void,
+    setShow: (show: boolean) => void,
+    show: boolean,
+}) => {
+    const [selectedLayout, setSelectedLayout] = React.useState<string>();
+    function handleAccept() { 
+        if (selectedLayout) props.loadLayout(selectedLayout);
+    }
+    return (
+        <PopupModal
+            setShow={props.setShow}
+            show={props.show}
+            onAccept={handleAccept}
+            id="load-saved-layout-modal"
+        >
+            <p><b>Select layout to load</b></p>
+            <Dropdown 
+                onChange={(layoutName: string) => setSelectedLayout(layoutName)}
+                selectedOption={selectedLayout}
+                possibleOptions={props.defaultLayouts}
+                placeholderText="Select a layout..."
+            />
+        </PopupModal>
     )
 }
 
@@ -147,7 +197,7 @@ const ToggleButton = (props: ToggleButtonProps) => {
     const text = props.on ? "on" : "off";
     const colorClass = props.on ? "btn-green" : "btn-red";
     return (
-        <div className="options-element">
+        <div className="toggle-button-div">
             <button
                 className={"toggle-button " + colorClass}
                 onClick={props.onClick}
@@ -212,9 +262,11 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     return (
         <div id="sidebar-component-provider">
             <p>Select a component to add:</p>
-            {
-                outlines.map(mapTabs)
-            }
+            <div id="components-set">
+                {
+                    outlines.map(mapTabs)
+                }
+            </div>
         </div>
     )
 }

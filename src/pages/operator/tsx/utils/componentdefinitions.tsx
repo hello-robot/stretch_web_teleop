@@ -2,7 +2,12 @@
  * @summary Definitions to describe different components to render
  */
 
-import { ActionMode } from "../staticcomponents/actionmodebutton";
+/** Enumerator for the possible action modes */
+export enum ActionMode {
+    StepActions = 'Step-Actions',
+    PressRelease = 'Press-Release',
+    ClickClick = 'Click-Click'
+}
 
 /**
  * High-level type of the component
@@ -26,17 +31,24 @@ export enum VideoStreamId {
 }
 
 /**
- * ID for a button pad, describes the shape of the button pad
+ * ID for a button pad describes the shape and button functions of the button pad
  */
 export enum ButtonPadId {
-    overhead = "Overhead",
-    realsense = "Realsense",
-    gripper = "Gripper"
+    Drive = "Drive",
+    ManipRealsense = "Manipulation Realsense",
+    Gripper = "Gripper",
+    ManipOverhead = "Manipulation Overhead",
+    Base = "Base",
+    Camera = "Camera",
+    Wrist = "Wrist",
+    Arm = "Arm"
 }
+
 
 /**
  * Identifier for the subtype of the component 
  * (e.g. which video stream camera, or which button pad)
+ * @note any new components with ID fields should be added to this type
  */
 export type ComponentId = VideoStreamId | ButtonPadId;
 

@@ -12,11 +12,21 @@ import gripRight from "operator/icons/Grip_Right.svg"
 import driveForward from "operator/icons/Drive_FWD.svg"
 import driveReverse from "operator/icons/Drive_RVS.svg"
 import { ButtonPadButton } from "../functionprovider/buttonpads"
-import { ButtonPadShape } from "../layoutcomponents/buttonpads"
-
 
 /** The pixel width of SVG components. */
 export const SVG_RESOLUTION = 500;
+
+
+/** Possible layouts for the button pad (i.e. the shape and arrangement of the 
+ * buttons)
+ */
+export enum ButtonPadShape {
+    Directional,
+    ManipRealsense,
+    Gripper,
+    ManipOverhead,
+    SimpleButtonPad
+}
 
 /**
  * Takes a percentage value and returns a pixel value based on {@link SVG_RESOLUTION}
@@ -77,12 +87,18 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
     const width = SVG_RESOLUTION;
     const height = aspectRatio ? SVG_RESOLUTION / aspectRatio : SVG_RESOLUTION;
     switch (shape) {
-        case (ButtonPadShape.Directional):
+        case ButtonPadShape.Directional:
             return getDirectionalPaths(width, height);
-        case (ButtonPadShape.Realsense):
-            return getRealsenseManipPaths(width, height);
-        case (ButtonPadShape.Gripper):
+        case ButtonPadShape.ManipRealsense:
+            return getManipRealsensePaths(width, height);
+        case ButtonPadShape.Gripper:
             return getGripperPaths(width, height);
+        case ButtonPadShape.ManipOverhead:
+            return getManipOverheadPaths(width, height);
+        case ButtonPadShape.SimpleButtonPad:
+            return getSimpleButtonPadPaths(width, height);
+        default:
+            throw Error(`Cannot get paths of unknown button pad shape ${ButtonPadShape}`);
     }
 }
 
@@ -121,7 +137,7 @@ function getDirectionalPaths(width: number, height: number, onRobot: boolean = t
  * Ordered: top left, top right, then top, bottom, left, right trapezoids, then 
  * top and bottom center buttons, and finally bottom left and bottom right.
  */
-function getRealsenseManipPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+function getManipRealsensePaths(width: number, height: number): [string[], { x: number, y: number }[]] {
     /**Number of button layers from top to bottom in the display*/
     const numVerticalLayers = 6;
     /**How tall each layer of buttons should be.*/
@@ -137,7 +153,7 @@ function getRealsenseManipPaths(width: number, height: number): [string[], { x: 
         // Center directional trapezoid buttons: top, bottom, left, right
         `M 0 ${layerHeight} ${width} ${layerHeight} ${centerRight} ${layerHeight * 2} 
             ${centerLeft} ${layerHeight * 2} Z`,
-        `M 0 ${layerHeight * 5} ${height} ${layerHeight * 5} 
+        `M 0 ${layerHeight * 5} ${width} ${layerHeight * 5} 
             ${centerRight},${layerHeight * 4} ${centerLeft},${layerHeight * 4} Z`,
         `M 0 ${layerHeight} 0 ${layerHeight * 5} ${centerLeft},${layerHeight * 4} 
             ${centerLeft},${layerHeight * 2} Z`,
@@ -194,6 +210,59 @@ function getGripperPaths(width: number, height: number): [string[], { x: number,
         { x: (2 * width - yMargin) / 2, y: height / 2 },  // right
         { x: yMargin * 7 / 2, y: height / 2 },  // gripper open
         { x: width / 2, y: height / 2 },  // gripper close
+    ]
+    return [paths, iconPositions];
+}
+
+
+/**
+ * Ordered top, bottom, far left, far right, inside left, inside right
+ */
+function getManipOverheadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    const sidesPercent = 0.20;
+    const sideWidth = width * sidesPercent;
+    const centerWidth = width - 2 * sideWidth;
+    const yLayer = height / 3;
+
+    const paths = [
+        rect(sideWidth, 0, centerWidth, yLayer),  // top
+        rect(sideWidth, height - yLayer, centerWidth, yLayer),  // bottom
+        rect(0, 0, sideWidth, height),  // far left
+        rect(width - sideWidth, 0, sideWidth, height),  // far right
+        rect(sideWidth, yLayer, centerWidth / 2, yLayer),  // inside left
+        rect(sideWidth + centerWidth / 2, yLayer, centerWidth / 2, yLayer),  // inside right
+    ];
+    const iconPositions = [
+        { x: width / 2, y: yLayer / 2 }, // top
+        { x: width / 2, y: height - yLayer / 2 }, // bottom
+        { x: sideWidth / 2, y: height / 2 }, // far left
+        { x: width - sideWidth / 2, y: height / 2 }, // far right
+        { x: sideWidth + centerWidth / 4, y: height / 2 }, // inside left
+        { x: width - sideWidth - centerWidth / 4, y: height / 2 }, // inside right
+    ]
+    return [paths, iconPositions];
+}
+
+/**
+ * Ordered top, bottom, left, right
+ */
+function getSimpleButtonPadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    const endsPercent = 0.20;
+    const endsHeight = height * endsPercent;
+    const center = width / 2;
+    const middleHeight = height - endsHeight * 2;
+
+    const paths = [
+        rect(0, 0, width, endsHeight),  // top
+        rect(0, height - endsHeight, width, endsHeight),  // bottom
+        rect(0, endsHeight, center, middleHeight),  // left
+        rect(center, endsHeight, center, middleHeight)  // right
+    ];
+    const iconPositions = [
+        { x: width / 2, y: endsHeight / 2 }, // top
+        { x: width / 2, y: height - endsHeight / 2 }, // bottom
+        { x: center / 2, y: height / 2 }, // left
+        { x: width - center / 2, y: height / 2 }, // right
     ]
     return [paths, iconPositions];
 }

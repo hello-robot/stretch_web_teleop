@@ -26,6 +26,10 @@
     height: 100%;
 }
 
+#operator-header .dropdown {
+    width: var(--header-btn-width);
+}
+
 #operator-voice {
     background-color: whitesmoke;
     box-shadow: var(--shadow);

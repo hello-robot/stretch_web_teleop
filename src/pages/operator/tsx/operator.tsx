@@ -1,28 +1,31 @@
 import React from "react";
 import { VelocityControl } from "operator/tsx/staticcomponents/velocitycontrol"
 import { LayoutArea } from "./staticcomponents/layoutarea";
-import { ActionMode, ActionModeButton } from "operator/tsx/staticcomponents/actionmodebutton"
 import { CustomizeButton } from "./staticcomponents/customizebutton";
 import { Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
-import { ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
+import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
 import { VoiceCommands } from "./staticcomponents/voicecommands";
 import { RemoteStream } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
-import "operator/css/operator.css"
 import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider";
 import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./functionprovider/buttonpads";
+import { Dropdown } from "./basic_components/dropdown";
+import { DEFAULT_LAYOUTS, StorageHandler } from "./utils/storageHandler";
+import "operator/css/operator.css"
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>,
-    layout: LayoutDefinition
+    layout: LayoutDefinition,
+    storageHandler: StorageHandler
 }) => {
     const [customizing, setCustomizing] = React.useState(false);
     const [activePath, setActivePath] = React.useState<string | undefined>(undefined);
     const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
+    const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
@@ -47,7 +50,7 @@ export const Operator = (props: {
      * provider (functionally).
      */
     function setActionMode(actionMode: ActionMode) {
-        props.layout.actionMode = actionMode;
+        layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
         updateLayout();
     }
@@ -59,7 +62,7 @@ export const Operator = (props: {
      *                            top of the operator body should be displayed
      */
     function setDisplayVoiceControl(displayVoiceControl: boolean) {
-        props.layout.displayVoiceControl = displayVoiceControl;
+        layout.current.displayVoiceControl = displayVoiceControl;
         updateLayout();
     }
 
@@ -74,9 +77,9 @@ export const Operator = (props: {
         let newPath: string = path;
         if (!activePath) {
             // New element not already in the layout
-            addToLayout(activeDef, path, props.layout);
+            addToLayout(activeDef, path, layout.current);
         } else {
-            newPath = moveInLayout(activePath, path, props.layout);
+            newPath = moveInLayout(activePath, path, layout.current);
         }
         setActivePath(newPath);
         console.log('new active path', newPath)
@@ -110,7 +113,7 @@ export const Operator = (props: {
     /** Callback when the delete button in the sidebar is clicked */
     const handleDelete = () => {
         if (!activePath) throw Error('handleDelete called when activePath is undefined');
-        removeFromLayout(activePath, props.layout);
+        removeFromLayout(activePath, layout.current);
         updateLayout();
         setActivePath(undefined);
         setActiveDef(undefined);
@@ -119,7 +122,11 @@ export const Operator = (props: {
     /**
      * Callback when the customization button is clicked.
      */
-    const handleCustomize = () => {
+    const handleToggleCustomize = () => {
+        if (customizing) {
+            console.log('saving layout');
+            props.storageHandler.saveLayout(layout.current);
+        }
         setCustomizing(!customizing);
         setActiveDef(undefined);
         setActivePath(undefined);
@@ -141,9 +148,12 @@ export const Operator = (props: {
     return (
         <div id="operator">
             <div id="operator-header">
-                <ActionModeButton
-                    actionMode={props.layout.actionMode}
-                    onChange={(am) => { setActionMode(am); }}
+                {/* Action mode button */}
+                <Dropdown
+                    onChange={(am: ActionMode) => setActionMode(am)}
+                    selectedOption={layout.current.actionMode}
+                    possibleOptions={Object.values(ActionMode)}
+                    showActive
                 />
                 <VelocityControl
                     scale={velocityScale}
@@ -151,10 +161,10 @@ export const Operator = (props: {
                 />
                 <CustomizeButton
                     customizing={customizing}
-                    onClick={handleCustomize}
+                    onClick={handleToggleCustomize}
                 />
             </div>
-            <div id="operator-voice" hidden={!props.layout.displayVoiceControl}>
+            <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
                 <VoiceCommands
                     onUpdateVelocityScale=
                     {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
@@ -162,7 +172,7 @@ export const Operator = (props: {
             </div>
             <div id="operator-body">
                 <LayoutArea
-                    layout={props.layout}
+                    layout={layout.current}
                     sharedState={sharedState}
                 />
             </div>
@@ -173,8 +183,10 @@ export const Operator = (props: {
                 activePath={activePath}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
-                displayVoiceControl={props.layout.displayVoiceControl}
+                displayVoiceControl={layout.current.displayVoiceControl}
                 setDisplayVoiceControl={setDisplayVoiceControl}
+                defaultLayouts={Object.keys(DEFAULT_LAYOUTS)}
+                loadLayout={(layoutName: string) => { layout.current = props.storageHandler.loadLayout(layoutName); updateLayout(); }}
             />
         </div>
     )

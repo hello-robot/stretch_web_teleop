@@ -1,7 +1,7 @@
 import { FunctionProvider } from "./functionprovider"
 import { PredictiveDisplayFunctions } from "../layoutcomponents/predictivedisplay"
-import { ActionMode } from "../staticcomponents/actionmodebutton"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints } from 'shared/util'
+import { ActionMode } from "../utils/componentdefinitions"
 
 export class PredictiveDisplayFunctionProvider extends FunctionProvider {
     constructor() {

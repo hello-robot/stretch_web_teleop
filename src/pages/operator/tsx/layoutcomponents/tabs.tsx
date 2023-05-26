@@ -6,6 +6,7 @@ import { CustomizableComponentProps } from "operator/tsx/layoutcomponents/custom
 import { ChangeEvent } from "react";
 import { className } from "shared/util";
 import { DropZone } from "operator/tsx/layoutcomponents/dropzone";
+import { PopupModal } from "../basic_components/popup_modal";
 
 /* 
 TODO:
@@ -178,12 +179,12 @@ export const Tabs = (props: CustomizableComponentProps) => {
             <div className="tabs-content" {...selectProp}>
                 <ComponentList {...componentListProps} />
             </div>
-            {showTabModal ?
-                <NewTabModal
-                    setShow={setShowTabModal}
-                    addTab={addTab} />
-                : undefined
-            }
+            <NewTabModal
+                setShow={setShowTabModal}
+                show={showTabModal}
+                addTab={addTab}
+            />
+
         </div>
     )
 }
@@ -191,33 +192,28 @@ export const Tabs = (props: CustomizableComponentProps) => {
 /** Modal for selecting a new tab */
 const NewTabModal = (props: {
     setShow: (show: boolean) => void,
+    show: boolean,
     addTab: (name: string) => void
 }) => {
     const [text, setText] = React.useState("");
-    /** Hides the popup and adds the new tab */
-    const onAccept = () => {
+    function handleAccept() {
         const newLabel = text.length > 0 ? text : 'new tab';
-        props.setShow(false);
         props.addTab(newLabel);
     }
-    /** Records new label typed into the box */
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setText(e.target.value);
-    }
+    function handleChange(e: ChangeEvent<HTMLInputElement>) { setText(e.target.value); }
+
     return (
-        <>
-            <div id="new-tab-modal">
-                <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
-                <input type="text" id="new-tab-name" name="new-tab-name"
-                    value={text} onChange={handleChange}
-                    placeholder="label for the new tab"
-                />
-                <div id="bottom-buttons">
-                    <button className="btn-red" onClick={() => props.setShow(false)}>Cancel</button>
-                    <button className="btn-green" onClick={onAccept} style={{ float: "right" }}>Accept</button>
-                </div>
-            </div>
-            <div onClick={() => props.setShow(false)} id="popup-background"></div>
-        </>
+        <PopupModal
+            setShow={props.setShow}
+            show={props.show}
+            onAccept={handleAccept}
+            id="new-tab-modal"
+        >
+            <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
+            <input type="text" id="new-tab-name" name="new-tab-name"
+                value={text} onChange={handleChange}
+                placeholder="label for the new tab"
+            />
+        </PopupModal>
     )
 }
