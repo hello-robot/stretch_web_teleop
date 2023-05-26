@@ -91,9 +91,9 @@ export interface Pose2D {
 }
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
-    "wrist_extension": [0.0, .518],
-    "joint_wrist_yaw": [-1.38, 4.45],
-    "joint_lift": [0.1, 1.05],
+    "wrist_extension": [0.05, .518],
+    "joint_wrist_yaw": [-1.395, 4.45],
+    "joint_lift": [0.165, 1.05],
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
     "joint_gripper_finger_left": [-0.375, 0.166],

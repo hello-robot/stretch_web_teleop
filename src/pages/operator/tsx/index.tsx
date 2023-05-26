@@ -1,5 +1,5 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage, RemoteStream } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
@@ -12,14 +12,20 @@ import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecomman
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
 import { LocalStorageHandler } from './utils/storageHandler';
+import { PantiltFunctionProvider } from './functionprovider/pantilt';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
+let connection: WebRTCConnection;
+let root: Root;
+
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
+export var pantiltFunctionProvider = new PantiltFunctionProvider();
 
-let connection = new WebRTCConnection({
+// if (process.env.STYLEGUIDIST == 'false') {
+connection = new WebRTCConnection({
     peerRole: "operator",
     polite: true,
     onMessage: handleMessage,
@@ -32,7 +38,8 @@ connection.joinOperatorRoom()
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
-const root = createRoot(container!);
+root = createRoot(container!);
+// }
 
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');

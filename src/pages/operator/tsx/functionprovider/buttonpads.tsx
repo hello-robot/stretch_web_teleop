@@ -97,8 +97,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
             const [buttonNeg, buttonPos] = buttons;
-            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Collision : ButtonState.Inactive);
-            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Collision : ButtonState.Inactive);
+            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
+            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
         });
 
         if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
@@ -154,7 +154,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @param buttonPadFunction the {@link ButtonPadButton}
      * @returns the {@link ButtonFunctions} for the button
      */
-    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions {
+    public provideFunctions(buttonPadFunction: ButtonPadButton): ButtonFunctions | undefined {
         let action: () => void;
         const onLeave = () => {
             this.stopCurrentAction();
@@ -185,7 +185,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
-                        action = () => this.incrementalArmMovement(jointName, increment);
+                        action = () => this.incrementalJointMovement(jointName, increment);
                         break;
                 }
                 return {
@@ -215,7 +215,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
-                        action = () => this.continuousArmMovement(jointName, increment);
+                        action = () => this.continuousJointMovement(jointName, increment);
                         break;
                 }
 
@@ -263,7 +263,7 @@ function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, Butt
         case ('joint_lift'):
             return [ButtonPadButton.ArmLower, ButtonPadButton.ArmLift]
         case ('joint_wrist_yaw'):
-            return [ButtonPadButton.WristRotateIn, ButtonPadButton.WristRotateOut]
+            return [ButtonPadButton.WristRotateOut, ButtonPadButton.WristRotateIn]
         case ("translate_mobile_base"):
             return [ButtonPadButton.BaseForward, ButtonPadButton.BaseReverse];
         case ("rotate_mobile_base"):

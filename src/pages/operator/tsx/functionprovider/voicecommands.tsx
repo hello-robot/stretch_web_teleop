@@ -2,6 +2,7 @@ import { FunctionProvider } from "./functionprovider"
 import { VoiceCommandFunction, VoiceCommandFunctions } from "../staticcomponents/voicecommands"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS } from 'shared/util'
 import { VELOCITY_SCALE } from "../staticcomponents/velocitycontrol"
+
 export class VoiceFunctionProvider extends FunctionProvider {
     constructor() {
         super()
@@ -58,7 +59,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "lower arm",
                     callback: () => {
-                        this.incrementalArmMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_lift", -1 * JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale)
                         handleCommand("Lower arm")
                     },
                 }
@@ -66,7 +67,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "raise arm",
                     callback: () => {
-                        this.incrementalArmMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_lift", JOINT_INCREMENTS["joint_lift"]! * FunctionProvider.velocityScale)
                         handleCommand("Raise arm")
                     },
                 }
@@ -74,7 +75,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "extend arm",
                     callback: () => {
-                        this.incrementalArmMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("wrist_extension", JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale)
                         handleCommand("Extend arm")
                     },
                 }
@@ -82,7 +83,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "retract arm",
                     callback: () => {
-                        this.incrementalArmMovement("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("wrist_extension", -1 * JOINT_INCREMENTS["wrist_extension"]! * FunctionProvider.velocityScale)
                         handleCommand("Retract arm")
                     },
                 }
@@ -90,7 +91,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "rotate wrist counterclockwise",
                     callback: () => {
-                        this.incrementalArmMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_wrist_yaw", JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale)
                         handleCommand("Rotate wrist counterclockwise")
                     },
                 }
@@ -98,7 +99,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "rotate wrist clockwise",
                     callback: () => {
-                        this.incrementalArmMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_wrist_yaw", -1 * JOINT_INCREMENTS["joint_wrist_yaw"]! * FunctionProvider.velocityScale)
                         handleCommand("Rotate wrist clockwise")
                     },
                 }
@@ -106,7 +107,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "open gripper",
                     callback: () => {
-                        this.incrementalArmMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_gripper_finger_left", JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale)
                         handleCommand("Open gripper")
                     },
                 }
@@ -114,7 +115,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "close gripper",
                     callback: () => {
-                        this.incrementalArmMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale)
+                        this.incrementalJointMovement("joint_gripper_finger_left", -1 * JOINT_INCREMENTS["joint_gripper_finger_left"]! * FunctionProvider.velocityScale)
                         handleCommand("Close gripper")
                     },
                 }
