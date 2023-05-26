@@ -152,7 +152,7 @@ export class Robot extends React.Component {
         let collision = inCollision({ jointStateMessage: this.jointState, jointName: jointName })
         // Negative joint increment is for lower/retract/rotate out
         // Positive joint increment is for lift/extend/rotate in
-        let index = jointValueInc < 0 ? 0 : 1 
+        let index = jointValueInc <= 0 ? 0 : 1 
         // If request to move the joint in the direction of collision, cancel movement
         if (collision[index]) return;
 
@@ -160,10 +160,10 @@ export class Robot extends React.Component {
 
         // Make sure new joint value is within limits
         if (jointName in JOINT_LIMITS) {
-            let inLimits = inJointLimits({ jointStateMessage: this.jointState, jointName: jointName })
+            let inLimits = inJointLimitsHelper({ jointValue: newJointValue, jointName: jointName })
             if (!inLimits) throw 'invalid joint name'
-            if (!inLimits[0]) newJointValue = JOINT_LIMITS[jointName]![0]
-            if (!inLimits[1]) newJointValue = JOINT_LIMITS[jointName]![1]
+            console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
+            if (!inLimits[index]) newJointValue = JOINT_LIMITS[jointName]![index]
         }
 
         let pose = { [jointName]: newJointValue }
@@ -260,24 +260,37 @@ export const GetJointValue = (props: { jointStateMessage: ROSJointState, jointNa
 
 export function inJointLimits(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
     let jointValue = GetJointValue(props)
+    return inJointLimitsHelper({ jointValue: jointValue, jointName: props.jointName})
+}
+
+function inJointLimitsHelper(props: { jointValue: number, jointName: ValidJoints }) {
     let jointLimits = JOINT_LIMITS[props.jointName]
     if (!jointLimits) return;
 
     var eps = 0.03
     let inLimits: [boolean, boolean] = [true, true]
-    inLimits[0] = jointValue - eps >= jointLimits[0] // Lower joint limit
-    inLimits[1] = jointValue + eps <= jointLimits[1] // Upper joint limit
+    inLimits[0] = props.jointValue - eps >= jointLimits[0] // Lower joint limit
+    inLimits[1] = props.jointValue + eps <= jointLimits[1] // Upper joint limit
     return inLimits
 }
 
 export function inCollision(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
-    let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
     let inCollision: [boolean, boolean] = [false, false]
+    const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
+        "joint_head_tilt": [-50, 50],
+        "joint_head_pan": [-50, 50],
+        "wrist_extension": [-20, 30],
+        "joint_lift": [0, 40],
+        "joint_wrist_yaw": [-10, 10],
+    }
 
+    if (!(props.jointName in MAX_EFFORTS)) return inCollision;
+
+    let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
     // In collision if joint is applying more than 50% effort when moving downward/inward/backward
-    inCollision[0] = props.jointStateMessage.effort[jointIndex] < -50
+    inCollision[0] = props.jointStateMessage.effort[jointIndex] < MAX_EFFORTS[props.jointName]![0]
     // In collision if joint is applying more than 50% effort when moving upward/outward/forward
-    inCollision[1] = props.jointStateMessage.effort[jointIndex] > 50
+    inCollision[1] = props.jointStateMessage.effort[jointIndex] > MAX_EFFORTS[props.jointName]![1]
 
     return inCollision
 }

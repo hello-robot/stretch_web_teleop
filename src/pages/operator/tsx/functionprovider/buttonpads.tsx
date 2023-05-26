@@ -93,8 +93,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
             const [buttonNeg, buttonPos] = buttons;
-            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Collision : ButtonState.Inactive);
-            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Collision : ButtonState.Inactive);
+            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
+            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
         });
 
         if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
@@ -259,7 +259,7 @@ function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, Butt
         case ('joint_lift'):
             return [ButtonPadButton.ArmLower, ButtonPadButton.ArmLift]
         case ('joint_wrist_yaw'):
-            return [ButtonPadButton.WristRotateIn, ButtonPadButton.WristRotateOut]
+            return [ButtonPadButton.WristRotateOut, ButtonPadButton.WristRotateIn]
         case ("translate_mobile_base"):
             return [ButtonPadButton.BaseForward, ButtonPadButton.BaseReverse];
         case ("rotate_mobile_base"):
