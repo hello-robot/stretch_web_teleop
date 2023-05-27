@@ -60,3 +60,32 @@
     grid-column: 1/1;
     grid-row: 3;
 }
+
+/** https://stackoverflow.com/a/40989121 **/
+.loader {
+    position: absolute;
+    top: calc(50% - 5em);
+    left: calc(50% - 5em);
+    width: 10em;
+    height: 10em;
+    border: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-left: 1.1em solid #000000;
+    border-radius: 50%;
+    animation: load 1s infinite linear;
+}
+
+.loading-text {
+    position: absolute;
+    top: calc(50% - 1.5em);
+    left: calc(50% - 2em);
+    font-size: large;
+}
+
+@keyframes load {
+    0% {
+        transform: rotate(0deg);
+    } 
+    100% {
+        transform: rotate(360deg);
+    }
+}
