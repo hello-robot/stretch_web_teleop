@@ -57,7 +57,7 @@ add_service_files(
   DIRECTORY 
   srv
   FILES
-  ImageView.srv
+  CameraPerspective.srv
   DepthAR.srv
 )
 

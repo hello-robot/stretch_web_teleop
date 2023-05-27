@@ -1,6 +1,8 @@
 import React from 'react'
-import { cmd, VelocityCommand } from 'shared/commands';
+import { Pose } from 'roslib';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand } from 'shared/commands';
 import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
+import { generateUUID } from './util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -18,7 +20,7 @@ export class RemoteRobot extends React.Component {
         let cmd: cmd = {
             type: "driveBase",
             modifier: { linVel: linVel, angVel: angVel }
-        };
+        } as DriveCommand;
         this.robotChannel(cmd);
 
         return {
@@ -44,7 +46,7 @@ export class RemoteRobot extends React.Component {
             type: "incrementalMove",
             jointName: jointName,
             increment: increment
-        }
+        } as IncrementalMove;
         this.robotChannel(cmd);
 
         return {
@@ -58,7 +60,24 @@ export class RemoteRobot extends React.Component {
         let cmd: cmd = {
             type: "setRobotMode",
             modifier: mode
-        }
+        } as setRobotModeCommand;
+        this.robotChannel(cmd)
+    }
+
+    setCameraPerspective(camera: "overhead" | "realsense" | "gripper", perspective: string) {
+        let cmd: cmd = {
+            type: "setCameraPerspective",
+            camera: camera,
+            perspective: perspective
+        } as CameraPerspectiveCommand;
+        this.robotChannel(cmd)
+    }
+
+    setRobotPose(pose: RobotPose) {
+        let cmd: cmd = {
+            type: "setRobotPose",
+            pose: pose,
+        } as RobotPose;
         this.robotChannel(cmd)
     }
 }

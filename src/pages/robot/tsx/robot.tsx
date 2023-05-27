@@ -1,7 +1,8 @@
 import React from 'react'
 import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'shared/util';
 import ROSLIB, { Message, Ros } from "roslib";
-import { JOINT_LIMITS, Pose2D, GoalMessage } from 'shared/util';
+import { JOINT_LIMITS, RobotPose } from 'shared/util';
+import { response } from 'express';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
@@ -15,7 +16,8 @@ export class Robot extends React.Component {
     cmdVelTopic?: ROSLIB.Topic;
     switchToNavigationService?: ROSLIB.Service;
     switchToPositionService?: ROSLIB.Service;
-    
+    setCameraPerspectiveService?: ROSLIB.Service;
+
     constructor(props: {jointStateCallback: (jointState: ROSJointState) => void}) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -48,6 +50,7 @@ export class Robot extends React.Component {
         this.createCmdVelTopic()
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
+        this.createSetCameraPerspectiveService()
 
         return Promise.resolve()
     }
@@ -107,6 +110,22 @@ export class Robot extends React.Component {
         });
     }
     
+    createSetCameraPerspectiveService() {
+        this.setCameraPerspectiveService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/camera_perspective',
+            serviceType: 'stretch_web_interface_react/CameraPerspective'
+        })
+    }
+
+    setCameraPerspective(props: {camera: "overhead" | "realsense" | "gripper", perspective: string}) {
+        var request = new ROSLIB.ServiceRequest({camera: props.camera, perspective: props.perspective})
+        this.setCameraPerspectiveService?.callService(request, (response: boolean) => {
+            response ? console.log("Set " + props.camera + " to " + props.perspective + " perspective") 
+                     : console.error(props.perspective + " is not a valid perspective for " + props.camera + " camera!")
+        })
+    }
+
     switchToNavigationMode() {
         var request = new ROSLIB.ServiceRequest({});
         this.switchToNavigationService!.callService(request, () => {
@@ -171,7 +190,7 @@ export class Robot extends React.Component {
         return this.makePoseGoal(pose)
     }
 
-    makePoseGoal(pose: {[jointName: string]: number}) {
+    makePoseGoal(pose: RobotPose) {
         let jointNames: ValidJoints[] = []
         let jointPositions: number[] = []
         for (let key in pose) {
@@ -213,17 +232,21 @@ export class Robot extends React.Component {
         return newGoal
     }
 
+    executePoseGoal(pose: RobotPose) {
+        this.stopExecution();
+        this.trajectoryClient?.cancel();
+        this.poseGoal = this.makePoseGoal(pose)
+        this.poseGoal.send()
+    }
+
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
         this.stopExecution();
-        // this.moveBaseClient?.cancel();
-        this.trajectoryClient?.cancel();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
         if (!this.poseGoal) {
             console.log("Joint in collision!")
             return;
         }
         this.poseGoal.send()
-        // this.affirmExecution()
     }
 
     stopExecution() {

@@ -8,6 +8,7 @@ import { Operator } from './operator';
 import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider';
 import { ButtonFunctionProvider } from 'operator/tsx/functionprovider/buttonpads'
 import { PredictiveDisplayFunctionProvider } from 'operator/tsx/functionprovider/predictivedisplay'
+import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons';
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
@@ -21,6 +22,7 @@ let root: Root;
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
+export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 
 // if (process.env.STYLEGUIDIST == 'false') {
 connection = new WebRTCConnection({

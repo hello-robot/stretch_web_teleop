@@ -1,4 +1,0 @@
-string camera # The name of the camera (overhead, realsense, gripper)
-string view   # The name of the view defined in the params file (e.g. default, manip)
----
-bool success
