@@ -82,28 +82,37 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * Takes joint states and updates the button state map based on which joints
      * are in collision or at their limit.
      * 
-     * @param atJointLimits dictionary of joints whose limit booleans have changed
+     * @param inJointLimit dictionary of joints whose limit booleans have changed
      * @param inCollision dictionary of joints whose collision booleans have changed
      */
-    public updateJointStates(atJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) {
+    public updateJointStates(inJointLimit: ValidJointStateDict, inCollision: ValidJointStateDict) {
         Object.keys(inCollision).forEach((k: string) => {
             const key = k as ValidJoints;
             const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
             const [buttonNeg, buttonPos] = buttons;
-            this.buttonStateMap.set(buttonNeg, inCollisionNeg ? ButtonState.Collision : ButtonState.Inactive);
-            this.buttonStateMap.set(buttonPos, inCollisionPos ? ButtonState.Collision : ButtonState.Inactive);
+            // TODO: i think there's still something wrong with this logic
+            const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
+            const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
+            const prevInCollisionNeg = prevButtonStateNeg === ButtonState.Collision
+            const prevInCollisionPos = prevButtonStatePos === ButtonState.Collision;
+            if (!prevButtonStateNeg || inCollisionNeg !== prevInCollisionNeg) this.buttonStateMap.set(buttonNeg, inCollisionNeg ? ButtonState.Collision : ButtonState.Inactive);
+            if (!prevButtonStatePos || inCollisionPos !== prevInCollisionPos) this.buttonStateMap.set(buttonPos, inCollisionPos ? ButtonState.Collision : ButtonState.Inactive);
         });
 
-        Object.keys(atJointLimits).forEach((k: string) => {
+        Object.keys(inJointLimit).forEach((k: string) => {
             const key = k as ValidJoints;
-            const [inLimitNeg, inLimitPos] = atJointLimits[key]!;
+            const [inLimitNeg, inLimitPos] = inJointLimit[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
             const [buttonNeg, buttonPos] = buttons;
-            this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
-            this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
+            const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
+            const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
+            const prevInLimitNeg = prevButtonStateNeg === ButtonState.Limit
+            const prevInLimitPos = prevButtonStatePos === ButtonState.Limit;
+            if (!prevButtonStateNeg || inLimitNeg !== prevInLimitNeg) this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
+            if (!prevButtonStatePos || inLimitPos !== prevInLimitPos) this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
         });
 
         if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);

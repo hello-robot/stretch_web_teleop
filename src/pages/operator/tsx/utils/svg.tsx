@@ -1,16 +1,16 @@
 
 import armDown from "operator/icons/Arm_Down.svg"
-import armExtend from "operator/icons/Arm_Extend.svg"
+import armExtend from "operator/icons/Arm_Reach.svg"
 import armRetract from "operator/icons/Arm_Retract.svg"
 import armUp from "operator/icons/Arm_Up.svg"
 import driveLeft from "operator/icons/Drive_Left.svg"
 import driveRight from "operator/icons/Drive_Right.svg"
-import gripClose from "operator/icons/Grip_Close.svg"
+import gripClose from "operator/icons/Grip_Grasp.svg"
 import gripLeft from "operator/icons/Grip_Left.svg"
 import gripOpen from "operator/icons/Grip_Open.svg"
 import gripRight from "operator/icons/Grip_Right.svg"
-import driveForward from "operator/icons/Drive_FWD.svg"
-import driveReverse from "operator/icons/Drive_RVS.svg"
+import driveForward from "operator/icons/Drive_Forward.svg"
+import driveReverse from "operator/icons/Drive_Reverse.svg"
 import { ButtonPadButton } from "../functionprovider/buttonpads"
 
 /** The pixel width of SVG components. */
@@ -300,6 +300,7 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
         case (ButtonPadButton.WristRotateOut):
             return gripRight
         default:
-            throw Error(`unknown button pad button\t${buttonPadButton}`);
+            console.warn(`cannot get icon for ${buttonPadButton}`);
+            return null;
     }
 }
