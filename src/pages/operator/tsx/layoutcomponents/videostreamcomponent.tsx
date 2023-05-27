@@ -8,7 +8,7 @@ import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
-import { OverheadButtons, overheadButtons } from "../functionprovider/undervideobuttons";
+import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons } from "../functionprovider/undervideobuttons";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -392,13 +392,13 @@ const getOverheadButtons = () => {
     return (
         <React.Fragment >
             {overheadButtons.map(perspective => 
-                <OverheadButton perspective={perspective} key={perspective} />
+                <CameraPerspectiveButton perspective={perspective} key={perspective} />
             )}
         </React.Fragment>
     )
 }
 
-const OverheadButton = (props: {perspective: OverheadButtons}) => {
+const CameraPerspectiveButton = (props: {perspective: OverheadButtons | RealsenseButtons}) => {
     const onClick = underVideoFunctionProvider.provideFunctions(props.perspective).onClick;
     return (
         <button onClick={onClick}>
@@ -410,8 +410,9 @@ const OverheadButton = (props: {perspective: OverheadButtons}) => {
 function getRealsenseButtons() {
     return (
         <React.Fragment >
-            <button>Look at gripper</button>
-            <button>Look at base</button>
+            {realsenseButtons.map(perspective => 
+                <CameraPerspectiveButton perspective={perspective} key={perspective} />
+            )}
             <ToggleFollowGripperButton />
         </React.Fragment>
     )

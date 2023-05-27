@@ -1,6 +1,8 @@
 import React from 'react'
+import { Pose } from 'roslib';
 import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand } from 'shared/commands';
 import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
+import { generateUUID } from './util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -68,6 +70,14 @@ export class RemoteRobot extends React.Component {
             camera: camera,
             perspective: perspective
         } as CameraPerspectiveCommand;
+        this.robotChannel(cmd)
+    }
+
+    setRobotPose(pose: RobotPose) {
+        let cmd: cmd = {
+            type: "setRobotPose",
+            pose: pose,
+        } as RobotPose;
         this.robotChannel(cmd)
     }
 }

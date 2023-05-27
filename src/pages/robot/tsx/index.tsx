@@ -107,6 +107,9 @@ function handleMessage(message: WebRTCMessage) {
         case "setCameraPerspective":
             robot.setCameraPerspective({camera: message.camera, perspective: message.perspective})
             break
+        case "setRobotPose":
+            robot.executePoseGoal(message.pose)
+            break
     }
 };
 

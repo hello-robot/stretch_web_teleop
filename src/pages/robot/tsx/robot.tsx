@@ -1,7 +1,7 @@
 import React from 'react'
 import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'shared/util';
 import ROSLIB, { Message, Ros } from "roslib";
-import { JOINT_LIMITS, Pose2D, GoalMessage } from 'shared/util';
+import { JOINT_LIMITS, RobotPose } from 'shared/util';
 import { response } from 'express';
 
 export var robotMode: "navigation" | "position" = "position"
@@ -190,7 +190,7 @@ export class Robot extends React.Component {
         return this.makePoseGoal(pose)
     }
 
-    makePoseGoal(pose: {[jointName: string]: number}) {
+    makePoseGoal(pose: RobotPose) {
         let jointNames: ValidJoints[] = []
         let jointPositions: number[] = []
         for (let key in pose) {
@@ -232,17 +232,21 @@ export class Robot extends React.Component {
         return newGoal
     }
 
+    executePoseGoal(pose: RobotPose) {
+        this.stopExecution();
+        this.trajectoryClient?.cancel();
+        this.poseGoal = this.makePoseGoal(pose)
+        this.poseGoal.send()
+    }
+
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
         this.stopExecution();
-        // this.moveBaseClient?.cancel();
-        this.trajectoryClient?.cancel();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
         if (!this.poseGoal) {
             console.log("Joint in collision!")
             return;
         }
         this.poseGoal.send()
-        // this.affirmExecution()
     }
 
     stopExecution() {

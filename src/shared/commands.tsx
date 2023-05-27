@@ -1,7 +1,7 @@
 import { Pose2D, RobotPose, uuid } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | StopCommand | setRobotModeCommand | CameraPerspectiveCommand
+export type cmd = DriveCommand | IncrementalMove | StopCommand | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand
 
 export interface StopCommand { type: "stop" }
 
@@ -40,6 +40,11 @@ export interface PoseGoalCommand {
     type: "poseGoal",
     goal: NamedPose,
     id: uuid
+}
+
+export interface RobotPoseCommand {
+    type: "setRobotPose"
+    goal: RobotPose
 }
 
 export interface setRobotModeCommand {

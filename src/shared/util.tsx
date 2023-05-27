@@ -90,6 +90,16 @@ export interface Pose2D {
     theta?: number
 }
 
+export const REALSENSE_BASE_POSE: RobotPose = {
+    "joint_head_pan": -0.1,
+    "joint_head_tilt": -1.35
+}
+
+export const REALSENSE_GRIPPER_POSE: RobotPose = {
+    "joint_head_pan": -1.7,
+    "joint_head_tilt": -1.35
+}
+
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.05, .518],
     "joint_wrist_yaw": [-1.395, 4.45],

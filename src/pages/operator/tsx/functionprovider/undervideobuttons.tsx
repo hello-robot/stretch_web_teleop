@@ -1,4 +1,5 @@
 import { FunctionProvider } from "./functionprovider"
+import { REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
@@ -8,10 +9,20 @@ export enum UnderVideoButton {
     FollowGripper = "Follow Gripper"
 }
 
-/** Array of different views for the overhead camera */
-export const overheadButtons: UnderVideoButton[] = [UnderVideoButton.DriveView, UnderVideoButton.GripperView]
-/** Type to specify the different overhead camera views */
+/** Array of different perspectives for the overhead camera */
+export const overheadButtons: UnderVideoButton[] = [
+    UnderVideoButton.DriveView, 
+    UnderVideoButton.GripperView
+]
+/** Type to specify the different overhead camera perspectives */
 export type OverheadButtons = typeof overheadButtons[number]
+/** Array of different perspectives for the realsense camera */
+export const realsenseButtons: UnderVideoButton[] = [
+    UnderVideoButton.LookAtBase, 
+    UnderVideoButton.LookAtGripper, 
+]
+/** Type to specify the different realsense camera perspectives */
+export type RealsenseButtons = typeof realsenseButtons[number]
 
 export type UnderVideoButtonFunctions = {
     onClick: () => void
@@ -32,6 +43,18 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             case UnderVideoButton.GripperView:
                 return {
                     onClick: () => FunctionProvider.remoteRobot?.setCameraPerspective("overhead", "manip") 
+                }
+            case UnderVideoButton.LookAtBase:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot.setRobotPose(REALSENSE_BASE_POSE)
+                }
+            case UnderVideoButton.LookAtGripper:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot.setRobotPose(REALSENSE_GRIPPER_POSE)
+                }
+            case UnderVideoButton.FollowGripper:
+                return {
+                    onClick: () => console.log("follow gripper")
                 }
         }
     }
