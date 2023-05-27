@@ -14,7 +14,7 @@ import compressed_image_transport
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
 from cv_bridge import CvBridge
-from stretch_web_interface_react.srv import ImageView, DepthAR
+from stretch_web_interface_react.srv import CameraPerspective, DepthAR
 
 
 class ConfigureVideoStreams:
@@ -64,14 +64,14 @@ class ConfigureVideoStreams:
         ], 10, 1)
         self.camera_synchronizer.registerCallback(self.camera_callback)
 
-        # Service for requested image views configured based on params file
-        self.image_view_service = rospy.Service('image_view', ImageView, self.image_view_callback)
+        # Service for requested image perspectives configured based on params file
+        self.camera_perspective_service = rospy.Service('camera_perspective', CameraPerspective, self.camera_perspective_callback)
 
-        # Default image views
-        self.image_view = {"overhead": "nav", "realsense": "default", "gripper": "default"}
-        self.overhead_image_view = 'nav'
-        self.realsense_image_view = 'default'
-        self.gripper_image_view = 'default'
+        # Default image perspectives
+        self.camera_perspective = {"overhead": "nav", "realsense": "default", "gripper": "default"}
+        self.overhead_camera_perspective = 'nav'
+        self.realsense_camera_perspective = 'default'
+        self.gripper_camera_perspective = 'default'
 
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = rospy.Service('depth_ar', DepthAR, self.depth_ar_callback)
@@ -111,12 +111,12 @@ class ConfigureVideoStreams:
             # img[y_idx, x_idx, 3] = 0
         return img
         
-    def image_view_callback(self, req):
-        if req.camera not in self.image_view: 
-            raise ValueError("ImageView.srv camera must be overhead, realsense or gripper") 
+    def camera_perspective_callback(self, req):
+        if req.camera not in self.camera_perspective: 
+            raise ValueError("CameraPerspective.srv camera must be overhead, realsense or gripper") 
         
         try: 
-            self.image_view[req.camera] = req.view
+            self.camera_perspective[req.camera] = req.perspective
             return True
         except:
             return False
@@ -200,9 +200,9 @@ class ConfigureVideoStreams:
             self.gripper_images[image_config_name] = \
                 self.configure_images(ros_gripper_rgb_image, self.gripper_params[image_config_name])
         
-        self.overhead_camera_rgb_image = self.overhead_images[self.image_view["overhead"]]
-        self.realsense_rgb_image = self.realsense_images[self.image_view["realsense"]]
-        self.gripper_camera_rgb_image = self.gripper_images[self.image_view["gripper"]]
+        self.overhead_camera_rgb_image = self.overhead_images[self.camera_perspective["overhead"]]
+        self.realsense_rgb_image = self.realsense_images[self.camera_perspective["realsense"]]
+        self.gripper_camera_rgb_image = self.gripper_images[self.camera_perspective["gripper"]]
 
     def publish_compressed_msg(self, image, publisher):
         msg = CompressedImage()

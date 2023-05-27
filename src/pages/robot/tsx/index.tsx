@@ -103,6 +103,10 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "setRobotMode":
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
+            break
+        case "setCameraPerspective":
+            robot.setCameraPerspective({camera: message.camera, perspective: message.perspective})
+            break
     }
 };
 

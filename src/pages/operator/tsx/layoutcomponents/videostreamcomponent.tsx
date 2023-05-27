@@ -6,12 +6,9 @@ import { CustomizableComponentProps, SharedState } from "./customizablecomponent
 import { DropZone } from "./dropzone";
 import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
-import { buttonFunctionProvider } from "..";
+import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
-/** Array of different views for the overhead camera */
-const overheadButtons: string[] = ['Drive View', 'Gripper View']
-/** Type to specify the different overhead camera views */
-export type OverheadButtons = typeof overheadButtons[number]
+import { OverheadButtons, overheadButtons } from "../functionprovider/undervideobuttons";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -394,18 +391,18 @@ function getUnderVideoButtons(definition: VideoStreamDef): JSX.Element | undefin
 const getOverheadButtons = () => {
     return (
         <React.Fragment >
-            <button>Drive View</button>
-            <button>Gripper View</button>
-            {/* {overheadButtons.map(view => <OverheadButton view={view} key={view} />)} */}
+            {overheadButtons.map(perspective => 
+                <OverheadButton perspective={perspective} key={perspective} />
+            )}
         </React.Fragment>
     )
 }
 
-const OverheadButton = (props: {view: OverheadButtons}) => {
-    const onClick = console.log(props.view)!
+const OverheadButton = (props: {perspective: OverheadButtons}) => {
+    const onClick = underVideoFunctionProvider.provideFunctions(props.perspective).onClick;
     return (
         <button onClick={onClick}>
-            {props.view}
+            {props.perspective}
         </button>
     )
 }
