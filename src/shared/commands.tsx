@@ -44,7 +44,7 @@ export interface PoseGoalCommand {
 
 export interface RobotPoseCommand {
     type: "setRobotPose"
-    goal: RobotPose
+    pose: RobotPose
 }
 
 export interface setRobotModeCommand {
