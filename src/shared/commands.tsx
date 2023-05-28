@@ -1,9 +1,7 @@
-import { Pose2D, RobotPose, uuid } from "./util"
+import { RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | StopCommand | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand
-
-export interface StopCommand { type: "stop" }
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | SetFollowGripper
 
 export interface VelocityCommand {
     stop: () => void,
@@ -24,24 +22,6 @@ export interface IncrementalMove {
     increment: number
 }
 
-export interface NavGoalCommand {
-    type: "navGoal",
-    goal: Pose2D,
-    id: uuid,
-}
-
-export interface NamedPose {
-    name: string,
-    description: string,
-    jointState: RobotPose
-}
-
-export interface PoseGoalCommand {
-    type: "poseGoal",
-    goal: NamedPose,
-    id: uuid
-}
-
 export interface RobotPoseCommand {
     type: "setRobotPose"
     pose: RobotPose
@@ -56,4 +36,9 @@ export interface CameraPerspectiveCommand {
     type: "setCameraPerspective"
     camera: "overhead" | "realsense" | "gripper"
     perspective: string
+}
+
+export interface SetFollowGripper {
+    type: "setFollowGripper"
+    followGripper: boolean
 }

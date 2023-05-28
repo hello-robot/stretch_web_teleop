@@ -8,7 +8,7 @@ import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
-import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons } from "../functionprovider/undervideobuttons";
+import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../functionprovider/undervideobuttons";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -423,7 +423,10 @@ const ToggleFollowGripperButton = () => {
     return (
         <CheckToggleButton
             checked={followGripper}
-            onClick={() => setFollowGripper(!followGripper)}
+            onClick={() => {
+                setFollowGripper(!followGripper)
+                underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(!followGripper)
+            }}
             label={"Follow gripper"}
         />
     )

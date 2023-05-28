@@ -8,15 +8,19 @@ export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
 
 export class Robot extends React.Component {
-    ros!: ROSLIB.Ros
-    jointState?: ROSJointState;
-    jointStateCallback: (jointState: ROSJointState) => void
-    poseGoal?: ROSLIB.Goal;
-    trajectoryClient?: ROSLIB.ActionClient;
-    cmdVelTopic?: ROSLIB.Topic;
-    switchToNavigationService?: ROSLIB.Service;
-    switchToPositionService?: ROSLIB.Service;
-    setCameraPerspectiveService?: ROSLIB.Service;
+    private ros!: ROSLIB.Ros
+    private jointState?: ROSJointState;
+    private poseGoal?: ROSLIB.Goal;
+    private trajectoryClient?: ROSLIB.ActionClient;
+    private cmdVelTopic?: ROSLIB.Topic;
+    private switchToNavigationService?: ROSLIB.Service;
+    private switchToPositionService?: ROSLIB.Service;
+    private setCameraPerspectiveService?: ROSLIB.Service;
+    private robotFrameTfClient?: ROSLIB.TFClient;
+    private linkGripperFingerLeftTF?: ROSLIB.Transform
+    private linkHeadTiltTF?: ROSLIB.Transform
+    private jointStateCallback: (jointState: ROSJointState) => void
+    private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
 
     constructor(props: {jointStateCallback: (jointState: ROSJointState) => void}) {
         super(props);
@@ -51,6 +55,9 @@ export class Robot extends React.Component {
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
+        this.createRobotFrameTFClient()
+        this.subscribeToGripperFingerTF()
+        this.subscribeToHeadTiltTF()
 
         return Promise.resolve()
     }
@@ -115,6 +122,28 @@ export class Robot extends React.Component {
             ros: this.ros,
             name: '/camera_perspective',
             serviceType: 'stretch_web_interface_react/CameraPerspective'
+        })
+    }
+
+    createRobotFrameTFClient() {
+        this.robotFrameTfClient = new ROSLIB.TFClient({
+            ros: this.ros,
+            fixedFrame: 'base_link',
+            angularThres: 0.01,
+            transThres: 0.01,
+            rate: 10
+        });
+    }
+
+    subscribeToGripperFingerTF() {
+        this.robotFrameTfClient?.subscribe('link_gripper_finger_left', transform => {
+            this.linkGripperFingerLeftTF = transform;
+        });
+    }
+
+    subscribeToHeadTiltTF () {
+        this.robotFrameTfClient?.subscribe('link_head_tilt', transform => {
+            this.linkHeadTiltTF = transform;
         })
     }
 
@@ -252,17 +281,64 @@ export class Robot extends React.Component {
     stopExecution() {
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
         this.trajectoryClient.cancel()
-        // this.currentJointTrajectoryGoal = null
-
-        // if (this.currentTrajectoryKillInterval) {
-        //     clearTimeout(this.currentTrajectoryKillInterval)
-        //     // this.currentTrajectoryKillInterval = null
-        // }
-        // this.moveBaseClient?.cancel()
         if (this.poseGoal) {
             this.poseGoal.cancel()
             this.poseGoal = undefined
         }
+    }
+
+    setPanTiltFollowGripper(followGripper: boolean) {
+        if (followGripper) { 
+            let panOffset = 0;
+            let tiltOffset = 0;
+            this.lookAtGripperInterval = window.setInterval(() => { 
+                if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
+                    this.lookAtGripper(panOffset, tiltOffset);
+                }
+            }, 500)
+        } else {
+            clearInterval(this.lookAtGripperInterval)
+            this.lookAtGripperInterval = undefined
+        }
+    }
+
+    lookAtGripper(panOffset: number, tiltOffset: number) {
+        if (!this.linkGripperFingerLeftTF) throw 'linkGripperFingerLeftTF is undefined';
+        if (!this.linkHeadTiltTF) throw 'linkHeadTiltTF is undefined';
+        let posDifference = {
+            x: this.linkGripperFingerLeftTF.translation.x - this.linkHeadTiltTF.translation.x,
+            y: this.linkGripperFingerLeftTF.translation.y - this.linkHeadTiltTF.translation.y,
+            z: this.linkGripperFingerLeftTF.translation.z - this.linkHeadTiltTF.translation.z
+        };
+
+        // Normalize posDifference
+        const scalar = Math.sqrt(posDifference.x ** 2 + posDifference.y ** 2 + posDifference.z ** 2);
+        posDifference.x /= scalar;
+        posDifference.y /= scalar;
+        posDifference.z /= scalar;
+
+        const pan = Math.atan2(posDifference.y, posDifference.x) + panOffset;
+        const tilt = Math.atan2(posDifference.z, -posDifference.y) + tiltOffset;
+        
+        // Goals really close to current state cause some whiplash in these joints in simulation. 
+        // Ignoring small goals is a temporary fix
+        if (!this.jointState) throw 'jointState is undefined';
+        let panDiff = Math.abs(GetJointValue({
+            jointStateMessage: this.jointState, 
+            jointName: "joint_head_pan"
+        }) - pan);
+        let tiltDiff = Math.abs(GetJointValue({
+            jointStateMessage: this.jointState, 
+            jointName: "joint_head_tilt"
+        }) - tilt);
+        if (panDiff < 0.02 && tiltDiff < 0.02) {
+            return
+        }
+
+        this.executePoseGoal({
+            'joint_head_pan': pan + panOffset,
+            'joint_head_tilt': tilt + tiltOffset
+        })
     }
 }
 

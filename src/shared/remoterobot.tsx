@@ -1,8 +1,6 @@
 import React from 'react'
-import { Pose } from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand } from 'shared/commands';
-import { ValidJointStateDict, SensorData, RobotPose, ValidJoints } from 'shared/util';
-import { generateUUID } from './util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -17,22 +15,22 @@ export class RemoteRobot extends React.Component {
     }
 
     driveBase(linVel: number, angVel: number): VelocityCommand {
-        let cmd: cmd = {
+        let cmd: DriveCommand = {
             type: "driveBase",
             modifier: { linVel: linVel, angVel: angVel }
-        } as DriveCommand;
+        };
         this.robotChannel(cmd);
 
         return {
             "stop": () => {
-                let stopEvent: cmd = {
+                let stopEvent: DriveCommand = {
                     type: "driveBase",
                     modifier: { linVel: 0, angVel: 0 }
                 }
                 this.robotChannel(stopEvent)
             },
             "affirm": () => {
-                let affirmEvent: cmd = {
+                let affirmEvent: DriveCommand = {
                     type: "driveBase",
                     modifier: { linVel: linVel, angVel: angVel }
                 }
@@ -42,11 +40,11 @@ export class RemoteRobot extends React.Component {
     }
 
     incrementalMove(jointName: ValidJoints, increment: number): VelocityCommand {
-        let cmd: cmd = {
+        let cmd: IncrementalMove = {
             type: "incrementalMove",
             jointName: jointName,
             increment: increment
-        } as IncrementalMove;
+        };
         this.robotChannel(cmd);
 
         return {
@@ -57,33 +55,40 @@ export class RemoteRobot extends React.Component {
     }
 
     setRobotMode(mode: "position" | "navigation") {
-        let cmd: cmd = {
+        let cmd: setRobotModeCommand = {
             type: "setRobotMode",
             modifier: mode
-        } as setRobotModeCommand;
+        };
         this.robotChannel(cmd)
     }
 
     setCameraPerspective(camera: "overhead" | "realsense" | "gripper", perspective: string) {
-        let cmd: cmd = {
+        let cmd: CameraPerspectiveCommand = {
             type: "setCameraPerspective",
             camera: camera,
             perspective: perspective
-        } as CameraPerspectiveCommand;
+        }
         this.robotChannel(cmd)
     }
 
     setRobotPose(pose: RobotPose) {
-        let cmd: cmd = {
+        let cmd: RobotPoseCommand = {
             type: "setRobotPose",
             pose: pose,
-        } as RobotPose;
+        }
+        this.robotChannel(cmd)
+    }
+
+    setFollowGripper(followGripper: boolean) {
+        let cmd: cmd = {
+            type: "setFollowGripper",
+            followGripper: followGripper
+        }
         this.robotChannel(cmd)
     }
 }
 
 class RobotSensors extends React.Component {
-    private sensors: { [sensorName: string]: SensorData }
     private jointState?: RobotPose;
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
@@ -91,14 +96,6 @@ class RobotSensors extends React.Component {
 
     constructor(props: {}) {
         super(props)
-        this.sensors = {
-            "lift": {},
-            "arm": {},
-            "wrist": {},
-            "gripper": {},
-            "head": {},
-            "base": {}
-        }
         this.functionProviderCallback = () => { }
         this.setFunctionProviderCallback = this.setFunctionProviderCallback.bind(this)
     }

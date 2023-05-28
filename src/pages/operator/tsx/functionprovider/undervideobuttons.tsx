@@ -25,7 +25,8 @@ export const realsenseButtons: UnderVideoButton[] = [
 export type RealsenseButtons = typeof realsenseButtons[number]
 
 export type UnderVideoButtonFunctions = {
-    onClick: () => void
+    onClick?: () => void
+    onCheck?: (followGripper?: boolean) => void
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -46,15 +47,15 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 }
             case UnderVideoButton.LookAtBase:
                 return {
-                    onClick: () => FunctionProvider.remoteRobot.setRobotPose(REALSENSE_BASE_POSE)
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_BASE_POSE)
                 }
             case UnderVideoButton.LookAtGripper:
                 return {
-                    onClick: () => FunctionProvider.remoteRobot.setRobotPose(REALSENSE_GRIPPER_POSE)
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_GRIPPER_POSE)
                 }
             case UnderVideoButton.FollowGripper:
                 return {
-                    onClick: () => console.log("follow gripper")
+                    onCheck: (followGripper?: boolean) => FunctionProvider.remoteRobot?.setFollowGripper(followGripper!)
                 }
         }
     }

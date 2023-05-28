@@ -37,27 +37,10 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = SensorMessage | ValidJointStateMessage | StopMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | StopMessage | cmd;
 
 interface StopMessage {
     type: "stop"
-}
-
-export interface SensorMessage {
-    type: "sensor",
-    subtype: string,
-    name: "effort" | "transform" | "value",
-    value: number | ROSLIB.Transform
-}
-
-export interface SensorData {
-    effort?: number,
-    inJointLimits?: boolean,
-    transform?: ROSLIB.Transform
-}
-
-export type Sensor = {
-    lift: SensorData
 }
 
 export type RobotPose = { [key in ValidJoints]?: number }
@@ -66,28 +49,6 @@ export interface ValidJointStateMessage {
     type: "validJointState",
     jointsInLimits: { [key in ValidJoints]? : [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]? : [boolean, boolean] }
-}
-
-export type GoalMessage =  NavGoalMessage | PoseGoalMessage;
-
-export interface NavGoalMessage {
-    type: "goal",
-    name: "nav",
-    status: "success" | "failure",
-    value: NavGoalCommand
-}
-
-export interface PoseGoalMessage {
-    type: "goal",
-    name: "pose",
-    status: "success" | "failure",
-    value: PoseGoalCommand
-}
-
-export interface Pose2D {
-    x: number,
-    y: number,
-    theta?: number
 }
 
 export const REALSENSE_BASE_POSE: RobotPose = {
@@ -181,22 +142,6 @@ export function generateUUID(): uuid {
         return v.toString(16);
     });
 }
-
-// export type GoalMessage =  NavGoalMessage | PoseGoalMessage;
-
-// export interface NavGoalMessage {
-//     type: "goal",
-//     name: "nav",
-//     status: "success" | "failure",
-//     value: NavGoalCommand
-// }
-
-// export interface PoseGoalMessage {
-//     type: "goal",
-//     name: "pose",
-//     status: "success" | "failure",
-//     value: PoseGoalCommand
-// }
 
 /**
  * Creates a class name string based on a base class name and additional flags

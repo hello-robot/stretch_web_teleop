@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
@@ -39,16 +39,6 @@ robot.connect().then(() => {
     })
 
     connection.joinRobotRoom()
-    
-    // connection.registerRequestResponder("jointState", async () => {
-    //     let processedJointPositions: {[key in ValidJoints]?: number} = {};
-    //     AllJoints.forEach((key, _) => {
-    //         if (robot.jointState) {
-    //             processedJointPositions[key] = GetJointValue({jointStateMessage: robot.jointState, jointName: key})
-    //         }
-    //     });
-    //     return processedJointPositions
-    // });
 })
 
 function handleSessionStart() {
@@ -69,6 +59,8 @@ function handleSessionStart() {
 }
 
 function forwardJointStates(jointState: ROSJointState) {
+    if (!connection) throw 'WebRTC connection undefined!'
+    
     let jointValues: ValidJointStateDict = {}
     let effortValues: ValidJointStateDict = {}
     jointState.name.forEach((name?: ValidJoints) => {
@@ -82,7 +74,7 @@ function forwardJointStates(jointState: ROSJointState) {
         type: "validJointState",
         jointsInLimits: jointValues,
         jointsInCollision: effortValues
-    });
+    } as ValidJointStateMessage);
 }
 
 function handleMessage(message: WebRTCMessage) {
@@ -109,6 +101,9 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "setRobotPose":
             robot.executePoseGoal(message.pose)
+            break
+        case "setFollowGripper":
+            robot.setPanTiltFollowGripper(message.followGripper)
             break
     }
 };
