@@ -414,6 +414,7 @@ function getRealsenseButtons() {
                 <CameraPerspectiveButton perspective={perspective} key={perspective} />
             )}
             <ToggleFollowGripperButton />
+            <ToggleDepthSensingButton />
         </React.Fragment>
     )
 }
@@ -427,7 +428,21 @@ const ToggleFollowGripperButton = () => {
                 setFollowGripper(!followGripper)
                 underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(!followGripper)
             }}
-            label={"Follow gripper"}
+            label={"Follow Gripper"}
+        />
+    )
+}
+
+const ToggleDepthSensingButton = () => {
+    const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
+    return (
+        <CheckToggleButton
+            checked={depthSensing}
+            onClick={() => {
+                setDepthSensing(!depthSensing)
+                underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(!depthSensing)
+            }}
+            label={"Depth Sensing"}
         />
     )
 }
@@ -447,7 +462,7 @@ const CheckToggleButton = (props: CheckToggleButtonProps) => {
             onClick={props.onClick}
         >
             <span className={"material-icons"}>{icon}</span>
-            Follow gripper
+            {props.label}
         </button>
     )
 }

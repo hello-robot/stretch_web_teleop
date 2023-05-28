@@ -103,7 +103,10 @@ function handleMessage(message: WebRTCMessage) {
             robot.executePoseGoal(message.pose)
             break
         case "setFollowGripper":
-            robot.setPanTiltFollowGripper(message.followGripper)
+            robot.setPanTiltFollowGripper(message.toggle)
+            break
+        case "setDepthSensing":
+            robot.setDepthSensing(message.toggle)
             break
     }
 };

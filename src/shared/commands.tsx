@@ -1,7 +1,7 @@
 import { RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | SetFollowGripper
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -38,7 +38,7 @@ export interface CameraPerspectiveCommand {
     perspective: string
 }
 
-export interface SetFollowGripper {
-    type: "setFollowGripper"
-    followGripper: boolean
+export interface ToggleCommand {
+    type: "setFollowGripper" | "setDepthSensing"
+    toggle: boolean
 }

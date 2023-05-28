@@ -16,6 +16,7 @@ export class Robot extends React.Component {
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
+    private setDepthSensingService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
@@ -55,6 +56,7 @@ export class Robot extends React.Component {
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
+        this.createDepthSensingService()
         this.createRobotFrameTFClient()
         this.subscribeToGripperFingerTF()
         this.subscribeToHeadTiltTF()
@@ -125,6 +127,14 @@ export class Robot extends React.Component {
         })
     }
 
+    createDepthSensingService() {
+        this.setDepthSensingService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/depth_ar',
+            serviceType: 'stretch_web_interface_react/DepthAR'
+        })
+    }
+
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
             ros: this.ros,
@@ -152,6 +162,13 @@ export class Robot extends React.Component {
         this.setCameraPerspectiveService?.callService(request, (response: boolean) => {
             response ? console.log("Set " + props.camera + " to " + props.perspective + " perspective") 
                      : console.error(props.perspective + " is not a valid perspective for " + props.camera + " camera!")
+        })
+    }
+
+    setDepthSensing(toggle: boolean) {
+        var requeset = new ROSLIB.ServiceRequest({enable: toggle})
+        this.setDepthSensingService?.callService(requeset, (response: boolean) => {
+            response ? console.log("Enable depth sensing") : console.log("Disabled depth sensing")
         })
     }
 

@@ -6,7 +6,8 @@ export enum UnderVideoButton {
     GripperView = "Gripper View",
     LookAtGripper = "Look At Gripper",
     LookAtBase = "Look At Base",
-    FollowGripper = "Follow Gripper"
+    FollowGripper = "Follow Gripper",
+    DepthSensing = "Depth Sensing"
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -26,7 +27,7 @@ export type RealsenseButtons = typeof realsenseButtons[number]
 
 export type UnderVideoButtonFunctions = {
     onClick?: () => void
-    onCheck?: (followGripper?: boolean) => void
+    onCheck?: (toggle?: boolean) => void
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -55,7 +56,11 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 }
             case UnderVideoButton.FollowGripper:
                 return {
-                    onCheck: (followGripper?: boolean) => FunctionProvider.remoteRobot?.setFollowGripper(followGripper!)
+                    onCheck: (toggle?: boolean) => FunctionProvider.remoteRobot?.setToggle("setFollowGripper", toggle!)
+                }
+            case UnderVideoButton.DepthSensing:
+                return {
+                    onCheck: (toggle?: boolean) => FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle!)
                 }
         }
     }
