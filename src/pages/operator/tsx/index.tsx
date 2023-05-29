@@ -12,7 +12,8 @@ import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
-import { LocalStorageHandler } from './utils/storageHandler';
+import { FirebaseStorageHandler, LocalStorageHandler } from './utils/storageHandler';
+import { FirebaseOptions } from "firebase/app"
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -79,19 +80,38 @@ function configureRobot() {
     remoteRobot.setRobotMode("navigation");
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 
-    const storageHandler = new LocalStorageHandler();
-    const layout = storageHandler.loadLayout();
+    // const storageHandler = new LocalStorageHandler();
+    // const layout = storageHandler.loadLayout();
 
-    FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
-    FunctionProvider.addRemoteRobot(remoteRobot);
+    const config = {
+        apiKey: process.env.apiKey,
+        authDomain: process.env.authDomain,
+        projectId: process.env.projectId,
+        storageBucket: process.env.storageBucket,
+        messagingSenderId: process.env.messagingSenderId,
+        appId: process.env.appId,
+        measurementId: process.env.measurementId
+    }
 
-    root.render(
-        <Operator
-            remoteStreams={allRemoteStreams}
-            layout={layout}
-            storageHandler={storageHandler}
-        />
-    );
+    const storageHandlerReadyCallback = () => {
+        const layout = storageHandler.loadLayout();
+        FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
+        FunctionProvider.addRemoteRobot(remoteRobot);
+    
+        root.render(
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                storageHandler={storageHandler}
+            />
+        );
+    }
+
+    const storageHandler = new FirebaseStorageHandler({ 
+        config: config as FirebaseOptions,
+        onStorageHandlerReadyCallback: storageHandlerReadyCallback
+    });
+    storageHandler.signInWithGoogle()
 }
 
 function disconnectFromRobot() {
