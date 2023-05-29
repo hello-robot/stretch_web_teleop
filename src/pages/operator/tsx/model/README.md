@@ -5,7 +5,7 @@ Firebase is a set of application development platforms and backen cloud computin
 ### Creating a Firebase Project
 Sign into [Firebase](https://firebase.google.com/) with your google account then open the Firebase [console](https://console.firebase.google.com/) and create a new project. The project will default to using the no-cost [Spark plan](https://firebase.google.com/pricing?hl=en&authuser=1). 
 
-Add a web app to your firebase project. This will generate a configuration for your web app that looks something like this:
+Add a web app to your firebase project. You shouldn't need to worry about installing the Firebase SDK because it is already in the `package.json` dependencies for this repo. This will generate a configuration for your web app that looks something like this:
 ```
 const firebaseConfig = {
   apiKey: ...,
@@ -18,7 +18,7 @@ const firebaseConfig = {
 };
 ```
 
-Create a file named `.env` in `stretch-web-interface` and add the config to the `.env` file. It should look like this:
+Create a file named `.env` in `stretch-web-interface` and add the config to the `.env` file. The config will need to be reformatted slightly so the contents of `.env` look like this:
 ```
 apiKey=DEzaSyAzZEQ89KBuKXgKJ-UWV9vm3xM
 authDomain=stretch-teleop-interface.firebaseapp.com
