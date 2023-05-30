@@ -167,7 +167,16 @@
     margin-bottom: 0.4rem;
 }
 
-#load-saved-layout-modal .dropdown {
+#load-layout-modal .dropdown p {
+    margin: 0;
+}
+
+#load-layout-modal .dropdown em {
+    color: #6a6a6a;
+    margin-right: 1rem;
+}
+
+#load-layout-modal .dropdown {
     width: 90%;
 }
 

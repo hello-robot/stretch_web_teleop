@@ -21,7 +21,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     // X and Y position of the cursor when user clicks on the video
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
     const definition = props.definition as VideoStreamDef;
-    if (!definition.children) throw Error('Video Stream definition should have children');
+    if (!definition.children) console.warn(`Video stream definition at ${props.path} should have a 'children' property.`);
     // Get the stream to display inside the video
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
     // Refrence to the div immediately around the video element
@@ -31,7 +31,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
 
     // Create the overlay
-    const overlayDefinition = definition.children.length > 0 ? definition.children[0] : undefined;
+    const overlayDefinition = (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
     const overlay = createOverlay(overlayDefinition, props.path, props.sharedState, videoAspectRatio);
 

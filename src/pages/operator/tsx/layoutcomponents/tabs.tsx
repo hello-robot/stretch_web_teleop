@@ -208,6 +208,7 @@ const NewTabModal = (props: {
             show={props.show}
             onAccept={handleAccept}
             id="new-tab-modal"
+            acceptButtonText="Create Tab"
         >
             <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
             <input type="text" id="new-tab-name" name="new-tab-name"

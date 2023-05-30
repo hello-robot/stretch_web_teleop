@@ -2,7 +2,7 @@ import { MAIN_BRANCH_LAYOUT } from "../default_layouts/main_branch";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/study_branch";
 import { LayoutDefinition } from "./componentdefinitions";
 
-import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp  } from "firebase/app";
+import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "firebase/app";
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
 import { Database, getDatabase, child, get, ref, update, push } from 'firebase/database'
 
@@ -12,43 +12,72 @@ export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } =
     "Main branch": MAIN_BRANCH_LAYOUT
 }
 
-const USER_LAYOUT_SAVE_KEY = "user_custom_layout";
-
 export abstract class StorageHandler {
+    public abstract loadCustomLayout(layoutName: string): LayoutDefinition;
 
-    public abstract loadLayout(layoutName?: string): LayoutDefinition;
+    public abstract saveCustomLayout(layout: LayoutDefinition, layoutName: string): void;
 
-    public abstract saveLayout(layout: LayoutDefinition, layoutName?: string): void;
+    public abstract saveCurrentLayout(layout: LayoutDefinition): void;
+
+    public abstract loadCurrentLayout(): LayoutDefinition | null;
+
+    public abstract getCustomLayoutNames(): string[];
+
+    public loadCurrentLayoutOrDefault(): LayoutDefinition {
+        const currentLayout = this.loadCurrentLayout();
+        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
+        console.log('loading saved layout')
+        return currentLayout;
+    }
+
+    public getDefaultLayoutNames(): string[] {
+        return Object.keys(DEFAULT_LAYOUTS);
+    }
+
+    public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
+        return DEFAULT_LAYOUTS[layoutName];
+    }
 }
 
 export class LocalStorageHandler extends StorageHandler {
-    public loadLayout(layoutName?: string): LayoutDefinition {
-        console.log('loading layout' + layoutName)
-        if (!layoutName) {
-            const storedJson = localStorage.getItem(USER_LAYOUT_SAVE_KEY);
-            if (storedJson) {
-                console.log('loaded stored layout');
-                console.log(storedJson);
-                return JSON.parse(storedJson);
-            }
-            return STUDY_BRANCH_LAYOUT;
-        }
-        if (!(layoutName in DEFAULT_LAYOUTS))
-            throw Error(`could not find layout name ${DEFAULT_LAYOUTS}`);
-        console.log('returning default layout')
-        return DEFAULT_LAYOUTS[layoutName as DefaultLayoutName]!;
+    private static CURRENT_LAYOUT_KEY = "user_custom_layout";
+    private static LAYOUT_NAMES_KEY = "user_custom_layout_names"
+
+    public loadCustomLayout(layoutName: string): LayoutDefinition {
+        const storedJson = localStorage.getItem(layoutName);
+        if (!storedJson) throw Error(`Could not load custom layout ${layoutName}`);
+        return JSON.parse(storedJson);
     }
 
-    public saveLayout(layout: LayoutDefinition, layoutName?: string): void {
-        localStorage.setItem(layoutName || USER_LAYOUT_SAVE_KEY, JSON.stringify(layout));
+    public saveCustomLayout(layout: LayoutDefinition, layoutName: string): void {
+        const layoutNames = this.getCustomLayoutNames();
+        layoutNames.push(layoutName);
+        localStorage.setItem(LocalStorageHandler.LAYOUT_NAMES_KEY, JSON.stringify(layoutNames));
+        localStorage.setItem(layoutName, JSON.stringify(layout));
+    }
+
+    public saveCurrentLayout(layout: LayoutDefinition): void {
+        localStorage.setItem(LocalStorageHandler.CURRENT_LAYOUT_KEY, JSON.stringify(layout));
+    }
+
+    public loadCurrentLayout(): LayoutDefinition | null {
+        const storedJson = localStorage.getItem(LocalStorageHandler.CURRENT_LAYOUT_KEY);
+        if (!storedJson) return null;
+        return JSON.parse(storedJson);
+    }
+
+    public getCustomLayoutNames(): string[] {
+        const storedJson = localStorage.getItem(LocalStorageHandler.LAYOUT_NAMES_KEY);
+        if (!storedJson) return [];
+        return JSON.parse(storedJson);
     }
 }
 
 export class FirebaseStorageHandler extends StorageHandler {
     private config: FirebaseOptions;
     private app: FirebaseApp;
-	private database: Database;
-	private auth: Auth;
+    private database: Database;
+    private auth: Auth;
     private GAuthProvider: GoogleAuthProvider;
 
     private userEmail: string;
@@ -57,12 +86,20 @@ export class FirebaseStorageHandler extends StorageHandler {
     private currentLayout: LayoutDefinition;
     private onReadyCallback: () => void
 
-    constructor(props: {config: FirebaseOptions, onStorageHandlerReadyCallback: () => void}) {
+    constructor(props: { onStorageHandlerReadyCallback: () => void }) {
         super()
-        this.config = props.config
+        this.config = {
+            apiKey: process.env.apiKey,
+            authDomain: process.env.authDomain,
+            projectId: process.env.projectId,
+            storageBucket: process.env.storageBucket,
+            messagingSenderId: process.env.messagingSenderId,
+            appId: process.env.appId,
+            measurementId: process.env.measurementId
+        }
         this.app = initializeApp(this.config);
-		this.database = getDatabase(this.app);
-		this.auth = getAuth(this.app);
+        this.database = getDatabase(this.app);
+        this.auth = getAuth(this.app);
         this.GAuthProvider = new GoogleAuthProvider();
 
         this.userEmail = ""
@@ -77,50 +114,50 @@ export class FirebaseStorageHandler extends StorageHandler {
         if (user) {
             this.uid = user.uid;
             this.userEmail = user.email!;
-            
+
             this.getUserDataFirebase().then(async (userData) => {
-				this.layouts = userData.layouts;
+                this.layouts = userData.layouts;
                 this.currentLayout = userData.currentLayout
-				console.log(userData.layouts)
+                console.log(userData.layouts)
                 this.onReadyCallback()
-			}).catch((error) => {
-				console.trace(error)
-				console.warn("Detected that FirebaseModel isn't initialized. Loading default layouts.");
-				this.loadDefaultLayouts();
-			})
+            }).catch((error) => {
+                console.trace(error)
+                console.warn("Detected that FirebaseModel isn't initialized. Loading default layouts.");
+                this.loadDefaultLayouts();
+            })
         }
     }
 
     private async getUserDataFirebase() {
-		const snapshot = await get(child(ref(this.database), '/users/' + (this.uid)))
+        const snapshot = await get(child(ref(this.database), '/users/' + (this.uid)))
 
-		if (snapshot.exists()) {
-			return snapshot.val();
-		} else {
-			throw "No data available";
-		}
-	}
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            throw "No data available";
+        }
+    }
 
     public signInWithGoogle() {
-		if (this.userEmail == "") {
-			signInWithPopup(this.auth, this.GAuthProvider)
-				.then((result) => {
-					const credential = GoogleAuthProvider.credentialFromResult(result);
-					const token = credential!.accessToken;
-					const user = result.user;
+        if (this.userEmail == "") {
+            signInWithPopup(this.auth, this.GAuthProvider)
+                .then((result) => {
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential!.accessToken;
+                    const user = result.user;
                     return Promise.resolve()
-				})
-				.catch(this.handleError);
-		}
-	}
+                })
+                .catch(this.handleError);
+        }
+    }
 
     private handleError(error: FirebaseError) {
-		const errorCode = error.code;
-		const errorMessage = error.message;
-		console.error("firebaseError: " + errorCode + ": " + errorMessage);
-		console.trace();
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("firebaseError: " + errorCode + ": " + errorMessage);
+        console.trace();
         return Promise.reject()
-	}
+    }
 
     public loadLayout(layoutName?: string): LayoutDefinition {
         if (!layoutName) {
@@ -137,23 +174,23 @@ export class FirebaseStorageHandler extends StorageHandler {
     }
 
     async loadDefaultLayouts() {
-		this.writeLayouts(JSON.parse(JSON.stringify(DEFAULT_LAYOUTS)))
+        this.writeLayouts(JSON.parse(JSON.stringify(DEFAULT_LAYOUTS)))
         return this.writeCurrentLayout(STUDY_BRANCH_LAYOUT)
-	}
+    }
 
     private async writeCurrentLayout(layout: LayoutDefinition) {
         this.currentLayout = layout
 
         let updates: any = {};
-		updates['/users/' + (this.uid) + '/currentLayout'] = layout;
-		return update(ref(this.database), updates);
+        updates['/users/' + (this.uid) + '/currentLayout'] = layout;
+        return update(ref(this.database), updates);
     }
 
-	private async writeLayouts(layouts: { [name: string]: LayoutDefinition }) {
-		this.layouts = layouts;
+    private async writeLayouts(layouts: { [name: string]: LayoutDefinition }) {
+        this.layouts = layouts;
 
-		let updates: any = {};
-		updates['/users/' + (this.uid) + '/layouts'] = layouts;
-		return update(ref(this.database), updates);
-	}
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/layouts'] = layouts;
+        return update(ref(this.database), updates);
+    }
 }

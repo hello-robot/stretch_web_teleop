@@ -80,9 +80,6 @@ function configureRobot() {
     remoteRobot.setRobotMode("navigation");
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 
-    // const storageHandler = new LocalStorageHandler();
-    // const layout = storageHandler.loadLayout();
-
     const config = {
         apiKey: process.env.apiKey,
         authDomain: process.env.authDomain,
@@ -94,10 +91,10 @@ function configureRobot() {
     }
 
     const storageHandlerReadyCallback = () => {
-        const layout = storageHandler.loadLayout();
+        const layout = storageHandler.loadCurrentLayoutOrDefault();
         FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
         FunctionProvider.addRemoteRobot(remoteRobot);
-    
+
         root.render(
             <Operator
                 remoteStreams={allRemoteStreams}
@@ -107,11 +104,13 @@ function configureRobot() {
         );
     }
 
-    const storageHandler = new FirebaseStorageHandler({ 
+    const storageHandler = new FirebaseStorageHandler({
         config: config as FirebaseOptions,
         onStorageHandlerReadyCallback: storageHandlerReadyCallback
     });
     storageHandler.signInWithGoogle()
+    // const storageHandler = new LocalStorageHandler();
+    // storageHandlerReadyCallback();
 }
 
 function disconnectFromRobot() {

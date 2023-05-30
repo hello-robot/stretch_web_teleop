@@ -6,7 +6,8 @@ export type PopupModalProps = {
     setShow: (show: boolean) => void,
     show: boolean,
     onAccept: () => void,
-    id?: string
+    id?: string,
+    acceptButtonText?: string
 }
 
 export const PopupModal: React.FunctionComponent<React.PropsWithChildren<PopupModalProps>> = (props) => {
@@ -21,7 +22,7 @@ export const PopupModal: React.FunctionComponent<React.PropsWithChildren<PopupMo
                 {props.children}
                 <div className="popup-modal-bottom-buttons">
                     <button className="btn-red" onClick={() => props.setShow(false)}>Cancel</button>
-                    <button className="btn-green" onClick={handleClickAccept} style={{ float: "right" }}>Accept</button>
+                    <button className="btn-green" onClick={handleClickAccept} style={{ float: "right" }}>{props.acceptButtonText || "Accept"}</button>
                 </div>
             </div>
             <div onClick={() => props.setShow(false)} id="popup-background"></div>

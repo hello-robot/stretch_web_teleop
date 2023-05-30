@@ -2,7 +2,7 @@ import React from "react";
 import { VelocityControl } from "operator/tsx/staticcomponents/velocitycontrol"
 import { LayoutArea } from "./staticcomponents/layoutarea";
 import { CustomizeButton } from "./staticcomponents/customizebutton";
-import { Sidebar } from "./staticcomponents/sidebar";
+import { GlobalOptionsProps, Sidebar } from "./staticcomponents/sidebar";
 import { SharedState } from "./layoutcomponents/customizablecomponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
 import { VoiceCommands } from "./staticcomponents/voicecommands";
@@ -12,7 +12,7 @@ import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider
 import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./functionprovider/buttonpads";
 import { Dropdown } from "./basic_components/dropdown";
-import { DEFAULT_LAYOUTS, StorageHandler } from "./utils/storageHandler";
+import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./utils/storageHandler";
 import "operator/css/operator.css"
 
 /** Operator interface webpage */
@@ -125,7 +125,7 @@ export const Operator = (props: {
     const handleToggleCustomize = () => {
         if (customizing) {
             console.log('saving layout');
-            props.storageHandler.saveLayout(layout.current);
+            props.storageHandler.saveCurrentLayout(layout.current);
         }
         setCustomizing(!customizing);
         setActiveDef(undefined);
@@ -145,14 +145,30 @@ export const Operator = (props: {
         buttonStateMap: buttonStateMap.current
     }
 
+    /** Properties for the global options area of the sidebar */
+    const globalOptionsProps: GlobalOptionsProps = {
+        displayVoiceControl: layout.current.displayVoiceControl,
+        setDisplayVoiceControl: setDisplayVoiceControl,
+        defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
+        customLayouts: props.storageHandler.getCustomLayoutNames(),
+        loadLayout: (layoutName: string, dflt: boolean) => {
+            layout.current = dflt ?
+                props.storageHandler.loadDefaultLayout(layoutName as DefaultLayoutName) :
+                props.storageHandler.loadCustomLayout(layoutName);
+            updateLayout();
+        },
+        saveLayout: (layoutName: string) => { props.storageHandler.saveCustomLayout(layout.current, layoutName); }
+    }
+
+    const actionModes = Object.values(ActionMode);
     return (
         <div id="operator">
             <div id="operator-header">
                 {/* Action mode button */}
                 <Dropdown
-                    onChange={(am: ActionMode) => setActionMode(am)}
-                    selectedOption={layout.current.actionMode}
-                    possibleOptions={Object.values(ActionMode)}
+                    onChange={(idx) => setActionMode(actionModes[idx])}
+                    selectedIndex={actionModes.indexOf(layout.current.actionMode)}
+                    possibleOptions={actionModes}
                     showActive
                 />
                 <VelocityControl
@@ -179,14 +195,11 @@ export const Operator = (props: {
             <Sidebar
                 hidden={!customizing}
                 onDelete={handleDelete}
-                activeDef={activeDef}
-                activePath={activePath}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
-                displayVoiceControl={layout.current.displayVoiceControl}
-                setDisplayVoiceControl={setDisplayVoiceControl}
-                defaultLayouts={Object.keys(DEFAULT_LAYOUTS)}
-                loadLayout={(layoutName: string) => { layout.current = props.storageHandler.loadLayout(layoutName); updateLayout(); }}
+                activeDef={activeDef}
+                activePath={activePath}
+                globalOptionsProps={globalOptionsProps}
             />
         </div>
     )

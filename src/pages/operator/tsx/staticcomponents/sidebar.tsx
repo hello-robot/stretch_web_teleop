@@ -1,7 +1,7 @@
 import React from "react"
 import "operator/css/sidebar.css"
 import { className } from "shared/util";
-import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { PopupModal } from "../basic_components/popup_modal";
 import { Dropdown } from "../basic_components/dropdown";
 
@@ -12,10 +12,7 @@ type SidebarProps = {
     onSelect: (def: ComponentDefinition, path?: string) => void;
     activeDef?: ComponentDefinition;
     activePath?: string;
-    displayVoiceControl: boolean;
-    setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
-    defaultLayouts: string[],
-    loadLayout: (layoutName: string) => void,
+    globalOptionsProps: GlobalOptionsProps
 }
 
 /** Popup on the right side of the screen while in customization mode. */
@@ -40,10 +37,7 @@ export const Sidebar = (props: SidebarProps) => {
                             onSelect={props.onSelect}
                         />
                         <SidebarGlobalOptions
-                            displayVoiceControl={props.displayVoiceControl}
-                            setDisplayVoiceControl={props.setDisplayVoiceControl}
-                            defaultLayouts={props.defaultLayouts}
-                            loadLayout={props.loadLayout}
+                            {...props.globalOptionsProps}
                         />
 
                     </React.Fragment>
@@ -82,20 +76,23 @@ function componentDescription(definition: ComponentDefinition): string {
     }
 }
 
-type OptionsProps = {
-    activeDef: ComponentDefinition;
-    updateLayout: () => void;
-}
+/*******************************************************************************
+ * Global options
+ */
 
-type SidebarGlobalOptionsProps = {
+export type GlobalOptionsProps = {
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
     defaultLayouts: string[],
-    loadLayout: (layoutName: string) => void,
+    customLayouts: string[],
+    loadLayout: (layoutName: string, dflt: boolean) => void,
+    saveLayout: (layoutName: string) => void,
 }
 
-const SidebarGlobalOptions = (props: SidebarGlobalOptionsProps) => {
-    const [showLoadSavedLayoutModal, setShowLoadSavedLayoutModal] = React.useState<boolean>(false);
+const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
+    const [showLoadLayoutModal, setShowLoadLayoutModal] = React.useState<boolean>(false);
+    const [showSaveLayoutModal, setShowSaveLayoutModal] = React.useState<boolean>(false);
+
 
     return (
         <React.Fragment>
@@ -107,46 +104,117 @@ const SidebarGlobalOptions = (props: SidebarGlobalOptionsProps) => {
                     label="Display voice control"
                 />
                 <button
-                    onClick={() => setShowLoadSavedLayoutModal(true)}
+                    onClick={() => setShowLoadLayoutModal(true)}
                 >
-                    Load saved layout</button>
+                    Load layout
+                </button>
+                <button
+                    onClick={() => setShowSaveLayoutModal(true)}
+                >
+                    Save layout
+                </button>
             </div>
-            <LoadSavedLayoutModal
+            <LoadLayoutModal
                 defaultLayouts={props.defaultLayouts}
+                customLayouts={props.customLayouts}
                 loadLayout={props.loadLayout}
-                setShow={setShowLoadSavedLayoutModal}
-                show={showLoadSavedLayoutModal}
+                setShow={setShowLoadLayoutModal}
+                show={showLoadLayoutModal}
+            />
+            <SaveLayoutModal
+                saveLayout={props.saveLayout}
+                setShow={setShowSaveLayoutModal}
+                show={showSaveLayoutModal}
             />
         </React.Fragment>
     )
 }
 
-const LoadSavedLayoutModal = (props: {
+const LoadLayoutModal = (props: {
     defaultLayouts: string[],
-    loadLayout: (layoutName: string) => void,
+    customLayouts: string[],
+    loadLayout: (layoutName: string, dflt: boolean) => void,
     setShow: (show: boolean) => void,
     show: boolean,
 }) => {
-    const [selectedLayout, setSelectedLayout] = React.useState<string>();
-    function handleAccept() { 
-        if (selectedLayout) props.loadLayout(selectedLayout);
+    const [selectedIdx, setSelectedIdx] = React.useState<number>();
+
+    function handleAccept() {
+        if (selectedIdx === undefined) return;
+        let dflt: boolean, layoutName: string;
+        if (selectedIdx < props.defaultLayouts.length) {
+            layoutName = props.defaultLayouts[selectedIdx];
+            dflt = true;
+        } else {
+            layoutName = props.customLayouts[selectedIdx - props.defaultLayouts.length];
+            dflt = false;
+        }
+        console.log('loading layout', layoutName, dflt);
+        props.loadLayout(layoutName, dflt);
+
+    }
+
+    function mapFunct(layoutName: string, dflt: boolean) {
+        const prefix = dflt ? "DEFAULT" : "CUSTOM";
+        return <p><em>{prefix}</em> {layoutName}</p>
+    }
+
+    const defaultOptions = props.defaultLayouts.map(layoutName => mapFunct(layoutName, true));
+    const customOptions = props.customLayouts.map(layoutName => mapFunct(layoutName, false));
+
+    return (
+        <PopupModal
+            setShow={props.setShow}
+            show={props.show}
+            onAccept={handleAccept}
+            id="load-layout-modal"
+            acceptButtonText="Load Layout"
+        >
+            <p><b>Select layout to load</b></p>
+            <Dropdown
+                onChange={setSelectedIdx}
+                selectedIndex={selectedIdx}
+                possibleOptions={defaultOptions.concat(customOptions)}
+                placeholderText="Select a layout..."
+            />
+        </PopupModal>
+    )
+}
+
+const SaveLayoutModal = (props: {
+    saveLayout: (layoutName: string) => void,
+    setShow: (show: boolean) => void,
+    show: boolean,
+}) => {
+    const [name, setName] = React.useState<string>("");
+    function handleAccept() {
+        if (name.length > 0) props.saveLayout(name);
+        setName("");
     }
     return (
         <PopupModal
             setShow={props.setShow}
             show={props.show}
             onAccept={handleAccept}
-            id="load-saved-layout-modal"
+            id="save-layout-modal"
+            acceptButtonText="Save"
         >
-            <p><b>Select layout to load</b></p>
-            <Dropdown 
-                onChange={(layoutName: string) => setSelectedLayout(layoutName)}
-                selectedOption={selectedLayout}
-                possibleOptions={props.defaultLayouts}
-                placeholderText="Select a layout..."
+            <label htmlFor="new-layout-name"><b>New Tab Label</b></label>
+            <input type="text" id="new-layout-name" name="new-tab-name"
+                value={name} onChange={(e) => setName(e.target.value)}
+                placeholder="name for this layout"
             />
         </PopupModal>
     )
+}
+
+/*******************************************************************************
+ * Component specific options
+ */
+
+type OptionsProps = {
+    activeDef: ComponentDefinition;
+    updateLayout: () => void;
 }
 
 const SidebarOptions = (props: OptionsProps) => {
@@ -209,7 +277,9 @@ const ToggleButton = (props: ToggleButtonProps) => {
     );
 }
 
-/* Component Provider *********************************************************/
+/*******************************************************************************
+ * Component provider
+ */
 
 type SidebarComponentProviderProps = {
     activeDef?: ComponentDefinition;
@@ -219,7 +289,7 @@ type SidebarComponentProviderProps = {
 const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     const [expandedType, setExpandedType] = React.useState<ComponentType>();
 
-    const outlines: TabOutline[] = [
+    const outlines: ComponentProviderTabOutline[] = [
         { type: ComponentType.Tabs },
         { type: ComponentType.VideoStream, ids: Object.values(VideoStreamId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) }
@@ -247,16 +317,16 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         props.onSelect(definition);
     }
 
-    function mapTabs(outline: TabOutline) {
+    function mapTabs(outline: ComponentProviderTabOutline) {
         const expanded = outline.type === expandedType;
-        const tabProps: ProviderTabProps = {
+        const tabProps: ComponentProviderTabProps = {
             ...outline,
             expanded,
             activeDef: props.activeDef,
             onExpand: () => setExpandedType(expanded ? undefined : outline.type),
             onSelect: (id?: ComponentId) => handleSelect(outline.type, id)
         }
-        return <ProviderTab {...tabProps} key={outline.type} />
+        return <ComponentProviderTab {...tabProps} key={outline.type} />
     }
 
     return (
@@ -271,16 +341,16 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     )
 }
 
-type TabOutline = { type: ComponentType, ids?: ComponentId[] }
+type ComponentProviderTabOutline = { type: ComponentType, ids?: ComponentId[] }
 
-type ProviderTabProps = TabOutline & {
+type ComponentProviderTabProps = ComponentProviderTabOutline & {
     expanded: boolean;
     activeDef?: ComponentDefinition;
     onSelect: (id?: ComponentId) => void;
     onExpand: () => void;
 }
 
-const ProviderTab = (props: ProviderTabProps) => {
+const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     const tabActive = props.type === props.activeDef?.type;
     function mapIds(id: ComponentId) {
         const active = tabActive && id === props.activeDef?.id;
