@@ -52,6 +52,7 @@ export const Operator = (props: {
     function setActionMode(actionMode: ActionMode) {
         layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
+        props.storageHandler.saveCurrentLayout(layout.current);
         updateLayout();
     }
 

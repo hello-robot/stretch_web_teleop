@@ -104,3 +104,13 @@
 .dropdown-option:last-of-type {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;
 }
+
+/* CheckToggleButton **********************************************************/
+
+.check-toggle-button {
+    display: flex;
+}
+
+.check-toggle-button span.material-icons {
+    margin-right: 1rem;
+}

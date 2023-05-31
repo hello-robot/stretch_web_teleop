@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode } from "../utils/componentdefinitions";
+import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/componentdefinitions";
 
 /**
  * Default layout to load on start
@@ -19,6 +19,7 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.overhead,
+                            gripperView: false,
                             children: [
                                 {
                                     type: ComponentType.PredictiveDisplay,
@@ -26,18 +27,20 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                                     // id: ButtonPadId.overhead
                                 }
                             ]
-                        } as VideoStreamDef,
+                        } as OverheadVideoStreamDef,
                         // Realsense camera
                         {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.realsense,
+                            followGripper: false,
+                            depthSensing: false,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.Drive,
                                 } as ButtonPadDef
                             ]
-                        } as VideoStreamDef
+                        } as RealsenseVideoStreamDef
                     ]
                 },
                 {
@@ -47,23 +50,26 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.overhead,
+                            gripperView: true,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.ManipOverhead
                                 }
                             ]
-                        } as VideoStreamDef,
+                        } as OverheadVideoStreamDef,
                         {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.realsense,
+                            followGripper: false,
+                            depthSensing: false,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.ManipRealsense,
                                 } as ButtonPadDef
                             ]
-                        } as VideoStreamDef,
+                        } as RealsenseVideoStreamDef,
                         {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.gripper,

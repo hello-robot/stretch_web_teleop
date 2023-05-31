@@ -1,6 +1,6 @@
 import React from "react";
-import "operator/css/basiccomponents.css"
 import { className } from "shared/util";
+import "operator/css/basic_components.css"
 
 export const Dropdown = <T extends string | JSX.Element>(props: {
     onChange: (selectedIndex: number) => void,

@@ -1,5 +1,5 @@
 import React from "react";
-import "operator/css/basiccomponents.css"
+import "operator/css/basic_components.css"
 
 
 export type PopupModalProps = {

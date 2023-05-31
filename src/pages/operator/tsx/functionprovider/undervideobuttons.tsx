@@ -27,7 +27,7 @@ export type RealsenseButtons = typeof realsenseButtons[number]
 
 export type UnderVideoButtonFunctions = {
     onClick?: () => void
-    onCheck?: (toggle?: boolean) => void
+    onCheck?: (toggle: boolean) => void
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -56,12 +56,14 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 }
             case UnderVideoButton.FollowGripper:
                 return {
-                    onCheck: (toggle?: boolean) => FunctionProvider.remoteRobot?.setToggle("setFollowGripper", toggle!)
+                    onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setFollowGripper", toggle)
                 }
             case UnderVideoButton.DepthSensing:
                 return {
-                    onCheck: (toggle?: boolean) => FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle!)
+                    onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle)
                 }
+            default:
+                throw Error(`Cannot get function for unknown UnderVideoButton ${button}`)
         }
     }
 }

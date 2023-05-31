@@ -1,6 +1,6 @@
 import React from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
-import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition } from "../utils/componentdefinitions";
+import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/componentdefinitions";
 import { ButtonPad } from "./buttonpads";
 import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
@@ -8,7 +8,8 @@ import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
-import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../functionprovider/undervideobuttons";
+import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton, UnderVideoFunctionProvider } from "../functionprovider/undervideobuttons";
+import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -29,6 +30,8 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     // Boolean representing if the video stream needs to be constrained by height
     // (constrained by width otherwise)
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
+
+    executeVideoSettings(definition);
 
     // Create the overlay
     const overlayDefinition = (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
@@ -162,7 +165,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
         <div className='video-container' draggable={false}>
             {videoComponent}
             <div className="under-video-area">
-                {getUnderVideoButtons(definition)}
+                <UnderVideoButtons definition={definition}/>
             </div>
         </div>
     );
@@ -176,7 +179,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
-    const onClick = buttonFunctionProvider.provideFunctions(props.direction).onClick; 
+    const onClick = buttonFunctionProvider.provideFunctions(props.direction).onClick;
 
     // Specify button details based on the direction
     switch (props.direction) {
@@ -216,7 +219,7 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
 
 /******************************************************************************
  * Select context menu
- **************************************************************************** */
+ */
 
 /** Props for {@link SelectContexMenu} */
 type SelectContexMenuProps = {
@@ -287,7 +290,7 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
 
 /*******************************************************************************
  * Helper functions
- ******************************************************************************/
+ */
 
 /**
  * Get the aspect ratio of the video based on the definition
@@ -337,7 +340,7 @@ function createOverlay(
 
     switch (overlayDefinition.type) {
         case (ComponentType.ButtonPad):
-            return <ButtonPad {...overlayProps} overlay aspectRatio={aspectRatio}/>
+            return <ButtonPad {...overlayProps} overlay aspectRatio={aspectRatio} />
         case (ComponentType.PredictiveDisplay):
             return <PredictiveDisplay {...overlayProps} />
         default:
@@ -370,99 +373,142 @@ function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>):
     return remoteStreams.get(streamName)!.stream;
 }
 
-function getUnderVideoButtons(definition: VideoStreamDef): JSX.Element | undefined {
-    let buttons: JSX.Element | undefined;
+/**
+ * Executes any functions required when this video stream is rendered. This might
+ * be changing the view cropping for the overhead camera, hiding the depth sensing
+ * for the Realsense, etc.
+ * 
+ * @param definition {@link VideoStreamDef}
+ */
+function executeVideoSettings(definition: VideoStreamDef) {
     switch (definition.id) {
         case (VideoStreamId.gripper):
-            buttons = undefined;
             break;
         case (VideoStreamId.overhead):
-            buttons = getOverheadButtons();
+            executeOverheadSettings(definition as OverheadVideoStreamDef);
             break;
         case (VideoStreamId.realsense):
-            buttons = getRealsenseButtons();
+            executeRealsenseSettings(definition as RealsenseVideoStreamDef);
             break;
         default:
             throw Error(`unknow video stream id: ${definition.id}`);
     }
+}
+
+/**
+ * Executes functions to prepare for rendering the overhead video stream.
+ * 
+ * @param definition {@link OverheadVideoStreamDef}
+ */
+function executeOverheadSettings(definition: OverheadVideoStreamDef) {
+    const overheadViewButton = definition.gripperView ? UnderVideoButton.GripperView : UnderVideoButton.DriveView;
+    underVideoFunctionProvider.provideFunctions(overheadViewButton).onClick!();
+}
+
+
+/**
+ * Executes functions to prepare for rendering the Realsense video stream.
+ * 
+ * @param definition {@link RealsenseVideoStreamDef}
+ */
+function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
+    underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(definition.followGripper || false);
+    underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(definition.depthSensing || false);
+}
+
+/*******************************************************************************
+ * Under Video Buttons
+ */
+
+/**
+ * Buttons to display under a video stream (e.g. toggle cropping of overhead 
+ * stream, display depth sensing on Realsense, etc.)
+ */
+const UnderVideoButtons = (props: {definition: VideoStreamDef}) => {
+    let buttons: JSX.Element | null;
+    switch (props.definition.id) {
+        case (VideoStreamId.gripper):
+            buttons = null;
+            break;
+        case (VideoStreamId.overhead):
+            buttons = <UnderOverheadButtons definition={props.definition}/>;
+            break;
+        case (VideoStreamId.realsense):
+            buttons = <UnderRealsenseButtons definition={props.definition}/>;
+            break;
+        default:
+            throw Error(`unknow video stream id: ${props.definition.id}`);
+    }
     return buttons;
 }
 
-const getOverheadButtons = () => {
+/**
+ * Buttons to display under the overhead video stream.
+ */
+const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
+    const [gripperView, setGripperView] = React.useState<boolean>(props.definition.gripperView || false);
+    const buttonText = "Switch to " + (props.definition.gripperView  ? "Drive View" : "Gripper View");
+
+    /** Toggle the gripper view flag in the overhead definition */
+    function handleClick() {
+        console.log('click toggle overhead view', props.definition.gripperView, gripperView);
+        props.definition.gripperView = !props.definition.gripperView;
+        setGripperView(!gripperView);
+        underVideoFunctionProvider.provideFunctions(props.definition.gripperView ? UnderVideoButton.GripperView : UnderVideoButton.DriveView).onClick!();
+    }
+
+    return (
+        <button onClick={handleClick} >{buttonText}</button>
+    )
+}
+
+/**
+ * Buttons to display under the Realsense video stream.
+ */
+const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
+    const [rerender, setRerender] = React.useState<boolean>(false);
+
     return (
         <React.Fragment >
-            {overheadButtons.map(perspective => 
+            {realsenseButtons.map(perspective =>
                 <CameraPerspectiveButton perspective={perspective} key={perspective} />
             )}
+            <CheckToggleButton
+                checked={props.definition.followGripper || false}
+                onClick={() => {
+                    props.definition.followGripper = !props.definition.followGripper;
+                    setRerender(!rerender);
+                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(props.definition.followGripper)
+                }}
+                label="Follow Gripper"
+            />
+            <CheckToggleButton
+                checked={props.definition.depthSensing || false}
+                onClick={() => {
+                    props.definition.depthSensing = !props.definition.depthSensing;
+                    setRerender(!rerender);
+                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(props.definition.depthSensing)
+                }}
+                label="Depth Sensing"
+            />
         </React.Fragment>
     )
 }
 
-const CameraPerspectiveButton = (props: {perspective: OverheadButtons | RealsenseButtons}) => {
+/**
+ * Button to change the camera perspective for a given video stream.
+ */
+const CameraPerspectiveButton = (props: {
+    /** 
+     * When the button is clicked, the corresponding video stream should change
+     * to this perspective.
+     */
+    perspective: OverheadButtons | RealsenseButtons 
+}) => {
     const onClick = underVideoFunctionProvider.provideFunctions(props.perspective).onClick;
     return (
         <button onClick={onClick}>
             {props.perspective}
-        </button>
-    )
-}
-
-function getRealsenseButtons() {
-    return (
-        <React.Fragment >
-            {realsenseButtons.map(perspective => 
-                <CameraPerspectiveButton perspective={perspective} key={perspective} />
-            )}
-            <ToggleFollowGripperButton />
-            <ToggleDepthSensingButton />
-        </React.Fragment>
-    )
-}
-
-const ToggleFollowGripperButton = () => {
-    const [followGripper, setFollowGripper] = React.useState<boolean>(false);
-    return (
-        <CheckToggleButton
-            checked={followGripper}
-            onClick={() => {
-                setFollowGripper(!followGripper)
-                underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(!followGripper)
-            }}
-            label={"Follow Gripper"}
-        />
-    )
-}
-
-const ToggleDepthSensingButton = () => {
-    const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
-    return (
-        <CheckToggleButton
-            checked={depthSensing}
-            onClick={() => {
-                setDepthSensing(!depthSensing)
-                underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(!depthSensing)
-            }}
-            label={"Depth Sensing"}
-        />
-    )
-}
-
-type CheckToggleButtonProps = {
-    checked: boolean,
-    onClick: () => void,
-    label: string,
-}
-
-const CheckToggleButton = (props: CheckToggleButtonProps) => {
-    const { checked } = props;
-    const icon = checked ? "check_box" : "check_box_outline_blank";
-    return (
-        <button
-            className={className("check-toggle-button", { checked })}
-            onClick={props.onClick}
-        >
-            <span className={"material-icons"}>{icon}</span>
-            {props.label}
         </button>
     )
 }
