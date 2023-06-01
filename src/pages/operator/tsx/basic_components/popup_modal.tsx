@@ -22,7 +22,7 @@ export const PopupModal: React.FunctionComponent<React.PropsWithChildren<PopupMo
                 {props.children}
                 <div className="popup-modal-bottom-buttons">
                     <button className="btn-red" onClick={() => props.setShow(false)}>Cancel</button>
-                    <button className="btn-green" onClick={handleClickAccept} style={{ float: "right" }}>{props.acceptButtonText || "Accept"}</button>
+                    <button className="btn-turquoise font-white" onClick={handleClickAccept} style={{ float: "right" }}>{props.acceptButtonText || "Accept"}</button>
                 </div>
             </div>
             <div onClick={() => props.setShow(false)} id="popup-background"></div>

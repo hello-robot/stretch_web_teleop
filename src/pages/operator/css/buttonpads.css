@@ -10,7 +10,7 @@
     fill-opacity: 100%;
     stroke-width: 6px;
     stroke: var(--background-color);
-    fill: darkgray;
+    fill: hsl(0,0%,31%);
     flex: 1 1 0;
     padding: 0.4rem;
 }
@@ -45,7 +45,7 @@
 
 .button-pads path.active {
     fill-opacity: 60%;
-    fill: green;
+    fill: var(--btn-turquoise);
 }
 
 .button-pads path.collision {

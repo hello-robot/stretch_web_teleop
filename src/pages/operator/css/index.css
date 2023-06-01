@@ -5,9 +5,10 @@
     --selected-color: hsl(33, 95%, 63%);
 
     --btn-gray: #f0f0f0;
-    --btn-blue: hsl(200, 60%, 75%);
+    --btn-blue: hsl(200deg 83.23% 22.29%);
     --btn-green: rgb(129, 218, 129);
     --btn-red: hsl(0, 70%, 70%);
+    --btn-turquoise: hsl(171,32%,46%);
 
     --shadow-color: rgba(112, 112, 112, 0.196);
 
@@ -17,6 +18,8 @@
     --shadow: 3px 3px 2px var(--shadow-color);
 
     --tab-inactive: hsl(200, 20%, 85%);
+
+    --font-white: hsl(0, 0%, 100%);
 }
 
 * {
@@ -94,4 +97,12 @@ button .material-icons {
 
 .btn-blue {
     background-color: var(--btn-blue);
+}
+
+.btn-turquoise {
+    background-color: var(--btn-turquoise);
+}
+
+.font-white {
+    color: var(--font-white)
 }

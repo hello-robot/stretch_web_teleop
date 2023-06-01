@@ -16,7 +16,7 @@ export const CustomizeButton = (props: CustomizeButtonProps) => {
         <button
             onClick={props.onClick}
             id="customize-button"
-            className={props.customizing ? "btn-green" : undefined}
+            className={props.customizing ? "btn-turquoise font-white" : undefined}
         >
             <span className="material-icons">{icon}</span>
             {text}

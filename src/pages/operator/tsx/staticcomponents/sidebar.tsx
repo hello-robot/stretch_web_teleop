@@ -97,7 +97,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     return (
         <React.Fragment>
             <div id="global-settings">
-                <p>Global settings:</p>
+                {/* <p>Global settings:</p> */}
                 <ToggleButton
                     on={props.displayVoiceControl}
                     onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
@@ -263,7 +263,7 @@ type ToggleButtonProps = {
 
 const ToggleButton = (props: ToggleButtonProps) => {
     const text = props.on ? "on" : "off";
-    const colorClass = props.on ? "btn-green" : "btn-red";
+    const colorClass = props.on ? "btn-turquoise font-white" : "btn-red";
     return (
         <div className="toggle-button-div">
             <button
@@ -374,7 +374,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         <div className="provider-tab" key={props.type}>
             <button onClick={clickExpand} className={tabActive && !props.ids ? "active" : props.expanded ? "expanded" : ""}>
                 <span className="material-icons">{props.ids ? "expand_more" : ""}</span>
-                {props.type}
+                {props.type == ComponentType.Tabs ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type }
             </button>
             <div className="provider-tab-dropdown" hidden={!props.expanded}>
                 {
