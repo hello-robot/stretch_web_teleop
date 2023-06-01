@@ -14,9 +14,11 @@ const envKeys = Object.keys(env).reduce((prev, next) => {
     return prev;
 }, {});
 
-console.log(envKeys)
+module.exports = (env) => {
+  envKeys['process.env.storage'] = JSON.stringify(env.storage)
+  console.log(envKeys)
 
-module.exports = {
+  return {
   mode: 'development',
     entry: pages.reduce((config, page) => {
         config[page] = `./src/pages/${page}/tsx/index.tsx`;
@@ -98,4 +100,5 @@ module.exports = {
     }
   },
   watch: true,
+  }
 };

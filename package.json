@@ -29,7 +29,8 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "webpack --mode development --progress",
+    "firebase": "webpack --mode development --progress --env storage='firebase'",
+    "local": "webpack --mode development --progress --env storage='localstorage'",
     "styleguide": "styleguidist server"
   },
   "eslintConfig": {

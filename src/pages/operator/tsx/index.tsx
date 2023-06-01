@@ -12,7 +12,7 @@ import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
-import { FirebaseStorageHandler, LocalStorageHandler } from './utils/storageHandler';
+import { FirebaseStorageHandler, LocalStorageHandler, StorageHandler } from './utils/storageHandler';
 import { FirebaseOptions } from "firebase/app"
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
@@ -80,17 +80,9 @@ function configureRobot() {
     remoteRobot.setRobotMode("navigation");
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 
-    const config = {
-        apiKey: process.env.apiKey,
-        authDomain: process.env.authDomain,
-        projectId: process.env.projectId,
-        storageBucket: process.env.storageBucket,
-        messagingSenderId: process.env.messagingSenderId,
-        appId: process.env.appId,
-        measurementId: process.env.measurementId
-    }
-
+    let storageHandler: StorageHandler;
     const storageHandlerReadyCallback = () => {
+        console.log(storageHandler)
         const layout = storageHandler.loadCurrentLayoutOrDefault();
         FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
         FunctionProvider.addRemoteRobot(remoteRobot);
@@ -104,13 +96,27 @@ function configureRobot() {
         );
     }
 
-    const storageHandler = new FirebaseStorageHandler({
-        config: config as FirebaseOptions,
-        onStorageHandlerReadyCallback: storageHandlerReadyCallback
-    });
-    storageHandler.signInWithGoogle()
-    // const storageHandler = new LocalStorageHandler();
-    // storageHandlerReadyCallback();
+    console.log("storage ", process.env.storage)
+    if (process.env.storage == 'firebase') {
+        const config = {
+            apiKey: process.env.apiKey,
+            authDomain: process.env.authDomain,
+            projectId: process.env.projectId,
+            storageBucket: process.env.storageBucket,
+            messagingSenderId: process.env.messagingSenderId,
+            appId: process.env.appId,
+            measurementId: process.env.measurementId
+        }
+        storageHandler = new FirebaseStorageHandler({
+            onStorageHandlerReadyCallback: storageHandlerReadyCallback,
+            config: config as FirebaseOptions
+        });
+    } else if (process.env.storage == 'localstorage') {
+        console.log('Using Local Storage')
+        storageHandler = new LocalStorageHandler({
+            onStorageHandlerReadyCallback: storageHandlerReadyCallback
+        });
+    }
 }
 
 function disconnectFromRobot() {

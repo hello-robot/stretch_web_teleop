@@ -9,7 +9,7 @@ sudo pkill -f "node ./node_modules/.bin/nodemon server.js"
 
 export NODE_EXTRA_CA_CERTS="$(readlink -f ./certificates)/rootCA.pem"
 
-npm run start &
+npm run $1 &
 sudo --preserve-env ./node_modules/.bin/nodemon server.js &
 ./node_modules/.bin/nodemon start_robot_browser.js
 set +x

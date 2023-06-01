@@ -46,12 +46,15 @@ export abstract class StorageHandler {
 }
 
 export class LocalStorageHandler extends StorageHandler {
-    private static CURRENT_LAYOUT_KEY = "user_custom_layout";
-    private static LAYOUT_NAMES_KEY = "user_custom_layout_names"
+    public static CURRENT_LAYOUT_KEY = "user_custom_layout";    
+    public static LAYOUT_NAMES_KEY = "user_custom_layout_names"
 
     constructor(props: {onStorageHandlerReadyCallback: () => void}) {
         super(props)
-        this.onReadyCallback()
+        // Allow the initialization process to complete before invoking the callback
+        setTimeout(() => {
+            this.onReadyCallback();
+        }, 0);
     }
 
     public loadCustomLayout(layoutName: string): LayoutDefinition {
@@ -94,7 +97,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     private userEmail: string;
     private uid: string;
     private layouts: { [name: string]: LayoutDefinition };
-    private currentLayout: LayoutDefinition;
+    private currentLayout: LayoutDefinition | null;
 
     constructor(props: {onStorageHandlerReadyCallback: () => void, config: FirebaseOptions}) {
         super(props)
@@ -107,8 +110,10 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.userEmail = ""
         this.uid = ""
         this.layouts = {};
-        this.currentLayout = STUDY_BRANCH_LAYOUT
+        this.currentLayout = null;
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
+
+        this.signInWithGoogle()
     }
 
     private handleAuthStateChange(user: User | null) {
@@ -122,9 +127,8 @@ export class FirebaseStorageHandler extends StorageHandler {
                 console.log(userData.layouts)
                 this.onReadyCallback()
             }).catch((error) => {
-                console.trace(error)
-                console.warn("Detected that FirebaseModel isn't initialized. Loading default layouts.");
-                this.loadDefaultLayouts();
+                console.log("Detected that FirebaseModel isn't initialized for user ", this.uid);
+                this.onReadyCallback()
             })
         }
     }
@@ -163,27 +167,41 @@ export class FirebaseStorageHandler extends StorageHandler {
     public loadCustomLayout(layoutName: string): LayoutDefinition {
         let layout = this.layouts![layoutName]
         if (!layout) throw Error(`Could not load custom layout ${layoutName}`);
-        this.writeCurrentLayout(layout)
         return JSON.parse(JSON.stringify(layout));
     }
 
-    public saveLayout(layout: LayoutDefinition, layoutName: string): void {
+    public saveCustomLayout(layout: LayoutDefinition, layoutName: string): void {
         this.layouts[layoutName] = layout
         this.writeLayouts(this.layouts)
     }
 
-    async loadDefaultLayouts() {
-        this.writeLayouts(JSON.parse(JSON.stringify(DEFAULT_LAYOUTS)))
-        return this.writeCurrentLayout(STUDY_BRANCH_LAYOUT)
-    }
-
-    private async writeCurrentLayout(layout: LayoutDefinition) {
+    public saveCurrentLayout(layout: LayoutDefinition): void {
         this.currentLayout = layout
 
         let updates: any = {};
         updates['/users/' + (this.uid) + '/currentLayout'] = layout;
-        return update(ref(this.database), updates);
+        update(ref(this.database), updates);
     }
+    
+    public loadCurrentLayout(): LayoutDefinition | null {
+        return this.currentLayout
+    }
+
+    public getCustomLayoutNames(): string[] {
+        return Object.keys(this.layouts)
+    }
+
+    // async loadDefaultLayouts() {
+    //     this.writeLayouts(JSON.parse(JSON.stringify(DEFAULT_LAYOUTS)))
+    // }
+
+    // private async writeCurrentLayout(layout: LayoutDefinition) {
+    //     this.currentLayout = layout
+
+    //     let updates: any = {};
+    //     updates['/users/' + (this.uid) + '/currentLayout'] = layout;
+    //     return update(ref(this.database), updates);
+    // }
 
     private async writeLayouts(layouts: { [name: string]: LayoutDefinition }) {
         this.layouts = layouts;
