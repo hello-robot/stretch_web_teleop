@@ -39,6 +39,17 @@ connection = new WebRTCConnection({
 
 connection.joinOperatorRoom()
 
+// Check if the WebRTC connection is resolved
+setTimeout(() => {
+    let isResolved = connection.connectionState() == 'connected' ? true : false
+    console.log("connection state: ", isResolved)
+    if (isResolved) {
+        console.log('WebRTC connection is resolved.');
+    } else {
+        window.location.reload()
+    }
+}, 4000);
+
 // Create root once when index is loaded
 const container = document.getElementById('root');
 root = createRoot(container!);

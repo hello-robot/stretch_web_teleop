@@ -11,6 +11,11 @@ import gripOpen from "operator/icons/Grip_Open.svg"
 import gripRight from "operator/icons/Grip_Right.svg"
 import driveForward from "operator/icons/Drive_Forward.svg"
 import driveReverse from "operator/icons/Drive_Reverse.svg"
+import panLeft from "operator/icons/Pan_Left.svg"
+import panRight from "operator/icons/Pan_Right.svg"
+import tiltUp from "operator/icons/Tilt_Up.svg"
+import tiltDown from "operator/icons/Tilt_Down.svg"
+
 import { ButtonPadButton } from "../functionprovider/buttonpads"
 
 /** The pixel width of SVG components. */
@@ -301,6 +306,14 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
             return gripLeft;
         case (ButtonPadButton.WristRotateOut):
             return gripRight
+        case (ButtonPadButton.CameraPanLeft):
+            return panLeft
+        case (ButtonPadButton.CameraPanRight):
+            return panRight
+        case (ButtonPadButton.CameraTiltUp):
+            return tiltUp
+        case (ButtonPadButton.CameraTiltDown):
+            return tiltDown
         default:
             console.warn(`cannot get icon for ${buttonPadButton}`);
             return null;

@@ -109,10 +109,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [buttonNeg, buttonPos] = buttons;
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
-            const prevInLimitNeg = prevButtonStateNeg === ButtonState.Limit
-            const prevInLimitPos = prevButtonStatePos === ButtonState.Limit;
-            if (!prevButtonStateNeg || inLimitNeg !== prevInLimitNeg) this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
-            if (!prevButtonStatePos || inLimitPos !== prevInLimitPos) this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
+            const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit
+            const prevInLimitPos = prevButtonStatePos !== ButtonState.Limit;
+            if (prevButtonStateNeg == undefined || inLimitNeg !== prevInLimitNeg) this.buttonStateMap.set(buttonNeg, inLimitNeg ? ButtonState.Inactive : ButtonState.Limit);
+            if (prevButtonStatePos == undefined || inLimitPos !== prevInLimitPos) this.buttonStateMap.set(buttonPos, inLimitPos ? ButtonState.Inactive : ButtonState.Limit);
         });
 
         if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
@@ -294,6 +294,10 @@ function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, Butt
             return [ButtonPadButton.BaseForward, ButtonPadButton.BaseReverse];
         case ("rotate_mobile_base"):
             return [ButtonPadButton.BaseRotateLeft, ButtonPadButton.BaseRotateRight];
+        case ("joint_head_pan"):
+            return [ButtonPadButton.CameraPanRight, ButtonPadButton.CameraPanLeft];
+        case ("joint_head_tilt"):
+            return [ButtonPadButton.CameraTiltDown, ButtonPadButton.CameraTiltUp];
         default:
             return undefined;
     }
