@@ -84,8 +84,8 @@ function configureRobot() {
 
     let storageHandler: StorageHandler;
     const storageHandlerReadyCallback = () => {
-        console.log(storageHandler)
         const layout = storageHandler.loadCurrentLayoutOrDefault();
+        console.log(layout.actionMode)
         FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
         FunctionProvider.addRemoteRobot(remoteRobot);
 

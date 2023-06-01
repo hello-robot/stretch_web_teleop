@@ -477,6 +477,7 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                 checked={props.definition.followGripper || false}
                 onClick={() => {
                     props.definition.followGripper = !props.definition.followGripper;
+                    console.log(props.definition.followGripper)
                     setRerender(!rerender);
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(props.definition.followGripper)
                 }}

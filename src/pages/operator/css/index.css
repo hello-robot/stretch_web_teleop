@@ -20,6 +20,8 @@
     --tab-inactive: hsl(200, 20%, 85%);
 
     --font-white: hsl(0, 0%, 100%);
+
+    --path-blue: hsl(170,37%,53%)
 }
 
 * {
