@@ -8,7 +8,7 @@
    version="1.1"
    id="svg5"
    inkscape:version="1.1.2 (1:1.1+202202050950+0a00cf5339)"
-   sodipodi:docname="pan_left.svg"
+   sodipodi:docname="Pan_Left.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -128,14 +128,14 @@
          id="path920" />
     </g>
     <path
-       style="fill:none;stroke:#333333;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.849848;marker-end:url(#Arrow2Mend)"
+       style="fill:none;stroke:#333333;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.849848;marker-end:url(#Arrow2Mend)"
        d="m 157.84822,174.74606 c 4.93355,1.37901 9.86716,2.75805 13.1379,5.25272 3.27075,2.49468 4.8781,6.10457 4.05168,9.42497 -0.82641,3.32039 -4.08611,6.35097 -7.91257,8.59033 -3.82646,2.23935 -8.21937,3.6875 -15.44713,4.879 -7.22776,1.19151 -17.29008,2.1264 -25.04297,2.60992 -7.75289,0.48352 -13.19576,0.51565 -18.63847,0.54778"
        id="path1360"
        inkscape:path-effect="#path-effect1362"
        inkscape:original-d="m 157.84822,174.74606 c 4.93345,1.37936 9.86706,2.75839 14.80116,4.13719 1.60713,3.61037 3.21448,7.22026 4.82214,10.8299 -3.26011,3.03101 -6.51982,6.06158 -9.77931,9.09196 -4.39338,1.44849 -8.78631,2.8966 -13.17905,4.34454 -10.0628,0.93511 -20.12512,1.87007 -30.18757,2.80473 -5.44335,0.0324 -10.88622,0.0645 -16.32893,0.0964"
        sodipodi:nodetypes="ccccccc" />
     <path
-       style="fill:none;stroke:#333333;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.85098"
+       style="fill:none;stroke:#333333;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.85098"
        d="m 51.801192,174.74311 c -4.765022,1.37922 -9.530112,2.75846 -12.689123,5.25349 -3.15901,2.49502 -4.711454,6.10544 -3.913289,9.42634 0.798165,3.32089 3.946525,6.35192 7.642279,8.59158 3.695754,2.23966 7.938635,3.688 14.919501,4.87967 6.980865,1.19167 16.699475,2.12672 24.187539,2.61031 7.488065,0.4836 12.745014,0.51573 18.001793,0.54786"
        id="path1360-6"
        inkscape:path-effect="#path-effect1362-3"
