@@ -73,14 +73,6 @@
     flex: 1 0 auto;
 }
 
-.check-toggle-button {
-    display: flex;
-}
-
-.check-toggle-button span.material-icons {
-    margin-right: 1rem;
-}
-
 /* Realsense pan-tilt controls ************************************************/
 .realsense-pan-tilt-grid {
     width: 100%;

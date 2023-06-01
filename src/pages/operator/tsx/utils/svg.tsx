@@ -106,6 +106,8 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
  * Directional button pad made up of four trapazoids around a box in the 
  * center of the button pad.
  * 
+ * Ordered: top, right, bottom, left (clockwise starting with the top)
+ * 
  * @param onRobot if the square should be around the robot, centered if false
  */
 function getDirectionalPaths(width: number, height: number, onRobot: boolean = true): [string[], { x: number, y: number }[]] {
@@ -126,9 +128,9 @@ function getDirectionalPaths(width: number, height: number, onRobot: boolean = t
     const paths = [pathTop, pathRgt, pathBot, pathLft]
     const iconPositions = [
         { x: centerX, y: top / 2 },
-        { x: (SVG_RESOLUTION + rgt) / 2, y: centerY },
-        { x: centerX, y: (SVG_RESOLUTION + bot) / 2 },
-        { x: (lft) / 2, y: centerY }
+        { x: (SVG_RESOLUTION + rgt) / 2, y: centerY / width * height },
+        { x: centerX, y: (SVG_RESOLUTION / width * height + bot) / 2 },
+        { x: (lft) / 2, y: centerY / width * height }
     ]
     return [paths, iconPositions];
 }

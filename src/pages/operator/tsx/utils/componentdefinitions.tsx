@@ -103,3 +103,40 @@ export type VideoStreamDef = ParentComponentDefinition & {
     /** Indicates the camera video of the video stream */
     id: VideoStreamId;
 }
+
+/**
+ * Definition for the overhead stream component
+ * 
+ * @note these modifications to the overhead view are implemented in the
+ * backend, so if multiple overhead streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+export type OverheadVideoStreamDef = VideoStreamDef & {
+    /** 
+     * If true, the view should be cropped and rotated to focus on the gripper.
+     * Otherwise, camera view should be unchanged
+     * */
+    gripperView?: boolean;
+}
+
+/**
+ * Definition for the Realsense video stream component
+ * 
+ * @note these modifications to the Realsense view are implemented in the
+ * backend, so if multiple Realsense streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+export type RealsenseVideoStreamDef = VideoStreamDef & {
+    /**
+     * If the Realsense camera should pan and tilt to keep the gripper centered 
+     * in the view.
+     */
+    followGripper?: boolean;
+    /**
+     * If the AR depth ring should be shown to indicate the extent of the 
+     * reachable area.
+     */
+    depthSensing?: boolean;
+}
