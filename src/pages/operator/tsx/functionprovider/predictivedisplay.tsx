@@ -15,46 +15,51 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
      * 
      * @returns the {@link PredictiveDisplayFunctions} for the action modes
      */
-     public provideFunctions(): PredictiveDisplayFunctions {
+    public provideFunctions(setActiveCallback: (active: boolean) => void): PredictiveDisplayFunctions {
+        const baseLinVel = JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale;
+        const baseAngVel = JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale;
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 return {
-                    onClick: (length: number, angle: number) => 
-                        this.incrementalBaseDrive(
-                            JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale * length, 
-                            JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale * angle
-                        ),
-                    onLeave: () => this.stopCurrentAction()
+                    onClick: (length: number, angle: number) => {
+                        this.incrementalBaseDrive(baseLinVel * length, baseAngVel * angle);
+                        setActiveCallback(true);
+                        setTimeout(() => setActiveCallback(false), 1000);
+                    },
+                    onLeave: () => { this.stopCurrentAction(); setActiveCallback(false); }
                 }
             case ActionMode.PressRelease:
                 return {
-                    onClick: (length: number, angle: number) => 
-                        this.continuousBaseDrive(
-                            JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale * length, 
-                            JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale * angle
-                        ),
-                    onMove: (length: number, angle: number) => 
+                    onClick: (length: number, angle: number) => {
+                        this.continuousBaseDrive(baseLinVel * length, baseAngVel * angle);
+                        setActiveCallback(true);
+                    },
+                    onMove: (length: number, angle: number) =>
                         this.activeVelocityAction ? this.continuousBaseDrive(
-                            JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale * length, 
-                            JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale * angle
+                            baseLinVel * length,
+                            baseAngVel * angle
                         ) : null,
-                    onRelease: () => { this.stopCurrentAction(); console.log("on release") },
-                    onLeave: () => this.stopCurrentAction()
+                    onRelease: () => { this.stopCurrentAction(); setActiveCallback(false); },
+                    onLeave: () => { this.stopCurrentAction(); setActiveCallback(false); }
                 }
             case ActionMode.ClickClick:
                 return {
-                    onClick: (length: number, angle: number) => 
-                        !this.activeVelocityAction ? this.continuousBaseDrive(
-                            JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale * length, 
-                            JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale * angle
-                        ) : this.stopCurrentAction(),
+                    onClick: (length: number, angle: number) => {
+                        if (this.activeVelocityAction) {
+                            this.stopCurrentAction();
+                            setActiveCallback(false);
+                        } else {
+                            this.continuousBaseDrive(baseLinVel * length, baseAngVel * angle);
+                            setActiveCallback(true);
+                        }
+                    },
                     onMove: (length: number, angle: number) => 
                         this.activeVelocityAction ? this.continuousBaseDrive(
-                            JOINT_VELOCITIES["translate_mobile_base"]! * FunctionProvider.velocityScale * length, 
-                            JOINT_VELOCITIES["rotate_mobile_base"]! * FunctionProvider.velocityScale * angle
+                            baseLinVel * length,
+                            baseAngVel * angle
                         ) : null,
-                    onLeave: () => this.stopCurrentAction()
+                    onLeave: () => { this.stopCurrentAction(); setActiveCallback(false); }
                 }
         }
-     }    
+    }
 }
