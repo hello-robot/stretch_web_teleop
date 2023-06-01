@@ -13,6 +13,10 @@ export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } =
 }
 
 export abstract class StorageHandler {
+    constructor(props: {onStorageHandlerReadyCallback: () => void}) {
+        this.onReadyCallback = props.onStorageHandlerReadyCallback.bind(this)
+    }
+
     public abstract loadCustomLayout(layoutName: string): LayoutDefinition;
 
     public abstract saveCustomLayout(layout: LayoutDefinition, layoutName: string): void;
@@ -20,6 +24,8 @@ export abstract class StorageHandler {
     public abstract saveCurrentLayout(layout: LayoutDefinition): void;
 
     public abstract loadCurrentLayout(): LayoutDefinition | null;
+
+    public onReadyCallback: () => void;
 
     public abstract getCustomLayoutNames(): string[];
 
@@ -42,6 +48,11 @@ export abstract class StorageHandler {
 export class LocalStorageHandler extends StorageHandler {
     private static CURRENT_LAYOUT_KEY = "user_custom_layout";
     private static LAYOUT_NAMES_KEY = "user_custom_layout_names"
+
+    constructor(props: {onStorageHandlerReadyCallback: () => void}) {
+        super(props)
+        this.onReadyCallback()
+    }
 
     public loadCustomLayout(layoutName: string): LayoutDefinition {
         const storedJson = localStorage.getItem(layoutName);
@@ -84,19 +95,10 @@ export class FirebaseStorageHandler extends StorageHandler {
     private uid: string;
     private layouts: { [name: string]: LayoutDefinition };
     private currentLayout: LayoutDefinition;
-    private onReadyCallback: () => void
 
-    constructor(props: { onStorageHandlerReadyCallback: () => void }) {
-        super()
-        this.config = {
-            apiKey: process.env.apiKey,
-            authDomain: process.env.authDomain,
-            projectId: process.env.projectId,
-            storageBucket: process.env.storageBucket,
-            messagingSenderId: process.env.messagingSenderId,
-            appId: process.env.appId,
-            measurementId: process.env.measurementId
-        }
+    constructor(props: {onStorageHandlerReadyCallback: () => void, config: FirebaseOptions}) {
+        super(props)
+        this.config = props.config
         this.app = initializeApp(this.config);
         this.database = getDatabase(this.app);
         this.auth = getAuth(this.app);
@@ -106,7 +108,6 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.uid = ""
         this.layouts = {};
         this.currentLayout = STUDY_BRANCH_LAYOUT
-        this.onReadyCallback = props.onStorageHandlerReadyCallback.bind(this)
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
     }
 
@@ -159,13 +160,11 @@ export class FirebaseStorageHandler extends StorageHandler {
         return Promise.reject()
     }
 
-    public loadLayout(layoutName?: string): LayoutDefinition {
-        if (!layoutName) {
-            this.writeCurrentLayout(this.layouts!["Study branch"])
-            return JSON.parse(JSON.stringify(this.layouts!["Study branch"]))
-        }
-        this.writeCurrentLayout(this.layouts![layoutName])
-        return JSON.parse(JSON.stringify(this.layouts![layoutName]));
+    public loadCustomLayout(layoutName: string): LayoutDefinition {
+        let layout = this.layouts![layoutName]
+        if (!layout) throw Error(`Could not load custom layout ${layoutName}`);
+        this.writeCurrentLayout(layout)
+        return JSON.parse(JSON.stringify(layout));
     }
 
     public saveLayout(layout: LayoutDefinition, layoutName: string): void {
