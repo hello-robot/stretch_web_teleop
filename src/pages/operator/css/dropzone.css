@@ -1,5 +1,7 @@
 .drop-zone {
-    background-color: hsl(0, 0%, 83%);
+    background-color: hsl(0, 0%, 90%);
+    border: 0.2rem dashed gray;
+    border-radius: 10px;
     opacity: 100%;
     flex: 0 0 2rem;
     margin: 1rem 0.5rem;

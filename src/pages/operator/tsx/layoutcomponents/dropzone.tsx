@@ -73,7 +73,7 @@ export const DropZone = (props: DropZoneProps) => {
             hidden={!isActive}
             onClick={handleClick}
         >
-            vertical_align_bottom
+            save_alt
         </span>
     )
 }
