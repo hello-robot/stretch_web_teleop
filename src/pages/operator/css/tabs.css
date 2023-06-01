@@ -67,7 +67,8 @@
 } */
 
 .add-tab:hover {
-    background-color: var(--btn-green);
+    background-color: var(--btn-turquoise);
+    color: white;
 }
 
 /* Popup for adding a new tab *************************************************/

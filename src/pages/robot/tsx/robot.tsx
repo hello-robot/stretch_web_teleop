@@ -314,6 +314,7 @@ export class Robot extends React.Component {
                 }
             }, 500)
         } else {
+            this.stopExecution()
             clearInterval(this.lookAtGripperInterval)
             this.lookAtGripperInterval = undefined
         }

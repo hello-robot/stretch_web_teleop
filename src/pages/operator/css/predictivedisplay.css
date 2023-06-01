@@ -11,8 +11,8 @@
 }
 
 .predictive-display path {
-    stroke-width: 3;
-    stroke: blue;
+    stroke-width: 4;
+    stroke: var(--path-blue);
     /* stroke-linecap: round; */
 }
 
