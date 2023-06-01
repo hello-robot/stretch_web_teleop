@@ -3,7 +3,7 @@
     height: 100%;
     stroke: gray;
     cursor: crosshair;
-    fill:none;
+    fill: none;
 }
 
 .predictive-display.customizing {
@@ -16,7 +16,7 @@
     /* stroke-linecap: round; */
 }
 
-.predictive-display:active path{
+.predictive-display.active path {
     stroke: red;
 }
 
@@ -25,5 +25,5 @@
     height: 100%;
     stroke: gray;
     cursor: crosshair;
-    fill:none;
+    fill: none;
 }

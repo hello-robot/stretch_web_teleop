@@ -28,7 +28,7 @@
 .video-area {
     position: relative;
     grid-row: 2/2;
-    width: 100%;
+    max-width: 100%;
 }
 
 .video-canvas {
