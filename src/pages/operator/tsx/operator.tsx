@@ -12,7 +12,7 @@ import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider
 import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./functionprovider/buttonpads";
 import { Dropdown } from "./basic_components/dropdown";
-import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./utils/storageHandler";
+import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
 import "operator/css/operator.css"
 
 /** Operator interface webpage */
