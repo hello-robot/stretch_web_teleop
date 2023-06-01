@@ -214,6 +214,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     onClick: () => {
                         action();
                         this.setButtonActiveState(buttonPadFunction);
+                        // Set button state inactive after 1 second
+                        setTimeout(() => this.setButtonInactiveState(buttonPadFunction), 1000);
                     },
                     onLeave: onLeave
                 };

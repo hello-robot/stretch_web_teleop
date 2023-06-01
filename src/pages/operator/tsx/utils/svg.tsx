@@ -207,7 +207,21 @@ function getGripperPaths(width: number, height: number): [string[], { x: number,
         rect(0, height - yMargin, width, yMargin),  // bottom
         rect(0, yMargin, xMargin, yMargin * 3),  // left
         rect(width - xMargin, yMargin, xMargin, yMargin * 3), // right
-        rect(xMargin, yMargin, xMargin * 3, yMargin * 3),  // gripper open
+        // gripper open
+        // Outside (clockwise)
+        `M
+        ${xMargin} ${yMargin} 
+        ${width - xMargin} ${yMargin} 
+        ${width - xMargin} ${height - yMargin} 
+        ${xMargin} ${height - yMargin} 
+        Z`
+        // Inside (counterclockwise)
+        + `M
+        ${xMargin * 2} ${yMargin * 2} 
+        ${xMargin * 2} ${height - yMargin * 2}
+        ${width - xMargin * 2} ${height - yMargin * 2} 
+        ${width - xMargin * 2} ${yMargin * 2}
+        Z`,
         rect(xMargin * 2, yMargin * 2, xMargin, yMargin)  // gripper close
     ]
     const iconPositions = [
