@@ -12,7 +12,9 @@ import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
 import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
 import "operator/css/index.css"
-import { FirebaseStorageHandler, LocalStorageHandler, StorageHandler } from './utils/storageHandler';
+import { StorageHandler } from './storage_handler/StorageHandler';
+import { FirebaseStorageHandler } from './storage_handler/FirebaseStorageHandler';
+import { LocalStorageHandler } from './storage_handler/LocalStorageHandler';
 import { FirebaseOptions } from "firebase/app"
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
@@ -96,7 +98,6 @@ function configureRobot() {
         );
     }
 
-    console.log("storage ", process.env.storage)
     if (process.env.storage == 'firebase') {
         const config = {
             apiKey: process.env.apiKey,
@@ -112,7 +113,6 @@ function configureRobot() {
             config: config as FirebaseOptions
         });
     } else if (process.env.storage == 'localstorage') {
-        console.log('Using Local Storage')
         storageHandler = new LocalStorageHandler({
             onStorageHandlerReadyCallback: storageHandlerReadyCallback
         });
