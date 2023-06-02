@@ -68,8 +68,8 @@ export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
     "joint_gripper_finger_left": [-0.375, 0.166],
-    "joint_head_tilt": [-1.67, 0.4],
-    "joint_head_pan": [-4.0, 1.8]
+    "joint_head_tilt": [-1.6, 0.3],
+    "joint_head_pan": [-3.95, 1.7]
 }
 
 export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {

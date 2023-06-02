@@ -235,7 +235,7 @@ export class WebRTCConnection extends React.Component {
     }
     
     connectionState() {
-        return this.peerConnection?.iceConnectionState
+        return this.peerConnection?.connectionState
     }
 
     joinRobotRoom() {

@@ -105,7 +105,7 @@ class RobotSensors extends React.Component {
      * joints are in collision or at their limit.
      * 
      * @param jointValues mapping of joint name to a pair of booleans for 
-     *                    [joint is at lower limit, joint is at upper limit]
+     *                    [joint is within lower limit, joint is within upper limit]
      * @param effortValues mapping for joint name to pair of booleans for 
      *                     [joint in collision at lower end, joint is in 
      *                     collision at upper end]
@@ -115,7 +115,7 @@ class RobotSensors extends React.Component {
         let change = false;
         Object.keys(jointValues).forEach((k) => {
             const key = k as ValidJoints;
-
+            
             const same = key in this.inJointLimits ?
                 jointValues[key]![0] == this.inJointLimits[key]![0] &&
                 jointValues[key]![1] == this.inJointLimits[key]![1] : false;

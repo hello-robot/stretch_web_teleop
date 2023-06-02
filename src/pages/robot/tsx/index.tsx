@@ -41,6 +41,16 @@ robot.connect().then(() => {
     connection.joinRobotRoom()
 })
 
+setTimeout(() => {
+    let isResolved = connection.connectionState() == 'connected' ? true : false
+    console.log("connection state: ", isResolved)
+    if (isResolved) {
+        console.log('WebRTC connection is resolved.');
+    } else {
+        window.location.reload()
+    }
+}, 2000);
+
 function handleSessionStart() {
     connection.removeTracks()
 
@@ -60,7 +70,7 @@ function handleSessionStart() {
 
 function forwardJointStates(jointState: ROSJointState) {
     if (!connection) throw 'WebRTC connection undefined!'
-    
+
     let jointValues: ValidJointStateDict = {}
     let effortValues: ValidJointStateDict = {}
     jointState.name.forEach((name?: ValidJoints) => {
@@ -84,7 +94,7 @@ function handleMessage(message: WebRTCMessage) {
     }
 
     switch (message.type) {
-        case "driveBase": 
+        case "driveBase":
             robot.executeBaseVelocity(message.modifier)
             break;
         case "incrementalMove":
@@ -97,7 +107,7 @@ function handleMessage(message: WebRTCMessage) {
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
             break
         case "setCameraPerspective":
-            robot.setCameraPerspective({camera: message.camera, perspective: message.perspective})
+            robot.setCameraPerspective({ camera: message.camera, perspective: message.perspective })
             break
         case "setRobotPose":
             robot.executePoseGoal(message.pose)
@@ -114,4 +124,4 @@ function handleMessage(message: WebRTCMessage) {
 // New method of rendering in react 18
 const container = document.getElementById('root');
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript
-root.render(<AllVideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]}/>);
+root.render(<AllVideoStreamComponent streams={[navigationStream, realsenseStream, gripperStream]} />);

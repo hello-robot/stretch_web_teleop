@@ -3,6 +3,7 @@
     display: flex;
     align-items: center;
     justify-content: left;
+    border: 0.2rem solid black;
 }
 
 #voice-command-container {
