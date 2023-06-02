@@ -1,12 +1,15 @@
-## Installing interface and simulation environment
+# Overview
+This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic and Google Chrome. 
 
-Create a new catkin workspace and clone the following packages:
-```
-git clone https://github.com/hcrlab/hcrl_gazebo.git
-git clone https://github.com/hcrlab/stretch_ros.git
-git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git
-git clone https://github.com/vinitha910/stretch-web-interface.git
-```
+**WARNING: This prototype code and there are security issues. Use this code at your own risk.**
+
+# Setup 
+Please make sure you are using Ubuntu 20.04 and have [ROS Noetic](http://wiki.ros.org/noetic/Installation/Ubuntu) installed before installing the interface.
+
+## Installing the Interface and Simulation Environment 
+Create a new catkin workspace and clone [stretch_ros](https://github.com/hello-robot/stretch_ros) (`dev/noetic` branch) and [stretch-web-interface](https://github.com/vinitha910/stretch-web-interface)
+
+If you are installing the interface locally to be run in simulation, clone [hcrl_gazebo](https://github.com/hcrlab/hcrl_gazebo) and [realsense_gazebo_plugin](https://github.com/pal-robotics/realsense_gazebo_plugin):
 
 Run `rosdep install --from-paths . --ignore-src -y -r` in the workspace `src` folder to get all the package dependencies then build and source the workspace.
 
@@ -23,34 +26,40 @@ sudo apt-get install libnss3-tools
 rosccd stretch-web-interface/certificates && CAROOT=`pwd` mkcert --install
 ```
 
-To make your own certificates for your robot run (this example uses our robot slinky):
+To make your own certificates for your robot/local machine run (this example uses our robot slinky):
 ```
 mkcert slinky.hcrlab.cs.washington.edu slinky.local slinky.dev localhost 127.0.0.1 0.0.0.0 ::1
 ```
+Replace `slinky.hcrlab.cs.washington.edu` and `slinky` with your robot's hostname or IP address. If running locally in simulation, run `mkcert localhost` instead.
 
 Then copy the `Certificate Authority` that `mkcert` created (`rootCA-key.pem` and `rootCA.pem`) on the robot to `~/.local/share/mkcert`
 
-To install the interface on the robot, follow the same instructions above but do not clone `hcrl_gazebo` or `realsense_gazebo_plugin`.
+Finally, we need to add the `certfile` and `keyfile` that `mkcert` generated into an environment file for the interface to access. Created a file called `.env` in `stretch-web-interface` with your `certfile` and `keyfile` (this example uses our robot's files):
+```
+certfile=slinky.hcrlab.cs.washington.edu+6.pem
+keyfile=slinky.hcrlab.cs.washington.edu+6-key.pem
+```
 
-## Running interface in simulation environment
+## Running the Interface in Simulation
 Run the following commands in separate terminals:
 ```
 roslaunch hcrl_gazebo house_simulation_stretch.launch
 roslaunch stretch-web-interface web_interface_simulation.launch
+./start_web_server_and_robot_browser.sh local
 ```
 
 These commands launch the simulation environment, rosbridge websocket respectively.
 
-Run `./start_web_server.sh` in the `stretch-web-interface` directory. Open `localhost:3000` in **google chrome** to see the interface.
+Make sure `./start_web_server_and_robot_browser.sh local` is running in the `stretch-web-interface` directory. (`local` allows the site to use the browser's local storage to save useful information. We also have the interface configured with `firebase`.  See firebase [instructions](/src/pages/operator/tsx/storage_handler/README.md)) To use firebase, run `./start_web_server_and_robot_browser.sh firebase` instead. 
 
-## Running the interface on the real robot
+Open `localhost/operator` in **google chrome** to see the interface. You might see a `Webpage not secure` warning, click advanced and proceed. 
+
+## Running the Interface on Stretch
 Run the following commands in separate terminals **on the robot**:
 ```
 roslaunch stretch-web-interface web_interface.launch
-./start_web_server.sh
+./start_web_server_and_robot_browser.sh local
 ```
-Make sure `./start_web_server.sh` is running in the `stretch-web-interface` directory
+Make sure `./start_web_server_and_robot_browser.sh local` is running in the `stretch-web-interface` directory. (`local` allows the site to use the browser's local storage to save useful information. We also have the interface configured with `firebase`. See firebase [instructions](/src/pages/operator/tsx/storage_handler/README.md)). To use firebase, run `./start_web_server_and_robot_browser.sh firebase` instead. 
 
-On your **local machine** configure your `ROS_IP` to you IP address and the `ROS_MASTER_URI` to the robot's ros master. If your `ROS_IP` and `ROS_MASTER_URI` are not configured correctly you will no be able to see the video streams. 
-
-Enter the robot's IP address in **google chrome** to open the interface. You might need to enable invalid certificates for resources loaded from localhost in order for this to work (currently trying to fix this): `chrome://flags/#allow-insecure-localhost`
+Enter the robot's hostname or IP address followed by `/operator` in **google chrome** to open the interface. For example, to open up our robot's interface, we would open `slinky.hcrlab.cs.washington.edu/operator` in our browser. You might see a `Webpage not secure` warning, click advanced and proceed. 
