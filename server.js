@@ -1,8 +1,9 @@
 var fs = require('fs');
+require('dotenv').config();
 
 var options = {
-	key: fs.readFileSync('certificates/slinky.hcrlab.cs.washington.edu+6-key.pem'),
-	cert: fs.readFileSync('certificates/slinky.hcrlab.cs.washington.edu+6.pem')
+    key: fs.readFileSync(`certificates/${process.env.keyfile}`),
+    cert: fs.readFileSync(`certificates/${process.env.certfile}`)
 };
 
 // const http = require('http');
@@ -17,18 +18,16 @@ var options = {
 //     console.log('listening on *:' + port);
 // });
 
-require('dotenv').config();
-
 const socket = require('socket.io');
 var express = require('express')
 var app = express();
 app.all('*', ensureSecure); // at top of routing calls
 
-function ensureSecure(req, res, next){
+function ensureSecure(req, res, next) {
     // console.log('https://' + req.hostname + req.url)
-    if(!req.secure){
+    if (!req.secure) {
         // handle port numbers if you need non defaults
-        res.redirect('https://' + req.hostname + req.url); 
+        res.redirect('https://' + req.hostname + req.url);
         // res.redirect(`https://${req.hostname}${process.env.NGROK_URL}`);
     }
 
@@ -54,7 +53,7 @@ io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
 });
 
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
     console.log('new socket.io connection');
     // console.log('socket.handshake = ');
     // console.log(socket.handshake);
@@ -62,7 +61,7 @@ io.on('connection', function(socket) {
     socket.on('join', function (room) {
         console.log('Received request to join room ' + room);
         // A room can have atmost two clients
-        if (!io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2) { 
+        if (!io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2) {
             socket.join(room);
             socket.emit('join', room, socket.id);
         } else {
