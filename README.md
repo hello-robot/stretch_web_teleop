@@ -1,5 +1,5 @@
 # Overview
-This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic and Google Chrome. 
+This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic, Python 3.8 and Google Chrome. 
 
 **WARNING: This prototype code and there are security issues. Use this code at your own risk.**
 
@@ -11,7 +11,10 @@ Create a new catkin workspace and clone [stretch_ros](https://github.com/hello-r
 
 If you are installing the interface locally to be run in simulation, clone [hcrl_gazebo](https://github.com/hcrlab/hcrl_gazebo) and [realsense_gazebo_plugin](https://github.com/pal-robotics/realsense_gazebo_plugin):
 
-Run `rosdep install --from-paths . --ignore-src -y -r` in the workspace `src` folder to get all the package dependencies then build and source the workspace.
+Run `rosdep install --from-paths . --ignore-src -y -r` in the workspace `src` folder to get all the package dependencies then build and source the workspace. Install   `python3-pcl`:
+```
+sudo apt-get install python3-pcl
+```
 
 Then install the package dependencies for `stretch-web-interface` by running `npm install` in that directory.
 
