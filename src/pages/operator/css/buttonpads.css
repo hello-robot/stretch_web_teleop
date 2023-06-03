@@ -13,6 +13,8 @@
     fill: hsl(0,0%,31%);
     flex: 1 1 0;
     padding: 0.4rem;
+    max-height: 100%;
+    max-width: fit-content;
 }
 
 /* Overlay ********************************************************************/
