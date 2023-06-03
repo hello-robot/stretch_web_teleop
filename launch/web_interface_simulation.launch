@@ -2,8 +2,8 @@
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
       <arg name="port" value="9090" />
       <arg name="ssl" value="true" />
-      <arg name="certfile" value="$(find stretch_web_interface_react)/certificates/$(arg certfile)" />
-      <arg name="keyfile" value="$(find stretch_web_interface_react)/certificates/$(arg keyfile)" />
+      <arg name="certfile" value="$(find stretch_teleop_interface)/certificates/$(arg certfile)" />
+      <arg name="keyfile" value="$(find stretch_teleop_interface)/certificates/$(arg keyfile)" />
   </include>
 
   <!-- Start a nodelet manager -->
@@ -22,6 +22,6 @@
   </node>
 
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"></node>
-  <arg name="params" value="$(find stretch_web_interface_react)/nodes/configure_video_streams_params.yaml"/>
-  <node name="configure_video_streams" pkg="stretch_web_interface_react" type="configure_video_streams" args="$(arg params)" output="screen"/>
+  <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
+  <node name="configure_video_streams" pkg="stretch_teleop_interface" type="configure_video_streams" args="$(arg params)" output="screen"/>
 </launch>

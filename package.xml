@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>stretch_web_interface_react</name>
+  <name>stretch_teleop_interface</name>
   <version>0.0.0</version>
-  <description>The stretch-web-interface package</description>
+  <description>The stretch teleop interface package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="vinitha@todo.todo">vinitha</maintainer>
+  <maintainer email="vinitha@cs.washington.edu">Vinitha Ranganeni</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->

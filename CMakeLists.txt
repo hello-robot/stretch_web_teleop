@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(stretch_web_interface_react)
+project(stretch_teleop_interface)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)

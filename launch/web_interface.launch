@@ -2,7 +2,7 @@
   
   <!-- REALSENSE D435i -->
   <include file="$(find stretch_core)/launch/d435i_low_resolution.launch"></include>
-  <!-- <include file="$(find stretch_web_interface_react)/launch/d435i.launch"></include> -->
+  <!-- <include file="$(find stretch_teleop_interface)/launch/d435i.launch"></include> -->
   <!-- -->
 
   <!-- Start a nodelet manager -->
@@ -21,11 +21,11 @@
   </node>
 
   <!-- GRIPPER CAMERA -->
-  <include file="$(find stretch_web_interface_react)/launch/gripper_camera.launch"></include>
+  <include file="$(find stretch_teleop_interface)/launch/gripper_camera.launch"></include>
   <!-- -->
 
   <!-- NAVIGATION CAMERA -->
-  <include file="$(find stretch_web_interface_react)/launch/navigation_camera.launch"></include>
+  <include file="$(find stretch_teleop_interface)/launch/navigation_camera.launch"></include>
   <!-- -->
   
   <!-- STRETCH DRIVER -->
@@ -38,15 +38,15 @@
     <arg name="port" default="9090"/>
     <arg name="address" default="localhost" />
     <arg name="ssl" value="true" />
-    <arg name="certfile" value="$(find stretch_web_interface_react)/certificates/$(arg certfile)" />
-    <arg name="keyfile" value="$(find stretch_web_interface_react)/certificates/$(arg keyfile)" />
+    <arg name="certfile" value="$(find stretch_teleop_interface)/certificates/$(arg certfile)" />
+    <arg name="keyfile" value="$(find stretch_teleop_interface)/certificates/$(arg keyfile)" />
     <arg name="authenticate" default="false" />
   </include>
 
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"/>
 
-  <arg name="params" value="$(find stretch_web_interface_react)/nodes/configure_video_streams_params.yaml"/>
-  <node name="configure_video_streams" pkg="stretch_web_interface_react" type="configure_video_streams" args="$(arg params)" output="screen"/>
+  <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
+  <node name="configure_video_streams" pkg="stretch_teleop_interface" type="configure_video_streams" args="$(arg params)" output="screen"/>
   <!-- -->
   
 </launch>
