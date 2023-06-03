@@ -2,8 +2,8 @@
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
       <arg name="port" value="9090" />
       <arg name="ssl" value="true" />
-      <arg name="certfile" value="$(find stretch_web_interface_react)/certificates/slinky.hcrlab.cs.washington.edu+6.pem" />
-      <arg name="keyfile" value="$(find stretch_web_interface_react)/certificates/slinky.hcrlab.cs.washington.edu+6-key.pem" />
+      <arg name="certfile" value="$(find stretch_web_interface_react)/certificates/$(arg certfile)" />
+      <arg name="keyfile" value="$(find stretch_web_interface_react)/certificates/$(arg keyfile)" />
   </include>
 
   <!-- Start a nodelet manager -->
