@@ -4,13 +4,13 @@ import { STUDY_BRANCH_LAYOUT } from "../default_layouts/study_branch";
 import { LayoutDefinition } from "operator/tsx/utils/componentdefinitions";
 
 /** Type for all the possible names of default layouts. */
-export type DefaultLayoutName = "Study branch" | "Main branch" | "Stretch2Client";
+export type DefaultLayoutName = "Button Pad Overlays" | "Button Pad Panel" | "Button Grid/Joystick/Voice Commands";
 
 /** Object with all the default layouts. */
 export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } = {
-    "Study branch": STUDY_BRANCH_LAYOUT,
-    "Main branch": MAIN_BRANCH_LAYOUT,
-    "Stretch2Client": STRETCH2CLIENT_LAYOUT
+    "Button Pad Overlays": STUDY_BRANCH_LAYOUT,
+    "Button Pad Panel": MAIN_BRANCH_LAYOUT,
+    "Button Grid/Joystick/Voice Commands": STRETCH2CLIENT_LAYOUT
 }
 
 /** 
@@ -67,7 +67,7 @@ export abstract class StorageHandler {
      */
     public loadCurrentLayoutOrDefault(): LayoutDefinition {
         const currentLayout = this.loadCurrentLayout();
-        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[2];
+        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
         console.log('loading saved layout')
         return currentLayout;
     }

@@ -18,6 +18,31 @@
     opacity: 100%;
 }
 
+.voice-commands-popup-modal {
+    position: fixed;
+    border-radius: var(--btn-brdr-radius);
+    background-color: var(--background-color);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem;
+    z-index: 4;
+    height: 45rem;
+    width: 30rem;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    justify-content: space-between;
+    opacity: 100%;
+}
+
+.voice-commands-popup-modal #close-modal {
+    padding-left: 80%;
+}
+
+.voice-commands-popup-modal #commands {
+    padding-right: 20%;
+}
 
 .popup-modal-bottom-buttons {
     width: 100%;

@@ -20,10 +20,10 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                             type: ComponentType.VideoStream,
                             id: VideoStreamId.overhead,
                             children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.ManipOverhead
-                                }
+                                // {
+                                //     type: ComponentType.ButtonPad,
+                                //     id: ButtonPadId.ManipOverhead
+                                // }
                             ]
                         } as VideoStreamDef,
                         // Realsense camera

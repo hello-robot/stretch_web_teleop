@@ -43,7 +43,7 @@ export class FirebaseStorageHandler extends StorageHandler {
             this.getUserDataFirebase().then(async (userData) => {
                 this.layouts = userData.layouts;
                 this.currentLayout = userData.currentLayout
-                console.log(userData.layouts)
+                console.log(userData.currentLayout)
                 this.onReadyCallback()
             }).catch((error) => {
                 console.log("Detected that FirebaseModel isn't initialized for user ", this.uid);
@@ -107,6 +107,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     }
 
     public getCustomLayoutNames(): string[] {
+        if (!this.layouts) return []
         return Object.keys(this.layouts)
     }
 

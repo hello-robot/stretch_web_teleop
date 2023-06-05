@@ -106,7 +106,7 @@ function initializeOperator() {
         renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-    renderOperator(storageHandler);
+    // renderOperator(storageHandler);
 }
 
 /** 
