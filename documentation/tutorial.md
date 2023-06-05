@@ -78,7 +78,7 @@ The `follow gripper` button will automatically move the realsense to focus on th
 </p>
 
 ## Depth Sensing
-The depth sensing button will highlight points that are in the Stretch's reach in blue. This can be useful when trying to pick something up.
+The `depth sensing` button will highlight points that are in the Stretch's reach in blue. This can be useful when trying to pick something up.
 
 <p align="center">
     <img src="assets/depth_sensing.png" width="50%">
@@ -90,3 +90,37 @@ You can pan and tilt the realsense camera by clicking the buttons bordering the 
 <p align="center">
     <img src="assets/pan_tilt.gif">
 </p>
+
+## Button Grid and Joystick
+You can add a `button grid` and `joystick` from the customize menu similar to the way you would add a button pad. The `button grid` is similar to the `button pad` but is separated by the different sets of joints you can control. The `joystick` is similar to how you would drive the robot if you were controlling it with a remote controller's joystick.
+
+<p align="center">
+    <img src="assets/button_grid_joystick.gif">
+</p>
+
+## Adding/Deleting Panels and Tabs
+A `panel` contains a set of `tabs`; each `tab` contains a `layout` that you can define by adding different components such as camera views, button pads, etc. 
+
+### Panels
+You can add and delete panels. When you add a new `panel`, you must enter a name for a `tab` in that `panel`.
+
+<p align="center">
+    <img src="assets/panels.gif">
+</p>
+
+### Tabs
+You can add and delete tabs. Click the tab with the plus icon to add a `tab`. You will then be prompted to name the `tab` and can add components in that tab. To delete the `tab`, select it and click the trash icon.
+
+<p align="center">
+    <img src="assets/tabs.gif">
+</p>
+
+## Voice Commands
+You can control Stretch with voice commands. Click the info icon to see the available commands. Click the microphone icon to turn on the microphone. After you say a command, the command will display next to microphone icon. Click the microphone icon to turn off the microphone.
+
+<p align="center">
+    <img src="assets/voice_commands.gif">
+</p>
+
+## Load/Save Layouts
+We have pre-defined layouts that you can load. You can also save your layout and load it later.
