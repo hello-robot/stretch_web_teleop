@@ -31,7 +31,7 @@ export const panTiltButtons: ButtonPadButton[] = [ButtonPadButton.CameraTiltUp, 
 /** Button functions which require moving a joint in the negative direction. */
 const negativeButtonPadFunctions = new Set<ButtonPadButton>([
     ButtonPadButton.BaseReverse,
-    ButtonPadButton.BaseRotateLeft,
+    ButtonPadButton.BaseRotateRight,
     ButtonPadButton.ArmLower,
     ButtonPadButton.ArmRetract,
     ButtonPadButton.GripperClose,
