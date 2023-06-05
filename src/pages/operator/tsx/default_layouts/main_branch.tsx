@@ -1,7 +1,7 @@
 import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode } from "../utils/componentdefinitions";
 
 /**
- * Default layout to load on start
+ * Layout from the main branch
  */
 export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,

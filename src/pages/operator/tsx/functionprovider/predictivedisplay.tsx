@@ -53,11 +53,14 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                             setActiveCallback(true);
                         }
                     },
-                    onMove: (length: number, angle: number) => 
-                        this.activeVelocityAction ? this.continuousBaseDrive(
-                            baseLinVel * length,
-                            baseAngVel * angle
-                        ) : null,
+                    onMove: (length: number, angle: number) => {
+                        if (this.activeVelocityAction) {
+                            this.continuousBaseDrive(
+                                baseLinVel * length,
+                                baseAngVel * angle
+                            );
+                        }
+                    },
                     onLeave: () => { this.stopCurrentAction(); setActiveCallback(false); }
                 }
         }

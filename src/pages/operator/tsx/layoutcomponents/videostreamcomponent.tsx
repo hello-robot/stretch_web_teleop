@@ -2,7 +2,7 @@ import React from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
 import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/componentdefinitions";
 import { ButtonPad } from "./buttonpads";
-import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
+import { CustomizableComponentProps, isSelected, SharedState } from "./customizablecomponent";
 import { DropZone } from "./dropzone";
 import { PredictiveDisplay } from "./predictivedisplay";
 import "operator/css/videostreamcomponent.css"
@@ -45,7 +45,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
     }, [stream]);
 
     const { customizing } = props.sharedState;
-    const selected = props.path === props.sharedState.activePath;
+    const selected = isSelected(props);
     const videoClass = className("video-canvas", { customizing, selected })
 
     /** Mark this video stream as selected */

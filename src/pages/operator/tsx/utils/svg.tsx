@@ -1,4 +1,3 @@
-
 import armDown from "operator/icons/Arm_Down.svg"
 import armExtend from "operator/icons/Arm_Reach.svg"
 import armRetract from "operator/icons/Arm_Retract.svg"
@@ -22,7 +21,8 @@ import { ButtonPadButton } from "../functionprovider/buttonpads"
 export const SVG_RESOLUTION = 500;
 
 
-/** Possible layouts for the button pad (i.e. the shape and arrangement of the 
+/** 
+ * Possible layouts for the button pad (i.e. the shape and arrangement of the 
  * buttons)
  */
 export enum ButtonPadShape {

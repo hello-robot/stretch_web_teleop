@@ -1,6 +1,6 @@
 import React from "react";
 import "operator/css/buttonpads.css"
-import { CustomizableComponentProps, SharedState } from "./customizablecomponent";
+import { CustomizableComponentProps, SharedState, isSelected } from "./customizablecomponent";
 import { ButtonPadDef, ButtonPadId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
@@ -38,7 +38,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     const { customizing } = props.sharedState;
     const { overlay } = props;
-    const selected = props.path === props.sharedState.activePath;
+    const selected = isSelected(props);
 
     /** Uses the paths and buttonsProps to create the buttons */
     function mapPaths(svgPath: string, i: number) {

@@ -71,8 +71,11 @@ function componentDescription(definition: ComponentDefinition): string {
             return "Tabs";
         case (ComponentType.SingleTab):
             return `\"${(definition as SingleTabDef).label}\" Tab`;
+        case (ComponentType.VirtualJoystick):
+        case (ComponentType.ButtonGrid):
+            return definition.type;
         default:
-            throw Error(`Cannot get description for component type ${definition.type}`)
+            throw Error(`Cannot get description for component type ${definition.type}\nYou may need to add a case for this component in the switch statement.`)
     }
 }
 
@@ -80,25 +83,38 @@ function componentDescription(definition: ComponentDefinition): string {
  * Global options
  */
 
+/** Properties for {@link SidebarGlobalOptions} */
 export type GlobalOptionsProps = {
+    /** If the voice controls should be displayed. */
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+    /** List of names of the default layouts. */
     defaultLayouts: string[],
+    /** List of names of the user's custom layouts. */
     customLayouts: string[],
+    /**
+     * Callback when the user loads a layout.
+     * @param layoutName name of the layout to load
+     * @param dflt if it's a default layout, if false then it's a custom layout.
+     */
     loadLayout: (layoutName: string, dflt: boolean) => void,
+    /**
+     * Callback when the user saves a layout.
+     * @param layoutName name of the layout to save.
+     */
     saveLayout: (layoutName: string) => void,
 }
 
+/** Options which apply to the entire operator page. */
 const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     const [showLoadLayoutModal, setShowLoadLayoutModal] = React.useState<boolean>(false);
     const [showSaveLayoutModal, setShowSaveLayoutModal] = React.useState<boolean>(false);
-
 
     return (
         <React.Fragment>
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
-                <ToggleButton
+                <OnOffToggleButton
                     on={props.displayVoiceControl}
                     onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
                     label="Display voice control"
@@ -130,6 +146,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     )
 }
 
+/** Popup so the user can load a default layout or one of their custom layouts.  */
 const LoadLayoutModal = (props: {
     defaultLayouts: string[],
     customLayouts: string[],
@@ -181,6 +198,7 @@ const LoadLayoutModal = (props: {
     )
 }
 
+/** Popup so the user can save their current layout. */
 const SaveLayoutModal = (props: {
     saveLayout: (layoutName: string) => void,
     setShow: (show: boolean) => void,
@@ -213,10 +231,13 @@ const SaveLayoutModal = (props: {
  */
 
 type OptionsProps = {
+    /** Definition of the currently selected component from operator. */
     activeDef: ComponentDefinition;
+    /** Callback to rerender the layout in operator. */
     updateLayout: () => void;
 }
 
+/** Displays options for the currently selected layout component. */
 const SidebarOptions = (props: OptionsProps) => {
     switch (props.activeDef.type) {
         case (ComponentType.VideoStream):
@@ -229,6 +250,7 @@ const SidebarOptions = (props: OptionsProps) => {
     return <></>
 }
 
+/** Options for the overhead camera video stream layout component. */
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.activeDef as VideoStreamDef;
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
@@ -246,7 +268,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     }
     return (
         <div>
-            <ToggleButton
+            <OnOffToggleButton
                 on={predictiveDisplayOn}
                 onClick={togglePredictiveDisplay}
                 label="Predictive Display"
@@ -255,13 +277,17 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     )
 }
 
-type ToggleButtonProps = {
+/** Properties for {@link OnOffToggleButton} */
+type OnOffToggleButtonProps = {
     on: boolean;
+    /** Callback when the button is clicked */
     onClick: () => void;
+    /** Text label to display to the right of the on/off button. */
     label: string;
 }
 
-const ToggleButton = (props: ToggleButtonProps) => {
+/** A single toggle button with a color and on/off label corresponding to it's state. */
+const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
     const text = props.on ? "on" : "off";
     const colorClass = props.on ? "btn-turquoise font-white" : "btn-red";
     return (
@@ -281,18 +307,25 @@ const ToggleButton = (props: ToggleButtonProps) => {
  * Component provider
  */
 
+/** Properties for {@link SidebarComponentProvider} */
 type SidebarComponentProviderProps = {
+    /** Definition of the currently selected component from operator. */
     activeDef?: ComponentDefinition;
+    /** Callback function when a component is selected from the sidebar. */
     onSelect: (def: ComponentDefinition, path?: string) => void;
 }
 
+/** Displays all the components which can be added to the interface */
 const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     const [expandedType, setExpandedType] = React.useState<ComponentType>();
 
+    /** The options for possible components to add */
     const outlines: ComponentProviderTabOutline[] = [
         { type: ComponentType.Tabs },
         { type: ComponentType.VideoStream, ids: Object.values(VideoStreamId) },
-        { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) }
+        { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
+        { type: ComponentType.ButtonGrid },
+        { type: ComponentType.VirtualJoystick }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
@@ -341,8 +374,18 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     )
 }
 
-type ComponentProviderTabOutline = { type: ComponentType, ids?: ComponentId[] }
+/** An outline representing a component provider tab.  */
+type ComponentProviderTabOutline = {
+    /** The type of component this tab represents. */
+    type: ComponentType,
+    /** 
+     * The list of different identifiers for this component type. Is undefined 
+     * when a component doesn't have sub identifiers, for example a Panel component.
+     */
+    ids?: ComponentId[]
+}
 
+/** Properties for a single tab representing a single component type. */
 type ComponentProviderTabProps = ComponentProviderTabOutline & {
     expanded: boolean;
     activeDef?: ComponentDefinition;
@@ -350,6 +393,11 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
     onExpand: () => void;
 }
 
+/** 
+ * Displays a single dropdown tab within the component provider. If the ids field 
+ * in `props` is undefined then this represents a component without seperate
+ * identifiers, so it will be a button without a dropdown.
+ */
 const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     const tabActive = props.type === props.activeDef?.type;
     function mapIds(id: ComponentId) {
@@ -374,7 +422,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         <div className="provider-tab" key={props.type}>
             <button onClick={clickExpand} className={tabActive && !props.ids ? "active" : props.expanded ? "expanded" : ""}>
                 <span className="material-icons">{props.ids ? "expand_more" : ""}</span>
-                {props.type == ComponentType.Tabs ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type }
+                {props.type == ComponentType.Tabs ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type}
             </button>
             <div className="provider-tab-dropdown" hidden={!props.expanded}>
                 {

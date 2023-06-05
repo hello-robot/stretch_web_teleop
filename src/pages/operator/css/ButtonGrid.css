@@ -1,0 +1,59 @@
+.button-grid {
+    flex: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, auto 1fr);
+    grid-template-areas:
+        "header0 header0 header0 header0"
+        "b0 b1 b2 b3"
+        "header1 header1 header1 header1"
+        "b4 b5 b6 b7"
+        "header2 header2 header2 header2"
+        ". b8 b9 ."
+        "header3 header3 header3 header3"
+        ". b10 b11 ."
+    ;
+
+    padding: 0.4rem;
+    position: relative;
+    z-index: 1;
+    border-radius: var(--radius);
+}
+
+.button-grid::after {
+    border-radius: var(--radius);
+}
+
+.button-grid p {
+    text-align: center;
+    margin: 1.5rem 0 0.5rem 0;
+}
+
+.button-grid p:first-of-type {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.button-grid button {
+    width: 90%;
+    height: 4rem;
+    justify-self: center;
+    align-self: center;
+}
+
+.button-grid button.active {
+    background-color: var(--btn-turquoise);
+}
+
+.button-grid button.collision {
+    background-color: orange;
+}
+
+.button-grid button.limit {
+    background-color: red;
+}
+
+.button-grid-bkg-color {
+    grid-column: 1 / 5;
+    height: 5rem;
+}
