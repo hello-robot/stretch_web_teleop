@@ -9,7 +9,7 @@ export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
     actionMode: ActionMode.StepActions,
     children: [
         {
-            type: ComponentType.Tabs,
+            type: ComponentType.Panel,
             children: [
                 {
                     type: ComponentType.SingleTab,

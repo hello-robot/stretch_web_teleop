@@ -9,7 +9,7 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
     actionMode: ActionMode.StepActions,
     children: [
         {
-            type: ComponentType.Tabs,
+            type: ComponentType.Panel,
             children: [
                 {
                     type: ComponentType.SingleTab,

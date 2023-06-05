@@ -19,7 +19,6 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
 
     function handleSetActive(active: boolean) {
         if (!active) {
-            console.log('reset active false');
             setJoystick(drawJoystickCenter());
         }
         setActive(active);
@@ -48,7 +47,6 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
 
     function handleClick(event: React.MouseEvent<SVGSVGElement>) {
         if (!active) {
-            console.log('moving to click')
             setJoystickToMouse(event);
         }
         if (functions.onClick) functions.onClick(length.current, angle.current);
@@ -61,12 +59,6 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
     function setLengthAndWidth(x: number, y: number) {
         const xLocal = x - SVG_RESOLUTION / 2;
         const yLocal = y - SVG_RESOLUTION / 2;
-        // let len: number = Math.sqrt(xLocal * xLocal + yLocal * yLocal);
-        // len /= (SVG_RESOLUTION / 2);  // normalize
-        // len *= (yLocal > 0 ? -1 : 1);  // multiply sign
-
-        // angle.current = Math.atan2(-xLocal, yLocal);
-        // length.current = len
 
         angle.current = -xLocal / (SVG_RESOLUTION / 2)
         length.current = -yLocal / (SVG_RESOLUTION / 2);
@@ -95,7 +87,6 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
 
     function handleSelect(event: React.MouseEvent<SVGSVGElement>) {
         event.stopPropagation();
-        console.log('select')
         props.sharedState.onSelect(props.definition, props.path)
     }
 

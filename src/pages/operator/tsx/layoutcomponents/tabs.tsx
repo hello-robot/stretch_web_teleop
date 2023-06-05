@@ -3,7 +3,6 @@ import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from 
 import { ComponentList, ComponentListProps } from "operator/tsx/layoutcomponents/componentlist";
 import "operator/css/tabs.css"
 import { CustomizableComponentProps } from "operator/tsx/layoutcomponents/customizablecomponent";
-import { ChangeEvent } from "react";
 import { className } from "shared/util";
 import { DropZone } from "operator/tsx/layoutcomponents/dropzone";
 import { PopupModal } from "../basic_components/popup_modal";
@@ -180,8 +179,8 @@ export const Tabs = (props: CustomizableComponentProps) => {
                 <ComponentList {...componentListProps} />
             </div>
             <NewTabModal
-                setShow={setShowTabModal}
                 show={showTabModal}
+                setShow={setShowTabModal}
                 addTab={addTab}
             />
 
@@ -189,10 +188,10 @@ export const Tabs = (props: CustomizableComponentProps) => {
     )
 }
 
-/** Modal for selecting a new tab */
+/** Modal for creating a new tab on a panel component. */
 const NewTabModal = (props: {
-    setShow: (show: boolean) => void,
     show: boolean,
+    setShow: (show: boolean) => void,
     addTab: (name: string) => void
 }) => {
     const [text, setText] = React.useState("");
@@ -200,7 +199,7 @@ const NewTabModal = (props: {
         const newLabel = text.length > 0 ? text : 'new tab';
         props.addTab(newLabel);
     }
-    function handleChange(e: ChangeEvent<HTMLInputElement>) { setText(e.target.value); }
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) { setText(e.target.value); }
 
     return (
         <PopupModal

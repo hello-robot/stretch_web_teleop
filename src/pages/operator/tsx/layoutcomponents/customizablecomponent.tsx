@@ -55,7 +55,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
 
     // switch on the component type to render specific type of component
     switch (props.definition.type) {
-        case ComponentType.Tabs:
+        case ComponentType.Panel:
             return <Tabs {...props} />
         case ComponentType.ButtonPad:
             return <ButtonPad {...props} />;

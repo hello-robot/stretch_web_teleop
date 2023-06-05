@@ -57,14 +57,9 @@
     box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
 }
 
-
-/* .tab-button.selected {
-    box-shadow: 0 0 1rem 1rem #0ff;
+.tab-button.selected {
+    box-shadow: 0 0 0.2rem 0.2rem var(--selected-color);
 }
-
-.tabs-content.selected {
-    box-shadow: 0 0 1rem 1rem #0ff;
-} */
 
 .add-tab:hover {
     background-color: var(--btn-turquoise);
