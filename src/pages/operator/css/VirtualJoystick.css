@@ -5,6 +5,15 @@
     margin: 0.4rem;
     position: relative;
     z-index: 1;
+    max-height: 100%;
+
+    display:grid;
+    justify-items: center;
+}
+
+.virtual-joystick svg {
+    max-height: 100%;
+    max-width: fit-content;
 }
 
 .virtual-joystick:not(.customizing) {
