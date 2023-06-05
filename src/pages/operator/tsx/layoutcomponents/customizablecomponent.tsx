@@ -6,6 +6,7 @@ import { ButtonPad } from "./buttonpads";
 import { VideoStreamComponent } from "./videostreamcomponent";
 import { PredictiveDisplay } from "./predictivedisplay";
 import { ButtonStateMap } from "../functionprovider/buttonpads";
+import { ButtonGrid } from "./ButtonGrid";
 
 /** State required for all elements */
 export type SharedState = {
@@ -61,7 +62,9 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <VideoStreamComponent {...props} />;
         case ComponentType.PredictiveDisplay:
             return <PredictiveDisplay {...props} />;
+        case ComponentType.ButtonGrid:
+            return <ButtonGrid {...props} />;
         default:
-            throw Error(`unknow component type: ${props.definition.type}`);
+            throw Error(`CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`);
     }
 }

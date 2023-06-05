@@ -22,24 +22,26 @@ let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
 
+// Create the function providers. These abstract the logic between the React 
+// components and remote robot.
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 
-// if (process.env.STYLEGUIDIST == 'false') {
+// Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
     peerRole: "operator",
     polite: true,
-    onMessage: handleMessage,
+    onMessage: handleWebRTCMessage,
     onTrackAdded: handleRemoteTrackAdded,
-    onMessageChannelOpen: configureRobot,
+    onMessageChannelOpen: initializeOperator,
     onConnectionEnd: disconnectFromRobot
 });
 
 connection.joinOperatorRoom()
 
-// Check if the WebRTC connection is resolved
+// Check if the WebRTC connection is resolved. Reload every 4 seconds until resolved.
 setTimeout(() => {
     let isResolved = connection.connectionState() == 'connected' ? true : false
     console.log("connection state: ", isResolved)
@@ -53,8 +55,8 @@ setTimeout(() => {
 // Create root once when index is loaded
 const container = document.getElementById('root');
 root = createRoot(container!);
-// }
 
+/** Handle when the WebRTC connection adds a new track on a camera video stream. */
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
     console.log('Remote track added.');
     const track = event.track;
@@ -69,10 +71,15 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
     allRemoteStreams.set(streamName, { 'track': track, 'stream': stream });
 }
 
-function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
+/**
+ * Callback to handle a new WebRTC message from the robot browser.
+ * @param message the {@link WebRTCMessage} or an array of messages.
+ */
+function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
     if (message instanceof Array) {
         for (const subMessage of message) {
-            handleMessage(subMessage)
+            // Recursive call to handle each message in the array
+            handleWebRTCMessage(subMessage)
         }
         return
     }
@@ -83,51 +90,82 @@ function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
                 message.jointsInCollision
             );
             break;
+        default:
+            throw Error(`unhandled WebRTC message type ${message.type}`)
     }
 }
 
-function configureRobot() {
+/**
+ * Sets up remote robot, creates the storage handler, 
+ * and renders the operator browser.
+ */
+function initializeOperator() {
+    configureRemoteRobot();
+    let storageHandler: StorageHandler;
+    const storageHandlerReadyCallback = () => {
+        renderOperator(storageHandler);
+    }
+    storageHandler = createStorageHandler(storageHandlerReadyCallback);
+    renderOperator(storageHandler);
+}
+
+/** 
+ * Configures the remote robot, which connects with the robot browser over the 
+ * WebRTC connection.
+ */
+function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     remoteRobot.setRobotMode("navigation");
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
+}
 
-    let storageHandler: StorageHandler;
-    const storageHandlerReadyCallback = () => {
-        const layout = storageHandler.loadCurrentLayoutOrDefault();
-        console.log(layout.actionMode)
-        FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
-        FunctionProvider.addRemoteRobot(remoteRobot);
-
-        root.render(
-            <Operator
-                remoteStreams={allRemoteStreams}
-                layout={layout}
-                storageHandler={storageHandler}
-            />
-        );
+/**
+ * Creates a storage handler based on the `storage` property in the process 
+ * environment.
+ * @param storageHandlerReadyCallback callback when the storage handler is ready
+ * @returns the storage handler
+ */
+function createStorageHandler(storageHandlerReadyCallback: () => void) {
+    switch (process.env.storage) {
+        case ('firebase'):
+            const config: FirebaseOptions = {
+                apiKey: process.env.apiKey,
+                authDomain: process.env.authDomain,
+                projectId: process.env.projectId,
+                storageBucket: process.env.storageBucket,
+                messagingSenderId: process.env.messagingSenderId,
+                appId: process.env.appId,
+                measurementId: process.env.measurementId
+            }
+            return new FirebaseStorageHandler(
+                storageHandlerReadyCallback,
+                config
+            );
+        default:
+            // if (process.env.storage == 'localstorage')
+            return new LocalStorageHandler(storageHandlerReadyCallback);
     }
+}
 
-    if (process.env.storage == 'firebase') {
-        const config = {
-            apiKey: process.env.apiKey,
-            authDomain: process.env.authDomain,
-            projectId: process.env.projectId,
-            storageBucket: process.env.storageBucket,
-            messagingSenderId: process.env.messagingSenderId,
-            appId: process.env.appId,
-            measurementId: process.env.measurementId
-        }
-        storageHandler = new FirebaseStorageHandler({
-            onStorageHandlerReadyCallback: storageHandlerReadyCallback,
-            config: config as FirebaseOptions
-        });
-    } else if (process.env.storage == 'localstorage') {
-        storageHandler = new LocalStorageHandler({
-            onStorageHandlerReadyCallback: storageHandlerReadyCallback
-        });
-    }
+/**
+ * Renders the operator browser.
+ * 
+ * @param storageHandler the storage handler
+ */
+function renderOperator(storageHandler: StorageHandler) {
+    const layout = storageHandler.loadCurrentLayoutOrDefault();
+    FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
+    FunctionProvider.addRemoteRobot(remoteRobot);
+
+    root.render(
+        <Operator
+            remoteStreams={allRemoteStreams}
+            layout={layout}
+            storageHandler={storageHandler}
+        />
+    );
 }
 
 function disconnectFromRobot() {

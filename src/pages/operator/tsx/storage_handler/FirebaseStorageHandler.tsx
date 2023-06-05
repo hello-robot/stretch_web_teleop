@@ -5,6 +5,7 @@ import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "fire
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
 import { Database, getDatabase, child, get, ref, update, push } from 'firebase/database'
 
+/** Uses Firebase to store data. */
 export class FirebaseStorageHandler extends StorageHandler {
     private config: FirebaseOptions;
     private app: FirebaseApp;
@@ -17,9 +18,9 @@ export class FirebaseStorageHandler extends StorageHandler {
     private layouts: { [name: string]: LayoutDefinition };
     private currentLayout: LayoutDefinition | null;
 
-    constructor(props: {onStorageHandlerReadyCallback: () => void, config: FirebaseOptions}) {
-        super(props)
-        this.config = props.config
+    constructor(onStorageHandlerReadyCallback: () => void, config: FirebaseOptions) {
+        super(onStorageHandlerReadyCallback);
+        this.config = config;
         this.app = initializeApp(this.config);
         this.database = getDatabase(this.app);
         this.auth = getAuth(this.app);

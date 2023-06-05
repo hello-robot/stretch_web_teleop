@@ -1,9 +1,9 @@
-import ROSLIB, { Message } from 'roslib'
-import { cmd, NavGoalCommand, PoseGoalCommand } from './commands';
+import { Message } from 'roslib'
+import { cmd } from './commands';
 
 export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
 
-export type VelocityGoalArray = [{[key in ValidJoints]?: number}, {[key in ValidJoints]?: number}]
+export type VelocityGoalArray = [{ [key in ValidJoints]?: number }, { [key in ValidJoints]?: number }]
 
 export type RemoteStream = {
     stream: MediaStream;
@@ -47,8 +47,8 @@ export type RobotPose = { [key in ValidJoints]?: number }
 
 export interface ValidJointStateMessage {
     type: "validJointState",
-    jointsInLimits: { [key in ValidJoints]? : [boolean, boolean] }
-    jointsInCollision: { [key in ValidJoints]? : [boolean, boolean] }
+    jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
+    jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
 }
 
 export const REALSENSE_BASE_POSE: RobotPose = {
@@ -83,7 +83,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
 }
 
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
-    "joint_head_tilt": 0.1, 
+    "joint_head_tilt": 0.1,
     "joint_head_pan": 0.1,
     "joint_gripper_finger_left": .075,
     "wrist_extension": 0.075,
@@ -150,6 +150,11 @@ export function generateUUID(): uuid {
  * @param baseName base name of the class
  * @param flags additional flags to append to the class name
  * @returns returns a string for the class name
+ * 
+ * @example ```js
+ * className("foreground-button", {"active": false, "customizing": true})
+ * // returns "foreground-button customizing"
+ * ```
  */
 export function className(baseName: string, flags: {}): string {
     let className = baseName;

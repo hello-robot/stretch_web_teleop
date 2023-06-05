@@ -1,12 +1,13 @@
 import { StorageHandler } from "./StorageHandler";
 import { LayoutDefinition } from "../utils/componentdefinitions";
 
+/** Uses browser local storage to store data. */
 export class LocalStorageHandler extends StorageHandler {
     public static CURRENT_LAYOUT_KEY = "user_custom_layout";    
     public static LAYOUT_NAMES_KEY = "user_custom_layout_names"
 
-    constructor(props: {onStorageHandlerReadyCallback: () => void}) {
-        super(props)
+    constructor(onStorageHandlerReadyCallback: () => void) {
+        super(onStorageHandlerReadyCallback);
         // Allow the initialization process to complete before invoking the callback
         setTimeout(() => {
             this.onReadyCallback();
