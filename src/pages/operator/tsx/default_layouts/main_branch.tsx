@@ -9,7 +9,7 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     actionMode: ActionMode.ClickClick,
     children: [
         {
-            type: ComponentType.Tabs,
+            type: ComponentType.Panel,
             children: [
                 {
                     type: ComponentType.SingleTab,
@@ -93,7 +93,7 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
             ]
         } as TabsDef,
         {
-            type: ComponentType.Tabs,
+            type: ComponentType.Panel,
             children: [
                 {
                     type: ComponentType.SingleTab,

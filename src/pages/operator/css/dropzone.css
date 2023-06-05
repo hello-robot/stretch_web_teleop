@@ -28,6 +28,11 @@
 .drop-zone.tab {
     margin: 0;
     width: 5rem;
+    padding-top: 10px;
+
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /* border-bottom: none; */
 }
 
 /* Dropzone is an overlay in a video stream*/

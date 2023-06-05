@@ -1,7 +1,7 @@
 import React from "react"
 import "operator/css/sidebar.css"
 import { className } from "shared/util";
-import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
+import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { PopupModal } from "../basic_components/popup_modal";
 import { Dropdown } from "../basic_components/dropdown";
 
@@ -67,10 +67,9 @@ function componentDescription(definition: ComponentDefinition): string {
         case (ComponentType.ButtonPad):
         case (ComponentType.VideoStream):
             return `${(definition as VideoStreamDef | ButtonPadDef).id} ${definition.type}`
-        case (ComponentType.Tabs):
-            return "Tabs";
         case (ComponentType.SingleTab):
             return `\"${(definition as SingleTabDef).label}\" Tab`;
+        case (ComponentType.Panel):
         case (ComponentType.VirtualJoystick):
         case (ComponentType.ButtonGrid):
             return definition.type;
@@ -321,7 +320,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
 
     /** The options for possible components to add */
     const outlines: ComponentProviderTabOutline[] = [
-        { type: ComponentType.Tabs },
+        { type: ComponentType.Panel },
         { type: ComponentType.VideoStream, ids: Object.values(VideoStreamId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
@@ -333,17 +332,9 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
 
         // Add children based on the component type
         switch (type) {
-            case (ComponentType.Tabs):
-                (definition as TabsDef).children = [
-                    {
-                        type: ComponentType.SingleTab,
-                        label: "new tab",
-                        children: []
-                    } as SingleTabDef
-                ]
-                break;
+            case (ComponentType.Panel):
             case (ComponentType.VideoStream):
-                (definition as VideoStreamDef).children = []
+                (definition as ParentComponentDefinition).children = []
                 break;
         }
 
@@ -422,7 +413,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         <div className="provider-tab" key={props.type}>
             <button onClick={clickExpand} className={tabActive && !props.ids ? "active" : props.expanded ? "expanded" : ""}>
                 <span className="material-icons">{props.ids ? "expand_more" : ""}</span>
-                {props.type == ComponentType.Tabs ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type}
+                {props.type == ComponentType.Panel ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type}
             </button>
             <div className="provider-tab-dropdown" hidden={!props.expanded}>
                 {

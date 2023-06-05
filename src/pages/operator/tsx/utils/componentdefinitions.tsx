@@ -14,7 +14,7 @@ export enum ActionMode {
  */
 export enum ComponentType {
     Layout = "Layout",
-    Tabs = "Tabs",
+    Panel = "Panel",
     SingleTab = "Single Tab",
     VideoStream = "Video Stream",
     ButtonPad = "Button Pad",

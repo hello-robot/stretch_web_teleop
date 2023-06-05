@@ -8,7 +8,7 @@ export const TEST_LAYOUT: LayoutDefinition = {
     displayVoiceControl: false,
     actionMode: ActionMode.ClickClick,
     children: [{
-        type: ComponentType.Tabs,
+        type: ComponentType.Panel,
         children: [{
             type: ComponentType.SingleTab,
             label: 'Manipulation',
@@ -53,7 +53,7 @@ export const TEST_LAYOUT: LayoutDefinition = {
         }]
     } as TabsDef,
     {
-        type: ComponentType.Tabs,
+        type: ComponentType.Panel,
         children: [{
             type: ComponentType.SingleTab,
             label: 'Tab1',

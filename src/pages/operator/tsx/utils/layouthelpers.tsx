@@ -139,7 +139,7 @@ export const removeFromLayout = (
     const parent = getParent(splitPath, layout);
 
     // If this is the last tab in a tabs component, then delete the entire tabs
-    if (parent.type === ComponentType.Tabs && parent.children.length === 1) {
+    if (parent.type === ComponentType.Panel && parent.children.length === 1) {
         const parentIdx = +splitPath.slice(-2, -1);
         // note: since tabs cannot be nested, we can assume the layout is the 
         //       is the parent of the tabs component
