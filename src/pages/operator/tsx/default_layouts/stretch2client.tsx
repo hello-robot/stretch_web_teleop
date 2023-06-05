@@ -5,7 +5,7 @@ import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef
  */
 export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
-    displayVoiceControl: false,
+    displayVoiceControl: true,
     actionMode: ActionMode.StepActions,
     children: [
         {

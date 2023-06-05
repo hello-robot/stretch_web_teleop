@@ -38,16 +38,16 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                             ]
                         } as VideoStreamDef,
                         // Gripper camera
-                        {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.gripper,
-                            children: [
-                                // {
-                                //     type: ComponentType.ButtonPad,
-                                //     id: ButtonPadId.Gripper
-                                // }
-                            ]
-                        } as VideoStreamDef
+                        // {
+                        //     type: ComponentType.VideoStream,
+                        //     id: VideoStreamId.gripper,
+                        //     children: [
+                        //         // {
+                        //         //     type: ComponentType.ButtonPad,
+                        //         //     id: ButtonPadId.Gripper
+                        //         // }
+                        //     ]
+                        // } as VideoStreamDef
                     ]
                 },
                 {

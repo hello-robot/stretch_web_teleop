@@ -22,9 +22,9 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                             gripperView: false,
                             children: [
                                 {
-                                    type: ComponentType.PredictiveDisplay,
-                                    // type: ComponentType.ButtonPad,
-                                    // id: ButtonPadId.overhead
+                                    // type: ComponentType.PredictiveDisplay,
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Drive
                                 }
                             ]
                         } as OverheadVideoStreamDef,
