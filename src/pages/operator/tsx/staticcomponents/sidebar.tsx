@@ -71,8 +71,9 @@ function componentDescription(definition: ComponentDefinition): string {
             return "Tabs";
         case (ComponentType.SingleTab):
             return `\"${(definition as SingleTabDef).label}\" Tab`;
+        case (ComponentType.VirtualJoystick):
         case (ComponentType.ButtonGrid):
-            return "Button Grid";
+            return definition.type;
         default:
             throw Error(`Cannot get description for component type ${definition.type}\nYou may need to add a case for this component in the switch statement.`)
     }
@@ -323,7 +324,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Tabs },
         { type: ComponentType.VideoStream, ids: Object.values(VideoStreamId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
-        { type: ComponentType.ButtonGrid }
+        { type: ComponentType.ButtonGrid },
+        { type: ComponentType.VirtualJoystick }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {

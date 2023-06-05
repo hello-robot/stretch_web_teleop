@@ -19,7 +19,8 @@ export enum ComponentType {
     VideoStream = "Video Stream",
     ButtonPad = "Button Pad",
     PredictiveDisplay = "Predictive Display",
-    ButtonGrid = "ButtonGrid"
+    ButtonGrid = "Button Grid",
+    VirtualJoystick = "Joystick"
 }
 
 /**

@@ -26,17 +26,8 @@ export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
                     children: [
                         // Realsense camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.realsense,
-                            followGripper: false,
-                            depthSensing: false,
-                            children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Drive,
-                                } as ButtonPadDef
-                            ]
-                        } as RealsenseVideoStreamDef,
+                            type: ComponentType.VirtualJoystick
+                        },
                         {
                             type: ComponentType.ButtonGrid
                         }

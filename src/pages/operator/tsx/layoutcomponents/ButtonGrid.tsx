@@ -1,6 +1,6 @@
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
-import { CustomizableComponentProps } from "./customizablecomponent";
+import { CustomizableComponentProps, isSelected } from "./customizablecomponent";
 import "operator/css/ButtonGrid.css"
 import { className } from "shared/util";
 
@@ -60,7 +60,7 @@ for (let i = 0; i < 4; i++) {
 
 export const ButtonGrid = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
-    const selected = props.path === props.sharedState.activePath;
+    const selected = isSelected(props);
     console.log('selected', selected)
     function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
         event.stopPropagation();
