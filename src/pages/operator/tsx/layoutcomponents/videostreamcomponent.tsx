@@ -93,9 +93,7 @@ export const VideoStreamComponent = (props: CustomizableComponentProps) => {
 
             if (videoRect.height > height) {
                 setConstrainedHeight(true);
-                return;
-            }
-            if (videoRect.width > width) {
+            } else if (videoRect.width > width) {
                 setConstrainedHeight(false);
             }
         });
