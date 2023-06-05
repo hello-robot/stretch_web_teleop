@@ -7,6 +7,7 @@
     height: 100%;
     grid-template-columns: auto;
     grid-template-rows: 1fr auto minmax(9rem, 1fr);
+    object-fit: cover;
 }
 
 /* Overlays the button pad on top of the video stream*/
@@ -28,17 +29,19 @@
 .video-area {
     position: relative;
     grid-row: 2/2;
-    max-width: 100%;
+    width: 100%;
 }
 
 .video-canvas {
     width: 100%;
     height: auto;
+    object-fit: cover;
 }
 
 .video-canvas.constrainedHeight {
     width: auto;
     height: 100%;
+    object-fit: cover;
 }
 
 /* Don't display selected highlight on video canvas element */
@@ -80,11 +83,10 @@
     height: auto;
     grid-row: 2/2;
     grid-column: 1/1;
-    --pan-tilt-button-size: 1.5rem;
+    --pan-tilt-button-size: 2rem;
     display: grid;
     grid-template-columns: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
     grid-template-rows: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
-    ;
 }
 
 .realsense-pan-tilt-grid.constrainedHeight {
