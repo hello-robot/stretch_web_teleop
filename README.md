@@ -141,9 +141,15 @@ From within the `stretch_teleop_interface` directory, start the server and robot
 Open `localhost/operator` in **google chrome** to see the interface. You might see a `Webpage not secure` warning, click advanced and proceed. 
 
 ## Running the Interface on Stretch
-Run the following commands in separate terminals **on the robot**:
+Run the following commands in separate terminals **on the robot** (remember to change the `certfile` and `keyfile`):
 ```
-roslaunch stretch_teleop_interface web_interface.launch
+roslaunch stretch_teleop_interface web_interface.launch \
+certfile:=slinky.hcrlab.cs.washington.edu.pem \
+keyfile:=slinky.hcrlab.cs.washington.edu-key.pem 
+```
+
+From within the `stretch_teleop_interface` directory, start the server and robot browser:
+```
 ./start_web_server_and_robot_browser.sh local
 ```
 Make sure `./start_web_server_and_robot_browser.sh local` is running in the `stretch_teleop_interface` directory. (`local` allows the site to use the browser's local storage to save useful information. We also have the interface configured with `firebase`. See firebase [instructions](/src/pages/operator/tsx/storage_handler/README.md)). To use firebase, run `./start_web_server_and_robot_browser.sh firebase` instead. 
