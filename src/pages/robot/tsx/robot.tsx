@@ -307,14 +307,14 @@ export class Robot extends React.Component {
         if (followGripper) { 
             let panOffset = 0;
             let tiltOffset = 0;
-            this.lookAtGripperInterval = window.setInterval(() => { 
+            this.lookAtGripperInterval = window.setTimeout(() => { 
                 if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
                     this.lookAtGripper(panOffset, tiltOffset);
                 }
             }, 500)
         } else {
             this.stopExecution()
-            clearInterval(this.lookAtGripperInterval)
+            clearTimeout(this.lookAtGripperInterval)
             this.lookAtGripperInterval = undefined
         }
     }
