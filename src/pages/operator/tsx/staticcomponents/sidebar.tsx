@@ -328,7 +328,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
-        const definition: ComponentDefinition = { type, id };
+        const definition: ComponentDefinition = id ? { type, id }: { type }; 
 
         // Add children based on the component type
         switch (type) {

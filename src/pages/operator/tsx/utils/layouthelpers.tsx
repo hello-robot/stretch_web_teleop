@@ -34,7 +34,11 @@ const getChildFromParent = (parent: ParentComponentDefinition, childIdx: number)
  * @param childIdx index where to insert the child
  */
 const putChildInParent = (parent: ParentComponentDefinition, child: ComponentDefinition, childIdx: number) => {
-    parent.children.splice(childIdx, 0, child);
+    if (parent.children) { 
+        parent.children.splice(childIdx, 0, child)
+    } else {
+        parent.children = [child]
+    }
 }
 
 /**
