@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>stretch-web-interface</name>
+  <name>stretch_teleop_interface</name>
   <version>0.0.0</version>
-  <description>The stretch-web-interface package</description>
+  <description>The stretch teleop interface package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="vinitha@todo.todo">vinitha</maintainer>
+  <maintainer email="vinitha@cs.washington.edu">Vinitha Ranganeni</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -55,7 +55,10 @@
   <build_export_depend>tf2_web_republisher</build_export_depend>
   <exec_depend>rosbridge_server</exec_depend>
   <exec_depend>tf2_web_republisher</exec_depend>
-  <exec_depend>web_video_server</exec_depend>
+  <exec_depend>tf2_sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>compressed_image_transport</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

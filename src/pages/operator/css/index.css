@@ -1,0 +1,110 @@
+:root {
+    --btn-brdr-radius: 0.4rem;
+    --btn-padding: .5em 1em;
+
+    --selected-color: hsl(33, 95%, 63%);
+
+    --btn-gray: #f0f0f0;
+    --btn-blue: hsl(200deg 83.23% 22.29%);
+    --btn-green: rgb(129, 218, 129);
+    --btn-red: hsl(0, 70%, 70%);
+    --btn-turquoise: hsl(171,32%,46%);
+
+    --shadow-color: rgba(112, 112, 112, 0.196);
+
+    --background-color: hsl(0, 0%, 98%);
+    --gray-bg: hsl(0, 0%, 88%);
+
+    --shadow: 3px 3px 2px var(--shadow-color);
+
+    --tab-inactive: hsl(200, 20%, 85%);
+
+    --font-white: hsl(0, 0%, 100%);
+
+    --path-blue: hsl(170,37%,53%)
+}
+
+* {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    font: inherit;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background-color);
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* In customization mode add hidden shadow after each element, to be shown when
+the element is selected */
+.customizing::after {
+    content: "";
+    position: absolute;
+
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    left: 0;
+    top: 0;
+
+    box-shadow: 0 0 1rem 0.5rem var(--selected-color);
+    transition: opacity 0.25s ease-in-out;
+}
+
+.customizing.selected::after {
+    opacity: 1;
+}
+
+/* Button colors **************************************************************/
+
+button {
+    background-color: var(--btn-gray);
+    border: none;
+    border-radius: var(--btn-brdr-radius);
+    padding: var(--btn-padding);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+button .material-icons {
+    margin: -0.25rem;
+}
+
+.btn-green {
+    background-color: var(--btn-green);
+}
+
+.btn-red {
+    background-color: var(--btn-red);
+}
+
+.btn-blue {
+    background-color: var(--btn-blue);
+}
+
+.btn-turquoise {
+    background-color: var(--btn-turquoise);
+}
+
+.font-white {
+    color: var(--font-white)
+}

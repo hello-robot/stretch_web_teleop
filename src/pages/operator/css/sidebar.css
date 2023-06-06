@@ -1,0 +1,185 @@
+#sidebar {
+    width: 20rem;
+    grid-row: 2/4;
+    grid-column: 2;
+    height: 100%;
+    background-color: var(--gray-bg);
+    display: grid;
+    grid-template-rows: 5rem auto 7rem;
+    transition: width 0.5s ease-out;
+    /* Darken the gray background color from index.css */
+    --header-bg: color-mix(in srgb, var(--gray-bg) 90%, black);
+    white-space: nowrap;
+}
+
+#sidebar[hidden] {
+    width: 0;
+}
+
+
+#sidebar p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+
+#sidebar-header {
+    background-color: var(--header-bg);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+
+#sidebar-body {
+    padding: 1rem;
+    box-shadow: inset 0 0 3px 0px var(--shadow-color);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Footer *********************************************************************/
+
+#sidebar-footer {
+    background-color: var(--header-bg);
+}
+
+#delete-button {
+    font-size: 3rem;
+    padding: 1rem;
+    /* Center it */
+    display: block;
+    width: 90%;
+    margin: 0.8rem auto;
+}
+
+#delete-button.active {
+    background-color: var(--btn-lightred);
+    cursor: pointer;
+}
+
+#delete-button.active:hover {
+    background-color: var(--btn-red);
+}
+
+#delete-button:disabled {
+    background-color: lightgray;
+}
+
+/* Options ********************************************************************/
+
+.toggle-button-div {
+    display: inline-block;
+}
+
+.toggle-button {
+    display: inline-block;
+    margin-right: 1rem;
+    width: 7rem;
+    height: 5rem;
+    border-radius: var(--btn-brdr-radius);
+}
+
+.toggle-button.on {
+    background-color: var(--btn-lightgreen);
+}
+
+/* Component Provider *********************************************************/
+#sidebar-component-provider {
+    margin-bottom: 2rem;
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+#components-set {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.provider-tab {
+    border-radius: var(--btn-brdr-radius);
+    box-shadow: var(--shadow);
+    margin-right: 0.5rem;
+}
+
+#sidebar-component-provider button {
+    width: 100%;
+    text-align: left;
+    padding: var(--btn-padding);
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    box-shadow: none;
+}
+
+.provider-tab .active {
+    background-color: var(--selected-color);
+}
+
+.provider-tab button span {
+    width: 2rem;
+    transition: transform 0.2s linear;
+}
+
+.provider-tab button.expanded {
+    filter: brightness(95%);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.provider-tab button.expanded span {
+    transform: scaleY(-1);
+}
+
+.provider-tab button.id-button {
+    padding-left: 3rem;
+}
+
+.id-button {
+    transition: height 0.2s ease-out;
+    border-radius: 0;
+}
+
+.id-button:last-of-type {
+    border-bottom-left-radius: var(--btn-brdr-radius);
+    border-bottom-right-radius: var(--btn-brdr-radius);
+}
+
+/* Global settings area *******************************************************/
+#global-settings>button {
+    display: block;
+}
+
+#global-settings button {
+    height: 3rem;
+}   
+
+#global-settings>* {
+    width: 100%;
+}
+
+#global-settings>*,
+.provider-tab
+{
+    margin-bottom: 0.4rem;
+}
+
+#load-layout-modal .dropdown p {
+    margin: 0;
+}
+
+#load-layout-modal .dropdown em {
+    color: #6a6a6a;
+    margin-right: 1rem;
+}
+
+#load-layout-modal .dropdown {
+    width: 90%;
+}
+
+.select-selected {
+    background-color: dodgerblue;
+}

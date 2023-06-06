@@ -1,36 +1,37 @@
 {
-  "name": "stretch-web-interface",
+  "name": "stretch_teleop_interface",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@babel/preset-typescript": "^7.21.4",
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
-    "@mui/material": "^5.12.0",
     "@types/node": "^16.18.23",
     "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
-    "babel-loader": "^9.1.2",
-    "babel-plugin-react-native-web": "^0.19.4",
+    "@types/react-speech-recognition": "^3.9.2",
+    "@types/roslib": "^1.3.0",
+    "buffer": "^6.0.3",
     "css-loader": "^6.7.3",
+    "dotenv": "^16.0.3",
     "eslint-config-react-app": "^7.0.1",
-    "metro-react-native-babel-preset": "^0.76.2",
-    "node": "^19.8.1",
+    "express": "^4.18.2",
+    "file-loader": "^6.2.0",
+    "firebase": "^9.22.1",
+    "html-webpack-plugin": "^4.5.2",
+    "nodemon": "^2.0.22",
+    "playwright": "^1.33.0",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-gesture-responder": "^2.1.0",
-    "react-grid-dnd": "^2.1.2",
-    "react-native-web": "^0.19.4",
-    "react-svg-path": "^1.14.0",
+    "react-speech-recognition": "^3.10.0",
     "roslib": "^1.3.0",
-    "rosreact": "^0.2.0",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
     "style-loader": "^3.3.2",
-    "typescript": "^4.9.5",
-    "webpack": "^5.78.0",
-    "webpack-dev-server": "^4.13.2"
+    "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "webpack-dev-server --mode development"
+    "firebase": "webpack --mode development --progress --env storage='firebase'",
+    "local": "webpack --mode development --progress --env storage='localstorage'",
+    "styleguide": "styleguidist server"
   },
   "eslintConfig": {
     "extends": [
@@ -51,8 +52,14 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.21.4",
     "@babel/preset-react": "^7.18.6",
-    "html-webpack-plugin": "^4.5.2",
+    "@babel/preset-typescript": "^7.21.4",
+    "babel-loader": "^9.1.2",
+    "babel-polyfill": "^6.26.0",
+    "react-docgen-typescript": "^2.2.2",
+    "react-styleguidist": "^13.1.1",
+    "webpack": "^5.78.0",
     "webpack-cli": "^5.0.2"
   }
 }
