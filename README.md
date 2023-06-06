@@ -73,11 +73,8 @@ curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 sudo apt-get install libnss3-tools
-<<<<<<< HEAD
-roscd stretch-web-interface/certificates && CAROOT=`pwd` mkcert --install
-=======
 roscd stretch_teleop_interface/certificates && CAROOT=`pwd` mkcert --install
->>>>>>> origin/vinitha/dev
+
 ```
 The commands above have executed properly when there are two `.pem` files in the `stretch_teleop_interface/certificates` directory. These will likely be named `rootCA.pem` and `rootCA-key.pem`.
 > **_NOTE_**: You may need to double check the final command executed properly. You may need to navigate to the main directory of your catkin workspace and run `source devel/setup.bash` in order for `roscd` to locate the `stretch_teleop_interface/certificates` directory. You can also manually navigate to that directory and run ``CAROOT=`pwd` mkcert --install``.
