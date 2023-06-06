@@ -304,14 +304,24 @@ export class Robot extends React.Component {
     }
 
     setPanTiltFollowGripper(followGripper: boolean) {
+        if (this.lookAtGripperInterval && followGripper) return;
+        
         if (followGripper) { 
             let panOffset = 0;
             let tiltOffset = 0;
-            this.lookAtGripperInterval = window.setTimeout(() => { 
+            let lookIfReadyAndRepeat = () => {
                 if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
                     this.lookAtGripper(panOffset, tiltOffset);
                 }
-            }, 500)
+                this.lookAtGripperInterval = window.setTimeout(lookIfReadyAndRepeat, 500)
+            }
+            lookIfReadyAndRepeat()
+
+            // this.lookAtGripperInterval = window.setTimeout(() => { 
+            //     if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
+            //         this.lookAtGripper(panOffset, tiltOffset);
+            //     }
+            // }, 500)
         } else {
             this.stopExecution()
             clearTimeout(this.lookAtGripperInterval)

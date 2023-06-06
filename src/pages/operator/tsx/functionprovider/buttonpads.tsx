@@ -182,7 +182,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
         const increment = multiplier * JOINT_INCREMENTS[jointName]! * FunctionProvider.velocityScale;
 
         if (panTiltButtons.includes(buttonPadFunction)) {
-            return { onClick: () => this.incrementalJointMovement(jointName, increment) };
+            return { onClick: () => { 
+                FunctionProvider.remoteRobot?.setToggle("setFollowGripper", false);
+                this.incrementalJointMovement(jointName, increment) 
+            }};
         }
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
@@ -203,11 +206,16 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
+                        action = () => this.incrementalJointMovement(jointName, increment);
+                        break;
                     case (ButtonPadButton.CameraTiltUp):
                     case (ButtonPadButton.CameraTiltDown):
                     case (ButtonPadButton.CameraPanLeft):
                     case (ButtonPadButton.CameraPanRight):
-                        action = () => this.incrementalJointMovement(jointName, increment);
+                        action = () => {
+                            this.incrementalJointMovement(jointName, increment);
+                            FunctionProvider.remoteRobot?.setToggle("setFollowGripper", false);
+                        }
                         break;
                 }
                 return {
@@ -239,11 +247,16 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.WristRotateOut:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
+                        action = () => this.continuousJointMovement(jointName, increment);
+                        break;
                     case (ButtonPadButton.CameraTiltUp):
                     case (ButtonPadButton.CameraTiltDown):
                     case (ButtonPadButton.CameraPanLeft):
                     case (ButtonPadButton.CameraPanRight):
-                        action = () => this.continuousJointMovement(jointName, increment);
+                        action = () => {
+                            this.continuousJointMovement(jointName, increment);
+                            FunctionProvider.remoteRobot?.setToggle("setFollowGripper", false);
+                        }
                         break;
                 }
 
