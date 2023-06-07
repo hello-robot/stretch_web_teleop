@@ -21,11 +21,17 @@
   </node>
 
   <!-- GRIPPER CAMERA -->
-  <include file="$(find stretch_teleop_interface)/launch/gripper_camera.launch"></include>
+  <arg name="gripper_camera" default="true"/>
+  <group if="$(arg gripper_camera)">
+    <include file="$(find stretch_teleop_interface)/launch/gripper_camera.launch"></include>
+  </group>
   <!-- -->
 
   <!-- NAVIGATION CAMERA -->
-  <include file="$(find stretch_teleop_interface)/launch/navigation_camera.launch"></include>
+  <arg name="navigation_camera" default="true"/>
+  <group if="$(arg navigation_camera)">
+    <include file="$(find stretch_teleop_interface)/launch/navigation_camera.launch"></include>
+  </group>
   <!-- -->
   
   <!-- STRETCH DRIVER -->

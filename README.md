@@ -12,7 +12,7 @@
     - [Running the Interface on Stretch](#running-the-interface-on-stretch)
 
 # Overview
-This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic, Python 3.8 and Google Chrome. 
+This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic, Python 3.8 and Google Chrome. This interface uses Stretch's [teleop kit](https://hello-robot.com/stretch-teleop-kit). It is possible to use the interface without the teleop cameras. If you do not have the cameras skip the [Setup Fisheye Cameras](#setup-fisheye-cameras) section.
 
 **WARNING: This prototype code and there are security issues. Use this code at your own risk.**
 
@@ -20,7 +20,7 @@ This interface enables a user to remotely teleoperate a Stretch robot through a 
 Please make sure you are using Ubuntu 20.04 and have [ROS Noetic](http://wiki.ros.org/noetic/Installation/Ubuntu) installed before installing the interface.
 
 ## Installing the Interface and Simulation Environment 
-Create a new catkin workspace, and within the `src` directory clone [stretch_ros](https://github.com/hello-robot/stretch_ros) (`dev/noetic` branch) and [stretch_teleop_interface](https://github.com/vinitha910/stretch-web-interface)
+Create a new catkin workspace, and within the `src` directory clone [stretch_ros](https://github.com/hello-robot/stretch_ros) (`dev/noetic` branch) and [stretch_teleop_interface](https://github.com/hcrlab/stretch_teleop_interface)
 
 If you are installing the interface locally to be run in simulation, clone [hcrl_gazebo](https://github.com/hcrlab/hcrl_gazebo) and [realsense_gazebo_plugin](https://github.com/pal-robotics/realsense_gazebo_plugin):
 
@@ -33,19 +33,19 @@ Then build and source the workspace:
 catkin build
 source devel/setup.bash
 ```
-Install   `python3-pcl`:
+Install   `python3-pcl` and `npm`:
 ```
-sudo apt-get install python3-pcl
+sudo apt-get install python3-pcl npm
 ```
 
 Then install the package dependencies for `stretch_teleop_interface` by running `npm install` in that directory.
 
 ## Setup Fisheye Cameras
-The interface makes use of Stretch's [teleop kit](https://hello-robot.com/stretch-teleop-kit) which contains two fish-eye cameras. We need to setup the `udev` rules so Stretch can identify the cameras.
+The interface makes use of Stretch's [teleop kit](https://hello-robot.com/stretch-teleop-kit) which contains two fish-eye cameras. If you do not have the cameras, **skip** this section. 
 
 > **_NOTE_**: It is possibile to customize the interface to only use the Realsense but the fish-eye cameras add additional perspective making it easier to teleoperate the robot. 
 
-Begin by sourcing your workspace, if you haven't already, and run `./install_gripper_and_navigation_cameras.sh` in `stretch_teleop_interface/fish_eye_cameras`. 
+We need to setup the `udev` rules so Stretch can identify the cameras. Begin by sourcing your workspace, if you haven't already, and run `./install_gripper_and_navigation_cameras.sh` in `stretch_teleop_interface/fish_eye_cameras`. 
 
 Run `sudo dmesg | grep usb` to get information about currently plugged in devices. If you unplug and replug one of the fish-eye cameras before running the command its information will be displayed at the bottom. You should see something like this: 
 ```
@@ -74,7 +74,6 @@ chmod +x mkcert-v*-linux-amd64
 sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 sudo apt-get install libnss3-tools
 roscd stretch_teleop_interface/certificates && CAROOT=`pwd` mkcert --install
-
 ```
 The commands above have executed properly when there are two `.pem` files in the `stretch_teleop_interface/certificates` directory. These will likely be named `rootCA.pem` and `rootCA-key.pem`.
 > **_NOTE_**: You may need to double check the final command executed properly. You may need to navigate to the main directory of your catkin workspace and run `source devel/setup.bash` in order for `roscd` to locate the `stretch_teleop_interface/certificates` directory. You can also manually navigate to that directory and run ``CAROOT=`pwd` mkcert --install``.
@@ -144,6 +143,8 @@ roslaunch stretch_teleop_interface web_interface.launch \
 certfile:=slinky.hcrlab.cs.washington.edu.pem \
 keyfile:=slinky.hcrlab.cs.washington.edu-key.pem 
 ```
+
+The fish eye cameras from the Stretch teleop kit are launched by default. To disable the fish eyes cameras add `gripper_camera:=false` and `navigation_camera:=false`
 
 From within the `stretch_teleop_interface` directory, start the server and robot browser:
 ```
