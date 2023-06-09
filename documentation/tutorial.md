@@ -15,13 +15,13 @@ There are two tabs: `Navigation` and `Manipulation`. The `Navigation` tab has a 
 All the video streams have `button pads` overlaid on the video streams. These buttons control different joints on the robot. Each video stream has its own distinct button pad. To modify the button pads, click the `Customize` button select one of the `button pads` on a video stream and click the trash icon. Then select a new `button pad` that you want to add from the `button pad` drop down in the customize menu. Then select the video stream you want to place it on. 
 
 <p align="center">
-    <img src="assets/change_button_pads.gif">
+    <img src="assets/tutorial/change_button_pads.gif">
 </p>
 
 You can also move button pads outside of the video stream by selecting one of the regions to the side of the stream. 
 
 <p align="center">
-    <img src="assets/move_button_pads.gif">
+    <img src="assets/tutorial/move_button_pads.gif">
 </p>
 
 ## Action Modes
@@ -30,26 +30,26 @@ There are three different `action modes`: Step Actions, Press-Release and Click-
 ### Step Actions
 When you click, Stretch will move a fixed distance based on the selected speed.
 <p align="center">
-    <img src="assets/step_actions.gif">
+    <img src="assets/tutorial/step_actions.gif">
 </p>
 
 ### Press-Release
 Stretch will move while you are pressing and holding the button and will stop when you release.
 <p align="center">
-    <img src="assets/press_release.gif">
+    <img src="assets/tutorial/press_release.gif">
 </p>
 
 ### Click-Click
 Stretch will start moving when you click and will stop when you click again. You can also stop Stretch by moving the cursor outside the button you clicked.
 <p align="center">
-    <img src="assets/click_click.gif">
+    <img src="assets/tutorial/click_click.gif">
 </p>
 
 ## Predictive Display 
 The overhead fish eye video stream has an additional mode called `predictive display`. This mode will overlay a trajectory over the video stream that Stretch will follow. Stretch's speed and heading will depend on the length and curve of the trajectory. Stretch will move faster when the trajectory the longer the trajectory is. The trajectory will turn red when the robot is moving. The robot will rotate in place when you click on the base and will move backwards when you click behind the base. In the `press-release` and `click-click` modes you can move the cursor to update the trajectory while the robot is moving. Additionally, you can scale the speed by selecting one of the speed controls. The video below demonstrates using `predictive display` in the `press-release` mode, however, you can use any of the action modes for `predictive display`. 
 
 <p align="center">
-    <img src="assets/predictive_display.gif">
+    <img src="assets/tutorial/predictive_display.gif">
 </p>
 
 ## Collision and Joint Limits
@@ -67,14 +67,14 @@ You can change the camera direction for both the overhead fish eye and realsense
 </ul>
 
 <p align="center">
-    <img src="assets/change_views.gif">
+    <img src="assets/tutorial/change_views.gif">
 </p>
 
 ## Follow Gripper
 The `follow gripper` button will automatically move the realsense to focus on the gripper as the arm is moved. This is can be useful when trying to pick something up.
 
 <p align="center">
-    <img src="assets/follow_gripper.gif">
+    <img src="assets/tutorial/follow_gripper.gif">
 </p>
 
 ## Depth Sensing
@@ -88,14 +88,14 @@ The `depth sensing` button will highlight points that are in the Stretch's reach
 You can pan and tilt the realsense camera by clicking the buttons bordering the realsense video stream.
 
 <p align="center">
-    <img src="assets/pan_tilt.gif">
+    <img src="assets/tutorial/pan_tilt.gif">
 </p>
 
 ## Button Grid and Joystick
 You can add a `button grid` and `joystick` from the customize menu similar to the way you would add a button pad. The `button grid` is similar to the `button pad` but is separated by the different sets of joints you can control. The `joystick` is similar to how you would drive the robot if you were controlling it with a remote controller's joystick.
 
 <p align="center">
-    <img src="assets/button_grid_joystick.gif">
+    <img src="assets/tutorial/button_grid_joystick.gif">
 </p>
 
 ## Adding/Deleting Panels and Tabs
@@ -105,21 +105,21 @@ A `panel` contains a set of `tabs`; each `tab` contains a `layout` that you can 
 You can add and delete panels. When you add a new `panel`, you must enter a name for a `tab` in that `panel`.
 
 <p align="center">
-    <img src="assets/panels.gif">
+    <img src="assets/tutorial/panels.gif">
 </p>
 
 ### Tabs
 You can add and delete tabs. Click the tab with the plus icon to add a `tab`. You will then be prompted to name the `tab` and can add components in that tab. To delete the `tab`, select it and click the trash icon.
 
 <p align="center">
-    <img src="assets/tabs.gif">
+    <img src="assets/tutorial/tabs.gif">
 </p>
 
 ## Voice Commands
 You can control Stretch with voice commands. Click the info icon to see the available commands. Click the microphone icon to turn on the microphone. After you say a command, the command will display next to microphone icon. Click the microphone icon to turn off the microphone.
 
 <p align="center">
-    <img src="assets/voice_commands.gif">
+    <img src="assets/tutorial/voice_commands.gif">
 </p>
 
 ## Load/Save Layouts

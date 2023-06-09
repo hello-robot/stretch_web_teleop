@@ -1,6 +1,6 @@
-import { MAIN_BRANCH_LAYOUT } from "../default_layouts/main_branch";
-import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/stretch2client";
-import { STUDY_BRANCH_LAYOUT } from "../default_layouts/study_branch";
+import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
+import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
+import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
 
 /** Type for all the possible names of default layouts. */
