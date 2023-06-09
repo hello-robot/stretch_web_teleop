@@ -1,11 +1,11 @@
 import React from "react";
-import { VelocityControl } from "operator/tsx/staticcomponents/velocitycontrol"
-import { LayoutArea } from "./staticcomponents/layoutarea";
-import { CustomizeButton } from "./staticcomponents/customizebutton";
-import { GlobalOptionsProps, Sidebar } from "./staticcomponents/sidebar";
-import { SharedState } from "./layoutcomponents/customizablecomponent";
+import { VelocityControl } from "operator/tsx/staticcomponents/VelocityControl"
+import { LayoutArea } from "./staticcomponents/LayoutArea";
+import { CustomizeButton } from "./staticcomponents/CustomizeButton";
+import { GlobalOptionsProps, Sidebar } from "./staticcomponents/Sidebar";
+import { SharedState } from "./layoutcomponents/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
-import { VoiceCommands } from "./staticcomponents/voicecommands";
+import { VoiceCommands } from "./staticcomponents/VoiceCommands";
 import { RemoteStream } from "shared/util";
 import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
 import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider";

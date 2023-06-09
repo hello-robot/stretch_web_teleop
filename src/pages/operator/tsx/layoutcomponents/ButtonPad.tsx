@@ -1,11 +1,11 @@
 import React from "react";
-import "operator/css/buttonpads.css"
-import { CustomizableComponentProps, SharedState, isSelected } from "./customizablecomponent";
+import { CustomizableComponentProps, SharedState, isSelected } from "./CustomizableComponent";
 import { ButtonPadDef, ButtonPadId } from "../utils/componentdefinitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
+import "operator/css/ButtonPad.css"
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {

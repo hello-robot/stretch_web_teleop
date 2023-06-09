@@ -1,5 +1,5 @@
 import React from "react";
-import { CustomizableComponentProps, isSelected } from "./customizablecomponent";
+import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import { className } from "shared/util";
 import { SVG_RESOLUTION } from "../utils/svg";
 import { predicitiveDisplayFunctionProvider } from "..";

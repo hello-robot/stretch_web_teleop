@@ -1,5 +1,5 @@
 import React from "react";
-import "operator/css/velocitycontrol.css";
+import "operator/css/VelocityControl.css";
 
 /**Details of a velocity setting */
 type VelocityDetails = {

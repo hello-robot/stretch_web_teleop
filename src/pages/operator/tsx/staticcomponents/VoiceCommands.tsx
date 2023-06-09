@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { voiceFunctionProvider } from "operator/tsx/index";
-import "operator/css/voicecommands.css"
 import "operator/css/basic_components.css"
-import React from "react";
+import "operator/css/VoiceCommands.css"
 
 /** All the possible button functions */
 export enum VoiceCommandFunction {

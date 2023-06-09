@@ -1,9 +1,9 @@
 import React from "react"
-import "operator/css/sidebar.css"
 import { className } from "shared/util";
 import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
 import { PopupModal } from "../basic_components/popup_modal";
 import { Dropdown } from "../basic_components/dropdown";
+import "operator/css/Sidebar.css"
 
 type SidebarProps = {
     hidden: boolean;

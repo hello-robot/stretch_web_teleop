@@ -1,11 +1,11 @@
 import React from "react";
 import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/componentdefinitions"
-import { ComponentList, ComponentListProps } from "operator/tsx/layoutcomponents/componentlist";
-import "operator/css/tabs.css"
-import { CustomizableComponentProps } from "operator/tsx/layoutcomponents/customizablecomponent";
 import { className } from "shared/util";
-import { DropZone } from "operator/tsx/layoutcomponents/dropzone";
 import { PopupModal } from "../basic_components/popup_modal";
+import { ComponentListProps, ComponentList } from "./ComponentList";
+import { DropZone } from "./DropZone";
+import "operator/css/Panel.css"
+import { CustomizableComponentProps } from "./CustomizableComponent";
 
 /* 
 TODO:
@@ -17,9 +17,8 @@ implement behavior:
  * Customizable tabs component which displays the labels of the tabs at the top,
  * and renders the contents of the active tab inside.
  * @param props {@link CustomizableComponentProps}
- * @returns tabs component
  */
-export const Tabs = (props: CustomizableComponentProps) => {
+export const Panel = (props: CustomizableComponentProps) => {
     // Index of the active tab
     let [activeTab, setActiveTab] = React.useState(0);
     // If should show the popup to name a new tab

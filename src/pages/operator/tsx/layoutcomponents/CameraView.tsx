@@ -1,22 +1,22 @@
 import React from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
 import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/componentdefinitions";
-import { ButtonPad } from "./buttonpads";
-import { CustomizableComponentProps, isSelected, SharedState } from "./customizablecomponent";
-import { DropZone } from "./dropzone";
-import { PredictiveDisplay } from "./predictivedisplay";
-import "operator/css/videostreamcomponent.css"
+import { ButtonPad } from "./ButtonPad";
+import { CustomizableComponentProps, isSelected, SharedState } from "./CustomizableComponent";
+import { DropZone } from "./DropZone";
+import { PredictiveDisplay } from "./PredictiveDisplay";
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../functionprovider/buttonpads";
-import { OverheadButtons, overheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton, UnderVideoFunctionProvider } from "../functionprovider/undervideobuttons";
+import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../functionprovider/undervideobuttons";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
+import "operator/css/CameraView.css"
 
 /**
  * Displays a video stream with an optional button pad overlay
  * 
  * @param props properties
  */
-export const VideoStreamComponent = (props: CustomizableComponentProps) => {
+export const CameraView = (props: CustomizableComponentProps) => {
     // Reference to the video element
     const videoRef = React.useRef<HTMLVideoElement>(null);
     // X and Y position of the cursor when user clicks on the video

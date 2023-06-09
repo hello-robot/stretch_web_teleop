@@ -1,6 +1,6 @@
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
-import { CustomizableComponentProps, isSelected } from "./customizablecomponent";
+import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import "operator/css/ButtonGrid.css"
 import { className } from "shared/util";
 

@@ -10,7 +10,7 @@ import { ButtonFunctionProvider } from 'operator/tsx/functionprovider/buttonpads
 import { PredictiveDisplayFunctionProvider } from 'operator/tsx/functionprovider/predictivedisplay'
 import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons';
 import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
-import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/velocitycontrol';
+import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/VelocityControl';
 import "operator/css/index.css"
 import { StorageHandler } from './storage_handler/StorageHandler';
 import { FirebaseStorageHandler } from './storage_handler/FirebaseStorageHandler';

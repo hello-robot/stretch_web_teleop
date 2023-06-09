@@ -1,10 +1,10 @@
 import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
-import { DropZoneState } from "./dropzone";
-import { Tabs } from "./tabs";
+import { DropZoneState } from "./DropZone";
+import { Panel } from "./Panel";
 import { RemoteStream } from "shared/util";
-import { ButtonPad } from "./buttonpads";
-import { VideoStreamComponent } from "./videostreamcomponent";
-import { PredictiveDisplay } from "./predictivedisplay";
+import { ButtonPad } from "./ButtonPad";
+import { CameraView } from "./CameraView";
+import { PredictiveDisplay } from "./PredictiveDisplay";
 import { ButtonStateMap } from "../functionprovider/buttonpads";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
@@ -56,11 +56,11 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
     // switch on the component type to render specific type of component
     switch (props.definition.type) {
         case ComponentType.Panel:
-            return <Tabs {...props} />
+            return <Panel {...props} />
         case ComponentType.ButtonPad:
             return <ButtonPad {...props} />;
         case ComponentType.VideoStream:
-            return <VideoStreamComponent {...props} />;
+            return <CameraView {...props} />;
         case ComponentType.PredictiveDisplay:
             return <PredictiveDisplay {...props} />;
         case ComponentType.ButtonGrid:

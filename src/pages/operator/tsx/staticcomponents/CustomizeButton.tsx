@@ -1,4 +1,4 @@
-import "operator/css/customizebutton.css"
+import "operator/css/CustomizeButton.css"
 
 type CustomizeButtonProps = {
     /** If the interface is in customization mode */

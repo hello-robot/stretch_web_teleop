@@ -1,7 +1,7 @@
 import { FunctionProvider } from "./functionprovider"
-import { VoiceCommandFunction, VoiceCommandFunctions } from "../staticcomponents/voicecommands"
+import { VoiceCommandFunction, VoiceCommandFunctions } from "../staticcomponents/VoiceCommands"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS } from 'shared/util'
-import { VELOCITY_SCALE } from "../staticcomponents/velocitycontrol"
+import { VELOCITY_SCALE } from "../staticcomponents/VelocityControl"
 
 export class VoiceFunctionProvider extends FunctionProvider {
     constructor() {

@@ -33,9 +33,14 @@ Then build and source the workspace:
 catkin build
 source devel/setup.bash
 ```
-Install   `python3-pcl` and `npm`:
+Install  `python3-pcl` and `npm`:
 ```
 sudo apt-get install python3-pcl npm
+```
+Update node:
+```
+curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash -
+sudo apt install -y nodejs
 ```
 
 Then install the package dependencies for `stretch_teleop_interface` by running `npm install` in that directory.
