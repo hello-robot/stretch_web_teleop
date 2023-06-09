@@ -59,7 +59,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <Panel {...props} />
         case ComponentType.ButtonPad:
             return <ButtonPad {...props} />;
-        case ComponentType.VideoStream:
+        case ComponentType.CameraView:
             return <CameraView {...props} />;
         case ComponentType.PredictiveDisplay:
             return <PredictiveDisplay {...props} />;

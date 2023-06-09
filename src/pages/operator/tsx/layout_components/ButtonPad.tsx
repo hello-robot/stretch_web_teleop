@@ -1,6 +1,6 @@
 import React from "react";
 import { CustomizableComponentProps, SharedState, isSelected } from "./CustomizableComponent";
-import { ButtonPadDef, ButtonPadId } from "../utils/component_definitions";
+import { ButtonPadDefinition, ButtonPadId } from "../utils/component_definitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
@@ -9,15 +9,15 @@ import "operator/css/ButtonPad.css"
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {
-    /* If the button pad is overlaid on a video stream. */
+    /* If the button pad is overlaid on a camera view. */
     overlay?: boolean;
     /* Aspect ratio of the button pad */
     aspectRatio?: number;
 }
 
 /**
- * A set of buttons which can be overlaid as a child of a video stream or 
- * lonestanding.
+ * A set of buttons which can be overlaid as a child of a camera view or 
+ * standalone.
  * 
  * @param props {@link ButtonPadProps}
  */
@@ -25,7 +25,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     /** Reference to the SVG which makes up the button pad */
     const svgRef = React.useRef<SVGSVGElement>(null);
     /** List of path shapes for each button on the button pad */
-    const definition = props.definition as ButtonPadDef;
+    const definition = props.definition as ButtonPadDefinition;
     const id: ButtonPadId = definition.id;
     if (!id) throw Error("Undefined button pad ID at path " + props.path);
     const [shape, functions] = getShapeAndFunctionsFromId(definition.id);

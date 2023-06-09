@@ -1,6 +1,6 @@
 import React from "react"
 import { className } from "shared/util";
-import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/component_definitions";
+import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId } from "../utils/component_definitions";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
@@ -65,10 +65,10 @@ export const Sidebar = (props: SidebarProps) => {
 function componentDescription(definition: ComponentDefinition): string {
     switch (definition.type) {
         case (ComponentType.ButtonPad):
-        case (ComponentType.VideoStream):
-            return `${(definition as VideoStreamDef | ButtonPadDef).id} ${definition.type}`
+        case (ComponentType.CameraView):
+            return `${(definition as CameraViewDefinition | ButtonPadDefinition).id} ${definition.type}`
         case (ComponentType.SingleTab):
-            return `\"${(definition as SingleTabDef).label}\" Tab`;
+            return `\"${(definition as TabDefinition).label}\" Tab`;
         case (ComponentType.Panel):
         case (ComponentType.VirtualJoystick):
         case (ComponentType.ButtonGrid):
@@ -239,9 +239,9 @@ type OptionsProps = {
 /** Displays options for the currently selected layout component. */
 const SidebarOptions = (props: OptionsProps) => {
     switch (props.activeDef.type) {
-        case (ComponentType.VideoStream):
-            switch ((props.activeDef as VideoStreamDef).id!) {
-                case (VideoStreamId.overhead):
+        case (ComponentType.CameraView):
+            switch ((props.activeDef as CameraViewDefinition).id!) {
+                case (CameraViewId.overhead):
                     return <OverheadVideoStreamOptions {...props} />;
             }
             break;
@@ -251,7 +251,7 @@ const SidebarOptions = (props: OptionsProps) => {
 
 /** Options for the overhead camera video stream layout component. */
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
-    const definition = props.activeDef as VideoStreamDef;
+    const definition = props.activeDef as CameraViewDefinition;
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     function togglePredictiveDisplay() {
@@ -321,7 +321,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     /** The options for possible components to add */
     const outlines: ComponentProviderTabOutline[] = [
         { type: ComponentType.Panel },
-        { type: ComponentType.VideoStream, ids: Object.values(VideoStreamId) },
+        { type: ComponentType.CameraView, ids: Object.values(CameraViewId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
         { type: ComponentType.VirtualJoystick }
@@ -333,7 +333,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         // Add children based on the component type
         switch (type) {
             case (ComponentType.Panel):
-            case (ComponentType.VideoStream):
+            case (ComponentType.CameraView):
                 (definition as ParentComponentDefinition).children = []
                 break;
         }
@@ -413,7 +413,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         <div className="provider-tab" key={props.type}>
             <button onClick={clickExpand} className={tabActive && !props.ids ? "active" : props.expanded ? "expanded" : ""}>
                 <span className="material-icons">{props.ids ? "expand_more" : ""}</span>
-                {props.type == ComponentType.Panel ? "Panel" : props.type == ComponentType.VideoStream ? "Camera View" : props.type}
+                {props.type}
             </button>
             <div className="provider-tab-dropdown" hidden={!props.expanded}>
                 {

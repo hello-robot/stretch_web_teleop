@@ -15,8 +15,8 @@ export enum ActionMode {
 export enum ComponentType {
     Layout = "Layout",
     Panel = "Panel",
-    SingleTab = "Single Tab",
-    VideoStream = "Video Stream",
+    SingleTab = "Tab",
+    CameraView = "Camera View",
     ButtonPad = "Button Pad",
     PredictiveDisplay = "Predictive Display",
     ButtonGrid = "Button Grid",
@@ -26,7 +26,7 @@ export enum ComponentType {
 /**
  * ID for the video stream, one for each of the cameras
  */
-export enum VideoStreamId {
+export enum CameraViewId {
     overhead = "Overhead",
     realsense = "Realsense",
     gripper = "Gripper"
@@ -52,7 +52,7 @@ export enum ButtonPadId {
  * (e.g. which video stream camera, or which button pad)
  * @note any new components with ID fields should be added to this type
  */
-export type ComponentId = VideoStreamId | ButtonPadId;
+export type ComponentId = CameraViewId | ButtonPadId;
 
 /**
  * Definition for any interface component. Any video stream, button pad, 
@@ -68,7 +68,7 @@ export type ComponentDefinition = {
 /**
  * Definition for a button pad component
  */
-export type ButtonPadDef = ComponentDefinition & {
+export type ButtonPadDefinition = ComponentDefinition & {
     /** Indicates the shape and functions on the button pad*/
     id: ButtonPadId;
 }
@@ -85,7 +85,7 @@ export type LayoutDefinition = ParentComponentDefinition & {
 /**
  * Definition for a single tab in a tabs component
  */
-export type SingleTabDef = ParentComponentDefinition & {
+export type TabDefinition = ParentComponentDefinition & {
     /** The label that appears at the top of the tabs object. */
     label: string;
 }
@@ -93,17 +93,17 @@ export type SingleTabDef = ParentComponentDefinition & {
 /**
  * Definition for a tabs component
  */
-export type TabsDef = ParentComponentDefinition & {
+export type PanelDefinition = ParentComponentDefinition & {
     /** List of definitions for individual tabs */
-    children: SingleTabDef[];
+    children: TabDefinition[];
 }
 
 /**
  * Definition for a video stream component
  */
-export type VideoStreamDef = ParentComponentDefinition & {
+export type CameraViewDefinition = ParentComponentDefinition & {
     /** Indicates the camera video of the video stream */
-    id: VideoStreamId;
+    id: CameraViewId;
 }
 
 /**
@@ -114,7 +114,7 @@ export type VideoStreamDef = ParentComponentDefinition & {
  * simultaneously, any change to this defintion for one view will impact
  * all views.
  */
-export type OverheadVideoStreamDef = VideoStreamDef & {
+export type OverheadVideoStreamDef = CameraViewDefinition & {
     /** 
      * If true, the view should be cropped and rotated to focus on the gripper.
      * Otherwise, camera view should be unchanged
@@ -130,7 +130,7 @@ export type OverheadVideoStreamDef = VideoStreamDef & {
  * simultaneously, any change to this defintion for one view will impact
  * all views.
  */
-export type RealsenseVideoStreamDef = VideoStreamDef & {
+export type RealsenseVideoStreamDef = CameraViewDefinition & {
     /**
      * If the Realsense camera should pan and tilt to keep the gripper centered 
      * in the view.

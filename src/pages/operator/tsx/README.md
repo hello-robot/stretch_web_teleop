@@ -17,3 +17,9 @@ A list of directories and their contents:
     * components which are always visible, such as the action mode button, sidebar, velocity control, or customization button
 * `utils/`
     * typescript files which contain logic seperated from the React components
+* `Operator.tsx/`
+    * Highest level React component for the entire operator page
+* `index.tsx`
+    * Logic for connecting with the robot browser using WebRTC
+    * Initializes state for the application
+    * Renders `Operator`

@@ -13,7 +13,7 @@
     flex-direction: column; */
 }
 
-/* Overlays the button pad on top of the video stream*/
+/* Overlays the button pad on top of the camera view*/
 .video-overlay-container {
     z-index: 1;
     position: absolute;

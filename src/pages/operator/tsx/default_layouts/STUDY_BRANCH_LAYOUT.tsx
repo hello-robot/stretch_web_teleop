@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
+import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonPadDefinition, PanelDefinition, TabDefinition, LayoutDefinition, ActionMode, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
 
 /**
  * Default layout to load on start
@@ -17,8 +17,8 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                     children: [
                         // Overhead camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.overhead,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.overhead,
                             gripperView: false,
                             children: [
                                 {
@@ -30,15 +30,15 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                         } as OverheadVideoStreamDef,
                         // Realsense camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.realsense,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.realsense,
                             followGripper: false,
                             depthSensing: false,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.Drive,
-                                } as ButtonPadDef
+                                } as ButtonPadDefinition
                             ]
                         } as RealsenseVideoStreamDef
                     ]
@@ -48,8 +48,8 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                     label: 'Manipulation',
                     children: [
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.overhead,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.overhead,
                             gripperView: true,
                             children: [
                                 {
@@ -59,30 +59,30 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                             ]
                         } as OverheadVideoStreamDef,
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.realsense,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.realsense,
                             followGripper: false,
                             depthSensing: false,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.ManipRealsense,
-                                } as ButtonPadDef
+                                } as ButtonPadDefinition
                             ]
                         } as RealsenseVideoStreamDef,
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.gripper,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.gripper,
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.Gripper
                                 }
                             ]
-                        } as VideoStreamDef
+                        } as CameraViewDefinition
                     ]
-                } as SingleTabDef
+                } as TabDefinition
             ]
-        } as TabsDef
+        } as PanelDefinition
     ]
 }

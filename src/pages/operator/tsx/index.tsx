@@ -5,7 +5,7 @@ import { WebRTCMessage, RemoteStream } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './Operator';
-import { DEFAULT_VELOCITY_SCALE } from './static_components/VelocityControl';
+import { DEFAULT_VELOCITY_SCALE } from './static_components/SpeedControl';
 import { StorageHandler } from './storage_handler/StorageHandler';
 import { FirebaseStorageHandler } from './storage_handler/FirebaseStorageHandler';
 import { LocalStorageHandler } from './storage_handler/LocalStorageHandler';

@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
+import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonPadDefinition, PanelDefinition, TabDefinition, LayoutDefinition, ActionMode, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
 
 /**
  * Layout from Stretch to the Client paper
@@ -34,6 +34,6 @@ export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
                     ]
                 }
             ]
-        } as TabsDef
+        } as PanelDefinition
     ]
 }

@@ -1,4 +1,4 @@
-import { ComponentType, VideoStreamId, ButtonPadId, VideoStreamDef, ButtonPadDef, TabsDef, SingleTabDef, LayoutDefinition, ActionMode } from "../utils/component_definitions";
+import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonPadDefinition, PanelDefinition, TabDefinition, LayoutDefinition, ActionMode } from "../utils/component_definitions";
 
 /**
  * Layout from the main branch
@@ -17,26 +17,26 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                     children: [
                         // Overhead camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.overhead,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.overhead,
                             children: [
                                 // {
                                 //     type: ComponentType.ButtonPad,
                                 //     id: ButtonPadId.ManipOverhead
                                 // }
                             ]
-                        } as VideoStreamDef,
+                        } as CameraViewDefinition,
                         // Realsense camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.realsense,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.realsense,
                             children: [
                                 // {
                                 //     type: ComponentType.ButtonPad,
                                 //     id: ButtonPadId.Drive,
                                 // } as ButtonPadDef
                             ]
-                        } as VideoStreamDef,
+                        } as CameraViewDefinition,
                         // Gripper camera
                         // {
                         //     type: ComponentType.VideoStream,
@@ -56,8 +56,8 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                     children: [
                         // Overhead camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.overhead,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.overhead,
                             children: [
                                 // {
                                 //     type: ComponentType.PredictiveDisplay,
@@ -65,33 +65,33 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                                 //     // id: ButtonPadId.overhead
                                 // }
                             ]
-                        } as VideoStreamDef,
+                        } as CameraViewDefinition,
                         // Realsense camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.realsense,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.realsense,
                             children: [
                                 // {
                                 //     type: ComponentType.ButtonPad,
                                 //     id: ButtonPadId.Drive,
                                 // } as ButtonPadDef
                             ]
-                        } as VideoStreamDef,
+                        } as CameraViewDefinition,
                         // Gripper camera
                         {
-                            type: ComponentType.VideoStream,
-                            id: VideoStreamId.gripper,
+                            type: ComponentType.CameraView,
+                            id: CameraViewId.gripper,
                             children: [
                                 // {
                                 //     type: ComponentType.ButtonPad,
                                 //     id: ButtonPadId.Gripper
                                 // }
                             ]
-                        } as VideoStreamDef
+                        } as CameraViewDefinition
                     ]
                 }
             ]
-        } as TabsDef,
+        } as PanelDefinition,
         {
             type: ComponentType.Panel,
             children: [
@@ -102,9 +102,9 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.ButtonPad,
                             id: ButtonPadId.Base,
-                        } as ButtonPadDef
+                        } as ButtonPadDefinition
                     ]
-                } as SingleTabDef,
+                } as TabDefinition,
                 {
                     type: ComponentType.SingleTab,
                     label: 'Camera',
@@ -112,9 +112,9 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.ButtonPad,
                             id: ButtonPadId.Camera,
-                        } as ButtonPadDef
+                        } as ButtonPadDefinition
                     ]
-                } as SingleTabDef,
+                } as TabDefinition,
                 {
                     type: ComponentType.SingleTab,
                     label: 'Wrist',
@@ -122,9 +122,9 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.ButtonPad,
                             id: ButtonPadId.Wrist,
-                        } as ButtonPadDef
+                        } as ButtonPadDefinition
                     ]
-                } as SingleTabDef,
+                } as TabDefinition,
                 {
                     type: ComponentType.SingleTab,
                     label: 'Arm',
@@ -132,10 +132,10 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.ButtonPad,
                             id: ButtonPadId.Arm,
-                        } as ButtonPadDef
+                        } as ButtonPadDefinition
                     ]
-                } as SingleTabDef
+                } as TabDefinition
             ]
-        } as TabsDef
+        } as PanelDefinition
     ]
 }

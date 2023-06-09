@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/component_definitions"
+import { ComponentType, ParentComponentDefinition, TabDefinition, PanelDefinition } from "../utils/component_definitions"
 import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
 import { ComponentListProps, ComponentList } from "./ComponentList";
@@ -23,7 +23,7 @@ export const Panel = (props: CustomizableComponentProps) => {
     let [activeTab, setActiveTab] = React.useState(0);
     // If should show the popup to name a new tab
     const [showTabModal, setShowTabModal] = React.useState(false);
-    const definition = props.definition as TabsDef;
+    const definition = props.definition as PanelDefinition;
     const countChildren = definition.children.length;
 
     // Handle case where active tab was moved or deleted, just use last remaining tab
@@ -61,7 +61,7 @@ export const Panel = (props: CustomizableComponentProps) => {
             type: ComponentType.SingleTab,
             label: name,
             children: []
-        } as SingleTabDef;
+        } as TabDefinition;
         // Add it as a new child
         definition.children.push(newTabDef);
         // Set as selected element (and rerender)
@@ -128,7 +128,7 @@ export const Panel = (props: CustomizableComponentProps) => {
      * @param idx index of the child component in the children array
      * @returns A button to switch tabs
      */
-    function mapTabLabels(tabDef: SingleTabDef, idx: number) {
+    function mapTabLabels(tabDef: TabDefinition, idx: number) {
         const active = activeTab === idx;
         const selected = childTabSelected === idx;
         return (

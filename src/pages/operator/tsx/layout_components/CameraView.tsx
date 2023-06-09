@@ -1,6 +1,6 @@
 import React from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
-import { VideoStreamDef, ComponentType, VideoStreamId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
+import { CameraViewDefinition, ComponentType, CameraViewId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import { CustomizableComponentProps, isSelected, SharedState } from "./CustomizableComponent";
 import { DropZone } from "./DropZone";
@@ -21,7 +21,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const videoRef = React.useRef<HTMLVideoElement>(null);
     // X and Y position of the cursor when user clicks on the video
     const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
-    const definition = props.definition as VideoStreamDef;
+    const definition = props.definition as CameraViewDefinition;
     if (!definition.children) console.warn(`Video stream definition at ${props.path} should have a 'children' property.`);
     // Get the stream to display inside the video
     const stream: MediaStream = getStream(definition.id, props.sharedState.remoteStreams);
@@ -131,7 +131,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     )
     // If the video is from the Realsense camera then include the pan-tilt 
     // buttons around the video, otherwise return the video
-    const videoComponent = (props.definition.id === VideoStreamId.realsense) ?
+    const videoComponent = (props.definition.id === CameraViewId.realsense) ?
         (
             <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
                 {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
@@ -296,13 +296,13 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
  * @param definition definition of the video stream
  * @returns aspect ratio of the video stream
  */
-function getVideoAspectRatio(definition: VideoStreamDef): number {
+function getVideoAspectRatio(definition: CameraViewDefinition): number {
     switch (definition.id) {
-        case (VideoStreamId.gripper):
+        case (CameraViewId.gripper):
             return gripperProps.width / gripperProps.height;
-        case (VideoStreamId.overhead):
+        case (CameraViewId.overhead):
             return navigationProps.width / navigationProps.height;
-        case (VideoStreamId.realsense):
+        case (CameraViewId.realsense):
             return realsenseProps.width / realsenseProps.height;
         default:
             throw Error(`undefined aspect ratio for ${definition.type}`)
@@ -353,16 +353,16 @@ function createOverlay(
  * @param remoteStreams map of {@link RemoteStream}
                         * @returns the corresponding stream
                         */
-function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>): MediaStream {
+function getStream(id: CameraViewId, remoteStreams: Map<string, RemoteStream>): MediaStream {
     let streamName: string;
     switch (id) {
-        case VideoStreamId.overhead:
+        case CameraViewId.overhead:
             streamName = "overhead";
             break;
-        case VideoStreamId.realsense:
+        case CameraViewId.realsense:
             streamName = "realsense";
             break;
-        case VideoStreamId.gripper:
+        case CameraViewId.gripper:
             streamName = "gripper";
             break;
         default:
@@ -376,16 +376,16 @@ function getStream(id: VideoStreamId, remoteStreams: Map<string, RemoteStream>):
  * be changing the view cropping for the overhead camera, hiding the depth sensing
  * for the Realsense, etc.
  * 
- * @param definition {@link VideoStreamDef}
+ * @param definition {@link CameraViewDefinition}
  */
-function executeVideoSettings(definition: VideoStreamDef) {
+function executeVideoSettings(definition: CameraViewDefinition) {
     switch (definition.id) {
-        case (VideoStreamId.gripper):
+        case (CameraViewId.gripper):
             break;
-        case (VideoStreamId.overhead):
+        case (CameraViewId.overhead):
             executeOverheadSettings(definition as OverheadVideoStreamDef);
             break;
-        case (VideoStreamId.realsense):
+        case (CameraViewId.realsense):
             executeRealsenseSettings(definition as RealsenseVideoStreamDef);
             break;
         default:
@@ -422,16 +422,16 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
  * Buttons to display under a video stream (e.g. toggle cropping of overhead 
  * stream, display depth sensing on Realsense, etc.)
  */
-const UnderVideoButtons = (props: {definition: VideoStreamDef}) => {
+const UnderVideoButtons = (props: {definition: CameraViewDefinition}) => {
     let buttons: JSX.Element | null;
     switch (props.definition.id) {
-        case (VideoStreamId.gripper):
+        case (CameraViewId.gripper):
             buttons = null;
             break;
-        case (VideoStreamId.overhead):
+        case (CameraViewId.overhead):
             buttons = <UnderOverheadButtons definition={props.definition}/>;
             break;
-        case (VideoStreamId.realsense):
+        case (CameraViewId.realsense):
             buttons = <UnderRealsenseButtons definition={props.definition}/>;
             break;
         default:

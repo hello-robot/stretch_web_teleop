@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentDefinition, ComponentType, SingleTabDef, TabsDef } from "../utils/component_definitions";
+import { ComponentDefinition, ComponentType, TabDefinition, PanelDefinition } from "../utils/component_definitions";
 import { SharedState } from "./CustomizableComponent";
 import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
@@ -81,7 +81,7 @@ export const DropZone = (props: DropZoneProps) => {
         if (props.sharedState.dropZoneState.activeDef?.type !== ComponentType.Panel)
             throw Error(`Should only call createNewPanel() when the active selected component is of type Panel`);
 
-        const def = props.sharedState.dropZoneState.activeDef as TabsDef;
+        const def = props.sharedState.dropZoneState.activeDef as PanelDefinition;
 
         if (def.children.length > 1)
             throw Error(`createNewPanel() called with active panel definition that already has children: ${def.children}`)
@@ -94,7 +94,7 @@ export const DropZone = (props: DropZoneProps) => {
             type: ComponentType.SingleTab,
             label: newTabName,
             children: []
-        } as SingleTabDef)
+        } as TabDefinition)
 
         // Drop the new panel into the drop zone
         props.sharedState.dropZoneState.onDrop(props.path);
@@ -102,7 +102,7 @@ export const DropZone = (props: DropZoneProps) => {
 
     const isActive = props.sharedState.customizing && canDrop();
     const inTab = props.parentDef.type === ComponentType.Panel;
-    const overlay = props.parentDef.type === ComponentType.VideoStream;
+    const overlay = props.parentDef.type === ComponentType.CameraView;
     const standard = !(inTab || overlay);
 
     return (
@@ -184,7 +184,7 @@ function dropzoneRules(active: ComponentType, parent: ComponentType) {
         return false;
 
     // Only button pad can go into video stream
-    if (active !== ComponentType.ButtonPad && parent === ComponentType.VideoStream)
+    if (active !== ComponentType.ButtonPad && parent === ComponentType.CameraView)
         return false;
 
     return true;
