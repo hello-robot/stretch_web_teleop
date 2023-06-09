@@ -50,8 +50,6 @@ Below is a diagram showing the hiearchy between components in the operator page.
         
 ## Layout
 
-The layout is an object containing a set of nested `CustomizableComponents`, which all components in the layout inherit from. To see an example of the layout structure view a file in `default_layouts`.
-
 Here's a simple example of a layout:
 
 ```ts
@@ -99,17 +97,34 @@ export const SIMPLE_LAYOUT: LayoutDefinition = {
 }
 ```
 
+The layout is an object containing a set of nested `ComponentDefinitions`, where each `ComponentDefinition` represents the details for a `CustomizableComponent` to render.
+
+The predefined default layouts can be found in `./tsx/default_layouts/`.
+
+All of the definitions for the different component definitions can be found in `./tsx/utils/component_definitions.tsx`
+
 ## Render Logic Flow
+
+This diagram shows the flow of logic between classes and components while the Operator Page renders.
 
 ![Operator render logic flow](../../../documentation/assets/render_logic_flow.png)
 
 **`StorageHandler`**
-: When the `Operator` first renders, it gets the `layout` from the `StorageHandler` (to preserve state between page reloads). Whenever the user changes the `layout`, `Operator` will save the updated state with the `StorageHandler`.
+: When the `Operator` first renders, it gets the `layout` from the `StorageHandler` (to preserve state between page reloads). Whenever the user changes the `layout`, `Operator` will save the updated state with `StorageHandler`.
 
 **`Operator`**
-: `Operator` creates a `sharedState` object with relevant information for all components in the layout, then passes the `layout` and `sharedState` to the `LayoutArea` which corresponds to "Layout" in the Component Hiearchy.
+: creates a `sharedState` object with relevant information for all components in the layout, then passes the `layout` and `sharedState` to the `LayoutArea`.
 
 **`LayoutArea`**
-: 
+:  corresponds to "Layout" in the Component Hiearchy. This renders the individual components in the layout, with `DropZone`'s in between so that components can be moved in customize mode.
+
+**`CustomizableComponent`**
+: a single component in the layout, the customizable component renders a different subcomponent based on the `type` in the `ComponentDefinition`.
+
+**`FunctionProvider`**
+: takes the action mode and speed control from `ActionMode` and `SpeedControl` respectively. Returns a set of functions for how different controls should behave, for example `onClick` and `onRelease` for a button on a `ButtonPad`.
+
+**`ButtonPad` and other controls**
+: when `ButtonPad` or another control renders, it gets the set of functions from the `FunctionProvider`.
 
 
