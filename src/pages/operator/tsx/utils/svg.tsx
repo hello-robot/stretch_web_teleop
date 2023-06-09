@@ -15,7 +15,7 @@ import panRight from "operator/icons/Pan_Right.svg"
 import tiltUp from "operator/icons/Tilt_Up.svg"
 import tiltDown from "operator/icons/Tilt_Down.svg"
 
-import { ButtonPadButton } from "../functionprovider/buttonpads"
+import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider"
 
 /** The pixel width of SVG components. */
 export const SVG_RESOLUTION = 500;

@@ -1,5 +1,5 @@
 import { StorageHandler } from "./StorageHandler";
-import { LayoutDefinition } from "../utils/componentdefinitions";
+import { LayoutDefinition } from "../utils/component_definitions";
 
 /** Uses browser local storage to store data. */
 export class LocalStorageHandler extends StorageHandler {

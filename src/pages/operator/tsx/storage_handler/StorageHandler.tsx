@@ -1,7 +1,7 @@
 import { MAIN_BRANCH_LAYOUT } from "../default_layouts/main_branch";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/stretch2client";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/study_branch";
-import { LayoutDefinition } from "operator/tsx/utils/componentdefinitions";
+import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
 
 /** Type for all the possible names of default layouts. */
 export type DefaultLayoutName = "Button Pad Overlays" | "Button Pad Panel" | "Button Grid/Joystick/Voice Commands";

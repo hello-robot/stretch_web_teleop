@@ -4,18 +4,18 @@ import { WebRTCConnection } from 'shared/webrtcconnections';
 import { WebRTCMessage, RemoteStream } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
-import { Operator } from './operator';
-import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider';
-import { ButtonFunctionProvider } from 'operator/tsx/functionprovider/buttonpads'
-import { PredictiveDisplayFunctionProvider } from 'operator/tsx/functionprovider/predictivedisplay'
-import { UnderVideoFunctionProvider } from './functionprovider/undervideobuttons';
-import { VoiceFunctionProvider } from 'operator/tsx/functionprovider/voicecommands'
-import { DEFAULT_VELOCITY_SCALE } from './staticcomponents/VelocityControl';
-import "operator/css/index.css"
+import { Operator } from './Operator';
+import { DEFAULT_VELOCITY_SCALE } from './static_components/VelocityControl';
 import { StorageHandler } from './storage_handler/StorageHandler';
 import { FirebaseStorageHandler } from './storage_handler/FirebaseStorageHandler';
 import { LocalStorageHandler } from './storage_handler/LocalStorageHandler';
 import { FirebaseOptions } from "firebase/app"
+import { ButtonFunctionProvider } from './function_providers/ButtonFunctionProvider';
+import { FunctionProvider } from './function_providers/FunctionProvider';
+import { PredictiveDisplayFunctionProvider } from './function_providers/PredictiveDisplayFunctionProvider';
+import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
+import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
+import "operator/css/index.css"
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;

@@ -1,8 +1,8 @@
 import React from "react"
 import { className } from "shared/util";
-import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/componentdefinitions";
-import { PopupModal } from "../basic_components/popup_modal";
-import { Dropdown } from "../basic_components/dropdown";
+import { ButtonPadDef, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, SingleTabDef, TabsDef, VideoStreamDef, VideoStreamId } from "../utils/component_definitions";
+import { PopupModal } from "../basic_components/PopupModal";
+import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
 
 type SidebarProps = {

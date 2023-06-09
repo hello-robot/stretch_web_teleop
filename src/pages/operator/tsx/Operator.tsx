@@ -1,19 +1,19 @@
 import React from "react";
-import { VelocityControl } from "operator/tsx/staticcomponents/VelocityControl"
-import { LayoutArea } from "./staticcomponents/LayoutArea";
-import { CustomizeButton } from "./staticcomponents/CustomizeButton";
-import { GlobalOptionsProps, Sidebar } from "./staticcomponents/Sidebar";
-import { SharedState } from "./layoutcomponents/CustomizableComponent";
-import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/componentdefinitions";
-import { VoiceCommands } from "./staticcomponents/VoiceCommands";
+import { VelocityControl } from "operator/tsx/static_components/VelocityControl"
+import { LayoutArea } from "./static_components/LayoutArea";
+import { CustomizeButton } from "./static_components/CustomizeButton";
+import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
+import { SharedState } from "./layout_components/CustomizableComponent";
+import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
+import { VoiceCommands } from "./static_components/VoiceCommands";
 import { RemoteStream } from "shared/util";
-import { addToLayout, moveInLayout, removeFromLayout } from "operator/tsx/utils/layouthelpers";
-import { FunctionProvider } from "operator/tsx/functionprovider/functionprovider";
 import { buttonFunctionProvider } from ".";
-import { ButtonStateMap } from "./functionprovider/buttonpads";
-import { Dropdown } from "./basic_components/dropdown";
+import { ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
+import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
-import "operator/css/operator.css"
+import "operator/css/Operator.css"
+import { FunctionProvider } from "./function_providers/FunctionProvider";
+import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
 
 /** Operator interface webpage */
 export const Operator = (props: {

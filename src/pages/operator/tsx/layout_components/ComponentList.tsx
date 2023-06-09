@@ -1,7 +1,7 @@
 import React from "react";
 import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./CustomizableComponent";
 import { DropZone } from "./DropZone";
-import { ParentComponentDefinition, ComponentDefinition } from "../utils/componentdefinitions";
+import { ParentComponentDefinition, ComponentDefinition } from "../utils/component_definitions";
 
 /** Properties for {@link ComponentList} */
 export type ComponentListProps = {

@@ -1,8 +1,8 @@
 import { buttonFunctionProvider } from "operator/tsx/index";
-import { ButtonFunctions, ButtonPadButton, ButtonState } from "../functionprovider/buttonpads";
+import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
 import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
-import "operator/css/ButtonGrid.css"
 import { className } from "shared/util";
+import "operator/css/ButtonGrid.css"
 
 const BUTTON_NAMES = [
     "Forward",

@@ -1,11 +1,11 @@
-import { ComponentDefinition, ComponentType } from "../utils/componentdefinitions";
+import { ComponentDefinition, ComponentType } from "../utils/component_definitions";
 import { DropZoneState } from "./DropZone";
 import { Panel } from "./Panel";
 import { RemoteStream } from "shared/util";
 import { ButtonPad } from "./ButtonPad";
 import { CameraView } from "./CameraView";
 import { PredictiveDisplay } from "./PredictiveDisplay";
-import { ButtonStateMap } from "../functionprovider/buttonpads";
+import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
 

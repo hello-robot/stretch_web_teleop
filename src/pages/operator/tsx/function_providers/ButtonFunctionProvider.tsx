@@ -1,6 +1,6 @@
-import { FunctionProvider } from 'operator/tsx/functionprovider/functionprovider'
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints, ValidJointStateDict } from 'shared/util'
-import { ActionMode } from '../utils/componentdefinitions'
+import { ActionMode } from '../utils/component_definitions'
+import { FunctionProvider } from './FunctionProvider';
 
 /** 
  * Each of the possible buttons which could be on a button pad. The string is 

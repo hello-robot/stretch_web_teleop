@@ -1,8 +1,8 @@
 import React from "react";
-import { ComponentDefinition, ComponentType, SingleTabDef, TabsDef } from "../utils/componentdefinitions";
+import { ComponentDefinition, ComponentType, SingleTabDef, TabsDef } from "../utils/component_definitions";
 import { SharedState } from "./CustomizableComponent";
 import { className } from "shared/util";
-import { PopupModal } from "../basic_components/popup_modal";
+import { PopupModal } from "../basic_components/PopupModal";
 import "operator/css/DropZone.css"
 
 /** State required for drop zones */

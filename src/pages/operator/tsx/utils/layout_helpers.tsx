@@ -1,4 +1,4 @@
-import { ParentComponentDefinition, ComponentDefinition, ComponentType } from "operator/tsx/utils/componentdefinitions";
+import { ParentComponentDefinition, ComponentDefinition, ComponentType } from "operator/tsx/utils/component_definitions";
 
 /**
  * Gets the parent definition for the given child path

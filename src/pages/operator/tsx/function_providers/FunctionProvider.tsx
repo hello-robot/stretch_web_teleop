@@ -1,7 +1,7 @@
 import { RemoteRobot } from "shared/remoterobot"
 import { VelocityCommand } from 'shared/commands'
 import { ValidJoints } from "shared/util";
-import { ActionMode } from "../utils/componentdefinitions";
+import { ActionMode } from "../utils/component_definitions";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the 

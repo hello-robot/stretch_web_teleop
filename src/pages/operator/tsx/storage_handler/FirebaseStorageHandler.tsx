@@ -1,5 +1,5 @@
 import { StorageHandler } from "./StorageHandler";
-import { LayoutDefinition } from "../utils/componentdefinitions";
+import { LayoutDefinition } from "../utils/component_definitions";
 
 import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "firebase/app";
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'

@@ -1,11 +1,11 @@
 import React from "react";
-import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/componentdefinitions"
+import { ComponentType, ParentComponentDefinition, SingleTabDef, TabsDef } from "../utils/component_definitions"
 import { className } from "shared/util";
-import { PopupModal } from "../basic_components/popup_modal";
+import { PopupModal } from "../basic_components/PopupModal";
 import { ComponentListProps, ComponentList } from "./ComponentList";
 import { DropZone } from "./DropZone";
-import "operator/css/Panel.css"
 import { CustomizableComponentProps } from "./CustomizableComponent";
+import "operator/css/Panel.css"
 
 /* 
 TODO:

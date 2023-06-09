@@ -1,4 +1,4 @@
-import { FunctionProvider } from "./functionprovider"
+import { FunctionProvider } from "./FunctionProvider"
 import { REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
 
 export enum UnderVideoButton {
