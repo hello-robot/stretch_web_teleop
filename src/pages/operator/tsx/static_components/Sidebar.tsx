@@ -10,30 +10,30 @@ type SidebarProps = {
     onDelete: () => void;
     updateLayout: () => void;
     onSelect: (def: ComponentDefinition, path?: string) => void;
-    activeDef?: ComponentDefinition;
-    activePath?: string;
+    selectedDefinition?: ComponentDefinition;
+    selectedPath?: string;
     globalOptionsProps: GlobalOptionsProps
 }
 
 /** Popup on the right side of the screen while in customization mode. */
 export const Sidebar = (props: SidebarProps) => {
-    const deleteDisabled = props.activePath === undefined;
+    const deleteDisabled = props.selectedPath === undefined;
     const deleteTooltip = deleteDisabled ? "You must select an element before you can delete it" : "";
-    const selectedDescription = props.activeDef ? componentDescription(props.activeDef) : "none";
+    const selectedDescription = props.selectedDefinition ? componentDescription(props.selectedDefinition) : "none";
     return (
         <div id="sidebar" hidden={props.hidden}>
             <div id="sidebar-header">
                 <b>Selected: {selectedDescription}</b>
             </div>
             <div id="sidebar-body">
-                {props.activePath ?
+                {props.selectedPath ?
                     <SidebarOptions
-                        activeDef={props.activeDef!}
+                        selectedDefinition={props.selectedDefinition!}
                         updateLayout={props.updateLayout}
                     /> :
                     <React.Fragment>
                         <SidebarComponentProvider
-                            activeDef={props.activeDef}
+                            selectedDefinition={props.selectedDefinition}
                             onSelect={props.onSelect}
                         />
                         <SidebarGlobalOptions
@@ -233,7 +233,7 @@ const SaveLayoutModal = (props: {
 
 type OptionsProps = {
     /** Definition of the currently selected component from operator. */
-    activeDef: ComponentDefinition;
+    selectedDefinition: ComponentDefinition;
     /** Callback to rerender the layout in operator. */
     updateLayout: () => void;
 }
@@ -241,9 +241,9 @@ type OptionsProps = {
 /** Displays options for the currently selected layout component. */
 const SidebarOptions = (props: OptionsProps) => {
     let contents: JSX.Element | null = null;
-    switch (props.activeDef.type) {
+    switch (props.selectedDefinition.type) {
         case (ComponentType.CameraView):
-            switch ((props.activeDef as CameraViewDefinition).id!) {
+            switch ((props.selectedDefinition as CameraViewDefinition).id!) {
                 case (CameraViewId.overhead):
                     contents = <OverheadVideoStreamOptions {...props} />;
             }
@@ -260,7 +260,7 @@ const SidebarOptions = (props: OptionsProps) => {
 
 /** Options for the overhead camera video stream layout component. */
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
-    const definition = props.activeDef as CameraViewDefinition;
+    const definition = props.selectedDefinition as CameraViewDefinition;
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     function togglePredictiveDisplay() {
@@ -288,7 +288,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
 
 /** Options when user selects a single tab within a panel. */
 const TabOptions = (props: OptionsProps) => {
-    const definition = props.activeDef as TabDefinition;
+    const definition = props.selectedDefinition as TabDefinition;
     const [showRenameModal, setShowRenameModal] = React.useState<boolean>(false);
     const [renameText, setRenameText] = React.useState<string>("");
     function handleRename() {
@@ -354,7 +354,7 @@ const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
 /** Properties for {@link SidebarComponentProvider} */
 type SidebarComponentProviderProps = {
     /** Definition of the currently selected component from operator. */
-    activeDef?: ComponentDefinition;
+    selectedDefinition?: ComponentDefinition;
     /** Callback function when a component is selected from the sidebar. */
     onSelect: (def: ComponentDefinition, path?: string) => void;
 }
@@ -391,7 +391,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         const tabProps: ComponentProviderTabProps = {
             ...outline,
             expanded,
-            activeDef: props.activeDef,
+            selectedDefinition: props.selectedDefinition,
             onExpand: () => setExpandedType(expanded ? undefined : outline.type),
             onSelect: (id?: ComponentId) => handleSelect(outline.type, id)
         }
@@ -424,7 +424,7 @@ type ComponentProviderTabOutline = {
 /** Properties for a single tab representing a single component type. */
 type ComponentProviderTabProps = ComponentProviderTabOutline & {
     expanded: boolean;
-    activeDef?: ComponentDefinition;
+    selectedDefinition?: ComponentDefinition;
     onSelect: (id?: ComponentId) => void;
     onExpand: () => void;
 }
@@ -435,9 +435,9 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
  * identifiers, so it will be a button without a dropdown.
  */
 const ComponentProviderTab = (props: ComponentProviderTabProps) => {
-    const tabActive = props.type === props.activeDef?.type;
+    const tabActive = props.type === props.selectedDefinition?.type;
     function mapIds(id: ComponentId) {
-        const active = tabActive && id === props.activeDef?.id;
+        const active = tabActive && id === props.selectedDefinition?.id;
         return (
             <button
                 key={id}

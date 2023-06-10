@@ -1,5 +1,9 @@
 # Operator page TypeScript files
 
+For more info on [how to create your own component](./create_component.md).
+
+For more info on [how the customization logic works](./customization_logic.md).
+
 ## Directory outline
 
 A list of directories and their contents:
@@ -22,23 +26,27 @@ A list of directories and their contents:
 * `index.tsx`
     * Logic for connecting with the robot browser using WebRTC
     * Initializes state for the application
-    * Renders `Operator`
+    * Renders `Operator`     
+# Render Logic Flow
 
-# Creating Your Own Components
+This diagram shows the flow of logic between classes and components while the Operator Page renders.
 
-To create a new component you'll want to follow these steps:
+![Operator render logic flow](../../../../documentation/assets/operator/render_logic_flow.png)
 
-1. **Create a new type** for your component in `ComponentType` in `utils/component_definitions.tsx`.
-    * If there are going to be subtypes of your component then define an id for each of the subtypes like `CameraViewId` in `utils/component_definitions.tsx`
-    * If you component needs any other field in order for it to render (such as a `TabDefinition` having a `label`), then create a seperate definition for your component with those fields.
+**`StorageHandler`**
+: When the `Operator` first renders, it gets the `layout` from the `StorageHandler` (to preserve state between page reloads). Whenever the user changes the `layout`, `Operator` will save the updated state with `StorageHandler`.
 
-1. **Create a new file** in `layout_components` with the React code for your new component. The React functional component should take `CustomizableComponentProps` as its props. A field in `CustomizableComponentProps` is the `ComponentDefinition`, so you should be able to access all of the fields in the components defintion there. Here are some more details about the React component you create:
+**`Operator`**
+: creates a `sharedState` object with relevant information for all components in the layout, then passes the `layout` and `sharedState` to the `LayoutArea`.
 
-    1. **Selecting the component**. In your React component code, make sure there's a way to select the component if the user should be able to move it around the layout. This means calling `props.sharedState.onSelect` with the definition and path of the component. For an example, see the `onSelect` function defined in the `ButtonPad` functional component in `layout_components/ButtonPad.tsx`
-    1. **Setting the class name**. The standard is to use the [`className()`](../../../shared/util.tsx) util function to set the "customizing" and "selected" flags in a component classname. See [`CameraView.tsx`](./layout_components/CameraView.tsx) for an example.
+**`LayoutArea`**
+:  corresponds to "Layout" in the Component Hiearchy. This renders the individual components in the layout, with `DropZone`'s in between so that components can be moved in customize mode.
 
-1. **Add the component to `CustomizableComponent`**. In the switch statement within `CustomizableComponent` add a case associating the `ComponentType` for your component with the React functional component.
+**`CustomizableComponent`**
+: a single component in the layout, the customizable component renders a different subcomponent based on the `type` in the `ComponentDefinition`.
 
-1. **Create a definition** for your component in [`componentDescription()`](./static_components/Sidebar.tsx). Add a case to the switch statement for your `ComponentType`. This function tells the sidebar what to display (rather than "Selected: none") when your new component is selected.
+**`FunctionProvider`**
+: takes the action mode and speed control from `ActionMode` and `SpeedControl` respectively. Returns a set of functions for how different controls should behave, for example `onClick` and `onRelease` for a button on a `ButtonPad`.
 
-> TODO: I believe these are all the steps to create a new component. If any steps are missing or the process changes, make sure to update the instructions here.
+**`ButtonPad` and other controls**
+: when `ButtonPad` or another control renders, it gets the set of functions from the `FunctionProvider`.

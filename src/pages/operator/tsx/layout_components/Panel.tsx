@@ -107,9 +107,9 @@ export const Panel = (props: CustomizableComponentProps) => {
      * child.
      */
     function checkChildTabSelected(): number | null {
-        const activePath = props.sharedState.activePath;
-        if (!activePath) return null;  // nothing is selected/active
-        const activeSplitPath = activePath.split('-');
+        const selectedPath = props.sharedState.selectedPath;
+        if (!selectedPath) return null;  // nothing is selected/active
+        const activeSplitPath = selectedPath.split('-');
         const thisSplitPath = props.path.split('-');
         const activeChild = thisSplitPath.every((val, index) => val === activeSplitPath[index]);
         if (!activeChild) return null;  // active path is not a child element

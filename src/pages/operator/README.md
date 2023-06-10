@@ -2,17 +2,17 @@
 
 The operator page is what users see while teleoperating the robot.
 
-For more info on the directory file structure see [documentation here](./tsx/README.md).
+For more detailed info on the operator page logic and directory file structure see [documentation here](./tsx/README.md).
 
 ## Operator Page
 
-![Operator Page](../../../documentation/assets/operator_page.png)
+![Operator Page](../../../documentation/assets/operator/operator_page.png)
 
-## Component Hiearchy
+## Component Hierarchy
 
-Below is a diagram showing the hiearchy between components in the operator page.
+Below is a diagram showing the hierarchy between components in the operator page.
 
-![operator page component hiearcy](../../../documentation/assets/component_hiearchy.png)
+![operator page component hierarchy](../../../documentation/assets/operator/component_hiearchy.png)
 
 * Header
 : fixed at the top of the screen, this displays controls that the user always has access to
@@ -47,82 +47,4 @@ Below is a diagram showing the hiearchy between components in the operator page.
         : a virtual joystick which can be used to control the base
         * Button Pad
         : a set of buttons which can be placed independently or over a camera view
-        
-## Layout
-
-Here's a simple example of a layout:
-
-```ts
-import { LayoutDefinition, ComponentType, ActionMode, CameraViewId, ButtonPadId, OverheadVideoStreamDef, TabDefinition, PanelDefinition } from "/utils/component_definitions";
-
-export const SIMPLE_LAYOUT: LayoutDefinition = {
-    // All components have a type
-    type: ComponentType.Layout,
-    // If voice control should be displayed on the operator page
-    displayVoiceControl: false,
-    // The state of the action mode dropdown
-    actionMode: ActionMode.StepActions,
-
-    // The customizable components in the layout
-    children: [
-        {
-            // The layout contains a single panel
-            type: ComponentType.Panel,
-            children: [
-                {
-                    // The panel contains a single tab
-                    type: ComponentType.SingleTab,
-                    // The title of the tab is "Tab One"
-                    label: 'Tab One',
-                    children: [
-                        {
-                            // Tab contains a single camera view
-                            type: ComponentType.CameraView,
-                            // From the Stretch overhead camera
-                            id: CameraViewId.overhead,
-                            children: [
-                                {
-                                    // Camera view has a button pad overlay
-                                    type: ComponentType.ButtonPad,
-                                    // Button pad to control the base 
-                                    id: ButtonPadId.Drive
-                                }
-                            ]
-                        } as OverheadVideoStreamDef
-                    ]
-                } as TabDefinition
-            ]
-        } as PanelDefinition
-    ]
-}
-```
-
-The layout is an object containing a set of nested `ComponentDefinitions`, where each `ComponentDefinition` represents the details for a `CustomizableComponent` to render.
-
-The predefined default layouts can be found in `./tsx/default_layouts/`.
-
-All of the definitions for the different component definitions can be found in `./tsx/utils/component_definitions.tsx`
-
-## Render Logic Flow
-
-This diagram shows the flow of logic between classes and components while the Operator Page renders.
-
-![Operator render logic flow](../../../documentation/assets/render_logic_flow.png)
-
-**`StorageHandler`**
-: When the `Operator` first renders, it gets the `layout` from the `StorageHandler` (to preserve state between page reloads). Whenever the user changes the `layout`, `Operator` will save the updated state with `StorageHandler`.
-
-**`Operator`**
-: creates a `sharedState` object with relevant information for all components in the layout, then passes the `layout` and `sharedState` to the `LayoutArea`.
-
-**`LayoutArea`**
-:  corresponds to "Layout" in the Component Hiearchy. This renders the individual components in the layout, with `DropZone`'s in between so that components can be moved in customize mode.
-
-**`CustomizableComponent`**
-: a single component in the layout, the customizable component renders a different subcomponent based on the `type` in the `ComponentDefinition`.
-
-**`FunctionProvider`**
-: takes the action mode and speed control from `ActionMode` and `SpeedControl` respectively. Returns a set of functions for how different controls should behave, for example `onClick` and `onRelease` for a button on a `ButtonPad`.
-
-**`ButtonPad` and other controls**
-: when `ButtonPad` or another control renders, it gets the set of functions from the `FunctionProvider`.
+   

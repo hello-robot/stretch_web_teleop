@@ -15,7 +15,7 @@ export type DropZoneState = {
      */
     onDrop: (path: string) => void,
     /** Definition of the active selected component */
-    activeDef?: ComponentDefinition
+    selectedDefinition?: ComponentDefinition
 }
 
 /** Properties for {@link DropZone} */
@@ -38,24 +38,24 @@ export const DropZone = (props: DropZoneProps) => {
 
     function canDrop(): boolean {
         const { path, parentDef } = props;
-        const { activePath } = props.sharedState;
-        const { activeDef } = props.sharedState.dropZoneState;
+        const { selectedPath } = props.sharedState;
+        const { selectedDefinition } = props.sharedState.dropZoneState;
 
         // If no active object selected
-        if (!activeDef) {
+        if (!selectedDefinition) {
             return false;
         }
 
         // Must pass drop zone rules about which components can go where
-        if (!dropzoneRules(activeDef.type, parentDef.type)) return false;
+        if (!dropzoneRules(selectedDefinition.type, parentDef.type)) return false;
 
         // Don't need to check if dropzone is adjacent if the active component
         // is coming from the sidebar component provider
-        if (!activePath) return true;
+        if (!selectedPath) return true;
 
         // Can't drop if dropzone is right next to the active element
         // (that wouldn't move the active element at all)
-        return !pathsAdjacent(activePath, path);
+        return !pathsAdjacent(selectedPath, path);
     }
 
     /** Calls onDrop function from Operator with the path of this dropzone */
@@ -63,8 +63,8 @@ export const DropZone = (props: DropZoneProps) => {
         if (!props.sharedState.customizing) return;
         e.stopPropagation();
         // If adding a new tabs component from the sidebar
-        if (props.sharedState.dropZoneState.activeDef?.type === ComponentType.Panel &&
-            props.sharedState.activePath === undefined) {
+        if (props.sharedState.dropZoneState.selectedDefinition?.type === ComponentType.Panel &&
+            props.sharedState.selectedPath === undefined) {
             setShowNewPanelModal(true);
             return;
         }
@@ -78,16 +78,16 @@ export const DropZone = (props: DropZoneProps) => {
      * @param newTabName the name of the tab child within the new panel
      */
     function createNewPanel(newTabName: string) {
-        if (props.sharedState.dropZoneState.activeDef?.type !== ComponentType.Panel)
+        if (props.sharedState.dropZoneState.selectedDefinition?.type !== ComponentType.Panel)
             throw Error(`Should only call createNewPanel() when the active selected component is of type Panel`);
 
-        const def = props.sharedState.dropZoneState.activeDef as PanelDefinition;
+        const def = props.sharedState.dropZoneState.selectedDefinition as PanelDefinition;
 
         if (def.children.length > 1)
             throw Error(`createNewPanel() called with active panel definition that already has children: ${def.children}`)
 
-        if (props.sharedState.activePath !== undefined)
-            throw Error(`Called createNewPanel() when active selected path was not undefined ${props.sharedState.activePath}`);
+        if (props.sharedState.selectedPath !== undefined)
+            throw Error(`Called createNewPanel() when active selected path was not undefined ${props.sharedState.selectedPath}`);
 
         // Create a child tab and add it to the Panel's children
         def.children.push({
@@ -198,13 +198,13 @@ function dropzoneRules(active: ComponentType, parent: ComponentType) {
  * @note this prevents displaying drop zones directly adjacent to the selected 
  * component, which would have no effect on the components position.
  * 
- * @param activePath path to the active element
+ * @param selectedPath path to the active element
  * @param path path to this drop zone
  * @returns true if the paths are directly adjacent, false otherwise
  */
-function pathsAdjacent(activePath: string, path: string) {
+function pathsAdjacent(selectedPath: string, path: string) {
     // Check paths same length
-    const splitActivePath = activePath.split('-');
+    const splitActivePath = selectedPath.split('-');
     const splitSelfPath = path.split('-');
     const sameLength = splitActivePath.length == splitSelfPath.length;
     if (!sameLength) return false;

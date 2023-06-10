@@ -22,8 +22,8 @@ export const Operator = (props: {
     storageHandler: StorageHandler
 }) => {
     const [customizing, setCustomizing] = React.useState(false);
-    const [activePath, setActivePath] = React.useState<string | undefined>(undefined);
-    const [activeDef, setActiveDef] = React.useState<ComponentDefinition | undefined>(undefined);
+    const [selectedPath, setSelectedPath] = React.useState<string | undefined>(undefined);
+    const [selectedDefinition, setSelectedDef] = React.useState<ComponentDefinition | undefined>(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -72,17 +72,17 @@ export const Operator = (props: {
      * into the drop zone
      * @param path path to the clicked drop zone
      */
-    const handleDrop = (path: string) => {
+    function handleDrop(path: string) {
         console.log("handleDrop", path);
-        if (!activeDef) throw Error('Active definition undefined on drop event')
+        if (!selectedDefinition) throw Error('Active definition undefined on drop event')
         let newPath: string = path;
-        if (!activePath) {
+        if (!selectedPath) {
             // New element not already in the layout
-            addToLayout(activeDef, path, layout.current);
+            addToLayout(selectedDefinition, path, layout.current);
         } else {
-            newPath = moveInLayout(activePath, path, layout.current);
+            newPath = moveInLayout(selectedPath, path, layout.current);
         }
-        setActivePath(newPath);
+        setSelectedPath(newPath);
         console.log('new active path', newPath)
         updateLayout();
     }
@@ -92,32 +92,32 @@ export const Operator = (props: {
      * @param path path to the selected component
      * @param def definition of the selected component
      */
-    const handleSelect = (def: ComponentDefinition, path?: string) => {
+    function handleSelect(def: ComponentDefinition, path?: string) {
         console.log('selected', path);
         if (!customizing) return;
 
         // If reselected the same component at the same path, or the same component
         // without a path from the sidebar, then unactivate it
-        const pathsMatch = activePath && activePath == path;
-        const defsMatch = !activePath && def.type === activeDef?.type && def.id === activeDef?.id;
+        const pathsMatch = selectedPath && selectedPath == path;
+        const defsMatch = !selectedPath && def.type === selectedDefinition?.type && def.id === selectedDefinition?.id;
         if (pathsMatch || defsMatch) {
-            setActiveDef(undefined);
-            setActivePath(undefined);
+            setSelectedDef(undefined);
+            setSelectedPath(undefined);
             return;
         }
 
         // Activate the selected component
-        setActiveDef(def);
-        setActivePath(path);
+        setSelectedDef(def);
+        setSelectedPath(path);
     }
 
     /** Callback when the delete button in the sidebar is clicked */
-    const handleDelete = () => {
-        if (!activePath) throw Error('handleDelete called when activePath is undefined');
-        removeFromLayout(activePath, layout.current);
+    function handleDelete () {
+        if (!selectedPath) throw Error('handleDelete called when selectedPath is undefined');
+        removeFromLayout(selectedPath, layout.current);
         updateLayout();
-        setActivePath(undefined);
-        setActiveDef(undefined);
+        setSelectedPath(undefined);
+        setSelectedDef(undefined);
     }
 
     /**
@@ -129,14 +129,14 @@ export const Operator = (props: {
             props.storageHandler.saveCurrentLayout(layout.current);
         }
         setCustomizing(!customizing);
-        setActiveDef(undefined);
-        setActivePath(undefined);
+        setSelectedDef(undefined);
+        setSelectedPath(undefined);
     }
 
-    /** Un-select current component when click inside of header. */
+    /** Un-select current component when click inside of header */
     function handleClickHeader() {
-        setActiveDef(undefined); 
-        setActivePath(undefined);
+        setSelectedDef(undefined);
+        setSelectedPath(undefined);
     }
 
     /** State passed from the operator and shared by all components */
@@ -144,10 +144,10 @@ export const Operator = (props: {
         customizing: customizing,
         onSelect: handleSelect,
         remoteStreams: remoteStreams,
-        activePath: activePath,
+        selectedPath: selectedPath,
         dropZoneState: {
             onDrop: handleDrop,
-            activeDef: activeDef
+            selectedDefinition: selectedDefinition
         },
         buttonStateMap: buttonStateMap.current
     }
@@ -204,8 +204,8 @@ export const Operator = (props: {
                 onDelete={handleDelete}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
-                activeDef={activeDef}
-                activePath={activePath}
+                selectedDefinition={selectedDefinition}
+                selectedPath={selectedPath}
                 globalOptionsProps={globalOptionsProps}
             />
         </div>

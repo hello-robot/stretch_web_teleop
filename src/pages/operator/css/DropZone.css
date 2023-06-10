@@ -25,7 +25,7 @@
 }
 
 /* Dropzone is a tab in a tabs component header */
-.drop-zone.tab {
+.drop-zone.material-icons.tab {
     margin: 0;
     width: 5rem;
     padding-top: 10px;

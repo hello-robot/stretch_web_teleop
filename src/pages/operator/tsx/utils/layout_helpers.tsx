@@ -68,19 +68,19 @@ export function moveInLayout(
 
 /**
  * Adds a new component to the layout
- * @param activeDef definition of the component to add into the layout
+ * @param definition definition of the component to add into the layout
  * @param newPath path where to add the new component
  * @param layout the entire layout structure
  */
 export function addToLayout(
-    activeDef: ComponentDefinition,
+    definition: ComponentDefinition,
     newPath: string,
     layout: LayoutDefinition
 ) {
     let newPathSplit = newPath.split('-');
     const newChildIdx = +newPathSplit.slice(-1);
     const newParent = getParent(newPathSplit, layout);
-    putChildInParent(newParent, activeDef, newChildIdx);
+    putChildInParent(newParent, definition, newChildIdx);
 }
 
 /**

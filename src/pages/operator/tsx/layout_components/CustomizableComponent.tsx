@@ -19,7 +19,7 @@ export type SharedState = {
     /** State required for all dropzones */
     dropZoneState: DropZoneState,
     /** Path to the active component */
-    activePath?: string,
+    selectedPath?: string,
     /** Mapping of each button pad function to a {@link ButtonState} */
     buttonStateMap?: ButtonStateMap
 };
@@ -77,5 +77,5 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
  * @returns true if selected, otherwise false
  */
 export function isSelected(props: CustomizableComponentProps): boolean {
-    return props.path === props.sharedState.activePath;
+    return props.path === props.sharedState.selectedPath;
 }
