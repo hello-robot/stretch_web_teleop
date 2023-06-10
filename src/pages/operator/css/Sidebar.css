@@ -55,20 +55,12 @@
     margin: 0.8rem auto;
 }
 
-#delete-button.active {
-    background-color: var(--btn-lightred);
-    cursor: pointer;
-}
-
-#delete-button.active:hover {
-    background-color: var(--btn-red);
-}
-
-#delete-button:disabled {
-    background-color: lightgray;
-}
-
 /* Options ********************************************************************/
+
+#sidebar-options>button {
+    height: 5rem;
+    width: 100%;
+}
 
 .toggle-button-div {
     display: inline-block;

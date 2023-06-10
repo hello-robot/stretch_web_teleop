@@ -9,8 +9,8 @@ type VelocityDetails = {
     scale: number
 };
 
-/**Props for VelocityControl */
-type VelocityControlProps = {
+/**Props for {@link SpeedControl} */
+type SpeedControlProps = {
     /** Initial speed when interface first loaded. */
     scale: number;
     /**
@@ -32,8 +32,11 @@ export const VELOCITY_SCALE: VelocityDetails[] = [
 /**The speed the interface should initialize with */
 export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].scale;
 
-/** The velocity control buttons. */
-export const VelocityControl = (props: VelocityControlProps) => {
+/**
+ * Set of buttons so the user can control the scaling of the speed for all controls.
+ * @param props see {@link SpeedControlProps}
+ */
+export const SpeedControl = (props: SpeedControlProps) => {
     /** Maps the velocity labels and speeds to radio buttons */
     const mapFunc = ({ scale, label }: VelocityDetails) => {
         const active = scale === props.scale;

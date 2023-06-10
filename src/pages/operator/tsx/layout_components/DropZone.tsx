@@ -130,7 +130,8 @@ const NewPanelModal = (props: {
     show: boolean,
     /** Callback to change the state of `show` */
     setShow: (show: boolean) => void,
-    /** Callback to add the panel (drop into the dropzone).
+    /** 
+     * Callback to add the panel (drop into the dropzone).
      * @param tabName the name of the tab child in the new panel
      */
     addPanel: (tabName: string) => void
@@ -149,9 +150,10 @@ const NewPanelModal = (props: {
             onAccept={handleAccept}
             id="new-panel-modal"
             acceptButtonText="Create Panel"
+            acceptDisabled={text.length < 1}
         >
             <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
-            <input type="text" id="new-tab-name" name="new-tab-name"
+            <input autoFocus type="text" id="new-tab-name" name="new-tab-name"
                 value={text} onChange={handleChange}
                 placeholder="label for the new tab"
             />

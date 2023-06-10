@@ -195,10 +195,10 @@ const NewTabModal = (props: {
 }) => {
     const [text, setText] = React.useState("");
     function handleAccept() {
-        const newLabel = text.length > 0 ? text : 'new tab';
-        props.addTab(newLabel);
+        if (text.length > 0) {
+            props.addTab(text);
+        }
     }
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) { setText(e.target.value); }
 
     return (
         <PopupModal
@@ -207,10 +207,11 @@ const NewTabModal = (props: {
             onAccept={handleAccept}
             id="new-tab-modal"
             acceptButtonText="Create Tab"
+            acceptDisabled={text.length < 1}
         >
             <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
-            <input type="text" id="new-tab-name" name="new-tab-name"
-                value={text} onChange={handleChange}
+            <input autoFocus type="text" id="new-tab-name" name="new-tab-name"
+                value={text} onChange={e => setText(e.target.value)}
                 placeholder="label for the new tab"
             />
         </PopupModal>

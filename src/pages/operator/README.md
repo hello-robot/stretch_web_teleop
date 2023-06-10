@@ -126,5 +126,3 @@ This diagram shows the flow of logic between classes and components while the Op
 
 **`ButtonPad` and other controls**
 : when `ButtonPad` or another control renders, it gets the set of functions from the `FunctionProvider`.
-
-

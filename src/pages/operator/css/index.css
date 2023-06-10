@@ -85,6 +85,12 @@ button:hover {
     box-shadow: none;
 }
 
+button:disabled {
+    background-color: lightgray;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 button .material-icons {
     margin: -0.25rem;
 }

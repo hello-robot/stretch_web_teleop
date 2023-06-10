@@ -185,6 +185,7 @@ const LoadLayoutModal = (props: {
             onAccept={handleAccept}
             id="load-layout-modal"
             acceptButtonText="Load Layout"
+            acceptDisabled={selectedIdx === undefined}
         >
             <p><b>Select layout to load</b></p>
             <Dropdown
@@ -215,9 +216,10 @@ const SaveLayoutModal = (props: {
             onAccept={handleAccept}
             id="save-layout-modal"
             acceptButtonText="Save"
+            acceptDisabled={name.length < 1}
         >
             <label htmlFor="new-layout-name"><b>New Tab Label</b></label>
-            <input type="text" id="new-layout-name" name="new-tab-name"
+            <input autoFocus type="text" id="new-layout-name" name="new-tab-name"
                 value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="name for this layout"
             />
@@ -238,15 +240,22 @@ type OptionsProps = {
 
 /** Displays options for the currently selected layout component. */
 const SidebarOptions = (props: OptionsProps) => {
+    let contents: JSX.Element | null = null;
     switch (props.activeDef.type) {
         case (ComponentType.CameraView):
             switch ((props.activeDef as CameraViewDefinition).id!) {
                 case (CameraViewId.overhead):
-                    return <OverheadVideoStreamOptions {...props} />;
+                    contents = <OverheadVideoStreamOptions {...props} />;
             }
             break;
+        case (ComponentType.SingleTab):
+            contents = <TabOptions {...props} />;
     }
-    return <></>
+    return (
+        <div id="sidebar-options">
+            {contents}
+        </div>
+    )
 }
 
 /** Options for the overhead camera video stream layout component. */
@@ -255,6 +264,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     function togglePredictiveDisplay() {
+        console.log('toggle')
         const newPdOn = !predictiveDisplayOn;
         setPredictiveDisplayOn(newPdOn);
         if (newPdOn) {
@@ -266,13 +276,48 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
         props.updateLayout();
     }
     return (
-        <div>
+        <React.Fragment>
             <OnOffToggleButton
                 on={predictiveDisplayOn}
                 onClick={togglePredictiveDisplay}
                 label="Predictive Display"
             />
-        </div>
+        </React.Fragment>
+    )
+}
+
+/** Options when user selects a single tab within a panel. */
+const TabOptions = (props: OptionsProps) => {
+    const definition = props.activeDef as TabDefinition;
+    const [showRenameModal, setShowRenameModal] = React.useState<boolean>(false);
+    const [renameText, setRenameText] = React.useState<string>("");
+    function handleRename() {
+        if (renameText.length > 0) {
+            definition.label = renameText;
+            props.updateLayout();
+        }
+        setRenameText("");
+    }
+    return (
+        <React.Fragment>
+            <button onClick={() => setShowRenameModal(true)}>
+                Rename Tab
+            </button>
+            <PopupModal
+                show={showRenameModal}
+                setShow={setShowRenameModal}
+                onAccept={handleRename}
+                id="new-tab-modal"
+                acceptButtonText="Rename Tab"
+                acceptDisabled={renameText.length < 1}
+            >
+                <label htmlFor="new-tab-name"><b>Rename Tab</b></label>
+                <input autoFocus type="text" id="new-tab-name" name="new-tab-name"
+                    value={renameText} onChange={e => setRenameText(e.target.value)}
+                    placeholder={definition.label}
+                />
+            </PopupModal>
+        </React.Fragment>
     )
 }
 
@@ -328,7 +373,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
-        const definition: ComponentDefinition = id ? { type, id }: { type }; 
+        const definition: ComponentDefinition = id ? { type, id } : { type };
 
         // Add children based on the component type
         switch (type) {

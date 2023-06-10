@@ -1,54 +1,4 @@
-import { ParentComponentDefinition, ComponentDefinition, ComponentType } from "operator/tsx/utils/component_definitions";
-
-/**
- * Gets the parent definition for the given child path
- * @param splitPath path to child element, split into a list of indices
- * @param layout the layout object
- * @returns the parent definition
- */
-const getParent = (splitPath: string[], layout: ParentComponentDefinition): ParentComponentDefinition => {
-    let pathIdx = 0;
-    let parent: ParentComponentDefinition = layout;
-    while (pathIdx < splitPath.length - 1) {
-        const childIdx = +splitPath[pathIdx];
-        parent = parent.children[childIdx] as ParentComponentDefinition;
-        pathIdx++;
-    }
-    return parent!;
-}
-
-/**
- * Gets one of the children from a parent
- * @param parent definition of the parent component
- * @param childIdx index of the child element to retrieve
- * @returns the child component definition
- */
-const getChildFromParent = (parent: ParentComponentDefinition, childIdx: number): ComponentDefinition => {
-    return parent.children[childIdx];
-}
-
-/**
- * Inserts a child into the parent at a certain index
- * @param parent definition of parent component
- * @param child definition of child component
- * @param childIdx index where to insert the child
- */
-const putChildInParent = (parent: ParentComponentDefinition, child: ComponentDefinition, childIdx: number) => {
-    if (parent.children) { 
-        parent.children.splice(childIdx, 0, child)
-    } else {
-        parent.children = [child]
-    }
-}
-
-/**
- * Removes a child from the parent definition at a certain index
- * @param parent definition of parent component
- * @param childIdx index of the child to remove
- */
-const removeChildFromParent = (parent: ParentComponentDefinition, childIdx: number) => {
-    parent.children.splice(childIdx, 1);
-}
+import { ParentComponentDefinition, ComponentDefinition, ComponentType, LayoutDefinition } from "operator/tsx/utils/component_definitions";
 
 /**
  * Moves a component from an old path to a new path
@@ -58,7 +8,11 @@ const removeChildFromParent = (parent: ParentComponentDefinition, childIdx: numb
  * @returns the new path to the moved object (note: it's possible this is different
  *      than the `newPath`)
  */
-export const moveInLayout = (oldPath: string, newPath: string, layout: ParentComponentDefinition): string => {
+export function moveInLayout(
+    oldPath: string,
+    newPath: string,
+    layout: LayoutDefinition
+): string {
     // Get the child and its old parent
     console.log('old path', oldPath);
     console.log('newpath', newPath);
@@ -86,7 +40,7 @@ export const moveInLayout = (oldPath: string, newPath: string, layout: ParentCom
         oldChildIdx++;
 
     // Remove the child from the old parent
-    removeChildFromParent(oldParent, oldChildIdx);
+    removeChildFromParent(oldParent, oldPathSplit, oldChildIdx, layout);
 
     // Check if removing the old path changes the new path
     // note: this happens when the old path was a sibling with a lower index to
@@ -118,11 +72,11 @@ export const moveInLayout = (oldPath: string, newPath: string, layout: ParentCom
  * @param newPath path where to add the new component
  * @param layout the entire layout structure
  */
-export const addToLayout = (
+export function addToLayout(
     activeDef: ComponentDefinition,
     newPath: string,
-    layout: ParentComponentDefinition
-) => {
+    layout: LayoutDefinition
+) {
     let newPathSplit = newPath.split('-');
     const newChildIdx = +newPathSplit.slice(-1);
     const newParent = getParent(newPathSplit, layout);
@@ -134,20 +88,77 @@ export const addToLayout = (
  * @param path path to the component to delete
  * @param layout the entire layout structure
  */
-export const removeFromLayout = (
+export function removeFromLayout(
     path: string,
-    layout: ParentComponentDefinition
-) => {
+    layout: LayoutDefinition
+) {
     const splitPath = path.split('-');
     const childIdx = +splitPath.slice(-1);
     const parent = getParent(splitPath, layout);
+    removeChildFromParent(parent, splitPath, childIdx, layout);
+}
 
+/**
+ * Removes the child from the 
+ * @param parent parent component definition
+ * @param childSplitPath path to child element, split into list of indices
+ * @param childIdx index of child (last element in `splitPath`)
+ * @param layout entire layout structure
+ */
+function removeChildFromParent(
+    parent: ParentComponentDefinition,
+    childSplitPath: string[],
+    childIdx: number,
+    layout: LayoutDefinition
+) {
     // If this is the last tab in a tabs component, then delete the entire tabs
     if (parent.type === ComponentType.Panel && parent.children.length === 1) {
-        const parentIdx = +splitPath.slice(-2, -1);
+        const parentIdx = +childSplitPath.slice(-2, -1);
         // note: since tabs cannot be nested, we can assume the layout is the 
         //       is the parent of the tabs component
-        removeChildFromParent(layout, parentIdx);
+        layout.children.splice(parentIdx, 1);
     }
-    removeChildFromParent(parent, childIdx)
+    parent.children.splice(childIdx, 1);
+
+}
+
+/**
+ * Gets the parent definition for the given child path
+ * @param splitPath path to child element, split into a list of indices
+ * @param layout the layout object
+ * @returns the parent definition
+ */
+function getParent(splitPath: string[], layout: ParentComponentDefinition): ParentComponentDefinition {
+    let pathIdx = 0;
+    let parent: ParentComponentDefinition = layout;
+    while (pathIdx < splitPath.length - 1) {
+        const childIdx = +splitPath[pathIdx];
+        parent = parent.children[childIdx] as ParentComponentDefinition;
+        pathIdx++;
+    }
+    return parent!;
+}
+
+/**
+ * Gets one of the children from a parent
+ * @param parent definition of the parent component
+ * @param childIdx index of the child element to retrieve
+ * @returns the child component definition
+ */
+function getChildFromParent (parent: ParentComponentDefinition, childIdx: number): ComponentDefinition {
+    return parent.children[childIdx];
+}
+
+/**
+ * Inserts a child into the parent at a certain index
+ * @param parent definition of parent component
+ * @param child definition of child component
+ * @param childIdx index where to insert the child
+ */
+function putChildInParent (parent: ParentComponentDefinition, child: ComponentDefinition, childIdx: number) {
+    if (parent.children) {
+        parent.children.splice(childIdx, 0, child)
+    } else {
+        parent.children = [child]
+    }
 }

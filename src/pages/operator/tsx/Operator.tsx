@@ -1,5 +1,5 @@
 import React from "react";
-import { VelocityControl } from "operator/tsx/static_components/VelocityControl"
+import { SpeedControl } from "operator/tsx/static_components/SpeedControl"
 import { LayoutArea } from "./static_components/LayoutArea";
 import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
@@ -11,9 +11,9 @@ import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
-import "operator/css/Operator.css"
 import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
+import "operator/css/Operator.css"
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -133,6 +133,12 @@ export const Operator = (props: {
         setActivePath(undefined);
     }
 
+    /** Un-select current component when click inside of header. */
+    function handleClickHeader() {
+        setActiveDef(undefined); 
+        setActivePath(undefined);
+    }
+
     /** State passed from the operator and shared by all components */
     const sharedState: SharedState = {
         customizing: customizing,
@@ -164,7 +170,7 @@ export const Operator = (props: {
     const actionModes = Object.values(ActionMode);
     return (
         <div id="operator">
-            <div id="operator-header">
+            <div id="operator-header" onClick={handleClickHeader}>
                 {/* Action mode button */}
                 <Dropdown
                     onChange={(idx) => setActionMode(actionModes[idx])}
@@ -172,7 +178,7 @@ export const Operator = (props: {
                     possibleOptions={actionModes}
                     showActive
                 />
-                <VelocityControl
+                <SpeedControl
                     scale={velocityScale}
                     onChange={(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                 />
