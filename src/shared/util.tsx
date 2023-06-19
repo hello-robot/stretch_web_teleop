@@ -52,8 +52,8 @@ export interface ValidJointStateMessage {
 }
 
 export const REALSENSE_BASE_POSE: RobotPose = {
-    "joint_head_pan": -0.1,
-    "joint_head_tilt": -1.35
+    "joint_head_pan": 0.075,
+    "joint_head_tilt": -1.65
 }
 
 export const REALSENSE_GRIPPER_POSE: RobotPose = {

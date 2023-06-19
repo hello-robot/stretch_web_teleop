@@ -22,7 +22,7 @@
             },
             # Number of degress to rotate video stream clockwise
             # Pass "rotate": null to not rotate
-            "rotate": 'ROTATE_90_CLOCKWISE'
+            "rotate": null
         },
         "manip": {
             "mask": {
@@ -32,12 +32,12 @@
                 "center": null
             },
             "crop": {
-                "x_min": 75,
-                "x_max": 575,
-                "y_min": 380,
-                "y_max": 880
+                "x_min": 175,
+                "x_max": 675,
+                "y_min": 330,
+                "y_max": 830
             },
-            "rotate": null
+            "rotate": 'ROTATE_90_COUNTERCLOCKWISE'
         }
     },
     "realsense": {

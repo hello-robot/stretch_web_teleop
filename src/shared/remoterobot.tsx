@@ -1,5 +1,5 @@
 import React from 'react'
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand } from 'shared/commands';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper } from 'shared/commands';
 import { ValidJointStateDict, RobotPose, ValidJoints } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
@@ -83,6 +83,13 @@ export class RemoteRobot extends React.Component {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
+        }
+        this.robotChannel(cmd)
+    }
+
+    lookAtGripper(type: "lookAtGripper") {
+        let cmd: LookAtGripper = {
+            type: type
         }
         this.robotChannel(cmd)
     }

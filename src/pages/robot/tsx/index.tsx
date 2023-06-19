@@ -118,6 +118,8 @@ function handleMessage(message: WebRTCMessage) {
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
             break
+        case "lookAtGripper":
+            robot.lookAtGripper(0, 0)
     }
 };
 

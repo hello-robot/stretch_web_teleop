@@ -52,7 +52,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 }
             case UnderVideoButton.LookAtGripper:
                 return {
-                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_GRIPPER_POSE)
+                    onClick: () => FunctionProvider.remoteRobot?.lookAtGripper("lookAtGripper") //setRobotPose(REALSENSE_GRIPPER_POSE)
                 }
             case UnderVideoButton.FollowGripper:
                 return {

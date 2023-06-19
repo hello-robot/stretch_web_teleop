@@ -48,10 +48,10 @@ export function percent2Pixel(percentage: number) {
  * Position and dimensions of the robot base from the overhead camera view
  */
 export const OVERHEAD_ROBOT_BASE = {
-    centerX: percent2Pixel(50),
-    centerY: percent2Pixel(70),
+    centerX: percent2Pixel(50.5),
+    centerY: percent2Pixel(55),
     height: percent2Pixel(10),
-    width: percent2Pixel(10)
+    width: percent2Pixel(15)
 }
 
 /**Creates the SVG path for a rectangle
