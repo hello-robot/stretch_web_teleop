@@ -20,10 +20,19 @@
     </rosparam>
   </node>
 
+  <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
+  
   <!-- GRIPPER CAMERA -->
   <arg name="gripper_camera" default="true"/>
   <group if="$(arg gripper_camera)">
     <include file="$(find stretch_teleop_interface)/launch/gripper_camera.launch"></include>
+  </group>
+  <group unless="$(arg gripper_camera)">
+      <node pkg="image_publisher" type="image_publisher" name="gripper_camera"
+        args="$(find stretch_teleop_interface)/nodes/blank_image.png" >
+        <param name="frame_id" value="gripper_camera" />
+        <param name="publish_rate" value="1" />
+      </node>
   </group>
   <!-- -->
 
@@ -31,6 +40,13 @@
   <arg name="navigation_camera" default="true"/>
   <group if="$(arg navigation_camera)">
     <include file="$(find stretch_teleop_interface)/launch/navigation_camera.launch"></include>
+  </group>
+  <group unless="$(arg navigation_camera)">
+      <node pkg="image_publisher" type="image_publisher" name="navigation_camera"
+        args="$(find stretch_teleop_interface)/nodes/blank_image.png" >
+        <param name="frame_id" value="navigation_camera" />
+        <param name="publish_rate" value="10" />
+      </node>
   </group>
   <!-- -->
   
@@ -51,7 +67,6 @@
 
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"/>
 
-  <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
   <node name="configure_video_streams" pkg="stretch_teleop_interface" type="configure_video_streams" args="$(arg params)" output="screen"/>
   <!-- -->
   
