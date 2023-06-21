@@ -30,7 +30,7 @@
     width: var(--header-btn-width);
 }
 
-#operator-voice {
+#operator-voice, #operator-pose-library {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
     height: 4rem;
@@ -45,13 +45,16 @@
     grid-row: 2/2;
     grid-column: 1/1;
     transition: all 0.2s ease-out;
-    font-size: x-large;
+    font-size: large;
 }
 
-#operator-voice[hidden] {
-    height: 0;
-    opacity: 0;
-    margin: 0;
+#operator-voice[hidden], #operator-pose-library[hidden] {
+    display: none;
+}
+
+#operator-global-controls {
+    display: inline-flex;
+    justify-content: space-around;
 }
 
 #operator-body {

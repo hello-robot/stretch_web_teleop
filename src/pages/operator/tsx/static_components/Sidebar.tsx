@@ -87,6 +87,10 @@ export type GlobalOptionsProps = {
     /** If the voice controls should be displayed. */
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+    /** If the save/load poses should be displayed. */
+    displayPoseLibrary: boolean;
+    setDisplayPoseLibrary: (displayPoseLibrary: boolean) => void;
+    
     /** List of names of the default layouts. */
     defaultLayouts: string[],
     /** List of names of the user's custom layouts. */
@@ -117,6 +121,11 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     on={props.displayVoiceControl}
                     onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
                     label="Display voice control"
+                />
+                <OnOffToggleButton
+                    on={props.displayPoseLibrary}
+                    onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
+                    label="Display pose library"
                 />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}
@@ -187,7 +196,7 @@ const LoadLayoutModal = (props: {
             acceptButtonText="Load Layout"
             acceptDisabled={selectedIdx === undefined}
         >
-            <p><b>Select layout to load</b></p>
+            <label htmlFor="load-layout-name"><b>Load Layout</b></label>
             <Dropdown
                 onChange={setSelectedIdx}
                 selectedIndex={selectedIdx}
@@ -218,10 +227,10 @@ const SaveLayoutModal = (props: {
             acceptButtonText="Save"
             acceptDisabled={name.length < 1}
         >
-            <label htmlFor="new-layout-name"><b>New Tab Label</b></label>
+            <label htmlFor="new-layout-name"><b>Save Layout</b></label>
             <input autoFocus type="text" id="new-layout-name" name="new-tab-name"
                 value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="name for this layout"
+                placeholder="Name for this layout"
             />
         </PopupModal>
     )

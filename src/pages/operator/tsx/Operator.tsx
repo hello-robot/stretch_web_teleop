@@ -6,7 +6,7 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { VoiceCommands } from "./static_components/VoiceCommands";
-import { RemoteStream } from "shared/util";
+import { RemoteStream, RobotPose } from "shared/util";
 import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
@@ -14,10 +14,13 @@ import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_ha
 import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
 import "operator/css/Operator.css"
+import { PoseLibrary } from "./static_components/PoseLibrary";
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>,
+    getRobotPose: (head: boolean, gripper: boolean, arm: boolean) => RobotPose,
+    setRobotPose: (pose: RobotPose) => void,
     layout: LayoutDefinition,
     storageHandler: StorageHandler
 }) => {
@@ -64,6 +67,17 @@ export const Operator = (props: {
      */
     function setDisplayVoiceControl(displayVoiceControl: boolean) {
         layout.current.displayVoiceControl = displayVoiceControl;
+        updateLayout();
+    }
+
+    /**
+     * Sets the voice control component to display or hidden.
+     * 
+     * @param displayPoseLibrary if the pose library component at the 
+     *                           top of the operator body should be displayed
+     */
+    function setDisplayPoseLibrary(displayPoseLibrary: boolean) {
+        layout.current.displayPoseLibrary = displayPoseLibrary;
         updateLayout();
     }
 
@@ -156,6 +170,8 @@ export const Operator = (props: {
     const globalOptionsProps: GlobalOptionsProps = {
         displayVoiceControl: layout.current.displayVoiceControl,
         setDisplayVoiceControl: setDisplayVoiceControl,
+        displayPoseLibrary: layout.current.displayPoseLibrary,
+        setDisplayPoseLibrary: setDisplayPoseLibrary,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -187,11 +203,26 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
-            <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
-                <VoiceCommands
-                    onUpdateVelocityScale=
-                    {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
-                />
+            <div id="operator-global-controls">
+                <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
+                    <VoiceCommands
+                        onUpdateVelocityScale=
+                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
+                    />
+                </div>
+                <div id="operator-pose-library" hidden={!layout.current.displayPoseLibrary}>
+                    <PoseLibrary 
+                        savePose={(poseName: string, head: boolean, gripper: boolean, arm: boolean) => { 
+                            props.storageHandler.savePose(poseName, props.getRobotPose(head, gripper, arm)); 
+                        }}
+                        deletePose={((poseName: string) => {props.storageHandler.deletePose(poseName)})}
+                        savedPoseNames={() => {return props.storageHandler.getPoseNames()}}
+                        setRobotPose={(poseName: string) => {
+                            let pose: RobotPose = props.storageHandler.getPose(poseName)
+                            props.setRobotPose(pose)
+                        }}
+                    />
+                </div>
             </div>
             <div id="operator-body">
                 <LayoutArea

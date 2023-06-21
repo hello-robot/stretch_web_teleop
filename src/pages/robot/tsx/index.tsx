@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 
 export const robot = new Robot({ jointStateCallback: forwardJointStates })
@@ -71,6 +71,7 @@ function handleSessionStart() {
 function forwardJointStates(jointState: ROSJointState) {
     if (!connection) throw 'WebRTC connection undefined!'
 
+    let robotPose: RobotPose = rosJointStatetoRobotPose(jointState)
     let jointValues: ValidJointStateDict = {}
     let effortValues: ValidJointStateDict = {}
     jointState.name.forEach((name?: ValidJoints) => {
@@ -82,6 +83,7 @@ function forwardJointStates(jointState: ROSJointState) {
 
     connection.sendData({
         type: "validJointState",
+        robotPose: robotPose,
         jointsInLimits: jointValues,
         jointsInCollision: effortValues
     } as ValidJointStateMessage);

@@ -47,6 +47,7 @@ export type RobotPose = { [key in ValidJoints]?: number }
 
 export interface ValidJointStateMessage {
     type: "validJointState",
+    robotPose: RobotPose,
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
 }
@@ -116,6 +117,17 @@ export interface VideoProps {
     callback: (message: ROSCompressedImage) => void
 }
 
+export function rosJointStatetoRobotPose(jointState: ROSJointState): RobotPose {
+    let robotPose: RobotPose = {}
+    const names = jointState.name
+    const positions = jointState.position
+    names.map((name, index) => {
+        if (name) {
+            robotPose[name] = positions[index]
+        }
+    })
+    return robotPose
+}
 ////////////////////////////////////////////////////////////
 // safelyParseJSON code copied from
 // https://stackoverflow.com/questions/29797946/handling-bad-json-parse-in-node-safely

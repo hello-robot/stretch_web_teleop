@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, Root } from 'react-dom/client';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream } from 'shared/util';
+import { WebRTCMessage, RemoteStream, RobotPose } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './Operator';
@@ -86,6 +86,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
     switch (message.type) {
         case 'validJointState':
             remoteRobot.sensors.checkValidJointState(
+                message.robotPose,
                 message.jointsInLimits,
                 message.jointsInCollision
             );
@@ -163,6 +164,10 @@ function renderOperator(storageHandler: StorageHandler) {
         <Operator
             remoteStreams={allRemoteStreams}
             layout={layout}
+            getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {
+                return remoteRobot.sensors.getRobotPose(head, gripper, arm)
+            }}
+            setRobotPose={(pose: RobotPose) => { remoteRobot.setRobotPose(pose) }}
             storageHandler={storageHandler}
         />
     );

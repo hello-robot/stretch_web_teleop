@@ -114,3 +114,7 @@ button .material-icons {
 .font-white {
     color: var(--font-white)
 }
+
+.btn-yellow {
+    background-color: var(--selected-color);
+}

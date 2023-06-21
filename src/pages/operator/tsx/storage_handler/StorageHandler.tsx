@@ -2,6 +2,7 @@ import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
+import { RobotPose } from "shared/util";
 
 /** Type for all the possible names of default layouts. */
 export type DefaultLayoutName = "Button Pad Overlays" | "Button Pad Panel" | "Button Grid/Joystick/Voice Commands";
@@ -58,6 +59,32 @@ export abstract class StorageHandler {
      * @returns list of layout names
      */
     public abstract getCustomLayoutNames(): string[];
+
+    /**
+     * Save the joint state and its identifier
+     * @param name the name of the pose
+     * @param jointState the joint state to save
+     */
+    public abstract savePose(poseName: string, jointState: RobotPose): void;
+
+    /**
+     * Removes the pose from storage
+     * @param name the name of the pose
+     */
+    public abstract deletePose(poseName: string): void;
+
+    /**
+     * Get the list of all saved poses
+     * @returns list of all saved poses
+     */
+    public abstract getPoseNames(): string[];
+
+    /**
+     * Gets the pose associated with the given name
+     * @param name the name of the pose
+     * @returns a pose associated with the given name
+     */
+    public abstract getPose(poseName: string): RobotPose;
 
     /**
      * Gets the last saved state from the user's layout, or gets the default 

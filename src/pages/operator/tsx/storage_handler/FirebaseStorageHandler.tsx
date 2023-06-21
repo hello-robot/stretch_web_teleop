@@ -4,6 +4,7 @@ import { LayoutDefinition } from "../utils/component_definitions";
 import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "firebase/app";
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
 import { Database, getDatabase, child, get, ref, update, push } from 'firebase/database'
+import { RobotPose } from "shared/util";
 
 /** Uses Firebase to store data. */
 export class FirebaseStorageHandler extends StorageHandler {
@@ -17,6 +18,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     private uid: string;
     private layouts: { [name: string]: LayoutDefinition };
     private currentLayout: LayoutDefinition | null;
+    private poses: { [name: string]: RobotPose };
 
     constructor(onStorageHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onStorageHandlerReadyCallback);
@@ -30,6 +32,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.uid = ""
         this.layouts = {};
         this.currentLayout = null;
+        this.poses = {};
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
 
         this.signInWithGoogle()
@@ -116,6 +119,37 @@ export class FirebaseStorageHandler extends StorageHandler {
 
         let updates: any = {};
         updates['/users/' + (this.uid) + '/layouts'] = layouts;
+        return update(ref(this.database), updates);
+    }
+
+    public getPoseNames(): string[] {
+        if (!this.poses) return []
+        return Object.keys(this.poses)
+    }
+
+    public savePose(name: string, jointState: RobotPose) {
+        this.poses[name] = jointState
+        this.writePoses(this.poses)
+    }
+
+    public getPose(poseName: string): RobotPose {
+        let pose = this.poses![poseName]
+        if (!pose) throw Error(`Could not load pose ${poseName}`);
+        return JSON.parse(JSON.stringify(pose));
+    }
+
+    public deletePose(poseName: string): void {
+        let pose = this.poses![poseName]
+        if (!pose) throw Error(`Could not delete pose ${poseName}`);
+        delete this.poses[poseName]
+        this.writePoses(this.poses)
+    }
+
+    private async writePoses(poses: { [name: string]: RobotPose }) {
+        this.poses = poses;
+
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/poses'] = poses;
         return update(ref(this.database), updates);
     }
 }

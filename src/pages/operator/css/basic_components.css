@@ -9,8 +9,8 @@
     transform: translate(-50%, -50%);
     padding: 1rem;
     z-index: 4;
-    height: 20rem;
-    width: 30rem;
+    height: 50%;
+    width: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -139,4 +139,49 @@
 
 .check-toggle-button span.material-icons {
     margin-right: 1rem;
+}
+
+.pose-name {
+    /* padding-top: 5%; */
+    align-self: normal;
+}
+
+.pose-name label {
+    font-size: 1em;
+    padding-right: 2.5rem;
+}
+
+.pose-name input {
+    width: 65%;
+}
+
+.joint-checkbox, .arm, .gripper, .head {
+    align-self: normal;
+    /* padding-top: 5%; */
+}
+
+.joint-checkbox label {
+    font-size: 1em;
+    float: left;
+}
+
+.head label { 
+    padding-right: 5.25rem;
+}
+
+.gripper label { 
+    padding-right: 3.75rem;
+}
+
+.arm label { 
+    padding-right: 6rem;
+}
+
+.joint-checkbox input {
+    width: 10%;
+    height: 1.5rem;
+}
+
+hr {
+    width: 100%
 }

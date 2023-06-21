@@ -96,7 +96,7 @@ export class RemoteRobot extends React.Component {
 }
 
 class RobotSensors extends React.Component {
-    private jointState?: RobotPose;
+    private robotPose: RobotPose = {};
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
     private functionProviderCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void;
@@ -117,7 +117,11 @@ class RobotSensors extends React.Component {
      *                     [joint in collision at lower end, joint is in 
      *                     collision at upper end]
      */
-    checkValidJointState(jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
+    checkValidJointState(robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
+        if (robotPose !== this.robotPose) {
+            this.robotPose = robotPose;
+        }
+
         // Remove existing values from list
         let change = false;
         Object.keys(jointValues).forEach((k) => {
@@ -161,5 +165,25 @@ class RobotSensors extends React.Component {
      */
     setFunctionProviderCallback(callback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
         this.functionProviderCallback = callback;
+    }
+
+    /**
+     * @returns current robot pose
+     */
+    getRobotPose(head: boolean, gripper: boolean, arm: boolean): RobotPose {
+        let filteredPose: RobotPose = {}
+        if (head) {
+            filteredPose["joint_head_tilt"] = this.robotPose["joint_head_tilt"]
+            filteredPose["joint_head_pan"] = this.robotPose["joint_head_pan"]
+        }
+        if (gripper) {
+            filteredPose["joint_wrist_yaw"] = this.robotPose["joint_wrist_yaw"]
+            filteredPose["joint_gripper_finger_left"] = this.robotPose["joint_gripper_finger_left"]
+        }
+        if (arm) {
+            filteredPose["joint_lift"] = this.robotPose["joint_lift"]
+            filteredPose["wrist_extension"] = this.robotPose["wrist_extension"]
+        }
+        return filteredPose
     }
 }

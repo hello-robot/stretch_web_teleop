@@ -79,6 +79,7 @@ export type ParentComponentDefinition = ComponentDefinition & {
 
 export type LayoutDefinition = ParentComponentDefinition & {
     displayVoiceControl: boolean;
+    displayPoseLibrary: boolean;
     actionMode: ActionMode;
 }
 

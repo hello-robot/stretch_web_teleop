@@ -81,7 +81,6 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     // Constrain the width or height when the stream gets too large
     React.useEffect(() => {
-        console.log('use effect')
         const resizeObserver = new ResizeObserver(entries => {
 
             // height and width of area around the video stream
