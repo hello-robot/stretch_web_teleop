@@ -8,6 +8,7 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
+import { Map } from "./Map";
 
 /** State required for all elements */
 export type SharedState = {
@@ -67,6 +68,8 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <ButtonGrid {...props} />;
         case ComponentType.VirtualJoystick:
             return <VirtualJoystick {...props} />;
+        case ComponentType.Map:
+            return <Map {...props} />;
         default:
             throw Error(`CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`);
     }

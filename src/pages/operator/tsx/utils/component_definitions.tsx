@@ -2,6 +2,8 @@
  * @summary Definitions to describe different components to render
  */
 
+import ROSLIB from "roslib";
+
 /** Enumerator for the possible action modes */
 export enum ActionMode {
     StepActions = 'Step-Actions',
@@ -20,7 +22,8 @@ export enum ComponentType {
     ButtonPad = "Button Pad",
     PredictiveDisplay = "Predictive Display",
     ButtonGrid = "Button Grid",
-    VirtualJoystick = "Joystick"
+    VirtualJoystick = "Joystick",
+    Map = "Map"
 }
 
 /**
@@ -142,4 +145,11 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      * reachable area.
      */
     depthSensing?: boolean;
+}
+
+/**
+ * Definition for the map component
+ */
+export type MapDefinition = ComponentDefinition & {
+    ros: ROSLIB.Ros
 }

@@ -208,15 +208,6 @@ export const Operator = (props: {
                 />
             </div>
             <div id="operator-global-controls">
-                <div>
-                    <Nav2d 
-                        ros={props.ros}
-                        id={"map"}
-                        width={416}
-                        height={640}
-                        serverName="/move_base"
-                    />
-                </div>
                 <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=

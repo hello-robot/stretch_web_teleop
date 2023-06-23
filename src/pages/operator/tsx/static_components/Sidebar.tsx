@@ -1,9 +1,10 @@
 import React from "react"
 import { className } from "shared/util";
-import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId } from "../utils/component_definitions";
+import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId, MapDefinition } from "../utils/component_definitions";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
+import { ros } from 'robot/tsx/robot';
 
 type SidebarProps = {
     hidden: boolean;
@@ -72,6 +73,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case (ComponentType.Panel):
         case (ComponentType.VirtualJoystick):
         case (ComponentType.ButtonGrid):
+        case (ComponentType.Map):
             return definition.type;
         default:
             throw Error(`Cannot get description for component type ${definition.type}\nYou may need to add a case for this component in the switch statement.`)
@@ -378,7 +380,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.CameraView, ids: Object.values(CameraViewId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
-        { type: ComponentType.VirtualJoystick }
+        { type: ComponentType.VirtualJoystick },
+        { type: ComponentType.Map }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
@@ -389,6 +392,9 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             case (ComponentType.Panel):
             case (ComponentType.CameraView):
                 (definition as ParentComponentDefinition).children = []
+                break;
+            case (ComponentType.Map):
+                (definition as MapDefinition).ros = ros
                 break;
         }
 

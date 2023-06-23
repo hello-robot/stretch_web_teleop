@@ -5,8 +5,7 @@ import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
-export var ros: ROSLIB.Ros =
-new ROSLIB.Ros({
+export var ros: ROSLIB.Ros = new ROSLIB.Ros({
     url: 'wss://localhost:9090'
 });
 
