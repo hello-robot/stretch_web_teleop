@@ -21,7 +21,8 @@
   </node>
 
   <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
-  
+  <arg name="map_yaml" doc="filepath to previously captured map (required)" />
+
   <!-- GRIPPER CAMERA -->
   <arg name="gripper_camera" default="true"/>
   <group if="$(arg gripper_camera)">
@@ -64,10 +65,36 @@
     <arg name="keyfile" value="$(find stretch_teleop_interface)/certificates/$(arg keyfile)" />
     <arg name="authenticate" default="false" />
   </include>
+  <!-- -->
 
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"/>
 
   <node name="configure_video_streams" pkg="stretch_teleop_interface" type="configure_video_streams" args="$(arg params)" output="screen"/>
+
+  <!-- MAP SERVER -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_yaml)" />
   <!-- -->
+
+  <!-- CENTERED BASE LINK -->
+  <node name="centered_base_link_tf_publisher" pkg="tf" type="static_transform_publisher" args="-0.1 0 0 0 0 0 1 /base_link /centered_base_link 100" />
+  <!-- -->
+
+  <!-- LASER RANGE FINDER -->
+  <include file="$(find stretch_core)/launch/rplidar.launch" />
+  <!-- -->
+
+  <!-- LOCALIZATION -->
+  <include file="$(find amcl)/examples/amcl_diff.launch" />
   
+  <!-- NAVIGATION -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find stretch_navigation)/config/common_costmap_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find stretch_navigation)/config/common_costmap_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find stretch_navigation)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find stretch_navigation)/config/global_costmap_params_withmap.yaml" command="load" />
+    <rosparam file="$(find stretch_navigation)/config/base_local_planner_params.yaml" command="load" />
+    <remap from="/cmd_vel" to="/stretch/cmd_vel" />
+  </node>  
+  <!-- -->
+
 </launch>

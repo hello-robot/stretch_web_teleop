@@ -5,9 +5,12 @@ import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
+export var ros: ROSLIB.Ros =
+new ROSLIB.Ros({
+    url: 'wss://localhost:9090'
+});
 
 export class Robot extends React.Component {
-    private ros!: ROSLIB.Ros
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.Goal;
     private trajectoryClient?: ROSLIB.ActionClient;
@@ -26,15 +29,14 @@ export class Robot extends React.Component {
         super(props);
         this.jointStateCallback = props.jointStateCallback
     }
-
+    
     async connect(): Promise<void> {
-        let ros = new ROSLIB.Ros({
-            url: 'wss://localhost:9090'
-        });
-
+        // ros = new ROSLIB.Ros({
+        //     url: 'wss://localhost:9090'
+        // });
         return new Promise<void>((resolve, reject) => {
             ros.on('connection', async () => {
-                await this.onConnect(ros);
+                await this.onConnect();
                 resolve()
             })
             ros.on('error', (error) => {
@@ -47,8 +49,7 @@ export class Robot extends React.Component {
         });
     }
 
-    async onConnect(ros: ROSLIB.Ros) {
-        this.ros = ros
+    async onConnect() {
         this.subscribeToJointState()
         this.createTrajectoryClient()
         this.createCmdVelTopic()
@@ -62,10 +63,10 @@ export class Robot extends React.Component {
 
         return Promise.resolve()
     }
-
+    
     subscribeToJointState() {
         const jointStateTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
-            ros: this.ros,
+            ros: ros,
             name: '/stretch/joint_states/',
             messageType: 'sensor_msgs/JointState'
         });
@@ -78,7 +79,7 @@ export class Robot extends React.Component {
     
     subscribeToVideo(props: VideoProps) {
         let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
-            ros: this.ros,
+            ros: ros,
             name: props.topicName,
             messageType: 'sensor_msgs/CompressedImage'
         });
@@ -87,7 +88,7 @@ export class Robot extends React.Component {
     
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionClient({
-            ros: this.ros,
+            ros: ros,
             serverName: '/stretch_controller/follow_joint_trajectory',
             actionName: 'control_msgs/FollowJointTrajectoryAction',
             timeout: 100
@@ -96,7 +97,7 @@ export class Robot extends React.Component {
     
     createCmdVelTopic() {
         this.cmdVelTopic = new ROSLIB.Topic({
-            ros: this.ros,
+            ros: ros,
             name: '/stretch/cmd_vel',
             messageType: 'geometry_msgs/Twist'
         });
@@ -104,7 +105,7 @@ export class Robot extends React.Component {
     
     createSwitchToNavigationService() {
         this.switchToNavigationService = new ROSLIB.Service({
-            ros: this.ros,
+            ros: ros,
             name: '/switch_to_navigation_mode',
             serviceType: 'std_srvs/Trigger'
         });
@@ -112,7 +113,7 @@ export class Robot extends React.Component {
     
     createSwitchToPositionService() {
         this.switchToPositionService = new ROSLIB.Service({
-            ros: this.ros,
+            ros: ros,
             name: '/switch_to_position_mode',
             serviceType: 'std_srvs/Trigger'
         });
@@ -120,7 +121,7 @@ export class Robot extends React.Component {
     
     createSetCameraPerspectiveService() {
         this.setCameraPerspectiveService = new ROSLIB.Service({
-            ros: this.ros,
+            ros: ros,
             name: '/camera_perspective',
             serviceType: 'stretch_web_interface_react/CameraPerspective'
         })
@@ -128,7 +129,7 @@ export class Robot extends React.Component {
 
     createDepthSensingService() {
         this.setDepthSensingService = new ROSLIB.Service({
-            ros: this.ros,
+            ros: ros,
             name: '/depth_ar',
             serviceType: 'stretch_web_interface_react/DepthAR'
         })
@@ -136,7 +137,7 @@ export class Robot extends React.Component {
 
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
-            ros: this.ros,
+            ros: ros,
             fixedFrame: 'base_link',
             angularThres: 0.01,
             transThres: 0.01,

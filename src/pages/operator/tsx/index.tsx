@@ -16,6 +16,7 @@ import { PredictiveDisplayFunctionProvider } from './function_providers/Predicti
 import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
 import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
 import "operator/css/index.css"
+import { ros } from 'robot/tsx/robot';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -162,6 +163,7 @@ function renderOperator(storageHandler: StorageHandler) {
 
     root.render(
         <Operator
+            ros={ros}
             remoteStreams={allRemoteStreams}
             layout={layout}
             getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {

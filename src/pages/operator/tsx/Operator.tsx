@@ -15,9 +15,12 @@ import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
 import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
+import Nav2d from "react-nav2djs";
+import ROSLIB from "roslib";
 
 /** Operator interface webpage */
 export const Operator = (props: {
+    ros: ROSLIB.Ros,
     remoteStreams: Map<string, RemoteStream>,
     getRobotPose: (head: boolean, gripper: boolean, arm: boolean) => RobotPose,
     setRobotPose: (pose: RobotPose) => void,
@@ -184,6 +187,7 @@ export const Operator = (props: {
     }
 
     const actionModes = Object.values(ActionMode);
+    
     return (
         <div id="operator">
             <div id="operator-header" onClick={handleClickHeader}>
@@ -204,6 +208,15 @@ export const Operator = (props: {
                 />
             </div>
             <div id="operator-global-controls">
+                <div>
+                    <Nav2d 
+                        ros={props.ros}
+                        id={"map"}
+                        width={416}
+                        height={640}
+                        serverName="/move_base"
+                    />
+                </div>
                 <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=

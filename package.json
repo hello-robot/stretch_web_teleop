@@ -21,6 +21,7 @@
     "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-nav2djs": "github:vinitha910/react-nav2djs",
     "react-speech-recognition": "^3.10.0",
     "roslib": "^1.3.0",
     "socket.io": "^4.6.1",
