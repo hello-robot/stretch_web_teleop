@@ -3,14 +3,20 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, ROSPose, MapPoseMessage, AMCLPose } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
+import ROSLIB from 'roslib';
 
-export const robot = new Robot({ jointStateCallback: forwardJointStates })
+export const robot = new Robot({ 
+    jointStateCallback: forwardJointStates,
+    occupancyGridCallback: setOccupancyGrid,
+    amclPoseCallback: forwardAMCLPose
+})
 export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
+let occupancyGrid: ROSOccupancyGrid;
 
 robot.connect().then(() => {
     robot.subscribeToVideo({
@@ -89,6 +95,28 @@ function forwardJointStates(jointState: ROSJointState) {
     } as ValidJointStateMessage);
 }
 
+function forwardOccupancyGrid() {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: 'occupancyGrid',
+        message: occupancyGrid
+    } as OccupancyGridMessage);
+}
+
+function forwardAMCLPose(transform: ROSLIB.Transform) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: 'amclPose',
+        message: transform
+    } as MapPoseMessage)
+}
+
+function setOccupancyGrid(message: ROSOccupancyGrid) {
+    occupancyGrid = message
+}
+
 function handleMessage(message: WebRTCMessage) {
     if (!("type" in message)) {
         console.error("Malformed message:", message)
@@ -114,6 +142,9 @@ function handleMessage(message: WebRTCMessage) {
         case "setRobotPose":
             robot.executePoseGoal(message.pose)
             break
+        case "moveBase":
+            robot.executeMoveBaseGoal(message.pose)
+            break
         case "setFollowGripper":
             robot.setPanTiltFollowGripper(message.toggle)
             break
@@ -122,6 +153,10 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "lookAtGripper":
             robot.lookAtGripper(0, 0)
+            break
+        case "getOccupancyGrid":
+            forwardOccupancyGrid()
+            break
     }
 };
 

@@ -1,17 +1,27 @@
 import React from 'react'
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints } from 'shared/util';
+import ROSLIB from 'roslib';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, AMCLPose } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
 export class RemoteRobot extends React.Component {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
+    mapPose: ROSLIB.Transform;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
         this.robotChannel = props.robotChannel
         this.sensors = new RobotSensors({})
+        this.mapPose = {
+            translation: {
+                x: 0, y: 0, z: 0
+            } as ROSLIB.Vector3,
+            rotation: {
+                x: 0, y: 0, z: 0, w: 0
+            } as ROSLIB.Quaternion
+        } as ROSLIB.Transform
     }
 
     driveBase(linVel: number, angVel: number): VelocityCommand {
@@ -79,6 +89,14 @@ export class RemoteRobot extends React.Component {
         this.robotChannel(cmd)
     }
 
+    moveBase(pose: ROSPose) {
+        let cmd: MoveBaseCommand = {
+            type: "moveBase",
+            pose: pose
+        }
+        this.robotChannel(cmd)
+    }
+    
     setToggle(type: "setFollowGripper" | "setDepthSensing", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
@@ -92,6 +110,22 @@ export class RemoteRobot extends React.Component {
             type: type
         }
         this.robotChannel(cmd)
+    }
+
+    getOccupancyGrid(type: "getOccupancyGrid") {
+        let cmd: GetOccupancyGrid = {
+            type: type
+        }
+        this.robotChannel(cmd)
+    }
+
+    setMapPose(pose: ROSLIB.Transform) {
+        console.log(pose)
+        this.mapPose = pose
+    }
+
+    getMapPose() {
+        return this.mapPose
     }
 }
 

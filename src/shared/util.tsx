@@ -1,4 +1,4 @@
-import { Message } from 'roslib'
+import ROSLIB, { Message } from 'roslib'
 import { cmd } from './commands';
 
 export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
@@ -37,7 +37,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | StopMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -50,6 +50,56 @@ export interface ValidJointStateMessage {
     robotPose: RobotPose,
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
+}
+
+export interface OccupancyGridMessage {
+    type: "occupancyGrid",
+    message: ROSOccupancyGrid
+}
+
+export interface MapPoseMessage {
+    type: 'amclPose',
+    message: ROSLIB.Transform
+}
+
+export interface AMCLPose extends Message {
+    header: string,
+    pose: { 
+        pose: ROSPose,
+        covariance: number[]
+    }
+}
+
+export interface ROSPoint extends Message {
+    x: number,
+    y: number,
+    z: number
+}
+
+export interface ROSQuaternion extends Message {
+    x: number,
+    y: number,
+    z: number,
+    w: number
+}
+
+export interface ROSPose extends Message{
+    position: ROSPoint
+    orientation: ROSQuaternion
+}
+
+export interface ROSMapMetaData extends Message {
+    map_load_time: number,
+    resolution: number,
+    width: number,
+    height: number,
+    origin: ROSPose
+}
+
+export interface ROSOccupancyGrid {
+    header: string,
+    info: ROSMapMetaData,
+    data: number[]
 }
 
 export const REALSENSE_BASE_POSE: RobotPose = {

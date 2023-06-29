@@ -1,7 +1,7 @@
-import { RobotPose } from "./util"
+import { ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -45,4 +45,13 @@ export interface ToggleCommand {
 
 export interface LookAtGripper {
     type: "lookAtGripper"
+}
+
+export interface GetOccupancyGrid {
+    type: "getOccupancyGrid"
+}
+
+export interface MoveBaseCommand {
+    type: "moveBase"
+    pose: ROSPose
 }

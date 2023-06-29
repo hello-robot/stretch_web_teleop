@@ -83,8 +83,47 @@
   <include file="$(find stretch_core)/launch/rplidar.launch" />
   <!-- -->
 
+  <node name="imu_filter_madgwick" pkg="imu_filter_madgwick" type="imu_filter_node" output="screen" respawn="false">
+    <param name="use_mag" value="true" />
+    <remap from="imu/data_raw" to="imu_mobile_base" />
+    <remap from="imu/mag" to="magnetometer_mobile_base" />
+  </node>
   <!-- LOCALIZATION -->
-  <include file="$(find amcl)/examples/amcl_diff.launch" />
+<node pkg="amcl" type="amcl" name="amcl" output="screen">
+  <!-- Publish scans from best pose at a max of 10 Hz -->
+  <param name="odom_model_type" value="diff"/>
+  <param name="transform_tolerance" value="0.2" />
+  <param name="gui_publish_rate" value="10.0"/>
+  <param name="laser_max_beams" value="60"/>
+  <param name="min_particles" value="500"/>
+  <param name="max_particles" value="2000"/>
+  <param name="kld_err" value="0.05"/>
+  <param name="kld_z" value="0.99"/>
+  <param name="odom_alpha1" value="0.3"/>
+  <param name="odom_alpha2" value="0.3"/>
+  <param name="robot_model_type" value="differential"/>
+  <!-- translation std dev, m -->
+  <param name="odom_alpha3" value="0.3"/>
+  <param name="odom_alpha4" value="0.3"/>
+  <param name="laser_z_hit" value="0.5"/>
+  <param name="laser_z_short" value="0.05"/>
+  <param name="laser_z_max" value="0.05"/>
+  <param name="laser_z_rand" value="0.5"/>
+  <param name="laser_sigma_hit" value="0.2"/>
+  <param name="laser_lambda_short" value="0.1"/>
+  <param name="laser_model_type" value="likelihood_field"/>
+  <!-- <param name="laser_model_type" value="beam"/> -->
+  <param name="laser_likelihood_max_dist" value="2.0"/>
+  <param name="update_min_d" value="0.2"/>
+  <param name="update_min_a" value="0.25"/>
+  <param name="odom_frame_id" value="odom"/>
+  <param name="resample_interval" value="1"/>
+  <param name="transform_tolerance" value="0.1"/>
+  <param name="recovery_alpha_slow" value="0.0001"/>
+  <param name="recovery_alpha_fast" value="0.01"/>
+</node>
+
+  <include file="$(find stretch_core)/launch/stretch_ekf.launch"></include>
   
   <!-- NAVIGATION -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -93,8 +132,14 @@
     <rosparam file="$(find stretch_navigation)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find stretch_navigation)/config/global_costmap_params_withmap.yaml" command="load" />
     <rosparam file="$(find stretch_navigation)/config/base_local_planner_params.yaml" command="load" />
+    <remap from="odom" to="odometry/filtered" />
+    <!-- <param name="recovery_behaviors" value="[ {name: rotate_recovery, type: rotate_recovery/RotateRecovery}, {name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},{name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}]"/> -->
+    <!-- <rosparam file="$(find stretch_navigation)/config/base_global_planner_params.yaml" command="load" />
+    
+    <param name="base_global_planner" value="global_planner/GlobalPlanner" /> -->
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
     <remap from="/cmd_vel" to="/stretch/cmd_vel" />
-  </node>  
+  </node> 
   <!-- -->
 
 </launch>

@@ -6,7 +6,7 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { VoiceCommands } from "./static_components/VoiceCommands";
-import { RemoteStream, RobotPose } from "shared/util";
+import { ROSOccupancyGrid, RemoteStream, RobotPose } from "shared/util";
 import { buttonFunctionProvider } from ".";
 import { ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
@@ -20,7 +20,6 @@ import ROSLIB from "roslib";
 
 /** Operator interface webpage */
 export const Operator = (props: {
-    ros: ROSLIB.Ros,
     remoteStreams: Map<string, RemoteStream>,
     getRobotPose: (head: boolean, gripper: boolean, arm: boolean) => RobotPose,
     setRobotPose: (pose: RobotPose) => void,

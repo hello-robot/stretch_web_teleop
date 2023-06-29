@@ -17,8 +17,9 @@
     align-self: center;
     width: 100%;
     height: auto;
+    z-index: 1;
 }
 
-#mapCanvas {
+.mapCanvas {
     width: 100%;
 }

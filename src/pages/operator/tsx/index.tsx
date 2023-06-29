@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, Root } from 'react-dom/client';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream, RobotPose } from 'shared/util';
+import { WebRTCMessage, RemoteStream, RobotPose, ROSOccupancyGrid } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './Operator';
@@ -15,8 +15,8 @@ import { FunctionProvider } from './function_providers/FunctionProvider';
 import { PredictiveDisplayFunctionProvider } from './function_providers/PredictiveDisplayFunctionProvider';
 import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
 import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
-import "operator/css/index.css"
-import { ros } from 'robot/tsx/robot';
+import "operator/css/index.css";
+import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -29,6 +29,9 @@ export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
+export var mapFunctionProvider = new MapFunctionProvider()
+
+export let occupancyGrid: ROSOccupancyGrid
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -84,6 +87,8 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         }
         return
     }
+    if (message.type != 'validJointState') console.log(message.type)
+
     switch (message.type) {
         case 'validJointState':
             remoteRobot.sensors.checkValidJointState(
@@ -91,6 +96,15 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
                 message.jointsInLimits,
                 message.jointsInCollision
             );
+            break;
+        case 'occupancyGrid':
+            occupancyGrid = message.message
+            console.log(occupancyGrid)
+            break;
+        case 'amclPose':
+            remoteRobot.setMapPose(
+                message.message
+            )
             break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
@@ -108,6 +122,7 @@ function initializeOperator() {
         renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
+    remoteRobot.getOccupancyGrid("getOccupancyGrid")
     // renderOperator(storageHandler);
 }
 
@@ -163,7 +178,6 @@ function renderOperator(storageHandler: StorageHandler) {
 
     root.render(
         <Operator
-            ros={ros}
             remoteStreams={allRemoteStreams}
             layout={layout}
             getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {

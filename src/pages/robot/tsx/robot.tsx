@@ -1,6 +1,6 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps } from 'shared/util';
-import ROSLIB, { Message, Ros } from "roslib";
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, AMCLPose } from 'shared/util';
+import ROSLIB, { Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
@@ -12,21 +12,32 @@ export var ros: ROSLIB.Ros = new ROSLIB.Ros({
 export class Robot extends React.Component {
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.Goal;
+    private moveBaseGoal?: ROSLIB.Goal;
     private trajectoryClient?: ROSLIB.ActionClient;
+    private moveBaseClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
     private setDepthSensingService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
+    private mapFrameTfClient?: ROSLIB.TFClient;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
+    private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
+    private amclPoseCallback: (mapPose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
 
-    constructor(props: {jointStateCallback: (jointState: ROSJointState) => void}) {
+    constructor(props: {
+        jointStateCallback: (jointState: ROSJointState) => void,
+        occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
+        amclPoseCallback: (mapPose: ROSLIB.Transform) => void
+    }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
+        this.occupancyGridCallback = props.occupancyGridCallback
+        this.amclPoseCallback = props.amclPoseCallback
     }
     
     async connect(): Promise<void> {
@@ -50,15 +61,20 @@ export class Robot extends React.Component {
 
     async onConnect() {
         this.subscribeToJointState()
+        this.subscribeToOccupancyGrid()
+        // this.subscribeToAMCLPose()
         this.createTrajectoryClient()
+        this.createMoveBaseClient()
         this.createCmdVelTopic()
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
         this.createRobotFrameTFClient()
+        this.createMapFrameTFClient()
         this.subscribeToGripperFingerTF()
         this.subscribeToHeadTiltTF()
+        this.subscribeToMapTF()
 
         return Promise.resolve()
     }
@@ -85,6 +101,32 @@ export class Robot extends React.Component {
         topic.subscribe(props.callback)
     }
     
+    subscribeToOccupancyGrid() {
+        let topic: ROSLIB.Topic<ROSOccupancyGrid> = new ROSLIB.Topic({
+            ros: ros,
+            name: 'map',
+            messageType: 'nav_msgs/OccupancyGrid',
+            compression: 'png'
+        })
+
+        topic.subscribe((msg: ROSOccupancyGrid) => {
+            if (this.occupancyGridCallback) this.occupancyGridCallback(msg)
+        })
+    }
+
+    subscribeToAMCLPose() {
+        let topic: ROSLIB.Topic<AMCLPose> = new ROSLIB.Topic({
+            ros: ros,
+            name: '/amcl_pose',
+            messageType: 'geometry_msgs/PoseWithCovarianceStamped',
+            throttle_rate: 100
+        })
+        topic.subscribe((msg: AMCLPose) => {
+            console.log(msg)
+            if (this.amclPoseCallback) this.amclPoseCallback(msg)
+        })
+    }
+
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionClient({
             ros: ros,
@@ -94,6 +136,15 @@ export class Robot extends React.Component {
         });
     }
     
+    createMoveBaseClient() {
+        this.moveBaseClient = new ROSLIB.ActionClient({
+            ros: ros,
+            serverName: '/move_base',
+            actionName: 'move_base_msgs/MoveBaseAction',
+            timeout: 100
+        });
+    }
+
     createCmdVelTopic() {
         this.cmdVelTopic = new ROSLIB.Topic({
             ros: ros,
@@ -138,8 +189,18 @@ export class Robot extends React.Component {
         this.robotFrameTfClient = new ROSLIB.TFClient({
             ros: ros,
             fixedFrame: 'base_link',
-            angularThres: 0.01,
-            transThres: 0.01,
+            angularThres: 0.001,
+            transThres: 0.001,
+            rate: 10
+        });
+    }
+
+    createMapFrameTFClient() {
+        this.mapFrameTfClient = new ROSLIB.TFClient({
+            ros: ros,
+            fixedFrame: 'map',
+            angularThres: 0.001,
+            transThres: 0.001,
             rate: 10
         });
     }
@@ -153,6 +214,13 @@ export class Robot extends React.Component {
     subscribeToHeadTiltTF () {
         this.robotFrameTfClient?.subscribe('link_head_tilt', transform => {
             this.linkHeadTiltTF = transform;
+        })
+    }
+
+    subscribeToMapTF() {
+        this.mapFrameTfClient?.subscribe('base_link', transform => {
+            console.log(transform)
+            if (this.amclPoseCallback) this.amclPoseCallback(transform)
         })
     }
 
@@ -235,6 +303,24 @@ export class Robot extends React.Component {
         return this.makePoseGoal(pose)
     }
 
+    makeMoveBaseGoal(pose: ROSPose) {
+        if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
+
+        let newGoal = new ROSLIB.Goal({
+            actionClient: this.moveBaseClient,
+            goalMessage: {
+                target_pose: {
+                    header: {
+                        frame_id: 'map'
+                    },
+                    pose: pose
+                }
+            }
+        })
+
+        return newGoal
+    }
+
     makePoseGoal(pose: RobotPose) {
         let jointNames: ValidJoints[] = []
         let jointPositions: number[] = []
@@ -284,6 +370,13 @@ export class Robot extends React.Component {
         this.poseGoal.send()
     }
 
+    executeMoveBaseGoal(pose: ROSPose) {
+        this.stopExecution()
+        this.moveBaseClient?.cancel()
+        this.moveBaseGoal = this.makeMoveBaseGoal(pose)
+        this.moveBaseGoal.send()
+    }
+
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
         this.stopExecution();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
@@ -300,6 +393,13 @@ export class Robot extends React.Component {
         if (this.poseGoal) {
             this.poseGoal.cancel()
             this.poseGoal = undefined
+        }
+
+        if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
+        this.moveBaseClient.cancel()
+        if (this.moveBaseGoal) {
+            this.moveBaseGoal.cancel()
+            this.moveBaseGoal = undefined
         }
     }
 
