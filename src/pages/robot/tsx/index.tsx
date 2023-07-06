@@ -3,15 +3,17 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, ROSPose, MapPoseMessage, AMCLPose } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, ROSPose, MapPoseMessage, AMCLPose, GoalStatus, GoalStatusMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
     occupancyGridCallback: setOccupancyGrid,
+    moveBaseResultCallback: forwardMoveBaseResult,
     amclPoseCallback: forwardAMCLPose
 })
+
 export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
@@ -45,17 +47,17 @@ robot.connect().then(() => {
     })
 
     connection.joinRobotRoom()
+}).then(() => {
+    setTimeout(() => {
+        let isResolved = connection.connectionState() == 'connected' ? true : false
+        console.log("connection state: ", isResolved)
+        if (isResolved) {
+            console.log('WebRTC connection is resolved.');
+        } else {
+            window.location.reload()
+        }
+    }, 2000);    
 })
-
-setTimeout(() => {
-    let isResolved = connection.connectionState() == 'connected' ? true : false
-    console.log("connection state: ", isResolved)
-    if (isResolved) {
-        console.log('WebRTC connection is resolved.');
-    } else {
-        window.location.reload()
-    }
-}, 2000);
 
 function handleSessionStart() {
     connection.removeTracks()
@@ -72,6 +74,15 @@ function handleSessionStart() {
     stream.getTracks().forEach(track => connection.addTrack(track, stream, "gripper"))
 
     connection.openDataChannels()
+}
+
+function forwardMoveBaseResult(goalStatus: GoalStatus) {
+    if (!connection) throw 'WebRTC connection undefined!'
+    
+    connection.sendData({
+        type: "goalStatus",
+        message: goalStatus
+    } as GoalStatusMessage)
 }
 
 function forwardJointStates(jointState: ROSJointState) {

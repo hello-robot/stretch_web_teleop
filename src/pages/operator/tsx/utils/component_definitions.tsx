@@ -3,6 +3,7 @@
  */
 
 import ROSLIB from "roslib";
+import { StorageHandler } from "../storage_handler/StorageHandler";
 
 /** Enumerator for the possible action modes */
 export enum ActionMode {
@@ -151,5 +152,10 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
  * Definition for the map component
  */
 export type MapDefinition = ComponentDefinition & {
-    ros: ROSLIB.Ros
+    /**
+     * Enable/disable the click listener on the map for settings a goal 
+     */
+    selectGoal?: boolean
+
+    storageHandler: StorageHandler
 }

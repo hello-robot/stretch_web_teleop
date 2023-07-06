@@ -37,7 +37,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | GoalStatusMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -50,6 +50,17 @@ export interface ValidJointStateMessage {
     robotPose: RobotPose,
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
+}
+
+export interface GoalStatusMessage {
+    type: "goalStatus"
+    message: GoalStatus
+}
+
+export interface GoalStatus {
+    goal_id: string
+    status: number
+    text: string
 }
 
 export interface OccupancyGridMessage {

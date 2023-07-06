@@ -9,6 +9,7 @@ export class RemoteRobot extends React.Component {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
     mapPose: ROSLIB.Transform;
+    moveBaseGoalReached: boolean;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
@@ -22,6 +23,15 @@ export class RemoteRobot extends React.Component {
                 x: 0, y: 0, z: 0, w: 0
             } as ROSLIB.Quaternion
         } as ROSLIB.Transform
+        this.moveBaseGoalReached = false
+    }
+
+    setGoalReached(reached: boolean) {
+        this.moveBaseGoalReached = reached
+    }
+
+    isGoalReached() {
+        return this.moveBaseGoalReached
     }
 
     driveBase(linVel: number, angVel: number): VelocityCommand {
@@ -120,12 +130,15 @@ export class RemoteRobot extends React.Component {
     }
 
     setMapPose(pose: ROSLIB.Transform) {
-        console.log(pose)
         this.mapPose = pose
     }
 
     getMapPose() {
         return this.mapPose
+    }
+
+    stopExecution() {
+        this.robotChannel({ type: "stop" })
     }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, AMCLPose } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, AMCLPose, GoalStatus } from 'shared/util';
 import ROSLIB, { Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
 
@@ -26,17 +26,20 @@ export class Robot extends React.Component {
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
-    private amclPoseCallback: (mapPose: ROSLIB.Transform) => void
+    private moveBaseResultCallback: (goalState: GoalStatus) => void
+    private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
-        amclPoseCallback: (mapPose: ROSLIB.Transform) => void
+        moveBaseResultCallback: (goalState: GoalStatus) => void,
+        amclPoseCallback: (pose: ROSLIB.Transform) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
         this.occupancyGridCallback = props.occupancyGridCallback
+        this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
     }
     
@@ -62,7 +65,6 @@ export class Robot extends React.Component {
     async onConnect() {
         this.subscribeToJointState()
         this.subscribeToOccupancyGrid()
-        // this.subscribeToAMCLPose()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createCmdVelTopic()
@@ -111,19 +113,6 @@ export class Robot extends React.Component {
 
         topic.subscribe((msg: ROSOccupancyGrid) => {
             if (this.occupancyGridCallback) this.occupancyGridCallback(msg)
-        })
-    }
-
-    subscribeToAMCLPose() {
-        let topic: ROSLIB.Topic<AMCLPose> = new ROSLIB.Topic({
-            ros: ros,
-            name: '/amcl_pose',
-            messageType: 'geometry_msgs/PoseWithCovarianceStamped',
-            throttle_rate: 100
-        })
-        topic.subscribe((msg: AMCLPose) => {
-            console.log(msg)
-            if (this.amclPoseCallback) this.amclPoseCallback(msg)
         })
     }
 
@@ -219,7 +208,6 @@ export class Robot extends React.Component {
 
     subscribeToMapTF() {
         this.mapFrameTfClient?.subscribe('base_link', transform => {
-            console.log(transform)
             if (this.amclPoseCallback) this.amclPoseCallback(transform)
         })
     }
@@ -318,6 +306,10 @@ export class Robot extends React.Component {
             }
         })
 
+        newGoal.on('result', (result) => {
+            this.moveBaseResultCallback(result)
+        });
+        
         return newGoal
     }
 

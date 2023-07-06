@@ -1,48 +1,43 @@
 import React from "react";
 import createjs from "createjs-module";
 
-export class ROSViewer extends React.Component {
+export class Canvas extends React.Component {
     private divID: string;
+    private className: string;
     private width: number;
     private height: number;
-    public scene: createjs.Stage;
+    public scene?: createjs.Stage;
     private x_prev_shift?: number;
     private y_prev_shift?: number;
 
     constructor(props: {
         divID: string,
+        className: string,
         width: number,
         height: number
     }) {
         super(props);
         this.divID = props.divID
+        this.className = props.className
         this.width = props.width
         this.height = props.height
-        this.createViewer()
+        this.createCanvas()
     }
 
-    createViewer() {
-        var divID = this.divID;
-        this.width = this.width;
-        this.height = this.height;
+    createCanvas() {
         var background = '#111111';
 
         // create the canvas to render to
         var canvas = document.createElement('canvas');
-        canvas.setAttribute("class", "mapCanvas");
+        canvas.setAttribute("class", this.className);
         canvas.width = this.width;
         canvas.height = this.height
-        // canvas.style.background = background;
-        // document.getElementById(divID)!.appendChild(canvas);
         
         // create the easel to use
         this.scene = new createjs.Stage(canvas);
         
-        // change Y axis center
-        // this.scene.y = this.height;
-        
         // add the renderer to the page
-        document.getElementById(divID)!.appendChild(canvas);
+        document.getElementById(this.divID)!.appendChild(canvas);
         
         // update at 30fps
         createjs.Ticker.framerate = 30;
@@ -55,6 +50,7 @@ export class ROSViewer extends React.Component {
         // save scene scaling
         this.scene.scaleX = this.width / width;
         this.scene.scaleY = this.height / height;
+        this.scene.update()
     }
 
     shift(x: number, y: number) {

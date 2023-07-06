@@ -5,6 +5,7 @@ import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "fire
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
 import { Database, getDatabase, child, get, ref, update, push } from 'firebase/database'
 import { RobotPose } from "shared/util";
+import ROSLIB from "roslib";
 
 /** Uses Firebase to store data. */
 export class FirebaseStorageHandler extends StorageHandler {
@@ -19,6 +20,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     private layouts: { [name: string]: LayoutDefinition };
     private currentLayout: LayoutDefinition | null;
     private poses: { [name: string]: RobotPose };
+    private mapPoses: { [name: string]: ROSLIB.Transform };
 
     constructor(onStorageHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onStorageHandlerReadyCallback);
@@ -33,6 +35,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.layouts = {};
         this.currentLayout = null;
         this.poses = {};
+        this.mapPoses = {}
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
 
         this.signInWithGoogle()
@@ -152,4 +155,46 @@ export class FirebaseStorageHandler extends StorageHandler {
         updates['/users/' + (this.uid) + '/poses'] = poses;
         return update(ref(this.database), updates);
     }
+
+    public getMapPoseNames(): string[] {
+        if (!this.mapPoses) return []
+        return Object.keys(this.poses)
+    }
+
+    public saveMapPose(name: string, pose: ROSLIB.Transform) {
+        this.mapPoses[name] = pose
+        this.writeMapPoses(this.mapPoses)
+    }
+
+    private async writeMapPoses(poses: { [name: string]: ROSLIB.Transform }) {
+        this.mapPoses = poses;
+
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/map_poses'] = poses;
+        return update(ref(this.database), updates);
+    }
+
+    public getMapPose(poseName: string): ROSLIB.Transform {
+        let pose = this.mapPoses![poseName]
+        if (!pose) throw Error(`Could not load pose ${poseName}`);
+        return JSON.parse(JSON.stringify(pose));
+    }
+
+    public getMapPoses(): ROSLIB.Transform[] {
+        const poseNames = this.getMapPoseNames()
+        var poses: ROSLIB.Transform[] = []
+        poseNames.forEach(poseName => {
+            const pose = this.getMapPose(poseName)
+            poses.push(pose)
+        })
+        return poses
+    }
+
+    public deleteMapPose(poseName: string): void {
+        let pose = this.mapPoses![poseName]
+        if (!pose) throw Error(`Could not delete pose ${poseName}`);
+        delete this.mapPoses[poseName]
+        this.writeMapPoses(this.mapPoses)
+    }
+
 }

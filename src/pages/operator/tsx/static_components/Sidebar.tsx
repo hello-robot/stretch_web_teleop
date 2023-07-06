@@ -4,7 +4,7 @@ import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, Com
 import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
-import { ros } from 'robot/tsx/robot';
+import { storageHandler } from "operator/tsx/index";
 
 type SidebarProps = {
     hidden: boolean;
@@ -394,7 +394,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
                 (definition as ParentComponentDefinition).children = []
                 break;
             case (ComponentType.Map):
-                (definition as MapDefinition).ros = ros
+                (definition as MapDefinition).storageHandler = storageHandler
                 break;
         }
 

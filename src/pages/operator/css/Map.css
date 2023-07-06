@@ -1,10 +1,10 @@
 .map-container {
     position: relative;
     flex: 1 1 0;
-    display: flex;
+    /* display: flex; */
     justify-items: center;
     padding: 0.4rem;
-    height: 100%;
+    /* height: 100%; */
     /* grid-template-columns: auto; */
     /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
     object-fit: cover;

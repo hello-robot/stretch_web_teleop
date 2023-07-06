@@ -17,11 +17,15 @@ import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunct
 import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
 import "operator/css/index.css";
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
+import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
+
+export let occupancyGrid: ROSOccupancyGrid
+export let storageHandler: StorageHandler;
 
 // Create the function providers. These abstract the logic between the React 
 // components and remote robot.
@@ -30,8 +34,7 @@ export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 export var mapFunctionProvider = new MapFunctionProvider()
-
-export let occupancyGrid: ROSOccupancyGrid
+export var underMapFunctionProvider: UnderMapFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -39,7 +42,7 @@ connection = new WebRTCConnection({
     polite: true,
     onMessage: handleWebRTCMessage,
     onTrackAdded: handleRemoteTrackAdded,
-    onMessageChannelOpen: initializeOperator,
+    onMessageChannelOpen: configureRemoteRobot,
     onConnectionEnd: disconnectFromRobot
 });
 
@@ -50,6 +53,7 @@ setTimeout(() => {
     let isResolved = connection.connectionState() == 'connected' ? true : false
     console.log("connection state: ", isResolved)
     if (isResolved) {
+        initializeOperator()
         console.log('WebRTC connection is resolved.');
     } else {
         window.location.reload()
@@ -87,7 +91,6 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         }
         return
     }
-    if (message.type != 'validJointState') console.log(message.type)
 
     switch (message.type) {
         case 'validJointState':
@@ -99,12 +102,14 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             break;
         case 'occupancyGrid':
             occupancyGrid = message.message
-            console.log(occupancyGrid)
             break;
         case 'amclPose':
             remoteRobot.setMapPose(
                 message.message
             )
+            break;
+        case 'goalStatus':
+            remoteRobot.setGoalReached(true)
             break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
@@ -116,13 +121,12 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
  * and renders the operator browser.
  */
 function initializeOperator() {
-    configureRemoteRobot();
-    let storageHandler: StorageHandler;
+    // configureRemoteRobot();
     const storageHandlerReadyCallback = () => {
         renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-    remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
     // renderOperator(storageHandler);
 }
 
@@ -135,6 +139,7 @@ function configureRemoteRobot() {
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     remoteRobot.setRobotMode("navigation");
+    remoteRobot.getOccupancyGrid("getOccupancyGrid")
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 }
 

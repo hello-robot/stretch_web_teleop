@@ -1,3 +1,4 @@
+import ROSLIB from "roslib";
 import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
@@ -85,6 +86,38 @@ export abstract class StorageHandler {
      * @returns a pose associated with the given name
      */
     public abstract getPose(poseName: string): RobotPose;
+
+    /**
+     * Save the map pose and its identifier
+     * @param name the name of the pose
+     * @param pose the pose on the map to save
+     */
+    public abstract saveMapPose(poseName: string, pose: ROSLIB.Transform): void;
+
+    /**
+     * Get an array of all saved map poses
+     * @returns array of all saved map poses
+     */
+    public abstract getMapPoseNames(): string[];
+
+    /**
+     * Gets the map pose associated with the given name
+     * @param name the name of the map pose
+     * @returns a map pose associated with the given name
+     */
+    public abstract getMapPose(poseName: string): ROSLIB.Transform;
+
+    /**
+     * Gets an array of all saved poses
+     * @returns an array of all saved poses  
+     */
+    public abstract getMapPoses(): ROSLIB.Transform[];
+
+    /**
+     * Removes the map pose from storage
+     * @param name the name of the map pose
+     */
+    public abstract deleteMapPose(poseName: string): void;
 
     /**
      * Gets the last saved state from the user's layout, or gets the default 
