@@ -21,6 +21,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     private currentLayout: LayoutDefinition | null;
     private poses: { [name: string]: RobotPose };
     private mapPoses: { [name: string]: ROSLIB.Transform };
+    private recordings: { [name: string]: RobotPose[] };
 
     constructor(onStorageHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onStorageHandlerReadyCallback);
@@ -36,6 +37,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.currentLayout = null;
         this.poses = {};
         this.mapPoses = {}
+        this.recordings = {}
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
 
         this.signInWithGoogle()
@@ -197,4 +199,34 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.writeMapPoses(this.mapPoses)
     }
 
+    public getRecordingNames(): string[] {
+        if (!this.recordings) return []
+        return Object.keys(this.recordings)
+    }
+
+    public getRecording(recordingName: string): RobotPose[] {
+        let recording = this.recordings![recordingName]
+        if (!recording) throw Error(`Could not load recording ${recordingName}`);
+        return JSON.parse(JSON.stringify(recording));
+    }
+
+    public savePoseRecording(recordingName: string, poses: RobotPose[]): void {
+        this.recordings[recordingName] = poses
+        this.writeRecordings(this.recordings)
+    }
+
+    private async writeRecordings(recordings: { [name: string]: RobotPose[] }) {
+        this.recordings = recordings;
+
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/recordings'] = recordings;
+        return update(ref(this.database), updates);
+    }
+
+    public deleteRecording(recordingName: string): void {
+        let recording = this.recordings![recordingName]
+        if (!recording) throw Error(`Could not delete recording ${recordingName}`);
+        delete this.recordings[recordingName]
+        this.writeRecordings(this.recordings)
+    }
 }

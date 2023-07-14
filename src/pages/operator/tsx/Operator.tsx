@@ -15,8 +15,7 @@ import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
 import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
-import Nav2d from "react-nav2djs";
-import ROSLIB from "roslib";
+import { PoseRecorder } from "./layout_components/PoseRecorder";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -73,13 +72,24 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the voice control component to display or hidden.
+     * Sets the pose library component to display or hidden.
      * 
      * @param displayPoseLibrary if the pose library component at the 
      *                           top of the operator body should be displayed
      */
     function setDisplayPoseLibrary(displayPoseLibrary: boolean) {
         layout.current.displayPoseLibrary = displayPoseLibrary;
+        updateLayout();
+    }
+
+    /**
+     * Sets the pose recorder component to display or hidden.
+     * 
+     * @param displayPoseRecorder if the pose recorder component at the 
+     *                             top of the operator body should be displayed
+     */
+     function setDisplayPoseRecorder(displayPoseRecorder: boolean) {
+        layout.current.displayPoseRecorder = displayPoseRecorder;
         updateLayout();
     }
 
@@ -173,7 +183,9 @@ export const Operator = (props: {
         displayVoiceControl: layout.current.displayVoiceControl,
         setDisplayVoiceControl: setDisplayVoiceControl,
         displayPoseLibrary: layout.current.displayPoseLibrary,
+        displayPoseRecorder: layout.current.displayPoseRecorder,
         setDisplayPoseLibrary: setDisplayPoseLibrary,
+        setDisplayPoseRecorder: setDisplayPoseRecorder,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -225,6 +237,9 @@ export const Operator = (props: {
                             props.setRobotPose(pose)
                         }}
                     />
+                </div>
+                <div id="operator-pose-recorder" hidden={!layout.current.displayPoseRecorder}>
+                    <PoseRecorder/>
                 </div>
             </div>
             <div id="operator-body">

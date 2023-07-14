@@ -120,6 +120,32 @@ export abstract class StorageHandler {
     public abstract deleteMapPose(poseName: string): void;
 
     /**
+     * Get the list of all saved pose sequence recordings
+     * @returns list of all saved pose sequence recordings
+     */
+    public abstract getRecordingNames(): string[];
+
+    /**
+     * Gets the recording associated with the given name
+     * @param recordingName the name of the recording
+     * @returns a recording associated with the given name
+     */
+    public abstract getRecording(recordingName: string): RobotPose[];
+
+    /**
+     * Save the pose sequence and its identifier
+     * @param recordingName the name of the recording
+     * @param poses the pose sequence to save
+     */
+    public abstract savePoseRecording(recordingName: string, poses: RobotPose[]): void;
+
+    /**
+     * Removes the recording from storage
+     * @param recordingName the name of the recording
+     */
+    public abstract deleteRecording(recordingName: string): void;
+
+    /**
      * Gets the last saved state from the user's layout, or gets the default 
      * layout if the user has no saved state.
      * @returns layout definition for the layout that should be loaded into the
@@ -127,7 +153,7 @@ export abstract class StorageHandler {
      */
     public loadCurrentLayoutOrDefault(): LayoutDefinition {
         const currentLayout = this.loadCurrentLayout();
-        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
+        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[1];
         console.log('loading saved layout')
         return currentLayout;
     }

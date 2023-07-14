@@ -48,18 +48,16 @@ export abstract class FunctionProvider {
 
     public continuousBaseDrive(linVel: number, angVel: number) {
         this.stopCurrentAction()
-        this.activeVelocityAction =
-            FunctionProvider.remoteRobot?.driveBase(linVel, angVel),
-            this.velocityExecutionHeartbeat = window.setInterval(() => {
-                this.activeVelocityAction =
-                    FunctionProvider.remoteRobot?.driveBase(linVel, angVel)
-            }, 150);
+        this.activeVelocityAction = FunctionProvider.remoteRobot?.driveBase(linVel, angVel)
+        this.velocityExecutionHeartbeat = window.setInterval(() => {
+            this.activeVelocityAction =
+                FunctionProvider.remoteRobot?.driveBase(linVel, angVel)
+        }, 150);
     }
 
     public continuousJointMovement(jointName: ValidJoints, increment: number) {
         this.stopCurrentAction()
-        this.activeVelocityAction =
-            FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
+        this.activeVelocityAction = FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
         this.velocityExecutionHeartbeat = window.setInterval(() => {
             this.activeVelocityAction =
                 FunctionProvider.remoteRobot?.incrementalMove(jointName, increment)
@@ -67,10 +65,13 @@ export abstract class FunctionProvider {
     }
 
     public stopCurrentAction() {
+        FunctionProvider.remoteRobot?.stopExecution()
         if (this.activeVelocityAction) {
             // No matter what region this is, stop the currently running action
             this.activeVelocityAction.stop()
             this.activeVelocityAction = undefined
+        }
+        if (this.velocityExecutionHeartbeat) {
             clearInterval(this.velocityExecutionHeartbeat)
             this.velocityExecutionHeartbeat = undefined
         }

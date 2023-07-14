@@ -1,5 +1,5 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
+import { Marker, REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
@@ -7,7 +7,9 @@ export enum UnderVideoButton {
     LookAtGripper = "Look At Gripper",
     LookAtBase = "Look At Base",
     FollowGripper = "Follow Gripper",
-    DepthSensing = "Depth Sensing"
+    DepthSensing = "Depth Sensing",
+    ToggleArucoMarkers = "Toggle Aruco Markers",
+    GetArucoMarkerNames = "Get Aruco Marker Names"
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -28,6 +30,7 @@ export type RealsenseButtons = typeof realsenseButtons[number]
 export type UnderVideoButtonFunctions = {
     onClick?: () => void
     onCheck?: (toggle: boolean) => void
+    getMarkers?: () => string[]
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -62,6 +65,25 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 return {
                     onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle)
                 }
+            case UnderVideoButton.ToggleArucoMarkers:
+                return {
+                    onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setArucoMarkers", toggle)
+                }
+            case UnderVideoButton.GetArucoMarkerNames:
+                return {
+                    getMarkers: () => { 
+                        const markers = FunctionProvider.remoteRobot?.getMarkers() 
+                        let marker_names: string[] = []
+                        if (markers) {
+                            markers.markers.forEach(marker => {
+                                marker_names.push(marker.text)
+                            }) 
+                            return marker_names
+                        } 
+                        return []
+                    }
+                }
+                break
             default:
                 throw Error(`Cannot get function for unknown UnderVideoButton ${button}`)
         }

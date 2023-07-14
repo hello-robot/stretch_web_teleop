@@ -9,6 +9,7 @@ export class LocalStorageHandler extends StorageHandler {
     public static LAYOUT_NAMES_KEY = "user_custom_layout_names";
     public static POSE_NAMES_KEY = "user_pose_names";
     public static MAP_POSE_NAMES_KEY = "user_map_pose_names";
+    public static POSE_RECORDING_NAMES_KEY = "user_pose_recording_names";
 
     constructor(onStorageHandlerReadyCallback: () => void) {
         super(onStorageHandlerReadyCallback);
@@ -111,5 +112,33 @@ export class LocalStorageHandler extends StorageHandler {
         const index = poseNames.indexOf(poseName)
         poseNames.splice(index, 1)
         localStorage.setItem(LocalStorageHandler.MAP_POSE_NAMES_KEY, JSON.stringify(poseNames));
+    }
+
+    public getRecordingNames(): string[] {
+        const storedJson = localStorage.getItem(LocalStorageHandler.POSE_RECORDING_NAMES_KEY);
+        if (!storedJson) return [];
+        return JSON.parse(storedJson)
+    }
+
+    public getRecording(recordingName: string): RobotPose[] {
+        const storedJson = localStorage.getItem('recording_' + recordingName);
+        if (!storedJson) throw Error(`Could not load recording ${recordingName}`);
+        return JSON.parse(storedJson);
+    }
+
+    public savePoseRecording(recordingName: string, poses: RobotPose[]): void {
+        const recordingNames = this.getRecordingNames();
+        if (!recordingNames.includes(recordingName)) recordingNames.push(recordingName);
+        localStorage.setItem(LocalStorageHandler.POSE_RECORDING_NAMES_KEY, JSON.stringify(recordingNames));
+        localStorage.setItem('recording_' + recordingName, JSON.stringify(poses));
+    }
+
+    deleteRecording(recordingName: string): void {
+        const recordingNames = this.getRecordingNames();
+        if (!recordingNames.includes(recordingName)) return;
+        localStorage.removeItem('recording_' + recordingName)
+        const index = recordingNames.indexOf(recordingName)
+        recordingNames.splice(index, 1)
+        localStorage.setItem(LocalStorageHandler.POSE_RECORDING_NAMES_KEY, JSON.stringify(recordingNames));
     }
 }

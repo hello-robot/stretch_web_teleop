@@ -59,6 +59,8 @@ add_service_files(
   FILES
   CameraPerspective.srv
   DepthAR.srv
+  ArucoMarkers.srv
+  NavigateToAruco.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -162,6 +164,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   nodes/configure_video_streams
+  nodes/aruco_navigation
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

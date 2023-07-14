@@ -30,12 +30,12 @@
     width: var(--header-btn-width);
 }
 
-#operator-voice, #operator-pose-library {
+#operator-voice, #operator-pose-library, #operator-pose-recorder {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
-    height: 4rem;
+    height: 6rem;
     width: 35rem;
-    display: flex;
+    display: inline-grid;
     align-items: center;
     justify-content: center;
     justify-self: center;
@@ -48,7 +48,7 @@
     font-size: large;
 }
 
-#operator-voice[hidden], #operator-pose-library[hidden] {
+#operator-voice[hidden], #operator-pose-library[hidden], #operator-pose-recorder[hidden] {
     display: none;
 }
 

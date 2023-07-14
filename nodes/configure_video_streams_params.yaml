@@ -22,7 +22,7 @@
             },
             # Number of degress to rotate video stream clockwise
             # Pass "rotate": null to not rotate
-            "rotate": null
+            "rotate": 'ROTATE_90_COUNTERCLOCKWISE'
         },
         "manip": {
             "mask": {

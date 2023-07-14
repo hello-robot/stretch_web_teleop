@@ -9,6 +9,7 @@ import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFunctionProvider";
 import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
+import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/CameraView.css"
 
 /**
@@ -464,6 +465,14 @@ const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
  */
 const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
+    const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    const [markers, setMarkers] = React.useState<string[]>([])
+
+    // const updateMarkers = setInterval(() => {
+    //     setMarkers(
+    //         underVideoFunctionProvider.provideFunctions(UnderVideoButton.GetArucoMarkerNames).getMarkers!()
+    //     )
+    // }, 1000)
 
     return (
         <React.Fragment >
@@ -487,6 +496,21 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(props.definition.depthSensing)
                 }}
                 label="Depth Sensing"
+            />
+            <CheckToggleButton
+                checked={props.definition.arucoMarkers || false}
+                onClick={() => {
+                    props.definition.arucoMarkers = !props.definition.arucoMarkers;
+                    setRerender(!rerender);
+                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.ToggleArucoMarkers).onCheck!(props.definition.arucoMarkers)
+                }}
+                label="Aruco Markers"
+            />
+            <Dropdown
+                onChange={setSelectedIdx}
+                selectedIndex={selectedIdx}
+                possibleOptions={markers}
+                placeholderText="Select a marker..."
             />
         </React.Fragment>
     )

@@ -6,6 +6,8 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
 export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: false,
+    displayPoseLibrary: true,
+    displayPoseRecorder: true,
     actionMode: ActionMode.ClickClick,
     children: [
         {

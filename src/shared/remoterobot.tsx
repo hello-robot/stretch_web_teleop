@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, AMCLPose } from 'shared/util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, AMCLPose, MarkerArray } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -10,6 +10,7 @@ export class RemoteRobot extends React.Component {
     sensors: RobotSensors
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
+    markers: MarkerArray;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
@@ -24,6 +25,7 @@ export class RemoteRobot extends React.Component {
             } as ROSLIB.Quaternion
         } as ROSLIB.Transform
         this.moveBaseGoalReached = false
+        this.markers = { markers: [] }
     }
 
     setGoalReached(reached: boolean) {
@@ -99,6 +101,14 @@ export class RemoteRobot extends React.Component {
         this.robotChannel(cmd)
     }
 
+    playbackPoses(poses: RobotPose[]) {
+        let cmd: PlaybackPosesCommand = {
+            type: "playbackPoses",
+            poses: poses
+        }
+        this.robotChannel(cmd)
+    }
+
     moveBase(pose: ROSPose) {
         let cmd: MoveBaseCommand = {
             type: "moveBase",
@@ -107,7 +117,7 @@ export class RemoteRobot extends React.Component {
         this.robotChannel(cmd)
     }
     
-    setToggle(type: "setFollowGripper" | "setDepthSensing", toggle: boolean) {
+    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
@@ -135,6 +145,14 @@ export class RemoteRobot extends React.Component {
 
     getMapPose() {
         return this.mapPose
+    }
+
+    setMarkers(markers: MarkerArray) {
+        this.markers = markers
+    }
+
+    getMarkers() {
+        return this.markers
     }
 
     stopExecution() {

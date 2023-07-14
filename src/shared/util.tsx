@@ -37,7 +37,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | GoalStatusMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | GoalStatusMessage | MarkersMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -79,6 +79,20 @@ export interface AMCLPose extends Message {
         pose: ROSPose,
         covariance: number[]
     }
+}
+
+export interface MarkerArray {
+    markers: Marker[]
+}
+
+export interface Marker {
+    text: string,
+    id: number
+}
+
+export interface MarkersMessage extends Message {
+    type: "arucoMarkers",
+    message: MarkerArray
 }
 
 export interface ROSPoint extends Message {

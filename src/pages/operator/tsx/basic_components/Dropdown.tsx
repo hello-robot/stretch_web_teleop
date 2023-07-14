@@ -7,7 +7,8 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
     possibleOptions: T[],
     selectedIndex?: number,
     placeholderText?: string,
-    showActive?: boolean
+    showActive?: boolean,
+    top?: boolean
 }) => {
     const [showDropdown, setShowDropdown] = React.useState(false);
     const inputRef = React.useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
                 {props.selectedIndex === undefined ? props.placeholderText : props.possibleOptions[props.selectedIndex]}
                 <span className="material-icons">expand_more</span>
             </button>
-            <div hidden={!showDropdown} className="dropdown-popup">
+            <div hidden={!showDropdown} className={className("dropdown-popup", { "top": props.top == undefined ? false : props.top })}>
                 {props.possibleOptions.map(mapFunc)}
             </div>
 

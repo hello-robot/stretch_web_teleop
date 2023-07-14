@@ -1,25 +1,32 @@
 .map-container {
     position: relative;
     flex: 1 1 0;
-    /* display: flex; */
+    display: grid;
     justify-items: center;
     padding: 0.4rem;
-    /* height: 100%; */
-    /* grid-template-columns: auto; */
+    max-height: 100%;
+    grid-template-columns: auto;
     /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
     object-fit: cover;
     justify-content: center;
     /* align-items: center;
     flex-direction: column; */
-}
-
-#map {
-    align-self: center;
-    width: 100%;
-    height: auto;
     z-index: 1;
 }
 
+.map {
+    align-self: center;
+    width: auto;
+    height: 100%;
+    z-index: 1;
+}
+
+.map.constrainedHeight {
+    width: auto;
+    height: 100%;
+}
+
 .mapCanvas {
-    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
 }

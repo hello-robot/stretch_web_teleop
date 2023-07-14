@@ -51,9 +51,6 @@ export const Map = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
-    // Reference to the video element
-    const mapRef = React.useRef<HTMLDivElement>();
-
     // Constrain the width or height when the stream gets too large
     React.useEffect(() => {
         var canvas = new Canvas({
@@ -202,12 +199,13 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                     selectedIndex={selectedIdx}
                     possibleOptions={poses}
                     placeholderText="Select a goal..."
+                    top={true}
                 />
                 <Tooltip text="Load goal" position="top">
                     <button className="play-btn" onClick={
-                        () => { 
+                        () => {
                             if (selectedIdx != undefined) {
-                                let pose: ROSLIB.Vector3 = props.functs.LoadGoal(selectedIdx)! 
+                                let pose: ROSLIB.Vector3 = props.functs.LoadGoal(selectedIdx)!
                                 props.functs.DisplayGoalMarker(pose)
                             }
                         }

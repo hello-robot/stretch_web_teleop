@@ -18,13 +18,14 @@ import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvide
 import "operator/css/index.css";
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
+import { PoseRecorderFunctionProvider } from './function_providers/PoseRecorderFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
 
-export let occupancyGrid: ROSOccupancyGrid
+export let occupancyGrid: ROSOccupancyGrid | undefined
 export let storageHandler: StorageHandler;
 
 // Create the function providers. These abstract the logic between the React 
@@ -35,6 +36,7 @@ export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionPro
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 export var mapFunctionProvider = new MapFunctionProvider()
 export var underMapFunctionProvider: UnderMapFunctionProvider;
+export var poseRecorderFunctionProvider: PoseRecorderFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -55,10 +57,21 @@ setTimeout(() => {
     if (isResolved) {
         initializeOperator()
         console.log('WebRTC connection is resolved.');
+
+        // If WebRTC disconnects, reload page
+        // const connectionStateChanged = setInterval(() => {
+        //     let isResolved = connection.connectionState() == 'connected'
+        //     if (!isResolved) {
+        //         clearInterval(connectionStateChanged)
+        //         window.location.reload()
+        //     }
+        // }, 2000)
+
     } else {
         window.location.reload()
     }
-}, 4000);
+}, 8000);
+
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -101,7 +114,11 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             );
             break;
         case 'occupancyGrid':
-            occupancyGrid = message.message
+            if (!occupancyGrid) {
+                occupancyGrid = message.message
+            } else {
+                occupancyGrid.data = occupancyGrid.data.concat(message.message.data)
+            }
             break;
         case 'amclPose':
             remoteRobot.setMapPose(
@@ -110,6 +127,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             break;
         case 'goalStatus':
             remoteRobot.setGoalReached(true)
+            break;
+        case 'arucoMarkers':
+            remoteRobot.setMarkers(message.message)
             break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
@@ -127,6 +147,7 @@ function initializeOperator() {
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
     underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
+    poseRecorderFunctionProvider = new PoseRecorderFunctionProvider(storageHandler)
     // renderOperator(storageHandler);
 }
 
@@ -139,6 +160,7 @@ function configureRemoteRobot() {
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     remoteRobot.setRobotMode("navigation");
+    occupancyGrid = undefined;
     remoteRobot.getOccupancyGrid("getOccupancyGrid")
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 }

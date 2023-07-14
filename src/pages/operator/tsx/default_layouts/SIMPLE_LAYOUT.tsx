@@ -5,9 +5,10 @@ export const SIMPLE_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     // If voice control should be displayed on the operator page
     displayVoiceControl: false,
+    displayPoseRecorder: false,
     // The state of the action mode dropdown
     actionMode: ActionMode.StepActions,
-
+    displayPoseLibrary: false,
     // The customizable components in the layout
     children: [
         {

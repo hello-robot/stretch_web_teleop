@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, AMCLPose, GoalStatus } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, GoalStatus, MarkerArray } from 'shared/util';
 import ROSLIB, { Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
 
@@ -20,6 +20,8 @@ export class Robot extends React.Component {
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
     private setDepthSensingService?: ROSLIB.Service;
+    private setArucoMarkersService?: ROSLIB.Service;
+    private navigateToArucoService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
@@ -28,19 +30,22 @@ export class Robot extends React.Component {
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
     private moveBaseResultCallback: (goalState: GoalStatus) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
+    private markerArrayCallback: (markers: MarkerArray) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
         moveBaseResultCallback: (goalState: GoalStatus) => void,
-        amclPoseCallback: (pose: ROSLIB.Transform) => void
+        amclPoseCallback: (pose: ROSLIB.Transform) => void,
+        markerArrayCallback: (markers: MarkerArray) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
         this.occupancyGridCallback = props.occupancyGridCallback
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
+        this.markerArrayCallback = props.markerArrayCallback
     }
     
     async connect(): Promise<void> {
@@ -65,6 +70,7 @@ export class Robot extends React.Component {
     async onConnect() {
         this.subscribeToJointState()
         this.subscribeToOccupancyGrid()
+        this.subscribeToMarkerArray()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createCmdVelTopic()
@@ -72,6 +78,8 @@ export class Robot extends React.Component {
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
+        this.createArucoMarkerService()
+        this.createArucoNavigationService()
         this.createRobotFrameTFClient()
         this.createMapFrameTFClient()
         this.subscribeToGripperFingerTF()
@@ -113,6 +121,18 @@ export class Robot extends React.Component {
 
         topic.subscribe((msg: ROSOccupancyGrid) => {
             if (this.occupancyGridCallback) this.occupancyGridCallback(msg)
+        })
+    }
+
+    subscribeToMarkerArray() {
+        let topic: ROSLIB.Topic<MarkerArray> = new ROSLIB.Topic({
+            ros: ros,
+            name: 'aruco/marker_array',
+            messageType: 'visualization_msgs/MarkerArray'
+        })
+
+        topic.subscribe((msg: MarkerArray) => {
+            if (this.markerArrayCallback) this.markerArrayCallback(msg)
         })
     }
 
@@ -174,6 +194,22 @@ export class Robot extends React.Component {
         })
     }
 
+    createArucoMarkerService() {
+        this.setArucoMarkersService = new ROSLIB.Service({
+            ros: ros,
+            name: '/aruco_markers',
+            serviceType: 'stretch_web_interface_react/ArucoMarkers'
+        })
+    }
+
+    createArucoNavigationService() {
+        this.navigateToArucoService = new ROSLIB.Service({
+            ros: ros,
+            name: '/navigate_to_aruco',
+            serviceType: 'stretch_web_interface_react/NavigateToAruco'
+        })
+    }
+
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
             ros: ros,
@@ -221,9 +257,16 @@ export class Robot extends React.Component {
     }
 
     setDepthSensing(toggle: boolean) {
-        var requeset = new ROSLIB.ServiceRequest({enable: toggle})
-        this.setDepthSensingService?.callService(requeset, (response: boolean) => {
+        var request = new ROSLIB.ServiceRequest({enable: toggle})
+        this.setDepthSensingService?.callService(request, (response: boolean) => {
             response ? console.log("Enable depth sensing") : console.log("Disabled depth sensing")
+        })
+    }
+
+    setArucoMarkers(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({enable: toggle})
+        this.setArucoMarkersService?.callService(request, (response: boolean) => {
+            response ? console.log("Enable aruco markers") : console.log("Disabled aruco markers")
         })
     }
 
@@ -360,6 +403,18 @@ export class Robot extends React.Component {
         this.trajectoryClient?.cancel();
         this.poseGoal = this.makePoseGoal(pose)
         this.poseGoal.send()
+    }
+
+    executePoseGoals(poses: RobotPose[], index: number) {
+        if (index < poses.length) {
+            this.stopExecution();
+            this.trajectoryClient?.cancel();
+            this.poseGoal = this.makePoseGoal(poses[index])
+            this.poseGoal.on('result', (result) => {
+                this.executePoseGoals(poses, index + 1)
+            })
+            this.poseGoal.send()
+        }
     }
 
     executeMoveBaseGoal(pose: ROSPose) {

@@ -104,6 +104,7 @@ export const PoseLibrary = (props: {
 
     return (
         <React.Fragment>
+            <div id="pose-library-container">Pose Library</div>
             <div id="pose-library-container">
                 <Dropdown
                     onChange={setSelectedIdx}

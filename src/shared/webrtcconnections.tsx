@@ -36,7 +36,7 @@ export class WebRTCConnection extends React.Component {
     private messageChannel?: RTCDataChannel
 
     private onTrackAdded?: (ev: RTCTrackEvent) => void
-    private onMessage: (obj: WebRTCMessage | WebRTCMessage[]) => void
+    private onMessage: (obj: WebRTCMessage) => void
     private onRobotConnectionStart?: () => void 
     private onMessageChannelOpen?: () => void
     private onConnectionEnd?: () => void

@@ -84,6 +84,7 @@ export type ParentComponentDefinition = ComponentDefinition & {
 export type LayoutDefinition = ParentComponentDefinition & {
     displayVoiceControl: boolean;
     displayPoseLibrary: boolean;
+    displayPoseRecorder: boolean;
     actionMode: ActionMode;
 }
 
@@ -146,6 +147,10 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      * reachable area.
      */
     depthSensing?: boolean;
+    /**
+     * If the aruco markers overlay should be displayed
+     */
+    arucoMarkers?: boolean;
 }
 
 /**

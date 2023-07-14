@@ -6,7 +6,9 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
 export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: false,
+    displayPoseRecorder: false,
     actionMode: ActionMode.StepActions,
+    displayPoseLibrary: false,
     children: [
         {
             type: ComponentType.Panel,

@@ -14,8 +14,8 @@ import compressed_image_transport
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
 from cv_bridge import CvBridge
-from stretch_teleop_interface.srv import CameraPerspective, DepthAR
-
+from stretch_teleop_interface.srv import CameraPerspective, DepthAR, ArucoMarkers
+from visualization_msgs.msg import MarkerArray
 
 class ConfigureVideoStreams:
     def __init__(self, params_file):
@@ -54,14 +54,15 @@ class ConfigureVideoStreams:
         self.gripper_camera_rgb_subscriber = message_filters.Subscriber(f'/gripper_camera/image_raw', Image)
         self.point_cloud_subscriber = message_filters.Subscriber("/voxel_grid/output", PointCloud2)
         self.camera_info_subscriber = message_filters.Subscriber("/camera/aligned_depth_to_color/camera_info", CameraInfo)
-
+        self.aruco_markers_subscriber = message_filters.Subscriber("/aruco/marker_array", MarkerArray)
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, 
             self.overhead_camera_rgb_subscriber, 
             self.gripper_camera_rgb_subscriber, 
             self.point_cloud_subscriber,
-            self.camera_info_subscriber
-        ], 10, 1)
+            self.camera_info_subscriber,
+            self.aruco_markers_subscriber
+        ], 1, 1, allow_headerless=True)
         self.camera_synchronizer.registerCallback(self.camera_callback)
 
         # Service for requested image perspectives configured based on params file
@@ -76,6 +77,10 @@ class ConfigureVideoStreams:
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = rospy.Service('depth_ar', DepthAR, self.depth_ar_callback)
         self.depth_ar = False
+
+        # Service for enable aruco marker detection
+        self.aruco_markers_service = rospy.Service('aruco_markers', ArucoMarkers, self.display_aruco_markers_callback)
+        self.aruco_markers = False
 
     def pc_callback(self, msg, img):
         # Get transform
@@ -107,10 +112,28 @@ class ConfigureVideoStreams:
 
         # Change color of pixels in robot's reach
         if img is not None:
-            img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 191, 0]
+            img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 191, 0, 50]
             # img[y_idx, x_idx, 3] = 0
         return img
-        
+
+    def aruco_markers_callback(self, msg, img):
+        markers = msg.markers
+        for marker in markers:
+            position = marker.pose.position
+
+            center = np.matmul(self.P, np.transpose(np.array([position.x, position.y, position.z, 1]))) # 3 x 1
+            cx = (center[0]/center[2]).astype(int)
+            cy = (center[1]/center[2]).astype(int)
+            r = 25
+
+            # img[circle_coords] = [255, 191, 0]
+            mask = self.create_circular_mask(img.shape[0], img.shape[1], (cy, cx), 20)
+            masked_img = img.copy()
+            masked_img[np.fliplr(mask)] = [255, 191, 0, 50]
+            img = cv2.addWeighted(masked_img, 0.4, img, 0.5, 0)
+
+        return img
+
     def camera_perspective_callback(self, req):
         if req.camera not in self.camera_perspective: 
             raise ValueError("CameraPerspective.srv camera must be overhead, realsense or gripper") 
@@ -123,6 +146,10 @@ class ConfigureVideoStreams:
 
     def depth_ar_callback(self, req):
         self.depth_ar = req.enable
+        return True
+
+    def display_aruco_markers_callback(self, req):
+        self.aruco_markers = req.enable
         return True
 
     def crop_image(self, image, params):
@@ -138,6 +165,7 @@ class ConfigureVideoStreams:
 
         return image[x_min:x_max, y_min:y_max]
 
+    # https://stackoverflow.com/questions/44865023/how-can-i-create-a-circular-mask-for-a-numpy-array
     def create_circular_mask(self, h, w, center=None, radius=None):
         if center is None: # use the middle of the image
             center = (int(w/2), int(h/2))
@@ -186,12 +214,13 @@ class ConfigureVideoStreams:
                 rgb_image = self.rotate_image(rgb_image, params['rotate'])
         return rgb_image
 
-    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image, pc_msg, camera_info):
+    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image, pc_msg, camera_info, marker_msg):
         self.P =  np.array(camera_info.P).reshape(3,4)
         for image_config_name in self.realsense_params:
             img = self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
-            # img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
             if self.depth_ar: img = self.pc_callback(pc_msg, img)
+            if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
         for image_config_name in self.overhead_params:
             self.overhead_images[image_config_name] = \

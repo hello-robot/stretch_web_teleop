@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, ROSPose, MapPoseMessage, AMCLPose, GoalStatus, GoalStatusMessage } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, Marker, MarkersMessage, MarkerArray } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
@@ -11,7 +11,8 @@ export const robot = new Robot({
     jointStateCallback: forwardJointStates,
     occupancyGridCallback: setOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseResult,
-    amclPoseCallback: forwardAMCLPose
+    amclPoseCallback: forwardAMCLPose,
+    markerArrayCallback: forwardMarkers
 })
 
 export let connection: WebRTCConnection;
@@ -56,7 +57,7 @@ robot.connect().then(() => {
         } else {
             window.location.reload()
         }
-    }, 2000);    
+    }, 6000);    
 })
 
 function handleSessionStart() {
@@ -109,10 +110,37 @@ function forwardJointStates(jointState: ROSJointState) {
 function forwardOccupancyGrid() {
     if (!connection) throw 'WebRTC connection undefined'
 
+    let splitOccupancyGrid: ROSOccupancyGrid = {
+        header: occupancyGrid.header,
+        info: occupancyGrid.info,
+        data: []
+    }
+
+    const data_size = 50000
+    for (let i = 0; i < occupancyGrid.data.length; i += data_size) {
+        const data_chunk = occupancyGrid.data.slice(i, i + data_size);
+        splitOccupancyGrid.data = data_chunk
+        connection.sendData({
+            type: 'occupancyGrid',
+            message: splitOccupancyGrid
+        } as OccupancyGridMessage);
+    }
+
+    occupancyGrid.data = occupancyGrid.data.slice(0, 70000)
+    console.log('forwarding', occupancyGrid)
     connection.sendData({
         type: 'occupancyGrid',
         message: occupancyGrid
     } as OccupancyGridMessage);
+}
+
+function forwardMarkers(markers: MarkerArray) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: "arucoMarkers",
+        message: markers
+    } as MarkersMessage)
 }
 
 function forwardAMCLPose(transform: ROSLIB.Transform) {
@@ -153,6 +181,9 @@ function handleMessage(message: WebRTCMessage) {
         case "setRobotPose":
             robot.executePoseGoal(message.pose)
             break
+        case "playbackPoses":
+            robot.executePoseGoals(message.poses, 0)
+            break
         case "moveBase":
             robot.executeMoveBaseGoal(message.pose)
             break
@@ -161,6 +192,9 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
+            break
+        case "setArucoMarkers":
+            robot.setArucoMarkers(message.toggle)
             break
         case "lookAtGripper":
             robot.lookAtGripper(0, 0)

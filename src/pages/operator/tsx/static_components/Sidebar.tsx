@@ -93,6 +93,10 @@ export type GlobalOptionsProps = {
     displayPoseLibrary: boolean;
     setDisplayPoseLibrary: (displayPoseLibrary: boolean) => void;
     
+    /** If the save/load poses should be displayed. */
+    displayPoseRecorder: boolean;
+    setDisplayPoseRecorder: (displayPoseRecorder: boolean) => void;
+    
     /** List of names of the default layouts. */
     defaultLayouts: string[],
     /** List of names of the user's custom layouts. */
@@ -128,6 +132,11 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     on={props.displayPoseLibrary}
                     onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
                     label="Display pose library"
+                />
+                 <OnOffToggleButton
+                    on={props.displayPoseRecorder}
+                    onClick={() => props.setDisplayPoseRecorder(!props.displayPoseRecorder)}
+                    label="Display pose recorder"
                 />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}
