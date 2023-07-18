@@ -133,9 +133,27 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // buttons around the video, otherwise return the video
     const videoComponent = (props.definition.id === CameraViewId.realsense) ?
         (
-            <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
-                <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
+            <>
+                {/* <h4 className="title">Adjustable Camera</h4> */}
+                <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                    {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
+                    <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            muted={true}
+                            className={className(videoClass, { constrainedHeight })}
+                        />
+                        {overlayContainer}
+                    </div>
+                </div>
+            </>
+        )
+        :
+        (
+            <>
+                <h4 className="title">{props.definition.id} Camera</h4>
+                <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
                     <video
                         ref={videoRef}
                         autoPlay
@@ -144,19 +162,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
                     />
                     {overlayContainer}
                 </div>
-            </div>
-        )
-        :
-        (
-            <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
-                <video
-                    ref={videoRef}
-                    autoPlay
-                    muted={true}
-                    className={className(videoClass, { constrainedHeight })}
-                />
-                {overlayContainer}
-            </div>
+            </>
         )
 
     return (
@@ -466,7 +472,7 @@ const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
 const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
-    const [markers, setMarkers] = React.useState<string[]>([])
+    const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
 
     // const updateMarkers = setInterval(() => {
     //     setMarkers(
@@ -511,7 +517,21 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                 selectedIndex={selectedIdx}
                 possibleOptions={markers}
                 placeholderText="Select a marker..."
+                top={true}
             />
+            <button className="play-btn" onClick={
+                () => {
+                    if (selectedIdx != undefined) {
+                        let marker_name = markers[selectedIdx]
+                        underVideoFunctionProvider.provideFunctions(UnderVideoButton.NavigateToMarker).send!(marker_name)
+                    }
+                }
+            }>
+                Play 
+                <span className="material-icons">
+                    play_circle
+                </span>
+            </button>
         </React.Fragment>
     )
 }

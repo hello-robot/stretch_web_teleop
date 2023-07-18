@@ -1,6 +1,6 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand } from 'shared/commands';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand } from 'shared/commands';
 import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, AMCLPose, MarkerArray } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
@@ -121,6 +121,14 @@ export class RemoteRobot extends React.Component {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
+        }
+        this.robotChannel(cmd)
+    }
+
+    navigateToMarker(name: string) {
+        let cmd: NavigateToMarkerCommand = {
+            type: "navigateToMarker",
+            name: name
         }
         this.robotChannel(cmd)
     }

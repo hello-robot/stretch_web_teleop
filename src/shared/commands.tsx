@@ -1,7 +1,7 @@
 import { ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand | NavigateToMarkerCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -63,4 +63,9 @@ export interface MoveBaseCommand {
 
 export interface StopCommand {
     type: "stop"
+}
+
+export interface NavigateToMarkerCommand {
+    type: "navigateToMarker"
+    name: string
 }

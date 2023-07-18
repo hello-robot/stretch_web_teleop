@@ -66,7 +66,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
     } : {};
 
     return (
-        <>
+        <div className="button-pad">
+            {!overlay ? id : <></>}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
@@ -76,7 +77,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
             >
                 {paths.map(mapPaths)}
             </svg>
-        </>
+        </div>
     );
 }
 
@@ -126,15 +127,15 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
     let functions: ButtonPadButton[];
     const B = ButtonPadButton;
     switch (id) {
-        case ButtonPadId.Drive:
-            functions = [
-                B.BaseForward,
-                B.BaseRotateRight,
-                B.BaseReverse,
-                B.BaseRotateLeft
-            ];
-            shape = ButtonPadShape.Directional;
-            break;
+        // case ButtonPadId.Drive:
+        //     functions = [
+        //         B.BaseForward,
+        //         B.BaseRotateRight,
+        //         B.BaseReverse,
+        //         B.BaseRotateLeft
+        //     ];
+        //     shape = ButtonPadShape.Directional;
+        //     break;
         case ButtonPadId.ManipRealsense:
             functions = [
                 B.WristRotateIn,

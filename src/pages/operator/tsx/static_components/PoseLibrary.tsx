@@ -113,16 +113,19 @@ export const PoseLibrary = (props: {
                     placeholderText="Select a pose..."
                 />
                 <button className="play-btn" onClick={() => loadPose()}>
+                    Play
                     <span className="material-icons">
                         play_circle
                     </span>
                 </button>
                 <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                    Save
                     <span className="material-icons">
                         save
                     </span>
                 </button>
                 <button className="delete-btn" onClick={() => deletePose()}>
+                    Delete
                     <span className="material-icons">
                         delete_forever
                     </span>

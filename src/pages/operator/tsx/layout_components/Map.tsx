@@ -97,6 +97,7 @@ export const Map = (props: CustomizableComponentProps) => {
 
     return (
         <div className="map-container">
+            <h4 className="title">Map</h4>
             <div id="map" className={className("map", { customizing, selected, active })} onClick={handleSelect}></div>
             <div className="under-video-area">
                 <UnderMapButtons definition={definition} functs={underMapFn} />
@@ -169,6 +170,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 />
                 <Tooltip text="Save goal" position="top">
                     <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                        Save
                         <span className="material-icons">
                             save
                         </span>
@@ -176,6 +178,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 </Tooltip>
                 <Tooltip text="Cancel goal" position="top">
                     <button className="delete-btn" onClick={props.functs.CancelGoal}>
+                        Cancel
                         <span className="material-icons">
                             cancel
                         </span>
@@ -210,6 +213,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                             }
                         }
                     }>
+                        Play 
                         <span className="material-icons">
                             play_circle
                         </span>
@@ -224,6 +228,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                         )
                         setSelectedIdx(undefined)
                     }}>
+                        Delete 
                         <span className="material-icons">
                             delete_forever
                         </span>

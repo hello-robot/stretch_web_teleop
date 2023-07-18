@@ -3,6 +3,7 @@
 import rospy
 import tf2_ros
 import actionlib
+import dynamic_reconfigure.client
 from geometry_msgs.msg import TransformStamped, Pose, Transform
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from stretch_teleop_interface.srv import NavigateToAruco
@@ -15,6 +16,8 @@ class ArucoNavigation:
     def __init__(self):
         # Service for enabling aruco navigation
         self.navigation_service = rospy.Service('navigate_to_aruco', NavigateToAruco, self.navigate_to_aruco_callback)
+        self.navigation_complete = False
+        self.reconfigure_client = dynamic_reconfigure.client.Client("move_base")
         self.aruco_name = ''
         self.tilt_range = [-1.0, 0.48]
         self.pan_range = [-4.07, 1.74]
@@ -95,79 +98,171 @@ class ArucoNavigation:
         head_goal.trajectory.header.stamp = rospy.Time.now()
         head_goal.trajectory.header.frame_id = 'base_link'
 
-        self.trajectory_client.cancel_all_goals()
+        # self.trajectory_client.cancel_all_goals()
         self.trajectory_client.send_goal(head_goal)
         self.trajectory_client.wait_for_result()
         
+    def set_pan_tilt_camera(self, pan, tilt):
+        point = JointTrajectoryPoint()
+        point.time_from_start = rospy.Duration(1.0)
+        point.positions = [pan, tilt]
+
+        head_goal = FollowJointTrajectoryGoal()
+        head_goal.trajectory.joint_names = ['joint_head_pan', 'joint_head_tilt']
+        head_goal.trajectory.points = [point]
+        head_goal.trajectory.header.stamp = rospy.Time.now()
+        head_goal.trajectory.header.frame_id = 'base_link'
+
+        # self.trajectory_client.cancel_all_goals()
+        self.trajectory_client.send_goal(head_goal)
+        self.trajectory_client.wait_for_result()
+
+    def navigate_to_light_switch(self):
+        # Transform the docking station frame such that x-axis points out of the aruco plane and 0.5 m in the front of the dock
+        # This facilitates passing the goal pose as this predock frame so that the robot can back up into the dock
+        saved_pose = Transform()
+        saved_pose.translation.x = -1.0
+        saved_pose.translation.y = 0.0
+        saved_pose.translation.z = 0.47
+        q = quaternion_from_euler(0, 0, 1.5)
+        saved_pose.rotation.x = q[0]
+        saved_pose.rotation.y = q[1]
+        saved_pose.rotation.z = q[2]
+        saved_pose.rotation.w = q[3]
+        tran = self.broadcast_tf(saved_pose, 'predock_pose', 'light_switch')
+        self.tf2_broadcaster.sendTransform(tran)
+        try:
+            trans = self.tf2_buffer.lookup_transform('map', 'predock_pose', rospy.Time(), rospy.Duration(1.0))
+            # Bring predock_frame at base_link level
+            angles = euler_from_quaternion([trans.transform.rotation.x,
+                                            trans.transform.rotation.y,
+                                            trans.transform.rotation.z,
+                                            trans.transform.rotation.w])
+            q = quaternion_from_euler(0, 0, angles[2])
+            trans.transform.translation.z = 0
+            trans.transform.rotation.x = q[0]
+            trans.transform.rotation.y = q[1]
+            trans.transform.rotation.z = q[2]
+            trans.transform.rotation.w = q[3]
+            trans.header.stamp = rospy.Time.now()
+            self.predock_tf = trans
+            rospy.loginfo("Published predock pose")
+
+            goal_pose = Pose()
+            goal_pose.position.x = self.predock_tf.transform.translation.x
+            goal_pose.position.y = self.predock_tf.transform.translation.y
+            goal_pose.position.z = self.predock_tf.transform.translation.z
+            goal_pose.orientation.x = self.predock_tf.transform.rotation.x
+            goal_pose.orientation.y = self.predock_tf.transform.rotation.y
+            goal_pose.orientation.z = self.predock_tf.transform.rotation.z
+            goal_pose.orientation.w = self.predock_tf.transform.rotation.w
+
+            action_goal = MoveBaseGoal()
+            action_goal.target_pose.header.frame_id = "map"
+            action_goal.target_pose.header.stamp = rospy.Time.now()
+            action_goal.target_pose.pose = goal_pose
+
+            # self.action_client.cancel_all_goals()
+            result = self.action_client.send_goal_and_wait(action_goal)
+            
+            self.move_base_aruco_callback(result)
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.loginfo("Could not publish pose to tf")
+            pass
+
+    def navigate_to_docking_station(self):
+        # Transform the docking station frame such that x-axis points out of the aruco plane and 0.5 m in the front of the dock
+        # This facilitates passing the goal pose as this predock frame so that the robot can back up into the dock
+        saved_pose = Transform()
+        saved_pose.translation.x = 0.0
+        saved_pose.translation.y = -1.0
+        saved_pose.translation.z = 0.47
+        saved_pose.rotation.x = -0.356 # -0.382
+        saved_pose.rotation.y = -0.356 # -0.352
+        saved_pose.rotation.z = -0.611 # -0.604
+        saved_pose.rotation.w = 0.611 # 0.604
+        tran = self.broadcast_tf(saved_pose, 'predock_pose', 'docking_station')
+        self.tf2_broadcaster.sendTransform(tran)
+        try:
+            trans = self.tf2_buffer.lookup_transform('map', 'predock_pose', rospy.Time(), rospy.Duration(1.0))
+            # Bring predock_frame at base_link level
+            angles = euler_from_quaternion([trans.transform.rotation.x,
+                                            trans.transform.rotation.y,
+                                            trans.transform.rotation.z,
+                                            trans.transform.rotation.w])
+            q = quaternion_from_euler(0, 0, angles[2])
+            trans.transform.translation.z = 0
+            trans.transform.rotation.x = q[0]
+            trans.transform.rotation.y = q[1]
+            trans.transform.rotation.z = q[2]
+            trans.transform.rotation.w = q[3]
+            trans.header.stamp = rospy.Time.now()
+            self.predock_tf = trans
+            rospy.loginfo("Published predock pose")
+
+            goal_pose = Pose()
+            goal_pose.position.x = self.predock_tf.transform.translation.x
+            goal_pose.position.y = self.predock_tf.transform.translation.y
+            goal_pose.position.z = self.predock_tf.transform.translation.z
+            goal_pose.orientation.x = self.predock_tf.transform.rotation.x
+            goal_pose.orientation.y = self.predock_tf.transform.rotation.y
+            goal_pose.orientation.z = self.predock_tf.transform.rotation.z
+            goal_pose.orientation.w = self.predock_tf.transform.rotation.w
+
+            action_goal = MoveBaseGoal()
+            action_goal.target_pose.header.frame_id = "map"
+            action_goal.target_pose.header.stamp = rospy.Time.now()
+            action_goal.target_pose.pose = goal_pose
+
+            self.action_client.send_goal(action_goal, done_cb=self.move_base_aruco_callback, feedback_cb=self.feedback)
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.loginfo("Could not publish pose to tf")
+            pass
+
+    def feedback(self, feedback):
+        print(feedback)
+
+    def move_base_aruco_callback(self, result):
+        if self.aruco_name == 'docking_station':
+            self.set_pan_tilt_camera(-3.14, -0.7406)
+            rospy.sleep(1.0)
+
+        if self.aruco_name == 'light_switch':
+            self.set_pan_tilt_camera(-1.565, -0.763)
+            rospy.sleep(1.0)
+        
+        self.reconfigure_client.update_configuration({"controller_frequency": 20.0})
+
+        new_map_to_aruco = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
+        translation_diff, angle_diff = self.calculate_diff(self.map_to_aruco, new_map_to_aruco)
+        if (translation_diff > 0.075 or angle_diff > 0.075):
+            self.map_to_aruco = new_map_to_aruco
+            self.reconfigure_client.update_configuration({"controller_frequency": 1.0})
+            if self.aruco_name == 'docking_station':
+                self.navigate_to_docking_station()
+                return 
+            elif self.aruco_name == 'light_switch':
+                print('readjusting')
+                self.navigate_to_light_switch()
+                return 
 
     def navigate_to_aruco_callback(self, req):
         self.aruco_name = req.name
         
-        marker = self.tf2_buffer.lookup_transform('base_link', self.aruco_name, rospy.Time())
-        trans = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
-        self.aruco_tf = self.broadcast_tf(trans.transform, self.aruco_name, 'map')
+        self.reconfigure_client.update_configuration({"controller_frequency": 20.0})
+                
+        self.marker = self.tf2_buffer.lookup_transform('base_link', self.aruco_name, rospy.Time())
+        self.map_to_aruco = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
+        self.aruco_tf = self.broadcast_tf(self.map_to_aruco.transform, self.aruco_name, 'map')
         rospy.loginfo("{} pose published to tf".format(self.aruco_name))
 
-        # self.snap_head_to_aruco(marker)
-
         if self.aruco_name == 'docking_station':
-            # Transform the docking station frame such that x-axis points out of the aruco plane and 0.5 m in the front of the dock
-            # This facilitates passing the goal pose as this predock frame so that the robot can back up into the dock
-            saved_pose = Transform()
-            saved_pose.translation.x = 0.0
-            saved_pose.translation.y = -1.0
-            saved_pose.translation.z = 0.47
-            saved_pose.rotation.x = -0.382
-            saved_pose.rotation.y = -0.352
-            saved_pose.rotation.z = -0.604
-            saved_pose.rotation.w = 0.604
-            tran = self.broadcast_tf(saved_pose, 'predock_pose', 'docking_station')
-            self.tf2_broadcaster.sendTransform(tran)
-            try:
-                trans = self.tf2_buffer.lookup_transform('map', 'predock_pose', rospy.Time(), rospy.Duration(1.0))
-                # Bring predock_frame at base_link level
-                angles = euler_from_quaternion([trans.transform.rotation.x,
-                                                trans.transform.rotation.y,
-                                                trans.transform.rotation.z,
-                                                trans.transform.rotation.w])
-                q = quaternion_from_euler(0, 0, angles[2])
-                trans.transform.translation.z = 0
-                trans.transform.rotation.x = q[0]
-                trans.transform.rotation.y = q[1]
-                trans.transform.rotation.z = q[2]
-                trans.transform.rotation.w = q[3]
-                trans.header.stamp = rospy.Time.now()
-                self.predock_tf = trans
-                rospy.loginfo("Published predock pose")
+            self.navigate_to_docking_station()
+        if self.aruco_name == 'light_switch':
+            self.navigate_to_light_switch()
 
-                goal_pose = Pose()
-                goal_pose.position.x = self.predock_tf.transform.translation.x
-                goal_pose.position.y = self.predock_tf.transform.translation.y
-                goal_pose.position.z = self.predock_tf.transform.translation.z
-                goal_pose.orientation.x = self.predock_tf.transform.rotation.x
-                goal_pose.orientation.y = self.predock_tf.transform.rotation.y
-                goal_pose.orientation.z = self.predock_tf.transform.rotation.z
-                goal_pose.orientation.w = self.predock_tf.transform.rotation.w
-
-                action_goal = MoveBaseGoal()
-                action_goal.target_pose.header.frame_id = "map"
-                action_goal.target_pose.header.stamp = rospy.Time.now()
-                action_goal.target_pose.pose = goal_pose
-
-                self.action_client.send_goal(action_goal)
-                self.action_client.wait_for_result()
-                rospy.sleep(0.75)
-
-                # self.snap_head_to_aruco(marker)
-
-                new_trans = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
-                translation_diff, angle_diff = self.calculate_diff(trans, new_trans)
-                if (translation_diff > 0.01 or angle_diff > 0.01):
-                    self.action_client.cancel_all_goals()
-                    self.navigate_to_aruco_callback(req)
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                rospy.loginfo("Could not publish pose to tf")
-                pass
+        print('done')
+        return True
 
     def start(self):
         while not rospy.is_shutdown():

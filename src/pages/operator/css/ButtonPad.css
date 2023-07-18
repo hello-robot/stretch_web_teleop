@@ -72,3 +72,10 @@
     border: 1px solid var(--selected-color);
     stroke-width: 5px;
 }
+
+.button-pad {
+    font-size: x-large;
+    flex: 1 1 0;
+    display: grid;
+    text-align: center;
+}

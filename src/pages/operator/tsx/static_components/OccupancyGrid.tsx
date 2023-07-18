@@ -159,6 +159,10 @@ export class OccupancyGrid extends React.Component {
                 imageData.data[++i] = 255;
             }
         }
+
+        // const imgData = imageData.data;
+        // Array.from({length: this.height}, (val, i) => imgData.slice(i * this.width * 4, (i + 1) * this.width * 4))
+        //      .forEach((val, i) => imgData.set(val, (this.height - i - 1) * this.width * 4));
         context!.putImageData(imageData, 0, 0);
 
         // create the bitmap
@@ -171,6 +175,7 @@ export class OccupancyGrid extends React.Component {
     }
 
     rosToGlobal(translation: ROSLIB.Vector3) {
+        // var x = ((this.width * this.scaleX!) - (-translation.x + this.width * this.scaleX! + this.origin!.position.x)) / this.scaleX!;
         var x = (translation.x + this.width * this.scaleX! + this.origin!.position.x) / this.scaleX!;
         var y = (-translation.y + this.height * this.scaleY! + this.origin!.position.y) / this.scaleY!;
         return {
@@ -180,9 +185,10 @@ export class OccupancyGrid extends React.Component {
     }
 
     globalToRos(x: number, y: number) {
-        console.log(x, y)
+        // var rosX = (x / 5) * this.scaleX! + this.origin!.position.x
         var rosX = (x / 5 - this.width) * this.scaleX! - this.origin!.position.x
         var rosY = (this.height - y / 5) * this.scaleY! + this.origin!.position.y
+        console.log(rosX, rosY)
         return {
             x: rosX,
             y: rosY,

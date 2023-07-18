@@ -9,7 +9,8 @@ export enum UnderVideoButton {
     FollowGripper = "Follow Gripper",
     DepthSensing = "Depth Sensing",
     ToggleArucoMarkers = "Toggle Aruco Markers",
-    GetArucoMarkerNames = "Get Aruco Marker Names"
+    GetArucoMarkerNames = "Get Aruco Marker Names",
+    NavigateToMarker = "Navigate to Marker"
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -31,6 +32,7 @@ export type UnderVideoButtonFunctions = {
     onClick?: () => void
     onCheck?: (toggle: boolean) => void
     getMarkers?: () => string[]
+    send?: (name: string) => void
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -81,6 +83,12 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                             return marker_names
                         } 
                         return []
+                    }
+                }
+            case UnderVideoButton.NavigateToMarker:
+                return {
+                    send: (name: string) => {
+                        FunctionProvider.remoteRobot?.navigateToMarker(name)
                     }
                 }
                 break

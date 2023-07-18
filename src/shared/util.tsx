@@ -37,7 +37,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | GoalStatusMessage | MarkersMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -52,15 +52,30 @@ export interface ValidJointStateMessage {
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
 }
 
-export interface GoalStatusMessage {
+export interface FollowJointTrajectoryActionResultMessage {
     type: "goalStatus"
-    message: GoalStatus
+    message: FollowJointTrajectoryActionResult
+}
+
+export interface FollowJointTrajectoryActionResult {
+    header: string
+    status: GoalStatus
+    result: string
 }
 
 export interface GoalStatus {
     goal_id: string
     status: number
     text: string
+}
+
+export interface MoveBaseStateMessage {
+    type: "moveBaseState"
+    message: MoveBaseState
+}
+
+export interface MoveBaseState {
+    success: boolean
 }
 
 export interface OccupancyGridMessage {
@@ -228,6 +243,24 @@ export function generateUUID(): uuid {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+export async function waitUntil(condition, timeout=5000, checkInterval=100) {
+    let interval;
+    let waitPromise = new Promise(resolve => {
+        interval = setInterval(() => {
+            if (!condition()) {
+                return;
+            }
+            clearInterval(interval);
+            resolve(true);
+        }, checkInterval)
+    })
+    let timeoutPromise = new Promise(resolve => setTimeout(() => {
+        clearInterval(interval)
+        resolve(false)
+    }, timeout))
+    return await Promise.any([waitPromise, timeoutPromise])
 }
 
 /**

@@ -77,4 +77,11 @@
     'use_rgb_only': False
     'name': 'unknown'
     'link': None
+  '0':
+    'length_mm': 47
+    'use_rgb_only': False
+    'name': 'light_switch'
+    'link': 'None'
+    
+
     

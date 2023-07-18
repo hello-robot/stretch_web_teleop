@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, Marker, MarkersMessage, MarkerArray } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, Marker, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
@@ -12,7 +12,8 @@ export const robot = new Robot({
     occupancyGridCallback: setOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseResult,
     amclPoseCallback: forwardAMCLPose,
-    markerArrayCallback: forwardMarkers
+    markerArrayCallback: forwardMarkers,
+    navigationCompleteCallback: forwardMoveBaseState
 })
 
 export let connection: WebRTCConnection;
@@ -84,6 +85,15 @@ function forwardMoveBaseResult(goalStatus: GoalStatus) {
         type: "goalStatus",
         message: goalStatus
     } as GoalStatusMessage)
+}
+
+function forwardMoveBaseState(state: MoveBaseState) {
+    if (!connection) throw 'WebRTC connection undefined!'
+    
+    connection.sendData({
+        type: "moveBaseState",
+        message: state
+    } as MoveBaseStateMessage)
 }
 
 function forwardJointStates(jointState: ROSJointState) {
@@ -192,6 +202,9 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
+            break
+        case "navigateToMarker":
+            robot.navigateToArucoMarkers(message.name)
             break
         case "setArucoMarkers":
             robot.setArucoMarkers(message.toggle)
