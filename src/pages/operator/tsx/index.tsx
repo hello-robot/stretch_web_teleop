@@ -18,7 +18,7 @@ import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvide
 import "operator/css/index.css";
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
-import { PoseRecorderFunctionProvider } from './function_providers/PoseRecorderFunctionProvider';
+import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -36,7 +36,7 @@ export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionPro
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 export var mapFunctionProvider = new MapFunctionProvider()
 export var underMapFunctionProvider: UnderMapFunctionProvider;
-export var poseRecorderFunctionProvider: PoseRecorderFunctionProvider;
+export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -59,13 +59,13 @@ setTimeout(() => {
         console.log('WebRTC connection is resolved.');
 
         // If WebRTC disconnects, reload page
-        // const connectionStateChanged = setInterval(() => {
-        //     let isResolved = connection.connectionState() == 'connected'
-        //     if (!isResolved) {
-        //         clearInterval(connectionStateChanged)
-        //         window.location.reload()
-        //     }
-        // }, 2000)
+        const connectionStateChanged = setInterval(() => {
+            let isResolved = connection.connectionState() == 'connected'
+            if (!isResolved) {
+                clearInterval(connectionStateChanged)
+                window.location.reload()
+            }
+        }, 2000)
 
     } else {
         window.location.reload()
@@ -128,6 +128,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         case 'goalStatus':
             remoteRobot.setGoalReached(true)
             break;
+        case 'moveBaseState':
+            console.log('aruco navigation complete')
+            break;
         case 'arucoMarkers':
             remoteRobot.setMarkers(message.message)
             break;
@@ -147,7 +150,7 @@ function initializeOperator() {
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
     underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
-    poseRecorderFunctionProvider = new PoseRecorderFunctionProvider(storageHandler)
+    movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
     // renderOperator(storageHandler);
 }
 

@@ -1,7 +1,8 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, GoalStatus, MarkerArray } from 'shared/util';
-import ROSLIB, { Message, Ros, Topic } from "roslib";
-import { JOINT_LIMITS, RobotPose, generateUUID } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState } from 'shared/util';
+import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
+import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
+import { response } from 'express';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
@@ -12,6 +13,7 @@ export var ros: ROSLIB.Ros = new ROSLIB.Ros({
 export class Robot extends React.Component {
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.Goal;
+    private poseGoalComplete?: boolean
     private moveBaseGoal?: ROSLIB.Goal;
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
@@ -28,17 +30,20 @@ export class Robot extends React.Component {
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
-    private moveBaseResultCallback: (goalState: GoalStatus) => void
+    private moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private markerArrayCallback: (markers: MarkerArray) => void
+    private navigationCompleteCallback: (state: MoveBaseState) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
+    private waitForResultPromise: Promise
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
-        moveBaseResultCallback: (goalState: GoalStatus) => void,
+        moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
-        markerArrayCallback: (markers: MarkerArray) => void
+        markerArrayCallback: (markers: MarkerArray) => void,
+        navigationCompleteCallback: (state: MoveBaseState) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -46,6 +51,7 @@ export class Robot extends React.Component {
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
         this.markerArrayCallback = props.markerArrayCallback
+        this.navigationCompleteCallback = props.navigationCompleteCallback
     }
     
     async connect(): Promise<void> {
@@ -71,6 +77,7 @@ export class Robot extends React.Component {
         this.subscribeToJointState()
         this.subscribeToOccupancyGrid()
         this.subscribeToMarkerArray()
+        this.subscribeToJointTrajectoryResult()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createCmdVelTopic()
@@ -120,6 +127,7 @@ export class Robot extends React.Component {
         })
 
         topic.subscribe((msg: ROSOccupancyGrid) => {
+            console.log('occupancy grid')
             if (this.occupancyGridCallback) this.occupancyGridCallback(msg)
         })
     }
@@ -135,6 +143,19 @@ export class Robot extends React.Component {
             if (this.markerArrayCallback) this.markerArrayCallback(msg)
         })
     }
+
+    subscribeToJointTrajectoryResult() {
+        let topic: ROSLIB.Topic = new ROSLIB.Topic({
+            ros: ros,
+            name: 'stretch_controller/follow_joint_trajectory/result',
+            messageType: 'control_msgs/FollowJointTrajectoryActionResult'
+        });
+    
+        topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
+            this.poseGoalComplete = msg.status.status > 1 ? true : false
+        });
+
+    };
 
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionClient({
@@ -270,6 +291,13 @@ export class Robot extends React.Component {
         })
     }
 
+    navigateToArucoMarkers(marker_name: string) {
+        var request = new ROSLIB.ServiceRequest({name: marker_name})
+        this.navigateToArucoService?.callService(request, (response: boolean) => {
+            this.navigationCompleteCallback({ success: response } as MoveBaseState)
+        })
+    }
+
     switchToNavigationMode() {
         var request = new ROSLIB.ServiceRequest({});
         this.switchToNavigationService!.callService(request, () => {
@@ -391,9 +419,9 @@ export class Robot extends React.Component {
             }
         });
     
-        newGoal.on('result', function (result) {
-            console.log('Final Result: ' + result);
-        });
+        // newGoal.on('result', function (result) {
+        //     console.log('Final Result: ' + result);
+        // });
 
         return newGoal
     }
@@ -405,15 +433,12 @@ export class Robot extends React.Component {
         this.poseGoal.send()
     }
 
-    executePoseGoals(poses: RobotPose[], index: number) {
+    async executePoseGoals(poses: RobotPose[], index: number) {
         if (index < poses.length) {
-            this.stopExecution();
-            this.trajectoryClient?.cancel();
-            this.poseGoal = this.makePoseGoal(poses[index])
-            this.poseGoal.on('result', (result) => {
-                this.executePoseGoals(poses, index + 1)
-            })
-            this.poseGoal.send()
+            this.poseGoalComplete = false
+            this.executePoseGoal(poses[index])
+            waitUntil(() => this.poseGoalComplete === true)
+                .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
         }
     }
 
@@ -553,7 +578,7 @@ export function inCollision(props: { jointStateMessage: ROSJointState, jointName
         "joint_head_tilt": [-50, 50],
         "joint_head_pan": [-50, 50],
         "wrist_extension": [-20, 30],
-        "joint_lift": [0, 40],
+        "joint_lift": [0, 70],
         "joint_wrist_yaw": [-10, 10],
     }
 

@@ -8,7 +8,7 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
     displayVoiceControl: false,
     displayPoseRecorder: false,
     actionMode: ActionMode.StepActions,
-    displayPoseLibrary: false,
+    displayMovementLibrary: false,
     children: [
         {
             type: ComponentType.Panel,
@@ -26,7 +26,7 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                                 {
                                     // type: ComponentType.PredictiveDisplay,
                                     type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Drive
+                                    id: ButtonPadId.Base
                                 }
                             ]
                         } as OverheadVideoStreamDef,
@@ -39,7 +39,7 @@ export const STUDY_BRANCH_LAYOUT: LayoutDefinition = {
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Drive,
+                                    id: ButtonPadId.Base,
                                 } as ButtonPadDefinition
                             ]
                         } as RealsenseVideoStreamDef

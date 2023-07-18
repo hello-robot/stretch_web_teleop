@@ -7,7 +7,7 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: false,
     displayPoseLibrary: true,
-    displayPoseRecorder: true,
+    displayMovementRecorder: true,
     actionMode: ActionMode.ClickClick,
     children: [
         {

@@ -40,11 +40,11 @@ export enum CameraViewId {
  * ID for a button pad describes the shape and button functions of the button pad
  */
 export enum ButtonPadId {
-    Drive = "Drive",
-    ManipRealsense = "Manipulation Realsense",
+    // Drive = "Drive",
+    ManipRealsense = "Drive/Arm/Gripper/Wrist",
     Gripper = "Gripper",
-    ManipOverhead = "Manipulation Overhead",
-    Base = "Base",
+    ManipOverhead = "Drive/Arm/Wrist",
+    Base = "Drive",
     Camera = "Camera",
     Wrist = "Wrist",
     Arm = "Arm"
@@ -84,7 +84,7 @@ export type ParentComponentDefinition = ComponentDefinition & {
 export type LayoutDefinition = ParentComponentDefinition & {
     displayVoiceControl: boolean;
     displayPoseLibrary: boolean;
-    displayPoseRecorder: boolean;
+    displayMovementRecorder: boolean;
     actionMode: ActionMode;
 }
 

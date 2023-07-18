@@ -1,9 +1,9 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { PoseRecorderFunctions, PoseRecorderFunction } from "../layout_components/PoseRecorder"
+import { MovementRecorderFunctions, MovementRecorderFunction } from "../layout_components/MovementRecorder"
 import { RobotPose, ValidJoints } from "shared/util"
 import { StorageHandler } from "../storage_handler/StorageHandler"
 
-export class PoseRecorderFunctionProvider extends FunctionProvider {
+export class MovementRecorderFunctionProvider extends FunctionProvider {
     private recordPosesHeartbeat?: number // ReturnType<typeof setInterval>
     private poses: RobotPose[]
     private storageHandler: StorageHandler
@@ -15,9 +15,9 @@ export class PoseRecorderFunctionProvider extends FunctionProvider {
         this.storageHandler = storageHandler
     }
 
-    public provideFunctions(poseRecordFunction: PoseRecorderFunction) {
+    public provideFunctions(poseRecordFunction: MovementRecorderFunction) {
         switch (poseRecordFunction) {
-            case PoseRecorderFunction.Record:
+            case MovementRecorderFunction.Record:
                 return () => { 
                         this.recordPosesHeartbeat = window.setInterval(() => {
                             const currentPose: RobotPose = FunctionProvider.remoteRobot!.sensors.getRobotPose(
@@ -37,9 +37,9 @@ export class PoseRecorderFunctionProvider extends FunctionProvider {
                             if (diff) {
                                 this.poses.push(currentPose)
                             }
-                        }, 1000)
+                        }, 200)
                     }
-            case PoseRecorderFunction.SaveRecording:
+            case MovementRecorderFunction.SaveRecording:
                 return (name: string) => { 
                         if (this.recordPosesHeartbeat) {
                             clearInterval(this.recordPosesHeartbeat)
@@ -48,16 +48,16 @@ export class PoseRecorderFunctionProvider extends FunctionProvider {
                         this.storageHandler.savePoseRecording(name, this.poses)
                         this.poses = []
                     }
-            case PoseRecorderFunction.SavedRecordingNames:
+            case MovementRecorderFunction.SavedRecordingNames:
                 return () => { 
                         return this.storageHandler.getRecordingNames()
                     }
-            case PoseRecorderFunction.DeleteRecording:
+            case MovementRecorderFunction.DeleteRecording:
                 return (recordingID: number) => { 
                         let recordingNames = this.storageHandler.getRecordingNames()
                         this.storageHandler.deleteRecording(recordingNames[recordingID])
                     }
-            case PoseRecorderFunction.LoadRecording:
+            case MovementRecorderFunction.LoadRecording:
                 return (recordingID: number) => { 
                         let recordingNames = this.storageHandler.getRecordingNames()
                         let recording = this.storageHandler.getRecording(recordingNames[recordingID])

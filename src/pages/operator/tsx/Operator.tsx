@@ -15,7 +15,7 @@ import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
 import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
-import { PoseRecorder } from "./layout_components/PoseRecorder";
+import { MovementRecorder } from "./layout_components/MovementRecorder";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -85,11 +85,11 @@ export const Operator = (props: {
     /**
      * Sets the pose recorder component to display or hidden.
      * 
-     * @param displayPoseRecorder if the pose recorder component at the 
+     * @param displayMovementRecorder if the pose recorder component at the 
      *                             top of the operator body should be displayed
      */
-     function setDisplayPoseRecorder(displayPoseRecorder: boolean) {
-        layout.current.displayPoseRecorder = displayPoseRecorder;
+     function setDisplayMovementRecorder(displayMovementRecorder: boolean) {
+        layout.current.displayMovementRecorder = displayMovementRecorder;
         updateLayout();
     }
 
@@ -183,9 +183,9 @@ export const Operator = (props: {
         displayVoiceControl: layout.current.displayVoiceControl,
         setDisplayVoiceControl: setDisplayVoiceControl,
         displayPoseLibrary: layout.current.displayPoseLibrary,
-        displayPoseRecorder: layout.current.displayPoseRecorder,
+        displayMovementRecorder: layout.current.displayMovementRecorder,
         setDisplayPoseLibrary: setDisplayPoseLibrary,
-        setDisplayPoseRecorder: setDisplayPoseRecorder,
+        setDisplayMovementRecorder: setDisplayMovementRecorder,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -238,8 +238,8 @@ export const Operator = (props: {
                         }}
                     />
                 </div>
-                <div id="operator-pose-recorder" hidden={!layout.current.displayPoseRecorder}>
-                    <PoseRecorder/>
+                <div id="operator-pose-recorder" hidden={!layout.current.displayMovementRecorder}>
+                    <MovementRecorder/>
                 </div>
             </div>
             <div id="operator-body">

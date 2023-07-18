@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
-import { poseRecorderFunctionProvider } from "operator/tsx/index";
+import { movementRecorderFunctionProvider } from "operator/tsx/index";
 import { Dropdown } from "../basic_components/Dropdown";
-import "operator/css/PoseRecorder.css"
+import "operator/css/MovementRecorder.css"
 import "operator/css/basic_components.css"
 
 /** All the possible button functions */
-export enum PoseRecorderFunction {
+export enum MovementRecorderFunction {
     Record,
     SaveRecording,
     SavedRecordingNames, 
@@ -14,7 +14,7 @@ export enum PoseRecorderFunction {
     LoadRecording
 }
 
-export interface PoseRecorderFunctions {
+export interface MovementRecorderFunctions {
     Record: () => void
     SaveRecording: (name: string) => void,
     SavedRecordingNames: () => string[],
@@ -22,13 +22,13 @@ export interface PoseRecorderFunctions {
     LoadRecording: (recordingID: number) => void
 }
 
-export const PoseRecorder = () => {
-    let functions: PoseRecorderFunctions = {
-        Record: poseRecorderFunctionProvider.provideFunctions(PoseRecorderFunction.Record) as () => void,
-        SaveRecording: poseRecorderFunctionProvider.provideFunctions(PoseRecorderFunction.SaveRecording) as (name: string) => void,
-        SavedRecordingNames: poseRecorderFunctionProvider.provideFunctions(PoseRecorderFunction.SavedRecordingNames) as () => string[],
-        DeleteRecording: poseRecorderFunctionProvider.provideFunctions(PoseRecorderFunction.DeleteRecording) as (recordingID: number) => void,
-        LoadRecording: poseRecorderFunctionProvider.provideFunctions(PoseRecorderFunction.LoadRecording) as (recordingID: number) => void
+export const MovementRecorder = () => {
+    let functions: MovementRecorderFunctions = {
+        Record: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.Record) as () => void,
+        SaveRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SaveRecording) as (name: string) => void,
+        SavedRecordingNames: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SavedRecordingNames) as () => string[],
+        DeleteRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.DeleteRecording) as (recordingID: number) => void,
+        LoadRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.LoadRecording) as (recordingID: number) => void
     }
 
     const [recordings, setRecordings] = useState<string[]>(functions.SavedRecordingNames());
@@ -88,6 +88,7 @@ export const PoseRecorder = () => {
                         functions.LoadRecording(selectedIdx)}
                     }
                 }>
+                    Play
                     <span className="material-icons">
                         play_circle
                     </span>
@@ -102,6 +103,7 @@ export const PoseRecorder = () => {
                         }
                     }
                 }>
+                    {!isRecording ? <i>Record</i> : <i>Save</i> }
                     {!isRecording
                         ? <span className="material-icons">radio_button_checked</span>
                         : <span className="material-icons">save</span>
@@ -114,6 +116,7 @@ export const PoseRecorder = () => {
                         setSelectedIdx(undefined)
                     }
                 }>
+                    Delete
                     <span className="material-icons">
                         delete_forever
                     </span>
