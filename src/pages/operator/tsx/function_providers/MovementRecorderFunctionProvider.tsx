@@ -37,7 +37,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                             if (diff) {
                                 this.poses.push(currentPose)
                             }
-                        }, 200)
+                        }, 100)
                     }
             case MovementRecorderFunction.SaveRecording:
                 return (name: string) => { 

@@ -16,6 +16,7 @@ import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_help
 import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
 import { MovementRecorder } from "./layout_components/MovementRecorder";
+import { ArucoMarkers } from "./layout_components/ArucoMarkers";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -83,13 +84,24 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the pose recorder component to display or hidden.
+     * Sets the movement recorder component to display or hidden.
      * 
      * @param displayMovementRecorder if the pose recorder component at the 
      *                             top of the operator body should be displayed
      */
      function setDisplayMovementRecorder(displayMovementRecorder: boolean) {
         layout.current.displayMovementRecorder = displayMovementRecorder;
+        updateLayout();
+    }
+
+    /**
+     * Sets the aruco markers component to display or hidden.
+     * 
+     * @param displayArucoMarkers if the pose recorder component at the 
+     *                             top of the operator body should be displayed
+     */
+    function setDisplayArucoMarkers(displayArucoMarkers: boolean) {
+        layout.current.displayArucoMarkers = displayArucoMarkers;
         updateLayout();
     }
 
@@ -181,11 +193,13 @@ export const Operator = (props: {
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
         displayVoiceControl: layout.current.displayVoiceControl,
-        setDisplayVoiceControl: setDisplayVoiceControl,
         displayPoseLibrary: layout.current.displayPoseLibrary,
         displayMovementRecorder: layout.current.displayMovementRecorder,
+        displayArucoMarkers: layout.current.displayArucoMarkers,
+        setDisplayVoiceControl: setDisplayVoiceControl,
         setDisplayPoseLibrary: setDisplayPoseLibrary,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
+        setDisplayArucoMarkers: setDisplayArucoMarkers,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -241,6 +255,9 @@ export const Operator = (props: {
                 <div id="operator-pose-recorder" hidden={!layout.current.displayMovementRecorder}>
                     <MovementRecorder/>
                 </div>
+                <div id="operator-aruco-markers" hidden={!layout.current.displayArucoMarkers}>
+                    <ArucoMarkers/>
+                </div>
             </div>
             <div id="operator-body">
                 <LayoutArea
@@ -259,4 +276,8 @@ export const Operator = (props: {
             />
         </div>
     )
+}
+
+function setDisplayArucoMarkers(displayArucoMarkers: boolean): void {
+    throw new Error("Function not implemented.");
 }

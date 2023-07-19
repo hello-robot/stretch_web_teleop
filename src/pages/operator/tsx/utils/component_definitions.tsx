@@ -85,6 +85,7 @@ export type LayoutDefinition = ParentComponentDefinition & {
     displayVoiceControl: boolean;
     displayPoseLibrary: boolean;
     displayMovementRecorder: boolean;
+    displayArucoMarkers: boolean;
     actionMode: ActionMode;
 }
 

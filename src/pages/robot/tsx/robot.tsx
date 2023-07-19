@@ -24,6 +24,7 @@ export class Robot extends React.Component {
     private setDepthSensingService?: ROSLIB.Service;
     private setArucoMarkersService?: ROSLIB.Service;
     private navigateToArucoService?: ROSLIB.Service;
+    private arucoMarkerUpdateService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
@@ -87,6 +88,7 @@ export class Robot extends React.Component {
         this.createDepthSensingService()
         this.createArucoMarkerService()
         this.createArucoNavigationService()
+        this.createArucoMarkerUpdateService()
         this.createRobotFrameTFClient()
         this.createMapFrameTFClient()
         this.subscribeToGripperFingerTF()
@@ -145,7 +147,7 @@ export class Robot extends React.Component {
     }
 
     subscribeToJointTrajectoryResult() {
-        let topic: ROSLIB.Topic = new ROSLIB.Topic({
+        let topic: ROSLIB.Topic<FollowJointTrajectoryActionResult> = new ROSLIB.Topic({
             ros: ros,
             name: 'stretch_controller/follow_joint_trajectory/result',
             messageType: 'control_msgs/FollowJointTrajectoryActionResult'
@@ -154,7 +156,6 @@ export class Robot extends React.Component {
         topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
             this.poseGoalComplete = msg.status.status > 1 ? true : false
         });
-
     };
 
     createTrajectoryClient() {
@@ -203,7 +204,7 @@ export class Robot extends React.Component {
         this.setCameraPerspectiveService = new ROSLIB.Service({
             ros: ros,
             name: '/camera_perspective',
-            serviceType: 'stretch_web_interface_react/CameraPerspective'
+            serviceType: 'stretch_teleop_interface/CameraPerspective'
         })
     }
 
@@ -211,7 +212,7 @@ export class Robot extends React.Component {
         this.setDepthSensingService = new ROSLIB.Service({
             ros: ros,
             name: '/depth_ar',
-            serviceType: 'stretch_web_interface_react/DepthAR'
+            serviceType: 'stretch_teleop_interface/DepthAR'
         })
     }
 
@@ -219,7 +220,7 @@ export class Robot extends React.Component {
         this.setArucoMarkersService = new ROSLIB.Service({
             ros: ros,
             name: '/aruco_markers',
-            serviceType: 'stretch_web_interface_react/ArucoMarkers'
+            serviceType: 'stretch_teleop_interface/ArucoMarkers'
         })
     }
 
@@ -227,7 +228,15 @@ export class Robot extends React.Component {
         this.navigateToArucoService = new ROSLIB.Service({
             ros: ros,
             name: '/navigate_to_aruco',
-            serviceType: 'stretch_web_interface_react/NavigateToAruco'
+            serviceType: 'stretch_teleop_interface/NavigateToAruco'
+        })
+    }
+
+    createArucoMarkerUpdateService() {
+        this.arucoMarkerUpdateService = new ROSLIB.Service({
+            ros: ros,
+            name: '/aruco_marker_update',
+            serviceType: 'stretch_teleop_interface/ArucoMarkerInfoUpdate'
         })
     }
 
@@ -295,6 +304,13 @@ export class Robot extends React.Component {
         var request = new ROSLIB.ServiceRequest({name: marker_name})
         this.navigateToArucoService?.callService(request, (response: boolean) => {
             this.navigationCompleteCallback({ success: response } as MoveBaseState)
+        })
+    }
+
+    updateArucoMarkersInfo() {
+        var request = new ROSLIB.ServiceRequest({update: true})
+        this.arucoMarkerUpdateService?.callService(request, (response: boolean) => {
+            response ? console.log("Aruco marker dictionary updated") : console.log("Aruco marker dictionary update failed!") 
         })
     }
 
@@ -426,6 +442,69 @@ export class Robot extends React.Component {
         return newGoal
     }
 
+    makePoseGoals(poses: RobotPose[]) {
+        let jointNames: ValidJoints[] = []
+        let velocities: number[] = []
+        let goal_tolerance = []
+        let path_tolerance = []
+        for (let key in poses[0]) {
+            jointNames.push(key as ValidJoints)
+            goal_tolerance.push({
+                name: key,
+                position: 0.2,
+                velocity: -1,
+                acceleration: -1
+            })
+            path_tolerance.push({
+                name: key,
+                position: 0.2,
+                velocity: -1,
+                acceleration: -1
+            })
+        }
+
+        let points: any = []
+        let jointPositions: number[] = []
+        poses.forEach((pose, index) => {
+            jointPositions = []
+            for (let key in pose) {
+                jointPositions.push(pose[key as ValidJoints]!)
+            }
+            points.push({
+                positions: jointPositions,
+                time_from_start: {
+                    secs: index,
+                    nsecs: 0
+                }
+            })
+        });
+
+        if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
+        let newGoal = new ROSLIB.Goal({
+            actionClient: this.trajectoryClient,
+            goalMessage: {
+                trajectory: {
+                    header: {
+                        stamp: {
+                            secs: 0,
+                            nsecs: 0
+                        }
+                    },
+                    joint_names: jointNames,
+                    points: points
+                },
+                goal_tolerance: goal_tolerance,
+                path_tolerance: path_tolerance
+            }
+        });
+    
+        // newGoal.on('result', function (result) {
+        //     console.log('Final Result: ' + result);
+        // });
+
+        return newGoal
+    }
+
     executePoseGoal(pose: RobotPose) {
         this.stopExecution();
         this.trajectoryClient?.cancel();
@@ -434,12 +513,16 @@ export class Robot extends React.Component {
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
-        if (index < poses.length) {
-            this.poseGoalComplete = false
-            this.executePoseGoal(poses[index])
-            waitUntil(() => this.poseGoalComplete === true)
-                .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
-        }
+        // if (index < poses.length) {
+        //     this.poseGoalComplete = false
+        //     this.executePoseGoal(poses[index])
+        //     waitUntil(() => this.poseGoalComplete === true)
+        //         .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
+        // }
+        this.stopExecution();
+        this.trajectoryClient?.cancel();
+        this.poseGoal = this.makePoseGoals(poses)
+        this.poseGoal.send()
     }
 
     executeMoveBaseGoal(pose: ROSPose) {

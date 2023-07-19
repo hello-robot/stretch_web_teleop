@@ -4,7 +4,7 @@ import { LayoutDefinition } from "../utils/component_definitions";
 import { FirebaseOptions, FirebaseError, initializeApp, FirebaseApp } from "firebase/app";
 import { Auth, getAuth, User, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'
 import { Database, getDatabase, child, get, ref, update, push } from 'firebase/database'
-import { RobotPose } from "shared/util";
+import { ArucoMarkersInfo, RobotPose } from "shared/util";
 import ROSLIB from "roslib";
 
 /** Uses Firebase to store data. */
@@ -22,6 +22,9 @@ export class FirebaseStorageHandler extends StorageHandler {
     private poses: { [name: string]: RobotPose };
     private mapPoses: { [name: string]: ROSLIB.Transform };
     private recordings: { [name: string]: RobotPose[] };
+    private markerNames: string[];
+    private markerIDs: string[];
+    private markerInfo: ArucoMarkersInfo;
 
     constructor(onStorageHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onStorageHandlerReadyCallback);
@@ -38,6 +41,9 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.poses = {};
         this.mapPoses = {}
         this.recordings = {}
+        this.markerNames = []
+        this.markerIDs = []
+        this.markerInfo = {} as ArucoMarkersInfo
         onAuthStateChanged(this.auth, (user) => this.handleAuthStateChange(user));
 
         this.signInWithGoogle()
@@ -51,7 +57,19 @@ export class FirebaseStorageHandler extends StorageHandler {
             this.getUserDataFirebase().then(async (userData) => {
                 this.layouts = userData.layouts;
                 this.currentLayout = userData.currentLayout
-                console.log(userData.currentLayout)
+                this.poses = userData.poses
+                this.mapPoses = userData.map_poses
+                this.recordings = userData.recordings
+                this.markerNames = userData.marker_names
+                this.markerIDs = userData.marker_ids
+                this.markerInfo = userData.marker_info
+
+                if (!this.markerNames) {
+                    this.markerNames = this.loadDefaultArucoMarkerNames()
+                    this.markerIDs = this.loadDefaultArucoMarkerIDs()
+                    this.markerInfo = this.loadDefaultArucoMarkers()
+                    this.writeMarkers()
+                }
                 this.onReadyCallback()
             }).catch((error) => {
                 console.log("Detected that FirebaseModel isn't initialized for user ", this.uid);
@@ -229,4 +247,49 @@ export class FirebaseStorageHandler extends StorageHandler {
         delete this.recordings[recordingName]
         this.writeRecordings(this.recordings)
     }
+
+    public saveMarker(markerID: string, markerName: string): void {
+        this.markerNames.push(markerName)
+        this.markerIDs.push(markerID)
+        this.markerInfo.aruco_marker_info[markerID] = {
+            length_mm: 47,
+            use_rgb_only: false,
+            name: markerName,
+            link: null
+        }
+        this.writeMarkers()
+    }
+
+    public deleteMarker(markerName: string): void {
+        if (!this.markerNames.includes(markerName)) throw Error(`Could not delete marker ${markerName}`);
+        let index = this.markerNames.indexOf(markerName)
+        let markerID = this.markerIDs![index]
+        if (!this.markerIDs.includes(markerID)) throw Error(`Could not delete marker ${markerName}`);
+        
+        delete this.markerNames[index]
+        delete this.markerIDs[index]
+        delete this.markerInfo.aruco_marker_info[index]
+        this.writeMarkers()
+    }
+
+    public getArucoMarkerNames(): string[] {
+        return JSON.parse(JSON.stringify(this.markerNames));
+    }
+
+    public getArucoMarkerIDs(): string[] {
+        return JSON.parse(JSON.stringify(this.markerIDs));
+    }
+
+    public getArucoMarkerInfo(): ArucoMarkersInfo {
+        return JSON.parse(JSON.stringify(this.markerInfo));
+    }
+
+    private async writeMarkers() {
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/markerNames'] = this.markerNames;
+        updates['/users/' + (this.uid) + '/markerIDs'] = this.markerIDs;
+        updates['/users/' + (this.uid) + '/markerInfo'] = this.markerInfo;
+        return update(ref(this.database), updates);
+    }
+
 }

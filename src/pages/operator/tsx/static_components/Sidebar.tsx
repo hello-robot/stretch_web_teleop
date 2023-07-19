@@ -94,8 +94,12 @@ export type GlobalOptionsProps = {
     setDisplayPoseLibrary: (displayPoseLibrary: boolean) => void;
     
     /** If the save/load poses should be displayed. */
-    displayPoseRecorder: boolean;
-    setDisplayPoseRecorder: (displayPoseRecorder: boolean) => void;
+    displayMovementRecorder: boolean;
+    setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
+    
+    /** If the save/load aruco markers should be displayed. */
+    displayArucoMarkers: boolean;
+    setDisplayArucoMarkers: (displayArucoMarkers: boolean) => void;
     
     /** List of names of the default layouts. */
     defaultLayouts: string[],
@@ -133,10 +137,15 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
                     label="Display pose library"
                 />
-                 <OnOffToggleButton
-                    on={props.displayPoseRecorder}
-                    onClick={() => props.setDisplayPoseRecorder(!props.displayPoseRecorder)}
-                    label="Display pose recorder"
+                <OnOffToggleButton
+                    on={props.displayMovementRecorder}
+                    onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
+                    label="Display movement recorder"
+                />
+                <OnOffToggleButton
+                    on={props.displayArucoMarkers}
+                    onClick={() => props.setDisplayArucoMarkers(!props.displayArucoMarkers)}
+                    label="Display aruco marker navigator"
                 />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}

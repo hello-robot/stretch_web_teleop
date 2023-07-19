@@ -75,8 +75,8 @@ export const MovementRecorder = () => {
 
     return (
         <React.Fragment>
-            <div id="pose-recorder-container">Pose Recorder</div>
-            <div id="pose-recorder-container">
+            <div id="movement-recorder-container">Movement Recorder</div>
+            <div id="movement-recorder-container">
                 <Dropdown
                     onChange={setSelectedIdx}
                     selectedIndex={selectedIdx}

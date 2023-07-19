@@ -10,6 +10,17 @@ export type RemoteStream = {
     track: MediaStreamTrack
 }
 
+export type ArucoMarkersInfo = {
+    aruco_marker_info: {
+        [key: string]: {
+            length_mm: number,
+            use_rgb_only: boolean,
+            name: string, 
+            link: string | null
+        }
+    }
+}
+
 export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
 
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }

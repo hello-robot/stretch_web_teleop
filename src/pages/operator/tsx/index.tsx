@@ -19,6 +19,7 @@ import "operator/css/index.css";
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
+import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -37,6 +38,7 @@ export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
 export var mapFunctionProvider = new MapFunctionProvider()
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
+export var arucoMarkerFunctionProvider: ArucoMarkerFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -151,6 +153,7 @@ function initializeOperator() {
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
     underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
     movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
+    arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
     // renderOperator(storageHandler);
 }
 

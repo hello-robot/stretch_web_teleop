@@ -3,7 +3,8 @@ import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
-import { RobotPose } from "shared/util";
+import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 
 /** Type for all the possible names of default layouts. */
 export type DefaultLayoutName = "Button Pad Overlays" | "Button Pad Panel" | "Button Grid/Joystick/Voice Commands";
@@ -173,5 +174,57 @@ export abstract class StorageHandler {
      */
     public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
         return DEFAULT_LAYOUTS[layoutName];
+    }
+
+    /**
+     * Save the aruco marker and its identifier
+     * @param markerID the ID of the aruco marker
+     * @param markerName the name of the aruco marker
+     */
+    public abstract saveMarker(markerID: string, markerName: string): void;
+
+    /**
+     * Removes the aruco maker from storage
+     * @param name the name of the aruco marker
+     */
+    public abstract deleteMarker(markerName: string): void;
+
+    /**
+     * Get the list of all saved aruco markers
+     * @returns list of all saved aruco markers
+     */
+    public abstract getArucoMarkerNames(): string[];
+
+     /**
+     * Get the list of all saved aruco markers IDs
+     * @returns list of all saved aruco markers IDs
+     */
+     public abstract getArucoMarkerIDs(): string[];
+
+    /**
+     * Get the list of all saved aruco marker info
+     * @returns list of all saved aruco marker info
+     */
+    public abstract getArucoMarkerInfo(): ArucoMarkersInfo;
+
+    public loadDefaultArucoMarkers(): ArucoMarkersInfo {
+        return ARUCO_MARKER_INFO
+    }
+
+    public loadDefaultArucoMarkerIDs(): string[] {
+        return Object.keys(ARUCO_MARKER_INFO.aruco_marker_info)
+    }
+
+    public loadDefaultArucoMarkerNames(): string[] {
+        // let names: string[] = []
+        // let markerInfo = Object.values(ARUCO_MARKER_INFO.aruco_marker_info)
+        // markerInfo.forEach((info) => {
+        //     names.push(info.name)
+        // })
+        // return names
+        
+        // Only return ID for docking station
+        // Other IDs are currently not applicable for aruco navigation
+        return ['docking station']
     }
 }

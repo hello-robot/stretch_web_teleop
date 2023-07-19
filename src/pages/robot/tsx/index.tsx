@@ -215,6 +215,9 @@ function handleMessage(message: WebRTCMessage) {
         case "getOccupancyGrid":
             forwardOccupancyGrid()
             break
+        case "updateArucoMarkersInfo":
+            robot.updateArucoMarkersInfo()
+            break;
     }
 };
 

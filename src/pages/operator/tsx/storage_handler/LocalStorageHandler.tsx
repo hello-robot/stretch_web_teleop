@@ -1,6 +1,6 @@
 import { StorageHandler } from "./StorageHandler";
 import { LayoutDefinition } from "../utils/component_definitions";
-import { RobotPose } from "shared/util";
+import { ArucoMarkersInfo, RobotPose } from "shared/util";
 import ROSLIB from "roslib";
 
 /** Uses browser local storage to store data. */
@@ -10,11 +10,17 @@ export class LocalStorageHandler extends StorageHandler {
     public static POSE_NAMES_KEY = "user_pose_names";
     public static MAP_POSE_NAMES_KEY = "user_map_pose_names";
     public static POSE_RECORDING_NAMES_KEY = "user_pose_recording_names";
+    public static MARKER_NAMES_KEY = "user_marker_names";
+    public static MARKER_IDS_KEY = "user_marker_ids";
+    public static MARKER_INFO_KEY = "user_marker_info";
 
     constructor(onStorageHandlerReadyCallback: () => void) {
         super(onStorageHandlerReadyCallback);
         // Allow the initialization process to complete before invoking the callback
         setTimeout(() => {
+            this.getArucoMarkerIDs()
+            this.getArucoMarkerInfo()
+            this.getCustomLayoutNames()
             this.onReadyCallback();
         }, 0);
     }
@@ -133,12 +139,80 @@ export class LocalStorageHandler extends StorageHandler {
         localStorage.setItem('recording_' + recordingName, JSON.stringify(poses));
     }
 
-    deleteRecording(recordingName: string): void {
+    public deleteRecording(recordingName: string): void {
         const recordingNames = this.getRecordingNames();
         if (!recordingNames.includes(recordingName)) return;
         localStorage.removeItem('recording_' + recordingName)
         const index = recordingNames.indexOf(recordingName)
         recordingNames.splice(index, 1)
         localStorage.setItem(LocalStorageHandler.POSE_RECORDING_NAMES_KEY, JSON.stringify(recordingNames));
+    }
+
+    public saveMarker(markerID: string, markerName: string): void {
+        const markerNames = this.getArucoMarkerNames();
+        const markerIDs = this.getArucoMarkerIDs()
+        // TODO: handle duplicates
+        if (!markerNames.includes(markerName) && !markerIDs.includes(markerID)) {
+            markerNames.push(markerName);
+            markerIDs.push(markerID);
+        }
+
+        const markers = this.getArucoMarkerInfo() as ArucoMarkersInfo;
+        markers.aruco_marker_info[markerID] = {
+            length_mm: 47,
+            use_rgb_only: false,
+            name: markerName,
+            link: null
+        }
+        localStorage.setItem(LocalStorageHandler.MARKER_NAMES_KEY, JSON.stringify(markerNames));
+        localStorage.setItem(LocalStorageHandler.MARKER_IDS_KEY, JSON.stringify(markerIDs));
+        localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markers));
+    }
+
+    public deleteMarker(markerName: string): void {
+        const markerNames = this.getArucoMarkerNames();
+        if (!markerNames.includes(markerName)) return;
+        const index = markerNames.indexOf(markerName)
+        const markerIDs = this.getArucoMarkerIDs()
+        const markerID = markerIDs[index]
+        const markers = this.getArucoMarkerInfo() as ArucoMarkersInfo;
+
+        delete markers.aruco_marker_info[markerID]
+        markerNames.splice(index, 1)
+        markerIDs.splice(index, 1)
+
+        localStorage.setItem(LocalStorageHandler.MARKER_NAMES_KEY, JSON.stringify(markerNames));
+        localStorage.setItem(LocalStorageHandler.MARKER_IDS_KEY, JSON.stringify(markerIDs));
+        localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markers));
+    }
+
+    public getArucoMarkerNames(): string[] {
+        const storedJson = localStorage.getItem(LocalStorageHandler.MARKER_NAMES_KEY);
+        if (!storedJson) {
+            const markerNames = this.loadDefaultArucoMarkerNames();
+            localStorage.setItem(LocalStorageHandler.MARKER_NAMES_KEY, JSON.stringify(markerNames));
+            return markerNames
+        }
+        return JSON.parse(storedJson)
+    }
+
+    public getArucoMarkerIDs(): string[] {
+        const storedJson = localStorage.getItem(LocalStorageHandler.MARKER_IDS_KEY);
+        if (!storedJson) {
+            const markerIDs = this.loadDefaultArucoMarkerIDs();
+            localStorage.setItem(LocalStorageHandler.MARKER_IDS_KEY, JSON.stringify(markerIDs));
+            return markerIDs
+        }
+        return JSON.parse(storedJson)
+    }
+
+    public getArucoMarkerInfo(): ArucoMarkersInfo {
+        const storedJson = localStorage.getItem(LocalStorageHandler.MARKER_INFO_KEY);
+        if (!storedJson) {
+            const markerInfo = this.loadDefaultArucoMarkers(); 
+            localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markerInfo));
+            return markerInfo
+        }
+        return JSON.parse(storedJson)
     }
 }
