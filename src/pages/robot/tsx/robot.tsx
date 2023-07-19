@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState, ArucoMarkersInfo } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -27,6 +27,7 @@ export class Robot extends React.Component {
     private arucoMarkerUpdateService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
+    private arucoMarkerInfoParam?: ROSLIB.Param;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
@@ -91,6 +92,7 @@ export class Robot extends React.Component {
         this.createArucoMarkerUpdateService()
         this.createRobotFrameTFClient()
         this.createMapFrameTFClient()
+        this.createArucoMarkerParamServer()
         this.subscribeToGripperFingerTF()
         this.subscribeToHeadTiltTF()
         this.subscribeToMapTF()
@@ -260,6 +262,13 @@ export class Robot extends React.Component {
         });
     }
 
+    createArucoMarkerParamServer() {
+        this.arucoMarkerInfoParam = new ROSLIB.Param({
+            ros : ros,
+            name : 'aruco_marker_info'
+        });
+    }
+
     subscribeToGripperFingerTF() {
         this.robotFrameTfClient?.subscribe('link_gripper_finger_left', transform => {
             this.linkGripperFingerLeftTF = transform;
@@ -297,6 +306,13 @@ export class Robot extends React.Component {
         var request = new ROSLIB.ServiceRequest({enable: toggle})
         this.setArucoMarkersService?.callService(request, (response: boolean) => {
             response ? console.log("Enable aruco markers") : console.log("Disabled aruco markers")
+        })
+    }
+
+    setArucoMarkerInfo(info: ArucoMarkersInfo) {
+        console.log(info.toString())
+        this.arucoMarkerInfoParam?.set(JSON.stringify(info), (response) => {
+            console.log(response);
         })
     }
 

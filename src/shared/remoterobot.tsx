@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, AMCLPose, MarkerArray } from 'shared/util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -138,6 +138,15 @@ export class RemoteRobot extends React.Component {
             type: "updateArucoMarkersInfo",
         }
         this.robotChannel(cmd)
+    }
+
+    setArucoMarkerInfo(info: ArucoMarkersInfo) {
+        let cmd: SetArucoMarkerInfoCommand = {
+            type: "setArucoMarkerInfo",
+            info: info
+        }
+        this.robotChannel(cmd)
+        console.log("setting aruco marker info")
     }
 
     lookAtGripper(type: "lookAtGripper") {

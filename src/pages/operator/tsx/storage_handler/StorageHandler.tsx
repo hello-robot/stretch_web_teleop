@@ -212,7 +212,11 @@ export abstract class StorageHandler {
     }
 
     public loadDefaultArucoMarkerIDs(): string[] {
-        return Object.keys(ARUCO_MARKER_INFO.aruco_marker_info)
+        // return Object.keys(ARUCO_MARKER_INFO.aruco_marker_info)
+        
+        // Only return ID for docking station
+        // Other IDs are currently not applicable for aruco navigation
+        return['245']
     }
 
     public loadDefaultArucoMarkerNames(): string[] {

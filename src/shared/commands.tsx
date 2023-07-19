@@ -1,7 +1,7 @@
-import { ROSPose, RobotPose } from "./util"
+import { ArucoMarkersInfo, ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand | NavigateToMarkerCommand | UpdateArucoMarkersInfoCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand | NavigateToMarkerCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -72,4 +72,9 @@ export interface NavigateToMarkerCommand {
 
 export interface UpdateArucoMarkersInfoCommand {
     type: "updateArucoMarkersInfo"
+}
+
+export interface SetArucoMarkerInfoCommand {
+    type: "setArucoMarkerInfo"
+    info: ArucoMarkersInfo
 }

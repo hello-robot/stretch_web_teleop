@@ -218,6 +218,9 @@ function handleMessage(message: WebRTCMessage) {
         case "updateArucoMarkersInfo":
             robot.updateArucoMarkersInfo()
             break;
+        case "setArucoMarkerInfo":
+            robot.setArucoMarkerInfo(message.info)
+            break;    
     }
 };
 

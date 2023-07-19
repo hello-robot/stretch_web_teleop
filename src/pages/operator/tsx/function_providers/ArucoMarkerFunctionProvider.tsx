@@ -13,14 +13,18 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
         this.provideFunctions = this.provideFunctions.bind(this)
         this.poses = []
         this.storageHandler = storageHandler
+        let marker_info = this.storageHandler.getArucoMarkerInfo()
+        FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
     }
 
     public provideFunctions(arucoMarkerFunction: ArucoMarkersFunction) {
         switch (arucoMarkerFunction) {
             case ArucoMarkersFunction.SaveMarker:
                 return (markerID: string, name: string) => {
-                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
                     this.storageHandler.saveMarker(markerID, name)
+                    let marker_info = this.storageHandler.getArucoMarkerInfo()
+                    FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
+                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
                 }
             case ArucoMarkersFunction.NavigateToMarker:
                 return (name: string) => {
@@ -32,9 +36,11 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                 }
             case ArucoMarkersFunction.DeleteMarker:
                 return (markerIndex: number) => {
-                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
                     let markerNames = this.storageHandler.getArucoMarkerNames()
                     this.storageHandler.deleteMarker(markerNames[markerIndex])
+                    let marker_info = this.storageHandler.getArucoMarkerInfo()
+                    FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
+                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
                 }
         }
     }

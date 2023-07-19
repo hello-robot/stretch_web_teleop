@@ -20,6 +20,7 @@ import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
 import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
+import { ARUCO_MARKER_INFO } from './utils/aruco_markers_dict';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -168,6 +169,7 @@ function configureRemoteRobot() {
     remoteRobot.setRobotMode("navigation");
     occupancyGrid = undefined;
     remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    remoteRobot.setArucoMarkerInfo(ARUCO_MARKER_INFO)
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 }
 

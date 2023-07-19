@@ -1,4 +1,6 @@
-export const ARUCO_MARKER_INFO = {
+import { ArucoMarkersInfo } from "shared/util";
+
+export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
     aruco_marker_info: {
         '130': {
             length_mm: 47,

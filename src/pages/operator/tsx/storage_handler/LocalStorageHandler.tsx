@@ -149,6 +149,9 @@ export class LocalStorageHandler extends StorageHandler {
     }
 
     public saveMarker(markerID: string, markerName: string): void {
+        // Don't allow user to rewrite docking station
+        if (markerName === 'docking_station' || markerID === '245') return;
+
         const markerNames = this.getArucoMarkerNames();
         const markerIDs = this.getArucoMarkerIDs()
         // TODO: handle duplicates
@@ -170,6 +173,9 @@ export class LocalStorageHandler extends StorageHandler {
     }
 
     public deleteMarker(markerName: string): void {
+        // Don't allow user to delete docking station
+        if (markerName === 'docking station') return;
+
         const markerNames = this.getArucoMarkerNames();
         if (!markerNames.includes(markerName)) return;
         const index = markerNames.indexOf(markerName)
