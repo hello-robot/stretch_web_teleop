@@ -181,12 +181,6 @@ export class ButtonFunctionProvider extends FunctionProvider {
         const velocity = multiplier * JOINT_VELOCITIES[jointName]! * FunctionProvider.velocityScale;
         const increment = multiplier * JOINT_INCREMENTS[jointName]! * FunctionProvider.velocityScale;
 
-        if (panTiltButtons.includes(buttonPadFunction)) {
-            return { onClick: () => { 
-                FunctionProvider.remoteRobot?.setToggle("setFollowGripper", false);
-                this.incrementalJointMovement(jointName, increment) 
-            }};
-        }
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 switch (buttonPadFunction) {

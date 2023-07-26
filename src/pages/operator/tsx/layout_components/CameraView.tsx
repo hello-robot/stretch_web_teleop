@@ -183,7 +183,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     let gridPosition: { gridRow: number, gridColumn: number };  // the position in the 3x3 grid around the video element
     let rotation: string;  // how to rotate the arrow icon to point in the correct direction
-    const onClick = buttonFunctionProvider.provideFunctions(props.direction).onClick;
+    const functs = buttonFunctionProvider.provideFunctions(props.direction);
 
     // Specify button details based on the direction
     switch (props.direction) {
@@ -211,7 +211,9 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
         <button
             style={gridPosition}
             className={props.direction}
-            onClick={onClick}
+            onMouseDown={functs.onClick}
+            onMouseUp={functs.onRelease}
+            onMouseLeave={functs.onLeave}
         >
             <span
                 className="material-icons"
@@ -471,14 +473,8 @@ const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
  */
 const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
-    const [selectedIdx, setSelectedIdx] = React.useState<number>();
-    const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
-
-    // const updateMarkers = setInterval(() => {
-    //     setMarkers(
-    //         underVideoFunctionProvider.provideFunctions(UnderVideoButton.GetArucoMarkerNames).getMarkers!()
-    //     )
-    // }, 1000)
+    // const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
 
     return (
         <React.Fragment >
@@ -512,7 +508,7 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                 }}
                 label="Aruco Markers"
             />
-            <Dropdown
+            {/* <Dropdown
                 onChange={setSelectedIdx}
                 selectedIndex={selectedIdx}
                 possibleOptions={markers}
@@ -531,7 +527,7 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                 <span className="material-icons">
                     play_circle
                 </span>
-            </button>
+            </button> */}
         </React.Fragment>
     )
 }

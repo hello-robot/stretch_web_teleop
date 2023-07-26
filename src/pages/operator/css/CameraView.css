@@ -96,7 +96,7 @@
     height: auto;
     grid-row: 2/2;
     grid-column: 1/1;
-    --pan-tilt-button-size: 2rem;
+    --pan-tilt-button-size: 1.5rem;
     display: grid;
     grid-template-columns: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
     grid-template-rows: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
@@ -114,11 +114,12 @@
 }
 
 .realsense-pan-tilt-grid button {
-    padding: 10px;
+    padding: 0px;
 }
 
 .realsense-pan-tilt-grid button .material-icons {
     margin: 0;
+    font-size: xxx-large;
 }
 
 .realsense-pan-tilt-grid .up {
