@@ -268,7 +268,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         
         delete this.markerNames[index]
         delete this.markerIDs[index]
-        delete this.markerInfo.aruco_marker_info[index]
+        delete this.markerInfo.aruco_marker_info[markerID]
         this.writeMarkers()
     }
 
@@ -282,6 +282,12 @@ export class FirebaseStorageHandler extends StorageHandler {
 
     public getArucoMarkerInfo(): ArucoMarkersInfo {
         return JSON.parse(JSON.stringify(this.markerInfo));
+    }
+
+    public saveRelativePose(markerID: string, pose: ROSLIB.Transform): void {
+        if (!this.markerIDs.includes(markerID)) throw Error(`Could not save pose to marker ${markerID}`);
+        this.markerInfo.aruco_marker_info[markerID].pose = pose
+        this.writeMarkers()
     }
 
     private async writeMarkers() {

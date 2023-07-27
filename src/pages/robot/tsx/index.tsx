@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, Marker, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
@@ -13,7 +13,8 @@ export const robot = new Robot({
     moveBaseResultCallback: forwardMoveBaseResult,
     amclPoseCallback: forwardAMCLPose,
     markerArrayCallback: forwardMarkers,
-    navigationCompleteCallback: forwardMoveBaseState
+    navigationCompleteCallback: forwardMoveBaseState,
+    relativePoseCallback: forwardRelativePose
 })
 
 export let connection: WebRTCConnection;
@@ -23,6 +24,15 @@ export let gripperStream = new VideoStream(gripperProps);
 let occupancyGrid: ROSOccupancyGrid;
 
 robot.connect().then(() => {
+    connection = new WebRTCConnection({
+        peerRole: 'robot',
+        polite: false,
+        onRobotConnectionStart: handleSessionStart,
+        onMessage: handleMessage
+    })
+
+    connection.joinRobotRoom()
+
     robot.subscribeToVideo({
         topicName: "/navigation_camera/image_raw/rotated/compressed",
         callback: navigationStream.updateImage
@@ -40,15 +50,6 @@ robot.connect().then(() => {
         callback: gripperStream.updateImage
     })
     gripperStream.start()
-
-    connection = new WebRTCConnection({
-        peerRole: 'robot',
-        polite: false,
-        onRobotConnectionStart: handleSessionStart,
-        onMessage: handleMessage
-    })
-
-    connection.joinRobotRoom()
 }).then(() => {
     setTimeout(() => {
         let isResolved = connection.connectionState() == 'connected' ? true : false
@@ -58,7 +59,7 @@ robot.connect().then(() => {
         } else {
             window.location.reload()
         }
-    }, 6000);    
+    }, 10000);    
 })
 
 function handleSessionStart() {
@@ -166,6 +167,15 @@ function setOccupancyGrid(message: ROSOccupancyGrid) {
     occupancyGrid = message
 }
 
+function forwardRelativePose(pose: ROSLIB.Transform) {
+    if (!connection) throw 'WebRTC connection undefined'
+    
+    connection.sendData({
+        type: "relativePose",
+        message: pose
+    } as RelativePoseMessage)
+}
+
 function handleMessage(message: WebRTCMessage) {
     if (!("type" in message)) {
         console.error("Malformed message:", message)
@@ -204,7 +214,7 @@ function handleMessage(message: WebRTCMessage) {
             robot.setDepthSensing(message.toggle)
             break
         case "navigateToMarker":
-            robot.navigateToArucoMarkers(message.name)
+            robot.navigateToArucoMarkers(message.name, message.pose.transform)
             break
         case "setArucoMarkers":
             robot.setArucoMarkers(message.toggle)
@@ -221,6 +231,9 @@ function handleMessage(message: WebRTCMessage) {
         case "setArucoMarkerInfo":
             robot.setArucoMarkerInfo(message.info)
             break;    
+        case "getRelativePose":
+            robot.getRelativePose(message.marker_name)
+            break;
     }
 };
 

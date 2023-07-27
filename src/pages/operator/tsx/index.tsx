@@ -69,8 +69,8 @@ setTimeout(() => {
                 window.location.reload()
             }
         }, 2000)
-
-    } else {
+    } 
+    else {
         window.location.reload()
     }
 }, 8000);
@@ -132,10 +132,13 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             remoteRobot.setGoalReached(true)
             break;
         case 'moveBaseState':
-            console.log('aruco navigation complete')
+            remoteRobot.setMoveBaseState(message.message.result)
             break;
         case 'arucoMarkers':
             remoteRobot.setMarkers(message.message)
+            break;
+        case 'relativePose':
+            remoteRobot.setRelativePose(message.message)
             break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
@@ -150,11 +153,11 @@ function initializeOperator() {
     // configureRemoteRobot();
     const storageHandlerReadyCallback = () => {
         renderOperator(storageHandler);
+        underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
+        movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
+        arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-    underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
-    movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
-    arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
     // renderOperator(storageHandler);
 }
 
@@ -169,7 +172,6 @@ function configureRemoteRobot() {
     remoteRobot.setRobotMode("navigation");
     occupancyGrid = undefined;
     remoteRobot.getOccupancyGrid("getOccupancyGrid")
-    remoteRobot.setArucoMarkerInfo(ARUCO_MARKER_INFO)
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 }
 

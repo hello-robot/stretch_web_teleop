@@ -1,7 +1,8 @@
+import ROSLIB from "roslib"
 import { ArucoMarkersInfo, ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand | NavigateToMarkerCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopCommand | PlaybackPosesCommand | NavigateToMarkerCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand | GetRelativePoseCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -68,6 +69,7 @@ export interface StopCommand {
 export interface NavigateToMarkerCommand {
     type: "navigateToMarker"
     name: string
+    pose: ROSLIB.Transform
 }
 
 export interface UpdateArucoMarkersInfoCommand {
@@ -77,4 +79,9 @@ export interface UpdateArucoMarkersInfoCommand {
 export interface SetArucoMarkerInfoCommand {
     type: "setArucoMarkerInfo"
     info: ArucoMarkersInfo
+}
+
+export interface GetRelativePoseCommand {
+    type: "getRelativePose"
+    marker_name: string
 }

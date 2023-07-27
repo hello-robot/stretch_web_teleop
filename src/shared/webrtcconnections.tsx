@@ -63,7 +63,7 @@ export class WebRTCConnection extends React.Component {
         this.socket.on('join', (room: string) => {
             console.log('Another peer made a request to join room ' + room);
             console.log('I am ' + this.peerRole + '!');
-            // if (this.onRobotConnectionStart) this.onRobotConnectionStart()
+            if (this.onRobotConnectionStart) this.onRobotConnectionStart()
         });
 
         // This is only sent to the operator room
@@ -88,7 +88,7 @@ export class WebRTCConnection extends React.Component {
         this.socket.on('joined', (room: String) => {
             console.log('I am ' + this.peerRole + '!');
             console.log('joined: ' + room); 
-            if (this.onRobotConnectionStart) this.onRobotConnectionStart()
+            // if (this.onRobotConnectionStart) this.onRobotConnectionStart()
         });
 
         this.socket.on('signalling', (message: SignallingMessage) => {

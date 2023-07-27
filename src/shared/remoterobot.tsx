@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo } from 'shared/util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseState } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -11,6 +11,8 @@ export class RemoteRobot extends React.Component {
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
     markers: MarkerArray;
+    relativePose?: ROSLIB.Transform
+    moveBaseState?: string
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
@@ -125,11 +127,13 @@ export class RemoteRobot extends React.Component {
         this.robotChannel(cmd)
     }
 
-    navigateToMarker(name: string) {
+    navigateToMarker(name: string, pose: ROSLIB.Transform) {
         let cmd: NavigateToMarkerCommand = {
             type: "navigateToMarker",
-            name: name
+            name: name,
+            pose: pose
         }
+        console.log(cmd)
         this.robotChannel(cmd)
     }
 
@@ -139,6 +143,7 @@ export class RemoteRobot extends React.Component {
         }
         this.robotChannel(cmd)
     }
+
 
     setArucoMarkerInfo(info: ArucoMarkersInfo) {
         let cmd: SetArucoMarkerInfoCommand = {
@@ -177,6 +182,37 @@ export class RemoteRobot extends React.Component {
 
     getMarkers() {
         return this.markers
+    }
+
+    getRelativePose(marker_name: string) {
+        this.relativePose = undefined
+        let cmd: GetRelativePoseCommand = {
+            type: "getRelativePose",
+            marker_name: marker_name
+        }
+        this.robotChannel(cmd)
+        console.log("waiting")
+        return waitUntil(() => this.relativePose != undefined).then(() => { 
+            console.log("receive pose: ", this.relativePose)
+            return this.relativePose
+        })
+    }
+
+    setRelativePose(pose: ROSLIB.Transform) {
+        console.log(pose)
+        this.relativePose = pose
+    }
+
+    setMoveBaseState(state: MoveBaseState) {
+        this.moveBaseState = state.result
+    }
+
+    getMoveBaseState() {
+        this.moveBaseState = undefined
+        return waitUntil(() => this.moveBaseState != undefined, 100000).then(() => {
+            console.log(this.moveBaseState)
+            return this.moveBaseState
+        })
     }
 
     stopExecution() {

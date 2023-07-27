@@ -207,6 +207,13 @@ export abstract class StorageHandler {
      */
     public abstract getArucoMarkerInfo(): ArucoMarkersInfo;
 
+    /**
+     * Save the relative pose for the given aruco marker
+     * @param markerID the ID of the aruco marker
+     * @param pose the relative pose to save
+     */
+    public abstract saveRelativePose(markerID: string, pose: ROSLIB.Transform): void;
+
     public loadDefaultArucoMarkers(): ArucoMarkersInfo {
         return ARUCO_MARKER_INFO
     }
@@ -229,6 +236,6 @@ export abstract class StorageHandler {
         
         // Only return ID for docking station
         // Other IDs are currently not applicable for aruco navigation
-        return ['docking station']
+        return ['docking_station']
     }
 }

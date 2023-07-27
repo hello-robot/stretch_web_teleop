@@ -174,7 +174,7 @@ export class LocalStorageHandler extends StorageHandler {
 
     public deleteMarker(markerName: string): void {
         // Don't allow user to delete docking station
-        if (markerName === 'docking station') return;
+        if (markerName === 'docking_station') return;
 
         const markerNames = this.getArucoMarkerNames();
         if (!markerNames.includes(markerName)) return;
@@ -220,5 +220,14 @@ export class LocalStorageHandler extends StorageHandler {
             return markerInfo
         }
         return JSON.parse(storedJson)
+    }
+
+    public saveRelativePose(markerID: string, pose: ROSLIB.Transform): void {
+        // Don't allow user to rewrite docking station
+        if (markerID === '245') return;
+
+        const markers = this.getArucoMarkerInfo() as ArucoMarkersInfo;
+        markers.aruco_marker_info[markerID].pose = pose
+        localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markers));
     }
 }

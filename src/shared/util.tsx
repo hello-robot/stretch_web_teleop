@@ -17,6 +17,7 @@ export type ArucoMarkersInfo = {
             use_rgb_only: boolean,
             name: string, 
             link: string | null
+            pose?: ROSLIB.Transform
         }
     }
 }
@@ -48,7 +49,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | RelativePoseMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -86,7 +87,7 @@ export interface MoveBaseStateMessage {
 }
 
 export interface MoveBaseState {
-    success: boolean
+    result: string
 }
 
 export interface OccupancyGridMessage {
@@ -96,6 +97,11 @@ export interface OccupancyGridMessage {
 
 export interface MapPoseMessage {
     type: 'amclPose',
+    message: ROSLIB.Transform
+}
+
+export interface RelativePoseMessage {
+    type: 'relativePose',
     message: ROSLIB.Transform
 }
 

@@ -25,6 +25,7 @@ export class Robot extends React.Component {
     private setArucoMarkersService?: ROSLIB.Service;
     private navigateToArucoService?: ROSLIB.Service;
     private arucoMarkerUpdateService?: ROSLIB.Service;
+    private getRelativePoseService?: ROSLIB.Service
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
     private arucoMarkerInfoParam?: ROSLIB.Param;
@@ -36,8 +37,8 @@ export class Robot extends React.Component {
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private markerArrayCallback: (markers: MarkerArray) => void
     private navigationCompleteCallback: (state: MoveBaseState) => void
+    private relativePoseCallback: (pose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
-    private waitForResultPromise: Promise
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
@@ -45,7 +46,8 @@ export class Robot extends React.Component {
         moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
         markerArrayCallback: (markers: MarkerArray) => void,
-        navigationCompleteCallback: (state: MoveBaseState) => void
+        navigationCompleteCallback: (state: MoveBaseState) => void,
+        relativePoseCallback: (pose: ROSLIB.Transform) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -54,6 +56,7 @@ export class Robot extends React.Component {
         this.amclPoseCallback = props.amclPoseCallback
         this.markerArrayCallback = props.markerArrayCallback
         this.navigationCompleteCallback = props.navigationCompleteCallback
+        this.relativePoseCallback = props.relativePoseCallback
     }
     
     async connect(): Promise<void> {
@@ -90,6 +93,7 @@ export class Robot extends React.Component {
         this.createArucoMarkerService()
         this.createArucoNavigationService()
         this.createArucoMarkerUpdateService()
+        this.createGetRelativePoseService()
         this.createRobotFrameTFClient()
         this.createMapFrameTFClient()
         this.createArucoMarkerParamServer()
@@ -156,7 +160,7 @@ export class Robot extends React.Component {
         });
     
         topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
-            this.poseGoalComplete = msg.status.status > 1 ? true : false
+            this.poseGoalComplete = msg.status.status > 2 ? true : false
         });
     };
 
@@ -242,6 +246,14 @@ export class Robot extends React.Component {
         })
     }
 
+    createGetRelativePoseService() {
+        this.getRelativePoseService = new ROSLIB.Service({
+            ros: ros,
+            name: '/get_relative_pose',
+            serviceType: 'stretch_teleop_interface/RelativePose'
+        })
+    }
+
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
             ros: ros,
@@ -316,10 +328,17 @@ export class Robot extends React.Component {
         })
     }
 
-    navigateToArucoMarkers(marker_name: string) {
-        var request = new ROSLIB.ServiceRequest({name: marker_name})
-        this.navigateToArucoService?.callService(request, (response: boolean) => {
-            this.navigationCompleteCallback({ success: response } as MoveBaseState)
+    navigateToArucoMarkers(marker_name: string, relative_pose: ROSLIB.Transform) {
+        var request = new ROSLIB.ServiceRequest({
+            name: marker_name, 
+            pose: { 
+                translation: relative_pose.translation,
+                rotation: relative_pose.rotation
+            }
+        })
+        console.log(request)
+        this.navigateToArucoService?.callService(request, (response: string) => {
+            this.navigationCompleteCallback({ result: response } as MoveBaseState)
         })
     }
 
@@ -327,6 +346,13 @@ export class Robot extends React.Component {
         var request = new ROSLIB.ServiceRequest({update: true})
         this.arucoMarkerUpdateService?.callService(request, (response: boolean) => {
             response ? console.log("Aruco marker dictionary updated") : console.log("Aruco marker dictionary update failed!") 
+        })
+    }
+
+    getRelativePose(marker_name: string) {
+        var request = new ROSLIB.ServiceRequest({name: marker_name})
+        this.getRelativePoseService?.callService(request, (response: ROSLIB.Transform) => {
+            this.relativePoseCallback(response) 
         })
     }
 
