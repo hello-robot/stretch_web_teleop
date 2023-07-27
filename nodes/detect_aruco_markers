@@ -48,6 +48,7 @@ class ArucoMarker:
         
         self.frame_id = 'camera_color_optical_frame'
         self.info = None
+        print(marker_info.keys())
         if str(self.aruco_id) in marker_info:
             self.info = marker_info[str(self.aruco_id)]
 
@@ -196,14 +197,22 @@ class ArucoMarker:
         self.depth_image = depth_image
         self.camera_matrix = np.reshape(self.camera_info.K, (3,3))
         self.distortion_coefficients = np.array(self.camera_info.D)
-        rvecs, tvecs, unknown_variable = aruco.estimatePoseSingleMarkers([self.corners],
-                                                                         self.length_of_marker_mm,
-                                                                         self.camera_matrix,
-                                                                         self.distortion_coefficients)
-        self.aruco_rotation = rvecs[0][0]
+        self.object_points = np.hstack((np.array(self.corners[0]), np.transpose(np.array([[0.0,0.0,0.0,0.0]]))))
+        
+        marker_points = np.array([[-self.length_of_marker_mm / 2, self.length_of_marker_mm / 2, 0],
+                                [self.length_of_marker_mm / 2, self.length_of_marker_mm / 2, 0],
+                                [self.length_of_marker_mm / 2, -self.length_of_marker_mm / 2, 0],
+                                [-self.length_of_marker_mm / 2, -self.length_of_marker_mm / 2, 0]], dtype=np.float32)
+        rvecs = []
+        tvecs = []
+        for corner in self.corners:
+            nada, R, t = cv2.solvePnP(marker_points, corner, self.camera_matrix, self.distortion_coefficients, False, cv2.SOLVEPNP_IPPE_SQUARE)
+            rvecs.append(R)
+            tvecs.append(t)
+        self.aruco_rotation = rvecs[0]
         
         # Convert ArUco position estimate to be in meters.
-        self.aruco_position = tvecs[0][0]/1000.0
+        self.aruco_position = tvecs[0]/1000.0
         aruco_depth_estimate = self.aruco_position[2]
         
         self.center = np.average(self.corners, axis=1).flatten()
@@ -225,6 +234,8 @@ class ArucoMarker:
             if num_points < min_number_of_points_for_plane_fitting:
                 print('WARNING: There are too few points from the depth image for plane fitting, so only using the RGB ArUco estimate. number of points =', num_points)
                 only_use_rgb = True
+                self.ready = False
+                return
         else:
             only_use_rgb = True
 
@@ -368,7 +379,6 @@ class ArucoMarker:
 
         self.broadcasted = False
         self.ready = True
-
 
     def get_marker_poly(self):
         poly_points = np.array(corners)
@@ -547,6 +557,13 @@ class ArucoMarkerCollection:
 
     def update_marker_info(self, marker_info):
         self.marker_info = marker_info
+        if self.aruco_ids is not None: 
+            for corners, aruco_id in zip(self.aruco_corners, self.aruco_ids):
+                aruco_id = int(aruco_id)
+                new_marker = ArucoMarker(aruco_id, self.marker_info, self.show_debug_images)
+                self.collection[aruco_id] = new_marker
+
+                self.collection[aruco_id].update(corners, self.timestamp, self.frame_number, self.camera_info, self.depth_image)
 
     def update(self, rgb_image, camera_info, depth_image=None, timestamp=None):
         self.frame_number += 1
@@ -554,7 +571,7 @@ class ArucoMarkerCollection:
         self.rgb_image = rgb_image
         self.camera_info = camera_info
         self.depth_image = depth_image
-        self.gray_image = cv2.cvtColor(self.rgb_image, cv2.COLOR_BGR2GRAY)
+        self.gray_image = cv2.cvtColor(self.rgb_image, cv2.COLOR_BGR2GRAY) #self.rgb_image
         image_height, image_width = self.gray_image.shape
         self.aruco_corners, self.aruco_ids, aruco_rejected_image_points = aruco.detectMarkers(self.gray_image,
                                                                                               self.aruco_dict,
@@ -571,16 +588,23 @@ class ArucoMarkerCollection:
                 if marker is None:
                     new_marker = ArucoMarker(aruco_id, self.marker_info, self.show_debug_images)
                     self.collection[aruco_id] = new_marker
-
+                    
                 self.collection[aruco_id].update(corners, self.timestamp, self.frame_number, self.camera_info, self.depth_image)
 
     def get_ros_marker_array(self):
-        marker_array = MarkerArray()        
+        marker_array = MarkerArray()  
+        remove_keys = []      
         for key in self.collection:
             marker = self.collection[key]
             if marker.frame_number == self.frame_number:
                 ros_marker = marker.get_ros_marker()
+                if ros_marker == None: 
+                    remove_keys.append(key)
+                    continue
                 marker_array.markers.append(ros_marker)
+
+        for key in remove_keys:
+            self.collection.pop(key)
         return marker_array
 
     def get_ros_axes_array(self, include_z_axes=True, include_axes=True):
@@ -710,9 +734,10 @@ class DetectArucoNode:
 
         print('got marker info')
         self.marker_info = json.loads(rospy.get_param('/aruco_marker_info'))['aruco_marker_info']
+        print(self.marker_info.keys())
         self.aruco_marker_collection = ArucoMarkerCollection(self.marker_info, self.show_debug_images)
 
-        self.rgb_topic_name = '/camera/color/image_raw' #'/camera/infra1/image_rect_raw'
+        self.rgb_topic_name = '/camera/color/image_raw'
         self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image)
 
         self.depth_topic_name = '/camera/aligned_depth_to_color/image_raw'

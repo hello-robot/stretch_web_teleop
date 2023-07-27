@@ -1,3 +1,4 @@
+import ROSLIB from "roslib";
 import { ArucoMarkersInfo } from "shared/util";
 
 export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
@@ -36,7 +37,22 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             length_mm: 88.0,
             use_rgb_only: false,
             name: 'docking_station',
-            link: null
+            link: null,
+            pose: {
+                transform: new ROSLIB.Transform({
+                    translation: {
+                        x: 0.0,
+                        y: -1.0,
+                        z: 0.47
+                    },
+                    rotation: {
+                        x: -0.382,
+                        y: -0.352,
+                        z: -0.604,
+                        w: 0.604
+                    }
+                })
+            }
         },
         '246': {
             length_mm: 179.0,

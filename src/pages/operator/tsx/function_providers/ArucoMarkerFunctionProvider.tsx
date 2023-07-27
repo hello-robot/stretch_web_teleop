@@ -14,6 +14,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
         this.poses = []
         this.storageHandler = storageHandler
         let marker_info = this.storageHandler.getArucoMarkerInfo()
+        console.log('remote robot: ', FunctionProvider.remoteRobot)
         FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
     }
 
@@ -27,9 +28,24 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
                 }
             case ArucoMarkersFunction.NavigateToMarker:
-                return (name: string) => {
-                    FunctionProvider.remoteRobot?.navigateToMarker(name)
+                return async (markerIndex: number) => {
+                    FunctionProvider.remoteRobot?.stopExecution()
+                    let markerNames = this.storageHandler.getArucoMarkerNames()
+                    let name = markerNames[markerIndex]
+                    let markerIDs = this.storageHandler.getArucoMarkerIDs()
+                    let markerID = markerIDs[markerIndex]
+                    let marker_info = this.storageHandler.getArucoMarkerInfo()
+                    let pose = marker_info.aruco_marker_info[markerID].pose
+                    console.log(name, pose)
+                    FunctionProvider.remoteRobot?.navigateToMarker(name, pose)
+                    let result = await FunctionProvider.remoteRobot?.getMoveBaseState()
+                    if (!result) {
+                        FunctionProvider.remoteRobot?.stopExecution()
+                        return 'navigation failed'
+                    }
+                    return result;
                 }
+
             case ArucoMarkersFunction.SavedMarkerNames:
                 return () => {
                     return this.storageHandler.getArucoMarkerNames()
@@ -41,6 +57,16 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
                     FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
+                }
+            case ArucoMarkersFunction.SaveRelativePose:
+                return async (markerIndex: number) => {
+                    let markerNames = this.storageHandler.getArucoMarkerNames()
+                    let name = markerNames[markerIndex]
+                    let pose = await FunctionProvider.remoteRobot?.getRelativePose(name)
+                    let markerIDs = this.storageHandler.getArucoMarkerIDs()
+                    let markerID = markerIDs[markerIndex]
+                    if (!pose) return;
+                    this.storageHandler.saveRelativePose(markerID, pose)
                 }
         }
     }
