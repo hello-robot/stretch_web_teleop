@@ -6,9 +6,9 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { VoiceCommands } from "./static_components/VoiceCommands";
-import { ROSOccupancyGrid, RemoteStream, RobotPose } from "shared/util";
+import { className, RemoteStream, RobotPose } from "shared/util";
 import { buttonFunctionProvider } from ".";
-import { ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
+import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
@@ -17,6 +17,7 @@ import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
 import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { ArucoMarkers } from "./layout_components/ArucoMarkers";
+import { Alert } from "./basic_components/Alert";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -30,6 +31,8 @@ export const Operator = (props: {
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(undefined);
     const [selectedDefinition, setSelectedDef] = React.useState<ComponentDefinition | undefined>(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
+    const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
+
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -37,6 +40,11 @@ export const Operator = (props: {
     const [buttonStateMapRerender, setButtonStateMapRerender] = React.useState<boolean>(false);
     const buttonStateMap = React.useRef<ButtonStateMap>();
     function operatorCallback(bsm: ButtonStateMap) {
+        let collisionButtons: ButtonPadButton[] = []
+        bsm.forEach((state, button) => {
+            if (state == ButtonState.Collision) collisionButtons.push(button)
+        })
+        setButtonCollision(collisionButtons)
         buttonStateMap.current = bsm;
         setButtonStateMapRerender(!buttonStateMapRerender);
     }
@@ -233,6 +241,17 @@ export const Operator = (props: {
                 />
             </div>
             <div id="operator-global-controls">
+                {
+                    <div className="operator-collision-alerts">
+                        <div className={className('operator-alert', {fadeIn: buttonCollision.length > 0, fadeOut: buttonCollision.length == 0})}>
+                            <Alert type="warning">
+                                <span>
+                                    { buttonCollision.length > 0 ? buttonCollision.join(', ') + " in collision!" : ""}
+                                </span>
+                            </Alert>
+                        </div>
+                    </div>
+                }
                 <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=
@@ -276,8 +295,4 @@ export const Operator = (props: {
             />
         </div>
     )
-}
-
-function setDisplayArucoMarkers(displayArucoMarkers: boolean): void {
-    throw new Error("Function not implemented.");
 }

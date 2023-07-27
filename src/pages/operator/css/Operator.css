@@ -20,8 +20,48 @@
     --header-btn-width: 10rem;
 }
 
+.operator-collision-alerts {
+    width: 100%;
+    padding: 0.5rem 1rem 0 1rem;
+}
+
+.operator-collision-alerts .operator-alert {
+    animation: fade-out 1s;
+}
+
+.operator-collision-alerts .operator-alert.fadeOut {
+    display: block;
+    animation: fade-out 1s;
+    opacity: 0;
+}
+
+.operator-collision-alerts .operator-alert.fadeIn {
+    display: block;
+    animation: fade-in 0.5s;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
 /* Make all the components in the header fill the avaliable height */
-#operator-header > *,
+#operator-header>*,
 #operator-header button {
     height: 100%;
 }
@@ -30,7 +70,10 @@
     width: var(--header-btn-width);
 }
 
-#operator-voice, #operator-pose-library, #operator-pose-recorder, #operator-aruco-markers {
+#operator-voice,
+#operator-pose-library,
+#operator-pose-recorder,
+#operator-aruco-markers {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
     height: 6rem;
@@ -41,14 +84,21 @@
     /* justify-self: center; */
     align-self: center;
     border-radius: 200px;
-    margin-top: 10px;
+    /* margin-top: 10px; */
     /* grid-row: 2/2;
     grid-column: 1/1; */
     transition: all 0.2s ease-out;
     font-size: large;
 }
 
-#operator-voice[hidden], #operator-pose-library[hidden], #operator-pose-recorder[hidden], #operator-aruco-markers[hidden] {
+#operator-aruco-markers {
+    width: 52rem;
+}
+
+#operator-voice[hidden],
+#operator-pose-library[hidden],
+#operator-pose-recorder[hidden],
+#operator-aruco-markers[hidden] {
     display: none;
 }
 
@@ -91,7 +141,8 @@
 @keyframes load {
     0% {
         transform: rotate(0deg);
-    } 
+    }
+
     100% {
         transform: rotate(360deg);
     }
