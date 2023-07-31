@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState, ArucoNavigationStateMessage, ArucoNavigationState } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
@@ -11,6 +11,7 @@ export const robot = new Robot({
     jointStateCallback: forwardJointStates,
     occupancyGridCallback: setOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseResult,
+    arucoNavigationStateCallback: forwardArucoNavigationState,
     amclPoseCallback: forwardAMCLPose,
     markerArrayCallback: forwardMarkers,
     navigationCompleteCallback: forwardMoveBaseState,
@@ -152,6 +153,15 @@ function forwardMarkers(markers: MarkerArray) {
         type: "arucoMarkers",
         message: markers
     } as MarkersMessage)
+}
+
+function forwardArucoNavigationState(state: ArucoNavigationState) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: "arucoNavigationState",
+        message: state
+    } as ArucoNavigationStateMessage)
 }
 
 function forwardAMCLPose(transform: ROSLIB.Transform) {

@@ -7,6 +7,7 @@ import dynamic_reconfigure.client
 from geometry_msgs.msg import TransformStamped, Pose, Transform
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from stretch_teleop_interface.srv import NavigateToAruco, RelativePose
+from stretch_teleop_interface.msg import ArucoNavigationState
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from math import sqrt, fabs, atan2
 from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
@@ -21,7 +22,9 @@ class ArucoNavigation:
         # Service for enabling aruco navigation
         self.navigation_service = rospy.Service('navigate_to_aruco', NavigateToAruco, self.navigate_to_aruco_callback)
         self.relative_pose_service = rospy.Service('get_relative_pose', RelativePose, self.get_relative_pose_callback)
-        
+        self.navigation_state = rospy.Publisher('/navigate_to_aruco/state', ArucoNavigationState, queue_size=1)
+        self.state = ArucoNavigationState()
+
         self.navigation_complete = False
         self.reconfigure_client = dynamic_reconfigure.client.Client("move_base")
         self.aruco_name = ''
@@ -29,6 +32,8 @@ class ArucoNavigation:
         self.pan_range = [-4.07, 1.74]
         self.pan = None
         self.tilt = None
+        self.num_tries = 0
+        self.max_tries = 3
 
         self.tf2_buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tf2_buffer)
@@ -100,6 +105,10 @@ class ArucoNavigation:
                 print("print marker found")
                 return True
         
+        self.state.state = "Searching for marker..."
+        self.state.alertType = "info"
+        self.navigation_state.publish(self.state)
+
         if self.pan != None and self.tilt != None:
             print('looking around')
             tilt_angles = [
@@ -140,6 +149,9 @@ class ArucoNavigation:
                     if self.aruco_name == marker.text:
                         print("print marker found")
                         return True
+        # self.state.state = ""
+        # self.state.alertType = ""
+        # self.navigation_state.publish(self.state)
         return False
 
     def get_relative_pose_callback(self, req):
@@ -211,20 +223,26 @@ class ArucoNavigation:
         return trans
 
     def navigate_to_marker(self):
+        self.num_tries += 1
         print(self.relative_pose)
         tran = self.broadcast_tf(self.relative_pose, 'relative_pose', self.aruco_name)
         print(tran)
         self.tf2_broadcaster.sendTransform(tran)
         transforms = []
-
+        self.state.state = "Navigating to marker..."
+        self.state.alertType = "info"
+        self.navigation_state.publish(self.state)
         while len(transforms) < 10:
             try:
                 trans = self.tf2_buffer.lookup_transform('map', 'relative_pose', rospy.Time(), rospy.Duration(1.0))
                 transforms.append(trans)
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rospy.loginfo("Could not publish pose to tf")
-                return 'could not publish pose to tf'
-        
+                self.state.state = 'Navigation failed, please try again.'
+                self.state.alertType = "error"
+                self.navigation_state.publish(self.state)
+                return 'Navigation failed, please try again.'
+
         # tilt_angles = [
         #     max(self.tilt_range[0], self.tilt - 0.25), 
         #     max(self.tilt_range[0], self.tilt - 0.15),
@@ -295,15 +313,36 @@ class ArucoNavigation:
         # saved_pose.rotation.w = 0.604 # 0.611
 
     def move_base_aruco_callback(self, result):
+        if self.num_tries == self.max_tries:
+            self.num_tries = 0
+            self.state.state = 'Navigation succeeded!'
+            self.state.alertType = "success"
+            self.navigation_state.publish(self.state)
+            return 'Navigation succeeded!'
+
         rospy.sleep(0.1)
         marker_found = self.scan_for_marker()
-        if not marker_found: return 'marker not found'
-
+        if not marker_found: 
+            self.state.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
+            self.state.alertType = "error"
+            self.navigation_state.publish(self.state)
+            return 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
+        # self.state.state = ""
+        # self.state.alertType = ""
+        # self.navigation_state.publish(self.state)
         self.reconfigure_client.update_configuration({"controller_frequency": 18.0})
 
-        new_map_to_aruco = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
+        try:
+            new_map_to_aruco = self.tf2_buffer.lookup_transform('map', self.aruco_name, rospy.Time())
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rospy.loginfo("Could not publish pose to tf")
+            self.state.state = 'Navigation failed, please try again.'
+            self.state.alertType = "error"
+            self.navigation_state.publish(self.state)
+            return 'Navigation failed, please try again.'
+
         translation_diff, angle_diff = self.calculate_diff(self.map_to_aruco, new_map_to_aruco)
-        if (translation_diff > 0.05 or angle_diff > 0.05):
+        if (translation_diff > 0.075 or angle_diff > 0.075):
             self.map_to_aruco = new_map_to_aruco
             # self.reconfigure_client.update_configuration({"controller_frequency": 10.0})
             self.navigate_to_marker()
@@ -316,7 +355,10 @@ class ArucoNavigation:
         #     self.reconfigure_client.update_configuration({"controller_frequency": 1.0})
         #     self.navigate_to_marker()
 
-        return 'navigation complete'
+        self.state.state = 'Navigation succeeded!'
+        self.state.alertType = "success"
+        self.navigation_state.publish(self.state)
+        return 'Navigation succeeded!'
 
     def navigate_to_aruco_callback(self, req):
         print('in navigate callback')
@@ -324,7 +366,11 @@ class ArucoNavigation:
         print(req.pose)
         self.relative_pose = req.pose
         marker_found = self.scan_for_marker()
-        if not marker_found: return 'marker not found'
+        if not marker_found: 
+            self.state.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
+            self.state.alertType = "error"
+            self.navigation_state.publish(self.state)
+            return 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
 
         self.reconfigure_client.update_configuration({"controller_frequency": 20.0})
                 
@@ -338,5 +384,9 @@ class ArucoNavigation:
 if __name__ == '__main__':
     rospy.init_node('aruco_navigation')
     node = ArucoNavigation()
+    r = rospy.Rate(1) # 10hz
     while not rospy.is_shutdown():
-        rospy.sleep(0.1)    
+        # state = ArucoNavigationState()
+        # state.state = node.state
+        # node.navigation_state.publish(node.state)
+        r.sleep()    

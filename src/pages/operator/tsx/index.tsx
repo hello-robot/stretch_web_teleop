@@ -137,6 +137,10 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         case 'arucoMarkers':
             remoteRobot.setMarkers(message.message)
             break;
+        case 'arucoNavigationState':
+            arucoMarkerFunctionProvider.setArucoNavigationState(message.message)
+            // remoteRobot.setArucoNavigationState(message.message.state)
+            break;
         case 'relativePose':
             remoteRobot.setRelativePose(message.message)
             break;

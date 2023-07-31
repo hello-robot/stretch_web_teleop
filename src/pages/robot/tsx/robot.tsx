@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState, ArucoMarkersInfo } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState, ArucoMarkersInfo, ArucoNavigationState } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -36,6 +36,7 @@ export class Robot extends React.Component {
     private moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private markerArrayCallback: (markers: MarkerArray) => void
+    private arucoNavigationStateCallback: (state: ArucoNavigationState) => void
     private navigationCompleteCallback: (state: MoveBaseState) => void
     private relativePoseCallback: (pose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
@@ -46,6 +47,7 @@ export class Robot extends React.Component {
         moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
         markerArrayCallback: (markers: MarkerArray) => void,
+        arucoNavigationStateCallback: (state: ArucoNavigationState) => void,
         navigationCompleteCallback: (state: MoveBaseState) => void,
         relativePoseCallback: (pose: ROSLIB.Transform) => void
     }) {
@@ -55,6 +57,7 @@ export class Robot extends React.Component {
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
         this.markerArrayCallback = props.markerArrayCallback
+        this.arucoNavigationStateCallback = props.arucoNavigationStateCallback
         this.navigationCompleteCallback = props.navigationCompleteCallback
         this.relativePoseCallback = props.relativePoseCallback
     }
@@ -82,6 +85,7 @@ export class Robot extends React.Component {
         this.subscribeToJointState()
         this.subscribeToOccupancyGrid()
         this.subscribeToMarkerArray()
+        this.subscribeToArucoNavigationState()
         this.subscribeToJointTrajectoryResult()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
@@ -163,6 +167,18 @@ export class Robot extends React.Component {
             this.poseGoalComplete = msg.status.status > 2 ? true : false
         });
     };
+
+    subscribeToArucoNavigationState() {
+        let topic: ROSLIB.Topic<ArucoNavigationState> = new ROSLIB.Topic({
+            ros: ros,
+            name: '/navigate_to_aruco/state',
+            messageType: 'stretch_teleop_interface/ArucoNavigationState'
+        })
+
+        topic.subscribe((msg: ArucoNavigationState) => {
+            if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg)
+        })
+    }
 
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionClient({
@@ -515,7 +531,7 @@ export class Robot extends React.Component {
             points.push({
                 positions: jointPositions,
                 time_from_start: {
-                    secs: index,
+                    secs: index*10,
                     nsecs: 0
                 }
             })
@@ -535,8 +551,8 @@ export class Robot extends React.Component {
                     joint_names: jointNames,
                     points: points
                 },
-                goal_tolerance: goal_tolerance,
-                path_tolerance: path_tolerance
+                // goal_tolerance: goal_tolerance,
+                // path_tolerance: path_tolerance
             }
         });
     
@@ -555,16 +571,17 @@ export class Robot extends React.Component {
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
-        // if (index < poses.length) {
-        //     this.poseGoalComplete = false
-        //     this.executePoseGoal(poses[index])
-        //     waitUntil(() => this.poseGoalComplete === true)
-        //         .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
-        // }
-        this.stopExecution();
-        this.trajectoryClient?.cancel();
-        this.poseGoal = this.makePoseGoals(poses)
-        this.poseGoal.send()
+        // this.stopExecution();
+        if (index < poses.length) {
+            this.poseGoalComplete = false
+            // this.executePoseGoal(poses[index])
+            this.poseGoal = this.makePoseGoal(poses[index])
+            this.poseGoal.send()
+            waitUntil(() => this.poseGoalComplete === true)
+                .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
+        }
+        // this.poseGoal = this.makePoseGoals(poses)
+        // this.poseGoal.send()
     }
 
     executeMoveBaseGoal(pose: ROSPose) {

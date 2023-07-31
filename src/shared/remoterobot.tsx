@@ -5,7 +5,7 @@ import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, Aruc
 
 export type robotMessageChannel = (message: cmd) => void;
 
-export class RemoteRobot extends React.Component {
+export class RemoteRobot extends React.Component<{},any> {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
     mapPose: ROSLIB.Transform;
@@ -28,6 +28,10 @@ export class RemoteRobot extends React.Component {
         } as ROSLIB.Transform
         this.moveBaseGoalReached = false
         this.markers = { markers: [] }
+        this.state = {
+            arucoNavigationState: ""
+        }
+        this.getArucoNavigationState = this.getArucoNavigationState.bind(this)
     }
 
     setGoalReached(reached: boolean) {
@@ -191,15 +195,12 @@ export class RemoteRobot extends React.Component {
             marker_name: marker_name
         }
         this.robotChannel(cmd)
-        console.log("waiting")
-        return waitUntil(() => this.relativePose != undefined).then(() => { 
-            console.log("receive pose: ", this.relativePose)
+        return waitUntil(() => this.relativePose != undefined, 60000).then(() => { 
             return this.relativePose
         })
     }
 
     setRelativePose(pose: ROSLIB.Transform) {
-        console.log(pose)
         this.relativePose = pose
     }
 
@@ -209,10 +210,22 @@ export class RemoteRobot extends React.Component {
 
     getMoveBaseState() {
         this.moveBaseState = undefined
-        return waitUntil(() => this.moveBaseState != undefined, 100000).then(() => {
+        return waitUntil(() => this.moveBaseState != undefined, 150000).then(() => {
             console.log(this.moveBaseState)
             return this.moveBaseState
         })
+    }
+
+    setArucoNavigationState(state: string) {
+        console.log("setting aruco nav state")
+        this.setState({
+            arucoNavigationState: state
+        })
+    }
+
+    getArucoNavigationState() {
+        console.log(this.state.arucoNavigationState)
+        return this.state.arucoNavigationState
     }
 
     stopExecution() {

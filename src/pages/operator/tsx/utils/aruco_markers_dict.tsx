@@ -42,7 +42,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
                 transform: new ROSLIB.Transform({
                     translation: {
                         x: 0.0,
-                        y: -1.0,
+                        y: -0.5,
                         z: 0.47
                     },
                     rotation: {
