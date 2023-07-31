@@ -39,8 +39,9 @@ export interface UnderMapFunctions {
     LoadGoal: (goalID: number) => void
     GetPose: () => ROSLIB.Transform
     GetSavedPoseNames: () => string[]
+    GetSavedPoseTypes: () => string[]
     GetSavedPoses: () => ROSLIB.Transform[]
-    DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[]) => void
+    DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) => void
     DisplayGoalMarker: (pose: ROSLIB.Vector3) => void
 }
 
@@ -88,9 +89,10 @@ export const Map = (props: CustomizableComponentProps) => {
         LoadGoal: underMapFunctionProvider.provideFunctions(UnderMapButton.LoadGoal) as () => void,
         GetPose: underMapFunctionProvider.provideFunctions(UnderMapButton.GetPose) as () => ROSLIB.Transform,
         GetSavedPoseNames: underMapFunctionProvider.provideFunctions(UnderMapButton.GetSavedPoseNames) as () => string[],
+        GetSavedPoseTypes: underMapFunctionProvider.provideFunctions(UnderMapButton.GetSavedPoseTypes) as () => string[],
         GetSavedPoses: underMapFunctionProvider.provideFunctions(UnderMapButton.GetSavedPoses) as () => ROSLIB.Transform[],
-        DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[]) => {
-            return occupancyGrid!.displayPoseMarkers(toggle, poses, poseNames)
+        DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) => {
+            return occupancyGrid!.displayPoseMarkers(toggle, poses, poseNames, poseTypes)
         },
         DisplayGoalMarker: (pose: ROSLIB.Vector3) => occupancyGrid!.createGoalMarker(pose.x, pose.y, true)
     }
@@ -129,7 +131,10 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 }
                 props.functs.SaveGoal(name)
                 props.functs.DisplayPoseMarkers(
-                    displayGoals, props.functs.GetSavedPoses(), poses
+                    displayGoals, 
+                    props.functs.GetSavedPoses(),
+                    props.functs.GetSavedPoseNames(),
+                    props.functs.GetSavedPoseTypes()
                 )
             }
             setName("");
@@ -155,6 +160,14 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 </div>
             </PopupModal>
         )
+    }
+
+    function formatNamesandTypes(names: string[], types: string[]): React.JSX.Element[]{
+        let elements: React.JSX.Element[] = []
+        names.map((name, index) => {
+            elements.push(<p><em>{types[index]}</em> {name}</p>)
+        })
+        return elements
     }
 
     return (
@@ -192,7 +205,10 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                         // props.definition.displayGoals = !displayGoals;
                         setDisplayGoals(!displayGoals)
                         props.functs.DisplayPoseMarkers(
-                            !displayGoals, props.functs.GetSavedPoses(), props.functs.GetSavedPoseNames()
+                            !displayGoals, 
+                            props.functs.GetSavedPoses(),
+                            props.functs.GetSavedPoseNames(),
+                            props.functs.GetSavedPoseTypes()
                         )
                     }}
                     label="Display Goals"
@@ -200,7 +216,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 <Dropdown
                     onChange={setSelectedIdx}
                     selectedIndex={selectedIdx}
-                    possibleOptions={props.functs.GetSavedPoseNames()}
+                    possibleOptions={formatNamesandTypes(props.functs.GetSavedPoseNames(), props.functs.GetSavedPoseTypes())}
                     placeholderText="Select a goal..."
                     placement="top"
                 />
@@ -224,7 +240,10 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                         if (selectedIdx != undefined) props.functs.DeleteGoal(selectedIdx)
                         setPoses(props.functs.GetSavedPoseNames())
                         props.functs.DisplayPoseMarkers(
-                            !displayGoals, props.functs.GetSavedPoses(), props.functs.GetSavedPoseNames()
+                            !displayGoals, 
+                            props.functs.GetSavedPoses(),
+                            props.functs.GetSavedPoseNames(),
+                            props.functs.GetSavedPoseTypes()
                         )
                         setSelectedIdx(undefined)
                     }}>

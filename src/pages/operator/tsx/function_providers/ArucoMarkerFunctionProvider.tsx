@@ -99,7 +99,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     if (saveToMap) {
                         let mapPose = FunctionProvider.remoteRobot?.getMapPose()
                         if (!mapPose) return { result: ArucoNavigationResult.POSE_GET_FAIL, alert: "error" }
-                        this.storageHandler.saveMapPose(name, mapPose)
+                        this.storageHandler.saveMapPose(name, mapPose, "ARUCO")
                     }
                     return { result: ArucoNavigationResult.POSE_SAVED, alert: "success" }
                 }

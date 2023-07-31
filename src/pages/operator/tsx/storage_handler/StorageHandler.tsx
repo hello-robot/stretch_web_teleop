@@ -93,7 +93,7 @@ export abstract class StorageHandler {
      * @param name the name of the pose
      * @param pose the pose on the map to save
      */
-    public abstract saveMapPose(poseName: string, pose: ROSLIB.Transform): void;
+    public abstract saveMapPose(poseName: string, pose: ROSLIB.Transform, poseType: string): void;
 
     /**
      * Get an array of all saved map poses
@@ -113,6 +113,12 @@ export abstract class StorageHandler {
      * @returns an array of all saved poses  
      */
     public abstract getMapPoses(): ROSLIB.Transform[];
+
+    /**
+     * Get an array of all the saved map pose types (map or aruco)
+     * @returns an array of all saved map pose types
+     */
+    public abstract getMapPoseTypes(): string[];
 
     /**
      * Removes the map pose from storage

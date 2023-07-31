@@ -212,7 +212,7 @@ export class OccupancyGrid extends React.Component {
         }, 1000);
     }
 
-    public displayPoseMarkers(display: boolean, poses: ROSLIB.Transform[], poseNames: string[]) {
+    public displayPoseMarkers(display: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) {
         if (!display) {
             this.savedPoseMarkers.forEach(marker => {
                 marker.circle.visible = false
@@ -223,8 +223,9 @@ export class OccupancyGrid extends React.Component {
             poses.forEach((pose, index) => {
                 // Recreate marker
                 let globalCoord = this.rosToGlobal(pose.translation)
+                let color = poseTypes[index] == "MAP" ? [0, 0, 255] : [255, 0, 0]
                 var poseMarker = this.drawSavedPoseMarker(
-                    globalCoord.x, globalCoord.y, [0, 0, 255], poseNames[index]
+                    globalCoord.x, globalCoord.y, color, poseNames[index]
                 )
                 poseMarker.circle.visible = true
                 poseMarker.label.visible = false

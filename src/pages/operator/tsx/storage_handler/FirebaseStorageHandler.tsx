@@ -21,6 +21,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     private currentLayout: LayoutDefinition | null;
     private poses: { [name: string]: RobotPose };
     private mapPoses: { [name: string]: ROSLIB.Transform };
+    private mapPoseTypes: { [name: string]: string };
     private recordings: { [name: string]: RobotPose[] };
     private markerNames: string[];
     private markerIDs: string[];
@@ -40,6 +41,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.currentLayout = null;
         this.poses = {};
         this.mapPoses = {}
+        this.mapPoseTypes = {}
         this.recordings = {}
         this.markerNames = []
         this.markerIDs = []
@@ -59,6 +61,7 @@ export class FirebaseStorageHandler extends StorageHandler {
                 this.currentLayout = userData.currentLayout
                 this.poses = userData.poses
                 this.mapPoses = userData.map_poses
+                this.mapPoseTypes = userData.map_pose_types
                 this.recordings = userData.recordings
                 this.markerNames = userData.marker_names
                 this.markerIDs = userData.marker_ids
@@ -178,12 +181,14 @@ export class FirebaseStorageHandler extends StorageHandler {
 
     public getMapPoseNames(): string[] {
         if (!this.mapPoses) return []
-        return Object.keys(this.poses)
+        return Object.keys(this.mapPoses)
     }
 
-    public saveMapPose(name: string, pose: ROSLIB.Transform) {
+    public saveMapPose(name: string, pose: ROSLIB.Transform, poseType: string) {
         this.mapPoses[name] = pose
+        this.mapPoseTypes[name] = poseType
         this.writeMapPoses(this.mapPoses)
+        this.writeMapPoseTypes(this.mapPoseTypes)
     }
 
     private async writeMapPoses(poses: { [name: string]: ROSLIB.Transform }) {
@@ -191,6 +196,14 @@ export class FirebaseStorageHandler extends StorageHandler {
 
         let updates: any = {};
         updates['/users/' + (this.uid) + '/map_poses'] = poses;
+        return update(ref(this.database), updates);
+    }
+
+    private async writeMapPoseTypes(poseTypes: { [name: string]: string }) {
+        this.mapPoseTypes = poseTypes;
+
+        let updates: any = {};
+        updates['/users/' + (this.uid) + '/map_pose_types'] = poseTypes;
         return update(ref(this.database), updates);
     }
 
@@ -210,11 +223,18 @@ export class FirebaseStorageHandler extends StorageHandler {
         return poses
     }
 
+    public getMapPoseTypes(): string[] {
+        if (!this.mapPoseTypes) return []
+        return Object.keys(this.mapPoseTypes)
+    }
+
     public deleteMapPose(poseName: string): void {
         let pose = this.mapPoses![poseName]
         if (!pose) throw Error(`Could not delete pose ${poseName}`);
         delete this.mapPoses[poseName]
+        delete this.mapPoseTypes[poseName]
         this.writeMapPoses(this.mapPoses)
+        this.writeMapPoseTypes(this.mapPoseTypes)
     }
 
     public getRecordingNames(): string[] {

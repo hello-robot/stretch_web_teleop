@@ -4,14 +4,15 @@ import { StorageHandler } from "../storage_handler/StorageHandler"
 import { FunctionProvider } from "./FunctionProvider"
 
 export enum UnderMapButton {
-    SelectGoal = "Select Goal",
-    DeleteGoal = "Delete Goal",
-    CancelGoal = "Cancel Goal",
-    SaveGoal = "Save Goal",
-    LoadGoal = "Load Goal",
-    GetPose = "Get Pose",
-    GetSavedPoseNames = "Get Saved Pose Names",
-    GetSavedPoses = "Get Saved Poses"
+    SelectGoal,
+    DeleteGoal,
+    CancelGoal,
+    SaveGoal,
+    LoadGoal,
+    GetPose,
+    GetSavedPoseNames,
+    GetSavedPoseTypes,
+    GetSavedPoses,
 }
 
 export class UnderMapFunctionProvider extends FunctionProvider {
@@ -42,7 +43,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 return (name: string) => {
                     let pose = FunctionProvider.remoteRobot?.getMapPose()
                     if (!pose) throw 'Cannot save undefined map pose!'
-                    this.storageHandler.saveMapPose(name, pose)
+                    this.storageHandler.saveMapPose(name, pose, "MAP")
                 }
             case UnderMapButton.LoadGoal:
                 return (idx: number) => {
@@ -68,6 +69,8 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 return () => { return FunctionProvider.remoteRobot?.getMapPose() }
             case UnderMapButton.GetSavedPoseNames:
                 return () => { return this.storageHandler.getMapPoseNames() }
+            case UnderMapButton.GetSavedPoseTypes:
+                return () => { return this.storageHandler.getMapPoseTypes() }
             case UnderMapButton.GetSavedPoses:
                 return () => { return this.storageHandler.getMapPoses() }
             default:
