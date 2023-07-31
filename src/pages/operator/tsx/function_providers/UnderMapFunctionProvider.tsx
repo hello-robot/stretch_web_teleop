@@ -16,13 +16,13 @@ export enum UnderMapButton {
 
 export class UnderMapFunctionProvider extends FunctionProvider {
     private selectGoal: boolean
-    private storageHander: StorageHandler
+    private storageHandler: StorageHandler
 
     constructor(storageHandler: StorageHandler) {
         super()
         this.provideFunctions = this.provideFunctions.bind(this)
         this.selectGoal = false
-        this.storageHander = storageHandler
+        this.storageHandler = storageHandler
     }
 
     public provideFunctions(button: UnderMapButton) {
@@ -35,20 +35,19 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 return () => FunctionProvider.remoteRobot?.stopExecution() 
             case UnderMapButton.DeleteGoal:        
                 return (idx: number) => {
-                    let poses = this.storageHander.getMapPoseNames()
-                    this.storageHander.deleteMapPose(poses[idx])
+                    let poses = this.storageHandler.getMapPoseNames()
+                    this.storageHandler.deleteMapPose(poses[idx])
                 }
             case UnderMapButton.SaveGoal:
                 return (name: string) => {
                     let pose = FunctionProvider.remoteRobot?.getMapPose()
                     if (!pose) throw 'Cannot save undefined map pose!'
-                    console.log(pose)
-                    this.storageHander.saveMapPose(name, pose)
+                    this.storageHandler.saveMapPose(name, pose)
                 }
             case UnderMapButton.LoadGoal:
                 return (idx: number) => {
-                    let poses = this.storageHander.getMapPoseNames()
-                    let pose = this.storageHander.getMapPose(poses[idx])
+                    let poses = this.storageHandler.getMapPoseNames()
+                    let pose = this.storageHandler.getMapPose(poses[idx])
                     let rosPose = {
                         position: {
                             x: pose.translation.x,
@@ -68,9 +67,9 @@ export class UnderMapFunctionProvider extends FunctionProvider {
             case UnderMapButton.GetPose:
                 return () => { return FunctionProvider.remoteRobot?.getMapPose() }
             case UnderMapButton.GetSavedPoseNames:
-                return () => { return this.storageHander.getMapPoseNames() }
+                return () => { return this.storageHandler.getMapPoseNames() }
             case UnderMapButton.GetSavedPoses:
-                return () => { return this.storageHander.getMapPoses() }
+                return () => { return this.storageHandler.getMapPoses() }
             default:
                 throw Error(`Cannot get function for unknown UnderMapButton ${button}`)
         }
