@@ -80,24 +80,26 @@ export const PoseLibrary = (props: {
                 <div className="joint-checkbox">
                     <label>Joints to Save:</label>
                 </div>
-                <div className="joint-checkbox head">
-                    <label>Head</label>
-                    <input type="checkbox" id="head" name="save-head-pose" 
-                        value="Head" onChange={(e) => setHead(e.target.checked)}
-                    />
-                </div>
-                <div className="joint-checkbox gripper">
-                    <label>Gripper</label>
-                    <input type="checkbox" id="gripper" name="save-gripper-pose" 
-                        value="Gripper" onChange={(e) => setGripper(e.target.checked)}
-                    />
-                </div>
-                <div className="joint-checkbox arm">
-                    <label>Arm</label>
-                    <input type="checkbox" id="arm" name="save-arm-pose" 
-                        value="Arm" onChange={(e) => setArm(e.target.checked)}
-                    />
-                </div>
+                <ul className="checkbox">
+                    <li>
+                        <input type="checkbox" id="head" name="save-head-pose" 
+                            value="Head" onChange={(e) => setHead(e.target.checked)}
+                        />
+                        <label>Head</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="gripper" name="save-gripper-pose" 
+                            value="Gripper" onChange={(e) => setGripper(e.target.checked)}
+                        />
+                        <label>Gripper</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="arm" name="save-arm-pose" 
+                            value="Arm" onChange={(e) => setArm(e.target.checked)}
+                        />                    
+                        <label>Arm</label>
+                    </li>
+                </ul>
             </PopupModal>
         )
     }
@@ -111,6 +113,7 @@ export const PoseLibrary = (props: {
                     selectedIndex={selectedIdx}
                     possibleOptions={poses}
                     placeholderText="Select a pose..."
+                    placement="bottom"
                 />
                 <button className="play-btn" onClick={() => loadPose()}>
                     Play
