@@ -49,7 +49,7 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | RelativePoseMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | cmd;
 
 interface StopMessage {
     type: "stop"
@@ -79,6 +79,16 @@ export interface GoalStatus {
     goal_id: string
     status: number
     text: string
+}
+
+export interface ArucoNavigationState {
+    state: string
+    alertType: string
+}
+
+export interface ArucoNavigationStateMessage {
+    type: "arucoNavigationState"
+    message: ArucoNavigationState
 }
 
 export interface MoveBaseStateMessage {

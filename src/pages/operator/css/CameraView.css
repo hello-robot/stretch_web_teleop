@@ -48,7 +48,7 @@
 
 .video-canvas.constrainedHeight {
     display: inline-block;
-    width: auto;
+    /* width: auto; */
     height: 100%;
     object-fit: cover;
 }

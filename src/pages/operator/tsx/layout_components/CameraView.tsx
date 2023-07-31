@@ -9,7 +9,6 @@ import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFunctionProvider";
 import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
-import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/CameraView.css"
 
 /**

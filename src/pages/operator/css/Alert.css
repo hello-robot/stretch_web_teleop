@@ -14,8 +14,8 @@
 }
 
 .success {
-  color: #0f5132;
-  background-color: #d1e7dd;
+  color: #0f4f51;
+  background-color: #d1e4e7;
   border-color: #badbcc;
 }
 
@@ -24,19 +24,20 @@
   background-color: #fff3cd;
   border-color: #ffecb5;
 }
+
 .primary {
   color: #084298;
   background-color: #cfe2ff;
   border-color: #b6d4fe;
 }
 
-.secondary {
+.info {
   color: #41464b;
   background-color: #e2e3e5;
   border-color: #d3d6d8;
 }
 
-.info {
+.secondary {
   color: #055160;
   background-color: #cff4fc;
   border-color: #b6effb;
