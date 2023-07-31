@@ -13,7 +13,7 @@
     width: 50%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; */
     justify-content: space-between;
     opacity: 100%;
 }
@@ -90,9 +90,15 @@
     position: relative;
 }
 
-.dropdown-button.expanded {
+.dropdown-button.expanded.bottom {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+}
+
+.dropdown-button.expanded.top {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin: 0 !important;
 }
 
 /* Flip the dropdown arrow when active */
@@ -106,7 +112,7 @@
 
 .dropdown-popup {
     position: absolute;
-    width: 100%;
+    min-width: 100%;
     z-index: 3;
     box-shadow: var(--shadow);
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
@@ -115,6 +121,7 @@
 .dropdown-popup.top {
     top: auto;
     bottom: 100%;
+    box-shadow: var(--shadow-bottom);
 }
 
 .dropdown-option {
@@ -125,14 +132,23 @@
     display: block;
     border-radius: 0;
     text-align: left;
+    margin: 0 !important;
 }
 
 .dropdown-option.active {
     filter: brightness(80%);
 }
 
-.dropdown-option:last-of-type {
-    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;
+.dropdown-popup.top .dropdown-option:first-of-type {
+    border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0;
+}
+
+.dropdown-popup.top .dropdown-option:last-of-type {
+    box-shadow: none;
+}
+
+.dropdown-popup.bottom .dropdown-option:last-of-type {
+    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
 }
 
 /* CheckToggleButton **********************************************************/
@@ -152,7 +168,6 @@
 }
 
 .pose-name label {
-    font-size: 1em;
     padding-right: 2.5rem;
 }
 
@@ -160,31 +175,15 @@
     width: 65%;
 }
 
-.joint-checkbox, .arm, .gripper, .head {
-    align-self: normal;
-    /* padding-top: 5%; */
+ul.checkbox {
+    margin: 0;
+    padding: 0;
+    margin-left: 1rem;
+    list-style: none;
 }
 
-.joint-checkbox label {
-    font-size: 1em;
-    float: left;
-}
-
-.head label { 
-    padding-right: 5.25rem;
-}
-
-.gripper label { 
-    padding-right: 3.75rem;
-}
-
-.arm label { 
-    padding-right: 6rem;
-}
-
-.joint-checkbox input {
-    width: 10%;
-    height: 1.5rem;
+ul.checkbox li {
+    border: 0.5rem transparent solid;
 }
 
 hr {
@@ -193,4 +192,13 @@ hr {
 
 button .material-icons {
     margin: 0 !important;
+}
+
+input[type='checkbox'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: white;
+    border-radius: 5px;
+    border: 2px solid #555;
+    margin-right: 1rem;
 }

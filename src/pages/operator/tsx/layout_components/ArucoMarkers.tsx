@@ -1,17 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
 import { arucoMarkerFunctionProvider } from "operator/tsx/index";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/ArucoMarkers.css"
 import "operator/css/basic_components.css"
 import { Alert } from "../basic_components/Alert";
-import { className } from "shared/util";
-
-enum ArucoNavigationResult {
-    COMPLETE = "navigation complete",
-    FAIL = 'navigation failed',
-    MARKER_FAIL = "marker not found"
-}
+import { ArucoNavigationResult } from "../function_providers/ArucoMarkerFunctionProvider";
+import { ArucoNavigationState, className } from "shared/util";
 
 /** All the possible button functions */
 export enum ArucoMarkersFunction {
@@ -19,31 +14,57 @@ export enum ArucoMarkersFunction {
     NavigateToMarker,
     DeleteMarker,
     SavedMarkerNames,
-    SaveRelativePose
+    SaveRelativePose,
+}
+
+export interface ArucoMarkersFunctionResult {
+    result: ArucoNavigationResult | string,
+    alert: string
 }
 
 export interface ArucoMarkersFunctions {
-    SaveMarker: (markerID: string, name: string) => void,
-    NavigateToMarker: (markerID: number) => Promise<string>,
+    SaveMarker: (markerID: string, name: string) => ArucoMarkersFunctionResult,
+    NavigateToMarker: (markerID: number) => void,
     SavedMarkerNames: () => string[],
-    DeleteMarker: (markerIndex: number) => void,
-    SaveRelativePose: (markerIndex: number) => void
+    DeleteMarker: (markerIndex: number) => ArucoMarkersFunctionResult,
+    SaveRelativePose: (markerIndex: number, saveToMap: boolean) => Promise<ArucoMarkersFunctionResult>,
 }
 
-export const ArucoMarkers = () => {
+export const ArucoMarkers = (props: { arucoNavigationState: ArucoNavigationState }) => {
     let functions: ArucoMarkersFunctions = {
-        SaveMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveMarker) as (markerID: string, name: string) => void,
-        NavigateToMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.NavigateToMarker) as (markerID: number) => Promise<string>,
+        SaveMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveMarker) as (markerID: string, name: string) => ArucoMarkersFunctionResult,
+        NavigateToMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.NavigateToMarker) as (markerID: number) => void,
         SavedMarkerNames: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SavedMarkerNames) as () => string[],
-        DeleteMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.DeleteMarker) as (markerIndex: number) => void,
-        SaveRelativePose: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveRelativePose) as (markerIndex: number) => void
+        DeleteMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.DeleteMarker) as (markerIndex: number) => ArucoMarkersFunctionResult,
+        SaveRelativePose: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveRelativePose) as (markerIndex: number, saveToMap: boolean) => Promise<ArucoMarkersFunctionResult>,
     }
 
     const [markers, setMarkers] = useState<string[]>(functions.SavedMarkerNames());
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [showSaveMarkerModal, setShowSaveMarkerModal] = useState<boolean>(false);
-    const [result, setResult] = React.useState<string>("")
-    const [expand, setExpand] = React.useState<boolean>(false)
+    const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
+    const [result, setResult] = React.useState<ArucoMarkersFunctionResult>()
+
+    let timeout: NodeJS.Timeout;
+
+    useEffect(() => {
+        let state = props.arucoNavigationState
+        if (state && state.state !== "") setResult({ result: state.state, alert: state.alertType })
+    }, [props.arucoNavigationState])
+
+    useEffect(() => {
+        if (result) {
+            console.log(result)
+            document.getElementById("operator-aruco-markers")!.style.height = "10rem"
+            if (timeout) clearTimeout(timeout)
+            if (result.alert != "info") {
+                timeout = setTimeout(() => {
+                    document.getElementById("operator-aruco-markers")!.style.height = "6rem"
+                    setResult(undefined)
+                }, 5000)
+            }
+        }
+    }, [result]);
 
     const SaveMarkerModal = (props: {
         setShow: (show: boolean) => void,
@@ -58,7 +79,7 @@ export const ArucoMarkers = () => {
                     setMarkers(markers => [...markers, name])
                 }
                 if (!markerID) throw 'Marker ID undefined'
-                functions.SaveMarker(markerID, name);
+                setResult(functions.SaveMarker(markerID, name));
             }
             setName("");
             setMarkerID("");
@@ -93,6 +114,53 @@ export const ArucoMarkers = () => {
         )
     }
 
+    const SavePoseModal = (props: {
+        setShow: (show: boolean) => void,
+        show: boolean
+    }) => {
+        const [selectedMarkerID, setSelectedMarkerID] = React.useState<number>()
+        const [saveToMap, setSaveToMap] = React.useState<boolean>(false)
+
+        function handleAccept() {
+            if (!selectedMarkerID) throw 'Marker ID undefined'
+            const promise = functions.SaveRelativePose(selectedMarkerID, saveToMap)
+            promise.then((response) => {
+                setResult(response)
+            })
+            setSelectedMarkerID(undefined);
+            setSaveToMap(false);
+        }
+
+        return (
+            <PopupModal
+                setShow={props.setShow}
+                show={props.show}
+                onAccept={handleAccept}
+                id="save-pose-modal"
+                acceptButtonText="Save"
+                acceptDisabled={!selectedMarkerID}
+            >
+                <label htmlFor="save-pose"><b>Save Relative Pose</b></label>
+                <hr />
+                <Dropdown
+                    onChange={setSelectedMarkerID}
+                    selectedIndex={selectedMarkerID}
+                    possibleOptions={markers}
+                    placeholderText="Select a marker..."
+                    placement="bottom"
+                />
+                <ul className="checkbox">
+                    <li>
+                        <input type="checkbox" id="save-to-map" name="save-to-map" 
+                            value="Map" onChange={(e) => setSaveToMap(e.target.checked)}
+                        />
+                        <label>Save Marker to Map</label>
+                    </li>
+                </ul>
+            </PopupModal>
+        )
+    }
+
     return (
         <React.Fragment>
             <div className="aruco-markers-container">Aruco Marker Navigator</div>
@@ -102,18 +170,20 @@ export const ArucoMarkers = () => {
                     selectedIndex={selectedIdx}
                     possibleOptions={markers}
                     placeholderText="Select a marker..."
+                    placement="bottom"
                 />
                 <button className="play-btn" onClick={() => {
                     if (selectedIdx != undefined) {
-                        const promise = functions.NavigateToMarker(selectedIdx)
-                        promise.then((response) => { 
-                            setResult(response) 
-                            document.getElementById("operator-aruco-markers")!.style.height = "10rem"
-                            setTimeout(() => {
-                                document.getElementById("operator-aruco-markers")!.style.height = "6rem"
-                                setResult("")
-                            }, 5000)
-                        })
+                        functions.NavigateToMarker(selectedIdx)
+                        // const promise = functions.NavigateToMarker(selectedIdx)
+                        // promise.then((response) => {
+                        //     setResult(response)
+
+                        //     // setTimeout(() => {
+                        //     //     document.getElementById("operator-aruco-markers")!.style.height = "6rem"
+                        //     //     setResult("")
+                        //     // }, 5000)
+                        // })
                     }
                 }
                 }>
@@ -124,7 +194,7 @@ export const ArucoMarkers = () => {
                 </button>
                 <button className="delete-btn" onClick={() => {
                     if (selectedIdx != undefined) {
-                        functions.DeleteMarker(selectedIdx)
+                        setResult(functions.DeleteMarker(selectedIdx))
                         setMarkers(functions.SavedMarkerNames())
                         setSelectedIdx(undefined)
                     }
@@ -132,28 +202,34 @@ export const ArucoMarkers = () => {
                 }>
                     Delete <span className="material-icons">delete_forever</span>
                 </button>
-                <button className="save-btn" onClick={() => {
-                    if (selectedIdx != undefined) functions.SaveRelativePose(selectedIdx)
+                {/* <button className="save-btn" onClick={() => {
+                    if (selectedIdx != undefined) {
+                        const promise = functions.SaveRelativePose(selectedIdx)
+                        promise.then((response) => {
+                            setResult(response)
+                        })
+                    }
                 }}>
                     Save Pose <span className="material-icons">save</span>
+                </button> */}
+                <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                    Save Pose<span className="material-icons">save</span>
                 </button>
-                
             </div>
             <SaveMarkerModal
                 setShow={setShowSaveMarkerModal}
                 show={showSaveMarkerModal}
             />
-            { result == ArucoNavigationResult.COMPLETE 
-                ? <Alert type="success" message="Navigation Complete!"/>
-                : <></>
-            }
-            { result == ArucoNavigationResult.FAIL 
-                ? <Alert type="error" message="Navigation Failed!"/>
-                : <></>
-            }
-            { result == ArucoNavigationResult.MARKER_FAIL 
-                ? <Alert type="error" message="Could not find Aruco Marker. You may be too far away, try moving Stretch closer."/>
-                : <></>
+            <SavePoseModal
+                setShow={setShowSavePoseModal}
+                show={showSavePoseModal}
+            />
+            {result &&
+                <div className="operator-collision-alerts">
+                    <div className={className('operator-alert', { fadeIn: result !== undefined, fadeOut: result == undefined })}>
+                        <Alert type={result.alert} message={result.result} />
+                    </div>
+                </div>
             }
         </React.Fragment>
     )

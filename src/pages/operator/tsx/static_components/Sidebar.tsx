@@ -222,6 +222,7 @@ const LoadLayoutModal = (props: {
                 selectedIndex={selectedIdx}
                 possibleOptions={defaultOptions.concat(customOptions)}
                 placeholderText="Select a layout..."
+                placement="bottom"
             />
         </PopupModal>
     )

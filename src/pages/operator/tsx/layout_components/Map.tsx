@@ -200,9 +200,9 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 <Dropdown
                     onChange={setSelectedIdx}
                     selectedIndex={selectedIdx}
-                    possibleOptions={poses}
+                    possibleOptions={props.functs.GetSavedPoseNames()}
                     placeholderText="Select a goal..."
-                    top={true}
+                    placement="top"
                 />
                 <Tooltip text="Load goal" position="top">
                     <button className="play-btn" onClick={

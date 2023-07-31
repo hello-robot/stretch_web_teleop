@@ -22,6 +22,8 @@
     --font-white: hsl(0, 0%, 100%);
 
     --path-blue: hsl(170,37%,53%)
+
+    --shadow-bottom: 3px 0px 0px var(--shadow-color)
 }
 
 * {

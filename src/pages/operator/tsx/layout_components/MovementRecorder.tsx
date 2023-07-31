@@ -82,6 +82,7 @@ export const MovementRecorder = () => {
                     selectedIndex={selectedIdx}
                     possibleOptions={recordings}
                     placeholderText="Select a recording..."
+                    placement="bottom"
                 />
                 <button className="play-btn" onClick={() => {
                     if (selectedIdx != undefined) { 

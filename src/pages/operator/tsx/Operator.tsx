@@ -6,18 +6,18 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { VoiceCommands } from "./static_components/VoiceCommands";
-import { className, RemoteStream, RobotPose } from "shared/util";
-import { buttonFunctionProvider } from ".";
+import { ArucoNavigationState, className, RemoteStream, RobotPose } from "shared/util";
+import { arucoMarkerFunctionProvider, buttonFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
-import "operator/css/Operator.css"
 import { PoseLibrary } from "./static_components/PoseLibrary";
 import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { ArucoMarkers } from "./layout_components/ArucoMarkers";
 import { Alert } from "./basic_components/Alert";
+import "operator/css/Operator.css"
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -32,7 +32,8 @@ export const Operator = (props: {
     const [selectedDefinition, setSelectedDef] = React.useState<ComponentDefinition | undefined>(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
-
+    const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
+    
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -49,6 +50,11 @@ export const Operator = (props: {
         setButtonStateMapRerender(!buttonStateMapRerender);
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
+
+    function arucoNavigationStateCallback(state: ArucoNavigationState) {
+        setArucoNavigationState(state)
+    }
+    arucoMarkerFunctionProvider.setOperatorCallback(arucoNavigationStateCallback);
 
     let remoteStreams = props.remoteStreams;
 
@@ -230,6 +236,7 @@ export const Operator = (props: {
                     selectedIndex={actionModes.indexOf(layout.current.actionMode)}
                     possibleOptions={actionModes}
                     showActive
+                    placement="bottom"
                 />
                 <SpeedControl
                     scale={velocityScale}
@@ -275,7 +282,7 @@ export const Operator = (props: {
                     <MovementRecorder/>
                 </div>
                 <div id="operator-aruco-markers" hidden={!layout.current.displayArucoMarkers}>
-                    <ArucoMarkers/>
+                    <ArucoMarkers arucoNavigationState={arucoNavigationState}/>
                 </div>
             </div>
             <div id="operator-body">
