@@ -132,14 +132,14 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             remoteRobot.setGoalReached(true)
             break;
         case 'moveBaseState':
-            remoteRobot.setMoveBaseState(message.message.result)
+            console.log(message.message)
+            underMapFunctionProvider.setMoveBaseState(message.message)
             break;
         case 'arucoMarkers':
             remoteRobot.setMarkers(message.message)
             break;
         case 'arucoNavigationState':
             arucoMarkerFunctionProvider.setArucoNavigationState(message.message)
-            // remoteRobot.setArucoNavigationState(message.message.state)
             break;
         case 'relativePose':
             remoteRobot.setRelativePose(message.message)

@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
 import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseState } from 'shared/util';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -28,10 +28,6 @@ export class RemoteRobot extends React.Component<{},any> {
         } as ROSLIB.Transform
         this.moveBaseGoalReached = false
         this.markers = { markers: [] }
-        this.state = {
-            arucoNavigationState: ""
-        }
-        this.getArucoNavigationState = this.getArucoNavigationState.bind(this)
     }
 
     setGoalReached(reached: boolean) {
@@ -77,7 +73,7 @@ export class RemoteRobot extends React.Component<{},any> {
 
         return {
             "stop": () => {
-                this.robotChannel({ type: "stop" })
+                this.robotChannel({ type: "stopTrajectory" })
             }
         }
     }
@@ -204,32 +200,12 @@ export class RemoteRobot extends React.Component<{},any> {
         this.relativePose = pose
     }
 
-    setMoveBaseState(state: MoveBaseState) {
-        this.moveBaseState = state.result
+    stopTrajectory() {
+        this.robotChannel({ type: "stopTrajectory" })
     }
 
-    getMoveBaseState() {
-        this.moveBaseState = undefined
-        return waitUntil(() => this.moveBaseState != undefined, 150000).then(() => {
-            console.log(this.moveBaseState)
-            return this.moveBaseState
-        })
-    }
-
-    setArucoNavigationState(state: string) {
-        console.log("setting aruco nav state")
-        this.setState({
-            arucoNavigationState: state
-        })
-    }
-
-    getArucoNavigationState() {
-        console.log(this.state.arucoNavigationState)
-        return this.state.arucoNavigationState
-    }
-
-    stopExecution() {
-        this.robotChannel({ type: "stop" })
+    stopMoveBase() {
+        this.robotChannel({ type: "stopMoveBase" })
     }
 }
 

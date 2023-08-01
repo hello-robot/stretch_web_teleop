@@ -65,7 +65,7 @@ export abstract class FunctionProvider {
     }
 
     public stopCurrentAction() {
-        FunctionProvider.remoteRobot?.stopExecution()
+        FunctionProvider.remoteRobot?.stopTrajectory()
         if (this.activeVelocityAction) {
             // No matter what region this is, stop the currently running action
             this.activeVelocityAction.stop()

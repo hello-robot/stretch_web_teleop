@@ -134,7 +134,10 @@ export class LocalStorageHandler extends StorageHandler {
         localStorage.removeItem('map_' + poseName)
         const index = poseNames.indexOf(poseName)
         poseNames.splice(index, 1)
+        const poseTypes = this.getMapPoseTypes()
+        poseTypes.splice(index, 1)
         localStorage.setItem(LocalStorageHandler.MAP_POSE_NAMES_KEY, JSON.stringify(poseNames));
+        localStorage.setItem(LocalStorageHandler.MAP_POSE_TYPES_KEY, JSON.stringify(poseTypes));
     }
 
     public getRecordingNames(): string[] {

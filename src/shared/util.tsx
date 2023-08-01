@@ -49,10 +49,14 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopMessage | FollowJointTrajectoryActionResultMessage | MoveBaseStateMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | cmd;
 
-interface StopMessage {
-    type: "stop"
+interface StopTrajectoryMessage {
+    type: "stopTrajectory"
+}
+
+interface StopMoveBaseMessage {
+    type: "stopMoveBase"
 }
 
 export type RobotPose = { [key in ValidJoints]?: number }
@@ -86,9 +90,9 @@ export interface ArucoNavigationState {
     alertType: string
 }
 
-export interface ArucoNavigationStateMessage {
-    type: "arucoNavigationState"
-    message: ArucoNavigationState
+export interface MoveBaseState {
+    state: string
+    alertType: string
 }
 
 export interface MoveBaseStateMessage {
@@ -96,7 +100,19 @@ export interface MoveBaseStateMessage {
     message: MoveBaseState
 }
 
-export interface MoveBaseState {
+export interface ArucoNavigationStateMessage {
+    type: "arucoNavigationState"
+    message: ArucoNavigationState
+}
+
+export interface MoveBaseActionResultMessage {
+    type: "moveBaseActionResult"
+    message: MoveBaseActionResult
+}
+
+export interface MoveBaseActionResult {
+    header: string
+    status: GoalStatus
     result: string
 }
 

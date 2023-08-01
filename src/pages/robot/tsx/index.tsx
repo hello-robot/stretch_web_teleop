@@ -3,18 +3,17 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, MoveBaseStateMessage, MoveBaseState, ArucoNavigationStateMessage, ArucoNavigationState } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
     occupancyGridCallback: setOccupancyGrid,
-    moveBaseResultCallback: forwardMoveBaseResult,
+    moveBaseResultCallback: forwardMoveBaseState,
     arucoNavigationStateCallback: forwardArucoNavigationState,
     amclPoseCallback: forwardAMCLPose,
     markerArrayCallback: forwardMarkers,
-    navigationCompleteCallback: forwardMoveBaseState,
     relativePoseCallback: forwardRelativePose
 })
 
@@ -80,18 +79,16 @@ function handleSessionStart() {
     connection.openDataChannels()
 }
 
-function forwardMoveBaseResult(goalStatus: GoalStatus) {
-    if (!connection) throw 'WebRTC connection undefined!'
-    
-    connection.sendData({
-        type: "goalStatus",
-        message: goalStatus
-    } as GoalStatusMessage)
-}
-
 function forwardMoveBaseState(state: MoveBaseState) {
     if (!connection) throw 'WebRTC connection undefined!'
     
+    if (state.alertType != "info") {
+        connection.sendData({
+            type: "goalStatus",
+            message: state
+        } as GoalStatusMessage)
+    }
+
     connection.sendData({
         type: "moveBaseState",
         message: state
@@ -199,8 +196,11 @@ function handleMessage(message: WebRTCMessage) {
         case "incrementalMove":
             robot.executeIncrementalMove(message.jointName, message.increment)
             break
-        case "stop":
-            robot.stopExecution()
+        case "stopTrajectory":
+            robot.stopTrajectoryClient()
+            break
+        case "stopMoveBase":
+            robot.stopMoveBaseClient()
             break
         case "setRobotMode":
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()

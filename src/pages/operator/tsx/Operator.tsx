@@ -6,8 +6,8 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { VoiceCommands } from "./static_components/VoiceCommands";
-import { ArucoNavigationState, className, RemoteStream, RobotPose } from "shared/util";
-import { arucoMarkerFunctionProvider, buttonFunctionProvider } from ".";
+import { ArucoNavigationState, className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
+import { arucoMarkerFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
@@ -33,6 +33,7 @@ export const Operator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
     const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
+    const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
     
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -55,6 +56,29 @@ export const Operator = (props: {
         setArucoNavigationState(state)
     }
     arucoMarkerFunctionProvider.setOperatorCallback(arucoNavigationStateCallback);
+    let arucoAlertTimeout: NodeJS.Timeout;
+    React.useEffect(() => {
+        if (arucoNavigationState && arucoNavigationState.alertType != "info") {
+            if (arucoAlertTimeout) clearTimeout(arucoAlertTimeout)
+            arucoAlertTimeout = setTimeout(() => {
+                setArucoNavigationState(undefined)
+            }, 5000)
+        }
+    }, [arucoNavigationState])
+
+    function moveBaseStateCallback(state: MoveBaseState) {
+        setMoveBaseState(state)
+    }
+    underMapFunctionProvider.setOperatorCallback(moveBaseStateCallback);
+    let moveBaseAlertTimeout: NodeJS.Timeout;
+    React.useEffect(() => {
+        if (moveBaseState && moveBaseState.alertType != "info") {
+            if (moveBaseAlertTimeout) clearTimeout(moveBaseAlertTimeout)
+            moveBaseAlertTimeout = setTimeout(() => {
+                setMoveBaseState(undefined)
+            }, 5000)
+        }
+    }, [moveBaseState])
 
     let remoteStreams = props.remoteStreams;
 
@@ -259,6 +283,20 @@ export const Operator = (props: {
                         </div>
                     </div>
                 }
+                { arucoNavigationState &&
+                    <div className="operator-collision-alerts">
+                        <div className={className('operator-alert', { fadeIn: arucoNavigationState !== undefined, fadeOut: arucoNavigationState == undefined })}>
+                            <Alert type={arucoNavigationState.alertType} message={arucoNavigationState.state} />
+                        </div>
+                    </div>
+                }
+                { moveBaseState && !arucoNavigationState &&
+                    <div className="operator-collision-alerts">
+                        <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
+                            <Alert type={moveBaseState.alertType} message={moveBaseState.state} />
+                        </div>
+                    </div>
+                }
                 <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=
@@ -282,7 +320,7 @@ export const Operator = (props: {
                     <MovementRecorder/>
                 </div>
                 <div id="operator-aruco-markers" hidden={!layout.current.displayArucoMarkers}>
-                    <ArucoMarkers arucoNavigationState={arucoNavigationState}/>
+                    <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback}/>
                 </div>
             </div>
             <div id="operator-body">

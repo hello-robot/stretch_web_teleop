@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, Marker, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseState, ArucoMarkersInfo, ArucoNavigationState } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -33,22 +33,20 @@ export class Robot extends React.Component {
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
-    private moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void
+    private moveBaseResultCallback: (goalState: MoveBaseState) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private markerArrayCallback: (markers: MarkerArray) => void
     private arucoNavigationStateCallback: (state: ArucoNavigationState) => void
-    private navigationCompleteCallback: (state: MoveBaseState) => void
     private relativePoseCallback: (pose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
-        moveBaseResultCallback: (goalState: FollowJointTrajectoryActionResult) => void,
+        moveBaseResultCallback: (goalState: MoveBaseState) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
         markerArrayCallback: (markers: MarkerArray) => void,
         arucoNavigationStateCallback: (state: ArucoNavigationState) => void,
-        navigationCompleteCallback: (state: MoveBaseState) => void,
         relativePoseCallback: (pose: ROSLIB.Transform) => void
     }) {
         super(props);
@@ -58,7 +56,6 @@ export class Robot extends React.Component {
         this.amclPoseCallback = props.amclPoseCallback
         this.markerArrayCallback = props.markerArrayCallback
         this.arucoNavigationStateCallback = props.arucoNavigationStateCallback
-        this.navigationCompleteCallback = props.navigationCompleteCallback
         this.relativePoseCallback = props.relativePoseCallback
     }
     
@@ -87,6 +84,7 @@ export class Robot extends React.Component {
         this.subscribeToMarkerArray()
         this.subscribeToArucoNavigationState()
         this.subscribeToJointTrajectoryResult()
+        this.subscribeToMoveBaseResult()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createCmdVelTopic()
@@ -165,6 +163,22 @@ export class Robot extends React.Component {
     
         topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
             this.poseGoalComplete = msg.status.status > 2 ? true : false
+        });
+    };
+
+    subscribeToMoveBaseResult() {
+        let topic: ROSLIB.Topic<FollowJointTrajectoryActionResult> = new ROSLIB.Topic({
+            ros: ros,
+            name: 'move_base/result',
+            messageType: 'move_base_msgs/MoveBaseActionResult'
+        });
+    
+        topic.subscribe((msg: MoveBaseActionResult) => {
+            if (this.moveBaseResultCallback) {
+                if (msg.status.status == 2) this.moveBaseResultCallback({state: "Navigation cancelled!", alertType: "error"})
+                else if (msg.status.status == 3) this.moveBaseResultCallback({state: "Navigation succeeded!", alertType: "success"})
+                else this.moveBaseResultCallback({state: "Navigation failed!", alertType: "error"})
+            }
         });
     };
 
@@ -354,7 +368,7 @@ export class Robot extends React.Component {
         })
         console.log(request)
         this.navigateToArucoService?.callService(request, (response: string) => {
-            this.navigationCompleteCallback({ result: response } as MoveBaseState)
+            console.log(response)
         })
     }
 
@@ -451,9 +465,9 @@ export class Robot extends React.Component {
             }
         })
 
-        newGoal.on('result', (result) => {
-            this.moveBaseResultCallback(result)
-        });
+        // newGoal.on('result', (result) => {
+        //     this.moveBaseResultCallback(result)
+        // });
         
         return newGoal
     }
@@ -586,8 +600,8 @@ export class Robot extends React.Component {
 
     executeMoveBaseGoal(pose: ROSPose) {
         this.stopExecution()
-        this.moveBaseClient?.cancel()
         this.moveBaseGoal = this.makeMoveBaseGoal(pose)
+        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alertType: "info"})
         this.moveBaseGoal.send()
     }
 
@@ -602,13 +616,20 @@ export class Robot extends React.Component {
     }
 
     stopExecution() {
+        this.stopTrajectoryClient()
+        this.stopMoveBaseClient()    
+    }
+
+    stopTrajectoryClient() {
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
         this.trajectoryClient.cancel()
         if (this.poseGoal) {
             this.poseGoal.cancel()
             this.poseGoal = undefined
         }
+    }
 
+    stopMoveBaseClient() {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
         this.moveBaseClient.cancel()
         if (this.moveBaseGoal) {

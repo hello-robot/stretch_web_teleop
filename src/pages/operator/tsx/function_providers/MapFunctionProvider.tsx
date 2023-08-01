@@ -18,14 +18,13 @@ export class MapFunctionProvider extends FunctionProvider {
                 return () => { return FunctionProvider.remoteRobot?.getMapPose() }
             case MapFunction.MoveBase:
                 return (pose: ROSPose) => {
-                    FunctionProvider.remoteRobot?.stopExecution()
+                    // FunctionProvider.remoteRobot?.stopExecution()
                     FunctionProvider.remoteRobot?.moveBase(pose)
                 }
             case MapFunction.GoalReached:
                 return () => { 
                     let goalReached = FunctionProvider.remoteRobot?.isGoalReached()
                     if (goalReached) {
-                        FunctionProvider.remoteRobot?.stopExecution()
                         FunctionProvider.remoteRobot?.setGoalReached(false)
                         return true
                     } 

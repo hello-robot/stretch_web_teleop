@@ -30,8 +30,8 @@
 }
 
 .operator-collision-alerts .operator-alert.fadeOut {
-    display: block;
-    animation: fade-out 1s;
+    display: none;
+    animation: fade-out 2s;
     opacity: 0;
 }
 
@@ -54,7 +54,7 @@
     from {
         opacity: 1;
     }
-
+    
     to {
         opacity: 0;
     }

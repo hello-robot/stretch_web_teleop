@@ -6,7 +6,7 @@ import { mapFunctionProvider, occupancyGrid } from "operator/tsx/index";
 import "operator/css/Map.css"
 import { Canvas } from "../static_components/Canvas";
 import { OccupancyGrid } from "../static_components/OccupancyGrid";
-import { AMCLPose, ROSOccupancyGrid, ROSPose, className } from "shared/util";
+import { AMCLPose, ROSOccupancyGrid, ROSPose, className, waitUntil } from "shared/util";
 import ROSLIB from "roslib";
 import { UnderMapButton } from "../function_providers/UnderMapFunctionProvider";
 import { underMapFunctionProvider } from "operator/tsx/index";
@@ -42,7 +42,8 @@ export interface UnderMapFunctions {
     GetSavedPoseTypes: () => string[]
     GetSavedPoses: () => ROSLIB.Transform[]
     DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) => void
-    DisplayGoalMarker: (pose: ROSLIB.Vector3) => void
+    DisplayGoalMarker: (pose: ROSLIB.Vector3) => void,
+    NavigateToAruco: (goalID: number) => void
 }
 
 export const Map = (props: CustomizableComponentProps) => {
@@ -94,7 +95,8 @@ export const Map = (props: CustomizableComponentProps) => {
         DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) => {
             return occupancyGrid!.displayPoseMarkers(toggle, poses, poseNames, poseTypes)
         },
-        DisplayGoalMarker: (pose: ROSLIB.Vector3) => occupancyGrid!.createGoalMarker(pose.x, pose.y, true)
+        DisplayGoalMarker: (pose: ROSLIB.Vector3) => occupancyGrid!.createGoalMarker(pose.x, pose.y, true),
+        NavigateToAruco: underMapFunctionProvider.provideFunctions(UnderMapButton.NavigateToAruco) as (goalID: number) => void
     }
 
     return (
@@ -226,6 +228,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                             if (selectedIdx != undefined) {
                                 let pose: ROSLIB.Vector3 = props.functs.LoadGoal(selectedIdx)!
                                 props.functs.DisplayGoalMarker(pose)
+                                props.functs.NavigateToAruco(selectedIdx)
                             }
                         }
                     }>

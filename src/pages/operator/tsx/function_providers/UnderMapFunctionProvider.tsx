@@ -1,5 +1,4 @@
-import { ROSPose } from "shared/util"
-import { storageHandler } from ".."
+import { MoveBaseState, ROSPose, waitUntil } from "shared/util"
 import { StorageHandler } from "../storage_handler/StorageHandler"
 import { FunctionProvider } from "./FunctionProvider"
 
@@ -13,17 +12,28 @@ export enum UnderMapButton {
     GetSavedPoseNames,
     GetSavedPoseTypes,
     GetSavedPoses,
+    NavigateToAruco
 }
 
 export class UnderMapFunctionProvider extends FunctionProvider {
     private selectGoal: boolean
     private storageHandler: StorageHandler
+    private navigationSuccess?: boolean
+    /** 
+     * Callback function to update the move base state in the operator
+     */
+    private operatorCallback?: (state: MoveBaseState) => void = undefined;
 
     constructor(storageHandler: StorageHandler) {
         super()
         this.provideFunctions = this.provideFunctions.bind(this)
         this.selectGoal = false
         this.storageHandler = storageHandler
+    }
+
+    public setMoveBaseState(state: MoveBaseState) {
+        if (state.alertType == "success") this.navigationSuccess = true
+        if (this.operatorCallback) this.operatorCallback(state)
     }
 
     public provideFunctions(button: UnderMapButton) {
@@ -33,7 +43,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                         this.selectGoal = toggle
                     } 
             case UnderMapButton.CancelGoal:
-                return () => FunctionProvider.remoteRobot?.stopExecution() 
+                return () => FunctionProvider.remoteRobot?.stopMoveBase() 
             case UnderMapButton.DeleteGoal:        
                 return (idx: number) => {
                     let poses = this.storageHandler.getMapPoseNames()
@@ -47,6 +57,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 }
             case UnderMapButton.LoadGoal:
                 return (idx: number) => {
+                    this.navigationSuccess = undefined
                     let poses = this.storageHandler.getMapPoseNames()
                     let pose = this.storageHandler.getMapPose(poses[idx])
                     let rosPose = {
@@ -64,6 +75,37 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                     } as ROSPose
                     FunctionProvider.remoteRobot?.moveBase(rosPose)
                     return pose.translation
+                }
+            case UnderMapButton.NavigateToAruco:
+                return (idx: number) => {
+                    let poseTypes = this.storageHandler.getMapPoseTypes()
+                    if (poseTypes[idx] != "ARUCO") return
+                    waitUntil(() => this.navigationSuccess != undefined, 120000).then(() => {
+                        // If navigation failed don't try navigating to marker
+                        if (!this.navigationSuccess) {
+                            this.navigationSuccess = undefined
+                            return
+                        }
+
+                        this.navigationSuccess = undefined
+                        let poseNames = this.storageHandler.getMapPoseNames()
+                        let name = poseNames[idx]
+                        let markerNames = this.storageHandler.getArucoMarkerNames()
+                        let markerIndex = markerNames.indexOf(name)
+                        if (markerIndex == -1) {
+                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alertType: "error" })
+                            return
+                        }
+                        let markerIDs = this.storageHandler.getArucoMarkerIDs()
+                        let markerID = markerIDs[markerIndex]
+                        let marker_info = this.storageHandler.getArucoMarkerInfo()
+                        let pose = marker_info.aruco_marker_info[markerID].pose
+                        if (!pose) {
+                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alertType: "error" })
+                            return
+                        }
+                        FunctionProvider.remoteRobot?.navigateToMarker(name, pose)
+                    })
                 } 
             case UnderMapButton.GetPose:
                 return () => { return FunctionProvider.remoteRobot?.getMapPose() }
@@ -76,5 +118,15 @@ export class UnderMapFunctionProvider extends FunctionProvider {
             default:
                 throw Error(`Cannot get function for unknown UnderMapButton ${button}`)
         }
+    }
+
+    /**
+     * Sets the local pointer to the operator's callback function, to be called 
+     * whenever the move base state changes.
+     * 
+     * @param callback operator's callback function to update aruco navigation state
+     */
+    public setOperatorCallback(callback: (state: MoveBaseState) => void) {
+        this.operatorCallback = callback;
     }
 }

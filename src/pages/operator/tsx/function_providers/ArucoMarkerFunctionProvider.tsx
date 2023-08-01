@@ -49,25 +49,26 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
                     FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
-                    return { result: ArucoNavigationResult.MARKER_SAVED, alert: "success" }
+                    return { state: ArucoNavigationResult.MARKER_SAVED, alertType: "success" }
                 }
             case ArucoMarkersFunction.NavigateToMarker:
                 return (markerIndex: number) => {
-                    FunctionProvider.remoteRobot?.stopExecution()
+                    FunctionProvider.remoteRobot?.stopMoveBase()
                     let markerNames = this.storageHandler.getArucoMarkerNames()
                     let name = markerNames[markerIndex]
                     let markerIDs = this.storageHandler.getArucoMarkerIDs()
                     let markerID = markerIDs[markerIndex]
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     let pose = marker_info.aruco_marker_info[markerID].pose
-                    if (!pose) return { result: ArucoNavigationResult.POSE_FIND_FAIL, alert: "error" }
+                    console.log(pose)
+                    if (!pose) return { state: ArucoNavigationResult.POSE_FIND_FAIL, alertType: "error" }
                     FunctionProvider.remoteRobot?.navigateToMarker(name, pose)
                     // let result = await FunctionProvider.remoteRobot?.getMoveBaseState()
                     // if (!result) {
                     //     FunctionProvider.remoteRobot?.stopExecution()
-                    //     return { result: ArucoNavigationResult.NAVIGATION_FAIL, alert: "error" }
+                    //     return { state: ArucoNavigationResult.NAVIGATION_FAIL, alertType: "error" }
                     // }
-                    // return { result: result, alert: result == ArucoNavigationResult.NAVIGATION_COMPLETE ? "success" : "error" };
+                    // return { state: result, alertType: result == ArucoNavigationResult.NAVIGATION_COMPLETE ? "success" : "error" };
                 }
 
             case ArucoMarkersFunction.SavedMarkerNames:
@@ -77,7 +78,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
             case ArucoMarkersFunction.DeleteMarker:
                 return (markerIndex: number) => {
                     let markerNames = this.storageHandler.getArucoMarkerNames()
-                    if (markerNames[markerIndex] == 'docking_station') return { result: ArucoNavigationResult.MARKER_DELETE_FAIL, alert: "error" }
+                    if (markerNames[markerIndex] == 'docking_station') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
                     this.storageHandler.deleteMarker(markerNames[markerIndex])
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
@@ -85,7 +86,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let poses = this.storageHandler.getMapPoseNames()
                     let mapPoseIdx = poses.indexOf(markerNames[markerIndex])
                     if (mapPoseIdx != -1) this.storageHandler.deleteMapPose(poses[mapPoseIdx])
-                    return { result: ArucoNavigationResult.MARKER_DELETE_SUCCESS, alert: "success" }
+                    return { state: ArucoNavigationResult.MARKER_DELETE_SUCCESS, alertType: "success" }
                 }
             case ArucoMarkersFunction.SaveRelativePose:
                 return async (markerIndex: number, saveToMap: boolean) => {
@@ -94,14 +95,14 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let pose = await FunctionProvider.remoteRobot?.getRelativePose(name)
                     let markerIDs = this.storageHandler.getArucoMarkerIDs()
                     let markerID = markerIDs[markerIndex]
-                    if (!pose) return { result: ArucoNavigationResult.POSE_GET_FAIL, alert: "error" }
+                    if (!pose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alertType: "error" }
                     this.storageHandler.saveRelativePose(markerID, pose)
                     if (saveToMap) {
                         let mapPose = FunctionProvider.remoteRobot?.getMapPose()
-                        if (!mapPose) return { result: ArucoNavigationResult.POSE_GET_FAIL, alert: "error" }
+                        if (!mapPose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alertType: "error" }
                         this.storageHandler.saveMapPose(name, mapPose, "ARUCO")
                     }
-                    return { result: ArucoNavigationResult.POSE_SAVED, alert: "success" }
+                    return { state: ArucoNavigationResult.POSE_SAVED, alertType: "success" }
                 }
         }
     }
