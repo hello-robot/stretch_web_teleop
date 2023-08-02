@@ -31,8 +31,10 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // (constrained by width otherwise)
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
 
-    executeVideoSettings(definition);
-
+    React.useEffect(() => {
+        executeVideoSettings(definition);
+    }, [definition])
+    
     // Create the overlay
     const overlayDefinition = (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
