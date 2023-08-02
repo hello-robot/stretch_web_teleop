@@ -1,0 +1,21 @@
+# Define the goal
+
+# The name of the aruco tag
+string name
+
+# The relative pose to the aruco tag
+geometry_msgs/Transform pose
+
+---
+# Define the result
+
+bool success
+
+---
+# Define the feedback message
+
+# The state of the aruco navigation
+string state
+
+# The type of alert to be displayed
+string alertType

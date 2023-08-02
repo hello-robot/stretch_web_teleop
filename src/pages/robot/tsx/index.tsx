@@ -223,8 +223,8 @@ function handleMessage(message: WebRTCMessage) {
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
             break
-        case "navigateToMarker":
-            robot.navigateToArucoMarkers(message.name, message.pose.transform)
+        case "navigateToAruco":
+            robot.executeNavigateToArucoGoal(message.name, message.pose.transform)
             break
         case "setArucoMarkers":
             robot.setArucoMarkers(message.toggle)

@@ -1,6 +1,6 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, NavigateToMarkerCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand } from 'shared/commands';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, NavigateToArucoCommand } from 'shared/commands';
 import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
@@ -118,22 +118,21 @@ export class RemoteRobot extends React.Component<{},any> {
         }
         this.robotChannel(cmd)
     }
-    
+
+    navigateToAruco(name: string, pose: ROSLIB.Transform) {
+        let cmd: NavigateToArucoCommand = {
+            type: "navigateToAruco",
+            name: name, 
+            pose: pose
+        }
+        this.robotChannel(cmd)
+    }
+
     setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
         }
-        this.robotChannel(cmd)
-    }
-
-    navigateToMarker(name: string, pose: ROSLIB.Transform) {
-        let cmd: NavigateToMarkerCommand = {
-            type: "navigateToMarker",
-            name: name,
-            pose: pose
-        }
-        console.log(cmd)
         this.robotChannel(cmd)
     }
 

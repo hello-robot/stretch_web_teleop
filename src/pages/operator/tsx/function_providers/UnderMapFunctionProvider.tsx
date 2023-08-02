@@ -104,7 +104,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                             this.setMoveBaseState({ state: "Cannot find Aruco Marker", alertType: "error" })
                             return
                         }
-                        FunctionProvider.remoteRobot?.navigateToMarker(name, pose)
+                        FunctionProvider.remoteRobot?.navigateToAruco(name, pose)
                     })
                 } 
             case UnderMapButton.GetPose:

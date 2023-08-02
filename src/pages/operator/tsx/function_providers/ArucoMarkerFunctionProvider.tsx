@@ -62,7 +62,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let pose = marker_info.aruco_marker_info[markerID].pose
                     console.log(pose)
                     if (!pose) return { state: ArucoNavigationResult.POSE_FIND_FAIL, alertType: "error" }
-                    FunctionProvider.remoteRobot?.navigateToMarker(name, pose)
+                    FunctionProvider.remoteRobot?.navigateToAruco(name, pose)
                     // let result = await FunctionProvider.remoteRobot?.getMoveBaseState()
                     // if (!result) {
                     //     FunctionProvider.remoteRobot?.stopExecution()

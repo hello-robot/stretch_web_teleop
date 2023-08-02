@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -15,8 +15,10 @@ export class Robot extends React.Component {
     private poseGoal?: ROSLIB.Goal;
     private poseGoalComplete?: boolean
     private moveBaseGoal?: ROSLIB.Goal;
+    private navigateToArucoGoal?: ROSLIB.Goal;
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
+    private navigateToArucoClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
@@ -82,11 +84,13 @@ export class Robot extends React.Component {
         this.subscribeToJointState()
         this.subscribeToOccupancyGrid()
         this.subscribeToMarkerArray()
-        this.subscribeToArucoNavigationState()
+        // this.subscribeToArucoNavigationState()
         this.subscribeToJointTrajectoryResult()
         this.subscribeToMoveBaseResult()
+        this.subscribeToNavigateToArucoFeedback()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
+        this.createNavigateToArucoClient()
         this.createCmdVelTopic()
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
@@ -182,15 +186,27 @@ export class Robot extends React.Component {
         });
     };
 
-    subscribeToArucoNavigationState() {
-        let topic: ROSLIB.Topic<ArucoNavigationState> = new ROSLIB.Topic({
+    // subscribeToArucoNavigationState() {
+    //     let topic: ROSLIB.Topic<ArucoNavigationState> = new ROSLIB.Topic({
+    //         ros: ros,
+    //         name: '/navigate_to_aruco/state',
+    //         messageType: 'stretch_teleop_interface/ArucoNavigationState'
+    //     })
+
+    //     topic.subscribe((msg: ArucoNavigationState) => {
+    //         if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg)
+    //     })
+    // }
+
+    subscribeToNavigateToArucoFeedback() {
+        let topic: ROSLIB.Topic<ArucoNavigationFeedback> = new ROSLIB.Topic({
             ros: ros,
-            name: '/navigate_to_aruco/state',
-            messageType: 'stretch_teleop_interface/ArucoNavigationState'
+            name: '/navigate_to_aruco/feedback',
+            messageType: 'stretch_teleop_interface/NavigateToArucoFeedback'
         })
 
-        topic.subscribe((msg: ArucoNavigationState) => {
-            if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg)
+        topic.subscribe((msg: ArucoNavigationFeedback) => {
+            if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg.feedback)
         })
     }
 
@@ -210,6 +226,15 @@ export class Robot extends React.Component {
             actionName: 'move_base_msgs/MoveBaseAction',
             timeout: 100
         });
+    }
+
+    createNavigateToArucoClient() {
+        this.navigateToArucoClient = new ROSLIB.ActionClient({
+            ros: ros,
+            serverName: '/navigate_to_aruco',
+            actionName: 'stretch_teleop_interface/NavigateToArucoAction',
+            timeout: 100
+        })
     }
 
     createCmdVelTopic() {
@@ -450,6 +475,20 @@ export class Robot extends React.Component {
         return this.makePoseGoal(pose)
     }
 
+    makeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
+        if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
+
+        let newGoal = new ROSLIB.Goal({
+            actionClient: this.navigateToArucoClient,
+            goalMessage: {
+                name: name,
+                pose: pose
+            }
+        })
+
+        return newGoal
+    }
+
     makeMoveBaseGoal(pose: ROSPose) {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
 
@@ -605,6 +644,12 @@ export class Robot extends React.Component {
         this.moveBaseGoal.send()
     }
 
+    executeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
+        this.stopExecution()
+        this.navigateToArucoGoal = this.makeNavigateToArucoGoal(name, pose)
+        this.navigateToArucoGoal.send()
+    }
+
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
         this.stopExecution();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
@@ -618,6 +663,7 @@ export class Robot extends React.Component {
     stopExecution() {
         this.stopTrajectoryClient()
         this.stopMoveBaseClient()    
+        this.stopNavigateToArucoClient()
     }
 
     stopTrajectoryClient() {
@@ -635,6 +681,15 @@ export class Robot extends React.Component {
         if (this.moveBaseGoal) {
             this.moveBaseGoal.cancel()
             this.moveBaseGoal = undefined
+        }
+    }
+
+    stopNavigateToArucoClient() {
+        if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
+        this.navigateToArucoClient.cancel()
+        if (this.navigateToArucoGoal) {
+            this.navigateToArucoGoal.cancel()
+            this.navigateToArucoGoal = undefined
         }
     }
 

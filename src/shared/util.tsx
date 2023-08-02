@@ -85,6 +85,12 @@ export interface GoalStatus {
     text: string
 }
 
+export interface ArucoNavigationFeedback {
+    header: string
+    status: string
+    feedback: ArucoNavigationState
+}
+
 export interface ArucoNavigationState {
     state: string
     alertType: string
