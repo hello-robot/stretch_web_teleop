@@ -202,6 +202,9 @@ function handleMessage(message: WebRTCMessage) {
         case "stopMoveBase":
             robot.stopMoveBaseClient()
             break
+        case "stopArucoNavigation":
+            robot.stopNavigateToArucoClient()
+            break
         case "setRobotMode":
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
             break

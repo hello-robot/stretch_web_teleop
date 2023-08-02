@@ -15,6 +15,7 @@ export enum ArucoMarkersFunction {
     DeleteMarker,
     SavedMarkerNames,
     SaveRelativePose,
+    Cancel
 }
 
 // export interface ArucoNavigationState {
@@ -28,6 +29,7 @@ export interface ArucoMarkersFunctions {
     SavedMarkerNames: () => string[],
     DeleteMarker: (markerIndex: number) => ArucoNavigationState,
     SaveRelativePose: (markerIndex: number, saveToMap: boolean) => Promise<ArucoNavigationState>,
+    Cancel: () => void
 }
 
 export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavigationState) => void }) => {
@@ -37,6 +39,7 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
         SavedMarkerNames: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SavedMarkerNames) as () => string[],
         DeleteMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.DeleteMarker) as (markerIndex: number) => ArucoNavigationState,
         SaveRelativePose: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveRelativePose) as (markerIndex: number, saveToMap: boolean) => Promise<ArucoNavigationState>,
+        Cancel: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.Cancel) as () => void
     }
 
     const [markers, setMarkers] = useState<string[]>(functions.SavedMarkerNames());
@@ -46,25 +49,6 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
     const [result, setResult] = React.useState<ArucoNavigationState>()
 
     let timeout: NodeJS.Timeout;
-
-    // useEffect(() => {
-    //     let state = props.arucoNavigationState
-    //     if (state && state.state !== "") setResult({ result: state.state, alert: state.alertType })
-    // }, [props.arucoNavigationState])
-
-    // useEffect(() => {
-    //     if (result) {
-    //         console.log(result)
-    //         document.getElementById("operator-aruco-markers")!.style.height = "10rem"
-    //         if (timeout) clearTimeout(timeout)
-    //         if (result.alert != "info") {
-    //             timeout = setTimeout(() => {
-    //                 document.getElementById("operator-aruco-markers")!.style.height = "6rem"
-    //                 setResult(undefined)
-    //             }, 5000)
-    //         }
-    //     }
-    // }, [result]);
 
     const SaveMarkerModal = (props: {
         setArucoNavigationState: (state: ArucoNavigationState) => void
@@ -179,19 +163,13 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                     if (selectedIdx != undefined) {
                         let state = functions.NavigateToMarker(selectedIdx)
                         if (state) props.setArucoNavigationState(state)
-                        // const promise = functions.NavigateToMarker(selectedIdx)
-                        // promise.then((response) => {
-                        //     setResult(response)
-
-                        //     // setTimeout(() => {
-                        //     //     document.getElementById("operator-aruco-markers")!.style.height = "6rem"
-                        //     //     setResult("")
-                        //     // }, 5000)
-                        // })
                     }
                 }
                 }>
                     Play <span className="material-icons">play_circle</span>
+                </button>
+                <button className="delete-btn" onClick={() => functions.Cancel()}>
+                    Cancel<span className="material-icons">cancel</span>
                 </button>
                 <button className="save-btn" onClick={() => setShowSaveMarkerModal(true)}>
                     Save Marker<span className="material-icons">save</span>
@@ -206,16 +184,6 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                 }>
                     Delete <span className="material-icons">delete_forever</span>
                 </button>
-                {/* <button className="save-btn" onClick={() => {
-                    if (selectedIdx != undefined) {
-                        const promise = functions.SaveRelativePose(selectedIdx)
-                        promise.then((response) => {
-                            setResult(response)
-                        })
-                    }
-                }}>
-                    Save Pose <span className="material-icons">save</span>
-                </button> */}
                 <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
                     Save Pose<span className="material-icons">save</span>
                 </button>
@@ -230,13 +198,6 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                 setShow={setShowSavePoseModal}
                 show={showSavePoseModal}
             />
-            {/* {result &&
-                <div className="operator-collision-alerts">
-                    <div className={className('operator-alert', { fadeIn: result !== undefined, fadeOut: result == undefined })}>
-                        <Alert type={result.alert} message={result.result} />
-                    </div>
-                </div>
-            } */}
         </React.Fragment>
     )
 }

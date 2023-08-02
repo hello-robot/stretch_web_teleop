@@ -8,45 +8,50 @@ from geometry_msgs.msg import TransformStamped
 from geometry_msgs.msg import Pose
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
-from trajectory_msgs.msg import JointTrajectoryPoint
 from visualization_msgs.msg import MarkerArray
 import numpy as np
 from sensor_msgs.msg import JointState
-from stretch_teleop_interface.msg import NavigateToArucoAction, NavigateToArucoGoal, NavigateToArucoFeedback, NavigateToArucoResult
+from stretch_teleop_interface.msg import HeadScanAction, HeadScanGoal, NavigateToArucoAction, NavigateToArucoGoal, NavigateToArucoFeedback, NavigateToArucoResult
 
 class NavigateToArucoServer:
     def __init__(self):
         self.server = actionlib.SimpleActionServer('navigate_to_aruco', NavigateToArucoAction, self.execute_callback, False)
+        self.server.register_preempt_callback(self.cancel_goals)
         self.goal = NavigateToArucoGoal()
         self.feedback = NavigateToArucoFeedback()
         self.result = NavigateToArucoResult()
         self.num_tries = 0
         self.max_tries = 3
-        self.tilt_range = [-1.0, 0.0]
-        self.pan_range = [-4.07, 1.74]
+        self.preempt = False
 
         self.tf2_buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tf2_buffer)
         self.tf2_broadcaster = tf2_ros.TransformBroadcaster()
 
-        self.action_client = actionlib.SimpleActionClient(
+        self.head_scan_client = actionlib.SimpleActionClient(
+            "head_scan",
+            HeadScanAction
+        )
+        
+        self.move_base_client = actionlib.SimpleActionClient(
             "move_base",
             MoveBaseAction
         )
 
-        self.trajectory_client = actionlib.SimpleActionClient(
-            "stretch_controller/follow_joint_trajectory",
-            FollowJointTrajectoryAction
-        )
-
-        self.aruco_marker_array = rospy.Subscriber('aruco/marker_array', MarkerArray, self.aruco_callback)
-        self.joint_states = rospy.Subscriber('joint_states', JointState, self.joint_state_callback)
         self.server.start()
     
-    def aruco_callback(self, msg):
-        self.markers = msg.markers
+    def cancel_goals(self):
+        print('cancel goals')
+        self.head_scan_client.cancel_all_goals()
+        self.move_base_client.cancel_all_goals()
+        self.server.set_preempted()
 
+    def preempt_callback(self):
+        print('preempt callback')
+        self.feedback.state = 'Aruco navigation cancelled!'
+        self.feedback.alertType = "error"
+        self.server.publish_feedback(self.feedback)
+        
     def broadcast_tf(self, trans, name, ref):
         t = TransformStamped()
         t.header.stamp = rospy.Time.now()
@@ -55,81 +60,23 @@ class NavigateToArucoServer:
         t.transform = trans
         return t
     
-    def joint_state_callback(self, msg):
-        for name, position in zip(msg.name, msg.position):
-            if name == "joint_head_pan":
-                self.pan = position
-            if name == "joint_head_tilt":
-                self.tilt = position
-
-    def set_pan_tilt_camera(self, pan, tilt):
-        point = JointTrajectoryPoint()
-        point.time_from_start = rospy.Duration(1.0)
-        point.positions = [pan, tilt]
-
-        head_goal = FollowJointTrajectoryGoal()
-        head_goal.trajectory.joint_names = ['joint_head_pan', 'joint_head_tilt']
-        head_goal.trajectory.points = [point]
-        head_goal.trajectory.header.stamp = rospy.Time.now()
-        head_goal.trajectory.header.frame_id = 'base_link'
-
-        # self.trajectory_client.cancel_all_goals()
-        self.trajectory_client.send_goal(head_goal)
-        self.trajectory_client.wait_for_result()
-
-    def scan_for_marker(self):
-        for marker in self.markers:
-            if self.aruco_name == marker.text:
-                return True
-        
-        self.feedback.state = "Searching for marker..."
-        self.feedback.alertType = "info"
-        self.server.publish_feedback(self.feedback)
-
-        if self.pan != None and self.tilt != None:
-            tilt_angles = [
-                max(self.tilt_range[0], self.tilt - 0.5), 
-                max(self.tilt_range[0], self.tilt - 0.25),
-                min(self.tilt_range[1], self.tilt + 0.25),
-                min(self.tilt_range[1], self.tilt + 0.5)]
-            pan_angles = [
-                max(self.pan_range[0], self.pan - 0.5), 
-                max(self.pan_range[0], self.pan - 0.25),
-                min(self.pan_range[1], self.pan + 0.25),
-                min(self.pan_range[1], self.pan + 0.5)]
-            for tilt in tilt_angles[::-1]:
-                self.tilt = tilt
-                pan_angles = pan_angles[::-1]
-                for pan in pan_angles:
-                    self.pan = pan
-                    self.set_pan_tilt_camera(self.pan, self.tilt)
-                    rospy.sleep(0.2)
-                    for marker in self.markers:
-                        print(self.aruco_name, marker.text)
-                        if self.aruco_name == marker.text:
-                            return True
-
-        tilt_angles = np.linspace(self.tilt_range[0], self.tilt_range[1], 5)
-        pan_angles = np.linspace(self.pan_range[0], self.pan_range[1], 15)
-        for tilt in tilt_angles[::-1]:
-            self.tilt = tilt
-            pan_angles = pan_angles[::-1]
-            for pan in pan_angles:
-                self.pan = pan
-                self.set_pan_tilt_camera(self.pan, self.tilt)
-                rospy.sleep(0.2)
-                for marker in self.markers:
-                    if self.aruco_name == marker.text:
-                        return True
-        return False
-    
     def execute_callback(self, goal):
         self.num_tries = 0
         self.goal = goal
         self.aruco_name = self.goal.name
         self.relative_pose = self.goal.pose
-        marker_found = self.scan_for_marker()
-        if not marker_found: 
+
+        self.feedback.state = 'Scanning for marker...'
+        self.feedback.alertType = "info"
+        self.server.publish_feedback(self.feedback)
+        head_scan_goal = HeadScanGoal()
+        head_scan_goal.name = self.aruco_name
+        result = self.head_scan_client.send_goal_and_wait(head_scan_goal)
+        if self.server.is_preempt_requested():
+            self.preempt_callback()
+            return 
+        
+        if not self.head_scan_client.get_result(): 
             self.feedback.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
             self.feedback.alertType = "error"
             self.server.publish_feedback(self.feedback)
@@ -188,6 +135,10 @@ class NavigateToArucoServer:
         return diff
     
     def navigate_to_marker(self):
+        if self.server.is_preempt_requested():
+            self.preempt_callback()
+            return
+        
         self.num_tries += 1
         tran = self.broadcast_tf(self.relative_pose, 'relative_pose', self.aruco_name)
         self.tf2_broadcaster.sendTransform(tran)
@@ -207,7 +158,7 @@ class NavigateToArucoServer:
                 self.feedback.alertType = "error"
                 self.server.publish_feedback(self.feedback)
                 self.server.set_aborted()
-                return False
+                return
                         
         self.relative_pose_tf = self.average_transforms(transforms)
 
@@ -227,27 +178,33 @@ class NavigateToArucoServer:
         action_goal.target_pose.header.stamp = rospy.Time.now()
         action_goal.target_pose.pose = goal_pose
 
-        result = self.action_client.send_goal_and_wait(action_goal)
+        result = self.move_base_client.send_goal_and_wait(action_goal)
         
-        return self.move_base_aruco_callback(result)
+        self.move_base_aruco_callback(result)
     
     def move_base_aruco_callback(self, result):
+        if self.server.is_preempt_requested():
+            self.preempt_callback()
+            return
+        
         if self.num_tries == self.max_tries:
             self.num_tries = 0
             self.feedback.state = 'Navigation failed, please try again.'
             self.feedback.alertType = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
-            return False
+            return
 
         rospy.sleep(0.1)
-        marker_found = self.scan_for_marker()
-        if not marker_found: 
+        head_scan_goal = HeadScanGoal()
+        head_scan_goal.name = self.aruco_name
+        self.head_scan_client.send_goal_and_wait(head_scan_goal)
+        if not self.head_scan_client.get_result(): 
             self.feedback.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
             self.feedback.alertType = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
-            return False
+            return
         
         # self.reconfigure_client.update_configuration({"controller_frequency": 18.0})
 
@@ -259,7 +216,7 @@ class NavigateToArucoServer:
             self.feedback.alertType = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
-            return False
+            return
 
         diff = self.calculate_diff(self.map_to_aruco, new_map_to_aruco)
         if (diff > 0.075):
@@ -270,7 +227,7 @@ class NavigateToArucoServer:
         self.feedback.alertType = "success"
         self.server.publish_feedback(self.feedback)
         self.server.set_succeeded()
-        return True
+        return
     
 if __name__ == '__main__':
     rospy.init_node('navigate_to_aruco_server')

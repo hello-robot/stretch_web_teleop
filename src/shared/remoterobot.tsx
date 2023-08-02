@@ -206,6 +206,10 @@ export class RemoteRobot extends React.Component<{},any> {
     stopMoveBase() {
         this.robotChannel({ type: "stopMoveBase" })
     }
+
+    stopArucoNavigation() {
+        this.robotChannel({ type: "stopArucoNavigation" })
+    }
 }
 
 class RobotSensors extends React.Component {

@@ -53,22 +53,14 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                 }
             case ArucoMarkersFunction.NavigateToMarker:
                 return (markerIndex: number) => {
-                    FunctionProvider.remoteRobot?.stopMoveBase()
                     let markerNames = this.storageHandler.getArucoMarkerNames()
                     let name = markerNames[markerIndex]
                     let markerIDs = this.storageHandler.getArucoMarkerIDs()
                     let markerID = markerIDs[markerIndex]
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     let pose = marker_info.aruco_marker_info[markerID].pose
-                    console.log(pose)
                     if (!pose) return { state: ArucoNavigationResult.POSE_FIND_FAIL, alertType: "error" }
                     FunctionProvider.remoteRobot?.navigateToAruco(name, pose)
-                    // let result = await FunctionProvider.remoteRobot?.getMoveBaseState()
-                    // if (!result) {
-                    //     FunctionProvider.remoteRobot?.stopExecution()
-                    //     return { state: ArucoNavigationResult.NAVIGATION_FAIL, alertType: "error" }
-                    // }
-                    // return { state: result, alertType: result == ArucoNavigationResult.NAVIGATION_COMPLETE ? "success" : "error" };
                 }
 
             case ArucoMarkersFunction.SavedMarkerNames:
@@ -104,9 +96,12 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     }
                     return { state: ArucoNavigationResult.POSE_SAVED, alertType: "success" }
                 }
-        }
+            case ArucoMarkersFunction.Cancel:
+                return () => {
+                    FunctionProvider.remoteRobot?.stopArucoNavigation()
+                }
+            }
     }
-
     /**
      * Sets the local pointer to the operator's callback function, to be called 
      * whenever the aruco navigation state changes.

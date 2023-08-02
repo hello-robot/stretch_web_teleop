@@ -428,6 +428,7 @@ export class Robot extends React.Component {
     }
 
     executeBaseVelocity = (props: {linVel: number, angVel: number}): void => {
+        this.stopExecution()
         let twist = new ROSLIB.Message({
             linear: {
                 x: props.linVel,
@@ -624,7 +625,7 @@ export class Robot extends React.Component {
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
-        // this.stopExecution();
+        this.stopExecution();
         if (index < poses.length) {
             this.poseGoalComplete = false
             // this.executePoseGoal(poses[index])
@@ -668,8 +669,8 @@ export class Robot extends React.Component {
 
     stopTrajectoryClient() {
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
-        this.trajectoryClient.cancel()
         if (this.poseGoal) {
+            this.trajectoryClient.cancel()
             this.poseGoal.cancel()
             this.poseGoal = undefined
         }
@@ -677,8 +678,8 @@ export class Robot extends React.Component {
 
     stopMoveBaseClient() {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
-        this.moveBaseClient.cancel()
         if (this.moveBaseGoal) {
+            this.moveBaseClient.cancel()
             this.moveBaseGoal.cancel()
             this.moveBaseGoal = undefined
         }
@@ -686,8 +687,8 @@ export class Robot extends React.Component {
 
     stopNavigateToArucoClient() {
         if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
-        this.navigateToArucoClient.cancel()
         if (this.navigateToArucoGoal) {
+            this.navigateToArucoClient.cancel()
             this.navigateToArucoGoal.cancel()
             this.navigateToArucoGoal = undefined
         }
