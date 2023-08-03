@@ -19,3 +19,9 @@
     background-color: var(--btn-red);
     display: flex;
 }
+
+@media(max-width:1300px) {
+    #movement-recorder-container { 
+        font-size: smaller;
+    }
+}

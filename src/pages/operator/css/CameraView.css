@@ -4,9 +4,9 @@
     display: grid;
     justify-items: center;
     padding: 0.4rem;
-    /* height: 100%; */
+    height: 100%;
     grid-template-columns: auto;
-    /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
+    grid-template-rows: 1fr auto minmax(9rem, 1fr);
     object-fit: cover;
     justify-content: center;
     /* align-items: center;
@@ -176,4 +176,25 @@
 
 .title {
     font-size: x-large;
+    align-self: flex-end;
+}
+
+@media screen and (orientation:portrait) {
+    .video-container {
+        grid-template-rows: 1fr auto minmax(9rem, 1fr);
+    }
+}
+
+@media screen and (orientation:landscape) {
+    .video-container {
+        grid-template-rows: auto;
+    }
+
+    .realsense-pan-tilt-grid button .material-icons {
+        font-size: larger;
+    }
+    
+    .title {
+        font-size: smaller;
+    }
 }

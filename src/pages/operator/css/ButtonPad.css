@@ -78,4 +78,19 @@
     flex: 1 1 0;
     display: grid;
     text-align: center;
+    max-height: 100%;
+    justify-items: center;
+}
+
+@media(max-width:1300px) {
+    .title { 
+        font-size: smaller;
+        margin: 0.5rem;
+    }
+}
+
+@media screen and (orientation:portrait) {
+    .button-pad {
+        width: 100%;
+    }
 }

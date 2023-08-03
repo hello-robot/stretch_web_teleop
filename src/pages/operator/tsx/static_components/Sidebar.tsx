@@ -372,7 +372,7 @@ const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
             >
                 {text}
             </button>
-            <span>{props.label}</span>
+            <span className="global-label">{props.label}</span>
         </div>
     );
 }

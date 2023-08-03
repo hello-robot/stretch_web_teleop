@@ -1,6 +1,7 @@
 :root {
     --btn-brdr-radius: 0.4rem;
     --btn-padding: .5em 1em;
+    --btn-padding-med: 0.4rem 0.5rem;
 
     --selected-color: hsl(33, 95%, 63%);
 
@@ -119,4 +120,15 @@ button .material-icons {
 
 .btn-yellow {
     background-color: var(--selected-color);
+}
+
+@media(max-width:1300px) {
+    button { 
+        padding: var(--btn-padding-med); 
+        font-size: smaller;
+    }
+
+    .material-icons {
+        font-size: larger;
+    }
 }

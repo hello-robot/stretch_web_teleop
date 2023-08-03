@@ -17,3 +17,12 @@
     justify-content: space-evenly;
     align-items: center;
 }
+
+@media screen and (orientation:portrait) {
+    #layout-area,
+    .tabs-content {
+        flex-direction: column;
+        padding: 1rem;
+        grid-gap: 0.3rem;
+    }
+}
