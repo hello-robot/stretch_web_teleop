@@ -44,8 +44,8 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
     public provideFunctions(arucoMarkerFunction: ArucoMarkersFunction) {
         switch (arucoMarkerFunction) {
             case ArucoMarkersFunction.SaveMarker:
-                return (markerID: string, name: string) => {
-                    this.storageHandler.saveMarker(markerID, name)
+                return (markerID: string, name: string, size: string) => {
+                    this.storageHandler.saveMarker(markerID, name, size)
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
                     FunctionProvider.remoteRobot?.updateArucoMarkersInfo()

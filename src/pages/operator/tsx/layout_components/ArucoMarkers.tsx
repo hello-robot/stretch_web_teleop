@@ -4,9 +4,8 @@ import { arucoMarkerFunctionProvider } from "operator/tsx/index";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/ArucoMarkers.css"
 import "operator/css/basic_components.css"
-import { Alert } from "../basic_components/Alert";
-import { ArucoNavigationResult } from "../function_providers/ArucoMarkerFunctionProvider";
 import { ArucoNavigationState, className } from "shared/util";
+import { Tooltip } from "../static_components/Tooltip";
 
 /** All the possible button functions */
 export enum ArucoMarkersFunction {
@@ -24,7 +23,7 @@ export enum ArucoMarkersFunction {
 // }
 
 export interface ArucoMarkersFunctions {
-    SaveMarker: (markerID: string, name: string) => ArucoNavigationState,
+    SaveMarker: (markerID: string, name: string, size: string) => ArucoNavigationState,
     NavigateToMarker: (markerID: number) => ArucoNavigationState,
     SavedMarkerNames: () => string[],
     DeleteMarker: (markerIndex: number) => ArucoNavigationState,
@@ -32,9 +31,12 @@ export interface ArucoMarkersFunctions {
     Cancel: () => void
 }
 
-export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavigationState) => void }) => {
+export const ArucoMarkers = (props: { 
+    setArucoNavigationState: (state: ArucoNavigationState) => void,
+    hideLabels: boolean
+}) => {
     let functions: ArucoMarkersFunctions = {
-        SaveMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveMarker) as (markerID: string, name: string) => ArucoNavigationState,
+        SaveMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SaveMarker) as (markerID: string, name: string, size: string) => ArucoNavigationState,
         NavigateToMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.NavigateToMarker) as (markerID: number) => ArucoNavigationState,
         SavedMarkerNames: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.SavedMarkerNames) as () => string[],
         DeleteMarker: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.DeleteMarker) as (markerIndex: number) => ArucoNavigationState,
@@ -56,6 +58,7 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
         show: boolean
     }) => {
         const [markerID, setMarkerID] = React.useState<string>("")
+        const [markerSize, setMarkerSize] = React.useState<string>("")
         const [name, setName] = React.useState<string>("");
 
         function handleAccept() {
@@ -64,11 +67,12 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                     setMarkers(markers => [...markers, name])
                 }
                 if (!markerID) throw 'Marker ID undefined'
-                let state = functions.SaveMarker(markerID, name)
+                let state = functions.SaveMarker(markerID, name, markerSize)
                 props.setArucoNavigationState(state);
             }
             setName("");
             setMarkerID("");
+            setMarkerSize("")
         }
 
         return (
@@ -94,6 +98,13 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                     <input autoFocus type="number" id="new-marker-id" name="new-option-id"
                         value={markerID} onChange={(e) => setMarkerID(e.target.value)}
                         placeholder="Enter Marker ID"
+                    />
+                </div>
+                <div className="marker-size">
+                    <label>Marker Size</label>
+                    <input autoFocus type="number" id="new-marker-size" name="new-option-size"
+                        value={markerSize} onChange={(e) => setMarkerSize(e.target.value)}
+                        placeholder="Enter Marker Size (mm)"
                     />
                 </div>
             </PopupModal>
@@ -159,34 +170,49 @@ export const ArucoMarkers = (props: { setArucoNavigationState: (state: ArucoNavi
                     placeholderText="Select a marker..."
                     placement="bottom"
                 />
-                <button className="play-btn" onClick={() => {
-                    if (selectedIdx != undefined) {
-                        let state = functions.NavigateToMarker(selectedIdx)
-                        if (state) props.setArucoNavigationState(state)
+                <Tooltip text="Play" position="top">
+                    <button className="play-btn" onClick={() => {
+                        if (selectedIdx != undefined) {
+                            let state = functions.NavigateToMarker(selectedIdx)
+                            if (state) props.setArucoNavigationState(state)
+                        }
                     }
-                }
-                }>
-                    Play <span className="material-icons">play_circle</span>
-                </button>
-                <button className="delete-btn" onClick={() => functions.Cancel()}>
-                    Cancel<span className="material-icons">cancel</span>
-                </button>
-                <button className="save-btn" onClick={() => setShowSaveMarkerModal(true)}>
-                    Save Marker<span className="material-icons">save</span>
-                </button>
-                <button className="delete-btn" onClick={() => {
-                    if (selectedIdx != undefined) {
-                        props.setArucoNavigationState(functions.DeleteMarker(selectedIdx))
-                        setMarkers(functions.SavedMarkerNames())
-                        setSelectedIdx(undefined)
+                    }>
+                        <span hidden={props.hideLabels}>Play</span> 
+                        <span className="material-icons">play_circle</span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Cancel" position="top">
+                    <button className="delete-btn" onClick={() => functions.Cancel()}>
+                        <span hidden={props.hideLabels}>Cancel</span>
+                        <span className="material-icons">cancel</span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Save Marker" position="top">
+                    <button className="save-btn" onClick={() => setShowSaveMarkerModal(true)}>
+                        <span hidden={props.hideLabels}>Save Marker</span>
+                        <span className="material-icons">save</span><span className="material-icons">qr_code_2</span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Delete" position="top">
+                    <button className="delete-btn" onClick={() => {
+                        if (selectedIdx != undefined) {
+                            props.setArucoNavigationState(functions.DeleteMarker(selectedIdx))
+                            setMarkers(functions.SavedMarkerNames())
+                            setSelectedIdx(undefined)
+                        }
                     }
-                }
-                }>
-                    Delete <span className="material-icons">delete_forever</span>
-                </button>
-                <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
-                    Save Pose<span className="material-icons">save</span>
-                </button>
+                    }>
+                        <span hidden={props.hideLabels}>Delete Marker</span>
+                        <span className="material-icons">delete_forever</span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Save Pose" position="top">
+                    <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                        <span hidden={props.hideLabels}>Save Pose</span>
+                        <span className="material-icons">save</span><span className="material-icons">location_on</span>
+                    </button>
+                </Tooltip>
             </div>
             <SaveMarkerModal
                 setArucoNavigationState={props.setArucoNavigationState}

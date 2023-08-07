@@ -186,8 +186,9 @@ export abstract class StorageHandler {
      * Save the aruco marker and its identifier
      * @param markerID the ID of the aruco marker
      * @param markerName the name of the aruco marker
+     * @param size the size of the marker in mm
      */
-    public abstract saveMarker(markerID: string, markerName: string): void;
+    public abstract saveMarker(markerID: string, markerName: string, size: string): void;
 
     /**
      * Removes the aruco maker from storage

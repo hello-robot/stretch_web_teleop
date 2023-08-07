@@ -168,7 +168,7 @@ export class LocalStorageHandler extends StorageHandler {
         localStorage.setItem(LocalStorageHandler.POSE_RECORDING_NAMES_KEY, JSON.stringify(recordingNames));
     }
 
-    public saveMarker(markerID: string, markerName: string): void {
+    public saveMarker(markerID: string, markerName: string, size: string): void {
         // Don't allow user to rewrite docking station
         if (markerName === 'docking_station' || markerID === '245') return;
 
@@ -182,7 +182,7 @@ export class LocalStorageHandler extends StorageHandler {
 
         const markers = this.getArucoMarkerInfo() as ArucoMarkersInfo;
         markers.aruco_marker_info[markerID] = {
-            length_mm: 47,
+            length_mm: Number(size),
             use_rgb_only: false,
             name: markerName,
             link: null

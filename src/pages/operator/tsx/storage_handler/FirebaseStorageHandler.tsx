@@ -268,11 +268,11 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.writeRecordings(this.recordings)
     }
 
-    public saveMarker(markerID: string, markerName: string): void {
+    public saveMarker(markerID: string, markerName: string, size: string): void {
         this.markerNames.push(markerName)
         this.markerIDs.push(markerID)
         this.markerInfo.aruco_marker_info[markerID] = {
-            length_mm: 47,
+            length_mm: Number(size),
             use_rgb_only: false,
             name: markerName,
             link: null
