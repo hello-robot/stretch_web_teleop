@@ -9,6 +9,8 @@ export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
     displayMovementRecorder: false,
     actionMode: ActionMode.StepActions,
     displayPoseLibrary: false,
+    displayArucoMarkers: false,
+    displayLabels: true,
     children: [
         {
             type: ComponentType.Panel,

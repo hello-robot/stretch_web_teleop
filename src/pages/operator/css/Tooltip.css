@@ -9,7 +9,6 @@
     border-color: black transparent transparent transparent;
 }
 
-
 .tooltip-trigger .tooltip-bottom::after {
     content: " ";
     position: absolute;
@@ -21,12 +20,25 @@
     border-color: transparent transparent black transparent;
 }
 
-.tooltip-trigger .tooltip{
+.tooltip-trigger .tooltip {
+    display: none;
     opacity: 0;
 }
 
 .tooltip-trigger:hover .tooltip {
-    opacity:1;
+    display: block;
+    opacity: 1;
+    animation: fade-in 0.5s;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .tooltip-trigger {
@@ -34,8 +46,11 @@
     display: inline;
 }
 
-.tooltip-trigger .tooltip{
-    width: 100%;
+.tooltip-trigger .tooltip {
+    width: fit-content;
+    min-width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: black;
     color: #fff;
     text-align: center;
@@ -47,28 +62,28 @@
     z-index: 1;
 }
 
-.tooltip-right{
+.tooltip-right {
     top: -5px;
     left: 105%;
 }
 
 
-.tooltip-left{
+.tooltip-left {
     top: -5px;
     right: 105%;
 }
   
-.tooltip-top{
+.tooltip-top {
     bottom:105%;
     left:0%;
 }
 
-.tooltip-bottom{
+.tooltip-bottom {
     top:105%;
     left:0%;
 }
 
-.tooltip-trigger .tooltip-right::after{
+.tooltip-trigger .tooltip-right::after {
     content: " ";
     position: absolute;
     top: 50%;
@@ -80,7 +95,7 @@
 }
 
 
-.tooltip-trigger .tooltip-left::after{
+.tooltip-trigger .tooltip-left::after {
     content: " ";
     position: absolute;
     top: 50%;

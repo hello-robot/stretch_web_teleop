@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
 import { movementRecorderFunctionProvider } from "operator/tsx/index";
 import { Dropdown } from "../basic_components/Dropdown";
+import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css"
 import "operator/css/basic_components.css"
 
@@ -22,7 +23,7 @@ export interface MovementRecorderFunctions {
     LoadRecording: (recordingID: number) => void
 }
 
-export const MovementRecorder = () => {
+export const MovementRecorder = (props: { hideLabels: boolean }) => {
     let functions: MovementRecorderFunctions = {
         Record: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.Record) as () => void,
         SaveRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SaveRecording) as (name: string) => void,
@@ -84,44 +85,50 @@ export const MovementRecorder = () => {
                     placeholderText="Select a recording..."
                     placement="bottom"
                 />
-                <button className="play-btn" onClick={() => {
-                    if (selectedIdx != undefined) { 
-                        functions.LoadRecording(selectedIdx)}
-                    }
-                }>
-                    Play
-                    <span className="material-icons">
-                        play_circle
-                    </span>
-                </button>
-                <button className="save-btn" onClick={() => {
-                        if (!isRecording) {
-                            setIsRecording(true)
-                            functions.Record()
-                        } else {
-                            setIsRecording(false)
-                            setShowSaveRecordingModal(true)
+                <Tooltip text="Play movement" position="top">
+                    <button className="play-btn btn-label" onClick={() => {
+                        if (selectedIdx != undefined) { 
+                            functions.LoadRecording(selectedIdx)}
                         }
-                    }
-                }>
-                    {!isRecording ? <i>Record</i> : <i>Save</i> }
-                    {!isRecording
-                        ? <span className="material-icons">radio_button_checked</span>
-                        : <span className="material-icons">save</span>
-                    }
-                </button>
-                <button className="delete-btn" onClick={() => {
-                    if (selectedIdx != undefined) { 
-                        functions.DeleteRecording(selectedIdx)}
-                        setRecordings(functions.SavedRecordingNames())
-                        setSelectedIdx(undefined)
-                    }
-                }>
-                    Delete
-                    <span className="material-icons">
-                        delete_forever
-                    </span>
-                </button>
+                    }>
+                        <span hidden={props.hideLabels}>Play</span>
+                        <span className="material-icons">
+                            play_circle
+                        </span>
+                    </button>
+                </Tooltip>
+                <Tooltip text={!isRecording ? "Record movement": "Save movement"} position="top">
+                    <button className="save-btn btn-label" onClick={() => {
+                            if (!isRecording) {
+                                setIsRecording(true)
+                                functions.Record()
+                            } else {
+                                setIsRecording(false)
+                                setShowSaveRecordingModal(true)
+                            }
+                        }
+                    }>
+                        {!isRecording ? <i hidden={props.hideLabels}>Record</i> : <i hidden={props.hideLabels}>Save</i> }
+                        {!isRecording
+                            ? <span className="material-icons">radio_button_checked</span>
+                            : <span className="material-icons">save</span>
+                        }
+                    </button>
+                </Tooltip>
+                <Tooltip text="Delete recording" position="top">
+                    <button className="delete-btn btn-label" onClick={() => {
+                        if (selectedIdx != undefined) { 
+                            functions.DeleteRecording(selectedIdx)}
+                            setRecordings(functions.SavedRecordingNames())
+                            setSelectedIdx(undefined)
+                        }
+                    }>
+                        <span hidden={props.hideLabels}>Delete</span>
+                        <span className="material-icons">
+                            delete_forever
+                        </span>
+                    </button>
+                </Tooltip>
             </div>
             <SaveRecordingModal 
                 setShow={setShowSaveRecordingModal}

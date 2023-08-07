@@ -101,6 +101,10 @@ export type GlobalOptionsProps = {
     displayArucoMarkers: boolean;
     setDisplayArucoMarkers: (displayArucoMarkers: boolean) => void;
     
+    /** If the button text labels should be displayed */
+    displayLabels: boolean;
+    setDisplayLabels: (displayLabels: boolean) => void;
+    
     /** List of names of the default layouts. */
     defaultLayouts: string[],
     /** List of names of the user's custom layouts. */
@@ -128,6 +132,11 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
                 <OnOffToggleButton
+                    on={props.displayLabels}
+                    onClick={() => props.setDisplayLabels(!props.displayLabels)}
+                    label="Display button text labels"
+                />
+                <OnOffToggleButton
                     on={props.displayVoiceControl}
                     onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
                     label="Display voice control"
@@ -135,7 +144,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                 <OnOffToggleButton
                     on={props.displayPoseLibrary}
                     onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
-                    label="Display pose library"
+                    label="Display pose recorder"
                 />
                 <OnOffToggleButton
                     on={props.displayMovementRecorder}

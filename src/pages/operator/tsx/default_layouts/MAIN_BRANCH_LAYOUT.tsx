@@ -8,6 +8,8 @@ export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     displayVoiceControl: false,
     displayPoseLibrary: true,
     displayMovementRecorder: true,
+    displayArucoMarkers: false,
+    displayLabels: true,
     actionMode: ActionMode.ClickClick,
     children: [
         {

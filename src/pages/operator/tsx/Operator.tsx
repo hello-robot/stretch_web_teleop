@@ -34,7 +34,7 @@ export const Operator = (props: {
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
     const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
-    
+
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -127,7 +127,7 @@ export const Operator = (props: {
      * @param displayMovementRecorder if the pose recorder component at the 
      *                             top of the operator body should be displayed
      */
-     function setDisplayMovementRecorder(displayMovementRecorder: boolean) {
+    function setDisplayMovementRecorder(displayMovementRecorder: boolean) {
         layout.current.displayMovementRecorder = displayMovementRecorder;
         updateLayout();
     }
@@ -140,6 +140,16 @@ export const Operator = (props: {
      */
     function setDisplayArucoMarkers(displayArucoMarkers: boolean) {
         layout.current.displayArucoMarkers = displayArucoMarkers;
+        updateLayout();
+    }
+
+    /**
+     * Sets the display labels property to display or hidden.
+     * 
+     * @param displayLabels if the button text labels should be displayed 
+     */
+    function setDisplayLabels(displayLabels: boolean) {
+        layout.current.displayLabels = displayLabels;
         updateLayout();
     }
 
@@ -188,7 +198,7 @@ export const Operator = (props: {
     }
 
     /** Callback when the delete button in the sidebar is clicked */
-    function handleDelete () {
+    function handleDelete() {
         if (!selectedPath) throw Error('handleDelete called when selectedPath is undefined');
         removeFromLayout(selectedPath, layout.current);
         updateLayout();
@@ -225,7 +235,8 @@ export const Operator = (props: {
             onDrop: handleDrop,
             selectedDefinition: selectedDefinition
         },
-        buttonStateMap: buttonStateMap.current
+        buttonStateMap: buttonStateMap.current,
+        hideLabels: !layout.current.displayLabels
     }
 
     /** Properties for the global options area of the sidebar */
@@ -234,10 +245,12 @@ export const Operator = (props: {
         displayPoseLibrary: layout.current.displayPoseLibrary,
         displayMovementRecorder: layout.current.displayMovementRecorder,
         displayArucoMarkers: layout.current.displayArucoMarkers,
+        displayLabels: layout.current.displayLabels,
         setDisplayVoiceControl: setDisplayVoiceControl,
         setDisplayPoseLibrary: setDisplayPoseLibrary,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
         setDisplayArucoMarkers: setDisplayArucoMarkers,
+        setDisplayLabels: setDisplayLabels,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -250,7 +263,7 @@ export const Operator = (props: {
     }
 
     const actionModes = Object.values(ActionMode);
-    
+
     return (
         <div id="operator">
             <div id="operator-header" onClick={handleClickHeader}>
@@ -274,53 +287,54 @@ export const Operator = (props: {
             <div id="operator-global-controls">
                 {
                     <div className="operator-collision-alerts">
-                        <div className={className('operator-alert', {fadeIn: buttonCollision.length > 0, fadeOut: buttonCollision.length == 0})}>
+                        <div className={className('operator-alert', { fadeIn: buttonCollision.length > 0, fadeOut: buttonCollision.length == 0 })}>
                             <Alert type="warning">
                                 <span>
-                                    { buttonCollision.length > 0 ? buttonCollision.join(', ') + " in collision!" : ""}
+                                    {buttonCollision.length > 0 ? buttonCollision.join(', ') + " in collision!" : ""}
                                 </span>
                             </Alert>
                         </div>
                     </div>
                 }
-                { arucoNavigationState &&
+                {arucoNavigationState &&
                     <div className="operator-collision-alerts">
                         <div className={className('operator-alert', { fadeIn: arucoNavigationState !== undefined, fadeOut: arucoNavigationState == undefined })}>
                             <Alert type={arucoNavigationState.alertType} message={arucoNavigationState.state} />
                         </div>
                     </div>
                 }
-                { moveBaseState && !arucoNavigationState &&
+                {moveBaseState && !arucoNavigationState &&
                     <div className="operator-collision-alerts">
                         <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
                             <Alert type={moveBaseState.alertType} message={moveBaseState.state} />
                         </div>
                     </div>
                 }
-                <div id="operator-voice" hidden={!layout.current.displayVoiceControl}>
+                <div className="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=
                         {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                     />
                 </div>
-                <div id="operator-pose-library" hidden={!layout.current.displayPoseLibrary}>
-                    <PoseLibrary 
-                        savePose={(poseName: string, head: boolean, gripper: boolean, arm: boolean) => { 
-                            props.storageHandler.savePose(poseName, props.getRobotPose(head, gripper, arm)); 
+                <div className={className("operator-pose-library", { hideLabels: !layout.current.displayLabels })} hidden={!layout.current.displayPoseLibrary}>
+                    <PoseLibrary
+                        savePose={(poseName: string, head: boolean, gripper: boolean, arm: boolean) => {
+                            props.storageHandler.savePose(poseName, props.getRobotPose(head, gripper, arm));
                         }}
-                        deletePose={((poseName: string) => {props.storageHandler.deletePose(poseName)})}
-                        savedPoseNames={() => {return props.storageHandler.getPoseNames()}}
+                        deletePose={((poseName: string) => { props.storageHandler.deletePose(poseName) })}
+                        savedPoseNames={() => { return props.storageHandler.getPoseNames() }}
                         setRobotPose={(poseName: string) => {
                             let pose: RobotPose = props.storageHandler.getPose(poseName)
                             props.setRobotPose(pose)
                         }}
+                        hideLabels={!layout.current.displayLabels}
                     />
                 </div>
-                <div id="operator-pose-recorder" hidden={!layout.current.displayMovementRecorder}>
-                    <MovementRecorder/>
+                <div className={className("operator-pose-recorder", {hideLabels: !layout.current.displayLabels})} hidden={!layout.current.displayMovementRecorder}>
+                    <MovementRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
-                <div id="operator-aruco-markers" hidden={!layout.current.displayArucoMarkers}>
-                    <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback}/>
+                <div className={className("operator-aruco-markers", { hideLabels: !layout.current.displayLabels })}  hidden={!layout.current.displayArucoMarkers}>
+                    <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback} hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
             <div id="operator-body">

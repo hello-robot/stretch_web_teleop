@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
-import { RobotPose } from "shared/util";
 import { Dropdown } from "../basic_components/Dropdown";
+import { Tooltip } from "./Tooltip";
 import "operator/css/PoseLibrary.css"
 import "operator/css/basic_components.css"
 
@@ -9,7 +9,8 @@ export const PoseLibrary = (props: {
     savePose: (poseName: string, head: boolean, gripper: boolean, arm: boolean) => void,
     deletePose: (poseName: string) => void,
     savedPoseNames: () => string[],
-    setRobotPose: (poseName: string) => void
+    setRobotPose: (poseName: string) => void,
+    hideLabels: boolean
 }) => {
     const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
     const [poses, setPoses] = useState<string[]>(props.savedPoseNames());
@@ -37,6 +38,7 @@ export const PoseLibrary = (props: {
         const index = poses.indexOf(poseName)
         poses.splice(index, 1)
         setPoses(poses => poses)
+        setSelectedIdx(undefined)
     }
 
     const SavePoseModal = (props: {
@@ -45,9 +47,9 @@ export const PoseLibrary = (props: {
         show: boolean
     }) => {
         const [name, setName] = React.useState<string>("");
-        const [head, setHead] = React.useState<boolean>(false);
-        const [gripper, setGripper] = React.useState<boolean>(false);
-        const [arm, setArm] = React.useState<boolean>(false);
+        const [head, setHead] = React.useState<boolean>(true);
+        const [gripper, setGripper] = React.useState<boolean>(true);
+        const [arm, setArm] = React.useState<boolean>(true);
         function handleAccept() {
             if (name.length > 0) {
                 if (!poses.includes(name)) {
@@ -83,19 +85,19 @@ export const PoseLibrary = (props: {
                 <ul className="checkbox">
                     <li>
                         <input type="checkbox" id="head" name="save-head-pose" 
-                            value="Head" onChange={(e) => setHead(e.target.checked)}
+                            value="Head" defaultChecked={head} onChange={(e) => setHead(e.target.checked)}
                         />
                         <label>Head</label>
                     </li>
                     <li>
                         <input type="checkbox" id="gripper" name="save-gripper-pose" 
-                            value="Gripper" onChange={(e) => setGripper(e.target.checked)}
+                            value="Gripper" defaultChecked={gripper} onChange={(e) => setGripper(e.target.checked)}
                         />
                         <label>Gripper</label>
                     </li>
                     <li>
                         <input type="checkbox" id="arm" name="save-arm-pose" 
-                            value="Arm" onChange={(e) => setArm(e.target.checked)}
+                            value="Arm" defaultChecked={arm} onChange={(e) => setArm(e.target.checked)}
                         />                    
                         <label>Arm</label>
                     </li>
@@ -106,7 +108,7 @@ export const PoseLibrary = (props: {
 
     return (
         <React.Fragment>
-            <div id="pose-library-container">Pose Library</div>
+            <div id="pose-library-container">Pose Recorder</div>
             <div id="pose-library-container">
                 <Dropdown
                     onChange={setSelectedIdx}
@@ -115,24 +117,30 @@ export const PoseLibrary = (props: {
                     placeholderText="Select a pose..."
                     placement="bottom"
                 />
-                <button className="play-btn" onClick={() => loadPose()}>
-                    Play
-                    <span className="material-icons">
-                        play_circle
-                    </span>
-                </button>
-                <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
-                    Save
-                    <span className="material-icons">
-                        save
-                    </span>
-                </button>
-                <button className="delete-btn" onClick={() => deletePose()}>
-                    Delete
-                    <span className="material-icons">
-                        delete_forever
-                    </span>
-                </button>
+                <Tooltip text="Move to Pose" position="top">
+                    <button className="play-btn" onClick={() => loadPose()}>
+                        <span hidden={props.hideLabels}>Play</span>
+                        <span className="material-icons">
+                            play_circle
+                        </span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Save Pose" position="top">
+                    <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                        <span hidden={props.hideLabels}>Save</span>
+                        <span className="material-icons">
+                            save
+                        </span>
+                    </button>
+                </Tooltip>
+                <Tooltip text="Delete Pose" position="top">
+                    <button className="delete-btn" onClick={() => deletePose()}>
+                        <span hidden={props.hideLabels}>Delete</span>
+                        <span className="material-icons">
+                            delete_forever
+                        </span>
+                    </button>
+                </Tooltip>
             </div>
             <SavePoseModal 
                 savePose={props.savePose}

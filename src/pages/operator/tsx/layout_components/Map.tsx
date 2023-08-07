@@ -50,7 +50,7 @@ export const Map = (props: CustomizableComponentProps) => {
     const definition = props.definition as MapDefinition
     const [active, setActive] = React.useState<boolean>(false);
     const [occupancyGrid, setOccupanyGrid] = React.useState<OccupancyGrid>()
-    const { customizing } = props.sharedState;
+    const { customizing, hideLabels } = props.sharedState;
     const selected = isSelected(props);
 
     // Constrain the width or height when the stream gets too large
@@ -104,7 +104,7 @@ export const Map = (props: CustomizableComponentProps) => {
             <h4 className="title">Map</h4>
             <div id="map" className={className("map", { customizing, selected, active })} onClick={handleSelect}></div>
             <div className="under-video-area">
-                <UnderMapButtons definition={definition} functs={underMapFn} />
+                <UnderMapButtons definition={definition} functs={underMapFn} hideLabels={hideLabels}/>
             </div>
         </div>
     )
@@ -113,7 +113,7 @@ export const Map = (props: CustomizableComponentProps) => {
 /**
  * Buttons to display under the map.
  */
-const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFunctions }) => {
+const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFunctions, hideLabels?: boolean }) => {
     const [poses, setPoses] = useState<string[]>(props.functs.GetSavedPoseNames())
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [selectGoal, setSelectGoal] = React.useState<boolean>(false)
@@ -185,7 +185,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 />
                 <Tooltip text="Save goal" position="top">
                     <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
-                        Save
+                        <span hidden={props.hideLabels}>Save</span>
                         <span className="material-icons">
                             save
                         </span>
@@ -193,7 +193,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 </Tooltip>
                 <Tooltip text="Cancel goal" position="top">
                     <button className="delete-btn" onClick={props.functs.CancelGoal}>
-                        Cancel
+                        <span hidden={props.hideLabels}>Cancel</span>
                         <span className="material-icons">
                             cancel
                         </span>
@@ -232,7 +232,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                             }
                         }
                     }>
-                        Play 
+                         <span hidden={props.hideLabels}>Play</span>
                         <span className="material-icons">
                             play_circle
                         </span>
@@ -250,7 +250,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                         )
                         setSelectedIdx(undefined)
                     }}>
-                        Delete 
+                        <span hidden={props.hideLabels}>Delete</span> 
                         <span className="material-icons">
                             delete_forever
                         </span>

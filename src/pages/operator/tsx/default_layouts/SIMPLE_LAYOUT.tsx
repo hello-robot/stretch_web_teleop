@@ -9,6 +9,8 @@ export const SIMPLE_LAYOUT: LayoutDefinition = {
     // The state of the action mode dropdown
     actionMode: ActionMode.StepActions,
     displayPoseLibrary: false,
+    displayArucoMarkers: false,
+    displayLabels: true,
     // The customizable components in the layout
     children: [
         {
