@@ -49,6 +49,15 @@ body,
     height: 100%;
     margin: 0;
     overflow: hidden;
+    user-select: none;
+}
+
+@media screen and (orientation:landscape) and (max-device-width: 900px) {
+    html,
+    body,
+    #root {
+            overflow: scroll;
+    }
 }
 
 /* In customization mode add hidden shadow after each element, to be shown when

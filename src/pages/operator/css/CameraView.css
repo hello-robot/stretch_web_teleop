@@ -177,15 +177,16 @@
 .title {
     font-size: x-large;
     align-self: flex-end;
+    text-align: center;
 }
 
-@media screen and (orientation:portrait) {
+@media screen and (orientation:portrait) and (max-device-width: 900px) {
     .video-container {
-        grid-template-rows: 1fr auto minmax(9rem, 1fr);
+        grid-template-rows: 1fr auto minmax(3rem, 1fr);
     }
 }
 
-@media screen and (orientation:landscape) {
+@media screen and (orientation:landscape) and (max-device-width: 900px) {
     .video-container {
         grid-template-rows: auto;
     }

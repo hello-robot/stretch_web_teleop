@@ -12,7 +12,7 @@
     width: 8rem;
 }
 
-@media(max-width:1300px) {
+@media(max-width:1000px) {
     #velocity-control-container button {
         width: auto;
     }

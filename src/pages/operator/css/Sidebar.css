@@ -182,7 +182,7 @@
     text-wrap: wrap;
 }
 
-@media(max-width:1300px) {
+@media(max-width:900px) {
     #sidebar { 
         grid-template-rows: auto;
     }

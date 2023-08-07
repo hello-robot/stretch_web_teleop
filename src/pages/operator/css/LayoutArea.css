@@ -18,11 +18,18 @@
     align-items: center;
 }
 
-@media screen and (orientation:portrait) {
+@media screen and (orientation:portrait) and (max-device-width: 900px) {
     #layout-area,
     .tabs-content {
         flex-direction: column;
         padding: 1rem;
         grid-gap: 0.3rem;
+    }
+}
+
+@media screen and (orientation:landscape) and (max-device-width: 900px) {
+    #layout-area,
+    .tabs-content {
+        overflow: scroll;
     }
 }

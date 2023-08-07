@@ -68,13 +68,13 @@
 
 /* Popup for adding a new tab *************************************************/
 
-@media(max-width:1300px) {
+@media(max-width:900px) {
     .tab-button {
         font-size: medium;
     }
 }
 
-@media screen and (orientation:portrait) {
+@media screen and (orientation:portrait) and (max-device-width: 900px) {
     .tabs-component {
         width: 100%;
     }
