@@ -19,26 +19,29 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
         switch (poseRecordFunction) {
             case MovementRecorderFunction.Record:
                 return () => { 
-                        this.recordPosesHeartbeat = window.setInterval(() => {
-                            const currentPose: RobotPose = FunctionProvider.remoteRobot!.sensors.getRobotPose(
-                                true, true, true 
-                            )
-                            const lastPose = this.poses.length == 0 ? undefined : this.poses[this.poses.length - 1]
-                            let diff: boolean = false
-                            if (!lastPose) {
-                                diff = true
-                            } else {
-                                Object.keys(currentPose).map((key, index) => {
-                                    if (Math.abs(currentPose[key as ValidJoints]! - lastPose[key as ValidJoints]!) > 0.05) {
-                                        diff = true
+                    let lastJoint: ValidJoints | undefined;
+                    this.recordPosesHeartbeat = window.setInterval(() => {
+                        const currentPose: RobotPose = FunctionProvider.remoteRobot!.sensors.getRobotPose(
+                            true, true, true 
+                        )
+                        const lastPose = this.poses.length == 0 ? undefined : this.poses[this.poses.length - 1]
+                        if (lastPose) {
+                            Object.keys(currentPose).map((key, index) => {
+                                if (Math.abs(currentPose[key as ValidJoints]! - lastPose[key as ValidJoints]!) > 0.025) {
+                                    if (!lastJoint || lastJoint != key) {
+                                        lastJoint = key as ValidJoints
+                                        this.poses.push(currentPose)
+                                        return;
+                                    } else {
+                                        this.poses[this.poses.length - 1][lastJoint] = currentPose[key as ValidJoints]
                                     }
-                                })
-                            }
-                            if (diff) {
-                                this.poses.push(currentPose)
-                            }
-                        }, 250)
-                    }
+                                }
+                            })
+                        } else {
+                            this.poses.push(currentPose)
+                        }
+                    }, 50)
+                }
             case MovementRecorderFunction.SaveRecording:
                 return (name: string) => { 
                         if (this.recordPosesHeartbeat) {
