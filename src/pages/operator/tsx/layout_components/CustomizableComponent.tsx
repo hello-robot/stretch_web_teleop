@@ -22,7 +22,9 @@ export type SharedState = {
     /** Path to the active component */
     selectedPath?: string,
     /** Mapping of each button pad function to a {@link ButtonState} */
-    buttonStateMap?: ButtonStateMap
+    buttonStateMap?: ButtonStateMap,
+    /** Whether or not to hide the button labels */
+    hideLabels?: boolean
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
