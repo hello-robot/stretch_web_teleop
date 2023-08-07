@@ -455,11 +455,15 @@ export class Robot extends React.Component {
         } 
 
         let collision = inCollision({ jointStateMessage: this.jointState, jointName: jointName })
-        // Negative joint increment is for lower/retract/rotate out
-        // Positive joint increment is for lift/extend/rotate in
+        let collisionIndex = jointValueInc <= 0 ? 0 : 1
+        if (jointName === "joint_wrist_yaw") {
+            collisionIndex = jointValueInc <= 0 ? 1 : 0
+        }
+        // Negative joint increment is for lower/retract/wrist out
+        // Positive joint increment is for lift/extend/wrist in
         let index = jointValueInc <= 0 ? 0 : 1 
         // If request to move the joint in the direction of collision, cancel movement
-        if (collision[index]) return;
+        if (collision[collisionIndex]) return;
 
         newJointValue = newJointValue + jointValueInc
 
@@ -537,8 +541,8 @@ export class Robot extends React.Component {
                             positions: jointPositions,
                             // The following might causing the jumpiness in continuous motions
                             time_from_start: {
-                                secs: 0,
-                                nsecs: 1
+                                secs: 1,
+                                nsecs: 0
                             }
     
                         }
@@ -556,23 +560,8 @@ export class Robot extends React.Component {
 
     makePoseGoals(poses: RobotPose[]) {
         let jointNames: ValidJoints[] = []
-        let velocities: number[] = []
-        let goal_tolerance = []
-        let path_tolerance = []
         for (let key in poses[0]) {
             jointNames.push(key as ValidJoints)
-            goal_tolerance.push({
-                name: key,
-                position: 0.2,
-                velocity: -1,
-                acceleration: -1
-            })
-            path_tolerance.push({
-                name: key,
-                position: 0.2,
-                velocity: -1,
-                acceleration: -1
-            })
         }
 
         let points: any = []
@@ -585,7 +574,7 @@ export class Robot extends React.Component {
             points.push({
                 positions: jointPositions,
                 time_from_start: {
-                    secs: index*10,
+                    secs: 10,
                     nsecs: 0
                 }
             })
@@ -605,14 +594,8 @@ export class Robot extends React.Component {
                     joint_names: jointNames,
                     points: points
                 },
-                // goal_tolerance: goal_tolerance,
-                // path_tolerance: path_tolerance
             }
         });
-    
-        // newGoal.on('result', function (result) {
-        //     console.log('Final Result: ' + result);
-        // });
 
         return newGoal
     }
@@ -626,16 +609,8 @@ export class Robot extends React.Component {
 
     async executePoseGoals(poses: RobotPose[], index: number) {
         this.stopExecution();
-        if (index < poses.length) {
-            this.poseGoalComplete = false
-            // this.executePoseGoal(poses[index])
-            this.poseGoal = this.makePoseGoal(poses[index])
-            this.poseGoal.send()
-            waitUntil(() => this.poseGoalComplete === true)
-                .then((goalReached) => { if (goalReached) this.executePoseGoals(poses, index + 1) })
-        }
-        // this.poseGoal = this.makePoseGoals(poses)
-        // this.poseGoal.send()
+        this.poseGoal = this.makePoseGoals(poses)
+        this.poseGoal.send()
     }
 
     executeMoveBaseGoal(pose: ROSPose) {
@@ -796,7 +771,7 @@ export function inCollision(props: { jointStateMessage: ROSJointState, jointName
     const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
         "joint_head_tilt": [-50, 50],
         "joint_head_pan": [-50, 50],
-        "wrist_extension": [-20, 30],
+        "wrist_extension": [-30, 30],
         "joint_lift": [0, 70],
         "joint_wrist_yaw": [-10, 10],
     }

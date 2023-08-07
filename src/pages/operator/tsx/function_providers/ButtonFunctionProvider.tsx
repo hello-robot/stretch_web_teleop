@@ -91,7 +91,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
-            const [buttonNeg, buttonPos] = buttons;
+            let [buttonNeg, buttonPos] = key !== "joint_wrist_yaw" ? buttons : buttons.reverse()  
+
             // TODO: i think there's still something wrong with this logic
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
@@ -106,7 +107,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [inLimitNeg, inLimitPos] = inJointLimit[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
-            const [buttonNeg, buttonPos] = buttons;
+            const [buttonNeg, buttonPos] = buttons 
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
             const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit
