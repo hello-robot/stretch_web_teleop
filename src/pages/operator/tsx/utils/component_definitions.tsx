@@ -86,6 +86,7 @@ export type LayoutDefinition = ParentComponentDefinition & {
     displayPoseLibrary: boolean;
     displayMovementRecorder: boolean;
     displayArucoMarkers: boolean;
+    displayLabels: boolean;
     actionMode: ActionMode;
 }
 
@@ -162,6 +163,4 @@ export type MapDefinition = ComponentDefinition & {
      * Enable/disable the click listener on the map for settings a goal 
      */
     selectGoal?: boolean
-
-    storageHandler: StorageHandler
 }
