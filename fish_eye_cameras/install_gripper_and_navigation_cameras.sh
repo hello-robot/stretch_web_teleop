@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source /opt/ros/noetic/setup.bash
+source /home/hello-robot/teleop_ws/devel/setup.bash
+
 echo ""
 echo "Starting gripper and navigation camera installation script."
 
@@ -7,7 +10,8 @@ echo "Starting gripper and navigation camera installation script."
 echo ""
 echo "Adding udev rules for the gripper camera."
 echo "roscd stretch_teleop_interface/fish_eye_cameras/"
-roscd stretch_teleop_interface/fish_eye_cameras/
+roscd stretch_teleop_interface
+cd fish_eye_cameras/
 echo "sudo cp ./89-hello-gripper-camera.rules /etc/udev/rules.d/"
 sudo cp ./89-hello-gripper-camera.rules /etc/udev/rules.d/
 echo "sudo udevadm control --reload"
@@ -19,7 +23,8 @@ echo ""
 echo ""
 echo "Adding udev rules for the navigation camera."
 echo "roscd stretch_teleop_interface/fish_eye_cameras/"
-roscd stretch_teleop_interface/fish_eye_cameras/
+roscd stretch_teleop_interface
+cd fish_eye_cameras/
 echo "sudo cp ./88-hello-navigation-camera.rules /etc/udev/rules.d/"
 sudo cp ./88-hello-navigation-camera.rules /etc/udev/rules.d/
 echo "sudo udevadm control --reload"
@@ -39,7 +44,8 @@ echo "Done."
 echo ""
 echo "Change default uvcvideo kernal module settings to enable two quirks: UVC_QUIRK_RESTRICT_FRAME_RATE and UVC_QUIRK_FIX_BANDWIDTH."
 echo "roscd stretch_teleop_interface/fish_eye_cameras/"
-roscd stretch_teleop_interface/fish_eye_cameras/
+roscd stretch_teleop_interface
+cd fish_eye_cameras/
 echo "sudo cp ./uvcvideo.conf /etc/modprobe.d/"
 sudo cp ./uvcvideo.conf /etc/modprobe.d/
 echo "sudo rmmod uvcvideo"
