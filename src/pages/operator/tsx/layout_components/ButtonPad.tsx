@@ -5,6 +5,7 @@ import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
+import {isMobile} from 'react-device-detect';
 import "operator/css/ButtonPad.css"
 
 /** Properties for {@link ButtonPad} */
@@ -67,7 +68,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     return (
         <div className="button-pad">
-            {!overlay ? <h4 className="title">{id}</h4> : <></>}
+            {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
@@ -93,9 +94,9 @@ export type SingleButtonProps = {
 const SingleButton = (props: SingleButtonProps) => {
     const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(props.funct);
     const clickProps = props.sharedState.customizing ? {} : {
-        onMouseDown: functs.onClick,
-        onMouseUp: functs.onRelease,
-        onMouseLeave: functs.onLeave
+        onPointerDown: functs.onClick,
+        onPointerUp: functs.onRelease,
+        onPointerLeave: functs.onLeave
     }
     const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
@@ -208,6 +209,15 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
                 B.ArmRetract
             ];
             shape = ButtonPadShape.SimpleButtonPad;
+            break;
+        case ButtonPadId.ArmMobile:
+            functions = [
+                B.ArmLift,
+                B.ArmLower,
+                B.ArmExtend,
+                B.ArmRetract
+            ];
+            shape = ButtonPadShape.RowButtonPad;
             break;
         default:
             throw new Error(`unknow button pad id: ${id}`);

@@ -1,0 +1,87 @@
+#caregiver {
+    height: 100%;
+    touch-action: none;
+    /* display: grid; */
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr auto;
+    background-color: #4C5258;
+}
+
+.switch-camera {
+    z-index: 2;
+    position: absolute;
+    border-radius: 0px;
+    opacity: 0.5;
+    font-size: 100px;
+    padding: 0;
+    float: right;
+    text-align: right;
+    margin-left: 88%;
+}
+
+#caregiver-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* flex: 1 1 0;
+    grid-column: 1/1; */
+    /* grid-row: 3; */
+}
+
+/** https://stackoverflow.com/a/40989121 **/
+.loader {
+    position: absolute;
+    top: calc(50% - 5em);
+    left: calc(50% - 5em);
+    width: 10em;
+    height: 10em;
+    border: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-left: 1.1em solid #000000;
+    border-radius: 50%;
+    animation: load 1s infinite linear;
+}
+
+.loading-text {
+    position: absolute;
+    top: calc(50% - 1.5em);
+    left: calc(50% - 2em);
+    font-size: large;
+}
+
+.control-modes {
+    font-size: xxx-large;
+    justify-content: center;
+    display: flex;
+    padding-top: 20px;
+    gap: 15px;
+    padding-bottom: 50px;
+}
+
+@keyframes load {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media(max-width:900px) {
+    #operator-header .dropdown {
+        width: var(--header-btn-width-med);
+    }
+
+    #operator-header>*,
+    #operator-header button {
+        height: 3rem;
+    }
+
+    .operator-voice,
+    .operator-pose-library,
+    .operator-pose-recorder,
+    .operator-aruco-markers {
+        width: 30rem;
+        height: 5rem;
+    }
+}

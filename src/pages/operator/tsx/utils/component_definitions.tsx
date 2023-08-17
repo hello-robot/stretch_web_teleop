@@ -47,7 +47,8 @@ export enum ButtonPadId {
     Base = "Drive",
     Camera = "Camera",
     Wrist = "Wrist",
-    Arm = "Arm"
+    Arm = "Arm",
+    ArmMobile = "Arm Mobile"
 }
 
 

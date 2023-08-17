@@ -30,7 +30,8 @@ export enum ButtonPadShape {
     ManipRealsense,
     Gripper,
     ManipOverhead,
-    SimpleButtonPad
+    SimpleButtonPad,
+    RowButtonPad
 }
 
 /**
@@ -64,6 +65,24 @@ export function rect(x: number, y: number, width: number, height: number) {
     return `M ${x} ${y} ${x + width} ${y} ${x + width} ${y + height} 
                 ${x} ${y + height} Z`;
 }
+
+/**
+ * Get path data for a rounded rectangle. Allows for different radius on each corner.
+ * @param  {Number} w   Width of rounded rectangle
+ * @param  {Number} h   Height of rounded rectangle
+ * @param  {Number} tlr Top left corner radius
+ * @param  {Number} trr Top right corner radius
+ * @param  {Number} brr Bottom right corner radius
+ * @param  {Number} blr Bottom left corner radius
+ * @return {String}     Rounded rectangle SVG path data
+ */
+
+export function roundedRect(x: number, y: number, width: number, height: number) {
+  return `M${x},${y} h${width} a20,20 0 0 1 20,20 v${height} a20,20 0 0 1 -20,20 h-${width} a20,20 0 0 1 -20,-20 v-${height} a20,20 0 0 1 20,-20 z
+  `
+};
+// M${x},${y} h${width} a20,20 0 0 1 20,20 v${height} a20,20 0 0 1 -20,20 h-${width} a20,20 0 0 1 -20,-20 v-${height} a20,20 0 0 1 20,-20 z
+
 /** Represents the position and size of a box */
 type BoxPosition = {
     centerX: number,
@@ -102,6 +121,8 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
             return getManipOverheadPaths(width, height);
         case ButtonPadShape.SimpleButtonPad:
             return getSimpleButtonPadPaths(width, height);
+        case ButtonPadShape.RowButtonPad:
+            return getRowButtonPadPaths(width, height)
         default:
             throw Error(`Cannot get paths of unknown button pad shape ${ButtonPadShape}`);
     }
@@ -284,6 +305,26 @@ function getSimpleButtonPadPaths(width: number, height: number): [string[], { x:
         { x: width / 2, y: height - endsHeight / 2 }, // bottom
         { x: center / 2, y: height / 2 }, // left
         { x: width - center / 2, y: height / 2 }, // right
+    ]
+    return [paths, iconPositions];
+}
+
+/**
+ * Ordered from left to right
+ */
+function getRowButtonPadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    const paths = [
+        roundedRect(width / 13, 0, width / 10, height/4),  
+        roundedRect(width / 13 + width / 4, 0, width / 10, height/4),  
+        roundedRect(width / 13 + width / 2, 0, width / 10, height/4), 
+        roundedRect(width / 13 + (3 * width) / 4, 0, width / 10, height/4)
+    ];
+
+    const iconPositions = [
+        { x: width / 8, y: height / 5 }, 
+        { x: (3*width) / 8, y: height / 5 }, 
+        { x: (5*width) / 8, y: height / 5 }, 
+        { x: (7*width) / 8, y: height / 5 }, 
     ]
     return [paths, iconPositions];
 }

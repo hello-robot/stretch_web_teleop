@@ -15,6 +15,9 @@
     padding: 0.4rem;
     max-height: 100%;
     max-width: fit-content;
+    touch-action: none;
+    user-select: none;
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 
 /* Overlay ********************************************************************/
@@ -35,6 +38,10 @@
 /*When hovering over a child element of an svg*/
 .button-pads path:hover {
     fill-opacity: 30%;
+}
+
+@media (hover: none) {
+    .button-pads path.inactive:hover+image { filter: none !important; }
 }
 
 .button-pads image {

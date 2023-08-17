@@ -21,6 +21,8 @@ import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionP
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
 import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
 import { ARUCO_MARKER_INFO } from './utils/aruco_markers_dict';
+import { Caregiver } from './Caregiver';
+import {isMobile} from 'react-device-detect';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -62,19 +64,18 @@ setTimeout(() => {
         console.log('WebRTC connection is resolved.');
 
         // If WebRTC disconnects, reload page
-        const connectionStateChanged = setInterval(() => {
-            let isResolved = connection.connectionState() == 'connected'
-            if (!isResolved) {
-                clearInterval(connectionStateChanged)
-                window.location.reload()
-            }
-        }, 2000)
+        // const connectionStateChanged = setInterval(() => {
+        //     let isResolved = connection.connectionState() == 'connected'
+        //     if (!isResolved) {
+        //         clearInterval(connectionStateChanged)
+        //         window.location.reload()
+        //     }
+        // }, 2000)
     } 
     else {
         window.location.reload()
     }
 }, 8000);
-
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -216,18 +217,26 @@ function renderOperator(storageHandler: StorageHandler) {
     const layout = storageHandler.loadCurrentLayoutOrDefault();
     FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
     FunctionProvider.addRemoteRobot(remoteRobot);
-
-    root.render(
-        <Operator
-            remoteStreams={allRemoteStreams}
-            layout={layout}
-            getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {
-                return remoteRobot.sensors.getRobotPose(head, gripper, arm)
-            }}
-            setRobotPose={(pose: RobotPose) => { remoteRobot.setRobotPose(pose) }}
-            storageHandler={storageHandler}
-        />
-    );
+    
+    !isMobile ?
+        root.render(
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {
+                    return remoteRobot.sensors.getRobotPose(head, gripper, arm)
+                }}
+                setRobotPose={(pose: RobotPose) => { remoteRobot.setRobotPose(pose) }}
+                storageHandler={storageHandler}
+            />
+        ) 
+        :
+        root.render(
+            <Caregiver
+                remoteStreams={allRemoteStreams}
+                storageHandler={storageHandler}
+            />
+        )
 }
 
 function disconnectFromRobot() {
