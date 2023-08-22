@@ -5,6 +5,8 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css"
 import "operator/css/basic_components.css"
+import { isMobile } from "react-device-detect";
+import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 
 /** All the possible button functions */
 export enum MovementRecorderFunction {
@@ -12,7 +14,10 @@ export enum MovementRecorderFunction {
     SaveRecording,
     SavedRecordingNames, 
     DeleteRecording,
-    LoadRecording
+    LoadRecording,
+    Cancel,
+    DeleteRecordingName,
+    LoadRecordingName
 }
 
 export interface MovementRecorderFunctions {
@@ -23,7 +28,11 @@ export interface MovementRecorderFunctions {
     LoadRecording: (recordingID: number) => void
 }
 
-export const MovementRecorder = (props: { hideLabels: boolean }) => {
+export const MovementRecorder = (props: { 
+    hideLabels: boolean,
+    isRecording?: boolean,
+    onRecordingChange?: (isRecording: boolean) => void
+}) => {
     let functions: MovementRecorderFunctions = {
         Record: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.Record) as () => void,
         SaveRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SaveRecording) as (name: string) => void,
@@ -32,10 +41,16 @@ export const MovementRecorder = (props: { hideLabels: boolean }) => {
         LoadRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.LoadRecording) as (recordingID: number) => void
     }
 
+    let radioFuncts: RadioFunctions = {
+        Delete: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.DeleteRecordingName) as (name: string) => void,
+        GetLabels: functions.SavedRecordingNames,
+        SelectedLabel: (label: string) => setSelectedIdx(functions.SavedRecordingNames().indexOf(label))
+    }
+
     const [recordings, setRecordings] = useState<string[]>(functions.SavedRecordingNames());
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [showSaveRecordingModal, setShowSaveRecordingModal] = useState<boolean>(false);
-    const [isRecording, setIsRecording] = React.useState<boolean>(false)
+    const [isRecording, setIsRecording] = React.useState<boolean>(props.isRecording ? props.isRecording : false)
 
     const SaveRecordingModal = (props: {
         setShow: (show: boolean) => void,
@@ -60,9 +75,11 @@ export const MovementRecorder = (props: { hideLabels: boolean }) => {
                 id="save-recording-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
+                size={isMobile ? "small" : "medium"}
+                mobile={isMobile}
             >
-                <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
-                <hr/>
+                {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
+                <hr/> */}
                 <div className="recording-name">
                     <label>Recording Name</label>
                     <input autoFocus type="text" id="new-recording-name" name="new-option-name"
@@ -75,7 +92,8 @@ export const MovementRecorder = (props: { hideLabels: boolean }) => {
     }
 
     return (
-        <React.Fragment>
+        !isMobile 
+        ? <React.Fragment>
             <div id="movement-recorder-container">Movement Recorder</div>
             <div id="movement-recorder-container">
                 <Dropdown
@@ -129,6 +147,44 @@ export const MovementRecorder = (props: { hideLabels: boolean }) => {
                         </span>
                     </button>
                 </Tooltip>
+            </div>
+            <SaveRecordingModal 
+                setShow={setShowSaveRecordingModal}
+                show={showSaveRecordingModal}
+            />
+        </React.Fragment>
+        : 
+        <React.Fragment>
+            <RadioGroup functs={radioFuncts} />
+            <div className="global-btns">
+                <div className="mobile-save-btn" onClick={() => {
+                        if (!isRecording) {
+                            setIsRecording(true)
+                            functions.Record()
+                            if (props.onRecordingChange) props.onRecordingChange(true)
+                        } else {
+                            setIsRecording(false)
+                            setShowSaveRecordingModal(true)
+                            if (props.onRecordingChange) props.onRecordingChange(false)
+                        }
+                    }
+                }>
+                    {!isRecording
+                        ? <span className="material-icons">radio_button_checked</span>
+                        : <span className="material-icons">save</span>
+                    }
+                    {!isRecording ? <i>Record</i> : <i>Save</i> }
+                </div>
+                <div className="mobile-play-btn" onClick={() => {
+                    if (selectedIdx != undefined && selectedIdx > -1) { 
+                        functions.LoadRecording(selectedIdx)}
+                    }
+                }>
+                    <span className="material-icons">
+                        play_circle
+                    </span>
+                    <i>Play</i>
+                </div>
             </div>
             <SaveRecordingModal 
                 setShow={setShowSaveRecordingModal}
