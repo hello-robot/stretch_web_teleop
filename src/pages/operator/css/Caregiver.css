@@ -4,7 +4,7 @@
     /* display: grid; */
     grid-template-rows: auto auto 1fr;
     grid-template-columns: 1fr auto;
-    background-color: #4C5258;
+    background-color: #767c81;
 }
 
 .switch-camera {
@@ -12,11 +12,20 @@
     position: absolute;
     border-radius: 0px;
     opacity: 0.5;
-    font-size: 100px;
+    font-size: 80px;
     padding: 0;
     float: right;
     text-align: right;
     margin-left: 88%;
+}
+
+.pill {
+    border-radius: 1.5rem;
+}
+
+.active-color {
+    color:white;
+    background-color: #084298;
 }
 
 #caregiver-body {
@@ -49,12 +58,14 @@
 }
 
 .control-modes {
-    font-size: xxx-large;
+    touch-action: none;
+    font-size: 3.5rem;
     justify-content: center;
     display: flex;
     padding-top: 20px;
     gap: 15px;
     padding-bottom: 50px;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 @keyframes load {
@@ -84,4 +95,52 @@
         width: 30rem;
         height: 5rem;
     }
+}
+
+.slider {
+    height: 25px;
+    touch-action: none;
+    pointer-events: all;
+}
+
+.slider-container {    
+    display: flex;
+    align-items: baseline;
+    justify-content: space-around;
+    padding-top: 16px;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 70%;
+    height: 30px;
+    border-radius: 19px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+  
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.label {
+    font-size: 50px;
+    padding-bottom: 10px;
+}
+
+.map, .controls {
+    display: contents;
+}
+
+.map.hideMap, .controls.hideControls {
+    display: none;
 }

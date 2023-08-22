@@ -219,6 +219,15 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
+        case ButtonPadId.GripperMobile:
+            functions = [
+                B.WristRotateIn,
+                B.WristRotateOut,
+                B.GripperOpen,
+                B.GripperClose
+            ];
+            shape = ButtonPadShape.RowButtonPad;
+            break;
         default:
             throw new Error(`unknow button pad id: ${id}`);
     }

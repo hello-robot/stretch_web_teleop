@@ -35,3 +35,8 @@
     color: #6a6a6a;
     margin-right: 1rem;
 }
+
+.mobile {
+    padding: var(--btn-padding);
+    font-size: 30px;
+}

@@ -313,18 +313,20 @@ function getSimpleButtonPadPaths(width: number, height: number): [string[], { x:
  * Ordered from left to right
  */
 function getRowButtonPadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    height = height * 2;
+    
     const paths = [
-        roundedRect(width / 13, 0, width / 10, height/4),  
-        roundedRect(width / 13 + width / 4, 0, width / 10, height/4),  
-        roundedRect(width / 13 + width / 2, 0, width / 10, height/4), 
-        roundedRect(width / 13 + (3 * width) / 4, 0, width / 10, height/4)
+        roundedRect(width / 13, height / 16, width / 10, height/4),  
+        roundedRect(width / 13 + width / 4, height / 16, width / 10, height/4),  
+        roundedRect(width / 13 + width / 2, height / 16, width / 10, height/4), 
+        roundedRect(width / 13 + (3 * width) / 4, height / 16, width / 10, height/4)
     ];
 
     const iconPositions = [
-        { x: width / 8, y: height / 5 }, 
-        { x: (3*width) / 8, y: height / 5 }, 
-        { x: (5*width) / 8, y: height / 5 }, 
-        { x: (7*width) / 8, y: height / 5 }, 
+        { x: width / 8, y: 0.25 * height }, 
+        { x: (3*width) / 8, y: 0.25 * height }, 
+        { x: (5*width) / 8, y: 0.25 * height }, 
+        { x: (7*width) / 8, y: 0.25 * height }, 
     ]
     return [paths, iconPositions];
 }

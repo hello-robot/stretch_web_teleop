@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Dropdown } from "../basic_components/Dropdown";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Tooltip } from "operator/tsx/static_components/Tooltip"
+import { isMobile } from "react-device-detect";
 
 export enum MapFunction {
     GetMap,
@@ -28,7 +29,8 @@ export interface MapFunctions {
     GetPose: () => ROSLIB.Transform
     MoveBase: (pose: ROSPose) => void
     GoalReached: () => boolean
-    SelectGoal: () => boolean
+    SelectGoal: () => boolean,
+    TurnOffSelectGoal: () => void
 }
 
 export interface UnderMapFunctions {
@@ -50,6 +52,7 @@ export const Map = (props: CustomizableComponentProps) => {
     const definition = props.definition as MapDefinition
     const [active, setActive] = React.useState<boolean>(false);
     const [occupancyGrid, setOccupanyGrid] = React.useState<OccupancyGrid>()
+    const [selectGoal, setSelectGoal] = React.useState<boolean>(false)
     const { customizing, hideLabels } = props.sharedState;
     const selected = isSelected(props);
 
@@ -74,12 +77,18 @@ export const Map = (props: CustomizableComponentProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     }
 
+    const handleSelectGoal = React.useCallback((selectGoal: boolean) => {
+        setSelectGoal(selectGoal);
+        mapFn.SelectGoal = (): boolean => { return selectGoal }
+     }, []);
+
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(MapFunction.GetMap) as ROSOccupancyGrid,
         GetPose: mapFunctionProvider.provideFunctions(MapFunction.GetPose) as () => ROSLIB.Transform,
         MoveBase: mapFunctionProvider.provideFunctions(MapFunction.MoveBase) as (pose: ROSPose) => void,
         GoalReached: mapFunctionProvider.provideFunctions(MapFunction.GoalReached) as () => boolean,
-        SelectGoal: (): boolean => { console.log(definition.selectGoal!); return definition.selectGoal! }
+        SelectGoal: (): boolean => { return selectGoal },
+        TurnOffSelectGoal: () => {handleSelectGoal(false)}
     }
 
     let underMapFn: UnderMapFunctions = {
@@ -96,15 +105,15 @@ export const Map = (props: CustomizableComponentProps) => {
             return occupancyGrid!.displayPoseMarkers(toggle, poses, poseNames, poseTypes)
         },
         DisplayGoalMarker: (pose: ROSLIB.Vector3) => occupancyGrid!.createGoalMarker(pose.x, pose.y, true),
-        NavigateToAruco: underMapFunctionProvider.provideFunctions(UnderMapButton.NavigateToAruco) as (goalID: number) => void
+        NavigateToAruco: underMapFunctionProvider.provideFunctions(UnderMapButton.NavigateToAruco) as (goalID: number) => void,
     }
 
     return (
         <div className="map-container">
-            <h4 className="title">Map</h4>
-            <div id="map" className={className("map", { customizing, selected, active })} onClick={handleSelect}></div>
-            <div className="under-video-area">
-                <UnderMapButtons definition={definition} functs={underMapFn} hideLabels={hideLabels}/>
+            {!isMobile ? <h4 className="title">Map</h4> : <></>}
+            <div id="map" className={className("map", { customizing, selected, active })} onPointerDown={handleSelect}></div>
+            <div className={"under-video-area "}>
+                <UnderMapButtons handleSelectGoal={handleSelectGoal} functs={underMapFn} hideLabels={hideLabels}/>
             </div>
         </div>
     )
@@ -113,7 +122,7 @@ export const Map = (props: CustomizableComponentProps) => {
 /**
  * Buttons to display under the map.
  */
-const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFunctions, hideLabels?: boolean }) => {
+const UnderMapButtons = (props: { handleSelectGoal: (selectGoal: boolean) => void, functs: UnderMapFunctions, hideLabels?: boolean }) => {
     const [poses, setPoses] = useState<string[]>(props.functs.GetSavedPoseNames())
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [selectGoal, setSelectGoal] = React.useState<boolean>(false)
@@ -178,13 +187,20 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                 <CheckToggleButton
                     checked={selectGoal}
                     onClick={() => {
-                        props.definition.selectGoal = !selectGoal;
+                        props.handleSelectGoal(!selectGoal)
                         setSelectGoal(!selectGoal)
                     }}
                     label="Select Goal"
                 />
                 <Tooltip text="Save goal" position="top">
-                    <button className="save-btn" onClick={() => setShowSavePoseModal(true)}>
+                    <button className="save-btn" onPointerDown={() => { 
+                        setShowSavePoseModal(true) 
+                        // If on mobile disable select goal to stop accidental navigation
+                        if (isMobile && selectGoal) {
+                            props.handleSelectGoal(false)
+                            setSelectGoal(false)
+                        }
+                    }}>
                         <span hidden={props.hideLabels}>Save</span>
                         <span className="material-icons">
                             save
@@ -192,7 +208,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                     </button>
                 </Tooltip>
                 <Tooltip text="Cancel goal" position="top">
-                    <button className="delete-btn" onClick={props.functs.CancelGoal}>
+                    <button className="delete-btn" onPointerDown={props.functs.CancelGoal}>
                         <span hidden={props.hideLabels}>Cancel</span>
                         <span className="material-icons">
                             cancel
@@ -223,7 +239,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                     placement="top"
                 />
                 <Tooltip text="Load goal" position="top">
-                    <button className="play-btn" onClick={
+                    <button className="play-btn" onPointerDown={
                         () => {
                             if (selectedIdx != undefined) {
                                 let pose: ROSLIB.Vector3 = props.functs.LoadGoal(selectedIdx)!
@@ -239,7 +255,7 @@ const UnderMapButtons = (props: { definition: MapDefinition, functs: UnderMapFun
                     </button>
                 </Tooltip>
                 <Tooltip text="Delete goal" position="top">
-                    <button className="delete-btn" onClick={() => {
+                    <button className="delete-btn" onPointerDown={() => {
                         if (selectedIdx != undefined) props.functs.DeleteGoal(selectedIdx)
                         setPoses(props.functs.GetSavedPoseNames())
                         props.functs.DisplayPoseMarkers(
