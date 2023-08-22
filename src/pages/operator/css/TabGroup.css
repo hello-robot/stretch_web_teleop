@@ -1,0 +1,75 @@
+.tab {
+    font-size: 45px;
+    padding-top: 20px;
+    cursor: pointer;
+    outline: 0;
+    display: flex;
+    border-bottom: 5px solid black;
+    justify-content: space-evenly;
+    background-color: transparent;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.pill-tab {
+    font-size: 45px;
+    cursor: pointer;
+    outline: 0;
+    display: flex;
+    justify-content: space-between;
+    background-color: transparent;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    width: 80%;
+    height: auto;
+    background: #052a33;
+    margin: 3.5rem auto 1.5rem;
+    color: #E8F0F2;
+    border-radius: 10rem;
+    list-style: none;
+}
+
+.tab-btn {
+    background-color: transparent;
+    border-bottom: none;
+    color: white;
+    font-weight: 500;
+}
+
+li.pill-tab-btn {
+    background-color: transparent;
+    border-bottom: none;
+    padding: 1rem;
+    padding-left: 5rem;
+    padding-right: 5rem;
+}
+
+li.pill-tab-btn:first-child {
+    border-bottom-left-radius: 5rem;
+    border-top-left-radius: 5rem;
+}
+
+li.pill-tab-btn:last-child {
+    border-bottom-right-radius: 5rem;
+    border-top-right-radius: 5rem;
+}
+
+.tab-btn.active {
+    border-bottom: 15px solid #06c7e1;
+}
+
+.pill-tab-btn.active {
+    background: #39A2DB;
+}
+
+.tab-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    flex: 1 1 0;
+    /* padding-bottom: 10px; */
+    justify-content: space-between;
+}
+
+.tab-group {
+    display: contents;
+}
