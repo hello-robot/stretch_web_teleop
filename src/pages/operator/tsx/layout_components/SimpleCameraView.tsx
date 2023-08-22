@@ -61,6 +61,8 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
                             ref={videoRef}
                             autoPlay
                             muted={true}
+                            disablePictureInPicture={true}
+                            playsInline={true}
                             className={className('simple-video-canvas', { constrainedHeight })}
                         />
                     </div>
@@ -75,6 +77,8 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
                         ref={videoRef}
                         autoPlay
                         muted={true}
+                        disablePictureInPicture={true}
+                        playsInline={true}
                         className={className('simple-video-canvas', { constrainedHeight })}
                     />
                 </div>

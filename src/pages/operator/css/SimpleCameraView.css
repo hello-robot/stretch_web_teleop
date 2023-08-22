@@ -40,7 +40,7 @@
 }
 
 .simple-realsense {
-    margin-top: -50%;
+    margin-top: -75%;
 }
 
 /* @media screen and (max-height: 800px) {
@@ -58,7 +58,7 @@
 .overlay {
     position: absolute;
     z-index: 1;
-    margin-top: 50%;
+    margin-top: 75%;
     background-color: transparent;
     touch-action: none;
     box-shadow: none;
@@ -66,24 +66,24 @@
 
 .btn-left {
     width: 15%;
-    height: 100%;
+    height: 60%;
 }
 
 .btn-right {
     margin-left: 85%;
     width: 15%;
-    height: 100%;
+    height: 60%;
 }
 
 .btn-up {
     width: 100%;
-    height: 15%;
+    height: 10%;
 }
 
 .btn-down {
     margin-top: 160%;
     width: 100%;
-    height: 15%;
+    height: 10%;
 }
 
 /* Context menu popup *********************************************************/
