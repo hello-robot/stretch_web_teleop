@@ -19,3 +19,66 @@
     background-color: var(--btn-red);
     display: flex;
 }
+
+.mobile-save-btn {
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 45px;
+    padding: 20px;
+    margin: 1rem;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+}
+
+.mobile-save-pose-btn {
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 45px;
+    padding: 20px;
+    margin: 1rem;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+}
+
+.mobile-play-btn {
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 45px;
+    padding: 20px;
+    margin: 1rem;
+    text-align: center;
+    background: #06c7e1;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+}
+
+.mobile-cancel-btn {
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    padding: 25px;
+    margin: 1rem;
+    text-align: center;
+    background: #cd0b0b;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.markers-fn-btns {
+    display: flex;
+    font-size: 45px;
+}
