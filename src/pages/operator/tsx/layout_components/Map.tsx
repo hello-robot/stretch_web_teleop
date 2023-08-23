@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import 'latest-createjs';
 import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import { MapDefinition } from "../utils/component_definitions";
@@ -16,6 +16,7 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Tooltip } from "operator/tsx/static_components/Tooltip"
 import { isMobile } from "react-device-detect";
+import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 
 export enum MapFunction {
     GetMap,
@@ -30,7 +31,7 @@ export interface MapFunctions {
     MoveBase: (pose: ROSPose) => void
     GoalReached: () => boolean
     SelectGoal: () => boolean,
-    TurnOffSelectGoal: () => void
+    SetSelectGoal: (selectGoal: boolean) => void
 }
 
 export interface UnderMapFunctions {
@@ -45,7 +46,9 @@ export interface UnderMapFunctions {
     GetSavedPoses: () => ROSLIB.Transform[]
     DisplayPoseMarkers: (toggle: boolean, poses: ROSLIB.Transform[], poseNames: string[], poseTypes: string[]) => void
     DisplayGoalMarker: (pose: ROSLIB.Vector3) => void,
-    NavigateToAruco: (goalID: number) => void
+    NavigateToAruco: (goalID: number) => void,
+    Play: () => void,
+    GoalReached: () => Promise<boolean>
 }
 
 export const Map = (props: CustomizableComponentProps) => {
@@ -88,7 +91,7 @@ export const Map = (props: CustomizableComponentProps) => {
         MoveBase: mapFunctionProvider.provideFunctions(MapFunction.MoveBase) as (pose: ROSPose) => void,
         GoalReached: mapFunctionProvider.provideFunctions(MapFunction.GoalReached) as () => boolean,
         SelectGoal: (): boolean => { return selectGoal },
-        TurnOffSelectGoal: () => {handleSelectGoal(false)}
+        SetSelectGoal: (selectGoal: boolean) => {handleSelectGoal(selectGoal)},
     }
 
     let underMapFn: UnderMapFunctions = {
@@ -106,28 +109,48 @@ export const Map = (props: CustomizableComponentProps) => {
         },
         DisplayGoalMarker: (pose: ROSLIB.Vector3) => occupancyGrid!.createGoalMarker(pose.x, pose.y, true),
         NavigateToAruco: underMapFunctionProvider.provideFunctions(UnderMapButton.NavigateToAruco) as (goalID: number) => void,
+        Play: () => occupancyGrid!.play(),
+        GoalReached: underMapFunctionProvider.provideFunctions(UnderMapButton.GoalReached) as () => Promise<boolean>
     }
 
     return (
-        <div className="map-container">
-            {!isMobile ? <h4 className="title">Map</h4> : <></>}
-            <div id="map" className={className("map", { customizing, selected, active })} onPointerDown={handleSelect}></div>
-            <div className={"under-video-area "}>
-                <UnderMapButtons handleSelectGoal={handleSelectGoal} functs={underMapFn} hideLabels={hideLabels}/>
+        <React.Fragment>
+            <div className={isMobile ? "mobile-map-container" : "map-container"}>
+                {!isMobile ? <h4 className="title">Map</h4> : <></>}
+                <div id="map" className={className("map", { customizing, selected, active })} onPointerDown={handleSelect}></div>
+                {!isMobile &&
+                    <div className={"under-video-area"}>
+                        <UnderMapButtons handleSelectGoal={handleSelectGoal} functs={underMapFn} hideLabels={hideLabels}/>
+                    </div>
+                }
             </div>
-        </div>
+            {isMobile &&
+                <UnderMapButtons handleSelectGoal={handleSelectGoal} functs={underMapFn} hideLabels={hideLabels}/>
+            }
+        </React.Fragment>
     )
 }
 
 /**
  * Buttons to display under the map.
  */
-const UnderMapButtons = (props: { handleSelectGoal: (selectGoal: boolean) => void, functs: UnderMapFunctions, hideLabels?: boolean }) => {
+const UnderMapButtons = (props: { 
+    handleSelectGoal: (selectGoal: boolean) => void,
+    functs: UnderMapFunctions, 
+    hideLabels?: boolean 
+}) => {
     const [poses, setPoses] = useState<string[]>(props.functs.GetSavedPoseNames())
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [selectGoal, setSelectGoal] = React.useState<boolean>(false)
     const [displayGoals, setDisplayGoals] = React.useState<boolean>(false)
     const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
+    const [play, setPlay] = useState<boolean>(false);
+
+    let radioFuncts: RadioFunctions = {
+        Delete: (label: string) => props.functs.DeleteGoal(props.functs.GetSavedPoseNames().indexOf(label)),
+        GetLabels: () => props.functs.GetSavedPoseNames(),
+        SelectedLabel: (label: string) => setSelectedIdx(props.functs.GetSavedPoseNames().indexOf(label))
+    }
 
     const SavePoseModal = (props: {
         functs: UnderMapFunctions,
@@ -159,14 +182,16 @@ const UnderMapButtons = (props: { handleSelectGoal: (selectGoal: boolean) => voi
                 id="save-pose-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
+                size={isMobile ? "small" : "large"}
+                mobile={isMobile}
             >
-                <label htmlFor="new-pose-name"><b>Save Current Pose on Map</b></label>
-                <hr />
-                <div className="pose-name">
-                    <label>Pose Name</label>
+                {/* <label htmlFor="new-pose-name"><b>Save Current Pose on Map</b></label>
+                <hr /> */}
+                <div className={"pose-name" + isMobile ? "mobile-pose-name" : ""}>
+                    {/* <label>Pose Name</label> */}
                     <input autoFocus type="text" id="new-pose-name" name="new-option-name"
                         value={name} onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter name"
+                        placeholder="Enter name of destination"
                     />
                 </div>
             </PopupModal>
@@ -181,8 +206,8 @@ const UnderMapButtons = (props: { handleSelectGoal: (selectGoal: boolean) => voi
         return elements
     }
 
-    return (
-        <React.Fragment>
+    return ( !isMobile
+        ? <React.Fragment>
             <div className="under-video-area">
                 <CheckToggleButton
                     checked={selectGoal}
@@ -272,6 +297,70 @@ const UnderMapButtons = (props: { handleSelectGoal: (selectGoal: boolean) => voi
                         </span>
                     </button>
                 </Tooltip>
+            </div>
+            <SavePoseModal
+                functs={props.functs}
+                setShow={setShowSavePoseModal}
+                show={showSavePoseModal}
+            />
+        </React.Fragment>
+        : <React.Fragment>
+            <RadioGroup functs={radioFuncts} />
+            <div className="map-fn-btns">
+                <div className="mobile-map-save-btn" onPointerDown={() => {
+                    setShowSavePoseModal(true) 
+                    // If on mobile disable select goal to stop accidental navigation
+                    if (isMobile && selectGoal) {
+                        props.handleSelectGoal(false)
+                        setSelectGoal(false)
+                    }
+                }}>
+                    <span hidden={props.hideLabels}>Save new destination</span>
+                    <span className="material-icons">
+                        save
+                    </span>
+                </div>
+                {!play && <div className="mobile-map-play-btn" onPointerDown={
+                    () => {
+                        if (!play && selectGoal) {
+                            props.functs.Play()
+                            setPlay(true)
+                            setSelectGoal(false)
+                            props.functs.GoalReached().then(goalReached => setPlay(false))
+                        } else if (!play && selectedIdx != undefined) {
+                            let pose: ROSLIB.Vector3 = props.functs.LoadGoal(selectedIdx)!
+                            props.functs.DisplayGoalMarker(pose)
+                            props.functs.NavigateToAruco(selectedIdx)
+                            setPlay(true)
+                            setSelectGoal(false)
+                            props.functs.GoalReached().then(goalReached => setPlay(false))
+                        }
+                    }
+                }>
+                        <span>Play</span><span className="material-icons">
+                            play_circle
+                        </span>
+                        
+                </div>}
+                {play && <div className="mobile-map-cancel-btn" onPointerDown={
+                    () => { 
+                        props.functs.CancelGoal()
+                        setPlay(!play) 
+                    }
+                }>
+                        <span>Cancel</span><span className="material-icons">
+                            cancel
+                        </span>
+                        
+                </div>}
+                <CheckToggleButton
+                    checked={selectGoal}
+                    onClick={() => {
+                        props.handleSelectGoal(!selectGoal)
+                        setSelectGoal(!selectGoal)
+                    }}
+                    label="Select Goal"
+                />
             </div>
             <SavePoseModal
                 functs={props.functs}

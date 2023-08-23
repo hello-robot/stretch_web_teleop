@@ -30,7 +30,7 @@ export const CheckToggleButton = (props: CheckToggleButtonProps) => {
     return (
         <button
             className={className("check-toggle-button", { checked })}
-            onClick={props.onClick}
+            onPointerDown={props.onClick}
         >
             <span className={"material-icons"}>{icon}</span>
             {props.label}

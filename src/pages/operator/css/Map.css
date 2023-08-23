@@ -1,6 +1,6 @@
-.map-container {
+.map-container, .mobile-map-container {
     position: relative;
-    flex: 1 1 0;
+    /* flex: 1 1 0; */
     display: grid;
     justify-items: center;
     padding: 0.4rem;
@@ -12,6 +12,10 @@
     /* align-items: center;
     flex-direction: column; */
     z-index: 1;
+}
+
+.map-container {
+    flex: 1 1 0;
 }
 
 .map {
@@ -39,4 +43,61 @@
 .mobile {
     padding: var(--btn-padding);
     font-size: 30px;
+    flex: auto;
+}
+
+.mobile-map-save-btn {
+    width: 54%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    padding: 20px;
+    margin: 1rem;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.mobile-map-play-btn {
+    width: 32%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    padding: 25px;
+    margin: 1rem;
+    text-align: center;
+    background: #06c7e1;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.mobile-map-cancel-btn {
+    width: 32%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    padding: 25px;
+    margin: 1rem;
+    text-align: center;
+    background: #cd0b0b;
+    vertical-align: middle;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.check-toggle-button {
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    margin: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: transparent;
+}
+
+.map-fn-btns {
+    display: flex;
+    font-size: 45px;
 }

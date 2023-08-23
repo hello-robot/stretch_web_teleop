@@ -5,6 +5,7 @@ import createjs from "createjs-module";
 import { ROSOccupancyGrid, ROSPoint, ROSPose } from "shared/util";
 import ROSLIB from "roslib";
 import { MapFunctions } from "../layout_components/Map";
+import { isMobile } from "react-device-detect";
 
 export class OccupancyGrid extends React.Component {
     private rootObject: createjs.Stage
@@ -15,6 +16,7 @@ export class OccupancyGrid extends React.Component {
     private scaleX?: number
     private scaleY?: number
     private map: ROSOccupancyGrid
+    private goal_position?: ROSPoint
     private goalMarker?: createjs.Shape
     private getGoalReached?: NodeJS.Timer
     private savedPoseMarkers: { circle: createjs.Shape, label: createjs.Text }[]
@@ -27,6 +29,7 @@ export class OccupancyGrid extends React.Component {
         super(props);
         this.rootObject = props.rootObject
         this.rootObject.enableMouseOver();
+        createjs.Touch.enable(this.rootObject);
         this.width = 0
         this.height = 0
         this.map = props.functs.GetMap
@@ -175,8 +178,8 @@ export class OccupancyGrid extends React.Component {
     }
 
     rosToGlobal(translation: ROSLIB.Vector3) {
-        // var x = ((this.width * this.scaleX!) - (-translation.x + this.width * this.scaleX! + this.origin!.position.x)) / this.scaleX!;
-        var x = (translation.x + this.width * this.scaleX! + this.origin!.position.x) / this.scaleX!;
+        var x = ((this.width * this.scaleX!) - (-translation.x + this.width * this.scaleX! + this.origin!.position.x)) / this.scaleX!;
+        // var x = (translation.x + this.width * this.scaleX! + this.origin!.position.x) / this.scaleX!;
         var y = (-translation.y + this.height * this.scaleY! + this.origin!.position.y) / this.scaleY!;
         return {
             x: x,
@@ -185,8 +188,8 @@ export class OccupancyGrid extends React.Component {
     }
 
     globalToRos(x: number, y: number) {
-        // var rosX = (x / 5) * this.scaleX! + this.origin!.position.x
-        var rosX = (x / 5 - this.width) * this.scaleX! - this.origin!.position.x
+        var rosX = (x / 5) * this.scaleX! + this.origin!.position.x
+        // var rosX = (x / 5 - this.width) * this.scaleX! - this.origin!.position.x
         var rosY = (this.height - y / 5) * this.scaleY! + this.origin!.position.y
         console.log(rosX, rosY)
         return {
@@ -271,24 +274,33 @@ export class OccupancyGrid extends React.Component {
         }, 1000);
     }
 
+    play() {
+        if (this.goal_position) {
+            this.functs.MoveBase({
+                position: this.goal_position,
+                orientation: { x: 0, y: 0, z: -0.45, w: 0.893 }
+            } as ROSPose)
+        }
+        this.goal_position = undefined
+        if (isMobile) this.functs.SetSelectGoal(false)
+    }
+
     createOccupancyGridClient() {
         this.createOccupancyGrid()
         this.addCurrenPoseMarker()
 
-        this.rootObject.on('click', (event) => {
-            console.log(this.functs.SelectGoal())
+        this.rootObject.on('mousedown', (event) => {
+            let evt = event as createjs.MouseEvent
+            // convert to ROS coordinates
+            this.goal_position = this.globalToRos(evt.stageX, evt.stageY);
+
             if (this.functs.SelectGoal()) {
-                let evt = event as createjs.MouseEvent
-                // convert to ROS coordinates
-                var position: ROSPoint = this.globalToRos(evt.stageX, evt.stageY);
-                console.log(position)
-
-                this.functs.MoveBase({
-                    position: position,
-                    orientation: { x: 0, y: 0, z: -0.45, w: 0.893 }
-                } as ROSPose)
-
                 this.createGoalMarker(evt.stageX / 5, evt.stageY / 5, false)
+            }
+            
+            if (!isMobile && this.functs.SelectGoal()) {
+                this.play()
+                if (isMobile) this.functs.SetSelectGoal(false)
             }
         });
     }
