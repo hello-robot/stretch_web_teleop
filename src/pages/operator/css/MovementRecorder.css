@@ -26,7 +26,7 @@
     }
 }
 
-.mobile-save-btn {
+.mobile-movement-save-btn {
     width: 97%;
     border-radius: 13px;
     border: 5px solid whitesmoke;
@@ -38,7 +38,7 @@
     justify-content: center;
 }
 
-.mobile-play-btn {
+.mobile-movement-play-btn {
     width: 97%;
     border-radius: 13px;
     border: 5px solid whitesmoke;

@@ -75,16 +75,16 @@ export const MovementRecorder = (props: {
                 id="save-recording-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
-                size={isMobile ? "small" : "medium"}
+                size={isMobile ? "small" : "large"}
                 mobile={isMobile}
             >
                 {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
                 <hr/> */}
                 <div className="recording-name">
-                    <label>Recording Name</label>
+                    {/* <label>Recording Name</label> */}
                     <input autoFocus type="text" id="new-recording-name" name="new-option-name"
                         value={name} onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter name"
+                        placeholder="Enter name of movement"
                     />
                 </div>
             </PopupModal>
@@ -157,7 +157,7 @@ export const MovementRecorder = (props: {
         <React.Fragment>
             <RadioGroup functs={radioFuncts} />
             <div className="global-btns">
-                <div className="mobile-save-btn" onClick={() => {
+                <div className="mobile-movement-save-btn" onClick={() => {
                         if (!isRecording) {
                             setIsRecording(true)
                             functions.Record()
@@ -175,7 +175,7 @@ export const MovementRecorder = (props: {
                     }
                     {!isRecording ? <i>Record</i> : <i>Save</i> }
                 </div>
-                <div className="mobile-play-btn" onClick={() => {
+                <div className="mobile-movement-play-btn" onClick={() => {
                     if (selectedIdx != undefined && selectedIdx > -1) { 
                         functions.LoadRecording(selectedIdx)}
                     }
