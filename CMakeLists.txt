@@ -27,10 +27,6 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
-
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
