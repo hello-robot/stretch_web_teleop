@@ -1,2 +1,0 @@
-string state
-string alertType
