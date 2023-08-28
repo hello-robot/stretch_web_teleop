@@ -22,8 +22,8 @@ find_package(rosbridge_server REQUIRED)
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
-  nodes/configure_video_streams
-  nodes/aruco_navigation
+  nodes/configure_video_streams.py
+  nodes/aruco_navigation.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
