@@ -1,4 +1,0 @@
-string name
-geometry_msgs/Transform pose
----
-string result
