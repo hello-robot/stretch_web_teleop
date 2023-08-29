@@ -14,7 +14,7 @@
 # Overview
 This interface enables a user to remotely teleoperate a Stretch robot through a web browser. The interface has been tested using Ubuntu 20.04, ROS Noetic, Python 3.8 and Google Chrome. This interface uses Stretch's [teleop kit](https://hello-robot.com/stretch-teleop-kit). It is possible to use the interface without the teleop cameras. If you do not have the cameras skip the [Setup Fisheye Cameras](#setup-fisheye-cameras) section.
 
-**WARNING: This prototype code and there are security issues. Use this code at your own risk.**
+**WARNING: This is prototype code and there are security issues. Use this code at your own risk.**
 
 # Setup 
 Please make sure you are using Ubuntu 20.04 and have [ROS Noetic](http://wiki.ros.org/noetic/Installation/Ubuntu) installed before installing the interface.
