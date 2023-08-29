@@ -49,7 +49,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
                     FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
-                    return { state: ArucoNavigationResult.MARKER_SAVED, alertType: "success" }
+                    return { state: ArucoNavigationResult.MARKER_SAVED, alert_type: "success" }
                 }
             case ArucoMarkersFunction.NavigateToMarker:
                 return (markerIndex: number) => {
@@ -59,7 +59,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let markerID = markerIDs[markerIndex]
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     let pose = marker_info.aruco_marker_info[markerID].pose
-                    if (!pose) return { state: ArucoNavigationResult.POSE_FIND_FAIL, alertType: "error" }
+                    if (!pose) return { state: ArucoNavigationResult.POSE_FIND_FAIL, alert_type: "error" }
                     FunctionProvider.remoteRobot?.navigateToAruco(name, pose)
                 }
 
@@ -70,7 +70,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
             case ArucoMarkersFunction.DeleteMarker:
                 return (markerIndex: number) => {
                     let markerNames = this.storageHandler.getArucoMarkerNames()
-                    if (markerNames[markerIndex] == 'docking_station') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
+                    if (markerNames[markerIndex] == 'docking_station') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alert_type: "error" }
                     this.storageHandler.deleteMarker(markerNames[markerIndex])
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
@@ -78,7 +78,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let poses = this.storageHandler.getMapPoseNames()
                     let mapPoseIdx = poses.indexOf(markerNames[markerIndex])
                     if (mapPoseIdx != -1) this.storageHandler.deleteMapPose(poses[mapPoseIdx])
-                    return { state: ArucoNavigationResult.MARKER_DELETE_SUCCESS, alertType: "success" }
+                    return { state: ArucoNavigationResult.MARKER_DELETE_SUCCESS, alert_type: "success" }
                 }
             case ArucoMarkersFunction.SaveRelativePose:
                 return async (markerIndex: number, saveToMap: boolean) => {
@@ -87,14 +87,14 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                     let pose = await FunctionProvider.remoteRobot?.getRelativePose(name)
                     let markerIDs = this.storageHandler.getArucoMarkerIDs()
                     let markerID = markerIDs[markerIndex]
-                    if (!pose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alertType: "error" }
+                    if (!pose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alert_type: "error" }
                     this.storageHandler.saveRelativePose(markerID, pose)
                     if (saveToMap) {
                         let mapPose = FunctionProvider.remoteRobot?.getMapPose()
-                        if (!mapPose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alertType: "error" }
+                        if (!mapPose) return { state: ArucoNavigationResult.POSE_GET_FAIL, alert_type: "error" }
                         this.storageHandler.saveMapPose(name, mapPose, "ARUCO")
                     }
-                    return { state: ArucoNavigationResult.POSE_SAVED, alertType: "success" }
+                    return { state: ArucoNavigationResult.POSE_SAVED, alert_type: "success" }
                 }
             case ArucoMarkersFunction.Cancel:
                 return () => {

@@ -49,7 +49,7 @@ class NavigateToArucoServer:
     def preempt_callback(self):
         print('preempt callback')
         self.feedback.state = 'Aruco navigation cancelled!'
-        self.feedback.alertType = "error"
+        self.feedback.alert_type = "error"
         self.server.publish_feedback(self.feedback)
         
     def broadcast_tf(self, trans, name, ref):
@@ -67,7 +67,7 @@ class NavigateToArucoServer:
         self.relative_pose = self.goal.pose
 
         self.feedback.state = 'Scanning for marker...'
-        self.feedback.alertType = "info"
+        self.feedback.alert_type = "info"
         self.server.publish_feedback(self.feedback)
         head_scan_goal = HeadScanGoal()
         head_scan_goal.name = self.aruco_name
@@ -78,7 +78,7 @@ class NavigateToArucoServer:
         
         if not self.head_scan_client.get_result(): 
             self.feedback.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
-            self.feedback.alertType = "error"
+            self.feedback.alert_type = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
             return
@@ -145,7 +145,7 @@ class NavigateToArucoServer:
         transforms = []
 
         self.feedback.state = "Navigating to marker..."
-        self.feedback.alertType = "info"
+        self.feedback.alert_type = "info"
         self.server.publish_feedback(self.feedback)
 
         while len(transforms) < 10:
@@ -155,7 +155,7 @@ class NavigateToArucoServer:
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rospy.loginfo("Could not publish pose to tf")
                 self.feedback.state = 'Navigation failed, please try again.'
-                self.feedback.alertType = "error"
+                self.feedback.alert_type = "error"
                 self.server.publish_feedback(self.feedback)
                 self.server.set_aborted()
                 return
@@ -190,7 +190,7 @@ class NavigateToArucoServer:
         if self.num_tries == self.max_tries:
             self.num_tries = 0
             self.feedback.state = 'Navigation failed, please try again.'
-            self.feedback.alertType = "error"
+            self.feedback.alert_type = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
             return
@@ -201,7 +201,7 @@ class NavigateToArucoServer:
         self.head_scan_client.send_goal_and_wait(head_scan_goal)
         if not self.head_scan_client.get_result(): 
             self.feedback.state = 'Could not find Aruco Marker. Stretch may be too far away, try moving it closer to the marker.'
-            self.feedback.alertType = "error"
+            self.feedback.alert_type = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
             return
@@ -213,7 +213,7 @@ class NavigateToArucoServer:
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.loginfo("Could not publish pose to tf")
             self.feedback.state = 'Navigation failed, please try again.'
-            self.feedback.alertType = "error"
+            self.feedback.alert_type = "error"
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
             return
@@ -224,7 +224,7 @@ class NavigateToArucoServer:
             self.navigate_to_marker()
 
         self.feedback.state = 'Navigation succeeded!'
-        self.feedback.alertType = "success"
+        self.feedback.alert_type = "success"
         self.server.publish_feedback(self.feedback)
         self.server.set_succeeded()
         return

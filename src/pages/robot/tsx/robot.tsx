@@ -179,9 +179,9 @@ export class Robot extends React.Component {
     
         topic.subscribe((msg: MoveBaseActionResult) => {
             if (this.moveBaseResultCallback) {
-                if (msg.status.status == 2) this.moveBaseResultCallback({state: "Navigation cancelled!", alertType: "error"})
-                else if (msg.status.status == 3) this.moveBaseResultCallback({state: "Navigation succeeded!", alertType: "success"})
-                else this.moveBaseResultCallback({state: "Navigation failed!", alertType: "error"})
+                if (msg.status.status == 2) this.moveBaseResultCallback({state: "Navigation cancelled!", alert_type: "error"})
+                else if (msg.status.status == 3) this.moveBaseResultCallback({state: "Navigation succeeded!", alert_type: "success"})
+                else this.moveBaseResultCallback({state: "Navigation failed!", alert_type: "error"})
             }
         });
     };
@@ -616,7 +616,7 @@ export class Robot extends React.Component {
     executeMoveBaseGoal(pose: ROSPose) {
         this.stopExecution()
         this.moveBaseGoal = this.makeMoveBaseGoal(pose)
-        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alertType: "info"})
+        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alert_type: "info"})
         this.moveBaseGoal.send()
     }
 

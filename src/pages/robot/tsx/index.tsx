@@ -82,7 +82,7 @@ function handleSessionStart() {
 function forwardMoveBaseState(state: MoveBaseState) {
     if (!connection) throw 'WebRTC connection undefined!'
     
-    if (state.alertType != "info") {
+    if (state.alert_type != "info") {
         connection.sendData({
             type: "goalStatus",
             message: state

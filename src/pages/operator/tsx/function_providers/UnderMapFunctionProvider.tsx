@@ -32,7 +32,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
     }
 
     public setMoveBaseState(state: MoveBaseState) {
-        if (state.alertType == "success") this.navigationSuccess = true
+        if (state.alert_type == "success") this.navigationSuccess = true
         if (this.operatorCallback) this.operatorCallback(state)
     }
 
@@ -93,7 +93,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                         let markerNames = this.storageHandler.getArucoMarkerNames()
                         let markerIndex = markerNames.indexOf(name)
                         if (markerIndex == -1) {
-                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alertType: "error" })
+                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alert_type: "error" })
                             return
                         }
                         let markerIDs = this.storageHandler.getArucoMarkerIDs()
@@ -101,7 +101,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                         let marker_info = this.storageHandler.getArucoMarkerInfo()
                         let pose = marker_info.aruco_marker_info[markerID].pose
                         if (!pose) {
-                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alertType: "error" })
+                            this.setMoveBaseState({ state: "Cannot find Aruco Marker", alert_type: "error" })
                             return
                         }
                         FunctionProvider.remoteRobot?.navigateToAruco(name, pose)

@@ -93,12 +93,12 @@ export interface ArucoNavigationFeedback {
 
 export interface ArucoNavigationState {
     state: string
-    alertType: string
+    alert_type: string
 }
 
 export interface MoveBaseState {
     state: string
-    alertType: string
+    alert_type: string
 }
 
 export interface MoveBaseStateMessage {
