@@ -11,7 +11,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from visualization_msgs.msg import MarkerArray
 import numpy as np
 from sensor_msgs.msg import JointState
-from stretch_teleop_interface.msg import HeadScanAction, HeadScanGoal, NavigateToArucoAction, NavigateToArucoGoal, NavigateToArucoFeedback, NavigateToArucoResult
+from stretch_teleop_interface_msgs.msg import HeadScanAction, HeadScanGoal, NavigateToArucoAction, NavigateToArucoGoal, NavigateToArucoFeedback, NavigateToArucoResult
 
 class NavigateToArucoServer:
     def __init__(self):

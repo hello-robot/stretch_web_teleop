@@ -14,7 +14,7 @@ import compressed_image_transport
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
 from cv_bridge import CvBridge
-from stretch_teleop_interface.srv import CameraPerspective, DepthAR, ArucoMarkers
+from stretch_teleop_interface_msgs.srv import CameraPerspective, DepthAR, ArucoMarkers
 from visualization_msgs.msg import MarkerArray
 
 class ConfigureVideoStreams:
