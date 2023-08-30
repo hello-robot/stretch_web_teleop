@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-import rospy
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.time import Time
 import message_filters
 import numpy as np
 import cv2
 import yaml
 import sys
-import ros_numpy 
-import pcl 
-import tf2_ros 
-import compressed_image_transport 
+import ros2_numpy 
+import tf2_ros
 
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
@@ -17,13 +18,15 @@ from cv_bridge import CvBridge
 from stretch_teleop_interface_msgs.srv import CameraPerspective, DepthAR, ArucoMarkers
 from visualization_msgs.msg import MarkerArray
 
-class ConfigureVideoStreams:
+class ConfigureVideoStreams(Node):
     def __init__(self, params_file):
+        super().__init__('configure_video_streams')
+        
         with open(params_file, 'r') as params:
             self.image_params = yaml.safe_load(params)
 
-        self.tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(12))
-        tf2_ros.TransformListener(self.tf_buffer)
+        self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
+        self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         
         # Loaded params for each video stream
         self.overhead_params = self.image_params["overhead"] if "overhead" in self.image_params else None
@@ -41,20 +44,17 @@ class ConfigureVideoStreams:
         self.cv_bridge = CvBridge()
 
         # Compressed Image publishers
-        self.publisher_realsense_cmp = \
-            rospy.Publisher('/camera/color/image_raw/rotated/compressed', CompressedImage, queue_size=10)
-        self.publisher_overhead_cmp = \
-            rospy.Publisher('/navigation_camera/image_raw/rotated/compressed', CompressedImage, queue_size=10)
-        self.publisher_gripper_cmp = \
-            rospy.Publisher('/gripper_camera/image_raw/cropped/compressed', CompressedImage, queue_size=10)
+        self.publisher_realsense_cmp = self.create_publisher(CompressedImage, '/camera/color/image_raw/rotated/compressed', 10)
+        self.publisher_overhead_cmp = self.create_publisher(CompressedImage, '/navigation_camera/image_raw/rotated/compressed', 10)
+        self.publisher_gripper_cmp = self.create_publisher(CompressedImage, '/gripper_camera/image_raw/cropped/compressed', 10)
 
         # Subscribers
-        self.camera_rgb_subscriber = message_filters.Subscriber(f'/camera/color/image_raw', Image)
-        self.overhead_camera_rgb_subscriber = message_filters.Subscriber(f'/navigation_camera/image_raw', Image)
-        self.gripper_camera_rgb_subscriber = message_filters.Subscriber(f'/gripper_camera/image_raw', Image)
-        self.point_cloud_subscriber = message_filters.Subscriber("/voxel_grid/output", PointCloud2)
-        self.camera_info_subscriber = message_filters.Subscriber("/camera/aligned_depth_to_color/camera_info", CameraInfo)
-        self.aruco_markers_subscriber = message_filters.Subscriber("/aruco/marker_array", MarkerArray)
+        self.camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/camera/color/image_raw")
+        self.overhead_camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/navigation_camera/image_raw")
+        self.gripper_camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/gripper_camera/image_raw")
+        self.point_cloud_subscriber = message_filters.Subscriber(self, PointCloud2, "/voxel_grid/output")
+        self.camera_info_subscriber = message_filters.Subscriber(self, CameraInfo, "/camera/aligned_depth_to_color/camera_info")
+        self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, 
             self.overhead_camera_rgb_subscriber, 
@@ -66,7 +66,7 @@ class ConfigureVideoStreams:
         self.camera_synchronizer.registerCallback(self.camera_callback)
 
         # Service for requested image perspectives configured based on params file
-        self.camera_perspective_service = rospy.Service('camera_perspective', CameraPerspective, self.camera_perspective_callback)
+        self.camera_perspective_service = self.create_service(CameraPerspective, 'camera_perspective', self.camera_perspective_callback)
 
         # Default image perspectives
         self.camera_perspective = {"overhead": "nav", "realsense": "default", "gripper": "default"}
@@ -75,11 +75,11 @@ class ConfigureVideoStreams:
         self.gripper_camera_perspective = 'default'
 
         # Service for enabling the depth AR overlay on the realsense stream
-        self.depth_ar_service = rospy.Service('depth_ar', DepthAR, self.depth_ar_callback)
+        self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)
         self.depth_ar = False
 
-        # Service for enable aruco marker detection
-        self.aruco_markers_service = rospy.Service('aruco_markers', ArucoMarkers, self.display_aruco_markers_callback)
+        # Service for enabling aruco marker detection
+        self.aruco_markers_service = self.create_service(ArucoMarkers, 'aruco_markers', self.display_aruco_markers_callback)
         self.aruco_markers = False
 
     def pc_callback(self, msg, img):
@@ -88,20 +88,21 @@ class ConfigureVideoStreams:
             transform = self.tf_buffer.lookup_transform(
                 'base_link', 
                 'camera_color_optical_frame', 
-                rospy.Time(0)
+                Time(),
+                timeout=Duration(seconds=0.1)
             )
-        except tf2_ros.TransformException as e:
-            print(e)
+        except:
+            self.get_logger().warn("Could not find the transform between frames {} and {}".format('base_link', 'camera_color_optical_frame'))
             return img
         
         # Transform points cloud to base link and points that are in robot's reach
         pc_in_base_link_msg = do_transform_cloud(msg, transform)
-        pc_in_base_link = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
+        pc_in_base_link = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
         dist = np.sqrt(np.power(pc_in_base_link[:,0], 2) + np.power(pc_in_base_link[:,1], 2))
         filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
 
         # Get filtered points in camera frame
-        pc_in_camera = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
+        pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
         pts_in_range = pc_in_camera[filtered_indices, :]
         pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0],1))))
 
@@ -134,23 +135,27 @@ class ConfigureVideoStreams:
 
         return img
 
-    def camera_perspective_callback(self, req):
+    def camera_perspective_callback(self, req, res):
         if req.camera not in self.camera_perspective: 
             raise ValueError("CameraPerspective.srv camera must be overhead, realsense or gripper") 
         
         try: 
             self.camera_perspective[req.camera] = req.perspective
-            return True
+            res.success = True
+            return res
         except:
-            return False
+            res.success = False
+            return res
 
-    def depth_ar_callback(self, req):
+    def depth_ar_callback(self, req, res):
         self.depth_ar = req.enable
-        return True
+        res.success = True
+        return res
 
-    def display_aruco_markers_callback(self, req):
+    def display_aruco_markers_callback(self, req, res):
         self.aruco_markers = req.enable
-        return True
+        res.success = True
+        return res
 
     def crop_image(self, image, params):
         if params["x_min"] is None: raise ValueError("Crop x_min is not defined!")
@@ -235,24 +240,25 @@ class ConfigureVideoStreams:
 
     def publish_compressed_msg(self, image, publisher):
         msg = CompressedImage()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = self.get_clock().now().to_msg()
         msg.format = "jpeg"
         msg.data = np.array(cv2.imencode('.jpg', image)[1]).tobytes()
         publisher.publish(msg)
 
+    def timer_cb(self):
+        if self.overhead_camera_rgb_image is not None: 
+            self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
+        if self.realsense_rgb_image is not None: 
+            self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
+        if self.gripper_camera_rgb_image is not None: 
+            self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
+    
     def start(self):
         print("Publishing reconfigured video stream")
-        while not rospy.is_shutdown():
-            if self.overhead_camera_rgb_image is not None: 
-                self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
-            if self.realsense_rgb_image is not None: 
-                self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
-            if self.gripper_camera_rgb_image is not None: 
-                self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
-
-            rospy.sleep(0.1)
+        self.timer = self.create_timer(0.1, self.timer_cb)
 
 if __name__ == '__main__':
-    rospy.init_node('configure_video_streams')
+    rclpy.init()
     node = ConfigureVideoStreams(sys.argv[1])
     node.start()
+    rclpy.spin(node)
