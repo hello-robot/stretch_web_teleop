@@ -34,7 +34,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             link: 'link_aruco_shoulder'
         },
         '245': {
-            length_mm: 88.0,
+            length_mm: 88.0, 
             use_rgb_only: false,
             name: 'docking_station',
             link: null,
@@ -96,11 +96,89 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             name: 'unknown',
             link: null
         },
-        // 0: {
-        //     length_mm: 47,
+        // "0": {
+        //     length_mm: 40, 
+        //     use_rgb_only: false, 
+        //     name: "Brush",
+        //     link: null,
+        //     pose: {
+        //         transform: new ROSLIB.Transform({
+        //             translation: {
+        //                 x: 0.0,
+        //                 y: -0.6165221897614768,
+        //                 z:-0.8765156889436512
+        //             },
+        //             rotation: {
+        //                 x: -0.03965766243238807,
+        //                 y: 0.04420070564372583,
+        //                 z: 0.9982143182308036,
+        //                 w: 0.006462207990295707
+        //             }
+        //         })
+        //     }
+        // },
+        // "1": {
+        //     length_mm: 22,
         //     use_rgb_only: false,
-        //     name: 'light_switch',
-        //     link: null
-        // }
+        //     name: "Feeding Tool",
+        //     link: null,
+        //     pose: {
+        //         transform: new ROSLIB.Transform({
+        //             translation: {
+        //                 x: 0.0,
+        //                 y: -0.6165221897614768,
+        //                 z: -0.8765156889436512
+        //             },
+        //             rotation: {
+        //                 x: -0.03965766243238807,
+        //                 y: 0.04420070564372583,
+        //                 z: 0.9982143182308036,
+        //                 w: 0.006462207990295707
+        //             }
+        //         })
+        //     }
+        // },
+        // "2": {
+        //     length_mm: 40, 
+        //     use_rgb_only: false, 
+        //     name: "Button Pusher",
+        //     link: null,
+        //     pose: {
+        //         transform: new ROSLIB.Transform({
+        //             translation: {
+        //                 x: 0.0,
+        //                 y: -0.6165221897614768,
+        //                 z:-0.8765156889436512
+        //             },
+        //             rotation: {
+        //                 x: -0.03965766243238807,
+        //                 y: 0.04420070564372583,
+        //                 z: 0.9982143182308036,
+        //                 w: 0.006462207990295707
+        //             }
+        //         })
+        //     }
+        // },
+        "20": {
+            length_mm: 68, 
+            use_rgb_only: false, 
+            name: "Tool Shelf",
+            link: null,
+            pose: {
+                transform: new ROSLIB.Transform({
+                    translation: {
+                        x: 0.0,
+                        y: -1.2395535657717278,
+                        z: 0.655349797002288
+                    },
+                    rotation: {
+                        x: -0.007660462539611933,
+                        y: 0.720369323410184,
+                        z: 0.6932368040571439,
+                        w: -0.020787303947235967
+                    }
+                })
+            }
+        },
     }
 }

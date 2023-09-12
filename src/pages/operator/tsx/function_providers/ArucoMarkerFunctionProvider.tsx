@@ -71,6 +71,9 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
                 return (markerIndex: number) => {
                     let markerNames = this.storageHandler.getArucoMarkerNames()
                     if (markerNames[markerIndex] == 'docking_station') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
+                    // else if (markerNames[markerIndex] == 'Brush') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
+                    // else if (markerNames[markerIndex] == 'Feeding Tool') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
+                    // else if (markerNames[markerIndex] == 'Button Pusher') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alertType: "error" }
                     this.storageHandler.deleteMarker(markerNames[markerIndex])
                     let marker_info = this.storageHandler.getArucoMarkerInfo()
                     FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)

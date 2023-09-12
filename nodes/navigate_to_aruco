@@ -15,6 +15,7 @@ from sensor_msgs.msg import JointState
 from tf2_geometry_msgs import PoseStamped
 from stretch_teleop_interface.msg import HeadScanAction, HeadScanGoal, NavigateToArucoAction, NavigateToArucoGoal, NavigateToArucoFeedback, NavigateToArucoResult
 from stretch_teleop_interface.srv import RelativePose
+from geometry_msgs.msg import Twist
 
 class NavigateToArucoServer:
     def __init__(self):
@@ -29,6 +30,15 @@ class NavigateToArucoServer:
         self.preempt = False
         self.reconfigure_client = dynamic_reconfigure.client.Client("move_base")
 
+        self.cmd_vel = Twist()
+        self.cmd_vel.linear.x = 0.0
+        self.cmd_vel.linear.y = 0.0
+        self.cmd_vel.linear.z = 0.0
+        self.cmd_vel.angular.x = 0.0
+        self.cmd_vel.angular.y = 0.0
+        self.cmd_vel.angular.z = 0.0
+        self.cmd_vel_pub = rospy.Publisher('/stretch/cmd_vel', Twist, queue_size=10)
+
         self.tf2_buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tf2_buffer)
         self.tf2_broadcaster = tf2_ros.TransformBroadcaster()
@@ -41,6 +51,11 @@ class NavigateToArucoServer:
         self.move_base_client = actionlib.SimpleActionClient(
             "move_base",
             MoveBaseAction
+        )
+
+        self.head_to_aruco_client = actionlib.SimpleActionClient(
+            "head_to_aruco",
+            HeadScanAction
         )
 
         self.server.start()
@@ -229,10 +244,42 @@ class NavigateToArucoServer:
         action_goal.target_pose.header.stamp = rospy.Time.now()
         action_goal.target_pose.pose = goal_pose
 
+        # head_scan_goal = HeadScanGoal()
+        # head_scan_goal.name = self.aruco_name
+        # self.head_to_aruco_client.send_goal(head_scan_goal)
         result = self.move_base_client.send_goal_and_wait(action_goal)
-        
+        # self.head_to_aruco_client.cancel_all_goals()
+
         self.move_base_aruco_callback(result)
     
+    def rotate_to_place(self):
+        goal_angles = euler_from_quaternion([self.relative_pose_tf.transform.rotation.x,
+                                             self.relative_pose_tf.transform.rotation.y,
+                                             self.relative_pose_tf.transform.rotation.z,
+                                             self.relative_pose_tf.transform.rotation.w])
+        goal_theta = goal_angles[2]
+
+        diff = 0.5
+
+        while fabs(diff) > 0.025:
+            try:
+                curr_pose = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(), rospy.Duration(1.0))
+                curr_angles = euler_from_quaternion([curr_pose.transform.rotation.x,
+                                                     curr_pose.transform.rotation.y,
+                                                     curr_pose.transform.rotation.z,
+                                                     curr_pose.transform.rotation.w])
+                diff = goal_theta - curr_angles[2]
+                print(diff)
+                self.cmd_vel.angular.z = 0.75*diff
+                self.cmd_vel_pub.publish(self.cmd_vel)            
+            except:
+                print('except')
+                self.cmd_vel.angular.z = 0
+                self.cmd_vel_pub.publish(self.cmd_vel)
+
+        self.cmd_vel.angular.z = 0
+        self.cmd_vel_pub.publish(self.cmd_vel)
+        
     def move_base_aruco_callback(self, result):
         if self.server.is_preempt_requested():
             self.preempt_callback()
@@ -245,6 +292,8 @@ class NavigateToArucoServer:
             self.server.publish_feedback(self.feedback)
             self.server.set_aborted()
             return
+
+        self.rotate_to_place()
 
         rospy.sleep(0.1)
         self.feedback.state = 'Scanning for marker...'
@@ -284,6 +333,7 @@ class NavigateToArucoServer:
             self.map_to_aruco = new_map_to_aruco
             self.navigate_to_marker()
 
+        self.rotate_to_place()
         self.feedback.state = 'Aruco navigation succeeded!'
         self.feedback.alertType = "success"
         self.server.publish_feedback(self.feedback)

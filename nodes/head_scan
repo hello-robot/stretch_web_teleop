@@ -91,10 +91,10 @@ class HeadScanServer:
             min(self.pan_range[1], self.pan + 0.25),
             min(self.pan_range[1], self.pan + 0.5)]
         tilt_angles = [
-            max(self.tilt_range[0], self.tilt - 0.5), 
-            max(self.tilt_range[0], self.tilt - 0.25),
-            min(self.tilt_range[1], self.tilt + 0.25),
-            min(self.tilt_range[1], self.tilt + 0.5)]
+            max(self.tilt_range[0], self.tilt + 0.5), 
+            max(self.tilt_range[0], self.tilt + 0.25),
+            min(self.tilt_range[1], self.tilt - 0.25),
+            min(self.tilt_range[1], self.tilt - 0.5)]
         
         marker_found = self.scan(pan_angles, tilt_angles)
         if marker_found:
