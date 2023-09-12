@@ -98,7 +98,7 @@ class ConfigureVideoStreams:
         pc_in_base_link_msg = do_transform_cloud(msg, transform)
         pc_in_base_link = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
         dist = np.sqrt(np.power(pc_in_base_link[:,0], 2) + np.power(pc_in_base_link[:,1], 2))
-        filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
+        filtered_indices = np.where((dist > 0.25) & (dist < 0.9))[0]
 
         # Get filtered points in camera frame
         pc_in_camera = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
@@ -112,8 +112,10 @@ class ConfigureVideoStreams:
 
         # Change color of pixels in robot's reach
         if img is not None:
-            img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 191, 0, 50]
-            # img[y_idx, x_idx, 3] = 0
+            masked_img = img.copy()
+            masked_img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 217, 4, 50]
+            img = cv2.addWeighted(masked_img, 0.5, img, 0.5, 0)
+
         return img
 
     def aruco_markers_callback(self, msg, img):
@@ -130,7 +132,7 @@ class ConfigureVideoStreams:
             mask = self.create_circular_mask(img.shape[0], img.shape[1], (cy, cx), 20)
             masked_img = img.copy()
             masked_img[np.fliplr(mask)] = [255, 191, 0, 50]
-            img = cv2.addWeighted(masked_img, 0.4, img, 0.5, 0)
+            img = cv2.addWeighted(masked_img, 0.5, img, 0.5, 0)
 
         return img
 
