@@ -4,7 +4,7 @@ The web interface currently has a variety of control modes, displays and customi
 ## Overview of Layout
 We have a variety of layouts that you can load. We will start by exploring one of the layouts and how to can customize it to your liking.
 
-There are two tabs: `Navigation` and `Manipulation`. The `Navigation` tab has a overhead video stream from a fish eye camera and a video stream from a Realsense camera. The `Manipulation` tab has the same video streams from as the `Navigation` tab and an additional video stream from a fish eye camera mounted on the gripper. The overhead fish eye video stream in the `Manipulation` tab is cropped and rotated to focus on the arm and gripper.
+There are two tabs: `Navigation` and `Manipulation`. The `Navigation` tab has a overhead video stream from a fish eye camera and a video stream from a Realsense camera. The `Manipulation` tab has the same video streams as the `Navigation` tab and an additional video stream from a fish eye camera mounted on the gripper. The overhead fish eye video stream in the `Manipulation` tab is cropped and rotated to focus on the arm and gripper.
 
 | Navigation Tab                           | Manipulation Tab                             | 
 |----------------------------------------- | -------------------------------------------- |
