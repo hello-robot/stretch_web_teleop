@@ -111,6 +111,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 <title>{title}</title>
             </path>
             <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
+            <p>{title}</p>
         </React.Fragment>
     )
 }
@@ -214,8 +215,8 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             functions = [
                 B.ArmLift,
                 B.ArmLower,
-                B.ArmExtend,
-                B.ArmRetract
+                B.ArmRetract,
+                B.ArmExtend
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
@@ -225,6 +226,15 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
                 B.WristRotateOut,
                 B.GripperOpen,
                 B.GripperClose
+            ];
+            shape = ButtonPadShape.RowButtonPad;
+            break;
+        case ButtonPadId.DriveMobile:
+            functions = [
+                B.BaseForward,
+                B.BaseReverse,
+                B.BaseRotateLeft,
+                B.BaseRotateRight
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
