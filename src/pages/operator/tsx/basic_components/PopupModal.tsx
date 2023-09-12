@@ -14,6 +14,8 @@ export type PopupModalProps = {
     setShow: (show: boolean) => void,
     /** Callback when the user clicks accept. */
     onAccept: () => void,
+    /** Optional Callback when user cancels */
+    onCancel?: () => void
     /** Optional HTML id. */
     id?: string,
     /** Text to display on text button, defaults to "Accept" if undefined. */
@@ -60,7 +62,12 @@ export const PopupModal: React.FunctionComponent<React.PropsWithChildren<PopupMo
                 >
                     {props.children}
                     <div className="popup-modal-bottom-buttons">
-                        <button className="btn-red" onPointerDown={() => props.setShow(false)}>Cancel</button>
+                        <button 
+                            className="btn-red" 
+                            onPointerDown={() => { props.setShow(false); if (props.onCancel) props.onCancel() }}
+                        >
+                            Cancel
+                        </button>
                         <button 
                             className="btn-turquoise font-white" 
                             onPointerDown={handleClickAccept} 

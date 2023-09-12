@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg21"
+   version="1.1"
+   fill="none"
+   viewBox="0 0 190 187"
+   height="187"
+   width="190">
+  <metadata
+     id="metadata25">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="rotate(-90,94.9999,93.5)"
+     id="g14"
+     clip-path="url(#clip0_401_603)">
+    <path
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       id="path2"
+       d="M 95,188 169.478,93.5 H 20.5218 Z" />
+    <rect
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       y="0"
+       x="0"
+       id="rect4"
+       transform="matrix(1,0,0,-1,67,125)"
+       height="56"
+       width="56" />
+    <rect
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       y="0"
+       x="0"
+       id="rect6"
+       transform="matrix(1,0,0,-1,67,59)"
+       height="25"
+       width="56" />
+    <rect
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       y="0"
+       x="0"
+       id="rect8"
+       transform="matrix(1,0,0,-1,67,24)"
+       height="25"
+       width="56" />
+    <rect
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       y="0"
+       x="0"
+       id="rect10"
+       transform="matrix(1,0,0,-1,67,59)"
+       height="25"
+       width="56" />
+    <rect
+       style="fill:#d9d9d9;fill-opacity:0.8"
+       y="0"
+       x="0"
+       id="rect12"
+       transform="matrix(1,0,0,-1,67,24)"
+       height="25"
+       width="56" />
+  </g>
+  <defs
+     id="defs19">
+    <clipPath
+       id="clip0_401_603">
+      <rect
+         id="rect16"
+         transform="matrix(-1 0 0 1 190 0)"
+         fill="white"
+         height="187"
+         width="190" />
+    </clipPath>
+  </defs>
+</svg>

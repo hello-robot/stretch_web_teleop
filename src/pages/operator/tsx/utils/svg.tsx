@@ -14,8 +14,11 @@ import panLeft from "operator/icons/Pan_Left.svg"
 import panRight from "operator/icons/Pan_Right.svg"
 import tiltUp from "operator/icons/Tilt_Up.svg"
 import tiltDown from "operator/icons/Tilt_Down.svg"
+import armIn from "operator/icons/Arm_In.svg"
+import armOut from "operator/icons/Arm_Out.svg"
 
 import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider"
+import { isMobile } from "react-device-detect"
 
 /** The pixel width of SVG components. */
 export const SVG_RESOLUTION = 500;
@@ -340,9 +343,9 @@ function getRowButtonPadPaths(width: number, height: number): [string[], { x: nu
 export function getIcon(buttonPadButton: ButtonPadButton) {
     switch (buttonPadButton) {
         case (ButtonPadButton.BaseForward):
-            return driveForward;
+            return isMobile ? armUp : driveForward;
         case (ButtonPadButton.BaseReverse):
-            return driveReverse;
+            return isMobile ? armDown : driveReverse;
         case (ButtonPadButton.BaseRotateRight):
             return driveRight;
         case (ButtonPadButton.BaseRotateLeft):
@@ -352,9 +355,9 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
         case (ButtonPadButton.ArmLower):
             return armDown;
         case (ButtonPadButton.ArmExtend):
-            return armExtend;
+            return isMobile ? armIn : armExtend;
         case (ButtonPadButton.ArmRetract):
-            return armRetract;
+            return isMobile ? armOut : armRetract;
         case (ButtonPadButton.GripperOpen):
             return gripOpen;
         case (ButtonPadButton.GripperClose):

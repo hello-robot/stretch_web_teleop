@@ -5,8 +5,8 @@ import { SVG_RESOLUTION } from "../utils/svg";
 import { predicitiveDisplayFunctionProvider } from "..";
 import "operator/css/VirtualJoystick.css"
 
-const OUTER_RADIUS = SVG_RESOLUTION / 2 * 0.7;
-const JOYSTICK_RADIUS = SVG_RESOLUTION / 2 * 0.4;
+const OUTER_RADIUS = SVG_RESOLUTION / 2;
+const JOYSTICK_RADIUS = SVG_RESOLUTION / 3.3;
 
 
 export const VirtualJoystick = (props: CustomizableComponentProps) => {
