@@ -43,6 +43,15 @@ body {
     background-color: var(--background-color);
 }
 
+html {
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    -moz-user-select: -moz-none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 html,
 body,
 #root {
@@ -134,10 +143,16 @@ button .material-icons {
 @media(max-width:1300px) {
     button { 
         padding: var(--btn-padding-med); 
-        font-size: smaller;
+        /* font-size: 90px; */
     }
 
     .material-icons {
         font-size: larger;
+    }
+
+    .under-video-area button {
+        /* font-size: 30px; */
+        padding: var(--btn-padding);
+        gap: 10px;
     }
 }
