@@ -51,6 +51,14 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                         this.storageHandler.savePoseRecording(name, this.poses)
                         this.poses = []
                     }
+            case MovementRecorderFunction.StopRecording:
+                return () => {
+                    if (this.recordPosesHeartbeat) {
+                        clearInterval(this.recordPosesHeartbeat)
+                        this.recordPosesHeartbeat = undefined
+                    }
+                    this.poses = []
+                }
             case MovementRecorderFunction.SavedRecordingNames:
                 return () => { 
                         return this.storageHandler.getRecordingNames()
@@ -60,12 +68,23 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                         let recordingNames = this.storageHandler.getRecordingNames()
                         this.storageHandler.deleteRecording(recordingNames[recordingID])
                     }
+            case MovementRecorderFunction.DeleteRecordingName:
+                return (name: string) => { 
+                        this.storageHandler.deleteRecording(name)
+                    }
             case MovementRecorderFunction.LoadRecording:
                 return (recordingID: number) => { 
                         let recordingNames = this.storageHandler.getRecordingNames()
                         let recording = this.storageHandler.getRecording(recordingNames[recordingID])
                         FunctionProvider.remoteRobot?.playbackPoses(recording)
                     }
+            case MovementRecorderFunction.LoadRecordingName:
+                return (name: string) => { 
+                        let recording = this.storageHandler.getRecording(name)
+                        FunctionProvider.remoteRobot?.playbackPoses(recording)
+                    }
+            case MovementRecorderFunction.Cancel:
+                return () => FunctionProvider.remoteRobot?.stopTrajectory()
         }
     }
 }

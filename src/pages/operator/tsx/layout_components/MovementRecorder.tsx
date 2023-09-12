@@ -12,6 +12,7 @@ import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 export enum MovementRecorderFunction {
     Record,
     SaveRecording,
+    StopRecording,
     SavedRecordingNames, 
     DeleteRecording,
     LoadRecording,
@@ -23,6 +24,7 @@ export enum MovementRecorderFunction {
 export interface MovementRecorderFunctions {
     Record: () => void
     SaveRecording: (name: string) => void,
+    StopRecording: () => void,
     SavedRecordingNames: () => string[],
     DeleteRecording: (recordingID: number) => void,
     LoadRecording: (recordingID: number) => void
@@ -30,12 +32,13 @@ export interface MovementRecorderFunctions {
 
 export const MovementRecorder = (props: { 
     hideLabels: boolean,
+    globalRecord?: boolean,
     isRecording?: boolean,
-    onRecordingChange?: (isRecording: boolean) => void
 }) => {
     let functions: MovementRecorderFunctions = {
         Record: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.Record) as () => void,
         SaveRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SaveRecording) as (name: string) => void,
+        StopRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.StopRecording) as () => void,
         SavedRecordingNames: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.SavedRecordingNames) as () => string[],
         DeleteRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.DeleteRecording) as (recordingID: number) => void,
         LoadRecording: movementRecorderFunctionProvider.provideFunctions(MovementRecorderFunction.LoadRecording) as (recordingID: number) => void
@@ -72,6 +75,7 @@ export const MovementRecorder = (props: {
                 setShow={props.setShow}
                 show={props.show}
                 onAccept={handleAccept}
+                onCancel={() => functions.StopRecording()}
                 id="save-recording-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
@@ -91,9 +95,26 @@ export const MovementRecorder = (props: {
         )
     }
 
+    useEffect(() => {
+        if (props.isRecording == undefined) {
+            return
+        } else if (props.isRecording) {
+            functions.Record()
+        } else {
+            setShowSaveRecordingModal(true)
+        }
+    }, [props.isRecording])
+
+    if (props.globalRecord !== undefined && !props.globalRecord) return (
+        <SaveRecordingModal 
+            setShow={setShowSaveRecordingModal}
+            show={showSaveRecordingModal}
+        />
+    )
+
     return (
-        !isMobile 
-        ? <React.Fragment>
+        !isMobile ?
+        <React.Fragment>
             <div id="movement-recorder-container">Movement Recorder</div>
             <div id="movement-recorder-container">
                 <Dropdown
@@ -157,7 +178,7 @@ export const MovementRecorder = (props: {
         <React.Fragment>
             <RadioGroup functs={radioFuncts} />
             <div className="global-btns">
-                <div className="mobile-movement-save-btn" onClick={() => {
+                {/* <div className="mobile-movement-save-btn" onClick={() => {
                         if (!isRecording) {
                             setIsRecording(true)
                             functions.Record()
@@ -174,7 +195,7 @@ export const MovementRecorder = (props: {
                         : <span className="material-icons">save</span>
                     }
                     {!isRecording ? <i>Record</i> : <i>Save</i> }
-                </div>
+                </div> */}
                 <div className="mobile-movement-play-btn" onClick={() => {
                     if (selectedIdx != undefined && selectedIdx > -1) { 
                         functions.LoadRecording(selectedIdx)}
