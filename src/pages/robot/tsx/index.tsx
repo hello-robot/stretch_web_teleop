@@ -28,7 +28,8 @@ robot.connect().then(() => {
         peerRole: 'robot',
         polite: false,
         onRobotConnectionStart: handleSessionStart,
-        onMessage: handleMessage
+        onMessage: handleMessage,
+        onConnectionEnd: disconnectFromRobot
     })
 
     connection.joinRobotRoom()
@@ -248,6 +249,14 @@ function handleMessage(message: WebRTCMessage) {
             robot.getRelativePose(message.marker_name)
             break;
     }
+};
+
+function disconnectFromRobot() {
+    connection.hangup()
+}
+
+window.onbeforeunload = () => {
+    connection.hangup()
 };
 
 // New method of rendering in react 18

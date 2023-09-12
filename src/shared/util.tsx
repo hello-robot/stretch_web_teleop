@@ -49,6 +49,10 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
+export interface Transform {
+    transform: ROSLIB.Transform
+}
+
 export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | cmd;
 
 interface StopTrajectoryMessage {
@@ -202,9 +206,9 @@ export const REALSENSE_GRIPPER_POSE: RobotPose = {
 }
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
-    "wrist_extension": [0.05, .518],
+    "wrist_extension": [0.03, .518],
     "joint_wrist_yaw": [-1.37, 4.41],
-    "joint_lift": [0.175, 1.05],
+    "joint_lift": [0.165, 1.09],
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
     "joint_gripper_finger_left": [-0.375, 0.149],
@@ -218,8 +222,8 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "wrist_extension": .04,
     "joint_lift": .04,
     "joint_wrist_yaw": .1,
-    "translate_mobile_base": .1,
-    "rotate_mobile_base": .3
+    "translate_mobile_base": .2,
+    "rotate_mobile_base": .4
 }
 
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
