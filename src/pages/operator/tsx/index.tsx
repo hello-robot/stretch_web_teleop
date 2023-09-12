@@ -15,14 +15,13 @@ import { FunctionProvider } from './function_providers/FunctionProvider';
 import { PredictiveDisplayFunctionProvider } from './function_providers/PredictiveDisplayFunctionProvider';
 import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
 import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
-import "operator/css/index.css";
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
 import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
-import { ARUCO_MARKER_INFO } from './utils/aruco_markers_dict';
 import { Caregiver } from './Caregiver';
 import {isMobile} from 'react-device-detect';
+import "operator/css/index.css";
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;

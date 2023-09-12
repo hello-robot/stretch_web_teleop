@@ -1,7 +1,7 @@
 import React, { PointerEventHandler, useState } from "react";
 import { ActionMode, ButtonPadId, CameraViewId, ComponentDefinition, ComponentType, MapDefinition } from "./utils/component_definitions";
 import { ArucoNavigationState, className, MoveBaseState, RemoteStream } from "shared/util";
-import { arucoMarkerFunctionProvider, buttonFunctionProvider, movementRecorderFunctionProvider, underMapFunctionProvider } from ".";
+import { arucoMarkerFunctionProvider, buttonFunctionProvider, movementRecorderFunctionProvider, underMapFunctionProvider, underVideoFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
@@ -15,6 +15,9 @@ import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
 import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
 import { MovementRecorder, MovementRecorderFunction } from "./layout_components/MovementRecorder";
+import { ArucoMarkers } from "./layout_components/ArucoMarkers";
+import { CheckToggleButton } from "./basic_components/CheckToggleButton";
+import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 
 /** Operator interface webpage */
 export const Caregiver = (props: {
@@ -25,15 +28,13 @@ export const Caregiver = (props: {
     const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
     const [cameraID, setCameraID] = React.useState<CameraViewId>(CameraViewId.realsense)
-    const [rerender, setRerender] = React.useState<boolean>(false);
-    const [activeSelection, setActiveSelection] = React.useState<string>("drive")
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
-    const [screenType, setScreenType] = React.useState<string>("control")
     const [hideMap, setHideMap] = React.useState<boolean>(true)
     const [hideControls, setHideControls] = React.useState<boolean>(false)
     const [activeMainGroupTab, setActiveMainGroupTab] = React.useState<number>(0)
     const [activeControlTab, setActiveControlTab] = React.useState<number>(0)
-    const [isRecording, setIsRecording] = React.useState<boolean>(false);
+    const [isRecording, setIsRecording] = React.useState<boolean>();
+    const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
 
     FunctionProvider.actionMode = ActionMode.PressRelease;
 
@@ -47,8 +48,10 @@ export const Caregiver = (props: {
             if (state == ButtonState.Collision) collisionButtons.push(button)
         })
         setButtonCollision(collisionButtons)
-        buttonStateMap.current = bsm;
-        setButtonStateMapRerender(!buttonStateMapRerender);
+        if (bsm !== buttonStateMap.current) {
+            buttonStateMap.current = bsm;
+            setButtonStateMapRerender(!buttonStateMapRerender);
+        }
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
@@ -113,11 +116,23 @@ export const Caregiver = (props: {
     const driveMode = (show: boolean) => { return (
         show
         ? <React.Fragment key={'drive-mode'}> 
-            <VirtualJoystick 
+            {/* <VirtualJoystick 
                 {...{
                     path: "",
                     definition: { type: ComponentType.VirtualJoystick },
                     sharedState: sharedState
+                }}
+            /> */}
+            <ButtonPad
+                {...{
+                    path: "",
+                    definition: { 
+                        type: ComponentType.ButtonPad,
+                    id: ButtonPadId.DriveMobile 
+                    },
+                    sharedState: sharedState,
+                    overlay: false,
+                    aspectRatio: 3.35
                 }}
             />
         </React.Fragment>
@@ -183,10 +198,9 @@ export const Caregiver = (props: {
     }
 
     const controlModes = (show: boolean) => { return ( show ? <ControlModes key={'control-modes'}/> : <></>)}
-    const movementList = (show: boolean) => { return ( show ? <MovementRecorder hideLabels={false} isRecording={isRecording} onRecordingChange={(recording: boolean) => setIsRecording(recording)}/> : <></>)}
-    const markers = (show: boolean) => { return ( show ? <p key={'markers'}>Markers</p> : <></>)}
+    const recordingList = (show: boolean) => { return ( <MovementRecorder globalRecord={show} hideLabels={false} isRecording={isRecording}/>)}
+    const markers = (show: boolean) => { return ( show ? <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback} hideLabels={false}/> : <></>)}
 
-    console.log(isRecording)
     return (
         <div id="caregiver" onContextMenu={(e)=> e.preventDefault()}>
             <div id="caregiver-body">
@@ -196,26 +210,56 @@ export const Caregiver = (props: {
                             if (cameraID == CameraViewId.realsense) setCameraID(CameraViewId.overhead)
                             else if (cameraID == CameraViewId.overhead) setCameraID(CameraViewId.gripper)
                             else if (cameraID == CameraViewId.gripper) setCameraID(CameraViewId.realsense)
-                            // setRerender(!rerender)
                         }}>
                             <span className="material-icons">
                                 photo_camera
                             </span>
                         </button>
+                        <button onPointerDown={() => {setHideMap(false); setHideControls(true)}}>
+                            <span className="material-icons">
+                                map
+                            </span>
+                        </button>
                     </div>
-                    <div {...swipeHandlers}>
+                    {cameraID == CameraViewId.realsense &&
+                        <div className="depth-sensing">
+                            <CheckToggleButton
+                                checked={depthSensing}
+                                onClick={() => {
+                                    setDepthSensing(!depthSensing)
+                                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing).onCheck!(!depthSensing)
+                                }}
+                                label="Depth Sensing"
+                            />
+                        </div>
+                    }
+                    <button className="record" onPointerDown={() => { setIsRecording(!isRecording);  }}>
+                        { !isRecording 
+                            ? <><span className="material-icons">radio_button_checked</span><i>Record</i></> 
+                            : <><div className="recording"></div><div className="record-circle"></div><i>Stop Recording</i></> }
+                    </button>
+                    {/* <div {...swipeHandlers}> */}
+                    <div>
                         <SimpleCameraView id={ cameraID } remoteStreams={ remoteStreams }/>
                     </div>
                     <TabGroup 
-                        tabLabels={['Controls', 'Movements', 'Markers']}
-                        tabContent={[controlModes, movementList, markers]}
+                        tabLabels={['Controls', 'Recordings', 'Markers']}
+                        tabContent={[controlModes, recordingList, markers]}
                         startIdx={activeMainGroupTab}
                         onChange={(index: number) => setActiveMainGroupTab(index)}
                         pill={false}
                         key={'main-group'}
                     />
                 </div>
-                <div className={className('map', {hideMap})} {...swipeHandlers}>
+                {/* <div className={className('map', {hideMap})} {...swipeHandlers}> */}
+                <div className={className('map', {hideMap})}>
+                    <div className={'switch-camera'}>
+                        <button onPointerDown={() => {setHideMap(true); setHideControls(false)}}>
+                            <span className="material-icons">
+                                photo_camera
+                            </span>
+                        </button>
+                    </div>
                     <Map
                         {...{
                             path: "",
