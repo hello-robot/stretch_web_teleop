@@ -2,6 +2,7 @@ import ROSLIB from "roslib";
 import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
+import { REMOTE_CAREGIVER_LAYOUT } from "../default_layouts/REMOTE_CAREGIVER_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
 import { ArucoMarkersInfo, RobotPose } from "shared/util";
 import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
@@ -230,7 +231,7 @@ export abstract class StorageHandler {
         
         // Only return ID for docking station
         // Other IDs are currently not applicable for aruco navigation
-        return['245']
+        return['245', '20'] // ['0', '1', '2']
     }
 
     public loadDefaultArucoMarkerNames(): string[] {
@@ -243,6 +244,6 @@ export abstract class StorageHandler {
         
         // Only return ID for docking station
         // Other IDs are currently not applicable for aruco navigation
-        return ['docking_station']
+        return ['docking_station', 'Tool Shelf'] // ['Brush', 'Feeding Tool', 'Button Pusher']
     }
 }
