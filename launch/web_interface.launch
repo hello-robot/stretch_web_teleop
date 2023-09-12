@@ -137,6 +137,7 @@
     <rosparam file="$(find stretch_navigation)/config/global_costmap_params_withmap.yaml" command="load" />
     <rosparam file="$(find stretch_navigation)/config/base_local_planner_params.yaml" command="load" />
     <remap from="odom" to="odometry/filtered" />
+    <param name="planner_frequency" value="1" />
     <!-- <param name="recovery_behaviors" value="[ {name: rotate_recovery, type: rotate_recovery/RotateRecovery}, {name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},{name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}]"/> -->
     <!-- <rosparam file="$(find stretch_navigation)/config/base_global_planner_params.yaml" command="load" />
     
@@ -148,7 +149,8 @@
 
   <!-- <rosparam command="load" file="$(find stretch_teleop_interface)/config/stretch_marker_dict.yaml" /> -->
   <node name="detect_aruco_markers" pkg="stretch_teleop_interface" type="detect_aruco_markers" output="screen"/>
-
-  <!-- <node name="aruco_navigation" pkg="stretch_teleop_interface" type="aruco_navigation" output="screen"/> -->
+  <node name="head_scan" pkg="stretch_teleop_interface" type="head_scan" output="screen"/>
+  <node name="head_to_aruco" pkg="stretch_teleop_interface" type="head_to_aruco" output="screen"/>
+  <node name="navigate_to_aruco" pkg="stretch_teleop_interface" type="navigate_to_aruco" output="screen"/>
 
 </launch>
