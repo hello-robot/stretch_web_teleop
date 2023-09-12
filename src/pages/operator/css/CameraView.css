@@ -155,6 +155,7 @@
 
     padding-top: var(--padding);
     grid-row: 2/2;
+    z-index: 1;
 }
 
 
