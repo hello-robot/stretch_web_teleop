@@ -644,8 +644,8 @@ export class Robot extends React.Component {
 
     stopTrajectoryClient() {
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
+        this.trajectoryClient.cancel()
         if (this.poseGoal) {
-            this.trajectoryClient.cancel()
             this.poseGoal.cancel()
             this.poseGoal = undefined
         }
@@ -653,8 +653,8 @@ export class Robot extends React.Component {
 
     stopMoveBaseClient() {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
+        this.moveBaseClient.cancel()
         if (this.moveBaseGoal) {
-            this.moveBaseClient.cancel()
             this.moveBaseGoal.cancel()
             this.moveBaseGoal = undefined
         }
@@ -662,8 +662,8 @@ export class Robot extends React.Component {
 
     stopNavigateToArucoClient() {
         if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
+        this.navigateToArucoClient.cancel()
         if (this.navigateToArucoGoal) {
-            this.navigateToArucoClient.cancel()
             this.navigateToArucoGoal.cancel()
             this.navigateToArucoGoal = undefined
         }
@@ -771,7 +771,7 @@ export function inCollision(props: { jointStateMessage: ROSJointState, jointName
     const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
         "joint_head_tilt": [-50, 50],
         "joint_head_pan": [-50, 50],
-        "wrist_extension": [-30, 30],
+        "wrist_extension": [-40, 40],
         "joint_lift": [0, 70],
         "joint_wrist_yaw": [-10, 10],
     }
