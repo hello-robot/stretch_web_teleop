@@ -1,17 +1,17 @@
 .button-grid {
     flex: 2;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(4, auto 1fr);
     grid-template-areas:
-        "header0 header0 header0 header0"
-        "b0 b1 b2 b3"
-        "header1 header1 header1 header1"
-        "b4 b5 b6 b7"
-        "header2 header2 header2 header2"
-        ". b8 b9 ."
-        "header3 header3 header3 header3"
-        ". b10 b11 ."
+        "header0 header0 header0 header0 header0 header0"
+        ". b0 b1 b2 b3 ."
+        "header1 header1 header1 header1 header1 header1"
+        ". b4 b5 b6 b7 ."
+        "header2 header2 header2 header2 header2 header2"
+        "b8 b9 b10 b11 b12 b13"
+        "header3 header3 header3 header3 header3 header3"
+        ". . b14 b15 . ."
     ;
 
     padding: 0.4rem;
@@ -54,6 +54,6 @@
 }
 
 .button-grid-bkg-color {
-    grid-column: 1 / 5;
+    grid-column: 1 / 7;
     height: 5rem;
 }

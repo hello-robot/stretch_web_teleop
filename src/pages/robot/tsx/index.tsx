@@ -60,7 +60,7 @@ robot.connect().then(() => {
         } else {
             window.location.reload()
         }
-    }, 10000);    
+    }, 5000);    
 })
 
 function handleSessionStart() {
@@ -121,7 +121,6 @@ async function forwardOccupancyGrid() {
     if (!connection) throw 'WebRTC connection undefined'
 
     occupancyGrid = await robot.getOccupancyGrid()
-
     let splitOccupancyGrid: ROSOccupancyGrid = {
         header: occupancyGrid.header,
         info: occupancyGrid.info,
@@ -174,6 +173,7 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
 }
 
 function setOccupancyGrid(message: ROSOccupancyGrid) {
+    console.log("Set occupancy grid")
     occupancyGrid = message
 }
 
