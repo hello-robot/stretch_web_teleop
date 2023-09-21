@@ -1,7 +1,6 @@
 import { MoveBaseState, ROSPose, waitUntil } from "shared/util"
 import { StorageHandler } from "../storage_handler/StorageHandler"
 import { FunctionProvider } from "./FunctionProvider"
-import { resolve } from "path"
 
 export enum UnderMapButton {
     SelectGoal,
@@ -13,8 +12,7 @@ export enum UnderMapButton {
     GetSavedPoseNames,
     GetSavedPoseTypes,
     GetSavedPoses,
-    NavigateToAruco,
-    GoalReached
+    NavigateToAruco
 }
 
 export class UnderMapFunctionProvider extends FunctionProvider {
@@ -117,19 +115,6 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 return () => { return this.storageHandler.getMapPoseTypes() }
             case UnderMapButton.GetSavedPoses:
                 return () => { return this.storageHandler.getMapPoses() }
-            case UnderMapButton.GoalReached:
-                return () => { 
-                    const promise = new Promise((resolve, reject) => { 
-                        let interval = setInterval(() => { 
-                            let goalReached = FunctionProvider.remoteRobot?.isGoalReached()
-                            if (goalReached) {
-                                clearInterval(interval)
-                                resolve(true)
-                            }
-                        });
-                    });
-                    return promise; 
-                }
             default:
                 throw Error(`Cannot get function for unknown UnderMapButton ${button}`)
         }
