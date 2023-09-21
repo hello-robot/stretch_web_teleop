@@ -58,7 +58,7 @@ export const Operator = (props: {
     arucoMarkerFunctionProvider.setOperatorCallback(arucoNavigationStateCallback);
     let arucoAlertTimeout: NodeJS.Timeout;
     React.useEffect(() => {
-        if (arucoNavigationState && arucoNavigationState.alertType != "info") {
+        if (arucoNavigationState && arucoNavigationState.alert_type != "info") {
             if (arucoAlertTimeout) clearTimeout(arucoAlertTimeout)
             arucoAlertTimeout = setTimeout(() => {
                 setArucoNavigationState(undefined)
@@ -72,7 +72,7 @@ export const Operator = (props: {
     underMapFunctionProvider.setOperatorCallback(moveBaseStateCallback);
     let moveBaseAlertTimeout: NodeJS.Timeout;
     React.useEffect(() => {
-        if (moveBaseState && moveBaseState.alertType != "info") {
+        if (moveBaseState && moveBaseState.alert_type != "info") {
             if (moveBaseAlertTimeout) clearTimeout(moveBaseAlertTimeout)
             moveBaseAlertTimeout = setTimeout(() => {
                 setMoveBaseState(undefined)
@@ -299,14 +299,14 @@ export const Operator = (props: {
                 {arucoNavigationState &&
                     <div className="operator-collision-alerts">
                         <div className={className('operator-alert', { fadeIn: arucoNavigationState !== undefined, fadeOut: arucoNavigationState == undefined })}>
-                            <Alert type={arucoNavigationState.alertType} message={arucoNavigationState.state} />
+                            <Alert type={arucoNavigationState.alert_type} message={arucoNavigationState.state} />
                         </div>
                     </div>
                 }
                 {moveBaseState && !arucoNavigationState &&
                     <div className="operator-collision-alerts">
                         <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
-                            <Alert type={moveBaseState.alertType} message={moveBaseState.state} />
+                            <Alert type={moveBaseState.alert_type} message={moveBaseState.state} />
                         </div>
                     </div>
                 }

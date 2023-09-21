@@ -21,7 +21,7 @@ export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
-let occupancyGrid: ROSOccupancyGrid;
+let occupancyGrid: ROSOccupancyGrid | undefined;
 
 robot.connect().then(() => {
     connection = new WebRTCConnection({
@@ -83,7 +83,7 @@ function handleSessionStart() {
 function forwardMoveBaseState(state: MoveBaseState) {
     if (!connection) throw 'WebRTC connection undefined!'
     
-    if (state.alertType != "info") {
+    if (state.alert_type != "info") {
         connection.sendData({
             type: "goalStatus",
             message: state
@@ -117,8 +117,10 @@ function forwardJointStates(jointState: ROSJointState) {
     } as ValidJointStateMessage);
 }
 
-function forwardOccupancyGrid() {
+async function forwardOccupancyGrid() {
     if (!connection) throw 'WebRTC connection undefined'
+
+    occupancyGrid = await robot.getOccupancyGrid()
 
     let splitOccupancyGrid: ROSOccupancyGrid = {
         header: occupancyGrid.header,

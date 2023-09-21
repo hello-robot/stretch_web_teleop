@@ -21,7 +21,7 @@ export enum ArucoMarkersFunction {
 
 // export interface ArucoNavigationState {
 //     state: ArucoNavigationResult | string,
-//     alertType: string
+//     alert_type: string
 // }
 
 export interface ArucoMarkersFunctions {

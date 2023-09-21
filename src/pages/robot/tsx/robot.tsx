@@ -82,7 +82,7 @@ export class Robot extends React.Component {
 
     async onConnect() {
         this.subscribeToJointState()
-        this.subscribeToOccupancyGrid()
+        // this.subscribeToOccupancyGrid()
         this.subscribeToMarkerArray()
         // this.subscribeToArucoNavigationState()
         this.subscribeToJointTrajectoryResult()
@@ -132,18 +132,19 @@ export class Robot extends React.Component {
         topic.subscribe(props.callback)
     }
     
-    subscribeToOccupancyGrid() {
-        let topic: ROSLIB.Topic<ROSOccupancyGrid> = new ROSLIB.Topic({
+    async getOccupancyGrid() {
+        let getMapService = new ROSLIB.Service({
             ros: ros,
-            name: 'map',
-            messageType: 'nav_msgs/OccupancyGrid',
-            compression: 'png'
-        })
-
-        topic.subscribe((msg: ROSOccupancyGrid) => {
-            console.log('occupancy grid')
-            if (this.occupancyGridCallback) this.occupancyGridCallback(msg)
-        })
+            name: '/map_server/map',
+            serviceType: 'nav2_msgs/srv/GetMap'
+        });
+        
+        var request = new ROSLIB.ServiceRequest({})
+        return new Promise((resolve: (value: ROSOccupancyGrid) => void) => {
+            getMapService?.callService(request, (response: {map: ROSOccupancyGrid}) => {
+                resolve(response.map)
+            })
+        });
     }
 
     subscribeToMarkerArray() {
@@ -179,9 +180,9 @@ export class Robot extends React.Component {
     
         topic.subscribe((msg: MoveBaseActionResult) => {
             if (this.moveBaseResultCallback) {
-                if (msg.status.status == 2) this.moveBaseResultCallback({state: "Navigation cancelled!", alertType: "error"})
-                else if (msg.status.status == 3) this.moveBaseResultCallback({state: "Navigation succeeded!", alertType: "success"})
-                else this.moveBaseResultCallback({state: "Navigation failed!", alertType: "error"})
+                if (msg.status.status == 2) this.moveBaseResultCallback({state: "Navigation cancelled!", alert_type: "error"})
+                else if (msg.status.status == 3) this.moveBaseResultCallback({state: "Navigation succeeded!", alert_type: "success"})
+                else this.moveBaseResultCallback({state: "Navigation failed!", alert_type: "error"})
             }
         });
     };
@@ -211,20 +212,19 @@ export class Robot extends React.Component {
     }
 
     createTrajectoryClient() {
-        this.trajectoryClient = new ROSLIB.ActionClient({
+        this.trajectoryClient = new ROSLIB.ActionHandle({
             ros: ros,
-            serverName: '/stretch_controller/follow_joint_trajectory',
-            actionName: 'control_msgs/FollowJointTrajectoryAction',
-            timeout: 100
+            name: '/stretch_controller/follow_joint_trajectory',
+            actionType: 'control_msgs/action/FollowJointTrajectory',
         });
     }
     
     createMoveBaseClient() {
-        this.moveBaseClient = new ROSLIB.ActionClient({
+        this.moveBaseClient = new ROSLIB.ActionHandle({
             ros: ros,
-            serverName: '/move_base',
-            actionName: 'move_base_msgs/MoveBaseAction',
-            timeout: 100
+            name: '/navigate_to_pose',
+            actionType: 'nav2_msgs/action/NavigateToPose',
+            // timeout: 100
         });
     }
 
@@ -497,16 +497,16 @@ export class Robot extends React.Component {
     makeMoveBaseGoal(pose: ROSPose) {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
 
-        let newGoal = new ROSLIB.Goal({
-            actionClient: this.moveBaseClient,
-            goalMessage: {
-                target_pose: {
-                    header: {
-                        frame_id: 'map'
-                    },
-                    pose: pose
-                }
+        let newGoal = new ROSLIB.ActionGoal({
+            // actionClient: this.moveBaseClient,
+            // goalMessage: {
+            pose: {
+                header: {
+                    frame_id: 'map'
+                },
+                pose: pose
             }
+            // }
         })
 
         // newGoal.on('result', (result) => {
@@ -523,38 +523,35 @@ export class Robot extends React.Component {
             jointNames.push(key as ValidJoints)
             jointPositions.push(pose[key as ValidJoints]!)
         }
+
+        console.log(this.trajectoryClient)
     
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
-        let newGoal = new ROSLIB.Goal({
-            actionClient: this.trajectoryClient,
-            goalMessage: {
-                trajectory: {
-                    header: {
-                        stamp: {
-                            secs: 0,
+        let newGoal = new ROSLIB.ActionGoal({
+            trajectory: {
+                header: {
+
+                    stamp: {
+                        secs: 0,
+                        nsecs: 0
+                    }
+                },
+                joint_names: jointNames,
+                points: [
+                    {
+                        positions: jointPositions,
+                        // The following might causing the jumpiness in continuous motions
+                        time_from_start: {
+                            secs: 1,
                             nsecs: 0
                         }
-                    },
-                    joint_names: jointNames,
-                    points: [
-                        {
-                            positions: jointPositions,
-                            // The following might causing the jumpiness in continuous motions
-                            time_from_start: {
-                                secs: 1,
-                                nsecs: 0
-                            }
-    
-                        }
-                    ]
-                }
+
+                    }
+                ]
             }
+            // }
         });
     
-        // newGoal.on('result', function (result) {
-        //     console.log('Final Result: ' + result);
-        // });
-
         return newGoal
     }
 
@@ -581,19 +578,16 @@ export class Robot extends React.Component {
         });
 
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
-        let newGoal = new ROSLIB.Goal({
-            actionClient: this.trajectoryClient,
-            goalMessage: {
-                trajectory: {
-                    header: {
-                        stamp: {
-                            secs: 0,
-                            nsecs: 0
-                        }
-                    },
-                    joint_names: jointNames,
-                    points: points
+        let newGoal = new ROSLIB.ActionGoal({
+            trajectory: {
+                header: {
+                    stamp: {
+                        secs: 0,
+                        nsecs: 0
+                    }
                 },
+                joint_names: jointNames,
+                points: points
             }
         });
 
@@ -601,23 +595,26 @@ export class Robot extends React.Component {
     }
 
     executePoseGoal(pose: RobotPose) {
-        this.stopExecution();
-        this.trajectoryClient?.cancel();
+        this.switchToPositionMode()
+        // this.stopExecution();
         this.poseGoal = this.makePoseGoal(pose)
-        this.poseGoal.send()
+        this.trajectoryClient.createClient(this.poseGoal)
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
-        this.stopExecution();
+        this.switchToPositionMode()
+        // this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses)
-        this.poseGoal.send()
+        this.trajectoryClient.createClient(this.poseGoal)
     }
 
     executeMoveBaseGoal(pose: ROSPose) {
-        this.stopExecution()
+        this.switchToNavigationMode()
+        // this.stopExecution()
         this.moveBaseGoal = this.makeMoveBaseGoal(pose)
-        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alertType: "info"})
-        this.moveBaseGoal.send()
+        this.moveBaseClient.createClient(this.moveBaseGoal)
+        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alert_type: "info"})
+        // this.moveBaseGoal.send()
     }
 
     executeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
@@ -627,13 +624,9 @@ export class Robot extends React.Component {
     }
 
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
-        this.stopExecution();
+        this.switchToPositionMode()
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
-        if (!this.poseGoal) {
-            console.log("Joint in collision!")
-            return;
-        }
-        this.poseGoal.send()
+        this.trajectoryClient.createClient(this.poseGoal)
     }
 
     stopExecution() {
@@ -644,18 +637,18 @@ export class Robot extends React.Component {
 
     stopTrajectoryClient() {
         if (!this.trajectoryClient) throw 'trajectoryClient is undefined';
-        this.trajectoryClient.cancel()
         if (this.poseGoal) {
-            this.poseGoal.cancel()
+            this.trajectoryClient.cancelGoal()
+            // this.poseGoal.cancel()
             this.poseGoal = undefined
         }
     }
 
     stopMoveBaseClient() {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
-        this.moveBaseClient.cancel()
         if (this.moveBaseGoal) {
-            this.moveBaseGoal.cancel()
+            this.moveBaseClient.cancelGoal()
+            // this.moveBaseGoal.cancel()
             this.moveBaseGoal = undefined
         }
     }
