@@ -31,7 +31,7 @@ from hello_helpers.hello_misc import compare_versions
 import threading
 from collections import deque
 
-from stretch_teleop_interface.srv import ArucoMarkerInfoUpdate
+from stretch_teleop_interface_msgs.srv import ArucoMarkerInfoUpdate
 
 class ArucoMarker:
     def __init__(self, aruco_id, marker_info, show_debug_images=False):

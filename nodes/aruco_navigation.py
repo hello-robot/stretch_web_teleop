@@ -6,8 +6,8 @@ import actionlib
 import dynamic_reconfigure.client
 from geometry_msgs.msg import TransformStamped, Pose, Transform
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from stretch_teleop_interface.srv import NavigateToAruco, RelativePose
-from stretch_teleop_interface.msg import ArucoNavigationState
+from stretch_teleop_interface_msgs.srv import NavigateToAruco, RelativePose
+from stretch_teleop_interface_msgs.msg import ArucoNavigationState
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from math import sqrt, fabs, atan2
 from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction

@@ -7,7 +7,7 @@ from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAct
 from trajectory_msgs.msg import JointTrajectoryPoint
 from visualization_msgs.msg import MarkerArray
 from sensor_msgs.msg import JointState
-from stretch_teleop_interface.msg import HeadScanAction, HeadScanGoal, HeadScanFeedback, HeadScanResult
+from stretch_teleop_interface_msgs.msg import HeadScanAction, HeadScanGoal, HeadScanFeedback, HeadScanResult
 
 class HeadScanServer:
     def __init__(self):
