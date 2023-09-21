@@ -15,7 +15,7 @@ def generate_launch_description():
                 {'video_device': '/dev/hello-gripper-camera'},
                 {'image_width': 1024},
                 {'image_height': 768},
-                {'framerate': 15.0},
+                {'framerate': 30.0},
                 {'pixel_format': 'yuyv'},
                 {'brightness': -40},
                 {'contrast': 40},
@@ -31,7 +31,7 @@ def generate_launch_description():
                 {'camera_name': 'gripper_camera'},
                 {'io_method': 'mmap'}
             ],
-            remappings=[('/usb_cam/image_raw', '/gripper_camera/image_raw')]
+            remappings=[('/image_raw', '/gripper_camera/image_raw')]
         ),
         # You can add more nodes or configurations here if needed.
     ])

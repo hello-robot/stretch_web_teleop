@@ -1,3 +1,5 @@
+import os
+from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
 from launch.conditions import IfCondition, UnlessCondition
@@ -11,15 +13,22 @@ def generate_launch_description():
     teleop_interface_package = str(get_package_share_path('stretch_teleop_interface'))
     core_package = str(get_package_share_path('stretch_core'))
     rosbridge_package = str(get_package_share_path('rosbridge_server'))
+    stretch_core_path = str(get_package_share_directory('stretch_core'))
+    stretch_navigation_path = str(get_package_share_directory('stretch_nav2'))
+    navigation_bringup_path = str(get_package_share_directory('nav2_bringup'))
     
     # Declare launch arguments
     params_file = DeclareLaunchArgument('params', default_value=[
         PathJoinSubstitution([teleop_interface_package, 'config', 'configure_video_streams_params.yaml'])])
-    # map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map (required)')
+    map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map (required)')
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
     navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='false')
     certfile_arg = DeclareLaunchArgument('certfile', default_value='your_certfile.pem')
     keyfile_arg = DeclareLaunchArgument('keyfile', default_value='your_keyfile.pem')
+    nav2_params_file_param = DeclareLaunchArgument(
+        'nav2_params_file',
+        default_value=os.path.join(stretch_navigation_path, 'config', 'nav2_params.yaml'),
+        description='Full path to the ROS2 parameters file to use for all launched nodes')
 
     # Realsense D435i
     d435i_launch = IncludeLaunchDescription(
@@ -28,7 +37,7 @@ def generate_launch_description():
 
     # Gripper Camera Group
     gripper_camera_group = GroupAction(
-        condition=IfCondition(LaunchConfiguration('gripper_camera')),
+        condition=UnlessCondition(LaunchConfiguration('gripper_camera')),
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'gripper_camera.launch.py']))
@@ -49,7 +58,7 @@ def generate_launch_description():
 
     # Navigation Camera Group
     navigation_camera_group = GroupAction(
-        condition=IfCondition(LaunchConfiguration('navigation_camera')),
+        condition=UnlessCondition(LaunchConfiguration('navigation_camera')),
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'navigation_camera.launch.py']))
@@ -66,6 +75,30 @@ def generate_launch_description():
         parameters=[{'frame_id': 'navigation_camera', 'publish_rate': 15.0}],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
         condition=UnlessCondition(LaunchConfiguration('navigation_camera'))
+    )
+
+    map_server_cmd = Node(
+        package='nav2_map_server',
+        executable='map_server',
+        output='screen',
+        parameters=[{'yaml_filename': PathJoinSubstitution([teleop_interface_package, 'maps', LaunchConfiguration('map_yaml')])}]
+    )
+
+    start_lifecycle_manager_cmd = Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager',
+            output='screen',
+            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
+            parameters=[{'use_sim_time': True},
+                        {'autostart': True},
+                        {'node_names': ['map_server']}]
+    )
+                        
+    tf2_web_republisher_node = Node(
+        package='tf2_web_republisher_py',
+        executable='tf2_web_republisher',
+        name='tf2_web_republisher'
     )
 
     # Stretch Driver
@@ -95,9 +128,21 @@ def generate_launch_description():
         arguments=[LaunchConfiguration('params')]
     )
 
+    rplidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([stretch_core_path, '/launch/rplidar.launch.py']))
+
+    navigation_bringup_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([stretch_navigation_path, '/launch/bringup_launch.py']),
+        launch_arguments={'use_sim_time': 'false', 
+                          'autostart': 'true',
+                          'map': PathJoinSubstitution([teleop_interface_package, 'maps', LaunchConfiguration('map_yaml')]),
+                          'params_file': LaunchConfiguration('nav2_params_file'),
+                          'use_rviz': 'false'}.items())
+
     return LaunchDescription([
         params_file,
-        # map_yaml,
+        map_yaml,
+        nav2_params_file_param,
         gripper_camera_arg,
         navigation_camera_arg,
         certfile_arg,
@@ -107,7 +152,12 @@ def generate_launch_description():
         gripper_camera_node,
         navigation_camera_group,
         navigation_camera_node,
+        # map_server_cmd,
+        # start_lifecycle_manager_cmd,
+        tf2_web_republisher_node,
         stretch_driver_launch,
         rosbridge_launch,
-        configure_video_streams_node,
+        # configure_video_streams_node,
+        rplidar_launch,
+        navigation_bringup_launch
     ])

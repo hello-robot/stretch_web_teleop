@@ -11,12 +11,15 @@ import yaml
 import sys
 import ros2_numpy 
 import tf2_ros
-
-from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+import pcl
+import PyKDL
+# from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
+from sensor_msgs_py.point_cloud2 import read_points, create_cloud
 from cv_bridge import CvBridge
 from stretch_teleop_interface_msgs.srv import CameraPerspective, DepthAR, ArucoMarkers
 from visualization_msgs.msg import MarkerArray
+from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 class ConfigureVideoStreams(Node):
     def __init__(self, params_file):
@@ -44,26 +47,23 @@ class ConfigureVideoStreams(Node):
         self.cv_bridge = CvBridge()
 
         # Compressed Image publishers
-        self.publisher_realsense_cmp = self.create_publisher(CompressedImage, '/camera/color/image_raw/rotated/compressed', 10)
-        self.publisher_overhead_cmp = self.create_publisher(CompressedImage, '/navigation_camera/image_raw/rotated/compressed', 10)
-        self.publisher_gripper_cmp = self.create_publisher(CompressedImage, '/gripper_camera/image_raw/cropped/compressed', 10)
+        self.publisher_realsense_cmp = self.create_publisher(CompressedImage, '/camera/color/image_raw/rotated/compressed', 15)
+        self.publisher_overhead_cmp = self.create_publisher(CompressedImage, '/navigation_camera/image_raw/rotated/compressed', 15)
+        self.publisher_gripper_cmp = self.create_publisher(CompressedImage, '/gripper_camera/image_raw/cropped/compressed', 15)
 
         # Subscribers
-        self.camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/camera/color/image_raw")
-        self.overhead_camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/navigation_camera/image_raw")
-        self.gripper_camera_rgb_subscriber = message_filters.Subscriber(self, Image, "/gripper_camera/image_raw")
-        self.point_cloud_subscriber = message_filters.Subscriber(self, PointCloud2, "/voxel_grid/output")
-        self.camera_info_subscriber = message_filters.Subscriber(self, CameraInfo, "/camera/aligned_depth_to_color/camera_info")
-        self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
+        self.camera_rgb_subscriber =  message_filters.Subscriber(self, Image, "/camera/color/image_raw")
+        self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.point_cloud_subscriber =  message_filters.Subscriber(self, PointCloud2, "/camera/depth/color/points")
+        self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        # self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, 
-            self.overhead_camera_rgb_subscriber, 
-            self.gripper_camera_rgb_subscriber, 
             self.point_cloud_subscriber,
-            self.camera_info_subscriber,
-            self.aruco_markers_subscriber
+        #     # self.aruco_markers_subscriber
         ], 1, 1, allow_headerless=True)
-        self.camera_synchronizer.registerCallback(self.camera_callback)
+        self.camera_synchronizer.registerCallback(self.realsense_cb)
 
         # Service for requested image perspectives configured based on params file
         self.camera_perspective_service = self.create_service(CameraPerspective, 'camera_perspective', self.camera_perspective_callback)
@@ -77,12 +77,42 @@ class ConfigureVideoStreams(Node):
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)
         self.depth_ar = False
+        self.pcl_cloud_filtered = None
 
         # Service for enabling aruco marker detection
         self.aruco_markers_service = self.create_service(ArucoMarkers, 'aruco_markers', self.display_aruco_markers_callback)
         self.aruco_markers = False
 
+    # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L44
+    def transform_to_kdl(self, t):
+        return PyKDL.Frame(PyKDL.Rotation.Quaternion(t.transform.rotation.x, t.transform.rotation.y,
+                                                    t.transform.rotation.z, t.transform.rotation.w),
+                        PyKDL.Vector(t.transform.translation.x, 
+                                        t.transform.translation.y, 
+                                        t.transform.translation.z))
+
+    # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L52
+    def do_transform_cloud(self, cloud, transform):
+        t_kdl = self.transform_to_kdl(transform)
+        points_out = []
+        points = cloud.to_array()
+        for p_in in points:
+            p_out = t_kdl * PyKDL.Vector(p_in[0], p_in[1], p_in[2])
+            points_out.append([p_out[0], p_out[1], p_out[2]])
+        return np.array(points_out)
+    
+    def camera_info_cb(self, msg):
+        self.P =  np.array(msg.p).reshape(3,4)
+        # self.camera_info_subscriber.destroy()
+
     def pc_callback(self, msg, img):
+        pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
+        pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
+        passthrough = pcl_cloud.make_passthrough_filter()
+        passthrough.set_filter_field_name("z")
+        passthrough.set_filter_limits(0.01, 1.5)
+        self.pcl_cloud_filtered = passthrough.filter()
+
         # Get transform
         try:
             transform = self.tf_buffer.lookup_transform(
@@ -95,28 +125,33 @@ class ConfigureVideoStreams(Node):
             self.get_logger().warn("Could not find the transform between frames {} and {}".format('base_link', 'camera_color_optical_frame'))
             return img
         
+        if not self.pcl_cloud_filtered: return img
+        if self.pcl_cloud_filtered.to_array().size == 0: return img
+
         # Transform points cloud to base link and points that are in robot's reach
-        pc_in_base_link_msg = do_transform_cloud(msg, transform)
-        pc_in_base_link = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
+        pc_in_base_link = self.do_transform_cloud(self.pcl_cloud_filtered, transform)
+        # pc_in_base_link = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
         dist = np.sqrt(np.power(pc_in_base_link[:,0], 2) + np.power(pc_in_base_link[:,1], 2))
         filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
 
         # Get filtered points in camera frame
-        pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
-        pts_in_range = pc_in_camera[filtered_indices, :]
+        # pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
+        pts_in_range = self.pcl_cloud_filtered.to_array()[filtered_indices, :]
         pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0],1))))
 
         # Get pixel coordinates 
         coords = np.matmul(self.P, np.transpose(pts_in_range)) # 3 x N
-        x_idx = (coords[0,:]/coords[2,:]).astype(int)
-        y_idx = (coords[1,:]/coords[2,:]).astype(int)
+        x_idx = np.absolute((coords[0,:]/coords[2,:]).astype(int))
+        y_idx = np.absolute((coords[1,:]/coords[2,:]).astype(int))
+        # negative_indices = np.where((x_idx < 0) or (y_idx < 0))
 
         # Change color of pixels in robot's reach
         if img is not None:
             img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 191, 0, 50]
             # img[y_idx, x_idx, 3] = 0
-        return img
 
+        return img 
+    
     def aruco_markers_callback(self, msg, img):
         markers = msg.markers
         for marker in markers:
@@ -148,6 +183,7 @@ class ConfigureVideoStreams(Node):
             return res
 
     def depth_ar_callback(self, req, res):
+        print('depth')
         self.depth_ar = req.enable
         res.success = True
         return res
@@ -209,7 +245,10 @@ class ConfigureVideoStreams(Node):
 
     def configure_images(self, ros_image, params):
         rgb_image = self.cv_bridge.imgmsg_to_cv2(ros_image)
-        rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
+        if rgb_image.shape[-1] == 2:
+            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YUYV)
+        else:
+            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
         if params:
             if params['crop']:
                 rgb_image = self.crop_image(rgb_image, params['crop'])
@@ -219,24 +258,32 @@ class ConfigureVideoStreams(Node):
                 rgb_image = self.rotate_image(rgb_image, params['rotate'])
         return rgb_image
 
-    def camera_callback(self, ros_rgb_image, ros_overhead_rgb_image, ros_gripper_rgb_image, pc_msg, camera_info, marker_msg):
-        self.P =  np.array(camera_info.P).reshape(3,4)
+    def realsense_cb(self, image, pc):
         for image_config_name in self.realsense_params:
-            img = self.configure_images(ros_rgb_image, self.realsense_params[image_config_name])
+            img = self.configure_images(image, self.realsense_params[image_config_name])
             img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
-            if self.depth_ar: img = self.pc_callback(pc_msg, img)
-            if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
+            if self.depth_ar: img = self.pc_callback(pc, img)
+            # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
-        for image_config_name in self.overhead_params:
-            self.overhead_images[image_config_name] = \
-                self.configure_images(ros_overhead_rgb_image, self.overhead_params[image_config_name])
+        
+        self.realsense_rgb_image = self.realsense_images[self.camera_perspective["realsense"]]
+        self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
+
+    def gripper_camera_cb(self, image):
         for image_config_name in self.gripper_params:
             self.gripper_images[image_config_name] = \
-                self.configure_images(ros_gripper_rgb_image, self.gripper_params[image_config_name])
+                self.configure_images(image, self.gripper_params[image_config_name])
         
-        self.overhead_camera_rgb_image = self.overhead_images[self.camera_perspective["overhead"]]
-        self.realsense_rgb_image = self.realsense_images[self.camera_perspective["realsense"]]
         self.gripper_camera_rgb_image = self.gripper_images[self.camera_perspective["gripper"]]
+        self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
+
+    def navigation_camera_cb(self, image):
+        for image_config_name in self.overhead_params:
+            self.overhead_images[image_config_name] = \
+                self.configure_images(image, self.overhead_params[image_config_name])
+
+        self.overhead_camera_rgb_image = self.overhead_images[self.camera_perspective["overhead"]]
+        self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
 
     def publish_compressed_msg(self, image, publisher):
         msg = CompressedImage()
@@ -245,20 +292,8 @@ class ConfigureVideoStreams(Node):
         msg.data = np.array(cv2.imencode('.jpg', image)[1]).tobytes()
         publisher.publish(msg)
 
-    def timer_cb(self):
-        if self.overhead_camera_rgb_image is not None: 
-            self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
-        if self.realsense_rgb_image is not None: 
-            self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
-        if self.gripper_camera_rgb_image is not None: 
-            self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
-    
-    def start(self):
-        print("Publishing reconfigured video stream")
-        self.timer = self.create_timer(0.1, self.timer_cb)
-
 if __name__ == '__main__':
     rclpy.init()
     node = ConfigureVideoStreams(sys.argv[1])
-    node.start()
+    print("Publishing reconfigured video stream")
     rclpy.spin(node)

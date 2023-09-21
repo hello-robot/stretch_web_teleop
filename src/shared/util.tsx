@@ -1,7 +1,7 @@
 import ROSLIB, { Message } from 'roslib'
 import { cmd } from './commands';
 
-export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
+export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_roll' | 'joint_wrist_pitch' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
 
 export type VelocityGoalArray = [{ [key in ValidJoints]?: number }, { [key in ValidJoints]?: number }]
 
@@ -22,7 +22,7 @@ export type ArucoMarkersInfo = {
     }
 }
 
-export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
+export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
 
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }
 
@@ -77,6 +77,14 @@ export interface FollowJointTrajectoryActionResult {
     header: string
     status: GoalStatus
     result: string
+}
+
+export interface NavigateToPoseActionStatusList {
+    status_list: NavigateToPoseActionStatus[]
+}
+
+export interface NavigateToPoseActionStatus{
+    status: number
 }
 
 export interface GoalStatus {
@@ -203,6 +211,8 @@ export const REALSENSE_GRIPPER_POSE: RobotPose = {
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.05, .518],
+    "joint_wrist_roll": [-3.14, 3.14],
+    "joint_wrist_pitch": [-1.57, 0.57],
     "joint_wrist_yaw": [-1.37, 4.41],
     "joint_lift": [0.175, 1.05],
     "translate_mobile_base": [-30.0, 30.0],
@@ -217,6 +227,8 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "joint_head_pan": .3,
     "wrist_extension": .04,
     "joint_lift": .04,
+    "joint_wrist_roll": .1,
+    "joint_wrist_pitch": .1,
     "joint_wrist_yaw": .1,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .3
@@ -228,6 +240,8 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
     "joint_gripper_finger_left": .075,
     "wrist_extension": 0.075,
     "joint_lift": .075,
+    "joint_wrist_roll": .2,
+    "joint_wrist_pitch": .2,
     "joint_wrist_yaw": .2,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .2
