@@ -37,7 +37,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             length_mm: 88.0, 
             use_rgb_only: false,
             name: 'docking_station',
-            link: null,
+            link: "None",
             pose: {
                 transform: new ROSLIB.Transform({
                     translation: {
@@ -58,49 +58,49 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             length_mm: 179.0,
             use_rgb_only: false,
             name: 'floor_0',
-            link: null
+            link: "None"
         },
         '247': {
             length_mm: 179.0,
             use_rgb_only: false,
             name: 'floor_1',
-            link: null
+            link: "None"
         },
         '248': {
             length_mm: 179.0,
             use_rgb_only: false,
             name: 'floor_2',
-            link: null
+            link: "None"
         },
         '249': {
             length_mm: 179.0,
             use_rgb_only: false,
             name: 'floor_3',
-            link: null
+            link: "None"
         },
         '10': {
             length_mm: 24,
             use_rgb_only: false,
             name: 'target_object',
-            link: null
+            link: "None"
         },
         '21': {
             length_mm: 86,
             use_rgb_only: false,
             name: 'user_pointer',
-            link: null
+            link: "None"
         },
         'default': {
             length_mm: 24,
             use_rgb_only: false,
             name: 'unknown',
-            link: null
+            link: "None"
         },
         // "0": {
         //     length_mm: 40, 
         //     use_rgb_only: false, 
         //     name: "Brush",
-        //     link: null,
+        //     link: "None",
         //     pose: {
         //         transform: new ROSLIB.Transform({
         //             translation: {
@@ -121,7 +121,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
         //     length_mm: 22,
         //     use_rgb_only: false,
         //     name: "Feeding Tool",
-        //     link: null,
+        //     link: "None",
         //     pose: {
         //         transform: new ROSLIB.Transform({
         //             translation: {
@@ -142,7 +142,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
         //     length_mm: 40, 
         //     use_rgb_only: false, 
         //     name: "Button Pusher",
-        //     link: null,
+        //     link: "None",
         //     pose: {
         //         transform: new ROSLIB.Transform({
         //             translation: {
@@ -163,7 +163,7 @@ export const ARUCO_MARKER_INFO: ArucoMarkersInfo = {
             length_mm: 68, 
             use_rgb_only: false, 
             name: "Tool Shelf",
-            link: null,
+            link: "None",
             pose: {
                 transform: new ROSLIB.Transform({
                     translation: {
