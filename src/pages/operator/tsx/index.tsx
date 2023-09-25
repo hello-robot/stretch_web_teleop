@@ -117,7 +117,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             );
             break;
         case 'occupancyGrid':
-            if (!occupancyGrid) {
+                        if (!occupancyGrid) {
                 occupancyGrid = message.message
             } else {
                 occupancyGrid.data = occupancyGrid.data.concat(message.message.data)
@@ -162,7 +162,6 @@ function initializeOperator() {
         arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-    // renderOperator(storageHandler);
 }
 
 /** 
@@ -173,7 +172,6 @@ function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
     });
-    remoteRobot.setRobotMode("navigation");
     occupancyGrid = undefined;
     remoteRobot.getOccupancyGrid("getOccupancyGrid")
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
@@ -202,7 +200,6 @@ function createStorageHandler(storageHandlerReadyCallback: () => void) {
                 config
             );
         default:
-            // if (process.env.storage == 'localstorage')
             return new LocalStorageHandler(storageHandlerReadyCallback);
     }
 }
