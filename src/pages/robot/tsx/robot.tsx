@@ -6,20 +6,14 @@ import { response } from 'express';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
-export var ros: ROSLIB.Ros = new ROSLIB.Ros({
-    // set this to false to use the new service interface to
-    // tf2_web_republisher. true is the default and means roslibjs
-    // will use the action interface
-    groovyCompatibility : false,
-    url: 'wss://localhost:9090'
-});
 
 export class Robot extends React.Component {
+    private ros: ROSLIB.Ros;
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.ActionGoal;
     private poseGoalComplete?: boolean
     private moveBaseGoal?: ROSLIB.ActionGoal;
-    private navigateToArucoGoal?: ROSLIB.Goal;
+    private navigateToArucoGoal?: ROSLIB.ActionGoal;
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
     private navigateToArucoClient?: ROSLIB.ActionClient;
@@ -45,6 +39,7 @@ export class Robot extends React.Component {
     private arucoNavigationStateCallback: (state: ArucoNavigationState) => void
     private relativePoseCallback: (pose: ROSLIB.Transform) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
+    private subscriptions: ROSLIB.Topic[] = []
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
@@ -66,19 +61,24 @@ export class Robot extends React.Component {
     }
     
     async connect(): Promise<void> {
-        // ros = new ROSLIB.Ros({
-        //     url: 'wss://localhost:9090'
-        // });
+        this.ros = new ROSLIB.Ros({
+            // set this to false to use the new service interface to
+            // tf2_web_republisher. true is the default and means roslibjs
+            // will use the action interface
+            groovyCompatibility : false,
+            url: 'wss://localhost:9090'
+        });
+        
         return new Promise<void>((resolve, reject) => {
-            ros.on('connection', async () => {
+            this.ros.on('connection', async () => {
                 await this.onConnect();
                 resolve()
             })
-            ros.on('error', (error) => {
+            this.ros.on('error', (error) => {
                 reject(error)
             });
 
-            ros.on('close', () => {
+            this.ros.on('close', () => {
                 reject('Connection to websocket has been closed.')
             });
         });
@@ -91,7 +91,7 @@ export class Robot extends React.Component {
         // this.subscribeToArucoNavigationState()
         // this.subscribeToJointTrajectoryResult()
         this.subscribeToMoveBaseResult()
-        this.subscribeToNavigateToArucoFeedback()
+        // this.subscribeToNavigateToArucoFeedback()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createNavigateToArucoClient()
@@ -110,17 +110,25 @@ export class Robot extends React.Component {
         this.subscribeToGripperFingerTF()
         this.subscribeToHeadTiltTF()
         this.subscribeToMapTF()
-
+        
         return Promise.resolve()
+    }
+    
+    closeROSConnection() {
+        this.subscriptions.forEach((topic) => {
+            topic.unsubscribe()
+        })
+        this.ros.close()
     }
     
     subscribeToJointState() {
         const jointStateTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: '/stretch/joint_states',
             messageType: 'sensor_msgs/msg/JointState'
         });
-    
+        this.subscriptions.push(jointStateTopic)
+
         jointStateTopic.subscribe((msg: ROSJointState) => {
             this.jointState = msg
             if (this.jointStateCallback) this.jointStateCallback(msg)
@@ -129,35 +137,35 @@ export class Robot extends React.Component {
     
     subscribeToVideo(props: VideoProps) {
         let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: props.topicName,
             messageType: 'sensor_msgs/CompressedImage'
         });
         topic.subscribe(props.callback)
+        this.subscriptions.push(topic)
     }
     
-    async getOccupancyGrid() {
+    getOccupancyGrid() {
         let getMapService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/map_server/map',
             serviceType: 'nav2_msgs/srv/GetMap'
         });
         
         var request = new ROSLIB.ServiceRequest({})
-        return new Promise((resolve: (value: ROSOccupancyGrid) => void) => {
-            getMapService?.callService(request, (response: {map: ROSOccupancyGrid}) => {
-                resolve(response.map)
-            })
-        });
+        getMapService?.callService(request, (response: {map: ROSOccupancyGrid}) => {
+            if (this.occupancyGridCallback) this.occupancyGridCallback(response.map)
+        })
     }
 
     subscribeToMarkerArray() {
         let topic: ROSLIB.Topic<MarkerArray> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: 'aruco/marker_array',
             messageType: 'visualization_msgs/MarkerArray'
         })
-
+        this.subscriptions.push(topic)
+        
         topic.subscribe((msg: MarkerArray) => {
             if (this.markerArrayCallback) this.markerArrayCallback(msg)
         })
@@ -165,11 +173,12 @@ export class Robot extends React.Component {
 
     subscribeToJointTrajectoryResult() {
         let topic: ROSLIB.Topic<FollowJointTrajectoryActionResult> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: 'stretch_controller/follow_joint_trajectory/result',
             messageType: 'control_msgs/action/FollowJointTrajectory'
         });
-    
+        this.subscriptions.push(topic)
+        
         topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
             this.poseGoalComplete = msg.status.status > 2 ? true : false
         });
@@ -177,10 +186,11 @@ export class Robot extends React.Component {
 
     subscribeToMoveBaseResult() {
         let topic: ROSLIB.Topic<NavigateToPoseActionResult> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: '/navigate_to_pose/_action/status',
             messageType: 'action_msgs/msg/GoalStatusArray'
         });
+        this.subscriptions.push(topic)
     
         topic.subscribe((msg: NavigateToPoseActionStatusList) => {
             let status = msg.status_list.pop()?.status
@@ -206,10 +216,11 @@ export class Robot extends React.Component {
 
     subscribeToNavigateToArucoFeedback() {
         let topic: ROSLIB.Topic<ArucoNavigationFeedback> = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: '/navigate_to_aruco/feedback',
             messageType: 'stretch_teleop_interface/NavigateToArucoFeedback'
         })
+        this.subscriptions.push(topic)
 
         topic.subscribe((msg: ArucoNavigationFeedback) => {
             if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg.feedback)
@@ -218,7 +229,7 @@ export class Robot extends React.Component {
 
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionHandle({
-            ros: ros,
+            ros: this.ros,
             name: '/stretch_controller/follow_joint_trajectory',
             actionType: 'control_msgs/action/FollowJointTrajectory',
         });
@@ -226,7 +237,7 @@ export class Robot extends React.Component {
     
     createMoveBaseClient() {
         this.moveBaseClient = new ROSLIB.ActionHandle({
-            ros: ros,
+            ros: this.ros,
             name: '/navigate_to_pose',
             actionType: 'nav2_msgs/action/NavigateToPose',
             // timeout: 100
@@ -234,17 +245,17 @@ export class Robot extends React.Component {
     }
 
     createNavigateToArucoClient() {
-        this.navigateToArucoClient = new ROSLIB.ActionClient({
-            ros: ros,
-            serverName: '/navigate_to_aruco',
-            actionName: 'stretch_teleop_interface/NavigateToArucoAction',
-            timeout: 100
+        this.navigateToArucoClient = new ROSLIB.ActionHandle({
+            ros: this.ros,
+            name: '/navigate_to_aruco',
+            actionType: 'stretch_teleop_interface_msgs/action/NavigateToAruco',
+            // timeout: 100
         })
     }
 
     createCmdVelTopic() {
         this.cmdVelTopic = new ROSLIB.Topic({
-            ros: ros,
+            ros: this.ros,
             name: '/stretch/cmd_vel',
             messageType: 'geometry_msgs/Twist'
         });
@@ -252,7 +263,7 @@ export class Robot extends React.Component {
     
     createSwitchToNavigationService() {
         this.switchToNavigationService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/switch_to_navigation_mode',
             serviceType: 'std_srvs/Trigger'
         });
@@ -260,7 +271,7 @@ export class Robot extends React.Component {
     
     createSwitchToPositionService() {
         this.switchToPositionService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/switch_to_position_mode',
             serviceType: 'std_srvs/Trigger'
         });
@@ -268,7 +279,7 @@ export class Robot extends React.Component {
     
     createSetCameraPerspectiveService() {
         this.setCameraPerspectiveService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/camera_perspective',
             serviceType: 'stretch_teleop_interface/CameraPerspective'
         })
@@ -276,7 +287,7 @@ export class Robot extends React.Component {
 
     createDepthSensingService() {
         this.setDepthSensingService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/depth_ar',
             serviceType: 'stretch_teleop_interface/DepthAR'
         })
@@ -284,7 +295,7 @@ export class Robot extends React.Component {
 
     createArucoMarkerService() {
         this.setArucoMarkersService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/aruco_markers',
             serviceType: 'stretch_teleop_interface/ArucoMarkers'
         })
@@ -292,7 +303,7 @@ export class Robot extends React.Component {
 
     createArucoNavigationService() {
         this.navigateToArucoService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/navigate_to_aruco',
             serviceType: 'stretch_teleop_interface/NavigateToAruco'
         })
@@ -300,7 +311,7 @@ export class Robot extends React.Component {
 
     createArucoMarkerUpdateService() {
         this.arucoMarkerUpdateService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/aruco_marker_update',
             serviceType: 'stretch_teleop_interface/ArucoMarkerInfoUpdate'
         })
@@ -308,7 +319,7 @@ export class Robot extends React.Component {
 
     createGetRelativePoseService() {
         this.getRelativePoseService = new ROSLIB.Service({
-            ros: ros,
+            ros: this.ros,
             name: '/get_relative_pose',
             serviceType: 'stretch_teleop_interface/RelativePose'
         })
@@ -316,7 +327,7 @@ export class Robot extends React.Component {
 
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
-            ros: ros,
+            ros: this.ros,
             fixedFrame: 'base_link',
             angularThres: 0.001,
             transThres: 0.001,
@@ -326,7 +337,7 @@ export class Robot extends React.Component {
 
     createMapFrameTFClient() {
         this.mapFrameTfClient = new ROSLIB.TFClient({
-            ros: ros,
+            ros: this.ros,
             fixedFrame: 'map',
             angularThres: 0.001,
             transThres: 0.001,
@@ -336,8 +347,8 @@ export class Robot extends React.Component {
 
     createArucoMarkerParamServer() {
         this.arucoMarkerInfoParam = new ROSLIB.Param({
-            ros : ros,
-            name : 'aruco_marker_info'
+            ros : this.ros,
+            name : '/detect_aruco_markers:aruco_marker_info'
         });
     }
 
@@ -382,10 +393,21 @@ export class Robot extends React.Component {
     }
 
     setArucoMarkerInfo(info: ArucoMarkersInfo) {
-        console.log(info.toString())
-        this.arucoMarkerInfoParam?.set(JSON.stringify(info), (response) => {
-            console.log(response);
-        })
+        Object.keys(info.aruco_marker_info).forEach(key => {
+            let values = ["name", "length_mm", "use_rgb_only", "link"]
+            values.forEach(value => {
+                this.arucoMarkerInfoParam = new ROSLIB.Param({
+                    ros : this.ros,
+                    name : `/detect_aruco_markers:aruco_marker_info.${key}.${value}`
+                })
+                // console.log(`/detect_aruco_markers:aruco_marker_info.${key}.${value}`, eval(`info.aruco_marker_info["${key}"].${value}`))
+                this.arucoMarkerInfoParam.set(eval(`info.aruco_marker_info["${key}"].${value}`).toString(), (response) => {console.log(response)})
+            })
+        });
+
+        // this.arucoMarkerInfoParam?.set(JSON.stringify(info).toString(), (response) => {
+        //     console.log(response);
+        // })
     }
 
     navigateToArucoMarkers(marker_name: string, relative_pose: ROSLIB.Transform) {
@@ -493,12 +515,12 @@ export class Robot extends React.Component {
     makeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
         if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
 
-        let newGoal = new ROSLIB.Goal({
-            actionClient: this.navigateToArucoClient,
-            goalMessage: {
+        let newGoal = new ROSLIB.ActionGoal({
+            // actionClient: this.navigateToArucoClient,
+            // goalMessage: {
                 name: name,
                 pose: pose
-            }
+            // }
         })
 
         return newGoal
@@ -628,9 +650,9 @@ export class Robot extends React.Component {
     }
 
     executeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
-        this.stopExecution()
+        // this.stopExecution()
         this.navigateToArucoGoal = this.makeNavigateToArucoGoal(name, pose)
-        this.navigateToArucoGoal.send()
+        this.navigateToArucoClient.createClient(this.navigateToArucoGoal)
     }
 
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
@@ -665,9 +687,8 @@ export class Robot extends React.Component {
 
     stopNavigateToArucoClient() {
         if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
-        this.navigateToArucoClient.cancel()
         if (this.navigateToArucoGoal) {
-            this.navigateToArucoGoal.cancel()
+            this.navigateToArucoClient.cancelGoal()
             this.navigateToArucoGoal = undefined
         }
     }

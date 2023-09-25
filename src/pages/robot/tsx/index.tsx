@@ -9,7 +9,7 @@ import ROSLIB from 'roslib';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
-    occupancyGridCallback: setOccupancyGrid,
+    occupancyGridCallback: forwardOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseState,
     arucoNavigationStateCallback: forwardArucoNavigationState,
     amclPoseCallback: forwardAMCLPose,
@@ -21,7 +21,7 @@ export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
-let occupancyGrid: ROSOccupancyGrid | undefined;
+// let occupancyGrid: ROSOccupancyGrid | undefined;
 
 robot.connect().then(() => {
     connection = new WebRTCConnection({
@@ -51,8 +51,11 @@ robot.connect().then(() => {
         callback: gripperStream.updateImage
     })
     gripperStream.start()
+
+    robot.getOccupancyGrid()
 }).then(() => {
     setTimeout(() => {
+        console.log(connection.connectionState())
         let isResolved = connection.connectionState() == 'connected' ? true : false
         console.log("connection state: ", isResolved)
         if (isResolved) {
@@ -60,7 +63,7 @@ robot.connect().then(() => {
         } else {
             window.location.reload()
         }
-    }, 5000);    
+    }, 7000);    
 })
 
 function handleSessionStart() {
@@ -117,10 +120,9 @@ function forwardJointStates(jointState: ROSJointState) {
     } as ValidJointStateMessage);
 }
 
-async function forwardOccupancyGrid() {
+function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
     if (!connection) throw 'WebRTC connection undefined'
 
-    occupancyGrid = await robot.getOccupancyGrid()
     let splitOccupancyGrid: ROSOccupancyGrid = {
         header: occupancyGrid.header,
         info: occupancyGrid.info,
@@ -170,11 +172,6 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
         type: 'amclPose',
         message: transform
     } as MapPoseMessage)
-}
-
-function setOccupancyGrid(message: ROSOccupancyGrid) {
-    console.log("Set occupancy grid")
-    occupancyGrid = message
 }
 
 function forwardRelativePose(pose: ROSLIB.Transform) {
@@ -239,7 +236,7 @@ function handleMessage(message: WebRTCMessage) {
             robot.lookAtGripper(0, 0)
             break
         case "getOccupancyGrid":
-            forwardOccupancyGrid()
+            robot.getOccupancyGrid()
             break
         case "updateArucoMarkersInfo":
             robot.updateArucoMarkersInfo()
@@ -254,10 +251,12 @@ function handleMessage(message: WebRTCMessage) {
 };
 
 function disconnectFromRobot() {
+    robot.closeROSConnection()
     connection.hangup()
 }
 
 window.onbeforeunload = () => {
+    robot.closeROSConnection()
     connection.hangup()
 };
 
