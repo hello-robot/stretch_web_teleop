@@ -12,14 +12,16 @@ export type RemoteStream = {
 
 export type ArucoMarkersInfo = {
     aruco_marker_info: {
-        [key: string]: {
-            length_mm: number,
-            use_rgb_only: boolean,
-            name: string, 
-            link: string | null
-            pose?: ROSLIB.Transform
-        }
+        [key: string]: ArucoMarkerInfo
     }
+}
+
+export type ArucoMarkerInfo = {
+    length_mm: number,
+    use_rgb_only: boolean,
+    name: string, 
+    link?: string
+    pose?: ROSLIB.Transform
 }
 
 export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
@@ -221,7 +223,7 @@ export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "joint_lift": [0.175, 1.05],
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
-    "joint_gripper_finger_left": [-0.375, 0.149],
+    "joint_gripper_finger_left": [-0.37, 0.17],
     "joint_head_tilt": [-1.6, 0.3],
     "joint_head_pan": [-3.95, 1.7]
 }

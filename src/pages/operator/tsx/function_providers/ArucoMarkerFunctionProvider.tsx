@@ -1,6 +1,6 @@
 import { FunctionProvider } from "./FunctionProvider"
 import { ArucoMarkersFunction } from "../layout_components/ArucoMarkers"
-import { ArucoNavigationState, RobotPose } from "shared/util"
+import { ArucoMarkerInfo, ArucoNavigationState, RobotPose } from "shared/util"
 import { StorageHandler } from "../storage_handler/StorageHandler"
 import { useState } from "react"
 
@@ -46,9 +46,12 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
             case ArucoMarkersFunction.SaveMarker:
                 return (markerID: string, name: string, size: string) => {
                     this.storageHandler.saveMarker(markerID, name, size)
-                    let marker_info = this.storageHandler.getArucoMarkerInfo()
-                    FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
-                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
+                    let markerInfo = { 
+                        name: name, 
+                        length_mm: Number(size), 
+                        use_rgb_only: false 
+                    } as ArucoMarkerInfo
+                    FunctionProvider.remoteRobot?.addArucoMarker(markerID, markerInfo)
                     return { state: ArucoNavigationResult.MARKER_SAVED, alert_type: "success" }
                 }
             case ArucoMarkersFunction.NavigateToMarker:
@@ -70,11 +73,9 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
             case ArucoMarkersFunction.DeleteMarker:
                 return (markerIndex: number) => {
                     let markerNames = this.storageHandler.getArucoMarkerNames()
-                    if (markerNames[markerIndex] == 'docking_station') return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alert_type: "error" }
-                    this.storageHandler.deleteMarker(markerNames[markerIndex])
-                    let marker_info = this.storageHandler.getArucoMarkerInfo()
-                    FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
-                    FunctionProvider.remoteRobot?.updateArucoMarkersInfo()
+                    let markerID = this.storageHandler.deleteMarker(markerNames[markerIndex])
+                    if (!markerID) return { state: ArucoNavigationResult.MARKER_DELETE_FAIL, alert_type: "error" }
+                    FunctionProvider.remoteRobot?.deleteArucoMarker(markerID)
                     let poses = this.storageHandler.getMapPoseNames()
                     let mapPoseIdx = poses.indexOf(markerNames[markerIndex])
                     if (mapPoseIdx != -1) this.storageHandler.deleteMapPose(poses[mapPoseIdx])

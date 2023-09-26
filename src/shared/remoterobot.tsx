@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, NavigateToArucoCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState } from 'shared/util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, NavigateToArucoCommand, DeleteArucoMarkerCommand, AddArucoMarkerCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState, ArucoMarkerInfo } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -149,8 +149,26 @@ export class RemoteRobot extends React.Component<{},any> {
             type: "setArucoMarkerInfo",
             info: info
         }
+        // console.log(JSON.stringify(info.aruco_marker_info).toString())
         this.robotChannel(cmd)
         console.log("setting aruco marker info")
+    }
+
+    deleteArucoMarker(markerID: string) {
+        let cmd: DeleteArucoMarkerCommand = {
+            type: "deleteArucoMarker",
+            markerID: markerID
+        }
+        this.robotChannel(cmd)
+    }
+
+    addArucoMarker(markerID: string, markerInfo: ArucoMarkerInfo) {
+        let cmd: AddArucoMarkerCommand = {
+            type: "addArucoMarker",
+            markerID: markerID,
+            markerInfo: markerInfo
+        }
+        this.robotChannel(cmd)
     }
 
     lookAtGripper(type: "lookAtGripper") {

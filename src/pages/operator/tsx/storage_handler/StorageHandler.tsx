@@ -194,8 +194,9 @@ export abstract class StorageHandler {
     /**
      * Removes the aruco maker from storage
      * @param name the name of the aruco marker
+     * @returns the marker's ID or undefined if the marker cannot be deleted
      */
-    public abstract deleteMarker(markerName: string): void;
+    public abstract deleteMarker(markerName: string): string | undefined;
 
     /**
      * Get the list of all saved aruco markers

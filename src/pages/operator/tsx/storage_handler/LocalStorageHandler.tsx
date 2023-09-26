@@ -187,15 +187,14 @@ export class LocalStorageHandler extends StorageHandler {
         markers.aruco_marker_info[markerID] = {
             length_mm: Number(size),
             use_rgb_only: false,
-            name: markerName,
-            link: null
+            name: markerName
         }
         localStorage.setItem(LocalStorageHandler.MARKER_NAMES_KEY, JSON.stringify(markerNames));
         localStorage.setItem(LocalStorageHandler.MARKER_IDS_KEY, JSON.stringify(markerIDs));
         localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markers));
     }
 
-    public deleteMarker(markerName: string): void {
+    public deleteMarker(markerName: string): string | undefined {
         // Don't allow user to delete docking station
         if (markerName === 'docking_station') return;
         // else if (markerName === 'Brush') return;
@@ -216,6 +215,8 @@ export class LocalStorageHandler extends StorageHandler {
         localStorage.setItem(LocalStorageHandler.MARKER_NAMES_KEY, JSON.stringify(markerNames));
         localStorage.setItem(LocalStorageHandler.MARKER_IDS_KEY, JSON.stringify(markerIDs));
         localStorage.setItem(LocalStorageHandler.MARKER_INFO_KEY, JSON.stringify(markers));
+
+        return markerID
     }
 
     public getArucoMarkerNames(): string[] {

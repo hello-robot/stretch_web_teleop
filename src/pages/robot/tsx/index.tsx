@@ -244,6 +244,12 @@ function handleMessage(message: WebRTCMessage) {
         case "setArucoMarkerInfo":
             robot.setArucoMarkerInfo(message.info)
             break;    
+        case "deleteArucoMarker":
+            robot.deleteArucoMarker(message.markerID)
+            break;    
+        case "addArucoMarker":
+            robot.addArucoMarker(message.markerID, message.markerInfo)
+            break;    
         case "getRelativePose":
             robot.getRelativePose(message.marker_name)
             break;

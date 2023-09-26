@@ -1,8 +1,8 @@
 import ROSLIB from "roslib"
-import { ArucoMarkersInfo, ROSPose, RobotPose } from "./util"
+import { ArucoMarkerInfo, ArucoMarkersInfo, ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand | GetRelativePoseCommand | NavigateToArucoCommand | StopArucoNavigationCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand | DeleteArucoMarkerCommand| AddArucoMarkerCommand | GetRelativePoseCommand | NavigateToArucoCommand | StopArucoNavigationCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -87,6 +87,17 @@ export interface UpdateArucoMarkersInfoCommand {
 export interface SetArucoMarkerInfoCommand {
     type: "setArucoMarkerInfo"
     info: ArucoMarkersInfo
+}
+
+export interface DeleteArucoMarkerCommand {
+    type: "deleteArucoMarker"
+    markerID: string
+}
+
+export interface AddArucoMarkerCommand {
+    type: "addArucoMarker"
+    markerID: string
+    markerInfo: ArucoMarkerInfo
 }
 
 export interface GetRelativePoseCommand {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback, NavigateToPoseActionResult, NavigateToPoseActionStatusList } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ArucoMarkerInfo } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -281,7 +281,7 @@ export class Robot extends React.Component {
         this.setCameraPerspectiveService = new ROSLIB.Service({
             ros: this.ros,
             name: '/camera_perspective',
-            serviceType: 'stretch_teleop_interface/CameraPerspective'
+            serviceType: 'stretch_teleop_interface/srv/CameraPerspective'
         })
     }
 
@@ -289,7 +289,7 @@ export class Robot extends React.Component {
         this.setDepthSensingService = new ROSLIB.Service({
             ros: this.ros,
             name: '/depth_ar',
-            serviceType: 'stretch_teleop_interface/DepthAR'
+            serviceType: 'stretch_teleop_interface/srv/DepthAR'
         })
     }
 
@@ -297,7 +297,7 @@ export class Robot extends React.Component {
         this.setArucoMarkersService = new ROSLIB.Service({
             ros: this.ros,
             name: '/aruco_markers',
-            serviceType: 'stretch_teleop_interface/ArucoMarkers'
+            serviceType: 'stretch_teleop_interface/srv/ArucoMarkers'
         })
     }
 
@@ -305,7 +305,7 @@ export class Robot extends React.Component {
         this.navigateToArucoService = new ROSLIB.Service({
             ros: this.ros,
             name: '/navigate_to_aruco',
-            serviceType: 'stretch_teleop_interface/NavigateToAruco'
+            serviceType: 'stretch_teleop_interface/srv/NavigateToAruco'
         })
     }
 
@@ -313,7 +313,7 @@ export class Robot extends React.Component {
         this.arucoMarkerUpdateService = new ROSLIB.Service({
             ros: this.ros,
             name: '/aruco_marker_update',
-            serviceType: 'stretch_teleop_interface/ArucoMarkerInfoUpdate'
+            serviceType: 'stretch_teleop_interface/srv/ArucoMarkerInfoUpdate'
         })
     }
 
@@ -321,7 +321,7 @@ export class Robot extends React.Component {
         this.getRelativePoseService = new ROSLIB.Service({
             ros: this.ros,
             name: '/get_relative_pose',
-            serviceType: 'stretch_teleop_interface/RelativePose'
+            serviceType: 'stretch_teleop_interface/srv/RelativePose'
         })
     }
 
@@ -394,20 +394,33 @@ export class Robot extends React.Component {
 
     setArucoMarkerInfo(info: ArucoMarkersInfo) {
         Object.keys(info.aruco_marker_info).forEach(key => {
-            let values = ["name", "length_mm", "use_rgb_only", "link"]
-            values.forEach(value => {
-                this.arucoMarkerInfoParam = new ROSLIB.Param({
-                    ros : this.ros,
-                    name : `/detect_aruco_markers:aruco_marker_info.${key}.${value}`
-                })
-                // console.log(`/detect_aruco_markers:aruco_marker_info.${key}.${value}`, eval(`info.aruco_marker_info["${key}"].${value}`))
-                this.arucoMarkerInfoParam.set(eval(`info.aruco_marker_info["${key}"].${value}`).toString(), (response) => {console.log(response)})
-            })
+            this.addArucoMarker(key, info.aruco_marker_info[key])
         });
+    }
 
-        // this.arucoMarkerInfoParam?.set(JSON.stringify(info).toString(), (response) => {
-        //     console.log(response);
-        // })
+    deleteArucoMarker(markerID: string) {
+        let values = ["name", "length_mm", "use_rgb_only", "link"]
+        values.forEach(value => {
+            this.arucoMarkerInfoParam = new ROSLIB.Param({
+                ros : this.ros,
+                name : `/detect_aruco_markers:aruco_marker_info.${markerID}.${value}`
+            })
+            this.arucoMarkerInfoParam.delete((response) => {})
+        })
+    }
+
+    addArucoMarker(markerID: string, markerInfo: ArucoMarkerInfo) {
+        let values = ["name", "length_mm", "use_rgb_only", "link"]
+        values.forEach(value => {
+            this.arucoMarkerInfoParam = new ROSLIB.Param({
+                ros : this.ros,
+                name : `/detect_aruco_markers:aruco_marker_info.${markerID}.${value}`
+            })
+            let param = eval(`markerInfo.${value}`)
+            if (param !== undefined) {
+                this.arucoMarkerInfoParam.set(param.toString(), (response) => {})
+            }
+        })
     }
 
     navigateToArucoMarkers(marker_name: string, relative_pose: ROSLIB.Transform) {
