@@ -139,6 +139,18 @@ def generate_launch_description():
                           'params_file': LaunchConfiguration('nav2_params_file'),
                           'use_rviz': 'false'}.items())
 
+    detect_aruco_markers_node = Node(
+        package='stretch_core',
+        executable='detect_aruco_markers',
+        name='detect_aruco_markers'
+    )
+
+    head_scan_node = Node(
+        package='stretch_teleop_interface',
+        executable='head_scan.py',
+        name='head_scan'
+    )
+
     return LaunchDescription([
         params_file,
         map_yaml,
@@ -157,7 +169,9 @@ def generate_launch_description():
         tf2_web_republisher_node,
         stretch_driver_launch,
         rosbridge_launch,
-        # configure_video_streams_node,
+        configure_video_streams_node,
         rplidar_launch,
-        navigation_bringup_launch
+        navigation_bringup_launch,
+        detect_aruco_markers_node,
+        head_scan_node
     ])

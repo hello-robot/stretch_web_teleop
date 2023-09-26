@@ -30,7 +30,7 @@
     "react-native-web": "^0.19.7",
     "react-path-tooltip": "^1.0.25",
     "react-speech-recognition": "^3.10.0",
-    "roslib": "hello-vinitha/roslibjs#ros2actionclient",
+    "roslib": "github:hello-vinitha/roslibjs#ros2actionclient",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
     "style-loader": "^3.3.2"
