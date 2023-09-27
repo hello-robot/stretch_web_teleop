@@ -24,16 +24,6 @@ export let gripperStream = new VideoStream(gripperProps);
 // let occupancyGrid: ROSOccupancyGrid | undefined;
 
 robot.connect().then(() => {
-    connection = new WebRTCConnection({
-        peerRole: 'robot',
-        polite: false,
-        onRobotConnectionStart: handleSessionStart,
-        onMessage: handleMessage,
-        onConnectionEnd: disconnectFromRobot
-    })
-
-    connection.joinRobotRoom()
-
     robot.subscribeToVideo({
         topicName: "/navigation_camera/image_raw/rotated/compressed",
         callback: navigationStream.updateImage
@@ -53,18 +43,29 @@ robot.connect().then(() => {
     gripperStream.start()
 
     robot.getOccupancyGrid()
-}).then(() => {
-    setTimeout(() => {
-        console.log(connection.connectionState())
-        let isResolved = connection.connectionState() == 'connected' ? true : false
-        console.log("connection state: ", isResolved)
-        if (isResolved) {
-            console.log('WebRTC connection is resolved.');
-        } else {
-            window.location.reload()
-        }
-    }, 7000);    
-})
+
+    connection = new WebRTCConnection({
+        peerRole: 'robot',
+        polite: false,
+        onRobotConnectionStart: handleSessionStart,
+        onMessage: handleMessage,
+        onConnectionEnd: disconnectFromRobot
+    })
+
+    connection.joinRobotRoom()
+}) 
+// .then(() => {
+//     setTimeout(() => {
+//         console.log(connection.connectionState())
+//         let isResolved = connection.connectionState() == 'connected' ? true : false
+//         console.log("connection state: ", isResolved)
+//         if (isResolved) {
+//             console.log('WebRTC connection is resolved.');
+//         } else {
+//             window.location.reload()
+//         }
+//     }, 7000);    
+// })
 
 function handleSessionStart() {
     connection.removeTracks()

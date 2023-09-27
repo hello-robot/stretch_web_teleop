@@ -74,7 +74,9 @@ io.on('connection', function (socket) {
         // The robot room is only available if another operator is not connected to it
         if (io.sockets.adapter.rooms.get('robot') && io.sockets.adapter.rooms.get('robot').size < 2) {
             console.log('robot is available')
-            socket.emit('robot available', true)
+            socket.join('robot');
+            // socket.emit('join', 'robot', socket.id)
+            // socket.emit('robot available', true)
             socket.in('robot').emit('joined', 'robot');
         } else {
             console.log('robot not available')
