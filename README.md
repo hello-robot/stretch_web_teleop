@@ -157,3 +157,24 @@ From within the `stretch_teleop_interface` directory, start the server and robot
 Make sure `./start_web_server_and_robot_browser.sh local` is running in the `stretch_teleop_interface` directory. (`local` allows the site to use the browser's local storage to save useful information. We also have the interface configured with `firebase`. See firebase [instructions](/src/pages/operator/tsx/storage_handler/README.md)). To use firebase, run `./start_web_server_and_robot_browser.sh firebase` instead. 
 
 Enter the robot's hostname or IP address followed by `/operator` in **google chrome** to open the interface. For example, to open up our robot's interface, we would open `slinky.hcrlab.cs.washington.edu/operator` in our browser. You might see a `Webpage not secure` warning, click advanced and proceed. 
+
+## Licenses
+The following license applies to the contents of this directory written by Vinitha Ranganeni, Noah Ponto, authors associated with the University of Washington, and authors associated with Hello Robot Inc. (the "Contents"). This software is intended for use with Stretch ® mobile manipulators produced and sold by Hello Robot ®.  
+
+Copyright 2023 Vinitha Ranganeni, Noah Ponto, the University of Washington, and Hello Robot Inc.
+
+The Contents are licensed under the Apache License, Version 2.0 (the "License"). You may not use the Contents except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0 
+
+Unless required by applicable law or agreed to in writing, the Contents are distributed under the License are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+============================================================
+
+Some of the contents of this directory derive from the following repositories: 
+
+https://github.com/hello-robot/stretch_web_interface
+https://github.com/hcrlab/stretch_web_interface
+https://github.com/hcrlab/stretch_teleop_interface
+
+Text from relevant license files found in these repositories follows.
