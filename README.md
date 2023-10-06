@@ -174,7 +174,9 @@ Unless required by applicable law or agreed to in writing, the Contents are dist
 Some of the contents of this directory derive from the following repositories: 
 
 https://github.com/hello-robot/stretch_web_interface
+
 https://github.com/hcrlab/stretch_web_interface
+
 https://github.com/hcrlab/stretch_teleop_interface
 
-Text from relevant license files found in these repositories follows.
+Text from relevant license files found in these repositories.
