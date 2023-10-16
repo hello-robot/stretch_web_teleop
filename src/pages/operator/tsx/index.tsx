@@ -117,7 +117,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             );
             break;
         case 'occupancyGrid':
-                        if (!occupancyGrid) {
+            if (!occupancyGrid) {
                 occupancyGrid = message.message
             } else {
                 occupancyGrid.data = occupancyGrid.data.concat(message.message.data)
@@ -156,10 +156,11 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
 function initializeOperator() {
     // configureRemoteRobot();
     const storageHandlerReadyCallback = () => {
-        renderOperator(storageHandler);
+        FunctionProvider.addRemoteRobot(remoteRobot);
         underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
         movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
         arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
+        renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
 }
@@ -212,7 +213,6 @@ function createStorageHandler(storageHandlerReadyCallback: () => void) {
 function renderOperator(storageHandler: StorageHandler) {
     const layout = storageHandler.loadCurrentLayoutOrDefault();
     FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
-    FunctionProvider.addRemoteRobot(remoteRobot);
     
     !isMobile ?
         root.render(

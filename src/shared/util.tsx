@@ -217,7 +217,7 @@ export const REALSENSE_GRIPPER_POSE: RobotPose = {
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
     "wrist_extension": [0.05, .518],
-    "joint_wrist_roll": [-3.14, 3.14],
+    "joint_wrist_roll": [-2.95, 2.95],
     "joint_wrist_pitch": [-1.57, 0.57],
     "joint_wrist_yaw": [-1.37, 4.41],
     "joint_lift": [0.175, 1.05],
