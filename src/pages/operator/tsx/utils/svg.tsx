@@ -16,6 +16,12 @@ import tiltUp from "operator/icons/Tilt_Up.svg"
 import tiltDown from "operator/icons/Tilt_Down.svg"
 import armIn from "operator/icons/Arm_In.svg"
 import armOut from "operator/icons/Arm_Out.svg"
+import rollLeft from "operator/icons/Roll_Left.svg"
+import rollRight from "operator/icons/Roll_Right.svg"
+import pitchDown from "operator/icons/Pitch_Down.svg"
+import pitchUp from "operator/icons/Pitch_Up.svg"
+import yawLeft from "operator/icons/Yaw_Left.svg"
+import yawRight from "operator/icons/Yaw_Right.svg"
 
 import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider"
 import { isMobile } from "react-device-detect"
@@ -34,7 +40,8 @@ export enum ButtonPadShape {
     Gripper,
     ManipOverhead,
     SimpleButtonPad,
-    RowButtonPad
+    RowButtonPad,
+    StackedButtonPad
 }
 
 /**
@@ -126,6 +133,8 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
             return getSimpleButtonPadPaths(width, height);
         case ButtonPadShape.RowButtonPad:
             return getRowButtonPadPaths(width, height)
+        case ButtonPadShape.StackedButtonPad:
+            return getStackedButtonPadPaths(width, height)
         default:
             throw Error(`Cannot get paths of unknown button pad shape ${ButtonPadShape}`);
     }
@@ -334,6 +343,33 @@ function getRowButtonPadPaths(width: number, height: number): [string[], { x: nu
     return [paths, iconPositions];
 }
 
+function getStackedButtonPadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    const endsPercent = 0.25;
+    const endsHeight = height * endsPercent;
+
+    const paths = [
+        rect(0, 0, width / 2, endsHeight),  // top left
+        rect(width / 2, 0, width / 2, endsHeight),  // top right
+        rect(0, height - 3 * endsHeight, width / 2, endsHeight),  // middle 1 left
+        rect(width / 2, height - 3 * endsHeight, width / 2, endsHeight),  // middle 1 right
+        rect(0, height - 2 * endsHeight, width / 2, endsHeight),  // middle 2 left
+        rect(width / 2, height - 2 * endsHeight, width / 2, endsHeight),  // middle 2 right
+        rect(0, height - endsHeight, width / 2, endsHeight),  // bottom left
+        rect(width / 2, height - endsHeight, width / 2, endsHeight),  // bottom right
+    ];
+    const iconPositions = [
+        { x: width / 4, y: endsHeight / 2 }, // top left
+        { x: (3 * width) / 4, y: endsHeight / 2 }, // top right
+        { x: width / 4, y: height - 5 * endsHeight / 2 }, // middle 1 left
+        { x: (3 * width) / 4, y: height - 5 * endsHeight / 2 }, // middle 1 right
+        { x: width / 4, y: height - 3 * endsHeight / 2 }, // middle 2 left
+        { x: (3 * width) / 4, y: height - 3 * endsHeight / 2 }, // middle 2 right
+        { x: width / 4, y: height - endsHeight / 2 }, // bottom left
+        { x: (3 * width) / 4, y: height - endsHeight / 2 }, // bottom right
+    ]
+    return [paths, iconPositions];
+}
+
 /**
  * Gets the icon corresponding to a button in a button pad.
  * 
@@ -362,10 +398,18 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
             return gripOpen;
         case (ButtonPadButton.GripperClose):
             return gripClose;
+        case (ButtonPadButton.WristRollLeft):
+            return rollLeft
+        case (ButtonPadButton.WristRollRight):
+            return rollRight
+        case (ButtonPadButton.WristPitchUp):
+            return pitchUp
+        case (ButtonPadButton.WristPitchDown):
+            return pitchDown
         case (ButtonPadButton.WristRotateIn):
-            return gripLeft;
+            return yawLeft;
         case (ButtonPadButton.WristRotateOut):
-            return gripRight
+            return yawRight
         case (ButtonPadButton.CameraPanLeft):
             return panLeft
         case (ButtonPadButton.CameraPanRight):

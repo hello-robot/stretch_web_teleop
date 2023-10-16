@@ -194,13 +194,25 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             shape = ButtonPadShape.SimpleButtonPad;
             break;
         case ButtonPadId.Wrist:
+            // functions = [
+            //     B.GripperOpen,
+            //     B.GripperClose,
+            //     B.WristRotateIn,
+            //     B.WristRotateOut
+            // ];
+            // shape = ButtonPadShape.SimpleButtonPad;
+            // break;
             functions = [
-                B.GripperOpen,
-                B.GripperClose,
+                B.WristRollLeft,
+                B.WristRollRight,
+                B.WristPitchUp,
+                B.WristPitchDown,
                 B.WristRotateIn,
-                B.WristRotateOut
+                B.WristRotateOut,
+                B.GripperOpen,
+                B.GripperClose
             ];
-            shape = ButtonPadShape.SimpleButtonPad;
+            shape = ButtonPadShape.StackedButtonPad;
             break;
         case ButtonPadId.Arm:
             functions = [
