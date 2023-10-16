@@ -83,16 +83,27 @@ export class OccupancyGrid extends React.Component {
 
         // line width
         graphics.setStrokeStyle(strokeSize);
-        graphics.moveTo(0.0, size / 2.0);
+        graphics.moveTo(0.0, size / 1.5);
         graphics.beginStroke(strokeColor);
         graphics.beginFill(fillColor);
         graphics.lineTo(-size / 2.0, -size / 2.0);
         graphics.lineTo(size / 2.0, -size / 2.0);
-        graphics.lineTo(0.0, size / 2.0);
+        graphics.lineTo(0.0, size / 1.5);
         graphics.closePath();
         graphics.endFill();
         graphics.endStroke();
 
+        // graphics.setStrokeStyle(strokeSize);
+        // graphics.moveTo(0.0, size / 2.0);
+        // graphics.beginStroke(strokeColor);
+        // graphics.beginFill(fillColor);
+        // graphics.lineTo(-size / 2.0, -size / 2.0);
+        // graphics.lineTo(size / 2.0, 0.0);
+        // graphics.lineTo(0.0, size / 2.0);
+        // graphics.closePath();
+        // graphics.endFill();
+        // graphics.endStroke();
+        
         // create the shape
         createjs.Shape.call(arrow, graphics);
 
@@ -187,6 +198,19 @@ export class OccupancyGrid extends React.Component {
         };
     }
 
+    // https://github.com/RobotWebTools/ros2djs/blob/develop/src/Ros2D.js#L34C1-L44C3
+    // convert a ROS quaternion to theta in degrees
+    rosQuaternionToGlobalTheta(orientation: ROSLIB.Quaternion) {
+        // See https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Rotation_matrices
+        // here we use [x y z] = R * [1 0 0]
+        var w = orientation.w;
+        var x = orientation.x;
+        var y = orientation.y;
+        var z = orientation.z;
+        // Canvas rotation is clock wise and in degrees
+        return -Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)) * 180.0 / Math.PI;
+    };
+
     globalToRos(x: number, y: number) {
         var rosX = (x / 5) * this.scaleX! + this.origin!.position.x
         // var rosX = (x / 5 - this.width) * this.scaleX! - this.origin!.position.x
@@ -208,6 +232,8 @@ export class OccupancyGrid extends React.Component {
             let globalCoord = this.rosToGlobal(pose.translation)
             robotMarker.x = globalCoord.x
             robotMarker.y = globalCoord.y
+            let theta = this.rosQuaternionToGlobalTheta(pose.rotation)
+            robotMarker.rotation = theta
             robotMarker.scaleX = 1.0 / this.rootObject.scaleX
             robotMarker.scaleY = 1.0 / this.rootObject.scaleY
             robotMarker.visible = true
@@ -282,7 +308,14 @@ export class OccupancyGrid extends React.Component {
             } as ROSPose)
         }
         this.goal_position = undefined
-        if (isMobile) this.functs.SetSelectGoal(false)
+        // if (isMobile) this.functs.SetSelectGoal(false)
+        this.functs.SetSelectGoal(false)
+    }
+
+    removeGoalMarker() {
+        console.log("removing")
+        this.goal_position = undefined
+        if (this.goalMarker) this.rootObject.removeChild(this.goalMarker)
     }
 
     createOccupancyGridClient() {
@@ -296,12 +329,13 @@ export class OccupancyGrid extends React.Component {
 
             if (this.functs.SelectGoal()) {
                 this.createGoalMarker(evt.stageX / 5, evt.stageY / 5, false)
+                this.functs.SetSelectGoal(false)
             }
             
-            if (!isMobile && this.functs.SelectGoal()) {
-                this.play()
-                if (isMobile) this.functs.SetSelectGoal(false)
-            }
+            // if (!isMobile && this.functs.SelectGoal()) {
+            //     this.play()
+            //     if (isMobile) this.functs.SetSelectGoal(false)
+            // }
         });
     }
 }

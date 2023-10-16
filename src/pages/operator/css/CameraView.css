@@ -179,6 +179,7 @@
     font-size: x-large;
     align-self: flex-end;
     text-align: center;
+    margin: 10px;
 }
 
 @media screen and (orientation:portrait) and (max-device-width: 900px) {

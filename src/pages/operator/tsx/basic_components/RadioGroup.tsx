@@ -1,6 +1,7 @@
 import React from 'react';
 import { className } from 'shared/util';
 import 'operator/css/RadioGroup.css'
+import { isMobile } from 'react-device-detect';
 
 export const RadioButton = (props: {
     label: string, 
@@ -9,10 +10,10 @@ export const RadioButton = (props: {
     functs: RadioFunctions
 }) => {
     return (
-        <div className='radio-btn' onClick={props.onClick}>
+        <div className={isMobile ? 'radio-btn-mobile' : 'radio-btn'} onClick={props.onClick}>
             <label key={props.label}>
                 <input type="radio"
-                    className="radio"
+                    className={isMobile ? "radio-mobile" : "radio"}
                     value={props.label}
                     key={props.label}
                     checked={props.selected}
@@ -50,13 +51,20 @@ export const RadioGroup = (props: {
     const [selected, setSelected] = React.useState<string>()
 
     return (
-        <div className='radio-group' onContextMenu={(e)=> e.preventDefault()}>
+        <div className={isMobile ? 'radio-group-mobile' : 'radio-group'} onContextMenu={(e)=> e.preventDefault()}>
             {props.functs.GetLabels().map((label, index) => (
                 <RadioButton
                     key={label}
                     label={label}
                     selected={selected === label}
-                    onClick={() => { setSelected(label); props.functs.SelectedLabel(label) }}
+                    onClick={() => { 
+                        if (selected === label) {
+                            setSelected(''); 
+                            props.functs.SelectedLabel('')
+                        } else {
+                            setSelected(label); props.functs.SelectedLabel(label) 
+                        }
+                    }}
                     functs={props.functs}
                 />
             ))}
