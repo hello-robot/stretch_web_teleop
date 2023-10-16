@@ -1,10 +1,10 @@
 import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable
 from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_path
@@ -29,6 +29,8 @@ def generate_launch_description():
         'nav2_params_file',
         default_value=os.path.join(stretch_navigation_path, 'config', 'nav2_params.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
+    dict_file_path = os.path.join(core_package, 'config', 'stretch_marker_dict.yaml')
+    depthimage_to_laserscan_config = os.path.join(core_package, 'config', 'depthimage_to_laser_scan_params.yaml')
 
     # Realsense D435i
     d435i_launch = IncludeLaunchDescription(
@@ -49,7 +51,7 @@ def generate_launch_description():
     gripper_camera_node = Node(
         package='image_publisher',
         executable='image_publisher_node',
-        name='gripper_camera',
+        name='gripper_camera_node',
         output='screen',
         parameters=[{'frame_id': 'gripper_camera', 'publish_rate': 15.0}],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
@@ -70,7 +72,7 @@ def generate_launch_description():
     navigation_camera_node = Node(
         package='image_publisher',
         executable='image_publisher_node',
-        name='navigation_camera',
+        name='navigation_camera_node',
         output='screen',
         parameters=[{'frame_id': 'navigation_camera', 'publish_rate': 15.0}],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
@@ -98,7 +100,7 @@ def generate_launch_description():
     tf2_web_republisher_node = Node(
         package='tf2_web_republisher_py',
         executable='tf2_web_republisher',
-        name='tf2_web_republisher'
+        name='tf2_web_republisher_node'
     )
 
     # Stretch Driver
@@ -123,7 +125,7 @@ def generate_launch_description():
     configure_video_streams_node = Node(
         package='stretch_teleop_interface',
         executable='configure_video_streams.py',
-        name='configure_video_streams',
+        # name='configure_video_streams_node',
         output='screen',
         arguments=[LaunchConfiguration('params')]
     )
@@ -140,18 +142,38 @@ def generate_launch_description():
                           'use_rviz': 'false'}.items())
 
     detect_aruco_markers_node = Node(
-        package='stretch_core',
-        executable='detect_aruco_markers',
-        name='detect_aruco_markers'
+        package='stretch_teleop_interface',
+        executable='detect_aruco_markers.py',
+        name='detect_aruco_node',
+        output='screen',
+        parameters=[dict_file_path]
+    )
+
+    navigate_to_aruco_node = Node(
+        package='stretch_teleop_interface',
+        executable='navigate_to_aruco',
+        name='navigate_to_aruco_node',
+        output='screen',
+        parameters=[dict_file_path]
     )
 
     head_scan_node = Node(
         package='stretch_teleop_interface',
         executable='head_scan.py',
-        name='head_scan'
+        name='head_scan_node',
+        output='screen'
     )
 
-    return LaunchDescription([
+    depthimage_to_laserscan_node = Node(
+        package='depthimage_to_laserscan',
+        executable='depthimage_to_laserscan_node',
+        name='depthimage_to_laserscan',
+        remappings=[('depth', '/camera/depth/image_rect_raw'),
+                    ('depth_camera_info', '/camera/depth/camera_info')],
+        parameters=[depthimage_to_laserscan_config]
+    )
+
+    ld = LaunchDescription([
         params_file,
         map_yaml,
         nav2_params_file_param,
@@ -164,14 +186,32 @@ def generate_launch_description():
         gripper_camera_node,
         navigation_camera_group,
         navigation_camera_node,
+        configure_video_streams_node,
         # map_server_cmd,
         # start_lifecycle_manager_cmd,
         tf2_web_republisher_node,
         stretch_driver_launch,
         rosbridge_launch,
-        configure_video_streams_node,
         rplidar_launch,
         navigation_bringup_launch,
         detect_aruco_markers_node,
-        head_scan_node
+        head_scan_node,
+        # depthimage_to_laserscan_node
     ])
+
+    ld.add_action(
+        ExecuteProcess(
+            cmd=[
+                [
+                    FindExecutable(name="ros2"),
+                    " service call ",
+                    "/reinitialize_global_localization ",
+                    "std_srvs/srv/Empty ",
+                    "\"{}\"",
+                ]
+            ],
+            shell=True,
+        )
+    )
+
+    return ld
