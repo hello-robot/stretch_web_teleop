@@ -101,7 +101,7 @@ export class Robot extends React.Component {
         this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
         this.createArucoMarkerService()
-        this.createArucoNavigationService()
+        // this.createArucoNavigationService()
         this.createArucoMarkerUpdateService()
         this.createGetRelativePoseService()
         this.createRobotFrameTFClient()
@@ -348,7 +348,7 @@ export class Robot extends React.Component {
     createArucoMarkerParamServer() {
         this.arucoMarkerInfoParam = new ROSLIB.Param({
             ros : this.ros,
-            name : '/detect_aruco_markers:aruco_marker_info'
+            name : '/detect_aruco_node:aruco_marker_info'
         });
     }
 
@@ -403,7 +403,7 @@ export class Robot extends React.Component {
         values.forEach(value => {
             this.arucoMarkerInfoParam = new ROSLIB.Param({
                 ros : this.ros,
-                name : `/detect_aruco_markers:aruco_marker_info.${markerID}.${value}`
+                name : `/detect_aruco_node:aruco_marker_info.${markerID}.${value}`
             })
             this.arucoMarkerInfoParam.delete((response) => {})
         })
@@ -414,7 +414,7 @@ export class Robot extends React.Component {
         values.forEach(value => {
             this.arucoMarkerInfoParam = new ROSLIB.Param({
                 ros : this.ros,
-                name : `/detect_aruco_markers:aruco_marker_info.${markerID}.${value}`
+                name : `/detect_aruco_node:aruco_marker_info.${markerID}.${value}`
             })
             let param = eval(`markerInfo.${value}`)
             if (param !== undefined) {
@@ -431,7 +431,7 @@ export class Robot extends React.Component {
                 rotation: relative_pose.rotation
             }
         })
-        console.log(request)
+        console.log('navigate to arcuo: ', request)
         this.navigateToArucoService?.callService(request, (response: string) => {
             console.log(response)
         })

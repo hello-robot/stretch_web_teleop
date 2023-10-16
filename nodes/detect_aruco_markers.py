@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 
 import sys
-import rospy
+import rclpy
 import cv2
 import numpy as np
 import math
 import click
-import json 
+
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rcl_interfaces.msg import SetParametersResult
 
 import message_filters
 from std_msgs.msg import Header
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
-from sensor_msgs import point_cloud2
+from geometry_msgs.msg import TransformStamped
+from sensor_msgs_py import point_cloud2
 from sensor_msgs.msg import PointCloud2, PointField
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
@@ -20,18 +24,14 @@ from geometry_msgs.msg import Point
 
 from cv_bridge import CvBridge, CvBridgeError
 
-import tf
-from tf.transformations import quaternion_from_euler, euler_from_quaternion, quaternion_from_matrix
+from tf2_ros.transform_broadcaster import TransformBroadcaster
+from tf_transformations import quaternion_from_matrix
+from hello_helpers.hello_misc import compare_versions
 
 import struct
-import cv2
 import cv2.aruco as aruco
 import hello_helpers.fit_plane as fp
-from hello_helpers.hello_misc import compare_versions
-import threading
-from collections import deque
 
-from stretch_teleop_interface_msgs.srv import ArucoMarkerInfoUpdate
 
 class ArucoMarker:
     def __init__(self, aruco_id, marker_info, show_debug_images=False):
@@ -47,10 +47,7 @@ class ArucoMarker:
         self.id_color = [bgr[2], bgr[1], bgr[0]]
         
         self.frame_id = 'camera_color_optical_frame'
-        self.info = None
-        print(marker_info.keys())
-        if str(self.aruco_id) in marker_info:
-            self.info = marker_info[str(self.aruco_id)]
+        self.info = marker_info.get(str(self.aruco_id), None)
 
         if self.info is None:
             self.info = marker_info['default']
@@ -62,10 +59,11 @@ class ArucoMarker:
         # 280mm is the minimum depth for the D435i at 1280x720 resolution
         self.min_z_to_use_depth_image = 0.28 + (self.length_of_marker_mm/1000.0) 
         
+        duration = Duration(seconds=0.2)
         self.marker = Marker()
         self.marker.type = self.marker.CUBE
         self.marker.action = self.marker.ADD
-        self.marker.lifetime = rospy.Duration(0.2)
+        self.marker.lifetime = duration.to_msg()
         self.marker.text = self.info['name']
 
         self.frame_number = None
@@ -126,7 +124,7 @@ class ArucoMarker:
         coord_crop = np.mgrid[top : bottom : 1, left : right : 1]
 
         # Decompose the camera matrix.
-        camera_matrix = np.reshape(self.camera_info.K, (3,3))
+        camera_matrix = np.reshape(self.camera_info.k, (3,3))
         f_x = camera_matrix[0,0]
         c_x = camera_matrix[0,2]
         f_y = camera_matrix[1,1]
@@ -195,24 +193,28 @@ class ArucoMarker:
         self.frame_number = frame_number
         self.camera_info = camera_info
         self.depth_image = depth_image
-        self.camera_matrix = np.reshape(self.camera_info.K, (3,3))
-        self.distortion_coefficients = np.array(self.camera_info.D)
-        self.object_points = np.hstack((np.array(self.corners[0]), np.transpose(np.array([[0.0,0.0,0.0,0.0]]))))
-        
-        marker_points = np.array([[-self.length_of_marker_mm / 2, self.length_of_marker_mm / 2, 0],
-                                [self.length_of_marker_mm / 2, self.length_of_marker_mm / 2, 0],
-                                [self.length_of_marker_mm / 2, -self.length_of_marker_mm / 2, 0],
-                                [-self.length_of_marker_mm / 2, -self.length_of_marker_mm / 2, 0]], dtype=np.float32)
+        self.camera_matrix = np.reshape(self.camera_info.k, (3,3))
+        self.distortion_coefficients = np.array(self.camera_info.d)
+        rvecs, tvecs, unknown_variable = aruco.estimatePoseSingleMarkers([self.corners],
+                                                                         self.length_of_marker_mm / 1000.0,
+                                                                         self.camera_matrix,
+                                                                         self.distortion_coefficients)
+        self.aruco_rotation = rvecs[0][0]
+        marker_length = self.length_of_marker_mm / 1000.0
+        marker_points = np.array([[-marker_length / 2, marker_length / 2, 0],
+                                [marker_length / 2, marker_length / 2, 0],
+                                [marker_length / 2, -marker_length / 2, 0],
+                                [-marker_length / 2, -marker_length / 2, 0]], dtype=np.float32)
         rvecs = []
         tvecs = []
         for corner in self.corners:
-            nada, R, t = cv2.solvePnP(marker_points, corner, self.camera_matrix, self.distortion_coefficients, False, cv2.SOLVEPNP_IPPE_SQUARE)
+            nada, R, t = cv2.solvePnP(marker_points, corner, self.camera_matrix, self.distortion_coefficients, False, cv2.SOLVEPNP_SQPNP)
             rvecs.append(R)
             tvecs.append(t)
-        self.aruco_rotation = rvecs[0]
-        
+        self.aruco_rotation = rvecs[0].flatten()
+
         # Convert ArUco position estimate to be in meters.
-        self.aruco_position = tvecs[0]/1000.0
+        self.aruco_position = tvecs[0].flatten()
         aruco_depth_estimate = self.aruco_position[2]
         
         self.center = np.average(self.corners, axis=1).flatten()
@@ -232,10 +234,8 @@ class ArucoMarker:
             num_points = self.points_array.shape[0]
             min_number_of_points_for_plane_fitting = 16
             if num_points < min_number_of_points_for_plane_fitting:
-                print('WARNING: There are too few points from the depth image for plane fitting, so only using the RGB ArUco estimate. number of points =', num_points)
+                # print('WARNING: There are too few points from the depth image for plane fitting, so only using the RGB ArUco estimate. number of points =', num_points)
                 only_use_rgb = True
-                self.ready = False
-                return
         else:
             only_use_rgb = True
 
@@ -380,6 +380,7 @@ class ArucoMarker:
         self.broadcasted = False
         self.ready = True
 
+
     def get_marker_poly(self):
         poly_points = np.array(corners)
         poly_points = np.round(poly_points).astype(np.int32)
@@ -392,8 +393,19 @@ class ArucoMarker:
     def broadcast_tf(self, tf_broadcaster, force_redundant=False):
         # Create TF frame for the marker. By default, only broadcast a
         # single time after an update.
+        transform_stamped = TransformStamped()
+        transform_stamped.header.stamp = self.timestamp
+        transform_stamped.header.frame_id = self.frame_id
+        transform_stamped.child_frame_id = self.marker.text
+        transform_stamped.transform.translation.x = self.marker_position[0]
+        transform_stamped.transform.translation.y = self.marker_position[1]
+        transform_stamped.transform.translation.z = self.marker_position[2]
+        transform_stamped.transform.rotation.x = self.marker_quaternion[0]
+        transform_stamped.transform.rotation.y = self.marker_quaternion[1]
+        transform_stamped.transform.rotation.z = self.marker_quaternion[2]
+        transform_stamped.transform.rotation.w = self.marker_quaternion[3]
         if (not self.broadcasted) or force_redundant: 
-            tf_broadcaster.sendTransform(self.marker_position, self.marker_quaternion, self.timestamp, self.marker.text, self.frame_id)
+            tf_broadcaster.sendTransform(transform_stamped)
             self.broadcasted = True
         
     def get_ros_marker(self):
@@ -430,13 +442,14 @@ class ArucoMarker:
 
 
     def create_axis_marker(self, axis, id_num, rgba=None, name=None): 
+        duration = Duration(seconds=1.0)
         marker = Marker()
         marker.header.frame_id = self.frame_id
         marker.header.stamp = self.timestamp
         marker.id = id_num
         marker.type = marker.ARROW
         marker.action = marker.ADD
-        marker.lifetime = rospy.Duration(1.0)
+        marker.lifetime = duration.to_msg()
         if name is not None:
             marker.text = name
         axis_arrow = {'head_diameter': 0.005,
@@ -522,15 +535,14 @@ class ArucoMarker:
         
         return markers
         
-
-        
+     
 class ArucoMarkerCollection:
     def __init__(self, marker_info, show_debug_images=False):
         self.show_debug_images = show_debug_images
         
         self.marker_info = marker_info
         self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
-        self.aruco_detection_parameters = aruco.DetectorParameters()
+        self.aruco_detection_parameters =  aruco.DetectorParameters()
         # Apparently available in OpenCV 3.4.1, but not OpenCV 3.2.0.
         self.aruco_detection_parameters.cornerRefinementMethod = aruco.CORNER_REFINE_SUBPIX
         self.aruco_detection_parameters.cornerRefinementWinSize = 2
@@ -555,15 +567,28 @@ class ArucoMarkerCollection:
             marker = self.collection[key]
             marker.broadcast_tf(tf_broadcaster)
 
-    def update_marker_info(self, marker_info):
-        self.marker_info = marker_info
-        if self.aruco_ids is not None: 
-            for corners, aruco_id in zip(self.aruco_corners, self.aruco_ids):
-                aruco_id = int(aruco_id)
-                new_marker = ArucoMarker(aruco_id, self.marker_info, self.show_debug_images)
-                self.collection[aruco_id] = new_marker
+    def check_new_marker_info(self, aruco_id):
+        # Check if aruco id info exists
+        aruco_marker_info = self.marker_info.get(str(aruco_id), None)
+        if not aruco_marker_info: return False
 
-                self.collection[aruco_id].update(corners, self.timestamp, self.frame_number, self.camera_info, self.depth_image)
+        # Check that ALL required parameters are set for given aruco id
+        if aruco_marker_info.get('name', None) is None or \
+           aruco_marker_info.get('length_mm', None) is None or \
+           aruco_marker_info.get('use_rgb_only', None) is None:
+           return False
+
+        # Check if aruco marker already exists in collection
+        marker = self.collection.get(aruco_id, None)
+        if marker is None: return False
+
+        # Check if aruco marker info has been updated
+        if aruco_marker_info['name'] != marker.marker.text or \
+           aruco_marker_info['length_mm'] != marker.length_of_marker_mm or \
+           aruco_marker_info['use_rgb_only'] != marker.use_rgb_only:
+           return True
+                
+        return False
 
     def update(self, rgb_image, camera_info, depth_image=None, timestamp=None):
         self.frame_number += 1
@@ -571,7 +596,7 @@ class ArucoMarkerCollection:
         self.rgb_image = rgb_image
         self.camera_info = camera_info
         self.depth_image = depth_image
-        self.gray_image = cv2.cvtColor(self.rgb_image, cv2.COLOR_BGR2GRAY) #self.rgb_image
+        self.gray_image = cv2.cvtColor(self.rgb_image, cv2.COLOR_BGR2GRAY)
         image_height, image_width = self.gray_image.shape
         self.aruco_corners, self.aruco_ids, aruco_rejected_image_points = aruco.detectMarkers(self.gray_image,
                                                                                               self.aruco_dict,
@@ -585,26 +610,20 @@ class ArucoMarkerCollection:
             for corners, aruco_id in zip(self.aruco_corners, self.aruco_ids):
                 aruco_id = int(aruco_id)
                 marker = self.collection.get(aruco_id, None)
-                if marker is None:
+                new_marker_info_set = self.check_new_marker_info(aruco_id)
+                if marker is None or new_marker_info_set:
                     new_marker = ArucoMarker(aruco_id, self.marker_info, self.show_debug_images)
                     self.collection[aruco_id] = new_marker
-                    
+
                 self.collection[aruco_id].update(corners, self.timestamp, self.frame_number, self.camera_info, self.depth_image)
 
     def get_ros_marker_array(self):
-        marker_array = MarkerArray()  
-        remove_keys = []      
+        marker_array = MarkerArray()        
         for key in self.collection:
             marker = self.collection[key]
             if marker.frame_number == self.frame_number:
                 ros_marker = marker.get_ros_marker()
-                if ros_marker == None: 
-                    remove_keys.append(key)
-                    continue
                 marker_array.markers.append(ros_marker)
-
-        for key in remove_keys:
-            self.collection.pop(key)
         return marker_array
 
     def get_ros_axes_array(self, include_z_axes=True, include_axes=True):
@@ -622,8 +641,15 @@ class ArucoMarkerCollection:
         return marker_array
     
     
-class DetectArucoNode:
+class DetectArucoNode(Node):
     def __init__(self):
+        super().__init__('detect_aruco_node',
+                        allow_undeclared_parameters=True,
+                        automatically_declare_parameters_from_overrides=True)
+
+        node_name = self.get_name()
+        self.get_logger().info("{0} started".format(node_name))
+
         self.cv_bridge = CvBridge()
         self.rgb_image = None
         self.rgb_image_timestamp = None
@@ -634,6 +660,57 @@ class DetectArucoNode:
         self.show_debug_images = False
         self.publish_marker_point_clouds = False
 
+        self.add_on_set_parameters_callback(self.parameter_callback)
+
+        # Reading parameters from the stretch_marker_dict.yaml file and storing values
+        # in a dictionary called marker_info
+        param_list = ['130', '131', '132', '133', '134', '246', '247', '248', '249', '10', '21', 'default']
+        key_list = ['length_mm', 'use_rgb_only', 'name', 'link']
+        dict = {}
+        self.marker_info = {}
+        for aruco_id in param_list:
+            for key in key_list:
+                dict[key] = self.get_parameter_or('aruco_marker_info.{0}.{1}'.format(aruco_id, key)).value
+            self.marker_info[aruco_id] = dict
+            dict = {}
+            
+        self.aruco_marker_collection = ArucoMarkerCollection(self.marker_info, self.show_debug_images)
+
+        self.rgb_topic_name = '/camera/color/image_raw' #'/camera/infra1/image_rect_raw'
+        self.rgb_image_subscriber = message_filters.Subscriber(self, Image, self.rgb_topic_name)
+
+        self.depth_topic_name = '/camera/aligned_depth_to_color/image_raw'
+        self.depth_image_subscriber = message_filters.Subscriber(self, Image, self.depth_topic_name)
+
+        # TODO: This is unlikely to ever change, so it probably
+        # doesn't make sense to deal with the overhead of
+        # synchronizing it with other input.
+        self.camera_info_subscriber = message_filters.Subscriber(self, CameraInfo, '/camera/color/camera_info')
+
+        self.synchronizer = message_filters.TimeSynchronizer([self.rgb_image_subscriber, self.depth_image_subscriber, self.camera_info_subscriber], 10)
+        self.synchronizer.registerCallback(self.image_callback)
+
+        self.visualize_markers_pub = self.create_publisher(MarkerArray, '/aruco/marker_array', 1)
+        self.visualize_axes_pub = self.create_publisher(MarkerArray, '/aruco/axes', 1)
+        self.visualize_point_cloud_pub = self.create_publisher(PointCloud2, '/aruco/point_cloud2', 1)
+
+        self.wrist_top_marker_pub = self.create_publisher(Marker, '/aruco/wrist_top', 1)
+        self.wrist_inside_marker_pub = self.create_publisher(Marker, '/aruco/wrist_inside', 1)
+
+        self.tf_broadcaster = TransformBroadcaster(self)
+
+    def parameter_callback(self, params):
+        for param in params:
+            print(param)
+            prefix, aruco_id, key = param.name.split('.')
+            print(self.marker_info.get(aruco_id))
+            if self.marker_info.get(aruco_id) == None: 
+                self.marker_info[aruco_id] = {}
+            self.marker_info[aruco_id][key] = param.value
+
+        self.aruco_marker_collection.marker_info = self.marker_info
+        return SetParametersResult(successful=True)
+
     def image_callback(self, ros_rgb_image, ros_depth_image, rgb_camera_info):
         try:
             self.rgb_image = self.cv_bridge.imgmsg_to_cv2(ros_rgb_image, 'bgr8')
@@ -642,13 +719,19 @@ class DetectArucoNode:
             self.depth_image_timestamp = ros_depth_image.header.stamp
         except CvBridgeError as error:
             print(error)
-
         self.camera_info = rgb_camera_info
             
         # Copy the depth image to avoid a change to the depth image
         # during the update.
-        time_diff = self.rgb_image_timestamp - self.depth_image_timestamp
-        time_diff = abs(time_diff.to_sec())
+
+        # TODO: Check if this operation can be handled by a ROS 2 method instead of
+        # doing it manually
+        ############
+        time_diff_nanosec = abs(self.rgb_image_timestamp.nanosec - self.depth_image_timestamp.nanosec)
+        time_diff_sec = abs(self.rgb_image_timestamp.sec - self.depth_image_timestamp.sec)
+        time_diff = time_diff_sec + time_diff_nanosec*0.000001
+        ############
+
         if time_diff > 0.0001:
             print('WARNING: The rgb image and the depth image were not taken at the same time.')
             print('         The time difference between their timestamps =', closest_time_diff, 's')
@@ -702,7 +785,7 @@ class DetectArucoNode:
     def publish_point_cloud(self):
         header = Header()
         header.frame_id = 'camera_color_optical_frame'
-        header.stamp = rospy.Time.now()
+        header.stamp = self.get_clock().now().to_msg()
         fields = [PointField('x', 0, PointField.FLOAT32, 1),
                   PointField('y', 4, PointField.FLOAT32, 1),
                   PointField('z', 8, PointField.FLOAT32, 1),
@@ -713,65 +796,32 @@ class DetectArucoNode:
         a = 128
         rgba = struct.unpack('I', struct.pack('BBBB', b, g, r, a))[0]
         points = [[x, y, z, rgba] for x, y, z in self.all_points]
+        
         point_cloud = point_cloud2.create_cloud(header, fields, points)
         self.visualize_point_cloud_pub.publish(point_cloud)
         self.all_points = []
-    
-    def update_marker_cb(self, req):
-        self.marker_info = json.loads(rospy.get_param('/aruco_marker_info'))['aruco_marker_info']
-        self.aruco_marker_collection.update_marker_info(self.marker_info)
-        print("updated marker info")
-        return True
 
-    def main(self):
-        rospy.init_node('DetectArucoNode')
-        self.node_name = rospy.get_name()
-        rospy.loginfo("{0} started".format(self.node_name))
-        
-        # Wait till parameter has been published
-        while not rospy.has_param('/aruco_marker_info'):
-            pass
 
-        print('got marker info')
-        self.marker_info = json.loads(rospy.get_param('/aruco_marker_info'))['aruco_marker_info']
-        print(self.marker_info.keys())
-        self.aruco_marker_collection = ArucoMarkerCollection(self.marker_info, self.show_debug_images)
-
-        self.rgb_topic_name = '/camera/color/image_raw'
-        self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image)
-
-        self.depth_topic_name = '/camera/aligned_depth_to_color/image_raw'
-        self.depth_image_subscriber = message_filters.Subscriber(self.depth_topic_name, Image)
-
-        # TODO: This is unlikely to ever change, so it probably
-        # doesn't make sense to deal with the overhead of
-        # synchronizing it with other input.
-        self.camera_info_subscriber = message_filters.Subscriber('/camera/color/camera_info', CameraInfo)
-
-        self.synchronizer = message_filters.TimeSynchronizer([self.rgb_image_subscriber, self.depth_image_subscriber, self.camera_info_subscriber], 10)
-        self.synchronizer.registerCallback(self.image_callback)
-        
-        self.visualize_markers_pub = rospy.Publisher('/aruco/marker_array', MarkerArray, queue_size=1)
-        self.visualize_axes_pub = rospy.Publisher('/aruco/axes', MarkerArray, queue_size=1)
-        self.visualize_point_cloud_pub = rospy.Publisher('/aruco/point_cloud2', PointCloud2, queue_size=1)
-
-        self.wrist_top_marker_pub = rospy.Publisher('/aruco/wrist_top', Marker, queue_size=1)
-        self.wrist_inside_marker_pub = rospy.Publisher('/aruco/wrist_inside', Marker, queue_size=1)
-
-        self.tf_broadcaster = tf.TransformBroadcaster()
-
-        self.marker_update_service = rospy.Service('aruco_marker_update', ArucoMarkerInfoUpdate, self.update_marker_cb)
-
-if __name__ == '__main__':
+def main(args=None):
+    rclpy.init(args=args)
     if compare_versions(cv2.__version__,'4.7') == -1:
         txt = f"[ERROR] Found unsupported cv2 version({cv2.__version__}), Requires opencv-contrib-python>=4.7.0 " \
               f"\n\t\t\tShutting down node detect_aruco_markers"
-        rospy.logerr(click.style(txt,fg='red'))
+        print(click.style(txt,fg='red'))
         sys.exit()
     node = DetectArucoNode()
-    node.main()
+
+    logger = rclpy.logging.get_logger('logger')
     try:
-        rospy.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
-        print('interrupt received, so shutting down')
+        logger.info('interrupt received, so shutting down')
     cv2.destroyAllWindows()
+
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
+    

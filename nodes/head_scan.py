@@ -67,6 +67,7 @@ class HeadScanActionServer(Node):
                 self.set_pan_tilt_camera(pan, tilt)
                 time.sleep(0.5)
                 for marker in self.markers:
+                    print(self.aruco_name, marker.text)
                     if self.aruco_name == marker.text:
                         return True 
         
@@ -90,9 +91,8 @@ class HeadScanActionServer(Node):
         for marker in self.markers:
             if self.aruco_name == marker.text:
                 result.success = True
-                print('returning')
                 goal.succeed()
-                return self.result
+                return result
 
         # Scan in the local area
         pan_angles = [
@@ -134,10 +134,10 @@ class HeadScanActionServer(Node):
 if __name__ == '__main__':
     rclpy.init()
     node = HeadScanActionServer()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
+    # executor = MultiThreadedExecutor()
+    # executor.add_node(node)
     try:
-        rclpy.spin(node, executor)
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:
