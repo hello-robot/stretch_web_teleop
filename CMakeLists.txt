@@ -25,6 +25,7 @@ install(PROGRAMS
   nodes/configure_video_streams.py
   nodes/navigate_to_aruco.py
   nodes/head_scan.py
+  nodes/detect_aruco_markers.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
