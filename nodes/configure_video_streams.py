@@ -13,13 +13,15 @@ import ros2_numpy
 import tf2_ros
 import pcl
 import PyKDL
+import math
 # from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
-from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo
+from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo, JointState
 from sensor_msgs_py.point_cloud2 import read_points, create_cloud
 from cv_bridge import CvBridge
 from stretch_teleop_interface_msgs.srv import CameraPerspective, DepthAR, ArucoMarkers
 from visualization_msgs.msg import MarkerArray
 from rclpy.qos import ReliabilityPolicy, QoSProfile
+from rclpy.executors import MultiThreadedExecutor
 
 class ConfigureVideoStreams(Node):
     def __init__(self, params_file):
@@ -53,10 +55,11 @@ class ConfigureVideoStreams(Node):
 
         # Subscribers
         self.camera_rgb_subscriber =  message_filters.Subscriber(self, Image, "/camera/color/image_raw")
-        self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
-        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE))
+        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1)
+        self.joint_state_subscription = self.create_subscription(JointState, "/stretch/joint_states", self.joint_state_cb, 1)
         self.point_cloud_subscriber =  message_filters.Subscriber(self, PointCloud2, "/camera/depth/color/points")
-        self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, 1)
         # self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, 
@@ -82,6 +85,8 @@ class ConfigureVideoStreams(Node):
         # Service for enabling aruco marker detection
         self.aruco_markers_service = self.create_service(ArucoMarkers, 'aruco_markers', self.display_aruco_markers_callback)
         self.aruco_markers = False
+
+        self.roll_value = 0.0
 
     # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L44
     def transform_to_kdl(self, t):
@@ -243,10 +248,9 @@ class ConfigureVideoStreams(Node):
         else:
             raise ValueError("Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE")
 
-    def configure_images(self, ros_image, params):
-        rgb_image = self.cv_bridge.imgmsg_to_cv2(ros_image)
+    def configure_images(self, rgb_image, params):
         if rgb_image.shape[-1] == 2:
-            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YUYV)
+            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YVYU)
         else:
             rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
         if params:
@@ -258,7 +262,8 @@ class ConfigureVideoStreams(Node):
                 rgb_image = self.rotate_image(rgb_image, params['rotate'])
         return rgb_image
 
-    def realsense_cb(self, image, pc):
+    def realsense_cb(self, ros_image, pc):
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
         for image_config_name in self.realsense_params:
             img = self.configure_images(image, self.realsense_params[image_config_name])
             img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
@@ -269,15 +274,17 @@ class ConfigureVideoStreams(Node):
         self.realsense_rgb_image = self.realsense_images[self.camera_perspective["realsense"]]
         self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
 
-    def gripper_camera_cb(self, image):
+    def gripper_camera_cb(self, ros_image):
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
         for image_config_name in self.gripper_params:
+            # img = self.rotate_image_around_center(image, self.roll_value)
             self.gripper_images[image_config_name] = \
                 self.configure_images(image, self.gripper_params[image_config_name])
-        
         self.gripper_camera_rgb_image = self.gripper_images[self.camera_perspective["gripper"]]
         self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
 
-    def navigation_camera_cb(self, image):
+    def navigation_camera_cb(self, ros_image):
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
         for image_config_name in self.overhead_params:
             self.overhead_images[image_config_name] = \
                 self.configure_images(image, self.overhead_params[image_config_name])
@@ -285,6 +292,16 @@ class ConfigureVideoStreams(Node):
         self.overhead_camera_rgb_image = self.overhead_images[self.camera_perspective["overhead"]]
         self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
 
+    def rotate_image_around_center(self, image, angle):
+        image_center = tuple(np.array(image.shape[1::-1]) / 2)
+        rot_mat = cv2.getRotationMatrix2D(image_center, math.degrees(angle), 1.0)
+        result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+        return result
+
+    def joint_state_cb(self, joint_state):
+        roll_index = joint_state.name.index('joint_wrist_roll')
+        self.roll_value = joint_state.position[roll_index]
+        
     def publish_compressed_msg(self, image, publisher):
         msg = CompressedImage()
         msg.header.stamp = self.get_clock().now().to_msg()
