@@ -33,11 +33,12 @@
     "roslib": "github:hello-vinitha/roslibjs#ros2actionclient",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
-    "style-loader": "^3.3.2"
+    "style-loader": "^3.3.2",
+    "three": "^0.157.0"
   },
   "scripts": {
     "firebase": "webpack --mode development --progress --env storage='firebase'",
-    "local": "webpack --mode development --progress --env storage='localstorage'",
+    "localstorage": "webpack --mode development --progress --env storage='localstorage'",
     "styleguide": "styleguidist server"
   },
   "eslintConfig": {
@@ -64,6 +65,7 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.4",
     "@types/node": "^20.6.0",
+    "@types/three": "^0.157.0",
     "babel-loader": "^9.1.2",
     "babel-polyfill": "^6.26.0",
     "react-docgen-typescript": "^2.2.2",

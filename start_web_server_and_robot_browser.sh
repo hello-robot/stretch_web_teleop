@@ -4,12 +4,18 @@
 # lsof -i tcp:${PORT_NUMBER} | awk 'NR!=1 {print $2}' | xargs kill 
 # kill $(lsof -t -i:3000)
 
-sudo kill -9 $(sudo lsof -t -i:80)
-sudo pkill -f "node ./node_modules/.bin/nodemon server.js"
+# sudo kill -9 $(sudo lsof -t -i:80)
+# sudo pkill -f "node ./node_modules/.bin/nodemon server.js"
 
-export NODE_EXTRA_CA_CERTS="$(readlink -f ./certificates)/rootCA.pem"
+# export NODE_EXTRA_CA_CERTS="$(readlink -f ./certificates)/rootCA.pem"
 
-npm run $1 &
-sudo --preserve-env ./node_modules/.bin/nodemon server.js &
-./node_modules/.bin/nodemon start_robot_browser.js
+# npm run $1 &
+# ./node_modules/.bin/nodemon server.js &
+# ./node_modules/.bin/nodemon start_robot_browser.js
+# set +x
+
+export NODE_EXTRA_CA_CERTS="/home/hello-robot/hello_robot_ws/src/stretch_teleop_interface/certificates/rootCA.pem"
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && npm run localstorage &
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && ./node_modules/.bin/nodemon server.js &
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && ./node_modules/.bin/nodemon start_robot_browser.js
 set +x
