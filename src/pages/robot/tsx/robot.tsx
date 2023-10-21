@@ -121,6 +121,10 @@ export class Robot extends React.Component {
         this.ros.close()
     }
     
+    isROSConnected() {
+        return this.ros.isConnected
+    }
+    
     subscribeToJointState() {
         const jointStateTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
             ros: this.ros,

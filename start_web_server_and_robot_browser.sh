@@ -15,7 +15,8 @@
 # set +x
 
 export NODE_EXTRA_CA_CERTS="/home/hello-robot/hello_robot_ws/src/stretch_teleop_interface/certificates/rootCA.pem"
-cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && npm run localstorage &
-cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && ./node_modules/.bin/nodemon server.js &
-cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && ./node_modules/.bin/nodemon start_robot_browser.js
+# cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && npm run localstorage &
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && pm2 start npm --name="stretch_teleop_interface" -- run localstorage 
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && pm2 start server.js --watch
+cd /home/hello-robot/hello_robot_ws/src/stretch_teleop_interface && pm2 start start_robot_browser.js --watch 
 set +x

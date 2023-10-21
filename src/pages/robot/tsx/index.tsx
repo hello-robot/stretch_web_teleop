@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
+import { Robot, inJointLimits, inCollision, rosConnected } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
 import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
@@ -22,6 +22,14 @@ export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
 // let occupancyGrid: ROSOccupancyGrid | undefined;
+
+connection = new WebRTCConnection({
+    peerRole: 'robot',
+    polite: false,
+    onRobotConnectionStart: handleSessionStart,
+    onMessage: handleMessage,
+    onConnectionEnd: disconnectFromRobot
+})
 
 robot.connect().then(() => {
     robot.subscribeToVideo({
@@ -44,29 +52,15 @@ robot.connect().then(() => {
 
     robot.getOccupancyGrid()
 
-    connection = new WebRTCConnection({
-        peerRole: 'robot',
-        polite: false,
-        onRobotConnectionStart: handleSessionStart,
-        onMessage: handleMessage,
-        onConnectionEnd: disconnectFromRobot
-    })
-
     connection.joinRobotRoom()
-}) 
-// .then(() => {
-//     setTimeout(() => {
-//         console.log(connection.connectionState())
-//         let isResolved = connection.connectionState() == 'connected' ? true : false
-//         console.log("connection state: ", isResolved)
-//         if (isResolved) {
-//             console.log('WebRTC connection is resolved.');
-//         } else {
-//             window.location.reload()
-//         }
-//     }, 7000);    
-// })
-
+}).then(() => {
+    setInterval(() => {
+        console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
+        if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
+            window.location.reload()
+        }
+    }, 4000);    
+})
 function handleSessionStart() {
     connection.removeTracks()
 

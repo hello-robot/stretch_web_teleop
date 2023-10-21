@@ -194,8 +194,8 @@ def generate_launch_description():
         rosbridge_launch,
         rplidar_launch,
         navigation_bringup_launch,
-        detect_aruco_markers_node,
-        head_scan_node,
+        # detect_aruco_markers_node,
+        # head_scan_node,
         # depthimage_to_laserscan_node
     ])
 

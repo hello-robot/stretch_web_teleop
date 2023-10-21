@@ -27,6 +27,7 @@ let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>(
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
+let connectionResolved: boolean = false;
 
 export let occupancyGrid: ROSOccupancyGrid | undefined
 export let storageHandler: StorageHandler;
@@ -54,27 +55,22 @@ connection = new WebRTCConnection({
 
 connection.joinOperatorRoom()
 
-// Check if the WebRTC connection is resolved. Reload every 4 seconds until resolved.
+// Check if the WebRTC connection is resolved. Reload every 8 seconds until resolved.
 setTimeout(() => {
-    let isResolved = connection.connectionState() == 'connected' ? true : false
-    console.log("connection state: ", isResolved)
-    if (isResolved) {
-        initializeOperator()
-        console.log('WebRTC connection is resolved.');
-
-        // If WebRTC disconnects, reload page
-        // const connectionStateChanged = setInterval(() => {
-        //     let isResolved = connection.connectionState() == 'connected'
-        //     if (!isResolved) {
-        //         clearInterval(connectionStateChanged)
-        //         window.location.reload()
-        //     }
-        // }, 2000)
-    } 
-    else {
-        window.location.reload()
+    let isResolved = connection.connectionState() == 'connected'
+    if (connectionResolved != isResolved || !isResolved) {
+        connectionResolved = isResolved;
+        console.log("connection state: ", isResolved)
+        if (isResolved) { 
+            initializeOperator()
+            console.log('WebRTC connection is resolved.');
+        } 
+        else {
+            connection.hangup()
+            connection.joinOperatorRoom()
+        }
     }
-}, 8000);
+}, 6000);
 
 // Create root once when index is loaded
 const container = document.getElementById('root');

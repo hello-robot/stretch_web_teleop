@@ -18,6 +18,7 @@ var options = {
 //     console.log('listening on *:' + port);
 // });
 
+var pm2 = require('pm2');
 const socket = require('socket.io');
 var express = require('express')
 var app = express();
@@ -84,8 +85,14 @@ io.on('connection', function (socket) {
                 socket.emit('robot available', false)
             }
         } else {
-            console.log('robot not available, restarting robot server')
+            console.log('robot not available, restarting robot browser')
             socket.emit('robot available', false)
+            // pm2.list((err, processes) => { 
+            //     processes.forEach(process => {
+            //         console.log(process.name)
+            //     } 
+            // })
+            pm2.restart('start_robot_browser')
         }
     })
 
