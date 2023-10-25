@@ -101,8 +101,8 @@ const SingleButton = (props: SingleButtonProps) => {
     const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = 50;
-    const width = 50;
+    const height = 85;
+    const width = 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     return (
@@ -164,16 +164,18 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ]
             shape = ButtonPadShape.Gripper;
             break;
-        case ButtonPadId.ManipOverhead:
+        case ButtonPadId.WristGripper:
             functions = [
-                B.ArmExtend,
-                B.ArmRetract,
+                B.WristPitchUp,
+                B.WristPitchDown,
                 B.WristRotateIn,
                 B.WristRotateOut,
-                B.BaseForward,
-                B.BaseReverse
+                B.WristRollLeft,
+                B.WristRollRight,
+                B.GripperOpen,
+                B.GripperClose
             ];
-            shape = ButtonPadShape.ManipOverhead;
+            shape = ButtonPadShape.WristGripper;
             break;
         case ButtonPadId.Base:
             functions = [
@@ -218,8 +220,8 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             functions = [
                 B.ArmLift,
                 B.ArmLower,
-                B.ArmExtend,
-                B.ArmRetract
+                B.ArmRetract,
+                B.ArmExtend
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;

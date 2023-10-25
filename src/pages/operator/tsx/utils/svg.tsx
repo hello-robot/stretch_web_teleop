@@ -1,6 +1,6 @@
 import armDown from "operator/icons/Arm_Down.svg"
-import armExtend from "operator/icons/Arm_Reach.svg"
-import armRetract from "operator/icons/Arm_Retract.svg"
+import armExtend from "operator/icons/Arm_Out.svg"
+import armRetract from "operator/icons/Arm_In.svg"
 import armUp from "operator/icons/Arm_Up.svg"
 import driveLeft from "operator/icons/Drive_Left.svg"
 import driveRight from "operator/icons/Drive_Right.svg"
@@ -9,7 +9,7 @@ import gripLeft from "operator/icons/Grip_Left.svg"
 import gripOpen from "operator/icons/Grip_Open.svg"
 import gripRight from "operator/icons/Grip_Right.svg"
 import driveForward from "operator/icons/Drive_Forward.svg"
-import driveReverse from "operator/icons/Drive_Reverse.svg"
+import driveReverse from "operator/icons/Drive_Backward.svg"
 import panLeft from "operator/icons/Pan_Left.svg"
 import panRight from "operator/icons/Pan_Right.svg"
 import tiltUp from "operator/icons/Tilt_Up.svg"
@@ -38,7 +38,7 @@ export enum ButtonPadShape {
     Directional,
     ManipRealsense,
     Gripper,
-    ManipOverhead,
+    WristGripper,
     SimpleButtonPad,
     RowButtonPad,
     StackedButtonPad
@@ -127,8 +127,8 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
             return getManipRealsensePaths(width, height);
         case ButtonPadShape.Gripper:
             return getGripperPaths(width, height);
-        case ButtonPadShape.ManipOverhead:
-            return getManipOverheadPaths(width, height);
+        case ButtonPadShape.WristGripper:
+            return getWristGripperPaths(width, height);
         case ButtonPadShape.SimpleButtonPad:
             return getSimpleButtonPadPaths(width, height);
         case ButtonPadShape.RowButtonPad:
@@ -272,8 +272,8 @@ function getGripperPaths(width: number, height: number): [string[], { x: number,
 /**
  * Ordered top, bottom, far left, far right, inside left, inside right
  */
-function getManipOverheadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
-    const sidesPercent = 0.20;
+function getWristGripperPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    const sidesPercent = 0.25;
     const sideWidth = width * sidesPercent;
     const centerWidth = width - 2 * sideWidth;
     const yLayer = height / 3;
@@ -281,16 +281,20 @@ function getManipOverheadPaths(width: number, height: number): [string[], { x: n
     const paths = [
         rect(sideWidth, 0, centerWidth, yLayer),  // top
         rect(sideWidth, height - yLayer, centerWidth, yLayer),  // bottom
-        rect(0, 0, sideWidth, height),  // far left
-        rect(width - sideWidth, 0, sideWidth, height),  // far right
+        rect(0, 0, sideWidth, height / 2),  // far left top
+        rect(width - sideWidth, 0, sideWidth, height / 2),  // far right top
+        rect(0, height / 2, sideWidth, height / 2),  // far left bottom
+        rect(width - sideWidth, height / 2, sideWidth, height / 2),  // far right bottom
         rect(sideWidth, yLayer, centerWidth / 2, yLayer),  // inside left
         rect(sideWidth + centerWidth / 2, yLayer, centerWidth / 2, yLayer),  // inside right
     ];
     const iconPositions = [
         { x: width / 2, y: yLayer / 2 }, // top
         { x: width / 2, y: height - yLayer / 2 }, // bottom
-        { x: sideWidth / 2, y: height / 2 }, // far left
-        { x: width - sideWidth / 2, y: height / 2 }, // far right
+        { x: sideWidth / 2, y: height / 4 }, // far left top
+        { x: width - sideWidth / 2, y: height / 4 }, // far right top
+        { x: sideWidth / 2, y: 3 * height / 4 }, // far left top
+        { x: width - sideWidth / 2, y: 3 * height / 4 }, // far right top
         { x: sideWidth + centerWidth / 4, y: height / 2 }, // inside left
         { x: width - sideWidth - centerWidth / 4, y: height / 2 }, // inside right
     ]
@@ -301,7 +305,7 @@ function getManipOverheadPaths(width: number, height: number): [string[], { x: n
  * Ordered top, bottom, left, right
  */
 function getSimpleButtonPadPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
-    const endsPercent = 0.20;
+    const endsPercent = 0.30;
     const endsHeight = height * endsPercent;
     const center = width / 2;
     const middleHeight = height - endsHeight * 2;
