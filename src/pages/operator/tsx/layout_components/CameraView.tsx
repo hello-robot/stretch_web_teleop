@@ -500,7 +500,7 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                 }}
                 label="Depth Sensing"
             />
-            <CheckToggleButton
+            {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {
                     props.definition.arucoMarkers = !props.definition.arucoMarkers;
@@ -508,7 +508,7 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.ToggleArucoMarkers).onCheck!(props.definition.arucoMarkers)
                 }}
                 label="Aruco Markers"
-            />
+            /> */}
             {/* <Dropdown
                 onChange={setSelectedIdx}
                 selectedIndex={selectedIdx}

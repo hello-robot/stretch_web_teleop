@@ -17,6 +17,7 @@ export enum ActionMode {
  */
 export enum ComponentType {
     Layout = "Layout",
+    LayoutGrid = "Layout Grid",
     Panel = "Panel",
     SingleTab = "Tab",
     CameraView = "Camera View",
@@ -43,11 +44,11 @@ export enum ButtonPadId {
     // Drive = "Drive",
     ManipRealsense = "Drive/Arm/Gripper/Wrist",
     Gripper = "Gripper",
-    ManipOverhead = "Drive/Arm/Wrist",
+    WristGripper = "Wrist & Gripper",
     Base = "Drive",
     Camera = "Camera",
     Wrist = "Wrist",
-    Arm = "Arm",
+    Arm = "Arm & Lift",
     ArmMobile = "Arm Mobile",
     GripperMobile = "Gripper Mobile",
     DriveMobile = "Drive Mobile"
@@ -84,29 +85,34 @@ export type ParentComponentDefinition = ComponentDefinition & {
     children: ComponentDefinition[];
 }
 
-export type LayoutDefinition = ParentComponentDefinition & {
+export type LayoutDefinition = ComponentDefinition & {
     displayVoiceControl: boolean;
     displayPoseLibrary: boolean;
     displayMovementRecorder: boolean;
     displayArucoMarkers: boolean;
     displayLabels: boolean;
     actionMode: ActionMode;
+    children: LayoutGridDefinition[];
+}
+
+export type LayoutGridDefinition = ComponentDefinition & {
+    children: PanelDefinition[];
+};
+
+/**
+ * Definition for a tabs component
+ */
+export type PanelDefinition = ComponentDefinition & {
+    /** List of definitions for individual tabs */
+    children: TabDefinition[];
 }
 
 /**
  * Definition for a single tab in a tabs component
  */
-export type TabDefinition = ParentComponentDefinition & {
+ export type TabDefinition = ParentComponentDefinition & {
     /** The label that appears at the top of the tabs object. */
     label: string;
-}
-
-/**
- * Definition for a tabs component
- */
-export type PanelDefinition = ParentComponentDefinition & {
-    /** List of definitions for individual tabs */
-    children: TabDefinition[];
 }
 
 /**

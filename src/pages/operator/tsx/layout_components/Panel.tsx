@@ -4,7 +4,7 @@ import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
 import { ComponentListProps, ComponentList } from "./ComponentList";
 import { DropZone } from "./DropZone";
-import { CustomizableComponentProps } from "./CustomizableComponent";
+import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import "operator/css/Panel.css"
 
 /* 
@@ -25,7 +25,7 @@ export const Panel = (props: CustomizableComponentProps) => {
     const [showTabModal, setShowTabModal] = React.useState(false);
     const definition = props.definition as PanelDefinition;
     const countChildren = definition.children.length;
-
+    
     // Handle case where active tab was moved or deleted, just use last remaining tab
     if (activeTab >= countChildren) {
         setActiveTab(countChildren - 1);
@@ -41,7 +41,7 @@ export const Panel = (props: CustomizableComponentProps) => {
     }
 
     // Should take up screen size proportional to number of children
-    const flex = Math.max(activeTabDef.children.length, 1);
+    const flex = Math.max(activeTabDef.children.length + 1, 1);
 
     /** Props for rendering the children elements inside the active tab */
     const componentListProps: ComponentListProps = {

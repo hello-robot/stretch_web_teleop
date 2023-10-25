@@ -164,7 +164,7 @@ export const Operator = (props: {
         let newPath: string = path;
         if (!selectedPath) {
             // New element not already in the layout
-            addToLayout(selectedDefinition, path, layout.current);
+            newPath = addToLayout(selectedDefinition, path, layout.current);
         } else {
             newPath = moveInLayout(selectedPath, path, layout.current);
         }

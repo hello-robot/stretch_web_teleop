@@ -33,7 +33,7 @@ export class ArucoMarkerFunctionProvider extends FunctionProvider {
         this.poses = []
         this.storageHandler = storageHandler
         let marker_info = this.storageHandler.getArucoMarkerInfo()
-        FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
+        // FunctionProvider.remoteRobot?.setArucoMarkerInfo(marker_info)
         this.remoteRobotState = FunctionProvider.remoteRobot?.state
     }
 

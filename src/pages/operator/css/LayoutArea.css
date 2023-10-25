@@ -1,6 +1,9 @@
 #layout-area {
+    /* padding: var(--screen-padding);
+    flex: 1 1 0; */
     padding: var(--screen-padding);
-    flex: 1 1 0;
+    flex-direction: column;
+    height: auto;
 }
 
 /* Remove margin for elements at edges of the layout area */
