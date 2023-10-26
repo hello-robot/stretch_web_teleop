@@ -101,8 +101,8 @@ const SingleButton = (props: SingleButtonProps) => {
     const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = 85;
-    const width = 85;
+    const height = isMobile ? 75 : 85;
+    const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     return (

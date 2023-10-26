@@ -6,6 +6,8 @@ import "operator/css/ArucoMarkers.css"
 import "operator/css/basic_components.css"
 import { ArucoNavigationState, className } from "shared/util";
 import { Tooltip } from "../static_components/Tooltip";
+import { isMobile } from "react-device-detect";
+import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 
 /** All the possible button functions */
 export enum ArucoMarkersFunction {
@@ -19,7 +21,7 @@ export enum ArucoMarkersFunction {
 
 // export interface ArucoNavigationState {
 //     state: ArucoNavigationResult | string,
-//     alert_type: string
+//     alertType: string
 // }
 
 export interface ArucoMarkersFunctions {
@@ -44,11 +46,18 @@ export const ArucoMarkers = (props: {
         Cancel: arucoMarkerFunctionProvider.provideFunctions(ArucoMarkersFunction.Cancel) as () => void
     }
 
+    let radioFuncts: RadioFunctions = {
+        Delete: (label: string) => functions.DeleteMarker(functions.SavedMarkerNames().indexOf(label)),
+        GetLabels: functions.SavedMarkerNames,
+        SelectedLabel: (label: string) => setSelectedIdx(functions.SavedMarkerNames().indexOf(label))
+    }
+
     const [markers, setMarkers] = useState<string[]>(functions.SavedMarkerNames());
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [showSaveMarkerModal, setShowSaveMarkerModal] = useState<boolean>(false);
     const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
     const [result, setResult] = React.useState<ArucoNavigationState>()
+    const [play, setPlay] = React.useState<boolean>(false)
 
     let timeout: NodeJS.Timeout;
 
@@ -83,9 +92,11 @@ export const ArucoMarkers = (props: {
                 id="save-marker-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
+                size={isMobile ? "medium" : "large"}
+                mobile={isMobile}
             >
-                <label htmlFor="new-marker-name"><b>Save Marker</b></label>
-                <hr />
+                {/* <label htmlFor="new-marker-name"><b>Save Marker</b></label>
+                <hr /> */}
                 <div className="marker-name">
                     <label>Marker Name</label>
                     <input autoFocus type="text" id="new-marker-name" name="new-option-name"
@@ -137,9 +148,11 @@ export const ArucoMarkers = (props: {
                 id="save-pose-modal"
                 acceptButtonText="Save"
                 acceptDisabled={!selectedMarkerID}
+                size={isMobile ? "medium" : "large"}
+                mobile={isMobile}
             >
-                <label htmlFor="save-pose"><b>Save Relative Pose</b></label>
-                <hr />
+                {/* <label htmlFor="save-pose"><b>Save Relative Pose</b></label>
+                <hr /> */}
                 <Dropdown
                     onChange={setSelectedMarkerID}
                     selectedIndex={selectedMarkerID}
@@ -159,8 +172,8 @@ export const ArucoMarkers = (props: {
         )
     }
 
-    return (
-        <React.Fragment>
+    return ( !isMobile 
+        ? <React.Fragment>
             <div className="aruco-markers-container">Aruco Marker Navigator</div>
             <div className="aruco-markers-container">
                 <Dropdown
@@ -213,6 +226,52 @@ export const ArucoMarkers = (props: {
                         <span className="material-icons">save</span><span className="material-icons">location_on</span>
                     </button>
                 </Tooltip>
+            </div>
+            <SaveMarkerModal
+                setArucoNavigationState={props.setArucoNavigationState}
+                setShow={setShowSaveMarkerModal}
+                show={showSaveMarkerModal}
+            />
+            <SavePoseModal
+                setArucoNavigationState={props.setArucoNavigationState}
+                setShow={setShowSavePoseModal}
+                show={showSavePoseModal}
+            />
+        </React.Fragment>
+        : 
+        <React.Fragment>
+            <RadioGroup functs={radioFuncts} />
+            <div className="markers-fn-btns">
+                <div className="mobile-save-btn" onClick={() => setShowSaveMarkerModal(true)}>
+                    <span>Add Marker</span>
+                    <span className="material-icons">add</span>
+                </div>
+                <div className="mobile-save-pose-btn" onClick={() => setShowSavePoseModal(true)}>
+                    <span >Save Position</span>
+                    <span className="material-icons">location_on</span>
+                </div>
+                {!play && 
+                    <div className="mobile-play-btn" onClick={() => {
+                        if (selectedIdx != undefined) {
+                            let state = functions.NavigateToMarker(selectedIdx)
+                            if (state) props.setArucoNavigationState(state)
+                            setPlay(!play)
+                        }
+                    }
+                    }>
+                        <span>Play</span> 
+                        <span className="material-icons">play_circle</span>
+                    </div>
+                }
+                {play &&
+                    <div className="mobile-cancel-btn " onClick={() => {
+                        functions.Cancel()
+                        setPlay(!play)
+                    }}>
+                        <span>Cancel</span>
+                        <span className="material-icons">cancel</span>
+                    </div>
+                }
             </div>
             <SaveMarkerModal
                 setArucoNavigationState={props.setArucoNavigationState}

@@ -383,9 +383,9 @@ function getStackedButtonPadPaths(width: number, height: number): [string[], { x
 export function getIcon(buttonPadButton: ButtonPadButton) {
     switch (buttonPadButton) {
         case (ButtonPadButton.BaseForward):
-            return isMobile ? armUp : driveForward;
+            return driveForward;
         case (ButtonPadButton.BaseReverse):
-            return isMobile ? armDown : driveReverse;
+            return driveReverse;
         case (ButtonPadButton.BaseRotateRight):
             return driveRight;
         case (ButtonPadButton.BaseRotateLeft):
@@ -395,9 +395,9 @@ export function getIcon(buttonPadButton: ButtonPadButton) {
         case (ButtonPadButton.ArmLower):
             return armDown;
         case (ButtonPadButton.ArmExtend):
-            return isMobile ? armIn : armExtend;
+            return armExtend;
         case (ButtonPadButton.ArmRetract):
-            return isMobile ? armOut : armRetract;
+            return armRetract;
         case (ButtonPadButton.GripperOpen):
             return gripOpen;
         case (ButtonPadButton.GripperClose):
