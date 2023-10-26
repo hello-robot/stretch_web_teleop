@@ -1,5 +1,5 @@
 free_thresh: 0.196
-image: cropped_warehouse.pgm
+image: map.pgm
 negate: 0
 occupied_thresh: 0.65
 origin:
