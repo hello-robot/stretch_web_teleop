@@ -1,2 +1,2 @@
-pkill screen
+sudo pkill screen
 pm2 kill
