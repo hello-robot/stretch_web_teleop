@@ -57,7 +57,7 @@ class ConfigureVideoStreams(Node):
         self.camera_rgb_subscriber =  message_filters.Subscriber(self, Image, "/camera/color/image_raw")
         self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE))
         self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1)
-        self.joint_state_subscription = self.create_subscription(JointState, "/stretch/joint_states", self.joint_state_cb, 1)
+        #self.joint_state_subscription = self.create_subscription(JointState, "/stretch/joint_states", self.joint_state_cb, 1)
         self.point_cloud_subscriber =  message_filters.Subscriber(self, PointCloud2, "/camera/depth/color/points")
         self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, 1)
         # self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
