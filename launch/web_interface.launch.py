@@ -190,7 +190,7 @@ def generate_launch_description():
         multi_camera_launch,
         navigation_camera_group,
         navigation_camera_node,
-        # configure_video_streams_node,
+        configure_video_streams_node,
         # map_server_cmd,
         # start_lifecycle_manager_cmd,
         tf2_web_republisher_node,
