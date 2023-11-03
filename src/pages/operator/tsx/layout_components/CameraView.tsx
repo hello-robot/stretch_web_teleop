@@ -49,6 +49,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
     const videoClass = className("video-canvas", { customizing, selected })
+    const realsense = props.definition.id === CameraViewId.realsense
 
     /** Mark this video stream as selected */
     function selectSelf() {
@@ -106,7 +107,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     const overlayContainer = (
         <div
-            className={className("video-overlay-container", { customizing, selected })}
+            className={className("video-overlay-container", { customizing, selected, realsense })}
             // style={overlayDimensions}
             onClick={customizing ? handleClick : undefined}
         >
@@ -136,17 +137,17 @@ export const CameraView = (props: CustomizableComponentProps) => {
         (
             <>
                 {/* <h4 className="title">Adjustable Camera</h4> */}
-                <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                    {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
-                    <div className="video-area" style={{ gridRow: 2, gridColumn: 2 }} ref={videoAreaRef}>
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            muted={true}
-                            className={className(videoClass, { constrainedHeight })}
-                        />
-                        {overlayContainer}
+                <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
+                    <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                        {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
                     </div>
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        muted={true}
+                        className={className(videoClass, { constrainedHeight })}
+                    />
+                    {overlayContainer}
                 </div>
             </>
         )
@@ -218,6 +219,50 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
         >
             <span
                 className="material-icons"
+                style={{ transform: `rotate(${rotation}deg)` }}
+            >arrow_right</span>
+        </button>
+    )
+}
+
+/**
+ * Creates a single button for controlling the pan or tilt of the realsense camera
+ *
+ * @param props the direction of the button {@link PanTiltButton}
+                */
+ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
+    const functs = buttonFunctionProvider.provideFunctions(props.direction);
+    const dir = props.direction.split(" ")[2]
+    let rotation: string;
+
+    // Specify button details based on the direction
+    switch (props.direction) {
+        case (ButtonPadButton.CameraTiltUp):
+            rotation = "-90";
+            break;
+        case (ButtonPadButton.CameraTiltDown):
+            rotation = "90";
+            break;
+        case (ButtonPadButton.CameraPanLeft):
+            rotation = "180";
+            break;
+        case (ButtonPadButton.CameraPanRight):
+            rotation = "0";  // by default the arrow icon points right
+            break;
+        default:
+            throw Error(`unknown pan tilt button direction ${props.direction}`)
+    }
+
+    return (
+        <button
+            className={'overlay btn-' + dir}
+            onPointerDown={functs.onClick}
+            onPointerUp={functs.onRelease}
+            onPointerLeave={functs.onLeave}
+        >
+            {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
+            <span
+                className="material-icons icon"
                 style={{ transform: `rotate(${rotation}deg)` }}
             >arrow_right</span>
         </button>

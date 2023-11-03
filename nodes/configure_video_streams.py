@@ -56,7 +56,7 @@ class ConfigureVideoStreams(Node):
         # Subscribers
         self.camera_rgb_subscriber =  message_filters.Subscriber(self, Image, "/camera/color/image_raw")
         self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE))
-        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1)
+        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/color/image_rect_raw", self.gripper_camera_cb, 1)
         #self.joint_state_subscription = self.create_subscription(JointState, "/stretch/joint_states", self.joint_state_cb, 1)
         self.point_cloud_subscriber =  message_filters.Subscriber(self, PointCloud2, "/camera/depth/color/points")
         self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, 1)
@@ -72,10 +72,10 @@ class ConfigureVideoStreams(Node):
         self.camera_perspective_service = self.create_service(CameraPerspective, 'camera_perspective', self.camera_perspective_callback)
 
         # Default image perspectives
-        self.camera_perspective = {"overhead": "nav", "realsense": "default", "gripper": "default"}
+        self.camera_perspective = {"overhead": "nav", "realsense": "default", "gripper": "d405"}
         self.overhead_camera_perspective = 'nav'
         self.realsense_camera_perspective = 'default'
-        self.gripper_camera_perspective = 'default'
+        self.gripper_camera_perspective = 'd405'
 
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)

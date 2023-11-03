@@ -151,11 +151,11 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
                     label="Display movement recorder"
                 />
-                {/* <OnOffToggleButton
+                <OnOffToggleButton
                     on={props.displayArucoMarkers}
                     onClick={() => props.setDisplayArucoMarkers(!props.displayArucoMarkers)}
                     label="Display aruco marker navigator"
-                /> */}
+                />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}
                 >

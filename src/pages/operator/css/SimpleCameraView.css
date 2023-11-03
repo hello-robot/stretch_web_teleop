@@ -59,7 +59,7 @@
 .overlay {
     font-size: 100px;
     position: absolute;
-    z-index: 1;
+    z-index: 4;
     margin-top: 75%;
     background-color: transparent;
     touch-action: none;

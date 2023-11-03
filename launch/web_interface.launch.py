@@ -33,8 +33,11 @@ def generate_launch_description():
     depthimage_to_laserscan_config = os.path.join(core_package, 'config', 'depthimage_to_laser_scan_params.yaml')
 
     # Realsense D435i
-    d435i_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'd435i_low_resolution.launch.py']))
+    # d435i_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'd435i_low_resolution.launch.py']))
+    # )
+    multi_camera_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'multi_camera.launch.py']))
     )
 
     # Gripper Camera Group
@@ -181,12 +184,13 @@ def generate_launch_description():
         navigation_camera_arg,
         certfile_arg,
         keyfile_arg,
-        d435i_launch,
-        gripper_camera_group,
-        gripper_camera_node,
+        # d435i_launch,
+        # gripper_camera_group,
+        # gripper_camera_node,
+        multi_camera_launch,
         navigation_camera_group,
         navigation_camera_node,
-        configure_video_streams_node,
+        # configure_video_streams_node,
         # map_server_cmd,
         # start_lifecycle_manager_cmd,
         tf2_web_republisher_node,
