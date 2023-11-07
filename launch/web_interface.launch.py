@@ -4,7 +4,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable, AndSubstitution, NotSubstitution
 from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_path
@@ -21,8 +21,9 @@ def generate_launch_description():
     params_file = DeclareLaunchArgument('params', default_value=[
         PathJoinSubstitution([teleop_interface_package, 'config', 'configure_video_streams_params.yaml'])])
     map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map (required)')
+    d405_arg = DeclareLaunchArgument('d405', default_value='true')
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
-    navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='false')
+    navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='true')
     certfile_arg = DeclareLaunchArgument('certfile', default_value='your_certfile.pem')
     keyfile_arg = DeclareLaunchArgument('keyfile', default_value='your_keyfile.pem')
     nav2_params_file_param = DeclareLaunchArgument(
@@ -32,17 +33,30 @@ def generate_launch_description():
     dict_file_path = os.path.join(core_package, 'config', 'stretch_marker_dict.yaml')
     depthimage_to_laserscan_config = os.path.join(core_package, 'config', 'depthimage_to_laser_scan_params.yaml')
 
-    # Realsense D435i
-    # d435i_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'd435i_low_resolution.launch.py']))
-    # )
-    multi_camera_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'multi_camera.launch.py']))
+    # Launch only D435i if there there is no D405
+    d435i_launch = GroupAction(
+        condition=UnlessCondition(LaunchConfiguration('d405')),
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'd435i_low_resolution.launch.py']))
+            )
+        ]
     )
 
-    # Gripper Camera Group
+    # Launch both D435i and D405 if there is D405
+    multi_camera_launch = GroupAction(
+        condition=IfCondition(LaunchConfiguration('d405')),
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'multi_camera.launch.py']))
+            )
+        ]
+    )
+
+    # Gripper Fisheye Camera Group
+    # Launch gripper fisheye camera if it exists and there is no D405
     gripper_camera_group = GroupAction(
-        condition=UnlessCondition(LaunchConfiguration('gripper_camera')),
+        condition=IfCondition(AndSubstitution(LaunchConfiguration('gripper_camera'), NotSubstitution(LaunchConfiguration('d405')))),
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'gripper_camera.launch.py']))
@@ -51,19 +65,22 @@ def generate_launch_description():
     )
 
     # Gripper Camera Node
+    # Publish blank image if there is no gripper fisheye camera or D405
     gripper_camera_node = Node(
         package='image_publisher',
         executable='image_publisher_node',
         name='gripper_camera_node',
         output='screen',
-        parameters=[{'frame_id': 'gripper_camera', 'publish_rate': 15.0}],
+        parameters=[{'publish_rate': 15.0}],
+        remappings=[('image_raw', '/gripper_camera/color/image_rect_raw')],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
-        condition=UnlessCondition(LaunchConfiguration('gripper_camera'))
+        condition=UnlessCondition(AndSubstitution(LaunchConfiguration('gripper_camera'), LaunchConfiguration('d405')))
     )
 
     # Navigation Camera Group
+    # Launch navigation camera if it exists
     navigation_camera_group = GroupAction(
-        condition=UnlessCondition(LaunchConfiguration('navigation_camera')),
+        condition=IfCondition(LaunchConfiguration('navigation_camera')),
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'navigation_camera.launch.py']))
@@ -72,12 +89,14 @@ def generate_launch_description():
     )
 
     # Navigation Camera Node
+    # Publish blank image if navigation camera does not exist
     navigation_camera_node = Node(
         package='image_publisher',
         executable='image_publisher_node',
         name='navigation_camera_node',
         output='screen',
-        parameters=[{'frame_id': 'navigation_camera', 'publish_rate': 15.0}],
+        parameters=[{'publish_rate': 15.0}],
+        remappings=[('image_raw', '/navigation_camera/image_raw')],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
         condition=UnlessCondition(LaunchConfiguration('navigation_camera'))
     )
@@ -181,12 +200,13 @@ def generate_launch_description():
         map_yaml,
         nav2_params_file_param,
         gripper_camera_arg,
+        d405_arg,
         navigation_camera_arg,
         certfile_arg,
         keyfile_arg,
-        # d435i_launch,
-        # gripper_camera_group,
-        # gripper_camera_node,
+        d435i_launch,
+        gripper_camera_group,
+        gripper_camera_node,
         multi_camera_launch,
         navigation_camera_group,
         navigation_camera_node,
@@ -199,7 +219,7 @@ def generate_launch_description():
         rplidar_launch,
         navigation_bringup_launch,
         # detect_aruco_markers_node,
-        # head_scan_node,
+        head_scan_node,
         # depthimage_to_laserscan_node
     ])
 
