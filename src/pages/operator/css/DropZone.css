@@ -51,6 +51,7 @@
     margin: 0;
     padding: 0;
     border: none;
+    visibility: hidden;
 }
 
 .drop-zone:hover {

@@ -151,6 +151,7 @@
 
 .realsense-pan-tilt-grid .down {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
+    z-index: 2;
     width: 100%;
     bottom: 0;
     left: 0;
@@ -161,6 +162,7 @@
 
 .realsense-pan-tilt-grid .left {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
+    z-index: 2;
     height: 100%;
     position: absolute;
     background: transparent;
@@ -169,6 +171,7 @@
 
 .realsense-pan-tilt-grid .right {
     border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
+    z-index: 2;
     position: absolute;
     right: 0;
     height: 100%;
