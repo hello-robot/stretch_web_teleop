@@ -7,12 +7,12 @@ export class MapFunctionProvider extends FunctionProvider {
     constructor() {
         super()
         this.provideFunctions = this.provideFunctions.bind(this)
+        FunctionProvider.remoteRobot?.getOccupancyGrid("getOccupancyGrid")
     }
 
     public provideFunctions(mapFunction: MapFunction) {
         switch (mapFunction) {
             case MapFunction.GetMap:
-                FunctionProvider.remoteRobot?.getOccupancyGrid("getOccupancyGrid")
                 return occupancyGrid
             case MapFunction.GetPose:
                 return () => { return FunctionProvider.remoteRobot?.getMapPose() }

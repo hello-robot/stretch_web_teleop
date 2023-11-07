@@ -29,7 +29,7 @@ let connection: WebRTCConnection;
 let root: Root;
 let connectionResolved: boolean = false;
 
-export let occupancyGrid: ROSOccupancyGrid | undefined
+export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
 // Create the function providers. These abstract the logic between the React 
@@ -37,8 +37,8 @@ export let storageHandler: StorageHandler;
 export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
-export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
-export var mapFunctionProvider = new MapFunctionProvider()
+export var underVideoFunctionProvider = new UnderVideoFunctionProvider();
+export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
 export var arucoMarkerFunctionProvider: ArucoMarkerFunctionProvider;
@@ -113,6 +113,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             );
             break;
         case 'occupancyGrid':
+            console.log("getting grid")
             if (!occupancyGrid) {
                 occupancyGrid = message.message
             } else {
@@ -152,7 +153,6 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
 function initializeOperator() {
     // configureRemoteRobot();
     const storageHandlerReadyCallback = () => {
-        FunctionProvider.addRemoteRobot(remoteRobot);
         underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
         movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
         arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
@@ -170,7 +170,9 @@ function configureRemoteRobot() {
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     occupancyGrid = undefined;
-    remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    // remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    FunctionProvider.addRemoteRobot(remoteRobot);
+    mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
 }
 
