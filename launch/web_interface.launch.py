@@ -4,7 +4,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable, AndSubstitution, NotSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable, OrSubstitution, AndSubstitution, NotSubstitution
 from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_path
@@ -74,7 +74,7 @@ def generate_launch_description():
         parameters=[{'publish_rate': 15.0}],
         remappings=[('image_raw', '/gripper_camera/color/image_rect_raw')],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
-        condition=UnlessCondition(AndSubstitution(LaunchConfiguration('gripper_camera'), LaunchConfiguration('d405')))
+        condition=UnlessCondition(OrSubstitution(LaunchConfiguration('gripper_camera'), LaunchConfiguration('d405')))
     )
 
     # Navigation Camera Group
