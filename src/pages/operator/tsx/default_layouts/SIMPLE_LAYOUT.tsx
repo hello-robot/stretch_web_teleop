@@ -106,7 +106,11 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                         {
                             type: ComponentType.SingleTab,
                             label: 'Safety',
-                            children: []
+                            children: [
+                                {
+                                    type: ComponentType.RunStopButton
+                                }
+                            ]
                         }
                     ] 
                 } as PanelDefinition

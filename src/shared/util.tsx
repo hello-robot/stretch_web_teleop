@@ -55,7 +55,7 @@ export interface Transform {
     transform: ROSLIB.Transform
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory"
@@ -72,6 +72,11 @@ export interface ValidJointStateMessage {
     robotPose: RobotPose,
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
+}
+
+export interface IsRunStoppedMessage {
+    type: "isRunStopped",
+    enabled: boolean
 }
 
 export interface FollowJointTrajectoryActionResultMessage {

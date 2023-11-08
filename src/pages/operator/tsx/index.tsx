@@ -22,6 +22,7 @@ import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFun
 import { Caregiver } from './Caregiver';
 import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
+import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -38,6 +39,7 @@ export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider();
+export var runStopFunctionProvider = new RunStopFunctionProvider();
 export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
@@ -112,8 +114,10 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
                 message.jointsInCollision
             );
             break;
+        case 'isRunStopped':
+            remoteRobot.setIsRunStopped(message.enabled)
+            break;
         case 'occupancyGrid':
-            console.log("getting grid")
             if (!occupancyGrid) {
                 occupancyGrid = message.message
             } else {

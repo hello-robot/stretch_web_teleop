@@ -45,7 +45,7 @@ export interface CameraPerspectiveCommand {
 }
 
 export interface ToggleCommand {
-    type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers"
+    type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers" | "setRunStop"
     toggle: boolean
 }
 

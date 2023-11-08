@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision, rosConnected } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
@@ -14,7 +14,8 @@ export const robot = new Robot({
     arucoNavigationStateCallback: forwardArucoNavigationState,
     amclPoseCallback: forwardAMCLPose,
     markerArrayCallback: forwardMarkers,
-    relativePoseCallback: forwardRelativePose
+    relativePoseCallback: forwardRelativePose,
+    isRunStoppedCallback: forwardIsRunStopped
 })
 
 export let connection: WebRTCConnection;
@@ -92,6 +93,15 @@ function forwardMoveBaseState(state: MoveBaseState) {
         type: "moveBaseState",
         message: state
     } as MoveBaseStateMessage)
+}
+
+function forwardIsRunStopped(isRunStopped: boolean) {
+    if (!connection) throw 'WebRTC connection undefined!'
+
+    connection.sendData({
+        type: "isRunStopped",
+        enabled: isRunStopped,
+    } as IsRunStoppedMessage);
 }
 
 function forwardJointStates(jointState: ROSJointState) {
@@ -220,6 +230,9 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
+            break
+        case "setRunStop":
+            robot.setRunStop(message.toggle)
             break
         case "navigateToAruco":
             robot.executeNavigateToArucoGoal(message.name, message.pose.transform)

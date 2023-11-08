@@ -11,7 +11,8 @@ export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.ActionGoal;
-    private poseGoalComplete?: boolean
+    private poseGoalComplete?: boolean;
+    private isRunStopped?: boolean;
     private moveBaseGoal?: ROSLIB.ActionGoal;
     private navigateToArucoGoal?: ROSLIB.ActionGoal;
     private trajectoryClient?: ROSLIB.ActionClient;
@@ -22,6 +23,7 @@ export class Robot extends React.Component {
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
     private setDepthSensingService?: ROSLIB.Service;
+    private setRunStopService?: ROSLIB.Service;
     private setArucoMarkersService?: ROSLIB.Service;
     private navigateToArucoService?: ROSLIB.Service;
     private arucoMarkerUpdateService?: ROSLIB.Service;
@@ -38,6 +40,7 @@ export class Robot extends React.Component {
     private markerArrayCallback: (markers: MarkerArray) => void
     private arucoNavigationStateCallback: (state: ArucoNavigationState) => void
     private relativePoseCallback: (pose: ROSLIB.Transform) => void
+    private isRunStoppedCallback: (isRunStopped: boolean) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
     private subscriptions: ROSLIB.Topic[] = []
 
@@ -48,7 +51,8 @@ export class Robot extends React.Component {
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
         markerArrayCallback: (markers: MarkerArray) => void,
         arucoNavigationStateCallback: (state: ArucoNavigationState) => void,
-        relativePoseCallback: (pose: ROSLIB.Transform) => void
+        relativePoseCallback: (pose: ROSLIB.Transform) => void,
+        isRunStoppedCallback: (isRunStopped: boolean) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -58,6 +62,7 @@ export class Robot extends React.Component {
         this.markerArrayCallback = props.markerArrayCallback
         this.arucoNavigationStateCallback = props.arucoNavigationStateCallback
         this.relativePoseCallback = props.relativePoseCallback
+        this.isRunStoppedCallback = props.isRunStoppedCallback
     }
     
     async connect(): Promise<void> {
@@ -92,6 +97,7 @@ export class Robot extends React.Component {
         // this.subscribeToJointTrajectoryResult()
         this.subscribeToMoveBaseResult()
         // this.subscribeToNavigateToArucoFeedback()
+        this.subscribeToIsRunStopped()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
         this.createNavigateToArucoClient()
@@ -100,6 +106,7 @@ export class Robot extends React.Component {
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
+        this.createRunStopService()
         this.createArucoMarkerService()
         // this.createArucoNavigationService()
         this.createArucoMarkerUpdateService()
@@ -206,6 +213,19 @@ export class Robot extends React.Component {
         });
     };
 
+    subscribeToIsRunStopped() {
+        let topic: ROSLIB.Topic = new ROSLIB.Topic({
+            ros: this.ros,
+            name: 'is_runstopped',
+            messageType: 'std_msgs/msg/Bool'
+        });
+        this.subscriptions.push(topic)
+        
+        topic.subscribe((msg) => {
+            if (this.isRunStoppedCallback) this.isRunStoppedCallback(msg.data)
+        });
+    }
+
     // subscribeToArucoNavigationState() {
     //     let topic: ROSLIB.Topic<ArucoNavigationState> = new ROSLIB.Topic({
     //         ros: ros,
@@ -294,6 +314,14 @@ export class Robot extends React.Component {
             ros: this.ros,
             name: '/depth_ar',
             serviceType: 'stretch_teleop_interface/srv/DepthAR'
+        })
+    }
+
+    createRunStopService() {
+        this.setRunStopService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/runstop',
+            serviceType: 'std_srvs/srv/SetBool'
         })
     }
 
@@ -394,6 +422,11 @@ export class Robot extends React.Component {
         this.setArucoMarkersService?.callService(request, (response: boolean) => {
             response ? console.log("Enable aruco markers") : console.log("Disabled aruco markers")
         })
+    }
+
+    setRunStop(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({data: toggle})
+        this.setRunStopService?.callService(request, (response: boolean) => {})
     }
 
     setArucoMarkerInfo(info: ArucoMarkersInfo) {

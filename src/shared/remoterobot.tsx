@@ -8,6 +8,7 @@ export type robotMessageChannel = (message: cmd) => void;
 export class RemoteRobot extends React.Component<{},any> {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
+    isRunStopped: boolean
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
     markers: MarkerArray;
@@ -18,6 +19,7 @@ export class RemoteRobot extends React.Component<{},any> {
         super(props);
         this.robotChannel = props.robotChannel
         this.sensors = new RobotSensors({})
+        this.isRunStopped = false
         this.mapPose = {
             translation: {
                 x: 0, y: 0, z: 0
@@ -128,7 +130,7 @@ export class RemoteRobot extends React.Component<{},any> {
         this.robotChannel(cmd)
     }
 
-    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers", toggle: boolean) {
+    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers" | "setRunStop", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
@@ -176,6 +178,14 @@ export class RemoteRobot extends React.Component<{},any> {
             type: type
         }
         this.robotChannel(cmd)
+    }
+
+    setIsRunStopped(enabled: boolean) {
+        this.isRunStopped = enabled
+    }
+
+    getIsRunStopped() {
+        return this.isRunStopped
     }
 
     getOccupancyGrid(type: "getOccupancyGrid") {

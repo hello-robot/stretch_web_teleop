@@ -25,7 +25,8 @@ export enum ComponentType {
     PredictiveDisplay = "Predictive Display",
     ButtonGrid = "Button Grid",
     VirtualJoystick = "Joystick",
-    Map = "Map"
+    Map = "Map",
+    RunStopButton = "Run Stop Button"
 }
 
 /**
@@ -173,3 +174,8 @@ export type MapDefinition = ComponentDefinition & {
      */
     selectGoal?: boolean
 }
+
+/**
+ * Definition for the run stop button
+ */
+ export type RunStopDefinition = ComponentDefinition 
