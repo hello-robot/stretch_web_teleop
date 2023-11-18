@@ -139,7 +139,7 @@ def generate_launch_description():
             'ssl': 'true',
             'certfile': PathJoinSubstitution([teleop_interface_package, 'certificates', LaunchConfiguration('certfile')]),
             'keyfile': PathJoinSubstitution([teleop_interface_package, 'certificates', LaunchConfiguration('keyfile')]),
-            'authenticate': 'false',
+            'authenticate': 'false'
         }.items()
     )
 
@@ -235,7 +235,21 @@ def generate_launch_description():
                 ]
             ],
             shell=True,
-        )
+        ),
     )
 
+    ld.add_action(
+        ExecuteProcess(
+            cmd=[
+                [
+                    FindExecutable(name="ros2"),
+                    " param set ",
+                    "/rosbridge_websocket ",
+                    "std_msgs/msg/Bool ",
+                    "true",
+                ]
+            ],
+            shell=True,
+        )
+    )
     return ld

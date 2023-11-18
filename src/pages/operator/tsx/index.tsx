@@ -14,7 +14,6 @@ import { ButtonFunctionProvider } from './function_providers/ButtonFunctionProvi
 import { FunctionProvider } from './function_providers/FunctionProvider';
 import { PredictiveDisplayFunctionProvider } from './function_providers/PredictiveDisplayFunctionProvider';
 import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
-import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
@@ -36,7 +35,6 @@ export let storageHandler: StorageHandler;
 // Create the function providers. These abstract the logic between the React 
 // components and remote robot.
 export var buttonFunctionProvider = new ButtonFunctionProvider();
-export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider();
 export var runStopFunctionProvider = new RunStopFunctionProvider();

@@ -5,7 +5,7 @@ import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
-import { VoiceCommands } from "./static_components/VoiceCommands";
+// import { VoiceCommands } from "./static_components/VoiceCommands";
 import { ArucoNavigationState, className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
 import { arucoMarkerFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
@@ -310,12 +310,12 @@ export const Operator = (props: {
                         </div>
                     </div>
                 }
-                <div className="operator-voice" hidden={!layout.current.displayVoiceControl}>
+                {/* <div className="operator-voice" hidden={!layout.current.displayVoiceControl}>
                     <VoiceCommands
                         onUpdateVelocityScale=
                         {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                     />
-                </div>
+                </div> */}
                 <div className={className("operator-pose-library", { hideLabels: !layout.current.displayLabels })} hidden={!layout.current.displayPoseLibrary}>
                     <PoseLibrary
                         savePose={(poseName: string, head: boolean, gripper: boolean, arm: boolean) => {
