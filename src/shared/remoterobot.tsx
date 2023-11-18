@@ -185,6 +185,7 @@ export class RemoteRobot extends React.Component<{},any> {
     }
 
     getIsRunStopped() {
+        console.log(this.isRunStopped)
         return this.isRunStopped
     }
 

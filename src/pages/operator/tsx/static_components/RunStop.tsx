@@ -10,13 +10,16 @@ export const RunStopButton = (props: CustomizableComponentProps) => {
     const [enabled, setEnabled] = useState(functs.isEnabled())
 
     return (
-        <button
-            onClick={() => {
-                setEnabled(!enabled)
-                functs.onClick()
-            }}
-            className={className("run-stop-button", { enabled })}
-        >
-        </button>
+        <div className="runStopContainer">
+            <button
+                onClick={() => {
+                    setEnabled(!enabled)
+                    functs.onClick()
+                }}
+                className={className("run-stop-button", { enabled })}
+            >
+            </button>
+            {enabled ? <span>Run Stop: Enabled</span> : <span>Run Stop: Disabled</span>}
+        </div>
     )
 }

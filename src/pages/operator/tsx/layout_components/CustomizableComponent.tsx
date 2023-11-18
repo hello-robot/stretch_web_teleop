@@ -10,6 +10,7 @@ import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
 import { RunStopButton } from "../static_components/RunStop";
+import { BatteryGuage } from "../static_components/BatteryGauge";
 
 /** State required for all elements */
 export type SharedState = {
@@ -75,6 +76,8 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <Map {...props} />;
         case ComponentType.RunStopButton:
             return <RunStopButton {...props} />;
+        case ComponentType.BatteryGuage:
+            return <BatteryGuage {...props} />;
         default:
             throw Error(`CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`);
     }

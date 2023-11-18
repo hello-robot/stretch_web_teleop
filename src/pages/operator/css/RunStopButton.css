@@ -5,9 +5,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0; 
-    height: 75px;
-    width: 75px;
+    height: 80px;
+    width: 80px;
+    margin-bottom: 20px;
 }
 
 .enabled {
@@ -17,4 +17,10 @@
 @keyframes blinker {  
     from { opacity: 1; }
     to { opacity: 0; }
-  }
+}
+
+.runStopContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

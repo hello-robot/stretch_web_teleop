@@ -109,6 +109,9 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             children: [
                                 {
                                     type: ComponentType.RunStopButton
+                                },
+                                {
+                                    type: ComponentType.BatteryGuage
                                 }
                             ]
                         }

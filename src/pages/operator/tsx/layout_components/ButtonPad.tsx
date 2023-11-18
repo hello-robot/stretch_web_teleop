@@ -68,7 +68,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     return (
         <div className="button-pad">
-            {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>}
+            {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}

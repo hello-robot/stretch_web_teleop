@@ -26,7 +26,8 @@ export enum ComponentType {
     ButtonGrid = "Button Grid",
     VirtualJoystick = "Joystick",
     Map = "Map",
-    RunStopButton = "Run Stop Button"
+    RunStopButton = "Run Stop Button",
+    BatteryGuage = "Battery Gauge"
 }
 
 /**

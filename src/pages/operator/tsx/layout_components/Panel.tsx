@@ -32,7 +32,7 @@ export const Panel = (props: CustomizableComponentProps) => {
         activeTab = countChildren - 1;
     }
 
-    const activeTabDef = definition.children[activeTab] as ParentComponentDefinition;
+    const activeTabDef = definition.children[activeTab] as TabDefinition;
     if (!activeTabDef) {
         throw Error(`Tabs at: ${props.path}\nActive tab not defined\nActive tab: ${activeTab}`)
     }
@@ -41,7 +41,7 @@ export const Panel = (props: CustomizableComponentProps) => {
     }
 
     // Should take up screen size proportional to number of children
-    const flex = Math.max(activeTabDef.children.length + 1, 1);
+    const flex = activeTabDef.label === "Safety" ? 1 : Math.max(activeTabDef.children.length + 1, 1);
 
     /** Props for rendering the children elements inside the active tab */
     const componentListProps: ComponentListProps = {

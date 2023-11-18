@@ -1,0 +1,26 @@
+.bar {
+    width: 100%;
+    height: 15px;
+    background-color: #436fb7;
+    display: flex;
+    margin-top: 3px;
+}
+
+.barsContainer {
+    width: 50px;
+    height: 100px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.batteryGauge {
+    height: 100px;
+    position: absolute;
+}
+
+.batteryGaugeContainer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
