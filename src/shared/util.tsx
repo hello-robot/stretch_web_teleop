@@ -259,8 +259,8 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
 }
 
 export const navigationProps = {
-    width: 768,
-    height: 768, // 1024
+    width: 800,
+    height: 1280, // 1024
     fps: 6.0
 }
 

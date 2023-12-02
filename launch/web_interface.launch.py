@@ -88,6 +88,17 @@ def generate_launch_description():
         ]
     )
 
+    uvc_navigation_camera_group = GroupAction(
+        condition=IfCondition(LaunchConfiguration('navigation_camera')),
+        actions=[
+             Node(
+                package='stretch_teleop_interface',
+                executable='navigation_camera.py',
+                name='uvc_navigation_camera'
+            )
+        ]
+    )
+
     # Navigation Camera Node
     # Publish blank image if navigation camera does not exist
     navigation_camera_node = Node(
@@ -208,7 +219,8 @@ def generate_launch_description():
         gripper_camera_group,
         gripper_camera_node,
         multi_camera_launch,
-        navigation_camera_group,
+        # navigation_camera_group,
+        # uvc_navigation_camera_group,
         navigation_camera_node,
         configure_video_streams_node,
         # map_server_cmd,

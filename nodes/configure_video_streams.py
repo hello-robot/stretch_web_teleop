@@ -249,10 +249,11 @@ class ConfigureVideoStreams(Node):
             raise ValueError("Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE")
 
     def configure_images(self, rgb_image, params):
-        if rgb_image.shape[-1] == 2:
-            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YVYU)
-        else:
-            rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
+        # if rgb_image.shape[-1] == 2:
+        #     rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YVYU)
+        # else:
+            
+        rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
         if params:
             if params['crop']:
                 rgb_image = self.crop_image(rgb_image, params['crop'])
@@ -284,7 +285,7 @@ class ConfigureVideoStreams(Node):
         self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
 
     def navigation_camera_cb(self, ros_image):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image, 'rgb8')
         for image_config_name in self.overhead_params:
             self.overhead_images[image_config_name] = \
                 self.configure_images(image, self.overhead_params[image_config_name])

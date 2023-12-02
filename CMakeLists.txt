@@ -26,6 +26,7 @@ install(PROGRAMS
   nodes/navigate_to_aruco.py
   nodes/head_scan.py
   nodes/detect_aruco_markers.py
+  nodes/navigation_camera.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
