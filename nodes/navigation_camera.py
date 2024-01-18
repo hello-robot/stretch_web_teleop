@@ -15,7 +15,7 @@ import os
 UVC_COLOR_SIZE = [1280, 800] # [3840,2880] [1920, 1080] [1280, 720] [1280, 800] [640, 480]
 UVC_FPS = 100
 
-UVC_VIDEO_INDEX = 7
+UVC_VIDEO_INDEX = '/dev/hello-navigation-camera'
 UVC_VIDEO_FORMAT = 'MJPG' # MJPG YUYV 
 
 UVC_BRIGHTNESS =  10         # brightness 0x00980900 (int)    : min=-64 max=64 step=1 default=0 value=0
@@ -61,12 +61,12 @@ UVC_SETTINGS = {'brightness':UVC_BRIGHTNESS,
                 'exposure_time_absolute':UVC_EXPOSURE_TIME}
 
 # Set video format and size
-cmd = f"v4l2-ctl --device /dev/video{UVC_VIDEO_INDEX} --set-fmt-video=width={UVC_COLOR_SIZE[0]},height={UVC_COLOR_SIZE[1]}"
+cmd = f"v4l2-ctl --device {UVC_VIDEO_INDEX} --set-fmt-video=width={UVC_COLOR_SIZE[0]},height={UVC_COLOR_SIZE[1]}"
 os.system(cmd)
 
 # Set UVC SettingsNone
 for k in list(UVC_SETTINGS.keys()):
-    cmd = f"v4l2-ctl --device /dev/video{UVC_VIDEO_INDEX} --set-ctrl={k}={UVC_SETTINGS[k]}"
+    cmd = f"v4l2-ctl --device {UVC_VIDEO_INDEX} --set-ctrl={k}={UVC_SETTINGS[k]}"
     os.system(cmd)
 
 

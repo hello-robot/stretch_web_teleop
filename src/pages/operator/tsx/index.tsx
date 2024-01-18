@@ -70,7 +70,7 @@ setTimeout(() => {
             connection.joinOperatorRoom()
         }
     }
-}, 6000);
+}, 10000);
 
 // Create root once when index is loaded
 const container = document.getElementById('root');

@@ -217,8 +217,8 @@ export class WebRTCConnection extends React.Component {
                 if (!this.peerConnection) throw 'pc is undefined';
                 if (this.peerConnection.connectionState === "failed" || this.peerConnection.connectionState === "disconnected") {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
-                    this.createPeerConnection()
                     if (this.onConnectionEnd) this.onConnectionEnd();
+                    this.createPeerConnection()
                 }
                 console.log(this.peerConnection.connectionState)
             };

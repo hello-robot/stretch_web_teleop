@@ -12,7 +12,7 @@ def generate_launch_description():
             name='navigation_camera',
             output='screen',
             parameters=[
-                {'video_device': '/dev/video7'},
+                {'video_device': '/dev/hello-navigation-camera'},
                 {'image_width': 800},
                 {'image_height': 600},
                 {'framerate': 15.0},

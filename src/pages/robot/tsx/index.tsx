@@ -54,14 +54,15 @@ robot.connect().then(() => {
     robot.getOccupancyGrid()
 
     connection.joinRobotRoom()
-}).then(() => {
-    setInterval(() => {
-        console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
-        if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
-            window.location.reload()
-        }
-    }, 4000);    
 })
+// .then(() => {
+//     setInterval(() => {
+//         console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
+//         if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
+//             window.location.reload()
+//         }
+//     }, 4000);    
+//})
 function handleSessionStart() {
     connection.removeTracks()
 

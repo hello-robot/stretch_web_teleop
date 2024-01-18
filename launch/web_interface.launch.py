@@ -220,7 +220,7 @@ def generate_launch_description():
         gripper_camera_node,
         multi_camera_launch,
         # navigation_camera_group,
-        # uvc_navigation_camera_group,
+        uvc_navigation_camera_group,
         navigation_camera_node,
         configure_video_streams_node,
         # map_server_cmd,
