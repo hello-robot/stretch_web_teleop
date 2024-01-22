@@ -35,6 +35,10 @@ export interface ROSJointState extends Message {
     velocity: [number],
 }
 
+export interface ROSBatteryState extends Message {
+    voltage: number
+}
+
 export interface ROSCompressedImage extends Message {
     header: string,
     format: "jpeg" | "png",
@@ -55,7 +59,7 @@ export interface Transform {
     transform: ROSLIB.Transform
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | BatteryVoltageMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory"
@@ -154,6 +158,11 @@ export interface MapPoseMessage {
 export interface RelativePoseMessage {
     type: 'relativePose',
     message: ROSLIB.Transform
+}
+
+export interface BatteryVoltageMessage {
+    type: 'batteryVoltage',
+    message: number
 }
 
 export interface AMCLPose extends Message {

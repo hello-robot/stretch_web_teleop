@@ -24,7 +24,7 @@
     left: 0;
 }
 
-.video-overlay-container.realsense {
+.video-overlay-container.realsense, .video-overlay-container.overhead {
     z-index: 2;
     position: absolute;
     width: calc(100% - 102px);

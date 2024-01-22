@@ -25,6 +25,8 @@ export type SharedState = {
     selectedPath?: string,
     /** Mapping of each button pad function to a {@link ButtonState} */
     buttonStateMap?: ButtonStateMap,
+    /** Battery Voltage */
+    batteryVoltage?: number,
     /** Whether or not to hide the button labels */
     hideLabels?: boolean
 };

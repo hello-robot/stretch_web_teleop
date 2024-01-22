@@ -1,6 +1,6 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, NavigateToArucoCommand, DeleteArucoMarkerCommand, AddArucoMarkerCommand } from 'shared/commands';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, GetBatteryVoltageCommand, NavigateToArucoCommand, DeleteArucoMarkerCommand, AddArucoMarkerCommand } from 'shared/commands';
 import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState, ArucoMarkerInfo } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
@@ -9,6 +9,7 @@ export class RemoteRobot extends React.Component<{},any> {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
     isRunStopped: boolean
+    batteryVoltage: number
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
     markers: MarkerArray;
@@ -20,6 +21,7 @@ export class RemoteRobot extends React.Component<{},any> {
         this.robotChannel = props.robotChannel
         this.sensors = new RobotSensors({})
         this.isRunStopped = false
+        this.batteryVoltage = 13.0
         this.mapPose = {
             translation: {
                 x: 0, y: 0, z: 0
@@ -185,7 +187,6 @@ export class RemoteRobot extends React.Component<{},any> {
     }
 
     getIsRunStopped() {
-        console.log(this.isRunStopped)
         return this.isRunStopped
     }
 
@@ -242,15 +243,19 @@ export class RemoteRobot extends React.Component<{},any> {
 }
 
 class RobotSensors extends React.Component {
+    private batteryVoltage: number = 0.0;
     private robotPose: RobotPose = {};
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
     private functionProviderCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void;
+    private batteryFunctionProviderCallback?: (voltage: number) => void;
 
     constructor(props: {}) {
         super(props)
         this.functionProviderCallback = () => { }
+        this.batteryFunctionProviderCallback = () => { }
         this.setFunctionProviderCallback = this.setFunctionProviderCallback.bind(this)
+        this.setBatteryFunctionProviderCallback = this.setBatteryFunctionProviderCallback.bind(this)
     }
 
     /**
@@ -311,6 +316,24 @@ class RobotSensors extends React.Component {
      */
     setFunctionProviderCallback(callback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
         this.functionProviderCallback = callback;
+    }
+
+    setBatteryVoltage(voltage: number) {
+        let change = Math.abs(this.batteryVoltage - voltage) > 0.01
+        if (change && this.batteryFunctionProviderCallback) {
+            this.batteryVoltage = voltage
+            this.batteryFunctionProviderCallback(this.batteryVoltage)
+        }
+    }
+
+    /**
+     * Records a callback from the function provider. The callback is called 
+     * whenever the battery voltage changes.
+     * 
+     * @param callback callback to function provider
+     */
+     setBatteryFunctionProviderCallback(callback: (voltage: number) => void) {
+        this.batteryFunctionProviderCallback = callback;
     }
 
     /**

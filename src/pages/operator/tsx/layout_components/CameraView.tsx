@@ -133,7 +133,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     )
     // If the video is from the Realsense camera then include the pan-tilt 
     // buttons around the video, otherwise return the video
-    const videoComponent = (props.definition.id === CameraViewId.realsense) ?
+    const videoComponent = (props.definition.id === CameraViewId.realsense || props.definition.id === CameraViewId.overhead) ?
         (
             <>
                 {/* <h4 className="title">Adjustable Camera</h4> */}
@@ -154,7 +154,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         :
         (
             <>
-                <h4 className="title">{props.definition.id} Camera</h4>
+                {/* <h4 className="title">{props.definition.id} Camera</h4> */}
                 <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
                     <video
                         ref={videoRef}
@@ -483,7 +483,7 @@ const UnderVideoButtons = (props: {definition: CameraViewDefinition}) => {
             buttons = null;
             break;
         case (CameraViewId.overhead):
-            buttons = <UnderOverheadButtons definition={props.definition}/>;
+            buttons = null; // <UnderOverheadButtons definition={props.definition}/>;
             break;
         case (CameraViewId.realsense):
             buttons = <UnderRealsenseButtons definition={props.definition}/>;
