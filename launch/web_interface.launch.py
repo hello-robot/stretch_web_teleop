@@ -264,4 +264,19 @@ def generate_launch_description():
             shell=True,
         )
     )
+
+    ld.add_action(
+        ExecuteProcess(
+            cmd=[
+                [
+                    FindExecutable(name="ros2"),
+                    " param set ",
+                    "/gripper_camera ",
+                    "depth_module.enable_auto_exposure ",
+                    "true",
+                ]
+            ],
+            shell=True,
+        )
+    )
     return ld
