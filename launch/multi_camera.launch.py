@@ -38,6 +38,7 @@ configurable_parameters = [{'name': 'camera_namespace1',             'default': 
                            {'name': 'device_type2',                  'default': 'd405', 'description': 'camera unique name'},
                            {'name': 'json_file_path2',               'default': json_path2, 'description': 'allows advanced configuration'},
                            {'name': 'depth_module.profile2',         'default': '480x270x15', 'description': 'depth module profile'},                           
+                           {'name': 'depth_module.enable_auto_exposure2', 'default': 'true', 'description': 'enable/disable auto exposure for depth image'},
                            {'name': 'enable_depth2',                 'default': 'true', 'description': 'enable depth stream'},
                            {'name': 'rgb_camera.profile2',           'default': '424x240x15', 'description': 'color image width'},
                            {'name': 'rgb_camera.enable_auto_exposure2', 'default': 'true', 'description': 'enable/disable auto exposure for color image'},
