@@ -126,6 +126,16 @@ export type CameraViewDefinition = ParentComponentDefinition & {
 }
 
 /**
+ * Definition for the gripper stream component
+ * 
+ * @note these modifications to the overhead view are implemented in the
+ * backend, so if multiple overhead streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+ export type GripperVideoStreamDef = CameraViewDefinition 
+
+/**
  * Definition for the overhead stream component
  * 
  * @note these modifications to the overhead view are implemented in the

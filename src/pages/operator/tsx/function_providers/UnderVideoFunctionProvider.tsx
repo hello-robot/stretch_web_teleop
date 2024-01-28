@@ -1,11 +1,12 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { Marker, REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
+import { Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
     GripperView = "Gripper View",
     LookAtGripper = "Look At Gripper",
     LookAtBase = "Look At Base",
+    LookAhead= "Look Ahead",
     FollowGripper = "Follow Gripper",
     DepthSensing = "Depth Sensing",
     ToggleArucoMarkers = "Toggle Aruco Markers",
@@ -22,6 +23,7 @@ export const overheadButtons: UnderVideoButton[] = [
 export type OverheadButtons = typeof overheadButtons[number]
 /** Array of different perspectives for the realsense camera */
 export const realsenseButtons: UnderVideoButton[] = [
+    UnderVideoButton.LookAhead,
     UnderVideoButton.LookAtBase, 
     UnderVideoButton.LookAtGripper, 
 ]
@@ -54,6 +56,10 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             case UnderVideoButton.LookAtBase:
                 return {
                     onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_BASE_POSE)
+                }
+            case UnderVideoButton.LookAhead:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_FORWARD_POSE)
                 }
             case UnderVideoButton.LookAtGripper:
                 return {
