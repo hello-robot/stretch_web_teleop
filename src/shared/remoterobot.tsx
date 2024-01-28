@@ -346,6 +346,8 @@ class RobotSensors extends React.Component {
             filteredPose["joint_head_pan"] = this.robotPose["joint_head_pan"]
         }
         if (gripper) {
+            filteredPose["joint_wrist_roll"] = this.robotPose["joint_wrist_roll"]
+            filteredPose["joint_wrist_pitch"] = this.robotPose["joint_wrist_pitch"]
             filteredPose["joint_wrist_yaw"] = this.robotPose["joint_wrist_yaw"]
             filteredPose["joint_gripper_finger_left"] = this.robotPose["joint_gripper_finger_left"]
         }
