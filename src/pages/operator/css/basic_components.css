@@ -249,3 +249,63 @@ input[type='checkbox'] {
         font-size: 50px;
     }
 }
+
+/* AccordionSelect **********************************************************/
+
+/* Style the accordion section */
+.accordion_section {
+    display: flex;
+    flex-direction: column;
+}
+  
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+    /* background-color: #eee; */
+    /* color: #444; */
+    cursor: pointer;
+    /* padding: 18px; */
+    display: flex;
+    align-items: center;
+    border: none;
+    outline: none;
+    transition: background-color 0.6s ease;
+    justify-content: space-between;
+}
+  
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.accordion:hover,
+.active {
+    background-color: #ccc;
+}
+  
+/* Style the accordion content title */
+.accordion_title {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+}
+  
+/* Style the accordion content panel. Note: hidden by default */
+.accordion_content {
+    background-color: var(--btn-gray);
+    overflow: hidden;
+    transition: max-height 0.6s ease;
+}
+
+  /* Flip the dropdown arrow when active */
+.accordion span {
+    transition: transform 0.2s linear;
+}
+
+.accordion.active span {
+    transform: scaleY(-1);
+}
+
+.accordion-item {
+    padding: 0.75rem 0rem 0.75rem 0rem;
+    text-align: center;
+}
+
+.accordion-item:hover {
+    background-color: #ccc;
+}

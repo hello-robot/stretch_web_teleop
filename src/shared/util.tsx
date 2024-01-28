@@ -219,6 +219,11 @@ export interface ROSOccupancyGrid {
     data: number[]
 }
 
+export const REALSENSE_FORWARD_POSE: RobotPose = {
+    "joint_head_pan": 0.0,
+    "joint_head_tilt": 0.0
+}
+
 export const REALSENSE_BASE_POSE: RobotPose = {
     "joint_head_pan": 0.075,
     "joint_head_tilt": -1.65

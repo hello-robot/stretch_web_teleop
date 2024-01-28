@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
 import { CameraViewDefinition, ComponentType, CameraViewId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
@@ -10,6 +10,8 @@ import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFun
 import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import "operator/css/CameraView.css"
+import { Dropdown } from "../basic_components/Dropdown";
+import { AccordionSelect } from "../basic_components/AccordionSelect";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -519,14 +521,18 @@ const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
  */
 const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
-    // const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    const [selectedIdx, setSelectedIdx] = React.useState<number>();
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
-
+    
     return (
         <React.Fragment >
-            {realsenseButtons.map(perspective =>
-                <CameraPerspectiveButton perspective={perspective} key={perspective} />
-            )}
+            <AccordionSelect 
+                title="Look..."
+                possibleOptions={Object.values(realsenseButtons)}
+                onChange={(idx: number) => {
+                    underVideoFunctionProvider.provideFunctions(realsenseButtons[idx]).onClick!();
+                }}
+            />
             <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
