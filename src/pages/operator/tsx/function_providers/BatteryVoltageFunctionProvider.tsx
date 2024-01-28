@@ -40,7 +40,7 @@ export class BatteryVoltageFunctionProvider extends FunctionProvider {
                 let vbat_max = 12.0
                 let dv = (vbat_max - vbat_min)/4.0
                 
-                if (!this.voltage) throw ' Cannot retrieve battery voltage'
+                if (!this.voltage) return 'red' // throw 'Cannot retrieve battery voltage'
 
                 if (this.voltage < vbat_min) {
                     return 'red' // [64, 0, 0]

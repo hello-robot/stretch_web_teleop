@@ -123,6 +123,8 @@ export type PanelDefinition = ComponentDefinition & {
 export type CameraViewDefinition = ParentComponentDefinition & {
     /** Indicates the camera video of the video stream */
     id: CameraViewId;
+    /** Whether to display the default buttons under the camera view */
+    displayButtons: boolean;
 }
 
 /**
@@ -136,19 +138,35 @@ export type CameraViewDefinition = ParentComponentDefinition & {
  export type GripperVideoStreamDef = CameraViewDefinition 
 
 /**
- * Definition for the overhead stream component
+ * Definition for the fixed overhead stream component
  * 
  * @note these modifications to the overhead view are implemented in the
  * backend, so if multiple overhead streams are visible to the user 
  * simultaneously, any change to this defintion for one view will impact
  * all views.
  */
-export type OverheadVideoStreamDef = CameraViewDefinition & {
+export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
     /** 
      * If true, the view should be cropped and rotated to focus on the gripper.
      * Otherwise, camera view should be unchanged
      * */
     gripperView?: boolean;
+}
+
+/**
+ * Definition for the adjustable overhead stream component
+ * 
+ * @note these modifications to the overhead view are implemented in the
+ * backend, so if multiple overhead streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+ export type AdjustableOverheadVideoStreamDef = CameraViewDefinition & {
+    /**
+     * If the Realsense camera should pan and tilt to keep the gripper centered 
+     * in the view.
+     */
+     followGripper?: boolean;
 }
 
 /**

@@ -570,7 +570,7 @@ export class Robot extends React.Component {
         if (jointName in JOINT_LIMITS) {
             let inLimits = inJointLimitsHelper({ jointValue: newJointValue, jointName: jointName })
             if (!inLimits) throw 'invalid joint name'
-            console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
+            // console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
             if (!inLimits[index]) newJointValue = JOINT_LIMITS[jointName]![index]
         }
 

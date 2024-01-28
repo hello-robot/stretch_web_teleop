@@ -1,5 +1,5 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
+import { CENTER_WRIST, Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE, STOW_WRIST } from "shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
@@ -10,6 +10,8 @@ export enum UnderVideoButton {
     FollowGripper = "Follow Gripper",
     DepthSensing = "Depth Sensing",
     ToggleArucoMarkers = "Toggle Aruco Markers",
+    CenterWrist = "Center Wrist",
+    StowWrist = "Stow Wrist"
     // GetArucoMarkerNames = "Get Aruco Marker Names",
     // NavigateToMarker = "Navigate to Marker"
 }
@@ -26,6 +28,12 @@ export const realsenseButtons: UnderVideoButton[] = [
     UnderVideoButton.LookAhead,
     UnderVideoButton.LookAtBase, 
     UnderVideoButton.LookAtGripper, 
+]
+
+/** Array of different actions for the wrist */
+export const wristButtons: UnderVideoButton[] = [
+    UnderVideoButton.CenterWrist,
+    UnderVideoButton.StowWrist 
 ]
 /** Type to specify the different realsense camera perspectives */
 export type RealsenseButtons = typeof realsenseButtons[number]
@@ -76,6 +84,14 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             case UnderVideoButton.ToggleArucoMarkers:
                 return {
                     onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setArucoMarkers", toggle)
+                }
+            case UnderVideoButton.CenterWrist:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(CENTER_WRIST)
+                }
+            case UnderVideoButton.StowWrist:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST)
                 }
             // case UnderVideoButton.GetArucoMarkerNames:
             //     return {

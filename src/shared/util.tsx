@@ -219,6 +219,18 @@ export interface ROSOccupancyGrid {
     data: number[]
 }
 
+export const STOW_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": -0.49700,
+    "joint_wrist_yaw": 3.19579
+}
+
+export const CENTER_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": 0.0,
+    "joint_wrist_yaw": 0.0
+}
+
 export const REALSENSE_FORWARD_POSE: RobotPose = {
     "joint_head_pan": 0.0,
     "joint_head_tilt": 0.0

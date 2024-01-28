@@ -1,7 +1,7 @@
 import React from "react";
 import { CustomizableComponent, CustomizableComponentProps, SharedState } from "./CustomizableComponent";
 import { DropZone } from "./DropZone";
-import { ParentComponentDefinition, ComponentDefinition } from "../utils/component_definitions";
+import { ParentComponentDefinition, ComponentDefinition, ComponentType } from "../utils/component_definitions";
 
 /** Properties for {@link ComponentList} */
 export type ComponentListProps = {
@@ -28,22 +28,31 @@ export const ComponentList = (props: ComponentListProps) => {
                     path: curPath,
                     sharedState: props.sharedState
                 }
+                const { type } = compDef
                 return (
                     <React.Fragment key={`${index}`} >
-                        <DropZone
-                            path={curPath}
-                            sharedState={props.sharedState}
-                            parentDef={props.definition}
-                        />
-                        <CustomizableComponent {...cProps} />
+                        { type !== ComponentType.RunStopButton && type !== ComponentType.BatteryGuage ?
+                                <DropZone
+                                    path={curPath}
+                                    sharedState={props.sharedState}
+                                    parentDef={props.definition}
+                                />
+                            :
+                                <></>
+                        }
+                            <CustomizableComponent {...cProps} />
                     </React.Fragment>
                 );
             })}
-            <DropZone
-                path={(path ? path + "-" : "") + components.length}
-                sharedState={props.sharedState}
-                parentDef={props.definition}
-            />
+            { components[components.length -1].type !== ComponentType.BatteryGuage ?
+                    <DropZone
+                        path={(path ? path + "-" : "") + components.length}
+                        sharedState={props.sharedState}
+                        parentDef={props.definition}
+                    />
+                :
+                    <></>
+            }
         </>
     )
 }

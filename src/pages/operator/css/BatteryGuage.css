@@ -49,4 +49,5 @@
     align-items: center;
     display: flex;
     flex-direction: column;
+    max-height: 90%;
 }

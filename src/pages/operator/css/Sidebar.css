@@ -62,9 +62,9 @@
     width: 100%;
 }
 
-/* .toggle-button-div {
-    display: inline-block;
-} */
+.toggle-button-div {
+    padding-bottom: 10px;
+}
 
 .toggle-button {
     display: inline-block;
