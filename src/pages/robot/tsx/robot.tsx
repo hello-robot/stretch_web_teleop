@@ -865,8 +865,10 @@ export function inCollision(props: { jointStateMessage: ROSJointState, jointName
         "wrist_extension": [-40, 40],
         "joint_lift": [0, 70],
         "joint_wrist_yaw": [-10, 10],
+        "joint_wrist_pitch": [-10, 10],
+        "joint_wrist_roll": [-10, 10],
     }
-
+    
     if (!(props.jointName in MAX_EFFORTS)) return inCollision;
 
     let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
