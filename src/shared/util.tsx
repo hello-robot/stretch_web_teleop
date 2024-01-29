@@ -238,7 +238,7 @@ export const REALSENSE_FORWARD_POSE: RobotPose = {
 
 export const REALSENSE_BASE_POSE: RobotPose = {
     "joint_head_pan": 0.075,
-    "joint_head_tilt": -1.65
+    "joint_head_tilt": -1.0
 }
 
 export const REALSENSE_GRIPPER_POSE: RobotPose = {
