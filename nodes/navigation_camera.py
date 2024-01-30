@@ -15,7 +15,7 @@ import os
 UVC_COLOR_SIZE = [1280, 800] # [3840,2880] [1920, 1080] [1280, 720] [1280, 800] [640, 480]
 UVC_FPS = 100
 
-UVC_VIDEO_INDEX = '/dev/hello-navigation-camera'
+UVC_VIDEO_INDEX = '/dev/hello-nav-head-camera'
 UVC_VIDEO_FORMAT = 'MJPG' # MJPG YUYV 
 
 UVC_BRIGHTNESS =  10         # brightness 0x00980900 (int)    : min=-64 max=64 step=1 default=0 value=0
