@@ -233,7 +233,7 @@ export class OccupancyGrid extends React.Component {
             robotMarker.x = globalCoord.x
             robotMarker.y = globalCoord.y
             let theta = this.rosQuaternionToGlobalTheta(pose.rotation)
-            robotMarker.rotation = theta
+            robotMarker.rotation = theta - 90.0
             robotMarker.scaleX = 1.0 / this.rootObject.scaleX
             robotMarker.scaleY = 1.0 / this.rootObject.scaleY
             robotMarker.visible = true
