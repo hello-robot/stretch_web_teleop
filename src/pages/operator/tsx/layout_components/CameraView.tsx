@@ -52,7 +52,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const selected = isSelected(props);
     const videoClass = className("video-canvas", { customizing, selected })
     const realsense = props.definition.id === CameraViewId.realsense
-
+    const overhead = props.definition.id === CameraViewId.overhead
+    
     /** Mark this video stream as selected */
     function selectSelf() {
         props.sharedState.onSelect(props.definition, props.path);
@@ -109,7 +110,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     const overlayContainer = (
         <div
-            className={className("video-overlay-container", { customizing, selected, realsense })}
+            className={className("video-overlay-container", { customizing, selected, realsense, overhead })}
             // style={overlayDimensions}
             onClick={customizing ? handleClick : undefined}
         >

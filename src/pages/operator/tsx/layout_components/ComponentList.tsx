@@ -44,7 +44,7 @@ export const ComponentList = (props: ComponentListProps) => {
                     </React.Fragment>
                 );
             })}
-            { components[components.length -1].type !== ComponentType.BatteryGuage ?
+            { components.length > 0 && components[components.length -1].type !== ComponentType.BatteryGuage || components.length === 0 ?
                     <DropZone
                         path={(path ? path + "-" : "") + components.length}
                         sharedState={props.sharedState}
