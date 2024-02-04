@@ -50,23 +50,57 @@ The interface makes use of Stretch's [teleop kit](https://hello-robot.com/stretc
 
 > **_NOTE_**: It is possibile to customize the interface to only use the Realsense but the fish-eye cameras add additional perspective making it easier to teleoperate the robot. 
 
-We need to setup the `udev` rules so Stretch can identify the cameras. Begin by sourcing your workspace, if you haven't already, and run `./install_gripper_and_navigation_cameras.sh` in `stretch_teleop_interface/fish_eye_cameras`. 
+We need to setup the `udev` rules so Stretch can identify the cameras. Begin by running:
 
-Run `sudo dmesg | grep usb` to get information about currently plugged in devices. If you unplug and replug one of the fish-eye cameras before running the command its information will be displayed at the bottom. You should see something like this: 
 ```
-usb 1-2.1.1: New USB device found, idVendor=1d6c, idProduct=0103, bcdDevice= 0.10
-```
-
-Update the `idVendor` and `idProduct` in `/etc/udev/rules.d/88-hello-navigation-camera.rules` and `/etc/udev/rules.d/89-hello-gripper-camera.rules`. In this example, `1-2.1.1` should be the `KERNELS` in the `udev` rules. In this example, our `udev` rules would look like this:
-```
-KERNEL=="video*", KERNELS=="1-2.*" ATTRS{idVendor}=="1d6c", ATTRS{idProduct}=="0103", MODE:="0777", SYMLINK+="hello-navigation-camera" 
+pip3 install -U hello-robot-stretch-factory
 ```
 
-Unplug and replug both cameras after updating the `udev` rules and reload the `udev` rules: `sudo udevadm control --reload-rules`
+Then, unplug the USB cable for both fisheye cameras. Run the following command:
 
-Run `ll /dev/hello*` and check for both `/dev/hello-navigation-camera` and `/dev/hello-gripper-camera`. If you don’t see them then try unplugging/replugging the cameras a couple times and/or restarting the robot.
+```
+ls -al /dev/video*
+```
 
-> **_NOTE_**: Every time you change the `udev` rules you will have to reload the rules and unplug and replug the cameras to see if the symlinks appear.
+The output will look something like:
+
+```
+crw-rw-rw-+ 1 root plugdev 81, 0 Feb  3 20:41 /dev/video0
+crw-rw-rw-+ 1 root plugdev 81, 1 Feb  3 20:41 /dev/video1
+crw-rw-rw-+ 1 root plugdev 81, 2 Feb  3 20:41 /dev/video2
+crw-rw-rw-+ 1 root plugdev 81, 3 Feb  3 20:41 /dev/video3
+crw-rw-rw-+ 1 root plugdev 81, 4 Feb  3 20:41 /dev/video4
+crw-rw-rw-+ 1 root plugdev 81, 5 Feb  3 20:41 /dev/video5
+```
+
+Next, plug in one of the cameras (e.g. the navigation camera) and run the `ls -al /dev/video*` command again. The output will have changed:
+
+```
+crw-rw-rw-+ 1 root plugdev 81, 0 Feb  3 20:41 /dev/video0
+crw-rw-rw-+ 1 root plugdev 81, 1 Feb  3 20:41 /dev/video1
+crw-rw-rw-+ 1 root plugdev 81, 2 Feb  3 20:41 /dev/video2
+crw-rw-rw-+ 1 root plugdev 81, 3 Feb  3 20:41 /dev/video3
+crw-rw-rw-+ 1 root plugdev 81, 4 Feb  3 20:41 /dev/video4
+crw-rw-rw-+ 1 root plugdev 81, 5 Feb  3 20:41 /dev/video5
+crwxrwxrwx+ 1 root video   81, 6 Feb  3 20:41 /dev/video6
+crwxrwxrwx+ 1 root video   81, 7 Feb  3 20:41 /dev/video7
+```
+
+Of the two newly added devices, the first one, `/dev/video6` is the capture port for the camera. This is the port we will generate a UDEV rule for.
+
+Next, use the `REx_camera_set_symlink.py` tool to generate a UDEV rule for the previously identified port:
+
+```
+REx_camera_set_symlink.py --port /dev/video6 --symlink hello-navigation-camera
+```
+
+> **_NOTE_**: If you see a warning that the selected port is **not** a capture device, use the other device.
+
+Repeat the procedure to generate a UDEV rule for the other camera. For example, for the gripper camera, the command might be:
+
+```
+REx_camera_set_symlink.py --port /dev/video8 --symlink hello-gripper-camera
+```
 
 ## Certificates
 
