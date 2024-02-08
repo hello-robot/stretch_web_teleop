@@ -285,6 +285,13 @@ const SidebarOptions = (props: OptionsProps) => {
             switch ((props.selectedDefinition as CameraViewDefinition).id!) {
                 case (CameraViewId.overhead):
                     contents = <OverheadVideoStreamOptions {...props} />;
+                    break;
+                case (CameraViewId.realsense):
+                    contents = <VideoStreamOptions {...props} />;
+                    break;
+                case (CameraViewId.gripper):
+                    contents = <VideoStreamOptions {...props} />;
+                    break;
             }
             break;
         case (ComponentType.SingleTab):
@@ -302,8 +309,9 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.selectedDefinition as CameraViewDefinition;
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
+    const [showButtons, setShowButtons] = React.useState<boolean>(true);
+
     function togglePredictiveDisplay() {
-        console.log('toggle')
         const newPdOn = !predictiveDisplayOn;
         setPredictiveDisplayOn(newPdOn);
         if (newPdOn) {
@@ -314,12 +322,46 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
         }
         props.updateLayout();
     }
+    
+    function toggleButtons() {
+        setShowButtons(!showButtons);
+        definition.displayButtons = showButtons ? true : false
+        props.updateLayout();
+    }
+
     return (
         <React.Fragment>
             <OnOffToggleButton
                 on={predictiveDisplayOn}
                 onClick={togglePredictiveDisplay}
                 label="Predictive Display"
+            />
+            <OnOffToggleButton
+                on={showButtons}
+                onClick={toggleButtons}
+                label="Display Buttons"
+            />
+        </React.Fragment>
+    )
+}
+
+/** Options for the camera video stream layout component. */
+const VideoStreamOptions = (props: OptionsProps) => {
+    const definition = props.selectedDefinition as CameraViewDefinition;
+    const [showButtons, setShowButtons] = React.useState<boolean>(true);
+    
+    function toggleButtons() {
+        setShowButtons(!showButtons);
+        definition.displayButtons = showButtons ? true : false
+        props.updateLayout();
+    }
+
+    return (
+        <React.Fragment>
+            <OnOffToggleButton
+                on={showButtons}
+                onClick={toggleButtons}
+                label="Display Buttons"
             />
         </React.Fragment>
     )

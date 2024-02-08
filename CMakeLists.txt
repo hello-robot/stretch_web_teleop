@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(stretch_teleop_interface)
+project(stretch_web_teleop)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -26,6 +26,7 @@ install(PROGRAMS
   nodes/navigate_to_aruco.py
   nodes/head_scan.py
   nodes/detect_aruco_markers.py
+  nodes/navigation_camera.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

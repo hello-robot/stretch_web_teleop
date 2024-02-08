@@ -3,12 +3,13 @@ import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
 import { Robot, inJointLimits, inCollision, rosConnected } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage, ROSBatteryState, BatteryVoltageMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
+    batteryStateCallback: forwardBatteryState,
     occupancyGridCallback: forwardOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseState,
     arucoNavigationStateCallback: forwardArucoNavigationState,
@@ -54,14 +55,15 @@ robot.connect().then(() => {
     robot.getOccupancyGrid()
 
     connection.joinRobotRoom()
-}).then(() => {
-    setInterval(() => {
-        console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
-        if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
-            window.location.reload()
-        }
-    }, 4000);    
 })
+// .then(() => {
+//     setInterval(() => {
+//         console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
+//         if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
+//             window.location.reload()
+//         }
+//     }, 4000);    
+//})
 function handleSessionStart() {
     connection.removeTracks()
 
@@ -123,6 +125,15 @@ function forwardJointStates(jointState: ROSJointState) {
         jointsInLimits: jointValues,
         jointsInCollision: effortValues
     } as ValidJointStateMessage);
+}
+
+function forwardBatteryState(batteryState: ROSBatteryState) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: 'batteryVoltage',
+        message: batteryState.voltage
+    } as BatteryVoltageMessage);
 }
 
 function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {

@@ -1,13 +1,6 @@
 .run-stop-button {
-    background: red;
-    border: 0;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 20px;
+    max-width: 110px;
+    width: 100%;
 }
 
 .enabled {
@@ -23,4 +16,5 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
 }

@@ -22,6 +22,7 @@ import { Caregiver } from './Caregiver';
 import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
+import { BatteryVoltageFunctionProvider } from './function_providers/BatteryVoltageFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -38,6 +39,7 @@ export var buttonFunctionProvider = new ButtonFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
 export var underVideoFunctionProvider = new UnderVideoFunctionProvider();
 export var runStopFunctionProvider = new RunStopFunctionProvider();
+export var batteryVoltageFunctionProvider = new BatteryVoltageFunctionProvider();
 export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
@@ -70,7 +72,7 @@ setTimeout(() => {
             connection.joinOperatorRoom()
         }
     }
-}, 6000);
+}, 10000);
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -143,6 +145,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         case 'relativePose':
             remoteRobot.setRelativePose(message.message)
             break;
+        case 'batteryVoltage':
+            remoteRobot.sensors.setBatteryVoltage(message.message)
+            break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
     }
@@ -176,6 +181,7 @@ function configureRemoteRobot() {
     FunctionProvider.addRemoteRobot(remoteRobot);
     mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
+    remoteRobot.sensors.setBatteryFunctionProviderCallback(batteryVoltageFunctionProvider.updateVoltage)
 }
 
 /**

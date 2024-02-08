@@ -24,7 +24,7 @@
     left: 0;
 }
 
-.video-overlay-container.realsense {
+.video-overlay-container.realsense, .video-overlay-container.overhead {
     z-index: 2;
     position: absolute;
     width: calc(100% - 102px);
@@ -84,21 +84,24 @@
     grid-row: 3;
     grid-column: 1;
     /* background: blue; */
-    display: flex;
-    flex-wrap: wrap;
+    /* display: grid; */
+    /* flex-wrap: wrap; */
     align-content: flex-start;
     padding-top: 0.5rem;
     width: 100%;
     object-fit: cover;
-    justify-content: center;
+    /* justify-content: center; */
     align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .under-video-area button {
     /* height: 30%; */
-    margin: 0.2rem;
+    margin: 0.2rem 0rem 0.2rem 0rem;
     /* flex: 1 0 auto; */
     align-items: center;
+    width: 99%;
 }
 
 /* Realsense pan-tilt controls ************************************************/

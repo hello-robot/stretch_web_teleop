@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
-import { CameraViewDefinition, ComponentType, CameraViewId, ComponentDefinition, OverheadVideoStreamDef, RealsenseVideoStreamDef } from "../utils/component_definitions";
+import { CameraViewDefinition, ComponentType, CameraViewId, ComponentDefinition, FixedOverheadVideoStreamDef, RealsenseVideoStreamDef, AdjustableOverheadVideoStreamDef, GripperVideoStreamDef } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import { CustomizableComponentProps, isSelected, SharedState } from "./CustomizableComponent";
 import { DropZone } from "./DropZone";
 import { PredictiveDisplay } from "./PredictiveDisplay";
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFunctionProvider";
-import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
+import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton, wristButtons } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import "operator/css/CameraView.css"
+import { Dropdown } from "../basic_components/Dropdown";
+import { AccordionSelect } from "../basic_components/AccordionSelect";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -30,7 +32,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // Boolean representing if the video stream needs to be constrained by height
     // (constrained by width otherwise)
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
-
+    
     React.useEffect(() => {
         executeVideoSettings(definition);
     }, [definition])
@@ -50,7 +52,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const selected = isSelected(props);
     const videoClass = className("video-canvas", { customizing, selected })
     const realsense = props.definition.id === CameraViewId.realsense
-
+    const overhead = props.definition.id === CameraViewId.overhead
+    
     /** Mark this video stream as selected */
     function selectSelf() {
         props.sharedState.onSelect(props.definition, props.path);
@@ -107,7 +110,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     const overlayContainer = (
         <div
-            className={className("video-overlay-container", { customizing, selected, realsense })}
+            className={className("video-overlay-container", { customizing, selected, realsense, overhead })}
             // style={overlayDimensions}
             onClick={customizing ? handleClick : undefined}
         >
@@ -133,14 +136,18 @@ export const CameraView = (props: CustomizableComponentProps) => {
     )
     // If the video is from the Realsense camera then include the pan-tilt 
     // buttons around the video, otherwise return the video
-    const videoComponent = (props.definition.id === CameraViewId.realsense) ?
+    const videoComponent = (props.definition.id === CameraViewId.realsense || props.definition.id === CameraViewId.overhead) ?
         (
             <>
                 {/* <h4 className="title">Adjustable Camera</h4> */}
                 <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
-                    <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                        {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
-                    </div>
+                    { overlayDefinition?.type !== ComponentType.PredictiveDisplay ? 
+                        <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                            {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
+                        </div>
+                        :
+                        <></>
+                    }
                     <video
                         ref={videoRef}
                         autoPlay
@@ -154,7 +161,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         :
         (
             <>
-                <h4 className="title">{props.definition.id} Camera</h4>
+                {/* <h4 className="title">{props.definition.id} Camera</h4> */}
                 <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
                     <video
                         ref={videoRef}
@@ -170,9 +177,14 @@ export const CameraView = (props: CustomizableComponentProps) => {
     return (
         <div className='video-container' draggable={false}>
             {videoComponent}
-            <div className="under-video-area">
-                <UnderVideoButtons definition={definition}/>
-            </div>
+            {
+                definition.displayButtons ? 
+                    <div className="under-video-area">
+                        <UnderVideoButtons definition={definition}/>
+                    </div>
+                :
+                    <></>
+            }
         </div>
     );
 }
@@ -437,7 +449,8 @@ function executeVideoSettings(definition: CameraViewDefinition) {
         case (CameraViewId.gripper):
             break;
         case (CameraViewId.overhead):
-            executeOverheadSettings(definition as OverheadVideoStreamDef);
+            // executeFixedOverheadSettings(definition as FixedOverheadVideoStreamDef);
+            executeAdjustableOverheadettings(definition as AdjustableOverheadVideoStreamDef);
             break;
         case (CameraViewId.realsense):
             executeRealsenseSettings(definition as RealsenseVideoStreamDef);
@@ -450,13 +463,21 @@ function executeVideoSettings(definition: CameraViewDefinition) {
 /**
  * Executes functions to prepare for rendering the overhead video stream.
  * 
- * @param definition {@link OverheadVideoStreamDef}
+ * @param definition {@link FixedOverheadVideoStreamDef}
  */
-function executeOverheadSettings(definition: OverheadVideoStreamDef) {
+function executeFixedOverheadSettings(definition: FixedOverheadVideoStreamDef) {
     const overheadViewButton = definition.gripperView ? UnderVideoButton.GripperView : UnderVideoButton.DriveView;
     underVideoFunctionProvider.provideFunctions(overheadViewButton).onClick!();
 }
 
+/**
+ * Executes functions to prepare for rendering the Realsense video stream.
+ * 
+ * @param definition {@link AdjustableOverheadVideoStreamDef}
+ */
+ function executeAdjustableOverheadettings(definition: AdjustableOverheadVideoStreamDef) {
+    underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(definition.followGripper || false);
+}
 
 /**
  * Executes functions to prepare for rendering the Realsense video stream.
@@ -480,10 +501,10 @@ const UnderVideoButtons = (props: {definition: CameraViewDefinition}) => {
     let buttons: JSX.Element | null;
     switch (props.definition.id) {
         case (CameraViewId.gripper):
-            buttons = null;
+            buttons = <UnderGripperButtons definition={props.definition}/>;
             break;
         case (CameraViewId.overhead):
-            buttons = <UnderOverheadButtons definition={props.definition}/>;
+            buttons = <UnderAdjustableOverheadButtons definition={props.definition}/>;
             break;
         case (CameraViewId.realsense):
             buttons = <UnderRealsenseButtons definition={props.definition}/>;
@@ -497,7 +518,7 @@ const UnderVideoButtons = (props: {definition: CameraViewDefinition}) => {
 /**
  * Buttons to display under the overhead video stream.
  */
-const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
+const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef}) => {
     const [gripperView, setGripperView] = React.useState<boolean>(props.definition.gripperView || false);
     const buttonText = "Switch to " + (props.definition.gripperView  ? "Drive View" : "Gripper View");
 
@@ -515,18 +536,50 @@ const UnderOverheadButtons = (props: {definition: OverheadVideoStreamDef}) => {
 }
 
 /**
+ * Buttons to display under the adjustable overhead video stream.
+ */
+ const UnderAdjustableOverheadButtons = (props: {definition: AdjustableOverheadVideoStreamDef}) => {
+    const [rerender, setRerender] = React.useState<boolean>(false);
+    
+    return (
+        <React.Fragment >
+            <AccordionSelect 
+                title="Look..."
+                possibleOptions={Object.values(realsenseButtons)}
+                onChange={(idx: number) => {
+                    underVideoFunctionProvider.provideFunctions(realsenseButtons[idx]).onClick!();
+                }}
+            />
+            <CheckToggleButton
+                checked={props.definition.followGripper || false}
+                onClick={() => {
+                    props.definition.followGripper = !props.definition.followGripper;
+                    setRerender(!rerender);
+                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(props.definition.followGripper)
+                }}
+                label="Follow Gripper"
+            />
+        </React.Fragment>
+    )
+}
+
+/**
  * Buttons to display under the Realsense video stream.
  */
 const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
-    // const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    const [selectedIdx, setSelectedIdx] = React.useState<number>();
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
-
+    
     return (
         <React.Fragment >
-            {realsenseButtons.map(perspective =>
-                <CameraPerspectiveButton perspective={perspective} key={perspective} />
-            )}
+            <AccordionSelect 
+                title="Look..."
+                possibleOptions={Object.values(realsenseButtons)}
+                onChange={(idx: number) => {
+                    underVideoFunctionProvider.provideFunctions(realsenseButtons[idx]).onClick!();
+                }}
+            />
             <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
@@ -574,6 +627,23 @@ const UnderRealsenseButtons = (props: {definition: RealsenseVideoStreamDef}) => 
                     play_circle
                 </span>
             </button> */}
+        </React.Fragment>
+    )
+}
+
+/**
+ * Buttons to display under the overhead video stream.
+ */
+ const UnderGripperButtons = (props: {definition: GripperVideoStreamDef}) => {
+    return (
+        <React.Fragment>
+            <AccordionSelect 
+                title="Quick Actions..."
+                possibleOptions={Object.values(wristButtons)}
+                onChange={(idx: number) => {
+                    underVideoFunctionProvider.provideFunctions(wristButtons[idx]).onClick!();
+                }}
+            />
         </React.Fragment>
     )
 }

@@ -10,7 +10,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     displayMovementRecorder: false,
     displayArucoMarkers: false,
     displayLabels: true,
-    actionMode: ActionMode.PressRelease,
+    actionMode: ActionMode.PressAndHold,
     children: [
         {
             type: ComponentType.LayoutGrid,
@@ -26,35 +26,22 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.overhead,
-                                    children: [
-                                        // {
-                                        //     type: ComponentType.PredictiveDisplay,
-                                        //     // type: ComponentType.ButtonPad,
-                                        //     // id: ButtonPadId.overhead
-                                        // }
-                                    ]
+                                    displayButtons: false,
+                                    children: []
                                 } as CameraViewDefinition,
                                 // Realsense camera
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.realsense,
-                                    children: [
-                                        // {
-                                        //     type: ComponentType.ButtonPad,
-                                        //     id: ButtonPadId.Drive,
-                                        // } as ButtonPadDef
-                                    ]
+                                    displayButtons: true,
+                                    children: []
                                 } as CameraViewDefinition,
                                 // Gripper camera
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.gripper,
-                                    children: [
-                                        // {
-                                        //     type: ComponentType.ButtonPad,
-                                        //     id: ButtonPadId.Gripper
-                                        // }
-                                    ]
+                                    displayButtons: true,
+                                    children: []
                                 } as CameraViewDefinition
                             ]
                         }

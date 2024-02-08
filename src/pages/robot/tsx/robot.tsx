@@ -1,5 +1,5 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ArucoMarkerInfo } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ArucoMarkerInfo, ROSBatteryState } from 'shared/util';
 import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
 import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
 import { response } from 'express';
@@ -34,6 +34,7 @@ export class Robot extends React.Component {
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
+    private batteryStateCallback: (batteryState: ROSBatteryState) => void
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
     private moveBaseResultCallback: (goalState: MoveBaseState) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
@@ -46,6 +47,7 @@ export class Robot extends React.Component {
 
     constructor(props: {
         jointStateCallback: (jointState: ROSJointState) => void,
+        batteryStateCallback: (batteryState: ROSBatteryState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
         moveBaseResultCallback: (goalState: MoveBaseState) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
@@ -56,6 +58,7 @@ export class Robot extends React.Component {
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
+        this.batteryStateCallback = props.batteryStateCallback
         this.occupancyGridCallback = props.occupancyGridCallback
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
@@ -91,6 +94,7 @@ export class Robot extends React.Component {
 
     async onConnect() {
         this.subscribeToJointState()
+        this.subscribeToBatteryState()
         // this.subscribeToOccupancyGrid()
         this.subscribeToMarkerArray()
         // this.subscribeToArucoNavigationState()
@@ -146,6 +150,19 @@ export class Robot extends React.Component {
         });
     };
     
+    subscribeToBatteryState() {
+        const batteryStateTopic: ROSLIB.Topic<ROSBatteryState> = new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/battery',
+            messageType: 'sensor_msgs/msg/BatteryState'
+        });
+        this.subscriptions.push(batteryStateTopic)
+
+        batteryStateTopic.subscribe((msg: ROSBatteryState) => {
+            if (this.batteryStateCallback) this.batteryStateCallback(msg)
+        });
+    };
+
     subscribeToVideo(props: VideoProps) {
         let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
             ros: this.ros,
@@ -553,7 +570,7 @@ export class Robot extends React.Component {
         if (jointName in JOINT_LIMITS) {
             let inLimits = inJointLimitsHelper({ jointValue: newJointValue, jointName: jointName })
             if (!inLimits) throw 'invalid joint name'
-            console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
+            // console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
             if (!inLimits[index]) newJointValue = JOINT_LIMITS[jointName]![index]
         }
 
@@ -848,8 +865,10 @@ export function inCollision(props: { jointStateMessage: ROSJointState, jointName
         "wrist_extension": [-40, 40],
         "joint_lift": [0, 70],
         "joint_wrist_yaw": [-10, 10],
+        "joint_wrist_pitch": [-10, 10],
+        "joint_wrist_roll": [-10, 10],
     }
-
+    
     if (!(props.jointName in MAX_EFFORTS)) return inCollision;
 
     let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)

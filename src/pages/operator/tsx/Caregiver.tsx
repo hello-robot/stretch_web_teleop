@@ -36,7 +36,7 @@ export const Caregiver = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
 
-    FunctionProvider.actionMode = ActionMode.PressRelease;
+    FunctionProvider.actionMode = ActionMode.PressAndHold;
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated

@@ -35,6 +35,10 @@ export interface ROSJointState extends Message {
     velocity: [number],
 }
 
+export interface ROSBatteryState extends Message {
+    voltage: number
+}
+
 export interface ROSCompressedImage extends Message {
     header: string,
     format: "jpeg" | "png",
@@ -55,7 +59,7 @@ export interface Transform {
     transform: ROSLIB.Transform
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | BatteryVoltageMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory"
@@ -156,6 +160,11 @@ export interface RelativePoseMessage {
     message: ROSLIB.Transform
 }
 
+export interface BatteryVoltageMessage {
+    type: 'batteryVoltage',
+    message: number
+}
+
 export interface AMCLPose extends Message {
     header: string,
     pose: { 
@@ -210,9 +219,26 @@ export interface ROSOccupancyGrid {
     data: number[]
 }
 
+export const STOW_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": -0.49700,
+    "joint_wrist_yaw": 3.19579
+}
+
+export const CENTER_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": 0.0,
+    "joint_wrist_yaw": 0.0
+}
+
+export const REALSENSE_FORWARD_POSE: RobotPose = {
+    "joint_head_pan": 0.0,
+    "joint_head_tilt": 0.0
+}
+
 export const REALSENSE_BASE_POSE: RobotPose = {
     "joint_head_pan": 0.075,
-    "joint_head_tilt": -1.65
+    "joint_head_tilt": -1.0
 }
 
 export const REALSENSE_GRIPPER_POSE: RobotPose = {
@@ -221,11 +247,11 @@ export const REALSENSE_GRIPPER_POSE: RobotPose = {
 }
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
-    "wrist_extension": [0.05, .518],
-    "joint_wrist_roll": [-2.95, 2.95],
+    "wrist_extension": [0.001, .518],
+    "joint_wrist_roll": [-2.95, 2.94],
     "joint_wrist_pitch": [-1.57, 0.57],
     "joint_wrist_yaw": [-1.37, 4.41],
-    "joint_lift": [0.175, 1.05],
+    "joint_lift": [0.001, 1.1],
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
     "joint_gripper_finger_left": [-0.37, 0.17],
@@ -240,7 +266,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "joint_lift": .04,
     "joint_wrist_roll": .1,
     "joint_wrist_pitch": .1,
-    "joint_wrist_yaw": .1,
+    "joint_wrist_yaw": .4,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .3
 }
@@ -259,8 +285,8 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
 }
 
 export const navigationProps = {
-    width: 768,
-    height: 768, // 1024
+    width: 800,
+    height: 1280, // 1024
     fps: 6.0
 }
 

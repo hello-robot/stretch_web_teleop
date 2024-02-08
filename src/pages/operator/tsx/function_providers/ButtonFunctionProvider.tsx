@@ -97,7 +97,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
-            let [buttonNeg, buttonPos] = key !== "joint_wrist_yaw" ? buttons : buttons.reverse()  
+            let [buttonNeg, buttonPos] = key !== "joint_wrist_yaw" && key !== "joint_wrist_pitch" ? buttons : buttons.reverse()  
 
             // TODO: i think there's still something wrong with this logic
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
@@ -232,7 +232,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     },
                     onLeave: onLeave
                 };
-            case ActionMode.PressRelease:
+            case ActionMode.PressAndHold:
             case ActionMode.ClickClick:
                 switch (buttonPadFunction) {
                     case ButtonPadButton.BaseForward:
@@ -269,7 +269,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         break;
                 }
 
-                return (FunctionProvider.actionMode === ActionMode.PressRelease) ? {
+                return (FunctionProvider.actionMode === ActionMode.PressAndHold) ? {
                     onClick: () => {
                         action();
                         this.setButtonActiveState(buttonPadFunction);
@@ -315,7 +315,7 @@ function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, Butt
         case ('joint_wrist_roll'):
             return [ButtonPadButton.WristRollLeft, ButtonPadButton.WristRollRight]
         case ('joint_wrist_pitch'):
-            return [ButtonPadButton.WristPitchUp, ButtonPadButton.WristPitchDown]
+            return [ButtonPadButton.WristPitchDown, ButtonPadButton.WristPitchUp]
         case ('joint_wrist_yaw'):
             return [ButtonPadButton.WristRotateOut, ButtonPadButton.WristRotateIn]
         case ("translate_mobile_base"):

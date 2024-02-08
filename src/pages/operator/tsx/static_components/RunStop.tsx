@@ -4,6 +4,7 @@ import { className } from "shared/util";
 import { runStopFunctionProvider } from "..";
 import { RunStopFunctions } from "../function_providers/RunStopFunctionProvider";
 import { CustomizableComponentProps } from "../layout_components/CustomizableComponent";
+import runStopButton from "operator/icons/button.svg"
 
 export const RunStopButton = (props: CustomizableComponentProps) => {
     const functs: RunStopFunctions = runStopFunctionProvider.provideFunctions();
@@ -11,14 +12,14 @@ export const RunStopButton = (props: CustomizableComponentProps) => {
 
     return (
         <div className="runStopContainer">
-            <button
+            <img 
+                src={runStopButton}
                 onClick={() => {
                     setEnabled(!enabled)
                     functs.onClick()
                 }}
-                className={className("run-stop-button", { enabled })}
-            >
-            </button>
+                className={className("run-stop-button", {enabled})}
+            />
             {enabled ? <span>Run Stop: Enabled</span> : <span>Run Stop: Disabled</span>}
         </div>
     )

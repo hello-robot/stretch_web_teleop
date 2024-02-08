@@ -7,7 +7,7 @@ import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 // import { VoiceCommands } from "./static_components/VoiceCommands";
 import { ArucoNavigationState, className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
-import { arucoMarkerFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
+import { arucoMarkerFunctionProvider, batteryVoltageFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
@@ -34,7 +34,8 @@ export const Operator = (props: {
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
     const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
-
+    const [batteryVoltage, setBatteryVoltage] = React.useState<number>()
+    
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -51,6 +52,11 @@ export const Operator = (props: {
         setButtonStateMapRerender(!buttonStateMapRerender);
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
+
+    function batteryOperatorCallback(voltage: number) {
+        setBatteryVoltage(voltage)
+    }
+    batteryVoltageFunctionProvider.setOperatorCallback(batteryOperatorCallback);
 
     function arucoNavigationStateCallback(state: ArucoNavigationState) {
         setArucoNavigationState(state)
@@ -236,6 +242,7 @@ export const Operator = (props: {
             selectedDefinition: selectedDefinition
         },
         buttonStateMap: buttonStateMap.current,
+        batteryVoltage: batteryVoltage,
         hideLabels: !layout.current.displayLabels
     }
 

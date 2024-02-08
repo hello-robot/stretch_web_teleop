@@ -7,7 +7,7 @@ export const REMOTE_CAREGIVER_LAYOUT: LayoutDefinition = {
     displayVoiceControl: false,
     displayMovementRecorder: false,
     // The state of the action mode dropdown
-    actionMode: ActionMode.PressRelease,
+    actionMode: ActionMode.PressAndHold,
     displayPoseLibrary: false,
     displayArucoMarkers: false,
     displayLabels: true,

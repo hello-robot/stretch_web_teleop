@@ -2,7 +2,7 @@ import ROSLIB from "roslib"
 import { ArucoMarkerInfo, ArucoMarkersInfo, ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand | DeleteArucoMarkerCommand| AddArucoMarkerCommand | GetRelativePoseCommand | NavigateToArucoCommand | StopArucoNavigationCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | UpdateArucoMarkersInfoCommand | SetArucoMarkerInfoCommand | DeleteArucoMarkerCommand| AddArucoMarkerCommand | GetRelativePoseCommand | NavigateToArucoCommand | StopArucoNavigationCommand | GetBatteryVoltageCommand
 
 export interface VelocityCommand {
     stop: () => void,
@@ -103,4 +103,8 @@ export interface AddArucoMarkerCommand {
 export interface GetRelativePoseCommand {
     type: "getRelativePose"
     marker_name: string
+}
+
+export interface GetBatteryVoltageCommand {
+    type: "getBatteryVoltage"
 }

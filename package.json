@@ -1,5 +1,5 @@
 {
-  "name": "stretch_teleop_interface",
+  "name": "stretch_web_teleop",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
