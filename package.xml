@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>stretch_teleop_interface</name>
+  <name>stretch_web_teleop</name>
   <version>0.1.0</version>
-  <description>The stretch teleop interface package</description>
+  <description>The stretch web teleop package</description>
 
   <maintainer email="support@hello-robot.com">Hello Robot Inc.</maintainer>
 

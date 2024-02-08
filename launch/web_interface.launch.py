@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_path
 
 def generate_launch_description():
-    teleop_interface_package = str(get_package_share_path('stretch_teleop_interface'))
+    teleop_interface_package = str(get_package_share_path('stretch_web_teleop'))
     core_package = str(get_package_share_path('stretch_core'))
     rosbridge_package = str(get_package_share_path('rosbridge_server'))
     stretch_core_path = str(get_package_share_directory('stretch_core'))
@@ -92,7 +92,7 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('navigation_camera')),
         actions=[
              Node(
-                package='stretch_teleop_interface',
+                package='stretch_web_teleop',
                 executable='navigation_camera.py',
                 name='uvc_navigation_camera'
             )
@@ -156,7 +156,7 @@ def generate_launch_description():
 
     # Configure Video Streams
     configure_video_streams_node = Node(
-        package='stretch_teleop_interface',
+        package='stretch_web_teleop',
         executable='configure_video_streams.py',
         # name='configure_video_streams_node',
         output='screen',
@@ -175,7 +175,7 @@ def generate_launch_description():
                           'use_rviz': 'false'}.items())
 
     detect_aruco_markers_node = Node(
-        package='stretch_teleop_interface',
+        package='stretch_web_teleop',
         executable='detect_aruco_markers.py',
         name='detect_aruco_node',
         output='screen',
@@ -183,7 +183,7 @@ def generate_launch_description():
     )
 
     navigate_to_aruco_node = Node(
-        package='stretch_teleop_interface',
+        package='stretch_web_teleop',
         executable='navigate_to_aruco',
         name='navigate_to_aruco_node',
         output='screen',
@@ -191,7 +191,7 @@ def generate_launch_description():
     )
 
     head_scan_node = Node(
-        package='stretch_teleop_interface',
+        package='stretch_web_teleop',
         executable='head_scan.py',
         name='head_scan_node',
         output='screen'
