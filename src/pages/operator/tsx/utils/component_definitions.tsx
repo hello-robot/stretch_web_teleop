@@ -2,6 +2,9 @@
  * @summary Definitions to describe different components to render
  */
 
+import ROSLIB from "roslib";
+import { StorageHandler } from "../storage_handler/StorageHandler";
+
 /** Enumerator for the possible action modes */
 export enum ActionMode {
     StepActions = 'Step-Actions',
@@ -14,13 +17,17 @@ export enum ActionMode {
  */
 export enum ComponentType {
     Layout = "Layout",
+    LayoutGrid = "Layout Grid",
     Panel = "Panel",
     SingleTab = "Tab",
     CameraView = "Camera View",
     ButtonPad = "Button Pad",
     PredictiveDisplay = "Predictive Display",
     ButtonGrid = "Button Grid",
-    VirtualJoystick = "Joystick"
+    VirtualJoystick = "Joystick",
+    Map = "Map",
+    RunStopButton = "Run Stop Button",
+    BatteryGuage = "Battery Gauge"
 }
 
 /**
@@ -36,14 +43,17 @@ export enum CameraViewId {
  * ID for a button pad describes the shape and button functions of the button pad
  */
 export enum ButtonPadId {
-    Drive = "Drive",
-    ManipRealsense = "Manipulation Realsense",
+    // Drive = "Drive",
+    ManipRealsense = "Drive/Arm/Gripper/Wrist",
     Gripper = "Gripper",
-    ManipOverhead = "Manipulation Overhead",
-    Base = "Base",
+    WristGripper = "Wrist & Gripper",
+    Base = "Drive",
     Camera = "Camera",
     Wrist = "Wrist",
-    Arm = "Arm"
+    Arm = "Arm & Lift",
+    ArmMobile = "Arm Mobile",
+    GripperMobile = "Gripper Mobile",
+    DriveMobile = "Drive Mobile"
 }
 
 
@@ -77,25 +87,34 @@ export type ParentComponentDefinition = ComponentDefinition & {
     children: ComponentDefinition[];
 }
 
-export type LayoutDefinition = ParentComponentDefinition & {
+export type LayoutDefinition = ComponentDefinition & {
     displayVoiceControl: boolean;
+    displayPoseLibrary: boolean;
+    displayMovementRecorder: boolean;
+    displayArucoMarkers: boolean;
+    displayLabels: boolean;
     actionMode: ActionMode;
+    children: LayoutGridDefinition[];
+}
+
+export type LayoutGridDefinition = ComponentDefinition & {
+    children: PanelDefinition[];
+};
+
+/**
+ * Definition for a tabs component
+ */
+export type PanelDefinition = ComponentDefinition & {
+    /** List of definitions for individual tabs */
+    children: TabDefinition[];
 }
 
 /**
  * Definition for a single tab in a tabs component
  */
-export type TabDefinition = ParentComponentDefinition & {
+ export type TabDefinition = ParentComponentDefinition & {
     /** The label that appears at the top of the tabs object. */
     label: string;
-}
-
-/**
- * Definition for a tabs component
- */
-export type PanelDefinition = ParentComponentDefinition & {
-    /** List of definitions for individual tabs */
-    children: TabDefinition[];
 }
 
 /**
@@ -104,22 +123,50 @@ export type PanelDefinition = ParentComponentDefinition & {
 export type CameraViewDefinition = ParentComponentDefinition & {
     /** Indicates the camera video of the video stream */
     id: CameraViewId;
+    /** Whether to display the default buttons under the camera view */
+    displayButtons: boolean;
 }
 
 /**
- * Definition for the overhead stream component
+ * Definition for the gripper stream component
  * 
  * @note these modifications to the overhead view are implemented in the
  * backend, so if multiple overhead streams are visible to the user 
  * simultaneously, any change to this defintion for one view will impact
  * all views.
  */
-export type OverheadVideoStreamDef = CameraViewDefinition & {
+ export type GripperVideoStreamDef = CameraViewDefinition 
+
+/**
+ * Definition for the fixed overhead stream component
+ * 
+ * @note these modifications to the overhead view are implemented in the
+ * backend, so if multiple overhead streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
     /** 
      * If true, the view should be cropped and rotated to focus on the gripper.
      * Otherwise, camera view should be unchanged
      * */
     gripperView?: boolean;
+}
+
+/**
+ * Definition for the adjustable overhead stream component
+ * 
+ * @note these modifications to the overhead view are implemented in the
+ * backend, so if multiple overhead streams are visible to the user 
+ * simultaneously, any change to this defintion for one view will impact
+ * all views.
+ */
+ export type AdjustableOverheadVideoStreamDef = CameraViewDefinition & {
+    /**
+     * If the Realsense camera should pan and tilt to keep the gripper centered 
+     * in the view.
+     */
+     followGripper?: boolean;
 }
 
 /**
@@ -141,4 +188,23 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      * reachable area.
      */
     depthSensing?: boolean;
+    /**
+     * If the aruco markers overlay should be displayed
+     */
+    arucoMarkers?: boolean;
 }
+
+/**
+ * Definition for the map component
+ */
+export type MapDefinition = ComponentDefinition & {
+    /**
+     * Enable/disable the click listener on the map for settings a goal 
+     */
+    selectGoal?: boolean
+}
+
+/**
+ * Definition for the run stop button
+ */
+ export type RunStopDefinition = ComponentDefinition 

@@ -8,14 +8,40 @@
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 1rem;
-    z-index: 4;
-    height: 20rem;
-    width: 30rem;
+    z-index: 10;
+    height: 50%;
+    width: 50%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; */
     justify-content: space-between;
     opacity: 100%;
+    touch-action: manipulation
+}
+
+.popup-modal.small {
+    height: 20rem;
+    width: 47rem;
+    top: 10%;
+}
+
+.popup-modal.medium {
+    height: 50rem;
+    width: 47rem;
+    top: -10%
+    /* height: 35%; */
+}
+
+.popup-modal.large {
+    height: 50%;
+}
+
+.mobile {
+    left: -27%;
+    transform: translate(50%, 50%);
+    display: flex;
+    justify-content: space-around;
+    font-size: 50px !important;
 }
 
 .voice-commands-popup-modal {
@@ -51,6 +77,7 @@
 .popup-modal-bottom-buttons button {
     width: 45%;
     padding: .5em;
+    color: black;
 }
 
 /* Dark background behind popup */
@@ -66,7 +93,7 @@
 }
 
 .popup-modal label {
-    font-size: 1.5em;
+    font-size: 30px;
 }
 
 .popup-modal input {
@@ -88,11 +115,20 @@
     padding-bottom: 1rem;
     width: 100%;
     position: relative;
+    color: black;
 }
 
-.dropdown-button.expanded {
+.dropdown-button.expanded.bottom {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+    color: black;
+}
+
+.dropdown-button.expanded.top {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin: 0 !important;
+    color: black;
 }
 
 /* Flip the dropdown arrow when active */
@@ -106,10 +142,16 @@
 
 .dropdown-popup {
     position: absolute;
-    width: 100%;
+    min-width: 100%;
     z-index: 3;
     box-shadow: var(--shadow);
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
+}
+
+.dropdown-popup.top {
+    top: auto;
+    bottom: 100%;
+    box-shadow: var(--shadow-bottom);
 }
 
 .dropdown-option {
@@ -120,14 +162,24 @@
     display: block;
     border-radius: 0;
     text-align: left;
+    margin: 0 !important;
+    color: black;
 }
 
 .dropdown-option.active {
     filter: brightness(80%);
 }
 
-.dropdown-option:last-of-type {
-    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius) ;
+.dropdown-popup.top .dropdown-option:first-of-type {
+    border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0;
+}
+
+.dropdown-popup.top .dropdown-option:last-of-type {
+    box-shadow: none;
+}
+
+.dropdown-popup.bottom .dropdown-option:last-of-type {
+    border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
 }
 
 /* CheckToggleButton **********************************************************/
@@ -135,8 +187,125 @@
 .check-toggle-button {
     display: flex;
     justify-content: center;
+    color: black;
 }
 
 .check-toggle-button span.material-icons {
     margin-right: 1rem;
+}
+
+.pose-name {
+    /* padding-top: 5%; */
+    align-self: normal;
+}
+
+.pose-name label {
+    padding-right: 2.5rem;
+}
+
+.pose-name input {
+    width: 65%;
+}
+
+.mobile-pose-name input {
+    width: 100%;
+}
+
+ul.checkbox {
+    margin: 0;
+    padding: 0;
+    margin-left: 1rem;
+    list-style: none;
+}
+
+ul.checkbox li {
+    border: 0.5rem transparent solid;
+}
+
+hr {
+    width: 100%
+}
+
+button .material-icons {
+    margin: 0 !important;
+}
+
+input[type='checkbox'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: white;
+    border-radius: 5px;
+    border: 2px solid #555;
+    margin-right: 1rem;
+}
+
+@media screen and (max-device-width: 700px) {
+    input[type='checkbox'] {
+        margin-right: 3rem;
+        transform: scale(2);
+    }
+
+    .popup-modal label {
+        font-size: 50px;
+    }
+}
+
+/* AccordionSelect **********************************************************/
+
+/* Style the accordion section */
+.accordion_section {
+    display: flex;
+    flex-direction: column;
+}
+  
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+    /* background-color: #eee; */
+    /* color: #444; */
+    cursor: pointer;
+    /* padding: 18px; */
+    display: flex;
+    align-items: center;
+    border: none;
+    outline: none;
+    transition: background-color 0.6s ease;
+    justify-content: space-between;
+}
+  
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.accordion:hover,
+.active {
+    background-color: #ccc;
+}
+  
+/* Style the accordion content title */
+.accordion_title {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+}
+  
+/* Style the accordion content panel. Note: hidden by default */
+.accordion_content {
+    background-color: var(--btn-gray);
+    overflow: hidden;
+    transition: max-height 0.6s ease;
+}
+
+  /* Flip the dropdown arrow when active */
+.accordion span {
+    transition: transform 0.2s linear;
+}
+
+.accordion.active span {
+    transform: scaleY(-1);
+}
+
+.accordion-item {
+    padding: 0.75rem 0rem 0.75rem 0rem;
+    text-align: center;
+}
+
+.accordion-item:hover {
+    background-color: #ccc;
 }

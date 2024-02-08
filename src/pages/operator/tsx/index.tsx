@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, Root } from 'react-dom/client';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream } from 'shared/util';
+import { WebRTCMessage, RemoteStream, RobotPose, ROSOccupancyGrid } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './Operator';
@@ -14,20 +14,36 @@ import { ButtonFunctionProvider } from './function_providers/ButtonFunctionProvi
 import { FunctionProvider } from './function_providers/FunctionProvider';
 import { PredictiveDisplayFunctionProvider } from './function_providers/PredictiveDisplayFunctionProvider';
 import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunctionProvider';
-import { VoiceFunctionProvider } from './function_providers/VoiceFunctionProvider';
-import "operator/css/index.css"
+import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
+import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
+import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
+import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
+import { Caregiver } from './Caregiver';
+import {isMobile} from 'react-device-detect';
+import "operator/css/index.css";
+import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
+import { BatteryVoltageFunctionProvider } from './function_providers/BatteryVoltageFunctionProvider';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
+let connectionResolved: boolean = false;
+
+export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
+export let storageHandler: StorageHandler;
 
 // Create the function providers. These abstract the logic between the React 
 // components and remote robot.
 export var buttonFunctionProvider = new ButtonFunctionProvider();
-export var voiceFunctionProvider = new VoiceFunctionProvider();
 export var predicitiveDisplayFunctionProvider = new PredictiveDisplayFunctionProvider();
-export var underVideoFunctionProvider = new UnderVideoFunctionProvider()
+export var underVideoFunctionProvider = new UnderVideoFunctionProvider();
+export var runStopFunctionProvider = new RunStopFunctionProvider();
+export var batteryVoltageFunctionProvider = new BatteryVoltageFunctionProvider();
+export var mapFunctionProvider: MapFunctionProvider;
+export var underMapFunctionProvider: UnderMapFunctionProvider;
+export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
+export var arucoMarkerFunctionProvider: ArucoMarkerFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -35,22 +51,28 @@ connection = new WebRTCConnection({
     polite: true,
     onMessage: handleWebRTCMessage,
     onTrackAdded: handleRemoteTrackAdded,
-    onMessageChannelOpen: initializeOperator,
+    onMessageChannelOpen: configureRemoteRobot,
     onConnectionEnd: disconnectFromRobot
 });
 
 connection.joinOperatorRoom()
 
-// Check if the WebRTC connection is resolved. Reload every 4 seconds until resolved.
+// Check if the WebRTC connection is resolved. Reload every 8 seconds until resolved.
 setTimeout(() => {
-    let isResolved = connection.connectionState() == 'connected' ? true : false
-    console.log("connection state: ", isResolved)
-    if (isResolved) {
-        console.log('WebRTC connection is resolved.');
-    } else {
-        window.location.reload()
+    let isResolved = connection.connectionState() == 'connected'
+    if (connectionResolved != isResolved || !isResolved) {
+        connectionResolved = isResolved;
+        console.log("connection state: ", isResolved)
+        if (isResolved) { 
+            initializeOperator()
+            console.log('WebRTC connection is resolved.');
+        } 
+        else {
+            connection.hangup()
+            connection.joinOperatorRoom()
+        }
     }
-}, 4000);
+}, 10000);
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -83,12 +105,48 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         }
         return
     }
+
     switch (message.type) {
         case 'validJointState':
             remoteRobot.sensors.checkValidJointState(
+                message.robotPose,
                 message.jointsInLimits,
                 message.jointsInCollision
             );
+            break;
+        case 'isRunStopped':
+            remoteRobot.setIsRunStopped(message.enabled)
+            break;
+        case 'occupancyGrid':
+            if (!occupancyGrid) {
+                occupancyGrid = message.message
+            } else {
+                occupancyGrid.data = occupancyGrid.data.concat(message.message.data)
+            }
+            break;
+        case 'amclPose':
+            remoteRobot.setMapPose(
+                message.message
+            )
+            break;
+        case 'goalStatus':
+            remoteRobot.setGoalReached(true)
+            break;
+        case 'moveBaseState':
+            console.log(message.message)
+            underMapFunctionProvider.setMoveBaseState(message.message)
+            break;
+        case 'arucoMarkers':
+            remoteRobot.setMarkers(message.message)
+            break;
+        case 'arucoNavigationState':
+            arucoMarkerFunctionProvider.setArucoNavigationState(message.message)
+            break;
+        case 'relativePose':
+            remoteRobot.setRelativePose(message.message)
+            break;
+        case 'batteryVoltage':
+            remoteRobot.sensors.setBatteryVoltage(message.message)
             break;
         default:
             throw Error(`unhandled WebRTC message type ${message.type}`)
@@ -100,13 +158,14 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
  * and renders the operator browser.
  */
 function initializeOperator() {
-    configureRemoteRobot();
-    let storageHandler: StorageHandler;
+    // configureRemoteRobot();
     const storageHandlerReadyCallback = () => {
+        underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
+        movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
+        arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
         renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-    // renderOperator(storageHandler);
 }
 
 /** 
@@ -117,8 +176,12 @@ function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => connection.sendData(message),
     });
-    remoteRobot.setRobotMode("navigation");
+    occupancyGrid = undefined;
+    // remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    FunctionProvider.addRemoteRobot(remoteRobot);
+    mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
+    remoteRobot.sensors.setBatteryFunctionProviderCallback(batteryVoltageFunctionProvider.updateVoltage)
 }
 
 /**
@@ -144,7 +207,6 @@ function createStorageHandler(storageHandlerReadyCallback: () => void) {
                 config
             );
         default:
-            // if (process.env.storage == 'localstorage')
             return new LocalStorageHandler(storageHandlerReadyCallback);
     }
 }
@@ -157,15 +219,26 @@ function createStorageHandler(storageHandlerReadyCallback: () => void) {
 function renderOperator(storageHandler: StorageHandler) {
     const layout = storageHandler.loadCurrentLayoutOrDefault();
     FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
-    FunctionProvider.addRemoteRobot(remoteRobot);
-
-    root.render(
-        <Operator
-            remoteStreams={allRemoteStreams}
-            layout={layout}
-            storageHandler={storageHandler}
-        />
-    );
+    
+    !isMobile ?
+        root.render(
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {
+                    return remoteRobot.sensors.getRobotPose(head, gripper, arm)
+                }}
+                setRobotPose={(pose: RobotPose) => { remoteRobot.setRobotPose(pose) }}
+                storageHandler={storageHandler}
+            />
+        ) 
+        :
+        root.render(
+            <Caregiver
+                remoteStreams={allRemoteStreams}
+                storageHandler={storageHandler}
+            />
+        )
 }
 
 function disconnectFromRobot() {

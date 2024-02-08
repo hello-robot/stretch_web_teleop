@@ -1,7 +1,7 @@
-import { Message } from 'roslib'
+import ROSLIB, { Message } from 'roslib'
 import { cmd } from './commands';
 
-export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
+export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_roll' | 'joint_wrist_pitch' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
 
 export type VelocityGoalArray = [{ [key in ValidJoints]?: number }, { [key in ValidJoints]?: number }]
 
@@ -10,7 +10,21 @@ export type RemoteStream = {
     track: MediaStreamTrack
 }
 
-export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
+export type ArucoMarkersInfo = {
+    aruco_marker_info: {
+        [key: string]: ArucoMarkerInfo
+    }
+}
+
+export type ArucoMarkerInfo = {
+    length_mm: number,
+    use_rgb_only: boolean,
+    name: string, 
+    link?: string
+    pose?: ROSLIB.Transform
+}
+
+export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
 
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }
 
@@ -19,6 +33,10 @@ export interface ROSJointState extends Message {
     position: [number],
     effort: [number],
     velocity: [number],
+}
+
+export interface ROSBatteryState extends Message {
+    voltage: number
 }
 
 export interface ROSCompressedImage extends Message {
@@ -37,23 +55,190 @@ export interface SignallingMessage {
     cameraInfo?: CameraInfo
 }
 
-export type WebRTCMessage = ValidJointStateMessage | StopMessage | cmd;
+export interface Transform {
+    transform: ROSLIB.Transform
+}
 
-interface StopMessage {
-    type: "stop"
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | BatteryVoltageMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
+
+interface StopTrajectoryMessage {
+    type: "stopTrajectory"
+}
+
+interface StopMoveBaseMessage {
+    type: "stopMoveBase"
 }
 
 export type RobotPose = { [key in ValidJoints]?: number }
 
 export interface ValidJointStateMessage {
     type: "validJointState",
+    robotPose: RobotPose,
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] }
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] }
 }
 
+export interface IsRunStoppedMessage {
+    type: "isRunStopped",
+    enabled: boolean
+}
+
+export interface FollowJointTrajectoryActionResultMessage {
+    type: "goalStatus"
+    message: FollowJointTrajectoryActionResult
+}
+
+export interface FollowJointTrajectoryActionResult {
+    header: string
+    status: GoalStatus
+    result: string
+}
+
+export interface NavigateToPoseActionStatusList {
+    status_list: NavigateToPoseActionStatus[]
+}
+
+export interface NavigateToPoseActionStatus{
+    status: number
+}
+
+export interface GoalStatus {
+    goal_id: string
+    status: number
+    text: string
+}
+
+export interface ArucoNavigationFeedback {
+    header: string
+    status: string
+    feedback: ArucoNavigationState
+}
+
+export interface ArucoNavigationState {
+    state: string
+    alert_type: string
+}
+
+export interface MoveBaseState {
+    state: string
+    alert_type: string
+}
+
+export interface MoveBaseStateMessage {
+    type: "moveBaseState"
+    message: MoveBaseState
+}
+
+export interface ArucoNavigationStateMessage {
+    type: "arucoNavigationState"
+    message: ArucoNavigationState
+}
+
+export interface MoveBaseActionResultMessage {
+    type: "moveBaseActionResult"
+    message: MoveBaseActionResult
+}
+
+export interface MoveBaseActionResult {
+    header: string
+    status: GoalStatus
+    result: string
+}
+
+export interface OccupancyGridMessage {
+    type: "occupancyGrid",
+    message: ROSOccupancyGrid
+}
+
+export interface MapPoseMessage {
+    type: 'amclPose',
+    message: ROSLIB.Transform
+}
+
+export interface RelativePoseMessage {
+    type: 'relativePose',
+    message: ROSLIB.Transform
+}
+
+export interface BatteryVoltageMessage {
+    type: 'batteryVoltage',
+    message: number
+}
+
+export interface AMCLPose extends Message {
+    header: string,
+    pose: { 
+        pose: ROSPose,
+        covariance: number[]
+    }
+}
+
+export interface MarkerArray {
+    markers: Marker[]
+}
+
+export interface Marker {
+    text: string,
+    id: number
+}
+
+export interface MarkersMessage extends Message {
+    type: "arucoMarkers",
+    message: MarkerArray
+}
+
+export interface ROSPoint extends Message {
+    x: number,
+    y: number,
+    z: number
+}
+
+export interface ROSQuaternion extends Message {
+    x: number,
+    y: number,
+    z: number,
+    w: number
+}
+
+export interface ROSPose extends Message{
+    position: ROSPoint
+    orientation: ROSQuaternion
+}
+
+export interface ROSMapMetaData extends Message {
+    map_load_time: number,
+    resolution: number,
+    width: number,
+    height: number,
+    origin: ROSPose
+}
+
+export interface ROSOccupancyGrid {
+    header: string,
+    info: ROSMapMetaData,
+    data: number[]
+}
+
+export const STOW_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": -0.49700,
+    "joint_wrist_yaw": 3.19579
+}
+
+export const CENTER_WRIST: RobotPose = {
+    "joint_wrist_roll": 0.0,
+    "joint_wrist_pitch": 0.0,
+    "joint_wrist_yaw": 0.0
+}
+
+export const REALSENSE_FORWARD_POSE: RobotPose = {
+    "joint_head_pan": 0.0,
+    "joint_head_tilt": 0.0
+}
+
 export const REALSENSE_BASE_POSE: RobotPose = {
     "joint_head_pan": 0.075,
-    "joint_head_tilt": -1.65
+    "joint_head_tilt": -1.0
 }
 
 export const REALSENSE_GRIPPER_POSE: RobotPose = {
@@ -62,12 +247,14 @@ export const REALSENSE_GRIPPER_POSE: RobotPose = {
 }
 
 export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
-    "wrist_extension": [0.05, .518],
+    "wrist_extension": [0.001, .518],
+    "joint_wrist_roll": [-2.95, 2.94],
+    "joint_wrist_pitch": [-1.57, 0.57],
     "joint_wrist_yaw": [-1.37, 4.41],
-    "joint_lift": [0.175, 1.05],
+    "joint_lift": [0.001, 1.1],
     "translate_mobile_base": [-30.0, 30.0],
     "rotate_mobile_base": [-3.14, 3.14],
-    "joint_gripper_finger_left": [-0.375, 0.149],
+    "joint_gripper_finger_left": [-0.37, 0.17],
     "joint_head_tilt": [-1.6, 0.3],
     "joint_head_pan": [-3.95, 1.7]
 }
@@ -77,7 +264,9 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     "joint_head_pan": .3,
     "wrist_extension": .04,
     "joint_lift": .04,
-    "joint_wrist_yaw": .1,
+    "joint_wrist_roll": .1,
+    "joint_wrist_pitch": .1,
+    "joint_wrist_yaw": .4,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .3
 }
@@ -88,14 +277,16 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
     "joint_gripper_finger_left": .075,
     "wrist_extension": 0.075,
     "joint_lift": .075,
+    "joint_wrist_roll": .2,
+    "joint_wrist_pitch": .2,
     "joint_wrist_yaw": .2,
     "translate_mobile_base": .1,
     "rotate_mobile_base": .2
 }
 
 export const navigationProps = {
-    width: 768,
-    height: 768, // 1024
+    width: 800,
+    height: 1280, // 1024
     fps: 6.0
 }
 
@@ -116,6 +307,17 @@ export interface VideoProps {
     callback: (message: ROSCompressedImage) => void
 }
 
+export function rosJointStatetoRobotPose(jointState: ROSJointState): RobotPose {
+    let robotPose: RobotPose = {}
+    const names = jointState.name
+    const positions = jointState.position
+    names.map((name, index) => {
+        if (name) {
+            robotPose[name] = positions[index]
+        }
+    })
+    return robotPose
+}
 ////////////////////////////////////////////////////////////
 // safelyParseJSON code copied from
 // https://stackoverflow.com/questions/29797946/handling-bad-json-parse-in-node-safely
@@ -141,6 +343,24 @@ export function generateUUID(): uuid {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+export async function waitUntil(condition, timeout=5000, checkInterval=100) {
+    let interval;
+    let waitPromise = new Promise(resolve => {
+        interval = setInterval(() => {
+            if (!condition()) {
+                return;
+            }
+            clearInterval(interval);
+            resolve(true);
+        }, checkInterval)
+    })
+    let timeoutPromise = new Promise(resolve => setTimeout(() => {
+        clearInterval(interval)
+        resolve(false)
+    }, timeout))
+    return await Promise.any([waitPromise, timeoutPromise])
 }
 
 /**

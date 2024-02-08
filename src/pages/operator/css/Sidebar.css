@@ -63,7 +63,7 @@
 }
 
 .toggle-button-div {
-    display: inline-block;
+    padding-bottom: 10px;
 }
 
 .toggle-button {
@@ -174,4 +174,26 @@
 
 .select-selected {
     background-color: dodgerblue;
+}
+
+.global-label {
+    display: inline-flex;
+    inline-size: 164px;
+    text-wrap: wrap;
+}
+
+@media(max-width:900px) {
+    #sidebar { 
+        grid-template-rows: auto;
+    }
+
+    #delete-button {
+        font-size: x-large;
+        padding: 0.1rem;
+    }
+
+    #sidebar-body {
+        display: block;
+        overflow: scroll;
+    }
 }

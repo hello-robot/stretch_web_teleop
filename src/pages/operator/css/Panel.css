@@ -3,7 +3,9 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    margin: 0 0.5rem;
+    /* margin: 0 0.5rem; */
+    margin-top: 0.5rem; /* new */
+    width: 100%; /* new */
     box-shadow: var(--shadow);
     position: relative;
 
@@ -53,7 +55,7 @@
 .tab-button.active {
     background-color: var(--btn-blue);
     color: var(--font-white);
-    z-index: 2;
+    /* z-index: 2; */
     box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
 }
 
@@ -67,3 +69,15 @@
 }
 
 /* Popup for adding a new tab *************************************************/
+
+@media(max-width:900px) {
+    .tab-button {
+        font-size: medium;
+    }
+}
+
+@media screen and (orientation:portrait) and (max-device-width: 900px) {
+    .tabs-component {
+        width: 100%;
+    }
+}

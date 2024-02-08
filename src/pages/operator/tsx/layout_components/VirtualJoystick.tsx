@@ -5,8 +5,8 @@ import { SVG_RESOLUTION } from "../utils/svg";
 import { predicitiveDisplayFunctionProvider } from "..";
 import "operator/css/VirtualJoystick.css"
 
-const OUTER_RADIUS = SVG_RESOLUTION / 2 * 0.7;
-const JOYSTICK_RADIUS = SVG_RESOLUTION / 2 * 0.4;
+const OUTER_RADIUS = SVG_RESOLUTION / 2;
+const JOYSTICK_RADIUS = SVG_RESOLUTION / 3.3;
 
 
 export const VirtualJoystick = (props: CustomizableComponentProps) => {
@@ -91,21 +91,22 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
     }
 
     const controlProps = customizing ? { onClick: handleSelect } : {
-        onMouseMove: active ? handleMove : undefined,
-        onMouseLeave: handleLeave,
-        onMouseDown: handleClick,
-        onMouseUp: handleRelease
+        onPointerMove: active ? handleMove : undefined,
+        onPointerLeave: handleLeave,
+        onPointerDown: handleClick,
+        onPointerUp: handleRelease
     };
     return (
         <div className={className("virtual-joystick", { customizing, selected, active })} >
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${SVG_RESOLUTION}`}
+                preserveAspectRatio={'xMidYMid meet'}
                 {...controlProps}
             >
                 <circle className="outer-circle" cx={SVG_RESOLUTION / 2} cy={SVG_RESOLUTION / 2} r={OUTER_RADIUS} />
-                <path d={`M 0 ${SVG_RESOLUTION / 2} H ${SVG_RESOLUTION}`} />
-                <path d={`M ${SVG_RESOLUTION / 2} 0 V ${SVG_RESOLUTION}`} />
+                {/* <path d={`M 0 ${SVG_RESOLUTION / 2} H ${SVG_RESOLUTION}`} />
+                <path d={`M ${SVG_RESOLUTION / 2} 0 V ${SVG_RESOLUTION}`} /> */}
                 {joystick}
             </svg>
         </div>

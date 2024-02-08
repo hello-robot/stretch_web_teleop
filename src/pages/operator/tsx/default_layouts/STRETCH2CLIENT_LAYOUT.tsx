@@ -6,7 +6,11 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
 export const STRETCH2CLIENT_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: true,
+    displayMovementRecorder: false,
     actionMode: ActionMode.StepActions,
+    displayPoseLibrary: false,
+    displayArucoMarkers: false,
+    displayLabels: true,
     children: [
         {
             type: ComponentType.Panel,

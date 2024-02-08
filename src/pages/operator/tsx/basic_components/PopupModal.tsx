@@ -1,5 +1,7 @@
 import React from "react";
 import "operator/css/basic_components.css"
+import { className } from "shared/util"
+
 
 /** Properties for {@link PopupModal} */
 export type PopupModalProps = {
@@ -12,12 +14,17 @@ export type PopupModalProps = {
     setShow: (show: boolean) => void,
     /** Callback when the user clicks accept. */
     onAccept: () => void,
+    /** Optional Callback when user cancels */
+    onCancel?: () => void
     /** Optional HTML id. */
     id?: string,
     /** Text to display on text button, defaults to "Accept" if undefined. */
     acceptButtonText?: string,
     /** Accept button disabled if true, enabled if false or undefined. */
-    acceptDisabled?: boolean
+    acceptDisabled?: boolean,
+    /** Modal size */
+    size?: "small" | "medium" | "large"
+    mobile?: boolean
 }
 
 /**
@@ -39,27 +46,40 @@ export const PopupModal: React.FunctionComponent<React.PropsWithChildren<PopupMo
             props.setShow(false);
         }
     }
+    const size = props.size
+    const mobile = props.mobile
     const element = props.show ? (
         <React.Fragment>
-            <div 
-                id={props.id} 
-                className="popup-modal"
-                onKeyDown={handleKeyDown}
-            >
-                {props.children}
-                <div className="popup-modal-bottom-buttons">
-                    <button className="btn-red" onClick={() => props.setShow(false)}>Cancel</button>
-                    <button 
-                        className="btn-turquoise font-white" 
-                        onClick={handleClickAccept} 
-                        style={{ float: "right" }}
-                        disabled={props.acceptDisabled}
-                    >
-                        {props.acceptButtonText || "Accept"}
-                    </button>
+            {/* <ScrollView
+                style={{ flex: 1 }}
+                behavior="padding"
+                enabled={true}
+            > */}
+                <div 
+                    id={props.id} 
+                    className={className("popup-modal " + size, {mobile})}
+                    onKeyDown={handleKeyDown}
+                >
+                    {props.children}
+                    <div className="popup-modal-bottom-buttons">
+                        <button 
+                            className="btn-red" 
+                            onPointerDown={() => { props.setShow(false); if (props.onCancel) props.onCancel() }}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            className="btn-turquoise font-white" 
+                            onPointerDown={handleClickAccept} 
+                            style={{ float: "right" }}
+                            disabled={props.acceptDisabled}
+                        >
+                            {props.acceptButtonText || "Accept"}
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div onClick={() => props.setShow(false)} id="popup-background"></div>
+            {/* </ScrollView> */}
+        <div id="popup-background"></div>
         </React.Fragment>
     ) : null;
 

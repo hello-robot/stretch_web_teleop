@@ -66,7 +66,7 @@ module.exports = (env) => {
             loader: 'babel-loader',
             options: {
               presets: [
-                ['@babel/preset-env', {'loose': true}], 
+                '@babel/preset-env', 
                 ["@babel/preset-react", {"runtime": "automatic"}], 
                 '@babel/preset-typescript'
               ],
@@ -97,7 +97,12 @@ module.exports = (env) => {
       "shared": path.resolve(__dirname, './src/shared/'),
       "operator": path.resolve(__dirname, './src/pages/operator/'),
       "robot": path.resolve(__dirname, './src/pages/robot/'),
-    }
+    },
+    fallback: {
+        "fs": false,
+        "stream": false,
+        "zlib": false
+    },
   },
   watch: true,
   }

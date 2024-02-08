@@ -1,15 +1,19 @@
-import { MAIN_BRANCH_LAYOUT } from "../default_layouts/MAIN_BRANCH_LAYOUT";
+import ROSLIB from "roslib";
+import { BASIC_LAYOUT } from "../default_layouts/SIMPLE_LAYOUT";
 import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
 import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
+import { REMOTE_CAREGIVER_LAYOUT } from "../default_layouts/REMOTE_CAREGIVER_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
+import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 
 /** Type for all the possible names of default layouts. */
-export type DefaultLayoutName = "Button Pad Overlays" | "Button Pad Panel" | "Button Grid/Joystick/Voice Commands";
+export type DefaultLayoutName = "Button Pad Overlays" | "Basic Layout" | "Button Grid/Joystick/Voice Commands";
 
 /** Object with all the default layouts. */
 export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } = {
     "Button Pad Overlays": STUDY_BRANCH_LAYOUT,
-    "Button Pad Panel": MAIN_BRANCH_LAYOUT,
+    "Basic Layout": BASIC_LAYOUT,
     "Button Grid/Joystick/Voice Commands": STRETCH2CLIENT_LAYOUT
 }
 
@@ -60,6 +64,96 @@ export abstract class StorageHandler {
     public abstract getCustomLayoutNames(): string[];
 
     /**
+     * Save the joint state and its identifier
+     * @param name the name of the pose
+     * @param jointState the joint state to save
+     */
+    public abstract savePose(poseName: string, jointState: RobotPose): void;
+
+    /**
+     * Removes the pose from storage
+     * @param name the name of the pose
+     */
+    public abstract deletePose(poseName: string): void;
+
+    /**
+     * Get the list of all saved poses
+     * @returns list of all saved poses
+     */
+    public abstract getPoseNames(): string[];
+
+    /**
+     * Gets the pose associated with the given name
+     * @param name the name of the pose
+     * @returns a pose associated with the given name
+     */
+    public abstract getPose(poseName: string): RobotPose;
+
+    /**
+     * Save the map pose and its identifier
+     * @param name the name of the pose
+     * @param pose the pose on the map to save
+     */
+    public abstract saveMapPose(poseName: string, pose: ROSLIB.Transform, poseType: string): void;
+
+    /**
+     * Get an array of all saved map poses
+     * @returns array of all saved map poses
+     */
+    public abstract getMapPoseNames(): string[];
+
+    /**
+     * Gets the map pose associated with the given name
+     * @param name the name of the map pose
+     * @returns a map pose associated with the given name
+     */
+    public abstract getMapPose(poseName: string): ROSLIB.Transform;
+
+    /**
+     * Gets an array of all saved poses
+     * @returns an array of all saved poses  
+     */
+    public abstract getMapPoses(): ROSLIB.Transform[];
+
+    /**
+     * Get an array of all the saved map pose types (map or aruco)
+     * @returns an array of all saved map pose types
+     */
+    public abstract getMapPoseTypes(): string[];
+
+    /**
+     * Removes the map pose from storage
+     * @param name the name of the map pose
+     */
+    public abstract deleteMapPose(poseName: string): void;
+
+    /**
+     * Get the list of all saved pose sequence recordings
+     * @returns list of all saved pose sequence recordings
+     */
+    public abstract getRecordingNames(): string[];
+
+    /**
+     * Gets the recording associated with the given name
+     * @param recordingName the name of the recording
+     * @returns a recording associated with the given name
+     */
+    public abstract getRecording(recordingName: string): RobotPose[];
+
+    /**
+     * Save the pose sequence and its identifier
+     * @param recordingName the name of the recording
+     * @param poses the pose sequence to save
+     */
+    public abstract savePoseRecording(recordingName: string, poses: RobotPose[]): void;
+
+    /**
+     * Removes the recording from storage
+     * @param recordingName the name of the recording
+     */
+    public abstract deleteRecording(recordingName: string): void;
+
+    /**
      * Gets the last saved state from the user's layout, or gets the default 
      * layout if the user has no saved state.
      * @returns layout definition for the layout that should be loaded into the
@@ -67,7 +161,7 @@ export abstract class StorageHandler {
      */
     public loadCurrentLayoutOrDefault(): LayoutDefinition {
         const currentLayout = this.loadCurrentLayout();
-        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
+        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[1];
         console.log('loading saved layout')
         return currentLayout;
     }
@@ -87,5 +181,70 @@ export abstract class StorageHandler {
      */
     public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
         return DEFAULT_LAYOUTS[layoutName];
+    }
+
+    /**
+     * Save the aruco marker and its identifier
+     * @param markerID the ID of the aruco marker
+     * @param markerName the name of the aruco marker
+     * @param size the size of the marker in mm
+     */
+    public abstract saveMarker(markerID: string, markerName: string, size: string): void;
+
+    /**
+     * Removes the aruco maker from storage
+     * @param name the name of the aruco marker
+     * @returns the marker's ID or undefined if the marker cannot be deleted
+     */
+    public abstract deleteMarker(markerName: string): string | undefined;
+
+    /**
+     * Get the list of all saved aruco markers
+     * @returns list of all saved aruco markers
+     */
+    public abstract getArucoMarkerNames(): string[];
+
+     /**
+     * Get the list of all saved aruco markers IDs
+     * @returns list of all saved aruco markers IDs
+     */
+     public abstract getArucoMarkerIDs(): string[];
+
+    /**
+     * Get the list of all saved aruco marker info
+     * @returns list of all saved aruco marker info
+     */
+    public abstract getArucoMarkerInfo(): ArucoMarkersInfo;
+
+    /**
+     * Save the relative pose for the given aruco marker
+     * @param markerID the ID of the aruco marker
+     * @param pose the relative pose to save
+     */
+    public abstract saveRelativePose(markerID: string, pose: ROSLIB.Transform): void;
+
+    public loadDefaultArucoMarkers(): ArucoMarkersInfo {
+        return ARUCO_MARKER_INFO
+    }
+
+    public loadDefaultArucoMarkerIDs(): string[] {
+        // return Object.keys(ARUCO_MARKER_INFO.aruco_marker_info)
+        
+        // Only return ID for docking station
+        // Other IDs are currently not applicable for aruco navigation
+        return['245', '20'] // ['0', '1', '2']
+    }
+
+    public loadDefaultArucoMarkerNames(): string[] {
+        // let names: string[] = []
+        // let markerInfo = Object.values(ARUCO_MARKER_INFO.aruco_marker_info)
+        // markerInfo.forEach((info) => {
+        //     names.push(info.name)
+        // })
+        // return names
+        
+        // Only return ID for docking station
+        // Other IDs are currently not applicable for aruco navigation
+        return ['docking_station', 'Tool Shelf'] // ['Brush', 'Feeding Tool', 'Button Pusher']
     }
 }

@@ -18,16 +18,17 @@ var options = {
 //     console.log('listening on *:' + port);
 // });
 
+var pm2 = require('pm2');
 const socket = require('socket.io');
 var express = require('express')
 var app = express();
 app.all('*', ensureSecure); // at top of routing calls
 
 function ensureSecure(req, res, next) {
-    // console.log('https://' + req.hostname + req.url)
     if (!req.secure) {
         // handle port numbers if you need non defaults
-        res.redirect('https://' + req.hostname + req.url);
+        console.log('redirecting insecure request')
+        return res.redirect('https://' + req.hostname + req.url);
         // res.redirect(`https://${req.hostname}${process.env.NGROK_URL}`);
     }
 
@@ -72,13 +73,26 @@ io.on('connection', function (socket) {
 
     socket.on('is robot available', () => {
         // The robot room is only available if another operator is not connected to it
-        if (io.sockets.adapter.rooms.get('robot') && io.sockets.adapter.rooms.get('robot').size < 2) {
-            console.log('robot is available')
-            socket.emit('robot available', true)
-            socket.in('robot').emit('joined', 'robot');
+        if (io.sockets.adapter.rooms.get('robot')) {
+            if (io.sockets.adapter.rooms.get('robot').size < 2) {
+                console.log('robot is available')
+                socket.join('robot');
+                // socket.emit('join', 'robot', socket.id)
+                // socket.emit('robot available', true)
+                socket.in('robot').emit('joined', 'robot');
+            } else {
+                console.log('robot not available because room is full')
+                socket.emit('robot available', false)
+            }
         } else {
-            console.log('robot not available')
+            console.log('robot not available, restarting robot browser')
             socket.emit('robot available', false)
+            // pm2.list((err, processes) => { 
+            //     processes.forEach(process => {
+            //         console.log(process.name)
+            //     } 
+            // })
+            pm2.restart('start_robot_browser')
         }
     })
 

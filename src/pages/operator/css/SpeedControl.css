@@ -11,3 +11,9 @@
     /* Make buttons wider than default */
     width: 8rem;
 }
+
+@media(max-width:1000px) {
+    #velocity-control-container button {
+        width: auto;
+    }
+}

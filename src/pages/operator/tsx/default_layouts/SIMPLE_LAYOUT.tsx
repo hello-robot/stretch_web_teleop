@@ -1,42 +1,110 @@
-import { LayoutDefinition, ComponentType, ActionMode, CameraViewId, ButtonPadId, OverheadVideoStreamDef, TabDefinition, PanelDefinition } from "../utils/component_definitions";
+import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonPadDefinition, PanelDefinition, TabDefinition, LayoutDefinition, ActionMode, LayoutGridDefinition } from "../utils/component_definitions";
 
-export const SIMPLE_LAYOUT: LayoutDefinition = {
-    // All components have a type
+/**
+ * Basic Layout
+ */
+export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
-    // If voice control should be displayed on the operator page
     displayVoiceControl: false,
-    // The state of the action mode dropdown
-    actionMode: ActionMode.StepActions,
-
-    // The customizable components in the layout
+    displayPoseLibrary: false,
+    displayMovementRecorder: false,
+    displayArucoMarkers: false,
+    displayLabels: true,
+    actionMode: ActionMode.PressRelease,
     children: [
         {
-            // The layout contains a single panel
-            type: ComponentType.Panel,
+            type: ComponentType.LayoutGrid,
             children: [
-                // The panel contains a single tab
                 {
-                    type: ComponentType.SingleTab,
-                    // The title of the tab is "Tab One"
-                    label: 'Tab One',
+                    type: ComponentType.Panel,
                     children: [
                         {
-                            // Tab contains a single camera view
-                            type: ComponentType.CameraView,
-                            // From the Stretch overhead camera
-                            id: CameraViewId.overhead,
+                            type: ComponentType.SingleTab,
+                            label: 'Camera Views',
+                            children: [
+                                // Overhead camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.overhead,
+                                    displayButtons: false,
+                                    children: []
+                                } as CameraViewDefinition,
+                                // Realsense camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.realsense,
+                                    displayButtons: true,
+                                    children: []
+                                } as CameraViewDefinition,
+                                // Gripper camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.gripper,
+                                    displayButtons: true,
+                                    children: []
+                                } as CameraViewDefinition
+                            ]
+                        }
+                    ]
+                } as PanelDefinition
+            ]    
+        } as LayoutGridDefinition,
+        {
+            type: ComponentType.LayoutGrid,
+            children: [
+                {
+                    type: ComponentType.Panel,
+                    children: [
+                        {
+                            type: ComponentType.SingleTab,
+                            label: 'Base',
                             children: [
                                 {
-                                    // Camera view has a button pad overlay
                                     type: ComponentType.ButtonPad,
-                                    // Button pad to control the base 
-                                    id: ButtonPadId.Drive
+                                    id: ButtonPadId.Base,
+                                } as ButtonPadDefinition
+                            ]
+                        } as TabDefinition,
+                        {
+                            type: ComponentType.SingleTab,
+                            label: 'Wrist & Gripper',
+                            children: [
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.WristGripper,
+                                } as ButtonPadDefinition
+                            ]
+                        } as TabDefinition,
+                        {
+                            type: ComponentType.SingleTab,
+                            label: 'Arm & Lift',
+                            children: [
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Arm,
+                                } as ButtonPadDefinition
+                            ]
+                        } as TabDefinition
+                    ]
+                } as PanelDefinition,
+                {
+                    type: ComponentType.Panel,
+                    children: [
+                        {
+                            type: ComponentType.SingleTab,
+                            label: 'Safety',
+                            children: [
+                                {
+                                    type: ComponentType.RunStopButton
+                                },
+                                {
+                                    type: ComponentType.BatteryGuage
                                 }
                             ]
-                        } as OverheadVideoStreamDef
-                    ]
-                } as TabDefinition
+                        }
+                    ] 
+                } as PanelDefinition
             ]
-        } as PanelDefinition
+        }  as LayoutGridDefinition
     ]
 }

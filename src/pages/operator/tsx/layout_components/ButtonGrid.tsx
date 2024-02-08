@@ -15,6 +15,10 @@ const BUTTON_NAMES = [
     "Extend Arm",
     "Collapse Arm",
 
+    "Roll Left",
+    "Roll Right",
+    "Pitch Up",
+    "Pitch Down",
     "Rotate Left",
     "Rotate Right",
 
@@ -31,6 +35,10 @@ const BUTTON_FUNCTIONS = [
     ButtonPadButton.ArmLower,
     ButtonPadButton.ArmExtend,
     ButtonPadButton.ArmRetract,
+    ButtonPadButton.WristRollLeft,
+    ButtonPadButton.WristRollRight,
+    ButtonPadButton.WristPitchUp,
+    ButtonPadButton.WristPitchDown,
     ButtonPadButton.WristRotateIn,
     ButtonPadButton.WristRotateOut,
     ButtonPadButton.GripperOpen,

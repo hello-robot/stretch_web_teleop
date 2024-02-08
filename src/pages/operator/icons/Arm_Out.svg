@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 27.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 479 200"
+   style="enable-background:new 0 0 479 200;"
+   xml:space="preserve"
+   sodipodi:docname="Arm_Out.svg"
+   inkscape:version="1.1.2 (1:1.1+202202050950+0a00cf5339)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs33"><style
+     id="style1190">
+      .cls-1 {
+        fill: none;
+        stroke-width: 5px;
+      }
+
+      .cls-1, .cls-2 {
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: rgba(205, 202, 193, .8);
+      }
+
+      .cls-2 {
+        fill: #231f20;
+      }
+    </style></defs><sodipodi:namedview
+   id="namedview31"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="2.7933194"
+   inkscape:cx="312.71039"
+   inkscape:cy="80.728326"
+   inkscape:window-width="1848"
+   inkscape:window-height="1016"
+   inkscape:window-x="72"
+   inkscape:window-y="27"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+<style
+   type="text/css"
+   id="style2">
+	.st0{clip-path:url(#SVGID_00000041990836480947321200000008459015841381596083_);}
+	.st1{fill:#808080;}
+	.st2{fill:#FFFFFF;filter:url(#Adobe_OpacityMaskFilter);}
+	
+		.st3{mask:url(#path-4-inside-1_401_634_00000047759094063494162890000005635916377974113452_);fill:#808080;stroke:#808080;stroke-width:2;}
+</style>
+<g
+   id="g28"
+   style="fill:#d9dad9;fill-opacity:1">
+	<defs
+   id="defs5">
+		<rect
+   id="SVGID_1_"
+   x="-46.3"
+   y="-198.7"
+   width="591"
+   height="600.5" />
+	</defs>
+	<clipPath
+   id="SVGID_00000121984375294370879300000007122328590028407213_">
+		<use
+   xlink:href="#SVGID_1_"
+   style="overflow:visible;"
+   id="use7" />
+	</clipPath>
+	<g
+   style="clip-path:url(#SVGID_00000121984375294370879300000007122328590028407213_);fill:#d9dad9;fill-opacity:1"
+   clip-path="url(#SVGID_00000121984375294370879300000007122328590028407213_)"
+   id="g26">
+		<circle
+   class="st1"
+   cx="249.2"
+   cy="103.1"
+   r="28.4"
+   id="circle10"
+   style="fill:#d9dad9;fill-opacity:1" />
+		<circle
+   class="st1"
+   cx="168.6"
+   cy="103"
+   r="39.5"
+   id="circle12"
+   style="fill:#d9dad9;fill-opacity:1" />
+		<circle
+   class="st1"
+   cx="61.2"
+   cy="103"
+   r="55.3"
+   id="circle14"
+   style="fill:#d9dad9;fill-opacity:1" />
+		<defs
+   id="defs19">
+			<filter
+   id="Adobe_OpacityMaskFilter"
+   filterUnits="userSpaceOnUse"
+   x="313.5"
+   y="5.8"
+   width="158.3"
+   height="191.6">
+				<feColorMatrix
+   type="matrix"
+   values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"
+   id="feColorMatrix16" />
+			</filter>
+		</defs>
+		
+			<mask
+   maskUnits="userSpaceOnUse"
+   x="313.5"
+   y="5.8"
+   width="158.3"
+   height="191.6"
+   id="path-4-inside-1_401_634_00000047759094063494162890000005635916377974113452_">
+			<path
+   class="st2"
+   d="M470.6,196.4c-41.4,0-81.2-10-110.5-27.8c-29.3-17.8-45.7-41.9-45.7-67.1c0-25.1,16.5-49.3,45.8-67     c29.3-17.8,69.1-27.7,110.5-27.7l0,26.3c-30,0-58.7,7.2-79.9,20c-21.2,12.8-33.1,30.3-33.1,48.5c0,18.2,11.9,35.6,33.1,48.5     c21.2,12.9,49.9,20.1,79.9,20.1L470.6,196.4z"
+   id="path21" />
+		</mask>
+		<path
+   class="st3"
+   d="M470.6,196.4c-41.4,0-81.2-10-110.5-27.8c-29.3-17.8-45.7-41.9-45.7-67.1c0-25.1,16.5-49.3,45.8-67    c29.3-17.8,69.1-27.7,110.5-27.7l0,26.3c-30,0-58.7,7.2-79.9,20c-21.2,12.8-33.1,30.3-33.1,48.5c0,18.2,11.9,35.6,33.1,48.5    c21.2,12.9,49.9,20.1,79.9,20.1L470.6,196.4z"
+   mask="url(#path-4-inside-1_401_634_00000047759094063494162890000005635916377974113452_)"
+   id="path24"
+   style="fill:#d9dad9;fill-opacity:1" />
+	</g>
+</g>
+</svg>

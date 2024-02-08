@@ -19,6 +19,10 @@ export enum ButtonPadButton {
     GripperClose = "Gripper close",
     WristRotateIn = "Wrist rotate in",
     WristRotateOut = "Wrist rotate out",
+    WristPitchUp = "Wrist pitch up",
+    WristPitchDown = "Wrist pitch down",
+    WristRollLeft = "Wrist roll left",
+    WristRollRight = "Wrist roll right",
     CameraTiltUp = "Camera tilt up",
     CameraTiltDown = "Camera tilt down",
     CameraPanLeft = "Camera pan left",
@@ -36,6 +40,8 @@ const negativeButtonPadFunctions = new Set<ButtonPadButton>([
     ButtonPadButton.ArmRetract,
     ButtonPadButton.GripperClose,
     ButtonPadButton.WristRotateOut,
+    ButtonPadButton.WristPitchDown,
+    ButtonPadButton.WristRollLeft,
     ButtonPadButton.CameraTiltDown,
     ButtonPadButton.CameraPanRight
 ])
@@ -91,7 +97,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
-            const [buttonNeg, buttonPos] = buttons;
+            let [buttonNeg, buttonPos] = key !== "joint_wrist_yaw" && key !== "joint_wrist_pitch" ? buttons : buttons.reverse()  
+
             // TODO: i think there's still something wrong with this logic
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
@@ -106,7 +113,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const [inLimitNeg, inLimitPos] = inJointLimit[key]!;
             const buttons = getButtonsFromJointName(key);
             if (!buttons) return;
-            const [buttonNeg, buttonPos] = buttons;
+            const [buttonNeg, buttonPos] = buttons 
             const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg)
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos)
             const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit
@@ -181,12 +188,6 @@ export class ButtonFunctionProvider extends FunctionProvider {
         const velocity = multiplier * JOINT_VELOCITIES[jointName]! * FunctionProvider.velocityScale;
         const increment = multiplier * JOINT_INCREMENTS[jointName]! * FunctionProvider.velocityScale;
 
-        if (panTiltButtons.includes(buttonPadFunction)) {
-            return { onClick: () => { 
-                FunctionProvider.remoteRobot?.setToggle("setFollowGripper", false);
-                this.incrementalJointMovement(jointName, increment) 
-            }};
-        }
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 switch (buttonPadFunction) {
@@ -204,6 +205,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.ArmRetract:
                     case ButtonPadButton.WristRotateIn:
                     case ButtonPadButton.WristRotateOut:
+                    case ButtonPadButton.WristPitchUp:
+                    case ButtonPadButton.WristPitchDown:
+                    case ButtonPadButton.WristRollLeft:
+                    case ButtonPadButton.WristRollRight:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
                         action = () => this.incrementalJointMovement(jointName, increment);
@@ -245,6 +250,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     case ButtonPadButton.ArmRetract:
                     case ButtonPadButton.WristRotateIn:
                     case ButtonPadButton.WristRotateOut:
+                    case ButtonPadButton.WristPitchUp:
+                    case ButtonPadButton.WristPitchDown:
+                    case ButtonPadButton.WristRollLeft:
+                    case ButtonPadButton.WristRollRight:
                     case ButtonPadButton.GripperOpen:
                     case ButtonPadButton.GripperClose:
                         action = () => this.continuousJointMovement(jointName, increment);
@@ -303,6 +312,10 @@ function getButtonsFromJointName(jointName: ValidJoints): [ButtonPadButton, Butt
             return [ButtonPadButton.ArmRetract, ButtonPadButton.ArmExtend]
         case ('joint_lift'):
             return [ButtonPadButton.ArmLower, ButtonPadButton.ArmLift]
+        case ('joint_wrist_roll'):
+            return [ButtonPadButton.WristRollLeft, ButtonPadButton.WristRollRight]
+        case ('joint_wrist_pitch'):
+            return [ButtonPadButton.WristPitchDown, ButtonPadButton.WristPitchUp]
         case ('joint_wrist_yaw'):
             return [ButtonPadButton.WristRotateOut, ButtonPadButton.WristRotateIn]
         case ("translate_mobile_base"):
@@ -346,6 +359,14 @@ function getJointNameFromButtonFunction(buttonType: ButtonPadButton): ValidJoint
         case (ButtonPadButton.GripperClose):
         case (ButtonPadButton.GripperOpen):
             return "joint_gripper_finger_left";
+
+        case ButtonPadButton.WristRollLeft:
+        case ButtonPadButton.WristRollRight:
+            return "joint_wrist_roll"
+            
+        case ButtonPadButton.WristPitchUp:
+        case ButtonPadButton.WristPitchDown:
+            return "joint_wrist_pitch"
 
         case (ButtonPadButton.WristRotateIn):
         case (ButtonPadButton.WristRotateOut):

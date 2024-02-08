@@ -1,0 +1,132 @@
+#! /usr/bin/env python3
+
+import rospy
+import actionlib
+import numpy as np
+import tf2_ros
+from math import sqrt, atan2, fabs
+from sensor_msgs.msg import JointState
+from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
+from trajectory_msgs.msg import JointTrajectoryPoint
+from stretch_teleop_interface.msg import HeadScanAction, HeadScanGoal, HeadScanFeedback, HeadScanResult
+
+class HeadToArucoServer:
+    def __init__(self):
+        self.server = actionlib.SimpleActionServer('head_to_aruco', HeadScanAction, self.execute_callback, False)
+        self.goal = HeadScanGoal()
+        self.feedback = HeadScanFeedback()
+        self.result = HeadScanResult()
+        self.tilt_range = [-1.0, 0.0]
+        self.pan_range = [-4.07, 1.74]
+        self.execute = True
+
+        self.tf2_buffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tf2_buffer)
+        self.tf2_broadcaster = tf2_ros.TransformBroadcaster()
+
+        self.trajectory_client = actionlib.SimpleActionClient(
+            "stretch_controller/follow_joint_trajectory",
+            FollowJointTrajectoryAction
+        )
+        self.joint_states = rospy.Subscriber('joint_states', JointState, self.joint_state_callback)
+
+        self.server.start()
+    
+    def preempt_callback(self):
+        print('preempt callback')
+        self.result.success = False
+        self.trajectory_client.cancel_all_goals()
+        self.server.set_preempted(self.result)
+        self.execute = False
+
+    def joint_state_callback(self, msg):
+        for name, position in zip(msg.name, msg.position):
+            if name == "joint_head_pan":
+                self.pan = position
+            if name == "joint_head_tilt":
+                self.tilt = position
+
+    def set_pan_tilt_camera(self, pan, tilt):      
+        point = JointTrajectoryPoint()
+        point.time_from_start = rospy.Duration(1.0)
+        point.positions = [pan, tilt]
+
+        head_goal = FollowJointTrajectoryGoal()
+        head_goal.trajectory.joint_names = ['joint_head_pan', 'joint_head_tilt']
+        head_goal.trajectory.points = [point]
+        head_goal.trajectory.header.stamp = rospy.Time.now()
+        head_goal.trajectory.header.frame_id = 'base_link'
+
+        self.trajectory_client.send_goal_and_wait(head_goal)
+    
+    def find_aruco(self):
+        try:                
+            # marker = self.tf2_buffer.lookup_transform('base_link', self.aruco_name, rospy.Time())
+            # head = self.tf2_buffer.lookup_transform('base_link', 'link_head_tilt', rospy.Time())
+
+            # pose_diff_x = marker.transform.translation.x - head.transform.translation.x
+            # pose_diff_y = marker.transform.translation.y - head.transform.translation.y
+            # pose_diff_z = marker.transform.translation.z - head.transform.translation.z
+
+            # scalar = sqrt(pose_diff_x**2 + pose_diff_y**2 + pose_diff_z**2)
+            # pose_diff_x = pose_diff_x / scalar
+            # pose_diff_y = pose_diff_y / scalar
+            # pose_diff_z = pose_diff_z / scalar
+            
+            # pan = atan2(pose_diff_y, pose_diff_x)
+            # tilt = atan2(pose_diff_z, -pose_diff_y)
+
+            # # if pan < self.pan_range[0]:
+            # #     pan = self.pan_range[0] - pan
+            # if pan > self.pan_range[1]:
+            #     pan = -1*pan
+
+            marker = self.tf2_buffer.lookup_transform('base_link', self.aruco_name, rospy.Time())
+            head_tilt = self.tf2_buffer.lookup_transform('base_link', 'link_head_tilt', rospy.Time())                
+            pose_diff_x = marker.transform.translation.x - head_tilt.transform.translation.x
+            pose_diff_y = marker.transform.translation.y - head_tilt.transform.translation.y
+            pose_diff_z = marker.transform.translation.z - head_tilt.transform.translation.z
+
+            scalar = sqrt(pose_diff_x**2 + pose_diff_y**2 + pose_diff_z**2)
+            pose_diff_x = pose_diff_x / scalar
+            pose_diff_y = pose_diff_y / scalar
+            pose_diff_z = pose_diff_z / scalar
+
+            tilt = atan2(pose_diff_z, pose_diff_x)
+            if tilt < self.tilt_range[0]:
+                tilt = self.tilt_range[0]
+
+            head_pan = self.tf2_buffer.lookup_transform('base_link', 'link_head_pan', rospy.Time())                
+            pose_diff_x = marker.transform.translation.x - head_pan.transform.translation.x
+            pose_diff_y = marker.transform.translation.y - head_pan.transform.translation.y
+            pose_diff_z = marker.transform.translation.z - head_pan.transform.translation.z
+
+            scalar = sqrt(pose_diff_x**2 + pose_diff_y**2 + pose_diff_z**2)
+            pose_diff_x = pose_diff_x / scalar
+            pose_diff_y = pose_diff_y / scalar
+            pose_diff_z = pose_diff_z / scalar
+
+            pan = atan2(pose_diff_y, pose_diff_x)
+            if pan > self.pan_range[1]:
+                pan = self.pan_range[0]
+
+            # Ignore angles if too small to prevent shaking 
+            if fabs(pan - self.pan) > 0.05 or fabs(tilt - self.tilt) > 0.05:
+                self.set_pan_tilt_camera(pan, tilt)
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            return 
+                            
+    def execute_callback(self, goal):
+        if self.server.is_preempt_requested():
+            self.preempt_callback()
+            return
+
+        self.execute = True
+        self.goal = goal
+        self.aruco_name = self.goal.name
+        self.find_aruco()
+        
+if __name__ == '__main__':
+    rospy.init_node('head_to_aruco_server')
+    server = HeadToArucoServer()
+    rospy.spin()

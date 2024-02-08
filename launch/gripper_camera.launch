@@ -5,7 +5,7 @@
     <param name="image_width" value="1024" />
     <param name="image_height" value="768" />
     
-    <param name="framerate" value="6" />
+    <param name="framerate" value="15" />
     <param name="pixel_format" value="yuyv" />
     <!--
     <param name="framerate" value="30" />
@@ -17,9 +17,13 @@
     <param name="saturation" value="60" />
     <param name="hue" value="0" />
     <param name="sharpness" value="100" />
-    <param name="autoexposure" value="true" />
+    <!-- <param name="autoexposure" value="true" /> -->
     <param name="exposure" value="150" />
-    <param name="auto_white_balance" value="false" />
+    <!-- <param name="auto_white_balance" value="false" /> -->
+    <param name="autoexposure" value="true" />
+    <param name="auto_whitebalance" value="true" />
+    <param name="auto_focus" value="true" />
+    <param name="auto_brigthness" value="true" />
     <param name="white_balance" value="4250" />
     <param name="gain" value="80" />
     <!-- hue of 0 would be good if it could be set from her -->

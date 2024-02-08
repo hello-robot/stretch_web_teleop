@@ -24,6 +24,18 @@
     left: 0;
 }
 
+.video-overlay-container.realsense, .video-overlay-container.overhead {
+    z-index: 2;
+    position: absolute;
+    width: calc(100% - 102px);
+    height: calc(100% - 102px);
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    left: 51px;
+    top: 51px;
+}
+
 .video-overlay-container::after {
     grid-row: 2/2;
     grid-column: 1/1;
@@ -33,16 +45,22 @@
     position: relative;
     grid-row: 2/2;
     width: 100%;
+    max-height: 100%;
+    max-width: fit-content; /* 100% */
+    object-fit: cover;
+    display: inline-block;
 }
 
 .video-canvas {
+    display: inline-block;
     width: 100%;
     height: auto;
     object-fit: cover;
 }
 
 .video-canvas.constrainedHeight {
-    width: auto;
+    display: inline-block;
+    /* width: auto; */
     height: 100%;
     object-fit: cover;
 }
@@ -66,63 +84,102 @@
     grid-row: 3;
     grid-column: 1;
     /* background: blue; */
-    display: flex;
-    flex-wrap: wrap;
+    /* display: grid; */
+    /* flex-wrap: wrap; */
     align-content: flex-start;
     padding-top: 0.5rem;
     width: 100%;
+    object-fit: cover;
+    /* justify-content: center; */
+    align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .under-video-area button {
     /* height: 30%; */
-    margin: 0.2rem;
-    flex: 1 0 auto;
+    margin: 0.2rem 0rem 0.2rem 0rem;
+    /* flex: 1 0 auto; */
+    align-items: center;
+    width: 99%;
 }
 
 /* Realsense pan-tilt controls ************************************************/
 .realsense-pan-tilt-grid {
     width: 100%;
-    max-width: fit-content;
+    /* max-width: fit-content;
     height: auto;
     grid-row: 2/2;
     grid-column: 1/1;
-    --pan-tilt-button-size: 2rem;
+    --pan-tilt-button-size: 1.5rem;
     display: grid;
     grid-template-columns: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
     grid-template-rows: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size);
+    object-fit: cover;
+    align-items: stretch; */
 }
 
 .realsense-pan-tilt-grid.constrainedHeight {
     height: 100%;
-    width: auto;
+    /* width: auto; */
     /* grid-template-columns: var(--pan-tilt-button-size) min-content var(--pan-tilt-button-size);
     grid-template-rows: var(--pan-tilt-button-size) fit-content var(--pan-tilt-button-size); */
     justify-content: center;
+    object-fit: cover;
+    z-index: 2;
+    position: absolute;
+    display: block;
 }
 
 .realsense-pan-tilt-grid button {
-    padding: 0;
+    padding: 0px;
 }
 
 .realsense-pan-tilt-grid button .material-icons {
     margin: 0;
+    font-size: xxx-large;
+    background-color: whitesmoke;
+    opacity: 40%;
+    border-radius: 60px;
 }
 
 .realsense-pan-tilt-grid .up {
     border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    background: transparent;
+    box-shadow: none;
 }
 
 .realsense-pan-tilt-grid .down {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
+    z-index: 2;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    background: transparent;
+    box-shadow: none;
 }
 
 .realsense-pan-tilt-grid .left {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
+    z-index: 2;
+    height: 100%;
+    position: absolute;
+    background: transparent;
+    box-shadow: none;
 }
 
 .realsense-pan-tilt-grid .right {
     border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
-
+    z-index: 2;
+    position: absolute;
+    right: 0;
+    height: 100%;
+    background: transparent;
+    box-shadow: none;
 }
 
 
@@ -141,6 +198,7 @@
 
     padding-top: var(--padding);
     grid-row: 2/2;
+    z-index: 4;
 }
 
 
@@ -158,4 +216,31 @@
     content: attr(aria-label);
     font-weight: bold;
     padding: var(--padding);
+}
+
+.title {
+    font-size: x-large;
+    align-self: flex-end;
+    text-align: center;
+    margin: 10px;
+}
+
+@media screen and (orientation:portrait) and (max-device-width: 900px) {
+    .video-container {
+        grid-template-rows: 1fr auto minmax(3rem, 1fr);
+    }
+}
+
+@media screen and (orientation:landscape) and (max-device-width: 900px) {
+    .video-container {
+        grid-template-rows: auto;
+    }
+
+    .realsense-pan-tilt-grid button .material-icons {
+        font-size: larger;
+    }
+    
+    .title {
+        font-size: smaller;
+    }
 }

@@ -5,6 +5,7 @@ import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
+import {isMobile} from 'react-device-detect';
 import "operator/css/ButtonPad.css"
 
 /** Properties for {@link ButtonPad} */
@@ -66,7 +67,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
     } : {};
 
     return (
-        <>
+        <div className="button-pad">
+            {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
@@ -76,7 +78,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
             >
                 {paths.map(mapPaths)}
             </svg>
-        </>
+        </div>
     );
 }
 
@@ -92,15 +94,15 @@ export type SingleButtonProps = {
 const SingleButton = (props: SingleButtonProps) => {
     const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(props.funct);
     const clickProps = props.sharedState.customizing ? {} : {
-        onMouseDown: functs.onClick,
-        onMouseUp: functs.onRelease,
-        onMouseLeave: functs.onLeave
+        onPointerDown: functs.onClick,
+        onPointerUp: functs.onRelease,
+        onPointerLeave: functs.onLeave
     }
     const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = 50;
-    const width = 50;
+    const height = isMobile ? 75 : 85;
+    const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     return (
@@ -109,6 +111,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 <title>{title}</title>
             </path>
             <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
+            <p>{title}</p>
         </React.Fragment>
     )
 }
@@ -126,15 +129,15 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
     let functions: ButtonPadButton[];
     const B = ButtonPadButton;
     switch (id) {
-        case ButtonPadId.Drive:
-            functions = [
-                B.BaseForward,
-                B.BaseRotateRight,
-                B.BaseReverse,
-                B.BaseRotateLeft
-            ];
-            shape = ButtonPadShape.Directional;
-            break;
+        // case ButtonPadId.Drive:
+        //     functions = [
+        //         B.BaseForward,
+        //         B.BaseRotateRight,
+        //         B.BaseReverse,
+        //         B.BaseRotateLeft
+        //     ];
+        //     shape = ButtonPadShape.Directional;
+        //     break;
         case ButtonPadId.ManipRealsense:
             functions = [
                 B.WristRotateIn,
@@ -161,16 +164,18 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ]
             shape = ButtonPadShape.Gripper;
             break;
-        case ButtonPadId.ManipOverhead:
+        case ButtonPadId.WristGripper:
             functions = [
-                B.ArmExtend,
-                B.ArmRetract,
+                B.WristPitchUp,
+                B.WristPitchDown,
                 B.WristRotateIn,
                 B.WristRotateOut,
-                B.BaseForward,
-                B.BaseReverse
+                B.WristRollLeft,
+                B.WristRollRight,
+                B.GripperOpen,
+                B.GripperClose
             ];
-            shape = ButtonPadShape.ManipOverhead;
+            shape = ButtonPadShape.WristGripper;
             break;
         case ButtonPadId.Base:
             functions = [
@@ -191,22 +196,61 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             shape = ButtonPadShape.SimpleButtonPad;
             break;
         case ButtonPadId.Wrist:
+            // functions = [
+            //     B.GripperOpen,
+            //     B.GripperClose,
+            //     B.WristRotateIn,
+            //     B.WristRotateOut
+            // ];
+            // shape = ButtonPadShape.SimpleButtonPad;
+            // break;
             functions = [
-                B.GripperOpen,
-                B.GripperClose,
+                B.WristRollLeft,
+                B.WristRollRight,
+                B.WristPitchUp,
+                B.WristPitchDown,
                 B.WristRotateIn,
-                B.WristRotateOut
+                B.WristRotateOut,
+                B.GripperOpen,
+                B.GripperClose
             ];
-            shape = ButtonPadShape.SimpleButtonPad;
+            shape = ButtonPadShape.StackedButtonPad;
             break;
         case ButtonPadId.Arm:
             functions = [
                 B.ArmLift,
                 B.ArmLower,
-                B.ArmExtend,
-                B.ArmRetract
+                B.ArmRetract,
+                B.ArmExtend
             ];
             shape = ButtonPadShape.SimpleButtonPad;
+            break;
+        case ButtonPadId.ArmMobile:
+            functions = [
+                B.ArmLift,
+                B.ArmLower,
+                B.ArmRetract,
+                B.ArmExtend
+            ];
+            shape = ButtonPadShape.RowButtonPad;
+            break;
+        case ButtonPadId.GripperMobile:
+            functions = [
+                B.WristRotateIn,
+                B.WristRotateOut,
+                B.GripperOpen,
+                B.GripperClose
+            ];
+            shape = ButtonPadShape.RowButtonPad;
+            break;
+        case ButtonPadId.DriveMobile:
+            functions = [
+                B.BaseForward,
+                B.BaseReverse,
+                B.BaseRotateLeft,
+                B.BaseRotateRight
+            ];
+            shape = ButtonPadShape.RowButtonPad;
             break;
         default:
             throw new Error(`unknow button pad id: ${id}`);

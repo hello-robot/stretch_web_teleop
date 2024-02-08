@@ -1,5 +1,6 @@
 import { className } from "shared/util";
 import "operator/css/basic_components.css"
+import { isMobile } from "react-device-detect";
 
 /**
  * Properties for {@link CheckToggleButton}
@@ -29,8 +30,8 @@ export const CheckToggleButton = (props: CheckToggleButtonProps) => {
     const icon = checked ? "check_box" : "check_box_outline_blank";
     return (
         <button
-            className={className("check-toggle-button", { checked })}
-            onClick={props.onClick}
+            className={className(isMobile ? "check-toggle-button-mobile" : "check-toggle-button", { checked })}
+            onPointerDown={props.onClick}
         >
             <span className={"material-icons"}>{icon}</span>
             {props.label}

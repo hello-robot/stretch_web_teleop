@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="71.505005mm"
+   height="71.505005mm"
+   viewBox="0 0 71.505005 71.505005"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="button.svg"
+   inkscape:version="1.1.2 (1:1.1+202202050950+0a00cf5339)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.75187991"
+     inkscape:cx="57.854984"
+     inkscape:cy="246.71493"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     inkscape:window-x="72"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1655"
+       x="-0.087541669"
+       y="-0.087541669"
+       width="1.19175"
+       height="1.19175">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1645" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1647" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="1.6"
+         result="blur"
+         id="feGaussianBlur1649" />
+      <feOffset
+         dx="1"
+         dy="1"
+         result="offset"
+         id="feOffset1651" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1653" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-89.856539,-83.300639)">
+    <path
+       style="fill:#ffffff;stroke:#000000;stroke-width:2.825;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;filter:url(#filter1655);fill-opacity:0.99924242"
+       id="path846"
+       sodipodi:type="arc"
+       sodipodi:cx="125.10904"
+       sodipodi:cy="118.55314"
+       sodipodi:rx="30"
+       sodipodi:ry="30"
+       sodipodi:start="0"
+       sodipodi:end="6.2825395"
+       sodipodi:open="true"
+       sodipodi:arc-type="arc"
+       d="m 155.10904,118.55314 a 30,30 0 0 1 -29.99516,30 30,30 0 0 1 -30.004839,-29.99031 30,30 0 0 1 29.985469,-30.009688 30,30 0 0 1 30.01452,29.980628" />
+  </g>
+</svg>

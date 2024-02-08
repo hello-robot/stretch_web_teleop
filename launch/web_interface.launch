@@ -21,7 +21,8 @@
   </node>
 
   <arg name="params" value="$(find stretch_teleop_interface)/nodes/configure_video_streams_params.yaml"/>
-  
+  <arg name="map_yaml" doc="filepath to previously captured map (required)" />
+
   <!-- GRIPPER CAMERA -->
   <arg name="gripper_camera" default="true"/>
   <group if="$(arg gripper_camera)">
@@ -31,7 +32,7 @@
       <node pkg="image_publisher" type="image_publisher" name="gripper_camera"
         args="$(find stretch_teleop_interface)/nodes/blank_image.png" >
         <param name="frame_id" value="gripper_camera" />
-        <param name="publish_rate" value="1" />
+        <param name="publish_rate" value="15" />
       </node>
   </group>
   <!-- -->
@@ -45,7 +46,7 @@
       <node pkg="image_publisher" type="image_publisher" name="navigation_camera"
         args="$(find stretch_teleop_interface)/nodes/blank_image.png" >
         <param name="frame_id" value="navigation_camera" />
-        <param name="publish_rate" value="10" />
+        <param name="publish_rate" value="15" />
       </node>
   </group>
   <!-- -->
@@ -64,10 +65,92 @@
     <arg name="keyfile" value="$(find stretch_teleop_interface)/certificates/$(arg keyfile)" />
     <arg name="authenticate" default="false" />
   </include>
+  <!-- -->
 
   <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" respawn="false" output="screen"/>
 
   <node name="configure_video_streams" pkg="stretch_teleop_interface" type="configure_video_streams" args="$(arg params)" output="screen"/>
+
+  <!-- MAP SERVER -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_yaml)" />
   <!-- -->
+
+  <!-- CENTERED BASE LINK -->
+  <node name="centered_base_link_tf_publisher" pkg="tf" type="static_transform_publisher" args="-0.1 0 0 0 0 0 1 /base_link /centered_base_link 100" />
+  <!-- -->
+
+  <!-- LASER RANGE FINDER -->
+  <include file="$(find stretch_core)/launch/rplidar.launch" />
+  <!-- -->
+
+  <node name="imu_filter_madgwick" pkg="imu_filter_madgwick" type="imu_filter_node" output="screen" respawn="false">
+    <param name="use_mag" value="true" />
+    <remap from="imu/data_raw" to="imu_mobile_base" />
+    <remap from="imu/mag" to="magnetometer_mobile_base" />
+  </node>
+  <!-- LOCALIZATION -->
+<node pkg="amcl" type="amcl" name="amcl" output="screen">
+  <!-- Publish scans from best pose at a max of 10 Hz -->
+  <param name="odom_model_type" value="diff-corrected"/>
+  <param name="gui_publish_rate" value="10.0"/>
+  <param name="laser_max_beams" value="60"/>
+  <param name="min_particles" value="500"/>
+  <param name="max_particles" value="2000"/>
+  <param name="kld_err" value="0.05"/>
+  <param name="kld_z" value="0.99"/>
+  <param name="odom_alpha1" value="0.045"/>
+  <param name="odom_alpha2" value="0.045"/>
+  <param name="robot_model_type" value="differential"/>
+  <!-- translation std dev, m -->
+  <param name="odom_alpha3" value="0.045"/>
+  <param name="odom_alpha4" value="0.045"/>
+  <param name="laser_z_hit" value="0.5"/>
+  <param name="laser_z_short" value="0.05"/>
+  <param name="laser_z_max" value="0.05"/>
+  <param name="laser_z_rand" value="0.5"/>
+  <param name="laser_sigma_hit" value="0.2"/>
+  <param name="laser_lambda_short" value="0.1"/>
+  <param name="laser_model_type" value="likelihood_field_prob"/>
+  <!-- <param name="laser_model_type" value="beam"/> -->
+  <param name="laser_likelihood_max_dist" value="2.0"/>
+  <param name="update_min_d" value="0.2"/>
+  <param name="update_min_a" value="0.25"/>
+  <param name="odom_frame_id" value="odom"/>
+  <param name="resample_interval" value="1"/>
+  <param name="selective_resampling" value="false"/>
+  <param name="transform_tolerance" value="0.1"/>
+  <param name="recovery_alpha_slow" value="0.0001"/>
+  <param name="recovery_alpha_fast" value="0.01"/>
+
+  <remap from="scan" to="scan_filtered" />
+</node>
+
+  <include file="$(find stretch_core)/launch/stretch_ekf.launch"></include>
   
+  <!-- <include file="$(find stretch_core)/launch/stretch_scan_matcher.launch"></include> -->
+
+  <!-- NAVIGATION -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find stretch_navigation)/config/common_costmap_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find stretch_navigation)/config/common_costmap_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find stretch_navigation)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find stretch_navigation)/config/global_costmap_params_withmap.yaml" command="load" />
+    <rosparam file="$(find stretch_navigation)/config/base_local_planner_params.yaml" command="load" />
+    <remap from="odom" to="odometry/filtered" />
+    <param name="planner_frequency" value="1" />
+    <!-- <param name="recovery_behaviors" value="[ {name: rotate_recovery, type: rotate_recovery/RotateRecovery}, {name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},{name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}]"/> -->
+    <!-- <rosparam file="$(find stretch_navigation)/config/base_global_planner_params.yaml" command="load" />
+    
+    <param name="base_global_planner" value="global_planner/GlobalPlanner" /> -->
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
+    <remap from="/cmd_vel" to="/stretch/cmd_vel" />
+  </node> 
+  <!-- -->
+
+  <!-- <rosparam command="load" file="$(find stretch_teleop_interface)/config/stretch_marker_dict.yaml" /> -->
+  <node name="detect_aruco_markers" pkg="stretch_teleop_interface" type="detect_aruco_markers" output="screen"/>
+  <node name="head_scan" pkg="stretch_teleop_interface" type="head_scan" output="screen"/>
+  <node name="head_to_aruco" pkg="stretch_teleop_interface" type="head_to_aruco" output="screen"/>
+  <node name="navigate_to_aruco" pkg="stretch_teleop_interface" type="navigate_to_aruco" output="screen"/>
+
 </launch>

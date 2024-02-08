@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentDefinition, ComponentType, TabDefinition, PanelDefinition } from "../utils/component_definitions";
+import { ComponentDefinition, ComponentType, TabDefinition, PanelDefinition, ParentComponentDefinition, LayoutDefinition } from "../utils/component_definitions";
 import { SharedState } from "./CustomizableComponent";
 import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
@@ -23,7 +23,7 @@ export type DropZoneProps = {
     /** Path to the drop zone, same as CustomizableComponent path */
     path: string,
     /** Definition of the CustomizableComponent containing this drop zone */
-    parentDef: ComponentDefinition,
+    parentDef: ParentComponentDefinition,
     /** State shared between all components */
     sharedState: SharedState
 }
@@ -52,6 +52,19 @@ export const DropZone = (props: DropZoneProps) => {
         // Don't need to check if dropzone is adjacent if the active component
         // is coming from the sidebar component provider
         if (!selectedPath) return true;
+
+        // If Layout Grid only has one child panel and the panel is selected, hide dropzones to the
+        // left and right of the panel as these dropzones would not move the active panel
+        if (parentDef.type == ComponentType.Layout && selectedDefinition.type == ComponentType.Panel) {
+            let selectedLayoutGridIdx = Number(selectedPath?.split('-')[0])
+            let pathLayoutGridIdx = Number(path.split('-')[0])
+            
+            if (pathLayoutGridIdx === selectedLayoutGridIdx || pathLayoutGridIdx === selectedLayoutGridIdx + 1) {
+                let parentIdx = Number(selectedPath?.split('-')[0])
+                let def = parentDef as LayoutDefinition
+                if (def.children[parentIdx]?.children.length < 2) return false;
+            }
+        }
 
         // Can't drop if dropzone is right next to the active element
         // (that wouldn't move the active element at all)
@@ -170,15 +183,15 @@ const NewPanelModal = (props: {
  */
 function dropzoneRules(active: ComponentType, parent: ComponentType) {
     // Tabs can only go into layout
-    if (active === ComponentType.Panel && parent !== ComponentType.Layout)
+    if (active === ComponentType.Panel && parent !== ComponentType.LayoutGrid && parent !== ComponentType.Layout)
         return false;
 
     // Single tab can only go into tabs
     if (active === ComponentType.SingleTab && parent !== ComponentType.Panel)
         return false;
 
-    // Only tabs can go into layout 
-    if (active !== ComponentType.Panel && parent === ComponentType.Layout)
+    // Only tabs can go into panel 
+    if (active !== ComponentType.Panel && (parent === ComponentType.LayoutGrid || parent == ComponentType.Layout))
         return false;
 
     // Only single tab can go into tabs

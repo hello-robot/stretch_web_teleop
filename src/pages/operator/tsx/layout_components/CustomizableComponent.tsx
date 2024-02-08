@@ -8,6 +8,9 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
+import { Map } from "./Map";
+import { RunStopButton } from "../static_components/RunStop";
+import { BatteryGuage } from "../static_components/BatteryGauge";
 
 /** State required for all elements */
 export type SharedState = {
@@ -21,7 +24,11 @@ export type SharedState = {
     /** Path to the active component */
     selectedPath?: string,
     /** Mapping of each button pad function to a {@link ButtonState} */
-    buttonStateMap?: ButtonStateMap
+    buttonStateMap?: ButtonStateMap,
+    /** Battery Voltage */
+    batteryVoltage?: number,
+    /** Whether or not to hide the button labels */
+    hideLabels?: boolean
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
@@ -67,6 +74,12 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <ButtonGrid {...props} />;
         case ComponentType.VirtualJoystick:
             return <VirtualJoystick {...props} />;
+        case ComponentType.Map:
+            return <Map {...props} />;
+        case ComponentType.RunStopButton:
+            return <RunStopButton {...props} />;
+        case ComponentType.BatteryGuage:
+            return <BatteryGuage {...props} />;
         default:
             throw Error(`CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`);
     }

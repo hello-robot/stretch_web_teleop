@@ -1,17 +1,45 @@
 import React from 'react'
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints } from 'shared/util';
+import ROSLIB from 'roslib';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, GetBatteryVoltageCommand, NavigateToArucoCommand, DeleteArucoMarkerCommand, AddArucoMarkerCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState, ArucoMarkerInfo } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
-export class RemoteRobot extends React.Component {
+export class RemoteRobot extends React.Component<{},any> {
     robotChannel: robotMessageChannel;
     sensors: RobotSensors
+    isRunStopped: boolean
+    batteryVoltage: number
+    mapPose: ROSLIB.Transform;
+    moveBaseGoalReached: boolean;
+    markers: MarkerArray;
+    relativePose?: ROSLIB.Transform
+    moveBaseState?: string
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
         this.robotChannel = props.robotChannel
         this.sensors = new RobotSensors({})
+        this.isRunStopped = false
+        this.batteryVoltage = 13.0
+        this.mapPose = {
+            translation: {
+                x: 0, y: 0, z: 0
+            } as ROSLIB.Vector3,
+            rotation: {
+                x: 0, y: 0, z: 0, w: 0
+            } as ROSLIB.Quaternion
+        } as ROSLIB.Transform
+        this.moveBaseGoalReached = false
+        this.markers = { markers: [] }
+    }
+
+    setGoalReached(reached: boolean) {
+        this.moveBaseGoalReached = reached
+    }
+
+    isGoalReached() {
+        return this.moveBaseGoalReached
     }
 
     driveBase(linVel: number, angVel: number): VelocityCommand {
@@ -49,7 +77,7 @@ export class RemoteRobot extends React.Component {
 
         return {
             "stop": () => {
-                this.robotChannel({ type: "stop" })
+                this.robotChannel({ type: "stopTrajectory" })
             }
         }
     }
@@ -79,10 +107,70 @@ export class RemoteRobot extends React.Component {
         this.robotChannel(cmd)
     }
 
-    setToggle(type: "setFollowGripper" | "setDepthSensing", toggle: boolean) {
+    playbackPoses(poses: RobotPose[]) {
+        let cmd: PlaybackPosesCommand = {
+            type: "playbackPoses",
+            poses: poses
+        }
+        this.robotChannel(cmd)
+    }
+
+    moveBase(pose: ROSPose) {
+        let cmd: MoveBaseCommand = {
+            type: "moveBase",
+            pose: pose
+        }
+        this.robotChannel(cmd)
+    }
+
+    navigateToAruco(name: string, pose: ROSLIB.Transform) {
+        let cmd: NavigateToArucoCommand = {
+            type: "navigateToAruco",
+            name: name, 
+            pose: pose
+        }
+        this.robotChannel(cmd)
+    }
+
+    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers" | "setRunStop", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
+        }
+        this.robotChannel(cmd)
+    }
+
+    updateArucoMarkersInfo() {
+        let cmd: UpdateArucoMarkersInfoCommand = {
+            type: "updateArucoMarkersInfo",
+        }
+        this.robotChannel(cmd)
+    }
+
+
+    setArucoMarkerInfo(info: ArucoMarkersInfo) {
+        let cmd: SetArucoMarkerInfoCommand = {
+            type: "setArucoMarkerInfo",
+            info: info
+        }
+        // console.log(JSON.stringify(info.aruco_marker_info).toString())
+        this.robotChannel(cmd)
+        console.log("setting aruco marker info")
+    }
+
+    deleteArucoMarker(markerID: string) {
+        let cmd: DeleteArucoMarkerCommand = {
+            type: "deleteArucoMarker",
+            markerID: markerID
+        }
+        this.robotChannel(cmd)
+    }
+
+    addArucoMarker(markerID: string, markerInfo: ArucoMarkerInfo) {
+        let cmd: AddArucoMarkerCommand = {
+            type: "addArucoMarker",
+            markerID: markerID,
+            markerInfo: markerInfo
         }
         this.robotChannel(cmd)
     }
@@ -93,18 +181,81 @@ export class RemoteRobot extends React.Component {
         }
         this.robotChannel(cmd)
     }
+
+    setIsRunStopped(enabled: boolean) {
+        this.isRunStopped = enabled
+    }
+
+    getIsRunStopped() {
+        return this.isRunStopped
+    }
+
+    getOccupancyGrid(type: "getOccupancyGrid") {
+        let cmd: GetOccupancyGrid = {
+            type: type
+        }
+        this.robotChannel(cmd)
+    }
+
+    setMapPose(pose: ROSLIB.Transform) {
+        this.mapPose = pose
+    }
+
+    getMapPose() {
+        return this.mapPose
+    }
+
+    setMarkers(markers: MarkerArray) {
+        this.markers = markers
+    }
+
+    getMarkers() {
+        return this.markers
+    }
+
+    getRelativePose(marker_name: string) {
+        this.relativePose = undefined
+        let cmd: GetRelativePoseCommand = {
+            type: "getRelativePose",
+            marker_name: marker_name
+        }
+        this.robotChannel(cmd)
+        return waitUntil(() => this.relativePose != undefined, 60000).then(() => { 
+            return this.relativePose
+        })
+    }
+
+    setRelativePose(pose: ROSLIB.Transform) {
+        this.relativePose = pose
+    }
+
+    stopTrajectory() {
+        this.robotChannel({ type: "stopTrajectory" })
+    }
+
+    stopMoveBase() {
+        this.robotChannel({ type: "stopMoveBase" })
+    }
+
+    stopArucoNavigation() {
+        this.robotChannel({ type: "stopArucoNavigation" })
+    }
 }
 
 class RobotSensors extends React.Component {
-    private jointState?: RobotPose;
+    private batteryVoltage: number = 0.0;
+    private robotPose: RobotPose = {};
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
     private functionProviderCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void;
+    private batteryFunctionProviderCallback?: (voltage: number) => void;
 
     constructor(props: {}) {
         super(props)
         this.functionProviderCallback = () => { }
+        this.batteryFunctionProviderCallback = () => { }
         this.setFunctionProviderCallback = this.setFunctionProviderCallback.bind(this)
+        this.setBatteryFunctionProviderCallback = this.setBatteryFunctionProviderCallback.bind(this)
     }
 
     /**
@@ -117,7 +268,11 @@ class RobotSensors extends React.Component {
      *                     [joint in collision at lower end, joint is in 
      *                     collision at upper end]
      */
-    checkValidJointState(jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
+    checkValidJointState(robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
+        if (robotPose !== this.robotPose) {
+            this.robotPose = robotPose;
+        }
+
         // Remove existing values from list
         let change = false;
         Object.keys(jointValues).forEach((k) => {
@@ -161,5 +316,45 @@ class RobotSensors extends React.Component {
      */
     setFunctionProviderCallback(callback: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void) {
         this.functionProviderCallback = callback;
+    }
+
+    setBatteryVoltage(voltage: number) {
+        let change = Math.abs(this.batteryVoltage - voltage) > 0.01
+        if (change && this.batteryFunctionProviderCallback) {
+            this.batteryVoltage = voltage
+            this.batteryFunctionProviderCallback(this.batteryVoltage)
+        }
+    }
+
+    /**
+     * Records a callback from the function provider. The callback is called 
+     * whenever the battery voltage changes.
+     * 
+     * @param callback callback to function provider
+     */
+     setBatteryFunctionProviderCallback(callback: (voltage: number) => void) {
+        this.batteryFunctionProviderCallback = callback;
+    }
+
+    /**
+     * @returns current robot pose
+     */
+    getRobotPose(head: boolean, gripper: boolean, arm: boolean): RobotPose {
+        let filteredPose: RobotPose = {}
+        if (head) {
+            filteredPose["joint_head_tilt"] = this.robotPose["joint_head_tilt"]
+            filteredPose["joint_head_pan"] = this.robotPose["joint_head_pan"]
+        }
+        if (gripper) {
+            filteredPose["joint_wrist_roll"] = this.robotPose["joint_wrist_roll"]
+            filteredPose["joint_wrist_pitch"] = this.robotPose["joint_wrist_pitch"]
+            filteredPose["joint_wrist_yaw"] = this.robotPose["joint_wrist_yaw"]
+            filteredPose["joint_gripper_finger_left"] = this.robotPose["joint_gripper_finger_left"]
+        }
+        if (arm) {
+            filteredPose["joint_lift"] = this.robotPose["joint_lift"]
+            filteredPose["wrist_extension"] = this.robotPose["wrist_extension"]
+        }
+        return filteredPose
     }
 }

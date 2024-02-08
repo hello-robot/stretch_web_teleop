@@ -36,7 +36,7 @@ export class WebRTCConnection extends React.Component {
     private messageChannel?: RTCDataChannel
 
     private onTrackAdded?: (ev: RTCTrackEvent) => void
-    private onMessage: (obj: WebRTCMessage | WebRTCMessage[]) => void
+    private onMessage: (obj: WebRTCMessage) => void
     private onRobotConnectionStart?: () => void 
     private onMessageChannelOpen?: () => void
     private onConnectionEnd?: () => void
@@ -301,7 +301,7 @@ export class WebRTCConnection extends React.Component {
 
     sendData(obj: WebRTCMessage | WebRTCMessage[]) {
         if (!this.messageChannel || (this.messageChannel.readyState !== 'open')) {
-            //console.warn("Trying to send data, but data channel isn't ready")
+            console.warn("Trying to send data, but data channel isn't ready")
             return;
         }
         const data = JSON.stringify(obj);

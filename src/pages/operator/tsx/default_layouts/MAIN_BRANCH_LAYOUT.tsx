@@ -6,136 +6,150 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
 export const MAIN_BRANCH_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayVoiceControl: false,
+    displayPoseLibrary: true,
+    displayMovementRecorder: true,
+    displayArucoMarkers: false,
+    displayLabels: true,
     actionMode: ActionMode.ClickClick,
     children: [
         {
-            type: ComponentType.Panel,
+            type: ComponentType.LayoutGrid,
             children: [
                 {
-                    type: ComponentType.SingleTab,
-                    label: 'Navigation',
+                    type: ComponentType.Panel,
                     children: [
-                        // Overhead camera
                         {
-                            type: ComponentType.CameraView,
-                            id: CameraViewId.overhead,
+                            type: ComponentType.SingleTab,
+                            label: 'Navigation',
                             children: [
+                                // Overhead camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.overhead,
+                                    displayButtons: true,
+                                    children: [
+                                        // {
+                                        //     type: ComponentType.ButtonPad,
+                                        //     id: ButtonPadId.ManipOverhead
+                                        // }
+                                    ]
+                                } as CameraViewDefinition,
+                                // Realsense camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.realsense,
+                                    displayButtons: true,
+                                    children: [
+                                        // {
+                                        //     type: ComponentType.ButtonPad,
+                                        //     id: ButtonPadId.Drive,
+                                        // } as ButtonPadDef
+                                    ]
+                                } as CameraViewDefinition,
+                                // Gripper camera
                                 // {
-                                //     type: ComponentType.ButtonPad,
-                                //     id: ButtonPadId.ManipOverhead
-                                // }
+                                //     type: ComponentType.VideoStream,
+                                //     id: VideoStreamId.gripper,
+                                //     children: [
+                                //         // {
+                                //         //     type: ComponentType.ButtonPad,
+                                //         //     id: ButtonPadId.Gripper
+                                //         // }
+                                //     ]
+                                // } as VideoStreamDef
                             ]
-                        } as CameraViewDefinition,
-                        // Realsense camera
+                        },
                         {
-                            type: ComponentType.CameraView,
-                            id: CameraViewId.realsense,
+                            type: ComponentType.SingleTab,
+                            label: 'Manipulation',
                             children: [
-                                // {
-                                //     type: ComponentType.ButtonPad,
-                                //     id: ButtonPadId.Drive,
-                                // } as ButtonPadDef
+                                // Overhead camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.overhead,
+                                    displayButtons: false,
+                                    children: [
+                                        // {
+                                        //     type: ComponentType.PredictiveDisplay,
+                                        //     // type: ComponentType.ButtonPad,
+                                        //     // id: ButtonPadId.overhead
+                                        // }
+                                    ]
+                                } as CameraViewDefinition,
+                                // Realsense camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.realsense,
+                                    displayButtons: true,
+                                    children: [
+                                        // {
+                                        //     type: ComponentType.ButtonPad,
+                                        //     id: ButtonPadId.Drive,
+                                        // } as ButtonPadDef
+                                    ]
+                                } as CameraViewDefinition,
+                                // Gripper camera
+                                {
+                                    type: ComponentType.CameraView,
+                                    id: CameraViewId.gripper,
+                                    displayButtons: true,
+                                    children: [
+                                        // {
+                                        //     type: ComponentType.ButtonPad,
+                                        //     id: ButtonPadId.Gripper
+                                        // }
+                                    ]
+                                } as CameraViewDefinition
                             ]
-                        } as CameraViewDefinition,
-                        // Gripper camera
-                        // {
-                        //     type: ComponentType.VideoStream,
-                        //     id: VideoStreamId.gripper,
-                        //     children: [
-                        //         // {
-                        //         //     type: ComponentType.ButtonPad,
-                        //         //     id: ButtonPadId.Gripper
-                        //         // }
-                        //     ]
-                        // } as VideoStreamDef
+                        }
                     ]
-                },
+                } as PanelDefinition,
                 {
-                    type: ComponentType.SingleTab,
-                    label: 'Manipulation',
+                    type: ComponentType.Panel,
                     children: [
-                        // Overhead camera
                         {
-                            type: ComponentType.CameraView,
-                            id: CameraViewId.overhead,
+                            type: ComponentType.SingleTab,
+                            label: 'Base',
                             children: [
-                                // {
-                                //     type: ComponentType.PredictiveDisplay,
-                                //     // type: ComponentType.ButtonPad,
-                                //     // id: ButtonPadId.overhead
-                                // }
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Base,
+                                } as ButtonPadDefinition
                             ]
-                        } as CameraViewDefinition,
-                        // Realsense camera
+                        } as TabDefinition,
                         {
-                            type: ComponentType.CameraView,
-                            id: CameraViewId.realsense,
+                            type: ComponentType.SingleTab,
+                            label: 'Camera',
                             children: [
-                                // {
-                                //     type: ComponentType.ButtonPad,
-                                //     id: ButtonPadId.Drive,
-                                // } as ButtonPadDef
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Camera,
+                                } as ButtonPadDefinition
                             ]
-                        } as CameraViewDefinition,
-                        // Gripper camera
+                        } as TabDefinition,
                         {
-                            type: ComponentType.CameraView,
-                            id: CameraViewId.gripper,
+                            type: ComponentType.SingleTab,
+                            label: 'Wrist',
                             children: [
-                                // {
-                                //     type: ComponentType.ButtonPad,
-                                //     id: ButtonPadId.Gripper
-                                // }
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Wrist,
+                                } as ButtonPadDefinition
                             ]
-                        } as CameraViewDefinition
+                        } as TabDefinition,
+                        {
+                            type: ComponentType.SingleTab,
+                            label: 'Arm',
+                            children: [
+                                {
+                                    type: ComponentType.ButtonPad,
+                                    id: ButtonPadId.Arm,
+                                } as ButtonPadDefinition
+                            ]
+                        } as TabDefinition
                     ]
-                }
+                } as PanelDefinition
             ]
-        } as PanelDefinition,
-        {
-            type: ComponentType.Panel,
-            children: [
-                {
-                    type: ComponentType.SingleTab,
-                    label: 'Base',
-                    children: [
-                        {
-                            type: ComponentType.ButtonPad,
-                            id: ButtonPadId.Base,
-                        } as ButtonPadDefinition
-                    ]
-                } as TabDefinition,
-                {
-                    type: ComponentType.SingleTab,
-                    label: 'Camera',
-                    children: [
-                        {
-                            type: ComponentType.ButtonPad,
-                            id: ButtonPadId.Camera,
-                        } as ButtonPadDefinition
-                    ]
-                } as TabDefinition,
-                {
-                    type: ComponentType.SingleTab,
-                    label: 'Wrist',
-                    children: [
-                        {
-                            type: ComponentType.ButtonPad,
-                            id: ButtonPadId.Wrist,
-                        } as ButtonPadDefinition
-                    ]
-                } as TabDefinition,
-                {
-                    type: ComponentType.SingleTab,
-                    label: 'Arm',
-                    children: [
-                        {
-                            type: ComponentType.ButtonPad,
-                            id: ButtonPadId.Arm,
-                        } as ButtonPadDefinition
-                    ]
-                } as TabDefinition
-            ]
-        } as PanelDefinition
+        }
     ]
 }

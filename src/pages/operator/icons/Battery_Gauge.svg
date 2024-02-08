@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="149.19467mm"
+   height="33.96909mm"
+   viewBox="0 0 149.19467 33.96909"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="Battery_Gauge.svg"
+   inkscape:version="1.1.2 (1:1.1+202202050950+0a00cf5339)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview10"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="2.3728227"
+     inkscape:cx="169.20776"
+     inkscape:cy="65.955202"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     inkscape:window-x="72"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
+  <defs
+     id="defs2" />
+  <g
+     id="layer1"
+     transform="translate(-33.922072,-57.276288)"
+     style="fill:#ffffff;fill-opacity:1">
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:2.58196;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:0.258197, 0.258197;stroke-opacity:1;paint-order:markers fill stroke;fill-opacity:1"
+       id="rect846"
+       width="146.61325"
+       height="31.387129"
+       x="35.212826"
+       y="58.567268"
+       ry="15.693564" />
+    <path
+       style="fill:#ffffff;stroke:#9a9a9a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.627846;paint-order:markers fill stroke;fill-opacity:1"
+       id="path1838"
+       d="M 67.111024,74.260826 A 11.235101,11.242615 0 0 1 55.877737,85.503441 11.235101,11.242615 0 0 1 44.640823,74.264456 11.235101,11.242615 0 0 1 55.870482,63.018213 11.235101,11.242615 0 0 1 67.111022,74.253566" />
+    <path
+       style="fill:#ffffff;stroke:#9a9a9a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.627846;paint-order:markers fill stroke;fill-opacity:1"
+       id="path1838-3"
+       d="M 100.75971,74.260826 A 11.235101,11.242615 0 0 1 89.526419,85.503441 11.235101,11.242615 0 0 1 78.289505,74.264456 11.235101,11.242615 0 0 1 89.519163,63.018213 11.235101,11.242615 0 0 1 100.7597,74.253566" />
+    <path
+       style="fill:#ffffff;stroke:#9a9a9a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.627846;paint-order:markers fill stroke;fill-opacity:1"
+       id="path1838-3-6"
+       d="M 134.40837,74.260826 A 11.235101,11.242615 0 0 1 123.17509,85.503441 11.235101,11.242615 0 0 1 111.93817,74.264456 11.235101,11.242615 0 0 1 123.16783,63.018213 11.235101,11.242615 0 0 1 134.40837,74.253566" />
+    <path
+       style="fill:#ffffff;stroke:#9a9a9a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.627846;paint-order:markers fill stroke;fill-opacity:1"
+       id="path1838-3-6-7"
+       d="M 168.05706,74.260826 A 11.235101,11.242615 0 0 1 156.82377,85.503441 11.235101,11.242615 0 0 1 145.58686,74.264456 11.235101,11.242615 0 0 1 156.81652,63.018213 11.235101,11.242615 0 0 1 168.05706,74.253566" />
+  </g>
+</svg>

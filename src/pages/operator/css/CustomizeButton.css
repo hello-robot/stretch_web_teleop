@@ -1,10 +1,16 @@
 #customize-button {
     display: flex;
     align-items: center;
-    justify-content: left;
+    justify-content: center;
     width: var(--header-btn-width);
 }
 
 #customize-button span {
     margin-right: 2rem;
+}
+
+@media(max-width:900px) {
+    #customize-button { 
+        width: var(--btn-header-width-med); 
+    }
 }

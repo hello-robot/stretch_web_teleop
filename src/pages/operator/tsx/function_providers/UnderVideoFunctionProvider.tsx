@@ -1,13 +1,19 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { REALSENSE_BASE_POSE, REALSENSE_GRIPPER_POSE } from "shared/util"
+import { CENTER_WRIST, Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE, STOW_WRIST } from "shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
     GripperView = "Gripper View",
     LookAtGripper = "Look At Gripper",
     LookAtBase = "Look At Base",
+    LookAhead= "Look Ahead",
     FollowGripper = "Follow Gripper",
-    DepthSensing = "Depth Sensing"
+    DepthSensing = "Depth Sensing",
+    ToggleArucoMarkers = "Toggle Aruco Markers",
+    CenterWrist = "Center Wrist",
+    StowWrist = "Stow Wrist"
+    // GetArucoMarkerNames = "Get Aruco Marker Names",
+    // NavigateToMarker = "Navigate to Marker"
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -19,8 +25,15 @@ export const overheadButtons: UnderVideoButton[] = [
 export type OverheadButtons = typeof overheadButtons[number]
 /** Array of different perspectives for the realsense camera */
 export const realsenseButtons: UnderVideoButton[] = [
+    UnderVideoButton.LookAhead,
     UnderVideoButton.LookAtBase, 
     UnderVideoButton.LookAtGripper, 
+]
+
+/** Array of different actions for the wrist */
+export const wristButtons: UnderVideoButton[] = [
+    UnderVideoButton.CenterWrist,
+    UnderVideoButton.StowWrist 
 ]
 /** Type to specify the different realsense camera perspectives */
 export type RealsenseButtons = typeof realsenseButtons[number]
@@ -28,6 +41,8 @@ export type RealsenseButtons = typeof realsenseButtons[number]
 export type UnderVideoButtonFunctions = {
     onClick?: () => void
     onCheck?: (toggle: boolean) => void
+    getMarkers?: () => string[]
+    send?: (name: string) => void
 }
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -50,6 +65,10 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 return {
                     onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_BASE_POSE)
                 }
+            case UnderVideoButton.LookAhead:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(REALSENSE_FORWARD_POSE)
+                }
             case UnderVideoButton.LookAtGripper:
                 return {
                     onClick: () => FunctionProvider.remoteRobot?.lookAtGripper("lookAtGripper") //setRobotPose(REALSENSE_GRIPPER_POSE)
@@ -62,6 +81,39 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 return {
                     onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle)
                 }
+            case UnderVideoButton.ToggleArucoMarkers:
+                return {
+                    onCheck: (toggle: boolean) => FunctionProvider.remoteRobot?.setToggle("setArucoMarkers", toggle)
+                }
+            case UnderVideoButton.CenterWrist:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(CENTER_WRIST)
+                }
+            case UnderVideoButton.StowWrist:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST)
+                }
+            // case UnderVideoButton.GetArucoMarkerNames:
+            //     return {
+            //         getMarkers: () => { 
+            //             const markers = FunctionProvider.remoteRobot?.getMarkers() 
+            //             let marker_names: string[] = []
+            //             if (markers) {
+            //                 markers.markers.forEach(marker => {
+            //                     marker_names.push(marker.text)
+            //                 }) 
+            //                 return marker_names
+            //             } 
+            //             return []
+            //         }
+            //     }
+            // case UnderVideoButton.NavigateToMarker:
+            //     return {
+            //         send: (name: string) => {
+            //             FunctionProvider.remoteRobot?.navigateToMarker(name)
+            //         }
+            //     }
+            //     break
             default:
                 throw Error(`Cannot get function for unknown UnderVideoButton ${button}`)
         }

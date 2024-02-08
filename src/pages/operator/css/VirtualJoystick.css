@@ -1,7 +1,7 @@
 .virtual-joystick {
     flex: 1;
     border-radius: var(--btn-brdr-radius);
-    border: 2px solid var(--btn-blue);
+    /* border: 2px solid var(--btn-blue); */
     margin: 0.4rem;
     position: relative;
     z-index: 1;
@@ -35,7 +35,8 @@
 }
 
 .virtual-joystick .outer-circle {
-    fill: lightgray;
+    /* fill: lightgray; */
+    fill: #312e2e;
 }
 
 .virtual-joystick.active .joystick {

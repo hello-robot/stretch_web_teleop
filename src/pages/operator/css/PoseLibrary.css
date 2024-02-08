@@ -1,0 +1,27 @@
+#pose-library-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-btn {
+    background-color: var(--selected-color);
+    display: flex;
+}
+
+.save-btn {
+    background-color: var(--btn-turquoise);
+    display: flex;
+}
+
+.delete-btn { 
+    background-color: var(--btn-red);
+    display: flex;
+}
+
+@media(max-width:1300px) {
+    #pose-library-container { 
+        font-size: smaller;
+    }
+}

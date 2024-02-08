@@ -1,16 +1,37 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot, inJointLimits, inCollision } from 'robot/tsx/robot'
+import { Robot, inJointLimits, inCollision, rosConnected } from 'robot/tsx/robot'
 import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage } from 'shared/util'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatus, GoalStatusMessage, RelativePoseMessage, MarkersMessage, MarkerArray, ArucoNavigationStateMessage, ArucoNavigationState, MoveBaseActionResult, MoveBaseActionResultMessage, MoveBaseState, MoveBaseStateMessage, ROSBatteryState, BatteryVoltageMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
+import ROSLIB from 'roslib';
 
-export const robot = new Robot({ jointStateCallback: forwardJointStates })
+export const robot = new Robot({ 
+    jointStateCallback: forwardJointStates,
+    batteryStateCallback: forwardBatteryState,
+    occupancyGridCallback: forwardOccupancyGrid,
+    moveBaseResultCallback: forwardMoveBaseState,
+    arucoNavigationStateCallback: forwardArucoNavigationState,
+    amclPoseCallback: forwardAMCLPose,
+    markerArrayCallback: forwardMarkers,
+    relativePoseCallback: forwardRelativePose,
+    isRunStoppedCallback: forwardIsRunStopped
+})
+
 export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps)
 export let gripperStream = new VideoStream(gripperProps);
+// let occupancyGrid: ROSOccupancyGrid | undefined;
+
+connection = new WebRTCConnection({
+    peerRole: 'robot',
+    polite: false,
+    onRobotConnectionStart: handleSessionStart,
+    onMessage: handleMessage,
+    onConnectionEnd: disconnectFromRobot
+})
 
 robot.connect().then(() => {
     robot.subscribeToVideo({
@@ -31,26 +52,18 @@ robot.connect().then(() => {
     })
     gripperStream.start()
 
-    connection = new WebRTCConnection({
-        peerRole: 'robot',
-        polite: false,
-        onRobotConnectionStart: handleSessionStart,
-        onMessage: handleMessage
-    })
+    robot.getOccupancyGrid()
 
     connection.joinRobotRoom()
 })
-
-setTimeout(() => {
-    let isResolved = connection.connectionState() == 'connected' ? true : false
-    console.log("connection state: ", isResolved)
-    if (isResolved) {
-        console.log('WebRTC connection is resolved.');
-    } else {
-        window.location.reload()
-    }
-}, 2000);
-
+// .then(() => {
+//     setInterval(() => {
+//         console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
+//         if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
+//             window.location.reload()
+//         }
+//     }, 4000);    
+//})
 function handleSessionStart() {
     connection.removeTracks()
 
@@ -68,9 +81,35 @@ function handleSessionStart() {
     connection.openDataChannels()
 }
 
+function forwardMoveBaseState(state: MoveBaseState) {
+    if (!connection) throw 'WebRTC connection undefined!'
+    
+    if (state.alert_type != "info") {
+        connection.sendData({
+            type: "goalStatus",
+            message: state
+        } as GoalStatusMessage)
+    }
+
+    connection.sendData({
+        type: "moveBaseState",
+        message: state
+    } as MoveBaseStateMessage)
+}
+
+function forwardIsRunStopped(isRunStopped: boolean) {
+    if (!connection) throw 'WebRTC connection undefined!'
+
+    connection.sendData({
+        type: "isRunStopped",
+        enabled: isRunStopped,
+    } as IsRunStoppedMessage);
+}
+
 function forwardJointStates(jointState: ROSJointState) {
     if (!connection) throw 'WebRTC connection undefined!'
 
+    let robotPose: RobotPose = rosJointStatetoRobotPose(jointState)
     let jointValues: ValidJointStateDict = {}
     let effortValues: ValidJointStateDict = {}
     jointState.name.forEach((name?: ValidJoints) => {
@@ -82,9 +121,82 @@ function forwardJointStates(jointState: ROSJointState) {
 
     connection.sendData({
         type: "validJointState",
+        robotPose: robotPose,
         jointsInLimits: jointValues,
         jointsInCollision: effortValues
     } as ValidJointStateMessage);
+}
+
+function forwardBatteryState(batteryState: ROSBatteryState) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: 'batteryVoltage',
+        message: batteryState.voltage
+    } as BatteryVoltageMessage);
+}
+
+function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    let splitOccupancyGrid: ROSOccupancyGrid = {
+        header: occupancyGrid.header,
+        info: occupancyGrid.info,
+        data: []
+    }
+
+    const data_size = 50000
+    for (let i = 0; i < occupancyGrid.data.length; i += data_size) {
+        const data_chunk = occupancyGrid.data.slice(i, i + data_size);
+        splitOccupancyGrid.data = data_chunk
+        connection.sendData({
+            type: 'occupancyGrid',
+            message: splitOccupancyGrid
+        } as OccupancyGridMessage);
+    }
+
+    occupancyGrid.data = occupancyGrid.data.slice(0, 70000)
+    console.log('forwarding', occupancyGrid)
+    connection.sendData({
+        type: 'occupancyGrid',
+        message: occupancyGrid
+    } as OccupancyGridMessage);
+}
+
+function forwardMarkers(markers: MarkerArray) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: "arucoMarkers",
+        message: markers
+    } as MarkersMessage)
+}
+
+function forwardArucoNavigationState(state: ArucoNavigationState) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: "arucoNavigationState",
+        message: state
+    } as ArucoNavigationStateMessage)
+}
+
+function forwardAMCLPose(transform: ROSLIB.Transform) {
+    if (!connection) throw 'WebRTC connection undefined'
+
+    connection.sendData({
+        type: 'amclPose',
+        message: transform
+    } as MapPoseMessage)
+}
+
+function forwardRelativePose(pose: ROSLIB.Transform) {
+    if (!connection) throw 'WebRTC connection undefined'
+    
+    connection.sendData({
+        type: "relativePose",
+        message: pose
+    } as RelativePoseMessage)
 }
 
 function handleMessage(message: WebRTCMessage) {
@@ -100,8 +212,14 @@ function handleMessage(message: WebRTCMessage) {
         case "incrementalMove":
             robot.executeIncrementalMove(message.jointName, message.increment)
             break
-        case "stop":
-            robot.stopExecution()
+        case "stopTrajectory":
+            robot.stopTrajectoryClient()
+            break
+        case "stopMoveBase":
+            robot.stopMoveBaseClient()
+            break
+        case "stopArucoNavigation":
+            robot.stopNavigateToArucoClient()
             break
         case "setRobotMode":
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
@@ -112,15 +230,59 @@ function handleMessage(message: WebRTCMessage) {
         case "setRobotPose":
             robot.executePoseGoal(message.pose)
             break
+        case "playbackPoses":
+            robot.executePoseGoals(message.poses, 0)
+            break
+        case "moveBase":
+            robot.executeMoveBaseGoal(message.pose)
+            break
         case "setFollowGripper":
             robot.setPanTiltFollowGripper(message.toggle)
             break
         case "setDepthSensing":
             robot.setDepthSensing(message.toggle)
             break
+        case "setRunStop":
+            robot.setRunStop(message.toggle)
+            break
+        case "navigateToAruco":
+            robot.executeNavigateToArucoGoal(message.name, message.pose.transform)
+            break
+        case "setArucoMarkers":
+            robot.setArucoMarkers(message.toggle)
+            break
         case "lookAtGripper":
             robot.lookAtGripper(0, 0)
+            break
+        case "getOccupancyGrid":
+            robot.getOccupancyGrid()
+            break
+        case "updateArucoMarkersInfo":
+            robot.updateArucoMarkersInfo()
+            break;
+        case "setArucoMarkerInfo":
+            robot.setArucoMarkerInfo(message.info)
+            break;    
+        case "deleteArucoMarker":
+            robot.deleteArucoMarker(message.markerID)
+            break;    
+        case "addArucoMarker":
+            robot.addArucoMarker(message.markerID, message.markerInfo)
+            break;    
+        case "getRelativePose":
+            robot.getRelativePose(message.marker_name)
+            break;
     }
+};
+
+function disconnectFromRobot() {
+    robot.closeROSConnection()
+    connection.hangup()
+}
+
+window.onbeforeunload = () => {
+    robot.closeROSConnection()
+    connection.hangup()
 };
 
 // New method of rendering in react 18

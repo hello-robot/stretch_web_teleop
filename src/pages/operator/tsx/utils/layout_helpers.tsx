@@ -1,4 +1,4 @@
-import { ParentComponentDefinition, ComponentDefinition, ComponentType, LayoutDefinition } from "operator/tsx/utils/component_definitions";
+import { ParentComponentDefinition, ComponentDefinition, ComponentType, LayoutDefinition, LayoutGridDefinition } from "operator/tsx/utils/component_definitions";
 
 /**
  * Moves a component from an old path to a new path
@@ -31,6 +31,9 @@ export function moveInLayout(
     const newParent = getParent(newPathSplit, layout);
     console.log('newparent', newParent)
 
+    // Remove the child from the old parent
+    removeChildFromParent(oldParent, oldPathSplit, oldChildIdx, layout);
+
     // Put the child into the new parent
     putChildInParent(newParent, temp, newChildIdx);
     console.log('after adding child', newParent.children);
@@ -39,8 +42,20 @@ export function moveInLayout(
     if (oldParent === newParent && oldChildIdx > newChildIdx)
         oldChildIdx++;
 
-    // Remove the child from the old parent
-    removeChildFromParent(oldParent, oldPathSplit, oldChildIdx, layout);
+    // If newPath only contains one element it is a layout grid with one panel
+    // Add 0 to the path to point to select first child in layout grid
+    // if (newParent.type == ComponentType.LayoutGrid) {
+    //     console.log(newPathSplit)
+    if (newParent.type == ComponentType.LayoutGrid) {
+        if (+newPathSplit[0] === layout.children.length) newPathSplit[0] = (+newPathSplit[0] - 1).toString()  
+        return newPathSplit.join('-')
+    } 
+    if (newParent.type == ComponentType.Layout) {
+        if (+newPathSplit[0] === layout.children.length) newPathSplit[0] = (+newPathSplit[0] - 1).toString() 
+        if (newPathSplit.length === 1) newPathSplit.push('0')
+        return newPathSplit.join('-')
+    }
+    // }
 
     // Check if removing the old path changes the new path
     // note: this happens when the old path was a sibling with a lower index to
@@ -63,6 +78,7 @@ export function moveInLayout(
         newPathSplit[oldPathLastIdx] = "" + (+newPathSplit[oldPathLastIdx] - 1);
         console.log('updated path', newPathSplit.join('-'))
     }
+
     return newPathSplit.join('-');
 }
 
@@ -81,6 +97,10 @@ export function addToLayout(
     const newChildIdx = +newPathSplit.slice(-1);
     const newParent = getParent(newPathSplit, layout);
     putChildInParent(newParent, definition, newChildIdx);
+
+    // If newPath only contains one element it is a layout grid with one panel
+    // Add 0 to the path to point to select first child in layout grid
+    return newPathSplit.length == 1 ? newPath + '-0' : newPath
 }
 
 /**
@@ -111,7 +131,7 @@ function removeChildFromParent(
     childIdx: number,
     layout: LayoutDefinition
 ) {
-    // If this is the last tab in a tabs component, then delete the entire tabs
+    // If this is the last tab in a panel, then delete the entire panel
     if (parent.type === ComponentType.Panel && parent.children.length === 1) {
         const parentIdx = +childSplitPath.slice(-2, -1);
         // note: since tabs cannot be nested, we can assume the layout is the 
@@ -119,7 +139,13 @@ function removeChildFromParent(
         layout.children.splice(parentIdx, 1);
     }
     parent.children.splice(childIdx, 1);
+    console.log(parent.type, parent.children.length)
 
+    if (parent.type == ComponentType.LayoutGrid && parent.children.length === 0) {
+        const parentIdx = +childSplitPath.slice(0, 1);
+        console.log(layout.children, childSplitPath, parentIdx)
+        layout.children.splice(parentIdx, 1);
+    }
 }
 
 /**
@@ -157,7 +183,10 @@ function getChildFromParent (parent: ParentComponentDefinition, childIdx: number
  */
 function putChildInParent (parent: ParentComponentDefinition, child: ComponentDefinition, childIdx: number) {
     if (parent.children) {
-        parent.children.splice(childIdx, 0, child)
+        parent.type == ComponentType.Layout ?
+            parent.children.splice(childIdx, 0, {type: ComponentType.LayoutGrid, children: [child]} as LayoutGridDefinition)
+            :
+            parent.children.splice(childIdx, 0, child)
     } else {
         parent.children = [child]
     }

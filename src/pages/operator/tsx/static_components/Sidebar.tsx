@@ -1,9 +1,10 @@
 import React from "react"
 import { className } from "shared/util";
-import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId } from "../utils/component_definitions";
+import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId, MapDefinition } from "../utils/component_definitions";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
+import { storageHandler } from "operator/tsx/index";
 
 type SidebarProps = {
     hidden: boolean;
@@ -72,6 +73,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case (ComponentType.Panel):
         case (ComponentType.VirtualJoystick):
         case (ComponentType.ButtonGrid):
+        case (ComponentType.Map):
             return definition.type;
         default:
             throw Error(`Cannot get description for component type ${definition.type}\nYou may need to add a case for this component in the switch statement.`)
@@ -87,6 +89,22 @@ export type GlobalOptionsProps = {
     /** If the voice controls should be displayed. */
     displayVoiceControl: boolean;
     setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
+    /** If the save/load poses should be displayed. */
+    displayPoseLibrary: boolean;
+    setDisplayPoseLibrary: (displayPoseLibrary: boolean) => void;
+    
+    /** If the save/load poses should be displayed. */
+    displayMovementRecorder: boolean;
+    setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
+    
+    /** If the save/load aruco markers should be displayed. */
+    displayArucoMarkers: boolean;
+    setDisplayArucoMarkers: (displayArucoMarkers: boolean) => void;
+    
+    /** If the button text labels should be displayed */
+    displayLabels: boolean;
+    setDisplayLabels: (displayLabels: boolean) => void;
+    
     /** List of names of the default layouts. */
     defaultLayouts: string[],
     /** List of names of the user's custom layouts. */
@@ -114,9 +132,29 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
                 <OnOffToggleButton
+                    on={props.displayLabels}
+                    onClick={() => props.setDisplayLabels(!props.displayLabels)}
+                    label="Display button text labels"
+                />
+                {/* <OnOffToggleButton
                     on={props.displayVoiceControl}
                     onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
                     label="Display voice control"
+                /> */}
+                <OnOffToggleButton
+                    on={props.displayPoseLibrary}
+                    onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
+                    label="Display pose recorder"
+                />
+                <OnOffToggleButton
+                    on={props.displayMovementRecorder}
+                    onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
+                    label="Display movement recorder"
+                />
+                <OnOffToggleButton
+                    on={props.displayArucoMarkers}
+                    onClick={() => props.setDisplayArucoMarkers(!props.displayArucoMarkers)}
+                    label="Display aruco marker navigator"
                 />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}
@@ -187,12 +225,13 @@ const LoadLayoutModal = (props: {
             acceptButtonText="Load Layout"
             acceptDisabled={selectedIdx === undefined}
         >
-            <p><b>Select layout to load</b></p>
+            <label htmlFor="load-layout-name"><b>Load Layout</b></label>
             <Dropdown
                 onChange={setSelectedIdx}
                 selectedIndex={selectedIdx}
                 possibleOptions={defaultOptions.concat(customOptions)}
                 placeholderText="Select a layout..."
+                placement="bottom"
             />
         </PopupModal>
     )
@@ -218,10 +257,10 @@ const SaveLayoutModal = (props: {
             acceptButtonText="Save"
             acceptDisabled={name.length < 1}
         >
-            <label htmlFor="new-layout-name"><b>New Tab Label</b></label>
+            <label htmlFor="new-layout-name"><b>Save Layout</b></label>
             <input autoFocus type="text" id="new-layout-name" name="new-tab-name"
                 value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="name for this layout"
+                placeholder="Name for this layout"
             />
         </PopupModal>
     )
@@ -246,6 +285,13 @@ const SidebarOptions = (props: OptionsProps) => {
             switch ((props.selectedDefinition as CameraViewDefinition).id!) {
                 case (CameraViewId.overhead):
                     contents = <OverheadVideoStreamOptions {...props} />;
+                    break;
+                case (CameraViewId.realsense):
+                    contents = <VideoStreamOptions {...props} />;
+                    break;
+                case (CameraViewId.gripper):
+                    contents = <VideoStreamOptions {...props} />;
+                    break;
             }
             break;
         case (ComponentType.SingleTab):
@@ -263,8 +309,9 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.selectedDefinition as CameraViewDefinition;
     const pd = definition.children.length > 0 && definition.children[0].type == ComponentType.PredictiveDisplay;
     const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
+    const [showButtons, setShowButtons] = React.useState<boolean>(true);
+
     function togglePredictiveDisplay() {
-        console.log('toggle')
         const newPdOn = !predictiveDisplayOn;
         setPredictiveDisplayOn(newPdOn);
         if (newPdOn) {
@@ -275,12 +322,46 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
         }
         props.updateLayout();
     }
+    
+    function toggleButtons() {
+        setShowButtons(!showButtons);
+        definition.displayButtons = showButtons ? true : false
+        props.updateLayout();
+    }
+
     return (
         <React.Fragment>
             <OnOffToggleButton
                 on={predictiveDisplayOn}
                 onClick={togglePredictiveDisplay}
                 label="Predictive Display"
+            />
+            <OnOffToggleButton
+                on={showButtons}
+                onClick={toggleButtons}
+                label="Display Buttons"
+            />
+        </React.Fragment>
+    )
+}
+
+/** Options for the camera video stream layout component. */
+const VideoStreamOptions = (props: OptionsProps) => {
+    const definition = props.selectedDefinition as CameraViewDefinition;
+    const [showButtons, setShowButtons] = React.useState<boolean>(true);
+    
+    function toggleButtons() {
+        setShowButtons(!showButtons);
+        definition.displayButtons = showButtons ? true : false
+        props.updateLayout();
+    }
+
+    return (
+        <React.Fragment>
+            <OnOffToggleButton
+                on={showButtons}
+                onClick={toggleButtons}
+                label="Display Buttons"
             />
         </React.Fragment>
     )
@@ -342,7 +423,7 @@ const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
             >
                 {text}
             </button>
-            <span>{props.label}</span>
+            <span className="global-label">{props.label}</span>
         </div>
     );
 }
@@ -369,7 +450,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.CameraView, ids: Object.values(CameraViewId) },
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
-        { type: ComponentType.VirtualJoystick }
+        { type: ComponentType.VirtualJoystick },
+        { type: ComponentType.Map }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
@@ -380,6 +462,9 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             case (ComponentType.Panel):
             case (ComponentType.CameraView):
                 (definition as ParentComponentDefinition).children = []
+                break;
+            case (ComponentType.Map):
+                (definition as MapDefinition).storageHandler = storageHandler
                 break;
         }
 
