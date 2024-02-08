@@ -10,7 +10,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     displayMovementRecorder: false,
     displayArucoMarkers: false,
     displayLabels: true,
-    actionMode: ActionMode.PressRelease,
+    actionMode: ActionMode.PressAndHold,
     children: [
         {
             type: ComponentType.LayoutGrid,

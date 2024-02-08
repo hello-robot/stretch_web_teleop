@@ -8,7 +8,7 @@ import { StorageHandler } from "../storage_handler/StorageHandler";
 /** Enumerator for the possible action modes */
 export enum ActionMode {
     StepActions = 'Step-Actions',
-    PressRelease = 'Press-Release',
+    PressAndHold = 'Press-And-Hold',
     ClickClick = 'Click-Click'
 }
 

@@ -28,7 +28,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                     },
                     onLeave: () => { this.stopCurrentAction(); setActiveCallback(false); }
                 }
-            case ActionMode.PressRelease:
+            case ActionMode.PressAndHold:
                 return {
                     onClick: (length: number, angle: number) => {
                         this.continuousBaseDrive(baseLinVel * length, baseAngVel * angle);

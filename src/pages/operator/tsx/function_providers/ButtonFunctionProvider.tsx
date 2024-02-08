@@ -232,7 +232,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     },
                     onLeave: onLeave
                 };
-            case ActionMode.PressRelease:
+            case ActionMode.PressAndHold:
             case ActionMode.ClickClick:
                 switch (buttonPadFunction) {
                     case ButtonPadButton.BaseForward:
@@ -269,7 +269,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         break;
                 }
 
-                return (FunctionProvider.actionMode === ActionMode.PressRelease) ? {
+                return (FunctionProvider.actionMode === ActionMode.PressAndHold) ? {
                     onClick: () => {
                         action();
                         this.setButtonActiveState(buttonPadFunction);
