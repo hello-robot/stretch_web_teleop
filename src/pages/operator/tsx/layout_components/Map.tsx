@@ -62,11 +62,14 @@ export const Map = (props: CustomizableComponentProps) => {
     
     // Constrain the width or height when the stream gets too large
     React.useEffect(() => {
+        let map = mapFn.GetMap
+        let width = map ? map.info.width : 60
+        let height = map ? map.info.height : 100
         var canvas = new Canvas({
             divID: 'map',
             className: 'mapCanvas',
-            width: mapFn.GetMap.info.width * 5,  // Scale width to avoid blurriness when making map larger
-            height: mapFn.GetMap.info.height * 5 // Scale height to avoid blurriness when making map larger
+            width: width * 5,  // Scale width to avoid blurriness when making map larger
+            height: height * 5 // Scale height to avoid blurriness when making map larger
         });
         var occupancyGridMap = new OccupancyGrid({
             functs: mapFn,

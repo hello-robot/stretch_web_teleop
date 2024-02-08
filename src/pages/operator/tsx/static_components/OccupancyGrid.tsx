@@ -133,6 +133,20 @@ export class OccupancyGrid extends React.Component {
         var canvas = document.createElement('canvas')
         var context = canvas!.getContext('2d');
 
+        if (!this.map) {
+            var rect = new createjs.Shape();
+            rect.graphics.beginStroke('#000000');
+            rect.graphics.setStrokeStyle(3)
+            rect.graphics.drawRect(0, 0, 300, 500);
+            rect.graphics.endStroke();
+            var text = new createjs.Text('Could not load map', "30px Arial")
+            text.x = 20;
+            text.y = 250;
+            this.rootObject.addChild(rect)
+            this.rootObject.addChild(text)
+            return
+        }
+        
         // save the metadata we need
         this.origin = new ROSLIB.Pose({
             position: this.map.info.origin.position,
@@ -320,6 +334,9 @@ export class OccupancyGrid extends React.Component {
 
     createOccupancyGridClient() {
         this.createOccupancyGrid()
+
+        if (!this.map) return;
+
         this.addCurrenPoseMarker()
 
         this.rootObject.on('mousedown', (event) => {

@@ -2,7 +2,7 @@ import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, ExecuteProcess
-from launch.conditions import IfCondition, UnlessCondition
+from launch.conditions import IfCondition, UnlessCondition, LaunchConfigurationNotEquals
 from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, FindExecutable, OrSubstitution, AndSubstitution, NotSubstitution
 from launch.substitutions import ThisLaunchFileDir
@@ -20,7 +20,7 @@ def generate_launch_description():
     # Declare launch arguments
     params_file = DeclareLaunchArgument('params', default_value=[
         PathJoinSubstitution([teleop_interface_package, 'config', 'configure_video_streams_params.yaml'])])
-    map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map (required)')
+    map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map', default_value='')
     d405_arg = DeclareLaunchArgument('d405', default_value='true')
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
     navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='true')
@@ -111,24 +111,6 @@ def generate_launch_description():
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
         condition=UnlessCondition(LaunchConfiguration('navigation_camera'))
     )
-
-    map_server_cmd = Node(
-        package='nav2_map_server',
-        executable='map_server',
-        output='screen',
-        parameters=[{'yaml_filename': PathJoinSubstitution([teleop_interface_package, 'maps', LaunchConfiguration('map_yaml')])}]
-    )
-
-    start_lifecycle_manager_cmd = Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager',
-            output='screen',
-            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
-            parameters=[{'use_sim_time': True},
-                        {'autostart': True},
-                        {'node_names': ['map_server']}]
-    )
                         
     tf2_web_republisher_node = Node(
         package='tf2_web_republisher_py',
@@ -166,50 +148,23 @@ def generate_launch_description():
     rplidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([stretch_core_path, '/launch/rplidar.launch.py']))
 
-    navigation_bringup_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([stretch_navigation_path, '/launch/bringup_launch.py']),
-        launch_arguments={'use_sim_time': 'false', 
-                          'autostart': 'true',
-                          'map': PathJoinSubstitution([teleop_interface_package, 'maps', LaunchConfiguration('map_yaml')]),
-                          'params_file': LaunchConfiguration('nav2_params_file'),
-                          'use_rviz': 'false'}.items())
-
-    detect_aruco_markers_node = Node(
-        package='stretch_web_teleop',
-        executable='detect_aruco_markers.py',
-        name='detect_aruco_node',
-        output='screen',
-        parameters=[dict_file_path]
-    )
-
-    navigate_to_aruco_node = Node(
-        package='stretch_web_teleop',
-        executable='navigate_to_aruco',
-        name='navigate_to_aruco_node',
-        output='screen',
-        parameters=[dict_file_path]
-    )
-
-    head_scan_node = Node(
-        package='stretch_web_teleop',
-        executable='head_scan.py',
-        name='head_scan_node',
-        output='screen'
-    )
-
-    depthimage_to_laserscan_node = Node(
-        package='depthimage_to_laserscan',
-        executable='depthimage_to_laserscan_node',
-        name='depthimage_to_laserscan',
-        remappings=[('depth', '/camera/depth/image_rect_raw'),
-                    ('depth_camera_info', '/camera/depth/camera_info')],
-        parameters=[depthimage_to_laserscan_config]
+    navigation_bringup_launch = GroupAction(
+        condition=LaunchConfigurationNotEquals('map_yaml', ''),
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([stretch_navigation_path, '/launch/bringup_launch.py']),
+                launch_arguments={'use_sim_time': 'false', 
+                                'autostart': 'true',
+                                'map': PathJoinSubstitution([teleop_interface_package, 'maps', LaunchConfiguration('map_yaml')]),
+                                'params_file': LaunchConfiguration('nav2_params_file'),
+                                'use_rviz': 'false'}.items())
+        ]
     )
 
     ld = LaunchDescription([
-        params_file,
         map_yaml,
         nav2_params_file_param,
+        params_file,
         gripper_camera_arg,
         d405_arg,
         navigation_camera_arg,
@@ -223,16 +178,11 @@ def generate_launch_description():
         uvc_navigation_camera_group,
         navigation_camera_node,
         configure_video_streams_node,
-        # map_server_cmd,
-        # start_lifecycle_manager_cmd,
         tf2_web_republisher_node,
         stretch_driver_launch,
         rosbridge_launch,
         rplidar_launch,
-        navigation_bringup_launch,
-        # detect_aruco_markers_node,
-        head_scan_node,
-        # depthimage_to_laserscan_node
+        navigation_bringup_launch
     ])
 
     ld.add_action(
