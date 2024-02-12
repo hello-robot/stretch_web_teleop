@@ -215,12 +215,12 @@ export class WebRTCConnection extends React.Component {
 
             this.peerConnection.onconnectionstatechange = () => {
                 if (!this.peerConnection) throw 'pc is undefined';
+                console.log(this.peerConnection.connectionState)
                 if (this.peerConnection.connectionState === "failed" || this.peerConnection.connectionState === "disconnected") {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
                     if (this.onConnectionEnd) this.onConnectionEnd();
                     this.createPeerConnection()
                 }
-                console.log(this.peerConnection.connectionState)
             };
 
             this.peerConnection.onicecandidateerror = (event) => {
@@ -301,7 +301,7 @@ export class WebRTCConnection extends React.Component {
 
     sendData(obj: WebRTCMessage | WebRTCMessage[]) {
         if (!this.messageChannel || (this.messageChannel.readyState !== 'open')) {
-            console.warn("Trying to send data, but data channel isn't ready")
+            // console.warn("Trying to send data, but data channel isn't ready")
             return;
         }
         const data = JSON.stringify(obj);

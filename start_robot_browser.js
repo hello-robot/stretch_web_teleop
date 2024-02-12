@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const puppeteer = require('puppeteer');
-// const { chromium } = require('playwright');
+const { firefox } = require('playwright');
 const logId = 'start_robot_browser.js';
 
 // You may want to change this to test that the
@@ -25,22 +24,17 @@ if (process.argv.length > 2) {
 	}
 	///////////////////////////////////////////////
 
-	// const browser = await chromium.launch({
-	// 	headless: true, // default is true
-	// 	ignoreHTTPSErrors: true, // avoid ERR_CERT_COMMON_NAME_INVALID
-	// 	defaultViewport: null,
-	// 	args: ['--use-fake-ui-for-media-stream', //gives permission to access the robot's cameras and microphones (cleaner and simpler than changing the user directory)
-	// 		'--disable-features=WebRtcHideLocalIpsWithMdns', // Disables mDNS hostname use in local network P2P discovery. Necessary for enterprise networks that don't forward mDNS traffic
-    //         '--ignore-certificate-errors']
-    // });
-	const browser = await puppeteer.launch({
+	const browser = await firefox.launch({
 		headless: true, // default is true
-		ignoreHTTPSErrors: true, // avoid ERR_CERT_COMMON_NAME_INVALID
-			args: ['--use-fake-ui-for-media-stream', //gives permission to access the robot's cameras and microphones (cleaner and simpler than changing the user directory)
+		defaultViewport: null,
+		args: ['--use-fake-ui-for-media-stream', //gives permission to access the robot's cameras and microphones (cleaner and simpler than changing the user directory)
 			'--disable-features=WebRtcHideLocalIpsWithMdns', // Disables mDNS hostname use in local network P2P discovery. Necessary for enterprise networks that don't forward mDNS traffic
-            '--ignore-certificate-errors']});
+            '--ignore-certificate-errors']
+    });
 
-	const page = await browser.newPage();
+	const context = await browser.newContext({ ignoreHTTPSErrors: true }); // avoid ERR_CERT_COMMON_NAME_INVALID
+
+	const page = await context.newPage();
 	
 	while (try_again) {
 		try {
