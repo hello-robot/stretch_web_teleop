@@ -81,14 +81,14 @@
 }
 
 /* Dark background behind popup */
-#popup-background {
+#popup-background, .loader-background {
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
     background-color: black;
-    opacity: 40%;
+    opacity: 60%;
     z-index: 3;
 }
 

@@ -76,8 +76,8 @@
     position: absolute;
     top: calc(50% - 5em);
     left: calc(50% - 5em);
-    width: 10em;
-    height: 10em;
+    width: 11em;
+    height: 11em;
     border: 1.1em solid rgba(0, 0, 0, 0.2);
     border-left: 1.1em solid #000000;
     border-radius: 50%;
@@ -86,9 +86,10 @@
 
 .loading-text {
     position: absolute;
-    top: calc(50% - 1.5em);
+    top: calc(50% - 1em);
     left: calc(50% - 2em);
     font-size: large;
+    z-index: 4;
 }
 
 .control-modes {
