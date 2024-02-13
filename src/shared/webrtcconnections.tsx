@@ -1,5 +1,5 @@
 import React from 'react'
-import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
+import { CameraInfo, delay, SignallingMessage, WebRTCMessage } from "shared/util";
 import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'shared/util'
 
@@ -30,6 +30,7 @@ export class WebRTCConnection extends React.Component {
     private ignoreOffer: boolean = false
     private isSettingRemoteAnswerPending = false
     private pendingIceCandidates: RTCIceCandidate[]
+    private dataChannelReceivedByteCount: number = 0;
 
     cameraInfo: CameraInfo = {}
 
@@ -216,10 +217,12 @@ export class WebRTCConnection extends React.Component {
             this.peerConnection.onconnectionstatechange = () => {
                 if (!this.peerConnection) throw 'pc is undefined';
                 console.log(this.peerConnection.connectionState)
-                if (this.peerConnection.connectionState === "failed" || this.peerConnection.connectionState === "disconnected") {
+                if (this.peerConnection.connectionState === "failed") {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
                     if (this.onConnectionEnd) this.onConnectionEnd();
                     this.createPeerConnection()
+                    delay(2000)
+                    this.peerRole == "operator" ? this.joinOperatorRoom() : this.joinRobotRoom()
                 }
             };
 
@@ -311,5 +314,20 @@ export class WebRTCConnection extends React.Component {
     onReceiveMessageCallback(event: { data: string }) {
         const obj: WebRTCMessage | WebRTCMessage[] = safelyParseJSON(event.data);
         if (this.onMessage) this.onMessage(obj)
+    }
+
+    async isConnected () {
+        var connected = false;
+
+        await this.peerConnection?.getStats(null).then(stats => {
+            stats.forEach(report => {
+                if (report.type == 'data-channel') {
+                    connected = report.bytesReceived > this.dataChannelReceivedByteCount ? true : false;
+                    this.dataChannelReceivedByteCount = report.bytesReceived;
+                }
+            })
+        });
+    
+        return connected;
     }
 }

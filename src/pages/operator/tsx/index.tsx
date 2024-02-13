@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, Root } from 'react-dom/client';
 import { WebRTCConnection } from 'shared/webrtcconnections';
-import { WebRTCMessage, RemoteStream, RobotPose, ROSOccupancyGrid } from 'shared/util';
+import { WebRTCMessage, RemoteStream, RobotPose, ROSOccupancyGrid, delay, waitUntil } from 'shared/util';
 import { RemoteRobot } from 'shared/remoterobot';
 import { cmd } from 'shared/commands';
 import { Operator } from './Operator';
@@ -28,8 +28,7 @@ let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>(
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
-let connectionResolved: boolean = false;
-
+let isConnected: boolean;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -55,24 +54,13 @@ connection = new WebRTCConnection({
     onConnectionEnd: disconnectFromRobot
 });
 
-connection.joinOperatorRoom()
+// connection.joinOperatorRoom()
 
-// Check if the WebRTC connection is resolved. Reload every 8 seconds until resolved.
-setTimeout(() => {
-    let isResolved = connection.connectionState() == 'connected'
-    if (connectionResolved != isResolved || !isResolved) {
-        connectionResolved = isResolved;
-        console.log("connection state: ", isResolved)
-        if (isResolved) { 
-            initializeOperator()
-            console.log('WebRTC connection is resolved.');
-        } 
-        else {
-            connection.hangup()
-            connection.joinOperatorRoom()
-        }
-    }
-}, 10000);
+setTimeout(async () => {
+    connection.joinOperatorRoom()
+    await delay(2000)
+    initializeOperator()
+}, 1000)
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -239,6 +227,33 @@ function renderOperator(storageHandler: StorageHandler) {
                 storageHandler={storageHandler}
             />
         )
+
+    if (!isMobile) {
+        var loader = document.createElement('div');
+        loader.className = 'loader'
+        var loaderText = document.createElement('div');
+        loaderText.className = 'reconnecting-text'
+        var text = document.createElement('p')
+        text.textContent = 'Reconnecting...'
+        loaderText.appendChild(text)
+        var loaderBackground = document.createElement('div');
+        loaderBackground.className = 'loader-background'
+
+        setInterval(async() => {
+            let connected = await connection.isConnected()
+            if (!connected && !window.document.body.contains(loader)) {
+                window.document.body.appendChild(loaderBackground)
+                window.document.body.appendChild(loaderText)
+                window.document.body.appendChild(loader)
+                isConnected = connected
+            } else if (connected && window.document.body.contains(loader)) {
+                window.document.body.removeChild(loaderBackground)
+                window.document.body.removeChild(loaderText)
+                window.document.body.removeChild(loader)
+                isConnected = connected
+            }
+        }, 1000)
+    }
 }
 
 function disconnectFromRobot() {

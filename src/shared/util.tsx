@@ -363,6 +363,8 @@ export async function waitUntil(condition, timeout=5000, checkInterval=100) {
     return await Promise.any([waitPromise, timeoutPromise])
 }
 
+export const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 /**
  * Creates a class name string based on a base class name and additional flags
  * to include.
