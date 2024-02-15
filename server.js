@@ -92,7 +92,7 @@ io.on('connection', function (socket) {
             //         console.log(process.name)
             //     } 
             // })
-            pm2.restart('start_robot_browser')
+            // pm2.restart('start_robot_browser')
         }
     })
 

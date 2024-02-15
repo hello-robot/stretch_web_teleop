@@ -275,7 +275,7 @@ export class WebRTCConnection extends React.Component {
             return;
         }
         console.log('Hanging up.');
-        this.stop();
+        // this.stop();
     }
 
     stop() {
