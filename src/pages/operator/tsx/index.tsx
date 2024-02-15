@@ -27,7 +27,7 @@ let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>(
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
-let isConnected: boolean;
+let isConnected: boolean = false;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -52,13 +52,19 @@ connection = new WebRTCConnection({
     onConnectionEnd: disconnectFromRobot
 });
 
-// connection.joinOperatorRoom()
+connection.joinOperatorRoom()
 
-setTimeout(async () => {
-    connection.joinOperatorRoom()
-    await delay(2000)
-    initializeOperator()
-}, 1000)
+// Check if the WebRTC connection is resolved. Reload every 2 seconds until resolved then render.
+let connectionInterval = setInterval(async () => {
+    let connected = await connection.isConnected();   
+    if (connected) {
+        initializeOperator()
+        clearInterval(connectionInterval)
+    } else {
+        connection.hangup()
+        connection.joinOperatorRoom()
+    }
+}, 2000)
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
