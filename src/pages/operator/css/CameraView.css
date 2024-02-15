@@ -34,6 +34,8 @@
     left: 0;
     left: 51px;
     top: 51px;
+    display: flex;
+    align-items: center;
 }
 
 .video-overlay-container::after {

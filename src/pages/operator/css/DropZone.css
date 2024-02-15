@@ -42,6 +42,7 @@
     width: 100%;
     height: 100%;
     opacity: 60%;
+    flex-grow: 1;
 }
 
 .drop-zone[hidden] {
