@@ -5,7 +5,7 @@ import { arucoMarkerFunctionProvider, buttonFunctionProvider, movementRecorderFu
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
-import "operator/css/Caregiver.css"
+import "operator/css/MobileOperator.css"
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
@@ -20,7 +20,7 @@ import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 
 /** Operator interface webpage */
-export const Caregiver = (props: {
+export const MobileOperator = (props: {
     remoteStreams: Map<string, RemoteStream>,
     storageHandler: StorageHandler
 }) => {
@@ -202,8 +202,8 @@ export const Caregiver = (props: {
     const markers = (show: boolean) => { return ( show ? <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback} hideLabels={false}/> : <></>)}
 
     return (
-        <div id="caregiver" onContextMenu={(e)=> e.preventDefault()}>
-            <div id="caregiver-body">
+        <div id="mobile-operator" onContextMenu={(e)=> e.preventDefault()}>
+            <div id="mobile-operator-body">
                 <div className={className('controls', {hideControls})} >
                     <div className={'switch-camera'}>
                         <button onPointerDown={() => {

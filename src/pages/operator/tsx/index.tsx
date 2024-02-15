@@ -18,7 +18,7 @@ import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
 import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
-import { Caregiver } from './Caregiver';
+import { MobileOperator } from './MobileOperator';
 import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
@@ -222,7 +222,7 @@ function renderOperator(storageHandler: StorageHandler) {
         ) 
         :
         root.render(
-            <Caregiver
+            <MobileOperator
                 remoteStreams={allRemoteStreams}
                 storageHandler={storageHandler}
             />

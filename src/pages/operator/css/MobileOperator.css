@@ -1,4 +1,4 @@
-#caregiver {
+#mobile-operator {
     height: 100%;
     touch-action: none;
     /* display: grid; */
@@ -62,7 +62,7 @@
     background-color: #084298;
 }
 
-#caregiver-body {
+#mobile-operator-body {
     display: flex;
     flex-direction: column;
     height: 100%;
