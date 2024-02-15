@@ -59,20 +59,10 @@ export class FirebaseStorageHandler extends StorageHandler {
             this.getUserDataFirebase().then(async (userData) => {
                 this.layouts = userData.layouts;
                 this.currentLayout = userData.currentLayout
-                this.poses = userData.poses
                 this.mapPoses = userData.map_poses
                 this.mapPoseTypes = userData.map_pose_types
                 this.recordings = userData.recordings
-                this.markerNames = userData.marker_names
-                this.markerIDs = userData.marker_ids
-                this.markerInfo = userData.marker_info
 
-                if (!this.markerNames) {
-                    this.markerNames = this.loadDefaultArucoMarkerNames()
-                    this.markerIDs = this.loadDefaultArucoMarkerIDs()
-                    this.markerInfo = this.loadDefaultArucoMarkers()
-                    this.writeMarkers()
-                }
                 this.onReadyCallback()
             }).catch((error) => {
                 console.log("Detected that FirebaseModel isn't initialized for user ", this.uid);
@@ -145,37 +135,6 @@ export class FirebaseStorageHandler extends StorageHandler {
 
         let updates: any = {};
         updates['/users/' + (this.uid) + '/layouts'] = layouts;
-        return update(ref(this.database), updates);
-    }
-
-    public getPoseNames(): string[] {
-        if (!this.poses) return []
-        return Object.keys(this.poses)
-    }
-
-    public savePose(name: string, jointState: RobotPose) {
-        this.poses[name] = jointState
-        this.writePoses(this.poses)
-    }
-
-    public getPose(poseName: string): RobotPose {
-        let pose = this.poses![poseName]
-        if (!pose) throw Error(`Could not load pose ${poseName}`);
-        return JSON.parse(JSON.stringify(pose));
-    }
-
-    public deletePose(poseName: string): void {
-        let pose = this.poses![poseName]
-        if (!pose) throw Error(`Could not delete pose ${poseName}`);
-        delete this.poses[poseName]
-        this.writePoses(this.poses)
-    }
-
-    private async writePoses(poses: { [name: string]: RobotPose }) {
-        this.poses = poses;
-
-        let updates: any = {};
-        updates['/users/' + (this.uid) + '/poses'] = poses;
         return update(ref(this.database), updates);
     }
 
@@ -267,55 +226,4 @@ export class FirebaseStorageHandler extends StorageHandler {
         delete this.recordings[recordingName]
         this.writeRecordings(this.recordings)
     }
-
-    public saveMarker(markerID: string, markerName: string, size: string): void {
-        this.markerNames.push(markerName)
-        this.markerIDs.push(markerID)
-        this.markerInfo.aruco_marker_info[markerID] = {
-            length_mm: Number(size),
-            use_rgb_only: false,
-            name: markerName,
-            link: null
-        }
-        this.writeMarkers()
-    }
-
-    public deleteMarker(markerName: string): void {
-        if (!this.markerNames.includes(markerName)) throw Error(`Could not delete marker ${markerName}`);
-        let index = this.markerNames.indexOf(markerName)
-        let markerID = this.markerIDs![index]
-        if (!this.markerIDs.includes(markerID)) throw Error(`Could not delete marker ${markerName}`);
-        
-        delete this.markerNames[index]
-        delete this.markerIDs[index]
-        delete this.markerInfo.aruco_marker_info[markerID]
-        this.writeMarkers()
-    }
-
-    public getArucoMarkerNames(): string[] {
-        return JSON.parse(JSON.stringify(this.markerNames));
-    }
-
-    public getArucoMarkerIDs(): string[] {
-        return JSON.parse(JSON.stringify(this.markerIDs));
-    }
-
-    public getArucoMarkerInfo(): ArucoMarkersInfo {
-        return JSON.parse(JSON.stringify(this.markerInfo));
-    }
-
-    public saveRelativePose(markerID: string, pose: ROSLIB.Transform): void {
-        if (!this.markerIDs.includes(markerID)) throw Error(`Could not save pose to marker ${markerID}`);
-        this.markerInfo.aruco_marker_info[markerID].pose = pose
-        this.writeMarkers()
-    }
-
-    private async writeMarkers() {
-        let updates: any = {};
-        updates['/users/' + (this.uid) + '/markerNames'] = this.markerNames;
-        updates['/users/' + (this.uid) + '/markerIDs'] = this.markerIDs;
-        updates['/users/' + (this.uid) + '/markerInfo'] = this.markerInfo;
-        return update(ref(this.database), updates);
-    }
-
 }

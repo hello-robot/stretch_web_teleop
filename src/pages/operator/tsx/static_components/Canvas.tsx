@@ -7,8 +7,6 @@ export class Canvas extends React.Component {
     private width: number;
     private height: number;
     public scene?: createjs.Stage;
-    private x_prev_shift?: number;
-    private y_prev_shift?: number;
 
     constructor(props: {
         divID: string,
@@ -25,8 +23,6 @@ export class Canvas extends React.Component {
     }
 
     createCanvas() {
-        var background = '#111111';
-
         // create the canvas to render to
         var canvas = document.createElement('canvas');
         canvas.setAttribute("class", this.className);
@@ -45,22 +41,11 @@ export class Canvas extends React.Component {
     }
 
     scaleToDimensions(width: number, height: number) {
-        if (!this.scene) throw 'ROSViewer scene is undefined!'
+        if (!this.scene) throw 'Canvas scene is undefined!'
         
         // save scene scaling
         this.scene.scaleX = this.width / width;
         this.scene.scaleY = this.height / height;
         this.scene.update()
-    }
-
-    shift(x: number, y: number) {
-        if (!this.scene) throw 'ROSViewer scene is undefined!'
-        
-        this.x_prev_shift = this.scene.x;
-        this.y_prev_shift = this.scene.y;
-
-        // shift scene by scaling the desired offset
-        this.scene.x -= (x * this.scene.scaleX);
-        this.scene.y += (y * this.scene.scaleY);
     }
 }

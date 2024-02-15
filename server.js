@@ -77,22 +77,14 @@ io.on('connection', function (socket) {
             if (io.sockets.adapter.rooms.get('robot').size < 2) {
                 console.log('robot is available')
                 socket.join('robot');
-                // socket.emit('join', 'robot', socket.id)
-                // socket.emit('robot available', true)
                 socket.in('robot').emit('joined', 'robot');
             } else {
                 console.log('robot not available because room is full')
                 socket.emit('robot available', false)
             }
         } else {
-            console.log('robot not available, restarting robot browser')
+            console.log('robot not available')
             socket.emit('robot available', false)
-            // pm2.list((err, processes) => { 
-            //     processes.forEach(process => {
-            //         console.log(process.name)
-            //     } 
-            // })
-            // pm2.restart('start_robot_browser')
         }
     })
 

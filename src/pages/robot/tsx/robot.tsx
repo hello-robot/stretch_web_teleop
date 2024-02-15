@@ -1,8 +1,7 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, FollowJointTrajectoryActionResult, MarkerArray, MoveBaseActionResult, ArucoMarkersInfo, ArucoNavigationState, MoveBaseState, ArucoNavigationFeedback, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ArucoMarkerInfo, ROSBatteryState } from 'shared/util';
-import ROSLIB, { Goal, Message, Ros, Topic } from "roslib";
-import { JOINT_LIMITS, RobotPose, generateUUID, waitUntil } from 'shared/util';
-import { response } from 'express';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, MoveBaseState, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ROSBatteryState } from 'shared/util';
+import ROSLIB from "roslib";
+import { JOINT_LIMITS, RobotPose } from 'shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
@@ -14,23 +13,16 @@ export class Robot extends React.Component {
     private poseGoalComplete?: boolean;
     private isRunStopped?: boolean;
     private moveBaseGoal?: ROSLIB.ActionGoal;
-    private navigateToArucoGoal?: ROSLIB.ActionGoal;
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
-    private navigateToArucoClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
     private setDepthSensingService?: ROSLIB.Service;
     private setRunStopService?: ROSLIB.Service;
-    private setArucoMarkersService?: ROSLIB.Service;
-    private navigateToArucoService?: ROSLIB.Service;
-    private arucoMarkerUpdateService?: ROSLIB.Service;
-    private getRelativePoseService?: ROSLIB.Service
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
-    private arucoMarkerInfoParam?: ROSLIB.Param;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
     private jointStateCallback: (jointState: ROSJointState) => void
@@ -38,9 +30,6 @@ export class Robot extends React.Component {
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
     private moveBaseResultCallback: (goalState: MoveBaseState) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
-    private markerArrayCallback: (markers: MarkerArray) => void
-    private arucoNavigationStateCallback: (state: ArucoNavigationState) => void
-    private relativePoseCallback: (pose: ROSLIB.Transform) => void
     private isRunStoppedCallback: (isRunStopped: boolean) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
     private subscriptions: ROSLIB.Topic[] = []
@@ -51,9 +40,6 @@ export class Robot extends React.Component {
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
         moveBaseResultCallback: (goalState: MoveBaseState) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
-        markerArrayCallback: (markers: MarkerArray) => void,
-        arucoNavigationStateCallback: (state: ArucoNavigationState) => void,
-        relativePoseCallback: (pose: ROSLIB.Transform) => void,
         isRunStoppedCallback: (isRunStopped: boolean) => void
     }) {
         super(props);
@@ -62,9 +48,6 @@ export class Robot extends React.Component {
         this.occupancyGridCallback = props.occupancyGridCallback
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
-        this.markerArrayCallback = props.markerArrayCallback
-        this.arucoNavigationStateCallback = props.arucoNavigationStateCallback
-        this.relativePoseCallback = props.relativePoseCallback
         this.isRunStoppedCallback = props.isRunStoppedCallback
     }
     
@@ -95,29 +78,18 @@ export class Robot extends React.Component {
     async onConnect() {
         this.subscribeToJointState()
         this.subscribeToBatteryState()
-        // this.subscribeToOccupancyGrid()
-        this.subscribeToMarkerArray()
-        // this.subscribeToArucoNavigationState()
-        // this.subscribeToJointTrajectoryResult()
         this.subscribeToMoveBaseResult()
-        // this.subscribeToNavigateToArucoFeedback()
         this.subscribeToIsRunStopped()
         this.createTrajectoryClient()
         this.createMoveBaseClient()
-        this.createNavigateToArucoClient()
         this.createCmdVelTopic()
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
         this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
         this.createRunStopService()
-        this.createArucoMarkerService()
-        // this.createArucoNavigationService()
-        this.createArucoMarkerUpdateService()
-        this.createGetRelativePoseService()
         this.createRobotFrameTFClient()
         this.createMapFrameTFClient()
-        this.createArucoMarkerParamServer()
         this.subscribeToGripperFingerTF()
         this.subscribeToHeadTiltTF()
         this.subscribeToMapTF()
@@ -186,32 +158,6 @@ export class Robot extends React.Component {
         })
     }
 
-    subscribeToMarkerArray() {
-        let topic: ROSLIB.Topic<MarkerArray> = new ROSLIB.Topic({
-            ros: this.ros,
-            name: 'aruco/marker_array',
-            messageType: 'visualization_msgs/MarkerArray'
-        })
-        this.subscriptions.push(topic)
-        
-        topic.subscribe((msg: MarkerArray) => {
-            if (this.markerArrayCallback) this.markerArrayCallback(msg)
-        })
-    }
-
-    subscribeToJointTrajectoryResult() {
-        let topic: ROSLIB.Topic<FollowJointTrajectoryActionResult> = new ROSLIB.Topic({
-            ros: this.ros,
-            name: 'stretch_controller/follow_joint_trajectory/result',
-            messageType: 'control_msgs/action/FollowJointTrajectory'
-        });
-        this.subscriptions.push(topic)
-        
-        topic.subscribe((msg: FollowJointTrajectoryActionResult) => {
-            this.poseGoalComplete = msg.status.status > 2 ? true : false
-        });
-    };
-
     subscribeToMoveBaseResult() {
         let topic: ROSLIB.Topic<NavigateToPoseActionResult> = new ROSLIB.Topic({
             ros: this.ros,
@@ -243,31 +189,6 @@ export class Robot extends React.Component {
         });
     }
 
-    // subscribeToArucoNavigationState() {
-    //     let topic: ROSLIB.Topic<ArucoNavigationState> = new ROSLIB.Topic({
-    //         ros: ros,
-    //         name: '/navigate_to_aruco/state',
-    //         messageType: 'stretch_teleop_interface/ArucoNavigationState'
-    //     })
-
-    //     topic.subscribe((msg: ArucoNavigationState) => {
-    //         if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg)
-    //     })
-    // }
-
-    subscribeToNavigateToArucoFeedback() {
-        let topic: ROSLIB.Topic<ArucoNavigationFeedback> = new ROSLIB.Topic({
-            ros: this.ros,
-            name: '/navigate_to_aruco/feedback',
-            messageType: 'stretch_teleop_interface/NavigateToArucoFeedback'
-        })
-        this.subscriptions.push(topic)
-
-        topic.subscribe((msg: ArucoNavigationFeedback) => {
-            if (this.arucoNavigationStateCallback) this.arucoNavigationStateCallback(msg.feedback)
-        })
-    }
-
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionHandle({
             ros: this.ros,
@@ -283,15 +204,6 @@ export class Robot extends React.Component {
             actionType: 'nav2_msgs/action/NavigateToPose',
             // timeout: 100
         });
-    }
-
-    createNavigateToArucoClient() {
-        this.navigateToArucoClient = new ROSLIB.ActionHandle({
-            ros: this.ros,
-            name: '/navigate_to_aruco',
-            actionType: 'stretch_teleop_interface_msgs/action/NavigateToAruco',
-            // timeout: 100
-        })
     }
 
     createCmdVelTopic() {
@@ -342,38 +254,6 @@ export class Robot extends React.Component {
         })
     }
 
-    createArucoMarkerService() {
-        this.setArucoMarkersService = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/aruco_markers',
-            serviceType: 'stretch_teleop_interface/srv/ArucoMarkers'
-        })
-    }
-
-    createArucoNavigationService() {
-        this.navigateToArucoService = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/navigate_to_aruco',
-            serviceType: 'stretch_teleop_interface/srv/NavigateToAruco'
-        })
-    }
-
-    createArucoMarkerUpdateService() {
-        this.arucoMarkerUpdateService = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/aruco_marker_update',
-            serviceType: 'stretch_teleop_interface/srv/ArucoMarkerInfoUpdate'
-        })
-    }
-
-    createGetRelativePoseService() {
-        this.getRelativePoseService = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/get_relative_pose',
-            serviceType: 'stretch_teleop_interface/srv/RelativePose'
-        })
-    }
-
     createRobotFrameTFClient() {
         this.robotFrameTfClient = new ROSLIB.TFClient({
             ros: this.ros,
@@ -391,13 +271,6 @@ export class Robot extends React.Component {
             angularThres: 0.001,
             transThres: 0.001,
             rate: 10
-        });
-    }
-
-    createArucoMarkerParamServer() {
-        this.arucoMarkerInfoParam = new ROSLIB.Param({
-            ros : this.ros,
-            name : '/detect_aruco_node:aruco_marker_info'
         });
     }
 
@@ -434,75 +307,9 @@ export class Robot extends React.Component {
         })
     }
 
-    setArucoMarkers(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({enable: toggle})
-        this.setArucoMarkersService?.callService(request, (response: boolean) => {
-            response ? console.log("Enable aruco markers") : console.log("Disabled aruco markers")
-        })
-    }
-
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({data: toggle})
         this.setRunStopService?.callService(request, (response: boolean) => {})
-    }
-
-    setArucoMarkerInfo(info: ArucoMarkersInfo) {
-        Object.keys(info.aruco_marker_info).forEach(key => {
-            this.addArucoMarker(key, info.aruco_marker_info[key])
-        });
-    }
-
-    deleteArucoMarker(markerID: string) {
-        let values = ["name", "length_mm", "use_rgb_only", "link"]
-        values.forEach(value => {
-            this.arucoMarkerInfoParam = new ROSLIB.Param({
-                ros : this.ros,
-                name : `/detect_aruco_node:aruco_marker_info.${markerID}.${value}`
-            })
-            this.arucoMarkerInfoParam.delete((response) => {})
-        })
-    }
-
-    addArucoMarker(markerID: string, markerInfo: ArucoMarkerInfo) {
-        let values = ["name", "length_mm", "use_rgb_only", "link"]
-        values.forEach(value => {
-            this.arucoMarkerInfoParam = new ROSLIB.Param({
-                ros : this.ros,
-                name : `/detect_aruco_node:aruco_marker_info.${markerID}.${value}`
-            })
-            let param = eval(`markerInfo.${value}`)
-            if (param !== undefined) {
-                this.arucoMarkerInfoParam.set(param.toString(), (response) => {})
-            }
-        })
-    }
-
-    navigateToArucoMarkers(marker_name: string, relative_pose: ROSLIB.Transform) {
-        var request = new ROSLIB.ServiceRequest({
-            name: marker_name, 
-            pose: { 
-                translation: relative_pose.translation,
-                rotation: relative_pose.rotation
-            }
-        })
-        console.log('navigate to arcuo: ', request)
-        this.navigateToArucoService?.callService(request, (response: string) => {
-            console.log(response)
-        })
-    }
-
-    updateArucoMarkersInfo() {
-        var request = new ROSLIB.ServiceRequest({update: true})
-        this.arucoMarkerUpdateService?.callService(request, (response: boolean) => {
-            response ? console.log("Aruco marker dictionary updated") : console.log("Aruco marker dictionary update failed!") 
-        })
-    }
-
-    getRelativePose(marker_name: string) {
-        var request = new ROSLIB.ServiceRequest({name: marker_name})
-        this.getRelativePoseService?.callService(request, (response: ROSLIB.Transform) => {
-            this.relativePoseCallback(response) 
-        })
     }
 
     switchToNavigationMode() {
@@ -579,38 +386,17 @@ export class Robot extends React.Component {
         return this.makePoseGoal(pose)
     }
 
-    makeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
-        if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
-
-        let newGoal = new ROSLIB.ActionGoal({
-            // actionClient: this.navigateToArucoClient,
-            // goalMessage: {
-                name: name,
-                pose: pose
-            // }
-        })
-
-        return newGoal
-    }
-
     makeMoveBaseGoal(pose: ROSPose) {
         if (!this.moveBaseClient) throw 'moveBaseClient is undefined';
 
         let newGoal = new ROSLIB.ActionGoal({
-            // actionClient: this.moveBaseClient,
-            // goalMessage: {
             pose: {
                 header: {
                     frame_id: 'map'
                 },
                 pose: pose
             }
-            // }
         })
-
-        // newGoal.on('result', (result) => {
-        //     this.moveBaseResultCallback(result)
-        // });
         
         return newGoal
     }
@@ -648,7 +434,6 @@ export class Robot extends React.Component {
                     }
                 ]
             }
-            // }
         });
     
         return newGoal
@@ -695,14 +480,12 @@ export class Robot extends React.Component {
 
     executePoseGoal(pose: RobotPose) {
         this.switchToPositionMode()
-        // this.stopExecution();
         this.poseGoal = this.makePoseGoal(pose)
         this.trajectoryClient.createClient(this.poseGoal)
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
         this.switchToPositionMode()
-        // this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses)
         this.trajectoryClient.createClient(this.poseGoal)
     }
@@ -716,12 +499,6 @@ export class Robot extends React.Component {
         // this.moveBaseGoal.send()
     }
 
-    executeNavigateToArucoGoal(name: string, pose: ROSLIB.Transform) {
-        // this.stopExecution()
-        this.navigateToArucoGoal = this.makeNavigateToArucoGoal(name, pose)
-        this.navigateToArucoClient.createClient(this.navigateToArucoGoal)
-    }
-
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
         this.switchToPositionMode()
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment)
@@ -731,7 +508,6 @@ export class Robot extends React.Component {
     stopExecution() {
         this.stopTrajectoryClient()
         this.stopMoveBaseClient()    
-        this.stopNavigateToArucoClient()
     }
 
     stopTrajectoryClient() {
@@ -752,14 +528,6 @@ export class Robot extends React.Component {
         }
     }
 
-    stopNavigateToArucoClient() {
-        if (!this.navigateToArucoClient) throw 'navigateToArucoClient is undefined';
-        if (this.navigateToArucoGoal) {
-            this.navigateToArucoClient.cancelGoal()
-            this.navigateToArucoGoal = undefined
-        }
-    }
-
     setPanTiltFollowGripper(followGripper: boolean) {
         if (this.lookAtGripperInterval && followGripper) return;
         
@@ -773,12 +541,6 @@ export class Robot extends React.Component {
                 this.lookAtGripperInterval = window.setTimeout(lookIfReadyAndRepeat, 500)
             }
             lookIfReadyAndRepeat()
-
-            // this.lookAtGripperInterval = window.setTimeout(() => { 
-            //     if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
-            //         this.lookAtGripper(panOffset, tiltOffset);
-            //     }
-            // }, 500)
         } else {
             this.stopExecution()
             clearTimeout(this.lookAtGripperInterval)

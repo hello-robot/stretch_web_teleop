@@ -59,32 +59,6 @@ export abstract class StorageHandler {
     public abstract getCustomLayoutNames(): string[];
 
     /**
-     * Save the joint state and its identifier
-     * @param name the name of the pose
-     * @param jointState the joint state to save
-     */
-    public abstract savePose(poseName: string, jointState: RobotPose): void;
-
-    /**
-     * Removes the pose from storage
-     * @param name the name of the pose
-     */
-    public abstract deletePose(poseName: string): void;
-
-    /**
-     * Get the list of all saved poses
-     * @returns list of all saved poses
-     */
-    public abstract getPoseNames(): string[];
-
-    /**
-     * Gets the pose associated with the given name
-     * @param name the name of the pose
-     * @returns a pose associated with the given name
-     */
-    public abstract getPose(poseName: string): RobotPose;
-
-    /**
      * Save the map pose and its identifier
      * @param name the name of the pose
      * @param pose the pose on the map to save
@@ -176,70 +150,5 @@ export abstract class StorageHandler {
      */
     public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
         return DEFAULT_LAYOUTS[layoutName];
-    }
-
-    /**
-     * Save the aruco marker and its identifier
-     * @param markerID the ID of the aruco marker
-     * @param markerName the name of the aruco marker
-     * @param size the size of the marker in mm
-     */
-    public abstract saveMarker(markerID: string, markerName: string, size: string): void;
-
-    /**
-     * Removes the aruco maker from storage
-     * @param name the name of the aruco marker
-     * @returns the marker's ID or undefined if the marker cannot be deleted
-     */
-    public abstract deleteMarker(markerName: string): string | undefined;
-
-    /**
-     * Get the list of all saved aruco markers
-     * @returns list of all saved aruco markers
-     */
-    public abstract getArucoMarkerNames(): string[];
-
-     /**
-     * Get the list of all saved aruco markers IDs
-     * @returns list of all saved aruco markers IDs
-     */
-     public abstract getArucoMarkerIDs(): string[];
-
-    /**
-     * Get the list of all saved aruco marker info
-     * @returns list of all saved aruco marker info
-     */
-    public abstract getArucoMarkerInfo(): ArucoMarkersInfo;
-
-    /**
-     * Save the relative pose for the given aruco marker
-     * @param markerID the ID of the aruco marker
-     * @param pose the relative pose to save
-     */
-    public abstract saveRelativePose(markerID: string, pose: ROSLIB.Transform): void;
-
-    public loadDefaultArucoMarkers(): ArucoMarkersInfo {
-        return ARUCO_MARKER_INFO
-    }
-
-    public loadDefaultArucoMarkerIDs(): string[] {
-        // return Object.keys(ARUCO_MARKER_INFO.aruco_marker_info)
-        
-        // Only return ID for docking station
-        // Other IDs are currently not applicable for aruco navigation
-        return['245', '20'] // ['0', '1', '2']
-    }
-
-    public loadDefaultArucoMarkerNames(): string[] {
-        // let names: string[] = []
-        // let markerInfo = Object.values(ARUCO_MARKER_INFO.aruco_marker_info)
-        // markerInfo.forEach((info) => {
-        //     names.push(info.name)
-        // })
-        // return names
-        
-        // Only return ID for docking station
-        // Other IDs are currently not applicable for aruco navigation
-        return ['docking_station', 'Tool Shelf'] // ['Brush', 'Feeding Tool', 'Button Pusher']
     }
 }

@@ -5,7 +5,6 @@ import createjs from "createjs-module";
 import { ROSOccupancyGrid, ROSPoint, ROSPose } from "shared/util";
 import ROSLIB from "roslib";
 import { MapFunctions } from "../layout_components/Map";
-import { isMobile } from "react-device-detect";
 
 export class OccupancyGrid extends React.Component {
     private rootObject: createjs.Stage
@@ -92,17 +91,6 @@ export class OccupancyGrid extends React.Component {
         graphics.closePath();
         graphics.endFill();
         graphics.endStroke();
-
-        // graphics.setStrokeStyle(strokeSize);
-        // graphics.moveTo(0.0, size / 2.0);
-        // graphics.beginStroke(strokeColor);
-        // graphics.beginFill(fillColor);
-        // graphics.lineTo(-size / 2.0, -size / 2.0);
-        // graphics.lineTo(size / 2.0, 0.0);
-        // graphics.lineTo(0.0, size / 2.0);
-        // graphics.closePath();
-        // graphics.endFill();
-        // graphics.endStroke();
         
         // create the shape
         createjs.Shape.call(arrow, graphics);
@@ -188,9 +176,6 @@ export class OccupancyGrid extends React.Component {
             }
         }
 
-        // const imgData = imageData.data;
-        // Array.from({length: this.height}, (val, i) => imgData.slice(i * this.width * 4, (i + 1) * this.width * 4))
-        //      .forEach((val, i) => imgData.set(val, (this.height - i - 1) * this.width * 4));
         context!.putImageData(imageData, 0, 0);
 
         // create the bitmap
@@ -204,7 +189,6 @@ export class OccupancyGrid extends React.Component {
 
     rosToGlobal(translation: ROSLIB.Vector3) {
         var x = ((this.width * this.scaleX!) - (-translation.x + this.width * this.scaleX! + this.origin!.position.x)) / this.scaleX!;
-        // var x = (translation.x + this.width * this.scaleX! + this.origin!.position.x) / this.scaleX!;
         var y = (-translation.y + this.height * this.scaleY! + this.origin!.position.y) / this.scaleY!;
         return {
             x: x,
@@ -227,7 +211,6 @@ export class OccupancyGrid extends React.Component {
 
     globalToRos(x: number, y: number) {
         var rosX = (x / 5) * this.scaleX! + this.origin!.position.x
-        // var rosX = (x / 5 - this.width) * this.scaleX! - this.origin!.position.x
         var rosY = (this.height - y / 5) * this.scaleY! + this.origin!.position.y
         console.log(rosX, rosY)
         return {
@@ -348,11 +331,6 @@ export class OccupancyGrid extends React.Component {
                 this.createGoalMarker(evt.stageX / 5, evt.stageY / 5, false)
                 this.functs.SetSelectGoal(false)
             }
-            
-            // if (!isMobile && this.functs.SelectGoal()) {
-            //     this.play()
-            //     if (isMobile) this.functs.SetSelectGoal(false)
-            // }
         });
     }
 }

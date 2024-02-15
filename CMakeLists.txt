@@ -23,9 +23,6 @@ find_package(rosbridge_server REQUIRED)
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
   nodes/configure_video_streams.py
-  nodes/navigate_to_aruco.py
-  nodes/head_scan.py
-  nodes/detect_aruco_markers.py
   nodes/navigation_camera.py
   DESTINATION lib/${PROJECT_NAME}
 )

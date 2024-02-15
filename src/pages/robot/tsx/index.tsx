@@ -12,10 +12,7 @@ export const robot = new Robot({
     batteryStateCallback: forwardBatteryState,
     occupancyGridCallback: forwardOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseState,
-    arucoNavigationStateCallback: forwardArucoNavigationState,
     amclPoseCallback: forwardAMCLPose,
-    markerArrayCallback: forwardMarkers,
-    relativePoseCallback: forwardRelativePose,
     isRunStoppedCallback: forwardIsRunStopped
 })
 
@@ -56,14 +53,7 @@ robot.connect().then(() => {
 
     connection.joinRobotRoom()
 })
-// .then(() => {
-//     setInterval(() => {
-//         console.log(!robot.isROSConnected() || connection.connectionState() !== 'connected')
-//         if (!robot.isROSConnected() || connection.connectionState() !== 'connected') {
-//             window.location.reload()
-//         }
-//     }, 4000);    
-//})
+
 function handleSessionStart() {
     connection.removeTracks()
 
@@ -163,24 +153,6 @@ function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
     } as OccupancyGridMessage);
 }
 
-function forwardMarkers(markers: MarkerArray) {
-    if (!connection) throw 'WebRTC connection undefined'
-
-    connection.sendData({
-        type: "arucoMarkers",
-        message: markers
-    } as MarkersMessage)
-}
-
-function forwardArucoNavigationState(state: ArucoNavigationState) {
-    if (!connection) throw 'WebRTC connection undefined'
-
-    connection.sendData({
-        type: "arucoNavigationState",
-        message: state
-    } as ArucoNavigationStateMessage)
-}
-
 function forwardAMCLPose(transform: ROSLIB.Transform) {
     if (!connection) throw 'WebRTC connection undefined'
 
@@ -188,15 +160,6 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
         type: 'amclPose',
         message: transform
     } as MapPoseMessage)
-}
-
-function forwardRelativePose(pose: ROSLIB.Transform) {
-    if (!connection) throw 'WebRTC connection undefined'
-    
-    connection.sendData({
-        type: "relativePose",
-        message: pose
-    } as RelativePoseMessage)
 }
 
 function handleMessage(message: WebRTCMessage) {
@@ -217,9 +180,6 @@ function handleMessage(message: WebRTCMessage) {
             break
         case "stopMoveBase":
             robot.stopMoveBaseClient()
-            break
-        case "stopArucoNavigation":
-            robot.stopNavigateToArucoClient()
             break
         case "setRobotMode":
             message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
@@ -245,33 +205,12 @@ function handleMessage(message: WebRTCMessage) {
         case "setRunStop":
             robot.setRunStop(message.toggle)
             break
-        case "navigateToAruco":
-            robot.executeNavigateToArucoGoal(message.name, message.pose.transform)
-            break
-        case "setArucoMarkers":
-            robot.setArucoMarkers(message.toggle)
-            break
         case "lookAtGripper":
             robot.lookAtGripper(0, 0)
             break
         case "getOccupancyGrid":
             robot.getOccupancyGrid()
-            break
-        case "updateArucoMarkersInfo":
-            robot.updateArucoMarkersInfo()
-            break;
-        case "setArucoMarkerInfo":
-            robot.setArucoMarkerInfo(message.info)
-            break;    
-        case "deleteArucoMarker":
-            robot.deleteArucoMarker(message.markerID)
-            break;    
-        case "addArucoMarker":
-            robot.addArucoMarker(message.markerID, message.markerInfo)
-            break;    
-        case "getRelativePose":
-            robot.getRelativePose(message.marker_name)
-            break;
+            break 
     }
 };
 

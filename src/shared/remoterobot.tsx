@@ -1,7 +1,7 @@
 import React from 'react'
 import ROSLIB from 'roslib';
-import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand, UpdateArucoMarkersInfoCommand, SetArucoMarkerInfoCommand, GetRelativePoseCommand, GetBatteryVoltageCommand, NavigateToArucoCommand, DeleteArucoMarkerCommand, AddArucoMarkerCommand } from 'shared/commands';
-import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, MarkerArray, ArucoMarkersInfo, waitUntil, MoveBaseActionResult, MoveBaseState, ArucoMarkerInfo } from 'shared/util';
+import { cmd, DriveCommand, CameraPerspectiveCommand, IncrementalMove, setRobotModeCommand, VelocityCommand, RobotPoseCommand, ToggleCommand, LookAtGripper, GetOccupancyGrid, MoveBaseCommand, PlaybackPosesCommand } from 'shared/commands';
+import { ValidJointStateDict, RobotPose, ValidJoints, ROSPose, waitUntil } from 'shared/util';
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -12,8 +12,6 @@ export class RemoteRobot extends React.Component<{},any> {
     batteryVoltage: number
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
-    markers: MarkerArray;
-    relativePose?: ROSLIB.Transform
     moveBaseState?: string
 
     constructor(props: { robotChannel: robotMessageChannel }) {
@@ -31,7 +29,6 @@ export class RemoteRobot extends React.Component<{},any> {
             } as ROSLIB.Quaternion
         } as ROSLIB.Transform
         this.moveBaseGoalReached = false
-        this.markers = { markers: [] }
     }
 
     setGoalReached(reached: boolean) {
@@ -123,54 +120,10 @@ export class RemoteRobot extends React.Component<{},any> {
         this.robotChannel(cmd)
     }
 
-    navigateToAruco(name: string, pose: ROSLIB.Transform) {
-        let cmd: NavigateToArucoCommand = {
-            type: "navigateToAruco",
-            name: name, 
-            pose: pose
-        }
-        this.robotChannel(cmd)
-    }
-
-    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setArucoMarkers" | "setRunStop", toggle: boolean) {
+    setToggle(type: "setFollowGripper" | "setDepthSensing" | "setRunStop", toggle: boolean) {
         let cmd: ToggleCommand = {
             type: type,
             toggle: toggle
-        }
-        this.robotChannel(cmd)
-    }
-
-    updateArucoMarkersInfo() {
-        let cmd: UpdateArucoMarkersInfoCommand = {
-            type: "updateArucoMarkersInfo",
-        }
-        this.robotChannel(cmd)
-    }
-
-
-    setArucoMarkerInfo(info: ArucoMarkersInfo) {
-        let cmd: SetArucoMarkerInfoCommand = {
-            type: "setArucoMarkerInfo",
-            info: info
-        }
-        // console.log(JSON.stringify(info.aruco_marker_info).toString())
-        this.robotChannel(cmd)
-        console.log("setting aruco marker info")
-    }
-
-    deleteArucoMarker(markerID: string) {
-        let cmd: DeleteArucoMarkerCommand = {
-            type: "deleteArucoMarker",
-            markerID: markerID
-        }
-        this.robotChannel(cmd)
-    }
-
-    addArucoMarker(markerID: string, markerInfo: ArucoMarkerInfo) {
-        let cmd: AddArucoMarkerCommand = {
-            type: "addArucoMarker",
-            markerID: markerID,
-            markerInfo: markerInfo
         }
         this.robotChannel(cmd)
     }
@@ -205,40 +158,12 @@ export class RemoteRobot extends React.Component<{},any> {
         return this.mapPose
     }
 
-    setMarkers(markers: MarkerArray) {
-        this.markers = markers
-    }
-
-    getMarkers() {
-        return this.markers
-    }
-
-    getRelativePose(marker_name: string) {
-        this.relativePose = undefined
-        let cmd: GetRelativePoseCommand = {
-            type: "getRelativePose",
-            marker_name: marker_name
-        }
-        this.robotChannel(cmd)
-        return waitUntil(() => this.relativePose != undefined, 60000).then(() => { 
-            return this.relativePose
-        })
-    }
-
-    setRelativePose(pose: ROSLIB.Transform) {
-        this.relativePose = pose
-    }
-
     stopTrajectory() {
         this.robotChannel({ type: "stopTrajectory" })
     }
 
     stopMoveBase() {
         this.robotChannel({ type: "stopMoveBase" })
-    }
-
-    stopArucoNavigation() {
-        this.robotChannel({ type: "stopArucoNavigation" })
     }
 }
 
