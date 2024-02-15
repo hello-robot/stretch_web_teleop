@@ -86,21 +86,10 @@ function componentDescription(definition: ComponentDefinition): string {
 
 /** Properties for {@link SidebarGlobalOptions} */
 export type GlobalOptionsProps = {
-    /** If the voice controls should be displayed. */
-    displayVoiceControl: boolean;
-    setDisplayVoiceControl: (displayVoiceControl: boolean) => void;
-    /** If the save/load poses should be displayed. */
-    displayPoseLibrary: boolean;
-    setDisplayPoseLibrary: (displayPoseLibrary: boolean) => void;
-    
     /** If the save/load poses should be displayed. */
     displayMovementRecorder: boolean;
     setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
-    
-    /** If the save/load aruco markers should be displayed. */
-    displayArucoMarkers: boolean;
-    setDisplayArucoMarkers: (displayArucoMarkers: boolean) => void;
-    
+
     /** If the button text labels should be displayed */
     displayLabels: boolean;
     setDisplayLabels: (displayLabels: boolean) => void;
@@ -136,25 +125,10 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
                 />
-                {/* <OnOffToggleButton
-                    on={props.displayVoiceControl}
-                    onClick={() => props.setDisplayVoiceControl(!props.displayVoiceControl)}
-                    label="Display voice control"
-                /> */}
-                <OnOffToggleButton
-                    on={props.displayPoseLibrary}
-                    onClick={() => props.setDisplayPoseLibrary(!props.displayPoseLibrary)}
-                    label="Display pose recorder"
-                />
                 <OnOffToggleButton
                     on={props.displayMovementRecorder}
                     onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
                     label="Display movement recorder"
-                />
-                <OnOffToggleButton
-                    on={props.displayArucoMarkers}
-                    onClick={() => props.setDisplayArucoMarkers(!props.displayArucoMarkers)}
-                    label="Display aruco marker navigator"
                 />
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}

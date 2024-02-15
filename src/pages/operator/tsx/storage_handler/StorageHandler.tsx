@@ -1,20 +1,15 @@
 import ROSLIB from "roslib";
 import { BASIC_LAYOUT } from "../default_layouts/SIMPLE_LAYOUT";
-import { STRETCH2CLIENT_LAYOUT } from "../default_layouts/STRETCH2CLIENT_LAYOUT";
-import { STUDY_BRANCH_LAYOUT } from "../default_layouts/STUDY_BRANCH_LAYOUT";
-import { REMOTE_CAREGIVER_LAYOUT } from "../default_layouts/REMOTE_CAREGIVER_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
 import { ArucoMarkersInfo, RobotPose } from "shared/util";
 import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 
 /** Type for all the possible names of default layouts. */
-export type DefaultLayoutName = "Button Pad Overlays" | "Basic Layout" | "Button Grid/Joystick/Voice Commands";
+export type DefaultLayoutName = "Basic Layout";
 
 /** Object with all the default layouts. */
 export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } = {
-    "Button Pad Overlays": STUDY_BRANCH_LAYOUT,
     "Basic Layout": BASIC_LAYOUT,
-    "Button Grid/Joystick/Voice Commands": STRETCH2CLIENT_LAYOUT
 }
 
 /** 
@@ -161,7 +156,7 @@ export abstract class StorageHandler {
      */
     public loadCurrentLayoutOrDefault(): LayoutDefinition {
         const currentLayout = this.loadCurrentLayout();
-        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[1];
+        if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
         console.log('loading saved layout')
         return currentLayout;
     }

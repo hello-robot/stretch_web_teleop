@@ -5,10 +5,7 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
  */
 export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
-    displayVoiceControl: false,
-    displayPoseLibrary: false,
     displayMovementRecorder: false,
-    displayArucoMarkers: false,
     displayLabels: true,
     actionMode: ActionMode.PressAndHold,
     children: [

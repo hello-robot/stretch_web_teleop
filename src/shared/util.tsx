@@ -10,20 +10,6 @@ export type RemoteStream = {
     track: MediaStreamTrack
 }
 
-export type ArucoMarkersInfo = {
-    aruco_marker_info: {
-        [key: string]: ArucoMarkerInfo
-    }
-}
-
-export type ArucoMarkerInfo = {
-    length_mm: number,
-    use_rgb_only: boolean,
-    name: string, 
-    link?: string
-    pose?: ROSLIB.Transform
-}
-
 export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
 
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }
@@ -59,7 +45,7 @@ export interface Transform {
     transform: ROSLIB.Transform
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | MarkersMessage | RelativePoseMessage | BatteryVoltageMessage | ArucoNavigationStateMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | BatteryVoltageMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory"
@@ -108,17 +94,6 @@ export interface GoalStatus {
     text: string
 }
 
-export interface ArucoNavigationFeedback {
-    header: string
-    status: string
-    feedback: ArucoNavigationState
-}
-
-export interface ArucoNavigationState {
-    state: string
-    alert_type: string
-}
-
 export interface MoveBaseState {
     state: string
     alert_type: string
@@ -127,11 +102,6 @@ export interface MoveBaseState {
 export interface MoveBaseStateMessage {
     type: "moveBaseState"
     message: MoveBaseState
-}
-
-export interface ArucoNavigationStateMessage {
-    type: "arucoNavigationState"
-    message: ArucoNavigationState
 }
 
 export interface MoveBaseActionResultMessage {
@@ -155,11 +125,6 @@ export interface MapPoseMessage {
     message: ROSLIB.Transform
 }
 
-export interface RelativePoseMessage {
-    type: 'relativePose',
-    message: ROSLIB.Transform
-}
-
 export interface BatteryVoltageMessage {
     type: 'batteryVoltage',
     message: number
@@ -180,11 +145,6 @@ export interface MarkerArray {
 export interface Marker {
     text: string,
     id: number
-}
-
-export interface MarkersMessage extends Message {
-    type: "arucoMarkers",
-    message: MarkerArray
 }
 
 export interface ROSPoint extends Message {

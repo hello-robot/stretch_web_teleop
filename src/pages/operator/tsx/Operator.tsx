@@ -1,29 +1,24 @@
 import React from "react";
-import { SpeedControl } from "operator/tsx/static_components/SpeedControl"
+import { SpeedControl } from "./static_components/SpeedControl"
 import { LayoutArea } from "./static_components/LayoutArea";
 import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
-// import { VoiceCommands } from "./static_components/VoiceCommands";
-import { ArucoNavigationState, className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
-import { arucoMarkerFunctionProvider, batteryVoltageFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
+import { className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
+import { batteryVoltageFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
 import { addToLayout, moveInLayout, removeFromLayout } from "./utils/layout_helpers";
-import { PoseLibrary } from "./static_components/PoseLibrary";
 import { MovementRecorder } from "./layout_components/MovementRecorder";
-import { ArucoMarkers } from "./layout_components/ArucoMarkers";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css"
 
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>,
-    getRobotPose: (head: boolean, gripper: boolean, arm: boolean) => RobotPose,
-    setRobotPose: (pose: RobotPose) => void,
     layout: LayoutDefinition,
     storageHandler: StorageHandler
 }) => {
@@ -32,7 +27,6 @@ export const Operator = (props: {
     const [selectedDefinition, setSelectedDef] = React.useState<ComponentDefinition | undefined>(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
-    const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
     const [batteryVoltage, setBatteryVoltage] = React.useState<number>()
     
@@ -57,20 +51,6 @@ export const Operator = (props: {
         setBatteryVoltage(voltage)
     }
     batteryVoltageFunctionProvider.setOperatorCallback(batteryOperatorCallback);
-
-    function arucoNavigationStateCallback(state: ArucoNavigationState) {
-        setArucoNavigationState(state)
-    }
-    arucoMarkerFunctionProvider.setOperatorCallback(arucoNavigationStateCallback);
-    let arucoAlertTimeout: NodeJS.Timeout;
-    React.useEffect(() => {
-        if (arucoNavigationState && arucoNavigationState.alert_type != "info") {
-            if (arucoAlertTimeout) clearTimeout(arucoAlertTimeout)
-            arucoAlertTimeout = setTimeout(() => {
-                setArucoNavigationState(undefined)
-            }, 5000)
-        }
-    }, [arucoNavigationState])
 
     function moveBaseStateCallback(state: MoveBaseState) {
         setMoveBaseState(state)
@@ -106,46 +86,13 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the voice control component to display or hidden.
-     * 
-     * @param displayVoiceControl if the voice control component at the 
-     *                            top of the operator body should be displayed
-     */
-    function setDisplayVoiceControl(displayVoiceControl: boolean) {
-        layout.current.displayVoiceControl = displayVoiceControl;
-        updateLayout();
-    }
-
-    /**
-     * Sets the pose library component to display or hidden.
-     * 
-     * @param displayPoseLibrary if the pose library component at the 
-     *                           top of the operator body should be displayed
-     */
-    function setDisplayPoseLibrary(displayPoseLibrary: boolean) {
-        layout.current.displayPoseLibrary = displayPoseLibrary;
-        updateLayout();
-    }
-
-    /**
      * Sets the movement recorder component to display or hidden.
      * 
-     * @param displayMovementRecorder if the pose recorder component at the 
+     * @param displayMovementRecorder if the movement recorder component at the 
      *                             top of the operator body should be displayed
      */
     function setDisplayMovementRecorder(displayMovementRecorder: boolean) {
         layout.current.displayMovementRecorder = displayMovementRecorder;
-        updateLayout();
-    }
-
-    /**
-     * Sets the aruco markers component to display or hidden.
-     * 
-     * @param displayArucoMarkers if the pose recorder component at the 
-     *                             top of the operator body should be displayed
-     */
-    function setDisplayArucoMarkers(displayArucoMarkers: boolean) {
-        layout.current.displayArucoMarkers = displayArucoMarkers;
         updateLayout();
     }
 
@@ -248,15 +195,9 @@ export const Operator = (props: {
 
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
-        displayVoiceControl: layout.current.displayVoiceControl,
-        displayPoseLibrary: layout.current.displayPoseLibrary,
         displayMovementRecorder: layout.current.displayMovementRecorder,
-        displayArucoMarkers: layout.current.displayArucoMarkers,
         displayLabels: layout.current.displayLabels,
-        setDisplayVoiceControl: setDisplayVoiceControl,
-        setDisplayPoseLibrary: setDisplayPoseLibrary,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
-        setDisplayArucoMarkers: setDisplayArucoMarkers,
         setDisplayLabels: setDisplayLabels,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
@@ -303,45 +244,15 @@ export const Operator = (props: {
                         </div>
                     </div>
                 }
-                {arucoNavigationState &&
-                    <div className="operator-collision-alerts">
-                        <div className={className('operator-alert', { fadeIn: arucoNavigationState !== undefined, fadeOut: arucoNavigationState == undefined })}>
-                            <Alert type={arucoNavigationState.alert_type} message={arucoNavigationState.state} />
-                        </div>
-                    </div>
-                }
-                {moveBaseState && !arucoNavigationState &&
+                {moveBaseState && 
                     <div className="operator-collision-alerts">
                         <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
                             <Alert type={moveBaseState.alert_type} message={moveBaseState.state} />
                         </div>
                     </div>
                 }
-                {/* <div className="operator-voice" hidden={!layout.current.displayVoiceControl}>
-                    <VoiceCommands
-                        onUpdateVelocityScale=
-                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
-                    />
-                </div> */}
-                <div className={className("operator-pose-library", { hideLabels: !layout.current.displayLabels })} hidden={!layout.current.displayPoseLibrary}>
-                    <PoseLibrary
-                        savePose={(poseName: string, head: boolean, gripper: boolean, arm: boolean) => {
-                            props.storageHandler.savePose(poseName, props.getRobotPose(head, gripper, arm));
-                        }}
-                        deletePose={((poseName: string) => { props.storageHandler.deletePose(poseName) })}
-                        savedPoseNames={() => { return props.storageHandler.getPoseNames() }}
-                        setRobotPose={(poseName: string) => {
-                            let pose: RobotPose = props.storageHandler.getPose(poseName)
-                            props.setRobotPose(pose)
-                        }}
-                        hideLabels={!layout.current.displayLabels}
-                    />
-                </div>
                 <div className={className("operator-pose-recorder", {hideLabels: !layout.current.displayLabels})} hidden={!layout.current.displayMovementRecorder}>
                     <MovementRecorder hideLabels={!layout.current.displayLabels} />
-                </div>
-                <div className={className("operator-aruco-markers", { hideLabels: !layout.current.displayLabels })}  hidden={!layout.current.displayArucoMarkers}>
-                    <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback} hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
             <div id="operator-body">

@@ -1,3 +1,4 @@
+import React from "react";
 import { ComponentDefinition, ComponentType } from "../utils/component_definitions";
 import { DropZoneState } from "./DropZone";
 import { Panel } from "./Panel";

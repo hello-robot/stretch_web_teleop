@@ -1,7 +1,7 @@
 import React, { PointerEventHandler, useState } from "react";
 import { ActionMode, ButtonPadId, CameraViewId, ComponentDefinition, ComponentType, MapDefinition } from "./utils/component_definitions";
-import { ArucoNavigationState, className, MoveBaseState, RemoteStream } from "shared/util";
-import { arucoMarkerFunctionProvider, buttonFunctionProvider, movementRecorderFunctionProvider, underMapFunctionProvider, underVideoFunctionProvider } from ".";
+import { className, MoveBaseState, RemoteStream } from "shared/util";
+import { buttonFunctionProvider, movementRecorderFunctionProvider, underMapFunctionProvider, underVideoFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
@@ -15,7 +15,6 @@ import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
 import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
 import { MovementRecorder, MovementRecorderFunction } from "./layout_components/MovementRecorder";
-import { ArucoMarkers } from "./layout_components/ArucoMarkers";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 
@@ -25,7 +24,6 @@ export const MobileOperator = (props: {
     storageHandler: StorageHandler
 }) => {
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
-    const [arucoNavigationState, setArucoNavigationState] = React.useState<ArucoNavigationState>()
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
     const [cameraID, setCameraID] = React.useState<CameraViewId>(CameraViewId.realsense)
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
@@ -54,20 +52,6 @@ export const MobileOperator = (props: {
         }
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
-
-    function arucoNavigationStateCallback(state: ArucoNavigationState) {
-        setArucoNavigationState(state)
-    }
-    arucoMarkerFunctionProvider.setOperatorCallback(arucoNavigationStateCallback);
-    let arucoAlertTimeout: NodeJS.Timeout;
-    React.useEffect(() => {
-        if (arucoNavigationState && arucoNavigationState.alertType != "info") {
-            if (arucoAlertTimeout) clearTimeout(arucoAlertTimeout)
-            arucoAlertTimeout = setTimeout(() => {
-                setArucoNavigationState(undefined)
-            }, 5000)
-        }
-    }, [arucoNavigationState])
 
     function moveBaseStateCallback(state: MoveBaseState) {
         setMoveBaseState(state)
@@ -199,7 +183,6 @@ export const MobileOperator = (props: {
 
     const controlModes = (show: boolean) => { return ( show ? <ControlModes key={'control-modes'}/> : <></>)}
     const recordingList = (show: boolean) => { return ( <MovementRecorder globalRecord={show} hideLabels={false} isRecording={isRecording}/>)}
-    const markers = (show: boolean) => { return ( show ? <ArucoMarkers setArucoNavigationState={arucoNavigationStateCallback} hideLabels={false}/> : <></>)}
 
     return (
         <div id="mobile-operator" onContextMenu={(e)=> e.preventDefault()}>
@@ -243,8 +226,8 @@ export const MobileOperator = (props: {
                         <SimpleCameraView id={ cameraID } remoteStreams={ remoteStreams }/>
                     </div>
                     <TabGroup 
-                        tabLabels={['Controls', 'Recordings', 'Markers']}
-                        tabContent={[controlModes, recordingList, markers]}
+                        tabLabels={['Controls', 'Recordings']}
+                        tabContent={[controlModes, recordingList]}
                         startIdx={activeMainGroupTab}
                         onChange={(index: number) => setActiveMainGroupTab(index)}
                         pill={false}

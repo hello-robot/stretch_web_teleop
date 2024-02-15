@@ -17,7 +17,6 @@ import { UnderVideoFunctionProvider } from './function_providers/UnderVideoFunct
 import { MapFunctionProvider } from './function_providers/MapFunctionProvider';
 import { UnderMapFunctionProvider } from './function_providers/UnderMapFunctionProvider';
 import { MovementRecorderFunctionProvider } from './function_providers/MovementRecorderFunctionProvider';
-import { ArucoMarkerFunctionProvider } from './function_providers/ArucoMarkerFunctionProvider';
 import { MobileOperator } from './MobileOperator';
 import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
@@ -42,7 +41,6 @@ export var batteryVoltageFunctionProvider = new BatteryVoltageFunctionProvider()
 export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
-export var arucoMarkerFunctionProvider: ArucoMarkerFunctionProvider;
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
@@ -124,12 +122,6 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             console.log(message.message)
             underMapFunctionProvider.setMoveBaseState(message.message)
             break;
-        case 'arucoMarkers':
-            remoteRobot.setMarkers(message.message)
-            break;
-        case 'arucoNavigationState':
-            arucoMarkerFunctionProvider.setArucoNavigationState(message.message)
-            break;
         case 'relativePose':
             remoteRobot.setRelativePose(message.message)
             break;
@@ -150,7 +142,6 @@ function initializeOperator() {
     const storageHandlerReadyCallback = () => {
         underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler)
         movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(storageHandler)
-        arucoMarkerFunctionProvider = new ArucoMarkerFunctionProvider(storageHandler)
         renderOperator(storageHandler);
     }
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
@@ -213,10 +204,6 @@ function renderOperator(storageHandler: StorageHandler) {
             <Operator
                 remoteStreams={allRemoteStreams}
                 layout={layout}
-                getRobotPose={(head: boolean, gripper: boolean, arm: boolean) => {
-                    return remoteRobot.sensors.getRobotPose(head, gripper, arm)
-                }}
-                setRobotPose={(pose: RobotPose) => { remoteRobot.setRobotPose(pose) }}
                 storageHandler={storageHandler}
             />
         ) 

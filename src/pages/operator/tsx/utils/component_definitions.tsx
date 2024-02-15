@@ -2,9 +2,6 @@
  * @summary Definitions to describe different components to render
  */
 
-import ROSLIB from "roslib";
-import { StorageHandler } from "../storage_handler/StorageHandler";
-
 /** Enumerator for the possible action modes */
 export enum ActionMode {
     StepActions = 'Step-Actions',
@@ -88,10 +85,7 @@ export type ParentComponentDefinition = ComponentDefinition & {
 }
 
 export type LayoutDefinition = ComponentDefinition & {
-    displayVoiceControl: boolean;
-    displayPoseLibrary: boolean;
     displayMovementRecorder: boolean;
-    displayArucoMarkers: boolean;
     displayLabels: boolean;
     actionMode: ActionMode;
     children: LayoutGridDefinition[];
@@ -188,10 +182,6 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      * reachable area.
      */
     depthSensing?: boolean;
-    /**
-     * If the aruco markers overlay should be displayed
-     */
-    arucoMarkers?: boolean;
 }
 
 /**
