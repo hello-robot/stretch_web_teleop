@@ -17,6 +17,8 @@ def generate_launch_description():
     stretch_navigation_path = str(get_package_share_directory('stretch_nav2'))
     navigation_bringup_path = str(get_package_share_directory('nav2_bringup'))
     
+    hello_fleet_id = os.getenv('HELLO_FLEET_ID')
+
     # Declare launch arguments
     params_file = DeclareLaunchArgument('params', default_value=[
         PathJoinSubstitution([teleop_interface_package, 'config', 'configure_video_streams_params.yaml'])])
@@ -24,8 +26,8 @@ def generate_launch_description():
     d405_arg = DeclareLaunchArgument('d405', default_value='true')
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
     navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='true')
-    certfile_arg = DeclareLaunchArgument('certfile', default_value='your_certfile.pem')
-    keyfile_arg = DeclareLaunchArgument('keyfile', default_value='your_keyfile.pem')
+    certfile_arg = DeclareLaunchArgument('certfile', default_value=hello_fleet_id + '+6.pem')
+    keyfile_arg = DeclareLaunchArgument('keyfile', default_value=hello_fleet_id + '+6-key.pem')
     nav2_params_file_param = DeclareLaunchArgument(
         'nav2_params_file',
         default_value=os.path.join(stretch_navigation_path, 'config', 'nav2_params.yaml'),
