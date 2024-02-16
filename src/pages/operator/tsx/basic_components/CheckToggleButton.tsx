@@ -1,6 +1,7 @@
 import { className } from "shared/util";
 import "operator/css/basic_components.css"
 import { isMobile } from "react-device-detect";
+import React from "react";
 
 /**
  * Properties for {@link CheckToggleButton}

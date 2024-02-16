@@ -1,11 +1,11 @@
 .radio-btn-mobile {
-    font-size: 45px;
+    font-size: 20px;
     border-radius: 13px;
     background-color: whitesmoke;
-    padding: 20px;
-    margin: 1rem;
-    border: 5px solid whitesmoke;
+    margin: 0.5rem;
+    border: 3px solid whitesmoke;
     filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4));
+
 }
 
 .radio-btn {
@@ -24,9 +24,9 @@
 }
 
 .radio-mobile {
-    height: 2rem;
-    width: 2rem;
-    margin-right: 2rem;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-right: 1.5rem;
 }
 
 .radio-group {
@@ -41,6 +41,7 @@
 
 .modify {
     float: right;
+    font-size: 25px;
 }
 
 .radio-icon {

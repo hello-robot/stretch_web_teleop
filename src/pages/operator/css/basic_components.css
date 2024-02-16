@@ -20,8 +20,8 @@
 }
 
 .popup-modal.small {
-    height: 20rem;
-    width: 47rem;
+    height: 15rem;
+    width: 20rem;
     top: 10%;
 }
 
@@ -37,11 +37,10 @@
 }
 
 .mobile {
-    left: -27%;
-    transform: translate(50%, 50%);
+    transform: translate(-50%, 50%);
     display: flex;
     justify-content: space-around;
-    font-size: 50px !important;
+    /* font-size: 50px !important; */
 }
 
 .voice-commands-popup-modal {
@@ -192,6 +191,20 @@
 
 .check-toggle-button span.material-icons {
     margin-right: 1rem;
+}
+
+.check-toggle-button, .check-toggle-button-mobile {
+    border-radius: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: transparent;
+}
+
+.check-toggle-button-mobile {
+    border: 5px solid whitesmoke;
+    /* margin: 1rem; */
 }
 
 .pose-name {

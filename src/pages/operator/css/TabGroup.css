@@ -1,6 +1,6 @@
 .tab {
-    font-size: 45px;
-    padding-top: 20px;
+    font-size: 20px;
+    /* padding-top: 10px; */
     cursor: pointer;
     outline: 0;
     display: flex;
@@ -11,7 +11,7 @@
 }
 
 .pill-tab {
-    font-size: 45px;
+    /* font-size: 45px; */
     cursor: pointer;
     outline: 0;
     display: flex;
@@ -21,7 +21,7 @@
     width: 80%;
     height: auto;
     background: #052a33;
-    margin: 3.5rem auto 1.5rem;
+    margin: 1rem auto 1rem;
     color: #E8F0F2;
     border-radius: 10rem;
     list-style: none;
@@ -37,9 +37,9 @@
 li.pill-tab-btn {
     background-color: transparent;
     border-bottom: none;
-    padding: 1rem;
-    padding-left: 5rem;
-    padding-right: 5rem;
+    padding: 0.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 li.pill-tab-btn:first-child {
@@ -53,7 +53,7 @@ li.pill-tab-btn:last-child {
 }
 
 .tab-btn.active {
-    border-bottom: 15px solid #06c7e1;
+    border-bottom: 5px solid #06c7e1;
 }
 
 .pill-tab-btn.active {

@@ -28,6 +28,15 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
         videoRef.current.srcObject = stream;
     }, [stream]);
 
+    function setVideoSize(videoRef) {
+        const videoRect = videoRef.current.getBoundingClientRect();
+        let marginTop = 0;
+        let min_control_panel_size = 300; // px
+        marginTop = Math.min(window.innerHeight - min_control_panel_size - videoRect.height, 0);
+        document.querySelector('.btn-down')?.setAttribute('style', 'margin-top:' + (videoRect.height  + marginTop - 70).toString() + "px;")
+        document.querySelector('.depth-sensing')?.setAttribute('style', 'margin-top:' + (videoRect.height + marginTop - 42).toString() + "px;")
+        videoRef.current.style.marginTop = marginTop.toString() + "px";
+    }
 
     // Constrain the width or height when the stream gets too large
     React.useEffect(() => {
@@ -51,7 +60,7 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
         return () => resizeObserver.disconnect();
     }, []);
 
-    const videoComponent = (props.id === CameraViewId.realsense) ?
+    const videoComponent = (props.id === CameraViewId.realsense || props.id === CameraViewId.overhead) ?
         (
             <>
                 <div className={className("simple-realsense", { constrainedHeight })}>
@@ -64,6 +73,7 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
                             disablePictureInPicture={true}
                             playsInline={true}
                             className={className('simple-video-canvas', { constrainedHeight })}
+                            onPlay={() => setVideoSize(videoRef)}
                         />
                     </div>
                 </div>
@@ -80,6 +90,7 @@ export const SimpleCameraView = (props: { id: CameraViewId, remoteStreams: Map<s
                         disablePictureInPicture={true}
                         playsInline={true}
                         className={className('simple-video-canvas', { constrainedHeight })}
+                        onPlay={() => setVideoSize(videoRef)}
                     />
                 </div>
             </>
