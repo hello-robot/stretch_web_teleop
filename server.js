@@ -78,6 +78,7 @@ io.on('connection', function (socket) {
                 console.log('robot is available')
                 socket.join('robot');
                 socket.in('robot').emit('joined', 'robot');
+                socket.emit('robot available', true)
             } else {
                 console.log('robot not available because room is full')
                 socket.emit('robot available', false)

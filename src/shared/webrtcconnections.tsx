@@ -31,6 +31,7 @@ export class WebRTCConnection extends React.Component {
     private isSettingRemoteAnswerPending = false
     private pendingIceCandidates: RTCIceCandidate[]
     private dataChannelReceivedByteCount: number = 0;
+    public isRobotAvailable: boolean;
 
     cameraInfo: CameraInfo = {}
 
@@ -75,9 +76,11 @@ export class WebRTCConnection extends React.Component {
 
         this.socket.on('robot available', (available: boolean) => {
             if (available) {
-                this.joinRobotRoom()
+                // this.joinRobotRoom()
+                this.isRobotAvailable = true;
             } else {
                 console.warn('no robot available')
+                this.isRobotAvailable = false;
             }
         })
 
@@ -319,6 +322,9 @@ export class WebRTCConnection extends React.Component {
     async isConnected () {
         var connected = false;
 
+        console.log("robot available: ", this.isRobotAvailable)
+        if (!this.isRobotAvailable) return false;
+        
         await this.peerConnection?.getStats(null).then(stats => {
             stats.forEach(report => {
                 if (report.type == 'data-channel') {

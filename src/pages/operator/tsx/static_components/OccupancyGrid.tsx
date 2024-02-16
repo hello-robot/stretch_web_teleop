@@ -119,7 +119,7 @@ export class OccupancyGrid extends React.Component {
     createOccupancyGrid() {
         // internal drawing canvas
         var canvas = document.createElement('canvas')
-        var context = canvas!.getContext('2d');
+        var context = canvas!.getContext('2d', { willReadFrequently: true });
 
         if (!this.map) {
             var rect = new createjs.Shape();

@@ -52,19 +52,23 @@ connection = new WebRTCConnection({
     onConnectionEnd: disconnectFromRobot
 });
 
-connection.joinOperatorRoom()
-
-// Check if the WebRTC connection is resolved. Reload every 2 seconds until resolved then render.
-let connectionInterval = setInterval(async () => {
-    let connected = await connection.isConnected();   
-    if (connected) {
-        initializeOperator()
-        clearInterval(connectionInterval)
-    } else {
-        connection.hangup()
-        connection.joinOperatorRoom()
+// connection.joinOperatorRoom()
+new Promise<void>(async (resolve) => {
+    let connected = false; 
+    while (!connected) {
+        // Check if data channel is open
+        connected = await connection.isConnected() 
+        if (connected) {
+            initializeOperator()
+            let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
+            if (isResolved) resolve()
+        } else {
+            connection.hangup()
+            connection.joinOperatorRoom()
+            await delay(2500)
+        }
     }
-}, 2000)
+})
 
 // Create root once when index is loaded
 const container = document.getElementById('root');
@@ -251,8 +255,15 @@ function renderOperator(storageHandler: StorageHandler) {
 
 function disconnectFromRobot() {
     connection.hangup()
+    connection.stop()
 }
 
 window.onbeforeunload = () => {
     connection.hangup()
+    connection.stop()
+};
+
+window.onunload = () => {
+    connection.hangup()
+    connection.stop()
 };
