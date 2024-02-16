@@ -16,7 +16,7 @@
     /* stroke-linecap: round; */
 }
 
-.predictive-display.active path {
+.predictive-display.moving path {
     stroke: red;
 }
 

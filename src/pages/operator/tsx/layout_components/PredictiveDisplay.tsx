@@ -59,8 +59,8 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
     const svgRef = React.useRef<SVGSVGElement>(null);
     const { customizing } = props.sharedState;
     const [trajectory, setTrajectory] = React.useState<JSX.Element | undefined>(undefined);
-    const [active, setActive] = React.useState<boolean>(false);
-    const functions = predicitiveDisplayFunctionProvider.provideFunctions(setActive);
+    const [moving, setMoving] = React.useState<boolean>(false);
+    const functions = predicitiveDisplayFunctionProvider.provideFunctions(setMoving);
     const length = React.useRef<number>(0);
     const angle = React.useRef<number>(0);
     const holding = React.useRef<boolean>(false);
@@ -121,7 +121,7 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
             viewBox={`0 0 ${SVG_RESOLUTION} ${resolution_height}`}
             preserveAspectRatio="none"
             ref={svgRef}
-            className={className("predictive-display", { customizing, active })}
+            className={className("predictive-display", { customizing, moving })}
             {...controlProps}
         >
             {customizing ? customizingTrajectory : trajectory}
