@@ -6,7 +6,7 @@ import { safelyParseJSON, generateUUID } from 'shared/util'
 const peerConstraints = {
     iceServers: [{
         urls: [
-            'stun:stun1.l.google.com:19302',
+            'stun:stun.l.google.com:19302',
         ],
     }]
 };
@@ -19,6 +19,14 @@ interface WebRTCProps {
     onRobotConnectionStart?: () => void;
     onMessageChannelOpen?: () => void;
     onConnectionEnd?: () => void;
+}
+
+/** WEBRTC State */
+export enum WebRTCState {
+    RobotNotAvailable = 'Robot not Available',
+    RobotAvailable = 'Robot Available',
+    Connected = 'Connected',
+    NotConnected = 'Not Connected'
 }
 
 export class WebRTCConnection extends React.Component {
@@ -278,7 +286,7 @@ export class WebRTCConnection extends React.Component {
             return;
         }
         console.log('Hanging up.');
-        // this.stop();
+        this.stop();
     }
 
     stop() {
@@ -320,15 +328,14 @@ export class WebRTCConnection extends React.Component {
     }
 
     async isConnected () {
-        var connected = false;
+        var connected = WebRTCState.NotConnected;
 
-        console.log("robot available: ", this.isRobotAvailable)
-        if (!this.isRobotAvailable) return false;
+        if (!this.isRobotAvailable) return WebRTCState.RobotNotAvailable;
         
         await this.peerConnection?.getStats(null).then(stats => {
             stats.forEach(report => {
                 if (report.type == 'data-channel') {
-                    connected = report.bytesReceived > this.dataChannelReceivedByteCount ? true : false;
+                    connected = report.bytesReceived > this.dataChannelReceivedByteCount ? WebRTCState.Connected : WebRTCState.NotConnected;
                     this.dataChannelReceivedByteCount = report.bytesReceived;
                 }
             })

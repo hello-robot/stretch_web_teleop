@@ -22,6 +22,8 @@ import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
 import { BatteryVoltageFunctionProvider } from './function_providers/BatteryVoltageFunctionProvider';
+import { WebRTCState } from '../../../shared/webrtcconnections';
+import { waitUntilAsync } from '../../../shared/util';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
@@ -54,18 +56,39 @@ connection = new WebRTCConnection({
 
 // connection.joinOperatorRoom()
 new Promise<void>(async (resolve) => {
-    let connected = false; 
-    while (!connected) {
-        // Check if data channel is open
+    let connected = WebRTCState.NotConnected; 
+    while (connected !== WebRTCState.Connected) {
+        // Check if data is flowing through data channel
         connected = await connection.isConnected() 
-        if (connected) {
-            initializeOperator()
-            let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
-            if (isResolved) resolve()
-        } else {
-            connection.hangup()
-            connection.joinOperatorRoom()
-            await delay(2500)
+        switch (connected) {
+            case WebRTCState.RobotNotAvailable:
+                connection.hangup()
+                connection.joinOperatorRoom()
+                await delay(500)
+                break;
+            case WebRTCState.NotConnected:
+                connection.hangup()
+                connection.joinOperatorRoom()
+                // Check if WebRTC connection has resolved
+                let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
+                
+                // If it has resolved then wait till data is flowing through the data channel
+                if (isResolved) {
+                    let connected = await waitUntilAsync(async () => await connection.isConnected() == WebRTCState.Connected, 10000);
+                    
+                    // If data is flowing through the data channel, render the operator page
+                    if (connected) {
+                        await delay(1000) // 1 second delay to allow data to start flowing through data channel
+                        initializeOperator()
+                        resolve()
+                    }
+                }
+                break;
+            case WebRTCState.Connected:
+                await delay(1000) // 1 second delay to allow data to start flowing through data channel
+                initializeOperator()
+                resolve()
+                break;
         }
     }
 })

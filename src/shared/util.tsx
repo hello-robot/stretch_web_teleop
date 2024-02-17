@@ -323,6 +323,25 @@ export async function waitUntil(condition, timeout=5000, checkInterval=100) {
     return await Promise.any([waitPromise, timeoutPromise])
 }
 
+export async function waitUntilAsync(condition, timeout=5000, checkInterval=100) {
+    let interval;
+    let waitPromise = new Promise(resolve => {
+        interval = setInterval(async () => {
+            let value = await condition()
+            if (!value) {
+                return;
+            }
+            clearInterval(interval);
+            resolve(true);
+        }, checkInterval)
+    })
+    let timeoutPromise = new Promise(resolve => setTimeout(() => {
+        clearInterval(interval)
+        resolve(false)
+    }, timeout))
+    return await Promise.any([waitPromise, timeoutPromise])
+}
+
 export const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 /**

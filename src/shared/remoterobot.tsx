@@ -228,7 +228,6 @@ class RobotSensors extends React.Component {
 
         // Only callback when value has changed
         if (change && this.functionProviderCallback) {
-            console.log(jointValues, effortValues);
             this.functionProviderCallback(jointValues, effortValues);
         }
     }
