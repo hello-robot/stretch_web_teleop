@@ -145,12 +145,12 @@ function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
         } as OccupancyGridMessage);
     }
 
-    occupancyGrid.data = occupancyGrid.data.slice(0, 70000)
-    console.log('forwarding', occupancyGrid)
-    connection.sendData({
-        type: 'occupancyGrid',
-        message: occupancyGrid
-    } as OccupancyGridMessage);
+    // occupancyGrid.data = occupancyGrid.data.slice(0, 70000)
+    // console.log('forwarding', occupancyGrid)
+    // connection.sendData({
+    //     type: 'occupancyGrid',
+    //     message: occupancyGrid
+    // } as OccupancyGridMessage);
 }
 
 function forwardAMCLPose(transform: ROSLIB.Transform) {

@@ -71,18 +71,10 @@ new Promise<void>(async (resolve) => {
                 connection.joinOperatorRoom()
                 // Check if WebRTC connection has resolved
                 let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
-                
+
                 // If it has resolved then wait till data is flowing through the data channel
-                if (isResolved) {
-                    let connected = await waitUntilAsync(async () => await connection.isConnected() == WebRTCState.Connected, 10000);
-                    
-                    // If data is flowing through the data channel, render the operator page
-                    if (connected) {
-                        await delay(1000) // 1 second delay to allow data to start flowing through data channel
-                        initializeOperator()
-                        resolve()
-                    }
-                }
+                if (isResolved) await waitUntilAsync(async () => await connection.isConnected() == WebRTCState.Connected, 10000);
+                
                 break;
             case WebRTCState.Connected:
                 await delay(1000) // 1 second delay to allow data to start flowing through data channel
@@ -261,12 +253,12 @@ function renderOperator(storageHandler: StorageHandler) {
 
         setInterval(async() => {
             let connected = await connection.isConnected()
-            if (!connected && !window.document.body.contains(loader)) {
+            if (connected !== WebRTCState.Connected && !window.document.body.contains(loader)) {
                 window.document.body.appendChild(loaderBackground)
                 window.document.body.appendChild(loaderText)
                 window.document.body.appendChild(loader)
                 isConnected = connected
-            } else if (connected && window.document.body.contains(loader)) {
+            } else if (connected == WebRTCState.Connected && window.document.body.contains(loader)) {
                 window.document.body.removeChild(loaderBackground)
                 window.document.body.removeChild(loaderText)
                 window.document.body.removeChild(loader)

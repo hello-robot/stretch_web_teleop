@@ -39,6 +39,8 @@ export class WebRTCConnection extends React.Component {
     private isSettingRemoteAnswerPending = false
     private pendingIceCandidates: RTCIceCandidate[]
     private dataChannelReceivedByteCount: number = 0;
+    private dataChannelReceivedTimestamp: number = 0;    
+    private dataChannelConnectionState: WebRTCState = WebRTCState.NotConnected;    
     public isRobotAvailable: boolean;
 
     cameraInfo: CameraInfo = {}
@@ -328,19 +330,23 @@ export class WebRTCConnection extends React.Component {
     }
 
     async isConnected () {
-        var connected = WebRTCState.NotConnected;
+        if (!this.isRobotAvailable) {
+            this.dataChannelConnectionState = WebRTCState.RobotNotAvailable
+            return this.dataChannelConnectionState;
+        }
 
-        if (!this.isRobotAvailable) return WebRTCState.RobotNotAvailable;
-        
         await this.peerConnection?.getStats(null).then(stats => {
             stats.forEach(report => {
                 if (report.type == 'data-channel') {
-                    connected = report.bytesReceived > this.dataChannelReceivedByteCount ? WebRTCState.Connected : WebRTCState.NotConnected;
+                    // Ignore repeated reports
+                    if (report.timestamp <= this.dataChannelReceivedTimestamp) return this.dataChannelConnectionState
+
+                    this.dataChannelConnectionState = report.bytesReceived > this.dataChannelReceivedByteCount ? WebRTCState.Connected : WebRTCState.NotConnected;
                     this.dataChannelReceivedByteCount = report.bytesReceived;
+                    this.dataChannelReceivedTimestamp = report.timestamp;
                 }
             })
         });
-    
-        return connected;
+        return this.dataChannelConnectionState;
     }
 }
