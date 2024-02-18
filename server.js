@@ -71,21 +71,20 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('is robot available', () => {
+    socket.on('add operator to robot room', (callback) => {
         // The robot room is only available if another operator is not connected to it
         if (io.sockets.adapter.rooms.get('robot')) {
             if (io.sockets.adapter.rooms.get('robot').size < 2) {
-                console.log('robot is available')
                 socket.join('robot');
                 socket.in('robot').emit('joined', 'robot');
-                socket.emit('robot available', true)
+                callback( {'success': true })
             } else {
-                console.log('robot not available because room is full')
-                socket.emit('robot available', false)
+                console.log('could not connect because robot room is full')
+                callback( {'success': false })
             }
         } else {
-            console.log('robot not available')
-            socket.emit('robot available', false)
+            console.log('could not connect because robot is not available')
+            callback( {'success': false })
         }
     })
 

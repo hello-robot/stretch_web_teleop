@@ -1,5 +1,5 @@
 import React from 'react'
-import { CameraInfo, delay, SignallingMessage, WebRTCMessage } from "shared/util";
+import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
 import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'shared/util'
 
@@ -21,14 +21,6 @@ interface WebRTCProps {
     onConnectionEnd?: () => void;
 }
 
-/** WEBRTC State */
-export enum WebRTCState {
-    RobotNotAvailable = 'Robot not Available',
-    RobotAvailable = 'Robot Available',
-    Connected = 'Connected',
-    NotConnected = 'Not Connected'
-}
-
 export class WebRTCConnection extends React.Component {
     private socket: Socket;
     private peerConnection?: RTCPeerConnection
@@ -40,8 +32,8 @@ export class WebRTCConnection extends React.Component {
     private pendingIceCandidates: RTCIceCandidate[]
     private dataChannelReceivedByteCount: number = 0;
     private dataChannelReceivedTimestamp: number = 0;    
-    private dataChannelConnectionState: WebRTCState = WebRTCState.NotConnected;    
-    public isRobotAvailable: boolean;
+    private dataChannelConnectionState: boolean = false;    
+    public robotAvailable: boolean;
 
     cameraInfo: CameraInfo = {}
 
@@ -75,24 +67,7 @@ export class WebRTCConnection extends React.Component {
         this.socket.on('join', (room: string) => {
             console.log('Another peer made a request to join room ' + room);
             console.log('I am ' + this.peerRole + '!');
-            // if (this.onRobotConnectionStart) this.onRobotConnectionStart()
         });
-
-        // This is only sent to the operator room
-        this.socket.on('available robot', (robot: string) => {
-            console.log('available robot: ', robot)
-            this.joinRoom(robot)
-        })
-
-        this.socket.on('robot available', (available: boolean) => {
-            if (available) {
-                // this.joinRobotRoom()
-                this.isRobotAvailable = true;
-            } else {
-                console.warn('no robot available')
-                this.isRobotAvailable = false;
-            }
-        })
 
         this.socket.on('bye', () => {
             console.log('Session terminated.');
@@ -234,8 +209,7 @@ export class WebRTCConnection extends React.Component {
                     console.error(this.peerConnection.connectionState, "Resetting the PeerConnection")
                     if (this.onConnectionEnd) this.onConnectionEnd();
                     this.createPeerConnection()
-                    delay(2000)
-                    this.peerRole == "operator" ? this.joinOperatorRoom() : this.joinRobotRoom()
+                    this.peerRole == "operator" ? this.addOperatorToRobotRoom() : this.joinRobotRoom()
                 }
             };
 
@@ -259,16 +233,13 @@ export class WebRTCConnection extends React.Component {
         this.socket.emit('join', 'robot')
     }
 
-    joinOperatorRoom() {
-        console.log('attempting to join room = operator');
-        this.socket.emit('join', 'operator')
-        this.socket.emit('is robot available');
-    }
-
-    joinRoom(room: string) {
-        console.log('attempting to join room =');
-        console.log(room);
-        this.socket.emit('join', room)
+    addOperatorToRobotRoom() {
+        return new Promise<boolean>((resolve) => {
+            this.socket.emit('add operator to robot room', (response) => {
+                console.log("SUCCESS: ", response.success)
+                resolve(response.success)
+            })
+        });
     }
 
     addTrack(track: MediaStreamTrack, stream: MediaStream, streamName: string) { 
@@ -330,23 +301,19 @@ export class WebRTCConnection extends React.Component {
     }
 
     async isConnected () {
-        if (!this.isRobotAvailable) {
-            this.dataChannelConnectionState = WebRTCState.RobotNotAvailable
-            return this.dataChannelConnectionState;
-        }
-
         await this.peerConnection?.getStats(null).then(stats => {
             stats.forEach(report => {
                 if (report.type == 'data-channel') {
                     // Ignore repeated reports
                     if (report.timestamp <= this.dataChannelReceivedTimestamp) return this.dataChannelConnectionState
 
-                    this.dataChannelConnectionState = report.bytesReceived > this.dataChannelReceivedByteCount ? WebRTCState.Connected : WebRTCState.NotConnected;
+                    this.dataChannelConnectionState = report.bytesReceived > this.dataChannelReceivedByteCount
                     this.dataChannelReceivedByteCount = report.bytesReceived;
                     this.dataChannelReceivedTimestamp = report.timestamp;
                 }
             })
         });
+
         return this.dataChannelConnectionState;
     }
 }

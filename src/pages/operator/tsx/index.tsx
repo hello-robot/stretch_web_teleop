@@ -54,34 +54,35 @@ connection = new WebRTCConnection({
     onConnectionEnd: disconnectFromRobot
 });
 
-// connection.joinOperatorRoom()
 new Promise<void>(async (resolve) => {
-    let connected = WebRTCState.NotConnected; 
-    while (connected !== WebRTCState.Connected) {
-        // Check if data is flowing through data channel
-        connected = await connection.isConnected() 
-        switch (connected) {
-            case WebRTCState.RobotNotAvailable:
-                connection.hangup()
-                connection.joinOperatorRoom()
-                await delay(500)
-                break;
-            case WebRTCState.NotConnected:
-                connection.hangup()
-                connection.joinOperatorRoom()
-                // Check if WebRTC connection has resolved
-                let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
+    let connected = false; 
+    while (!connected) {
+        connection.hangup()
 
-                // If it has resolved then wait till data is flowing through the data channel
-                if (isResolved) await waitUntilAsync(async () => await connection.isConnected() == WebRTCState.Connected, 10000);
-                
-                break;
-            case WebRTCState.Connected:
-                await delay(1000) // 1 second delay to allow data to start flowing through data channel
-                initializeOperator()
-                resolve()
-                break;
+        // Attempt to join robot room
+        let joinedRobotRoom = await connection.addOperatorToRobotRoom()
+        if (!joinedRobotRoom) {
+            await delay(500)
+            continue;
         }
+
+        // Wait for WebRTC connection to resolve, timeout after 10 seconds
+        let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
+        if (!isResolved) {
+            await delay(500)
+            continue;
+        }
+
+        // Wait for data to flow through the data channel, timeout after 10 seconds
+        connected = await waitUntilAsync(async () => await connection.isConnected(), 10000);
+        if (!connected) {
+            await delay(500)
+            continue;
+        }
+
+        await delay(1000) // 1 second delay to allow data to start flowing through data channel
+        initializeOperator()
+        resolve()
     }
 })
 
@@ -253,12 +254,12 @@ function renderOperator(storageHandler: StorageHandler) {
 
         setInterval(async() => {
             let connected = await connection.isConnected()
-            if (connected !== WebRTCState.Connected && !window.document.body.contains(loader)) {
+            if (!connected && !window.document.body.contains(loader)) {
                 window.document.body.appendChild(loaderBackground)
                 window.document.body.appendChild(loaderText)
                 window.document.body.appendChild(loader)
                 isConnected = connected
-            } else if (connected == WebRTCState.Connected && window.document.body.contains(loader)) {
+            } else if (connected && window.document.body.contains(loader)) {
                 window.document.body.removeChild(loaderBackground)
                 window.document.body.removeChild(loaderText)
                 window.document.body.removeChild(loader)
