@@ -161,6 +161,7 @@ export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
      * in the view.
      */
      followGripper?: boolean;
+     predictiveDisplay?: boolean;
 }
 
 /**

@@ -32,13 +32,13 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // Boolean representing if the video stream needs to be constrained by height
     // (constrained by width otherwise)
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
-    
+
     React.useEffect(() => {
         executeVideoSettings(definition);
     }, [definition])
     
     // Create the overlay
-    const overlayDefinition = (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
+    const overlayDefinition = props.definition.predictiveDisplay ? { type: ComponentType.PredictiveDisplay } : (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
     const overlay = createOverlay(overlayDefinition, props.path, props.sharedState, videoAspectRatio);
 
@@ -53,7 +53,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const videoClass = className("video-canvas", { customizing, selected })
     const realsense = props.definition.id === CameraViewId.realsense
     const overhead = props.definition.id === CameraViewId.overhead
-    
+    const predictiveDisplay = props.definition.predictiveDisplay
+
     /** Mark this video stream as selected */
     function selectSelf() {
         props.sharedState.onSelect(props.definition, props.path);
@@ -110,7 +111,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     const overlayContainer = (
         <div
-            className={className("video-overlay-container", { customizing, selected, realsense, overhead })}
+            className={className("video-overlay-container", { customizing, selected, realsense, overhead, predictiveDisplay })}
             // style={overlayDimensions}
             onClick={customizing ? handleClick : undefined}
         >
@@ -558,6 +559,19 @@ const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef}) 
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck!(props.definition.followGripper)
                 }}
                 label="Follow Gripper"
+            />
+            <CheckToggleButton
+                checked={props.definition.predictiveDisplay || false}
+                onClick={() => {
+                    if (!props.definition.predictiveDisplay) {
+                        underVideoFunctionProvider.provideFunctions(UnderVideoButton.LookAtBase).onClick!();
+                        props.definition.predictiveDisplay = true
+                    } else {
+                        props.definition.predictiveDisplay = false
+                    }
+                    setRerender(!rerender);
+                }}
+                label="Predictive Display"
             />
         </React.Fragment>
     )

@@ -11,9 +11,7 @@ export enum UnderVideoButton {
     DepthSensing = "Depth Sensing",
     ToggleArucoMarkers = "Toggle Aruco Markers",
     CenterWrist = "Center Wrist",
-    StowWrist = "Stow Wrist"
-    // GetArucoMarkerNames = "Get Aruco Marker Names",
-    // NavigateToMarker = "Navigate to Marker"
+    StowWrist = "Stow Wrist",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -93,27 +91,6 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 return {
                     onClick: () => FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST)
                 }
-            // case UnderVideoButton.GetArucoMarkerNames:
-            //     return {
-            //         getMarkers: () => { 
-            //             const markers = FunctionProvider.remoteRobot?.getMarkers() 
-            //             let marker_names: string[] = []
-            //             if (markers) {
-            //                 markers.markers.forEach(marker => {
-            //                     marker_names.push(marker.text)
-            //                 }) 
-            //                 return marker_names
-            //             } 
-            //             return []
-            //         }
-            //     }
-            // case UnderVideoButton.NavigateToMarker:
-            //     return {
-            //         send: (name: string) => {
-            //             FunctionProvider.remoteRobot?.navigateToMarker(name)
-            //         }
-            //     }
-            //     break
             default:
                 throw Error(`Cannot get function for unknown UnderVideoButton ${button}`)
         }

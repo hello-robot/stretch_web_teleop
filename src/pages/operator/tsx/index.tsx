@@ -22,14 +22,12 @@ import {isMobile} from 'react-device-detect';
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from './function_providers/RunStopFunctionProvider';
 import { BatteryVoltageFunctionProvider } from './function_providers/BatteryVoltageFunctionProvider';
-import { WebRTCState } from '../../../shared/webrtcconnections';
 import { waitUntilAsync } from '../../../shared/util';
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>()
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
-let isConnected: boolean = false;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -62,6 +60,7 @@ new Promise<void>(async (resolve) => {
         // Attempt to join robot room
         let joinedRobotRoom = await connection.addOperatorToRobotRoom()
         if (!joinedRobotRoom) {
+            console.log('Operator failed to join robot room')
             await delay(500)
             continue;
         }
@@ -69,6 +68,7 @@ new Promise<void>(async (resolve) => {
         // Wait for WebRTC connection to resolve, timeout after 10 seconds
         let isResolved = await waitUntil(() => connection.connectionState() == "connected", 10000)
         if (!isResolved) {
+            console.warn('WebRTC connection could not resolve')
             await delay(500)
             continue;
         }
@@ -76,11 +76,12 @@ new Promise<void>(async (resolve) => {
         // Wait for data to flow through the data channel, timeout after 10 seconds
         connected = await waitUntilAsync(async () => await connection.isConnected(), 10000);
         if (!connected) {
+            console.warn('No data flowing through data channel')
             await delay(500)
             continue;
         }
 
-        await delay(1000) // 1 second delay to allow data to start flowing through data channel
+        await delay(1000) // 1 second delay to allow data to flow through data channel
         initializeOperator()
         resolve()
     }
@@ -258,12 +259,10 @@ function renderOperator(storageHandler: StorageHandler) {
                 window.document.body.appendChild(loaderBackground)
                 window.document.body.appendChild(loaderText)
                 window.document.body.appendChild(loader)
-                isConnected = connected
             } else if (connected && window.document.body.contains(loader)) {
                 window.document.body.removeChild(loaderBackground)
                 window.document.body.removeChild(loaderText)
                 window.document.body.removeChild(loader)
-                isConnected = connected
             }
         }, 1000)
     }

@@ -11,19 +11,11 @@
 }
 
 .predictive-display path {
-    stroke-width: 4;
+    stroke-width: 8;
     stroke: var(--path-blue);
-    /* stroke-linecap: round; */
+    stroke-linecap: round;
 }
 
 .predictive-display.moving path {
     stroke: red;
-}
-
-.predictive-display {
-    width: 100%;
-    height: 100%;
-    stroke: gray;
-    cursor: crosshair;
-    fill: none;
 }

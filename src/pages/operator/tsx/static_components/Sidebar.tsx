@@ -305,11 +305,11 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
 
     return (
         <React.Fragment>
-            <OnOffToggleButton
+            {/* <OnOffToggleButton
                 on={predictiveDisplayOn}
                 onClick={togglePredictiveDisplay}
                 label="Predictive Display"
-            />
+            /> */}
             <OnOffToggleButton
                 on={showButtons}
                 onClick={toggleButtons}
