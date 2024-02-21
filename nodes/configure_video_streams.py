@@ -233,7 +233,7 @@ class ConfigureVideoStreams(Node):
         self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
 
     def gripper_camera_cb(self, ros_image):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image, 'rgb8')
         img = self.rotate_image_around_center(image, -1*self.roll_value) 
         self.gripper_camera_rgb_image = self.configure_images(img, self.gripper_params[self.gripper_camera_perspective])
         self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
