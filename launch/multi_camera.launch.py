@@ -1,19 +1,17 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+from launch_ros.actions import SetRemap, Node
 
-json_path1 = os.path.join(get_package_share_directory('stretch_core'), 'config', 'HighAccuracyPresetEmitterDisabled.json')
-json_path2 = os.path.join(get_package_share_directory('stretch_core'), 'config', 'HighAccuracyPreset.json')
+json_path = os.path.join(get_package_share_directory('stretch_core'), 'config', 'HighAccuracyPreset.json')
 
 configurable_parameters = [{'name': 'camera_namespace1',             'default': '', 'description': 'namespace for camera'},
                            {'name': 'camera_name1',                  'default': 'camera', 'description': 'camera unique name'},
                            {'name': 'device_type1',                  'default': 'd435', 'description': 'camera unique name'},
-                           {'name': 'json_file_path1',               'default': json_path1, 'description': 'allows advanced configuration'},
+                           {'name': 'json_file_path1',               'default': json_path, 'description': 'allows advanced configuration'},
                            {'name': 'depth_module.profile1',         'default': '424x240x15', 'description': 'depth module profile'},                           
                            {'name': 'enable_depth1',                 'default': 'true', 'description': 'enable depth stream'},
                            {'name': 'rgb_camera.profile1',           'default': '424x240x15', 'description': 'color image width'},
@@ -36,7 +34,7 @@ configurable_parameters = [{'name': 'camera_namespace1',             'default': 
                            {'name': 'camera_namespace2',             'default': '', 'description': 'namespace for camera'},
                            {'name': 'camera_name2',                  'default': 'gripper_camera', 'description': 'camera unique name'},
                            {'name': 'device_type2',                  'default': 'd405', 'description': 'camera unique name'},
-                           {'name': 'json_file_path2',               'default': json_path2, 'description': 'allows advanced configuration'},
+                           {'name': 'json_file_path2',               'default': json_path, 'description': 'allows advanced configuration'},
                            {'name': 'depth_module.profile2',         'default': '480x270x15', 'description': 'depth module profile'},                           
                            {'name': 'depth_module.enable_auto_exposure2', 'default': 'true', 'description': 'enable/disable auto exposure for depth image'},
                            {'name': 'enable_depth2',                 'default': 'true', 'description': 'enable depth stream'},
@@ -67,19 +65,24 @@ def set_configurable_parameters(parameters):
     return dict([(param['name'], LaunchConfiguration(param['name'])) for param in parameters])
 
 def generate_launch_description():
-     realsense_launch = IncludeLaunchDescription(
-          PythonLaunchDescriptionSource([os.path.join(
-               get_package_share_directory('realsense2_camera'), 'launch'),
-               '/rs_multi_camera_launch.py'])
-          )
+     realsense_launch = GroupAction(
+          actions=[
+               SetRemap(src='/gripper_camera/color/image_rect_raw', dst='/gripper_camera/image_raw'),
+               IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource([os.path.join(
+                         get_package_share_directory('realsense2_camera'), 'launch'),
+                         '/rs_multi_camera_launch.py'])
+                    )
+          ]
+     )
 
      d435i_accel_correction = Node(
           package='stretch_core',
           executable='d435i_accel_correction',
           output='screen',
-          )
+     )
 
      return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
           realsense_launch,
           d435i_accel_correction,
-          ])
+     ])

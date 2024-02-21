@@ -25,7 +25,8 @@ def generate_launch_description():
     map_yaml = DeclareLaunchArgument('map_yaml', description='filepath to previously captured map', default_value='')
     d405_arg = DeclareLaunchArgument('d405', default_value='true')
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
-    navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='true')
+    wide_angle_cam_arg = DeclareLaunchArgument('wide_angle_cam', default_value='true')
+    navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='false')
     certfile_arg = DeclareLaunchArgument('certfile', default_value=hello_fleet_id + '+6.pem')
     keyfile_arg = DeclareLaunchArgument('keyfile', default_value=hello_fleet_id + '+6-key.pem')
     nav2_params_file_param = DeclareLaunchArgument(
@@ -55,17 +56,6 @@ def generate_launch_description():
         ]
     )
 
-    # Gripper Fisheye Camera Group
-    # Launch gripper fisheye camera if it exists and there is no D405
-    gripper_camera_group = GroupAction(
-        condition=IfCondition(AndSubstitution(LaunchConfiguration('gripper_camera'), NotSubstitution(LaunchConfiguration('d405')))),
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'gripper_camera.launch.py']))
-            )
-        ]
-    )
-
     # Gripper Camera Node
     # Publish blank image if there is no gripper fisheye camera or D405
     gripper_camera_node = Node(
@@ -79,24 +69,29 @@ def generate_launch_description():
         condition=UnlessCondition(OrSubstitution(LaunchConfiguration('gripper_camera'), LaunchConfiguration('d405')))
     )
 
-    # Navigation Camera Group
-    # Launch navigation camera if it exists
-    navigation_camera_group = GroupAction(
-        condition=IfCondition(LaunchConfiguration('navigation_camera')),
+    beta_uvc_navigation_camera_group = GroupAction(
+        condition=IfCondition(AndSubstitution(LaunchConfiguration('navigation_camera'), NotSubstitution(LaunchConfiguration('wide_angle_cam')))),
         actions=[
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(PathJoinSubstitution([teleop_interface_package, 'launch', 'navigation_camera.launch.py']))
+                PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'beta_navigation_camera.launch.py']))
             )
         ]
     )
 
     uvc_navigation_camera_group = GroupAction(
-        condition=IfCondition(LaunchConfiguration('navigation_camera')),
+        condition=IfCondition(LaunchConfiguration('wide_angle_cam')),
         actions=[
-             Node(
-                package='stretch_web_teleop',
-                executable='navigation_camera.py',
-                name='uvc_navigation_camera'
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'navigation_camera.launch.py']))
+            )
+        ]
+    )
+
+    uvc_gripper_camera_group = GroupAction(
+        condition=IfCondition(AndSubstitution(LaunchConfiguration('gripper_camera'), NotSubstitution(LaunchConfiguration('d405')))),
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([core_package, 'launch', 'beta_gripper_camera.launch.py']))
             )
         ]
     )
@@ -111,7 +106,7 @@ def generate_launch_description():
         parameters=[{'publish_rate': 15.0}],
         remappings=[('image_raw', '/navigation_camera/image_raw')],
         arguments=[PathJoinSubstitution([teleop_interface_package, 'nodes', 'blank_image.png'])],
-        condition=UnlessCondition(LaunchConfiguration('navigation_camera'))
+        condition=UnlessCondition(OrSubstitution(LaunchConfiguration('navigation_camera'), LaunchConfiguration('wide_angle_cam')))
     )
                         
     tf2_web_republisher_node = Node(
@@ -144,7 +139,7 @@ def generate_launch_description():
         executable='configure_video_streams.py',
         # name='configure_video_streams_node',
         output='screen',
-        arguments=[LaunchConfiguration('params')]
+        arguments=[LaunchConfiguration('params'), LaunchConfiguration('d405'), LaunchConfiguration('wide_angle_cam')]
     )
 
     rplidar_launch = IncludeLaunchDescription(
@@ -170,14 +165,15 @@ def generate_launch_description():
         gripper_camera_arg,
         d405_arg,
         navigation_camera_arg,
+        wide_angle_cam_arg,
         certfile_arg,
         keyfile_arg,
         d435i_launch,
-        gripper_camera_group,
         gripper_camera_node,
         multi_camera_launch,
-        # navigation_camera_group,
         uvc_navigation_camera_group,
+        beta_uvc_navigation_camera_group,
+        uvc_gripper_camera_group,
         navigation_camera_node,
         configure_video_streams_node,
         tf2_web_republisher_node,
