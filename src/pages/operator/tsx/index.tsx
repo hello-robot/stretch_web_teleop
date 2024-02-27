@@ -128,7 +128,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             );
             break;
         case 'isRunStopped':
-            remoteRobot.setIsRunStopped(message.enabled)
+            remoteRobot.sensors.setRunStopState(message.enabled)
             break;
         case 'occupancyGrid':
             if (!occupancyGrid) {
@@ -188,6 +188,7 @@ function configureRemoteRobot() {
     mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);
     remoteRobot.sensors.setBatteryFunctionProviderCallback(batteryVoltageFunctionProvider.updateVoltage)
+    remoteRobot.sensors.setRunStopFunctionProviderCallback(runStopFunctionProvider.updateRunStopState)
 }
 
 /**

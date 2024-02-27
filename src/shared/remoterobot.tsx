@@ -135,14 +135,6 @@ export class RemoteRobot extends React.Component<{},any> {
         this.robotChannel(cmd)
     }
 
-    setIsRunStopped(enabled: boolean) {
-        this.isRunStopped = enabled
-    }
-
-    getIsRunStopped() {
-        return this.isRunStopped
-    }
-
     getOccupancyGrid(type: "getOccupancyGrid") {
         let cmd: GetOccupancyGrid = {
             type: type
@@ -172,15 +164,19 @@ class RobotSensors extends React.Component {
     private robotPose: RobotPose = {};
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
+    private runStopEnabled: boolean = false;
     private functionProviderCallback?: (inJointLimits: ValidJointStateDict, inCollision: ValidJointStateDict) => void;
     private batteryFunctionProviderCallback?: (voltage: number) => void;
+    private runStopFunctionProviderCallback?: (enabled: boolean) => void;
 
     constructor(props: {}) {
         super(props)
         this.functionProviderCallback = () => { }
         this.batteryFunctionProviderCallback = () => { }
+        this.runStopFunctionProviderCallback = () => { }
         this.setFunctionProviderCallback = this.setFunctionProviderCallback.bind(this)
         this.setBatteryFunctionProviderCallback = this.setBatteryFunctionProviderCallback.bind(this)
+        this.setRunStopFunctionProviderCallback = this.setRunStopFunctionProviderCallback.bind(this)
     }
 
     /**
@@ -250,6 +246,11 @@ class RobotSensors extends React.Component {
         }
     }
 
+    setRunStopState(enabled: boolean) {
+        this.runStopEnabled = enabled
+        if (this.runStopFunctionProviderCallback) this.runStopFunctionProviderCallback(this.runStopEnabled)
+    }
+
     /**
      * Records a callback from the function provider. The callback is called 
      * whenever the battery voltage changes.
@@ -258,6 +259,16 @@ class RobotSensors extends React.Component {
      */
      setBatteryFunctionProviderCallback(callback: (voltage: number) => void) {
         this.batteryFunctionProviderCallback = callback;
+    }
+
+    /**
+     * Records a callback from the function provider. The callback is called 
+     * whenever the battery voltage changes.
+     * 
+     * @param callback callback to function provider
+     */
+     setRunStopFunctionProviderCallback(callback: (enabled: boolean) => void) {
+        this.runStopFunctionProviderCallback = callback;
     }
 
     /**
