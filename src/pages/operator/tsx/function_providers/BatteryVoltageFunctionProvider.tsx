@@ -5,12 +5,7 @@ export type BatteryVoltageFunctions = {
 }
 
 export class BatteryVoltageFunctionProvider extends FunctionProvider {
-    private voltage: number = 0.0;
-
-    /** 
-    * Callback function to update the battery voltage in the operator
-    */
-    private operatorCallback?: (voltage: number) => void = undefined;
+    public voltage: number = 0.0;
 
     constructor() {
         super()
@@ -20,17 +15,6 @@ export class BatteryVoltageFunctionProvider extends FunctionProvider {
 
     public updateVoltage(voltage: number): void {
         this.voltage = voltage
-        if (this.operatorCallback) this.operatorCallback(voltage)
-    }
-
-     /**
-     * Sets the local pointer to the operator's callback function, to be called 
-     * whenever the battery voltage updates.
-     * 
-     * @param callback operator's callback function to update the battery voltage
-     */
-      public setOperatorCallback(callback: (voltage: number) => void) {
-        this.operatorCallback = callback;
     }
 
     public provideFunctions(): BatteryVoltageFunctions {

@@ -13,7 +13,7 @@ export const BatteryGuage = (props: CustomizableComponentProps) => {
 
     React.useEffect(() => {
         setColor(functs.getColor())
-    }, [props.sharedState.batteryVoltage])
+    }, [batteryVoltageFunctionProvider.voltage])
     
     return (
         <div className="batteryGaugeContainer">

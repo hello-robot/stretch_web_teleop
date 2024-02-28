@@ -6,7 +6,7 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
-import { batteryVoltageFunctionProvider, buttonFunctionProvider, underMapFunctionProvider } from ".";
+import { buttonFunctionProvider, underMapFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
@@ -28,7 +28,6 @@ export const Operator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(FunctionProvider.velocityScale);
     const [buttonCollision, setButtonCollision] = React.useState<ButtonPadButton[]>([]);
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>()
-    const [batteryVoltage, setBatteryVoltage] = React.useState<number>()
     
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -46,11 +45,6 @@ export const Operator = (props: {
         setButtonStateMapRerender(!buttonStateMapRerender);
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
-
-    function batteryOperatorCallback(voltage: number) {
-        setBatteryVoltage(voltage)
-    }
-    batteryVoltageFunctionProvider.setOperatorCallback(batteryOperatorCallback);
 
     function moveBaseStateCallback(state: MoveBaseState) {
         setMoveBaseState(state)
@@ -189,7 +183,6 @@ export const Operator = (props: {
             selectedDefinition: selectedDefinition
         },
         buttonStateMap: buttonStateMap.current,
-        batteryVoltage: batteryVoltage,
         hideLabels: !layout.current.displayLabels
     }
 
