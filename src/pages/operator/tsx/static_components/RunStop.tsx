@@ -4,16 +4,14 @@ import { runStopFunctionProvider } from "..";
 import { RunStopFunctions } from "../function_providers/RunStopFunctionProvider";
 import { CustomizableComponentProps } from "../layout_components/CustomizableComponent";
 import runStopButton from "operator/icons/button.svg"
-import React from "react";
+import React, { useState } from "react";
 
 export const RunStopButton = (props: CustomizableComponentProps) => {
     const functs: RunStopFunctions = runStopFunctionProvider.provideFunctions();
-    let enabled = runStopFunctionProvider.enabled;
+    const [enabled, setEnabled] = useState<boolean>(false);
 
-    React.useEffect(() => {
-        enabled = runStopFunctionProvider.enabled;
-    }, [runStopFunctionProvider.enabled])
-
+    runStopFunctionProvider.setRunStopStateChangeCallback(setEnabled)
+    
     return (
         <div className="runStopContainer">
             <img 

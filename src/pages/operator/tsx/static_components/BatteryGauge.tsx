@@ -8,12 +8,9 @@ import React from "react";
 import { BatteryVoltageFunctions } from "../function_providers/BatteryVoltageFunctionProvider";
 
 export const BatteryGuage = (props: CustomizableComponentProps) => {
-    const functs: BatteryVoltageFunctions = batteryVoltageFunctionProvider.provideFunctions();
-    const [color, setColor] = useState(functs.getColor())
+    const [color, setColor] = useState('green')
 
-    React.useEffect(() => {
-        setColor(functs.getColor())
-    }, [batteryVoltageFunctionProvider.voltage])
+    batteryVoltageFunctionProvider.setVoltageChangeCallback(setColor)
     
     return (
         <div className="batteryGaugeContainer">
