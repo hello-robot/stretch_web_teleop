@@ -121,12 +121,12 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
                 <OnOffToggleButton
-                    on={props.displayLabels}
+                    on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
                 />
                 <OnOffToggleButton
-                    on={props.displayMovementRecorder}
+                    on={!props.displayMovementRecorder}
                     onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
                     label="Display movement recorder"
                 />
