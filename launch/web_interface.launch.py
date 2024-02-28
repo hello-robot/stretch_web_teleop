@@ -1,4 +1,7 @@
 import os
+import fnmatch
+import stretch_body.robot_params
+
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, ExecuteProcess
@@ -9,6 +12,78 @@ from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_path
 
+
+def symlinks_to_has_beta_teleop_kit():
+    usb_device_seen = {
+        'hello-navigation-camera': False,
+        'hello-gripper-camera': False,
+    }
+
+    listOfFiles = os.listdir('/dev')
+    pattern = "hello*"
+    for entry in listOfFiles:
+        if fnmatch.fnmatch(entry, pattern):
+            usb_device_seen[entry] = True
+
+    return all(usb_device_seen.values())
+
+
+def symlinks_to_has_nav_head_cam():
+    usb_device_seen = {
+        'hello-nav-head-camera': False,
+    }
+
+    listOfFiles = os.listdir('/dev')
+    pattern = "hello*"
+    for entry in listOfFiles:
+        if fnmatch.fnmatch(entry, pattern):
+            usb_device_seen[entry] = True
+
+    return all(usb_device_seen.values())
+
+
+def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_cam):
+    """This method maps configurations to drivers. I.e. it identifies the robot configuration
+    based on the variables provided and returns which drivers should be activated. If the
+    variables don't constitute a valid configuration, something is wrong with the hardware,
+    so the function raises an exception.
+
+    Returns
+    -------
+    Tuple
+        tuple with four elements:
+          which_realsense_drivers ('d435i-only' or 'both'),
+          add_gripper_driver (True or False),
+          add_navigation_driver (True or False),
+          add_head_nav_driver (True or False)
+    """
+    # Stretch RE1
+    if   model == "RE1V0" and tool == "tool_stretch_gripper"   and has_beta_teleop_kit == False and has_nav_head_cam == False:
+        return 'd435-only', False, False, False
+    elif model == "RE1V0" and tool == "tool_stretch_gripper"   and has_beta_teleop_kit == True  and has_nav_head_cam == False:
+        return 'd435-only', True,  True,  False
+    elif model == "RE1V0" and tool == "tool_stretch_dex_wrist" and has_beta_teleop_kit == False and has_nav_head_cam == False:
+        return 'd435-only', False, False, False
+    elif model == "RE1V0" and tool == "tool_stretch_dex_wrist" and has_beta_teleop_kit == True  and has_nav_head_cam == False:
+        return 'd435-only', True,  True,  False
+    # Stretch 2
+    elif model == "RE2V0" and tool == "tool_stretch_gripper"   and has_beta_teleop_kit == False and has_nav_head_cam == False:
+        return 'd435-only', False, False, False
+    elif model == "RE2V0" and tool == "tool_stretch_gripper"   and has_beta_teleop_kit == True  and has_nav_head_cam == False:
+        return 'd435-only', True,  True,  False
+    elif model == "RE2V0" and tool == "tool_stretch_dex_wrist" and has_beta_teleop_kit == False and has_nav_head_cam == False:
+        return 'd435-only', False, False, False
+    elif model == "RE2V0" and tool == "tool_stretch_dex_wrist" and has_beta_teleop_kit == True  and has_nav_head_cam == False:
+        return 'd435-only', True,  True,  False
+    # Stretch 2+ (upgraded Stretch 2)
+    elif model == "RE2V0" and tool == "eoa_wrist_dw3_tool_sg3" and has_beta_teleop_kit == False and has_nav_head_cam == True:
+        return 'both'     , False, False, True
+    # Stretch 3
+    elif model == "SE3"   and tool == "eoa_wrist_dw3_tool_sg3" and has_beta_teleop_kit == False and has_nav_head_cam == True:
+        return 'both'     , False, False, True
+
+    raise ValueError(f'cannot find valid configuration for model={model}, tool={tool}, has_beta_teleop_kit={has_beta_teleop_kit}, has_nav_head_cam={has_nav_head_cam}')
+
 def generate_launch_description():
     teleop_interface_package = str(get_package_share_path('stretch_web_teleop'))
     core_package = str(get_package_share_path('stretch_core'))
@@ -17,7 +92,14 @@ def generate_launch_description():
     stretch_navigation_path = str(get_package_share_directory('stretch_nav2'))
     navigation_bringup_path = str(get_package_share_directory('nav2_bringup'))
     
-    hello_fleet_id = os.getenv('HELLO_FLEET_ID')
+    _, robot_params = stretch_body.robot_params.RobotParams().get_params()
+    stretch_serial_no = robot_params['robot']['serial_no']
+    stretch_model = robot_params['robot']['model_name']
+    stretch_tool = robot_params['robot']['tool']
+    stretch_has_beta_teleop_kit = symlinks_to_has_beta_teleop_kit()
+    stretch_has_nav_head_cam = symlinks_to_has_nav_head_cam()
+    drivers_realsense, driver_gripper_cam, driver_navigation_cam, driver_nav_head_cam =
+        map_configuration_to_drivers(stretch_model, stretch_tool, stretch_has_beta_teleop_kit, stretch_has_nav_head_cam)
 
     # Declare launch arguments
     params_file = DeclareLaunchArgument('params', default_value=[
@@ -27,8 +109,8 @@ def generate_launch_description():
     gripper_camera_arg = DeclareLaunchArgument('gripper_camera', default_value='false')
     wide_angle_cam_arg = DeclareLaunchArgument('wide_angle_cam', default_value='true')
     navigation_camera_arg = DeclareLaunchArgument('navigation_camera', default_value='false')
-    certfile_arg = DeclareLaunchArgument('certfile', default_value=hello_fleet_id + '+6.pem')
-    keyfile_arg = DeclareLaunchArgument('keyfile', default_value=hello_fleet_id + '+6-key.pem')
+    certfile_arg = DeclareLaunchArgument('certfile', default_value=stretch_serial_no + '+6.pem')
+    keyfile_arg = DeclareLaunchArgument('keyfile', default_value=stretch_serial_no + '+6-key.pem')
     nav2_params_file_param = DeclareLaunchArgument(
         'nav2_params_file',
         default_value=os.path.join(stretch_navigation_path, 'config', 'nav2_params.yaml'),
