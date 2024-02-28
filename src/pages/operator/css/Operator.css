@@ -23,7 +23,12 @@
 
 .operator-collision-alerts {
     width: 100%;
-    padding: 0.5rem 1rem 0 1rem;
+    /* padding: 0.5rem 1rem 0 1rem; */
+    position: absolute;
+}
+
+.operator-alert {
+    font-size: 1.5rem;
 }
 
 .operator-collision-alerts .operator-alert {
