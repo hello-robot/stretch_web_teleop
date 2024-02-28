@@ -67,11 +67,11 @@ class ConfigureVideoStreams(Node):
         self.camera_synchronizer.registerCallback(self.realsense_cb)
 
         # Default image perspectives
-        print(wide_angle_cam, d405)
+        self.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
         self.overhead_camera_perspective = "wide_angle_cam" if wide_angle_cam else "fixed"
         self.realsense_camera_perspective = "default"
         self.gripper_camera_perspective = "d405" if d405 else "default"
-        print(self.gripper_camera_perspective)
+        self.get_logger().info(self.gripper_camera_perspective)
 
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)
