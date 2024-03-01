@@ -1,6 +1,7 @@
 # Table of Contents 
 - [Overview](#overview)
 - [Setup](#setup)
+    - [Installing Teleop Cameras](#installing-teleop-cameras)
 - [Launching the interface](#launching-the-interface)
 - [Using the Interface Remotely](#using-the-interface-remotely)
     - [Storing Ngrok Tunnel Configuration ](#storing-ngrok-tunnel-configuration)
@@ -13,6 +14,8 @@ This interface enables a user to remotely teleoperate a Stretch robot through a 
 
 # Setup
 The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions]()) and create a the Stretch ROS2 Humble workspace ([instructions]()). This will install all package dependencies and install the web teleop interface.  
+
+## Installing Teleop Cameras
 
 # Launching the Interface
 
