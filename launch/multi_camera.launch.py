@@ -1,11 +1,10 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+from launch_ros.actions import SetRemap, Node
 
 json_path = os.path.join(get_package_share_directory('stretch_core'), 'config', 'HighAccuracyPreset.json')
 
@@ -66,11 +65,16 @@ def set_configurable_parameters(parameters):
     return dict([(param['name'], LaunchConfiguration(param['name'])) for param in parameters])
 
 def generate_launch_description():
-     realsense_launch = IncludeLaunchDescription(
-          PythonLaunchDescriptionSource([os.path.join(
-               get_package_share_directory('realsense2_camera'), 'launch'),
-               '/rs_multi_camera_launch.py'])
-          )
+     realsense_launch = GroupAction(
+          actions=[
+               SetRemap(src='/gripper_camera/color/image_rect_raw', dst='/gripper_camera/image_raw'),
+               IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource([os.path.join(
+                         get_package_share_directory('realsense2_camera'), 'launch'),
+                         '/rs_multi_camera_launch.py'])
+                    )
+          ]
+     )
 
      d435i_accel_correction = Node(
           package='stretch_core',

@@ -1,9 +1,11 @@
 import React from "react";
 import { ROSCompressedImage } from "shared/util";
+var jpeg = require('jpeg-js');
 
 type VideoStreamProps = {
     width: number,
     height: number,
+    scale: number,
     fps: number
 }
 
@@ -13,14 +15,17 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     video: HTMLVideoElement;
     width: number;
     height: number;
+    scale: number;
     fps: number;
     className?: string;
     outputVideoStream?: MediaStream
+    aspectRatio: any;
 
     constructor(props: VideoStreamProps) {
         super(props);
         this.width = props.width;
         this.height = props.height;
+        this.scale = props.scale;
         this.fps = props.fps;
         this.img = document.createElement("img");
         this.video = document.createElement("video");
@@ -33,7 +38,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 
     get imageReceived() {
-        return this.img.src != null;
+        return this.img.src !== "";
     }
 
     renderVideo() {
@@ -44,6 +49,14 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 
     updateImage(message: ROSCompressedImage) {
+        if (!this.imageReceived) {
+            let {width, height, data} = jpeg.decode(Uint8Array.from(atob(message.data), c => c.charCodeAt(0)), true)
+            this.aspectRatio = width / height
+            this.height = Math.max(height * this.aspectRatio, 1000)
+            this.width = this.height * this.aspectRatio;
+            this.canvas.current!.width = this.width
+            this.canvas.current!.height = this.height
+        }
         this.img.src = 'data:image/jpg;base64,' + message.data;
     }
 

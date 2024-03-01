@@ -24,7 +24,7 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
 
 class ConfigureVideoStreams(Node):
-    def __init__(self, params_file):
+    def __init__(self, params_file, d405, wide_angle_cam):
         super().__init__('configure_video_streams')
         
         with open(params_file, 'r') as params:
@@ -56,35 +56,27 @@ class ConfigureVideoStreams(Node):
         # Subscribers
         self.camera_rgb_subscriber =  message_filters.Subscriber(self, Image, "/camera/color/image_raw")
         self.overhead_camera_rgb_subscriber = self.create_subscription(Image, "/navigation_camera/image_raw", self.navigation_camera_cb, QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE))
-        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/color/image_rect_raw", self.gripper_camera_cb, 1)
+        self.gripper_camera_rgb_subscriber = self.create_subscription(Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1)
         self.joint_state_subscription = self.create_subscription(JointState, "/stretch/joint_states", self.joint_state_cb, 1)
         self.point_cloud_subscriber =  message_filters.Subscriber(self, PointCloud2, "/camera/depth/color/points")
         self.camera_info_subscriber = self.create_subscription(CameraInfo, "/camera/aligned_depth_to_color/camera_info", self.camera_info_cb, 1)
-        # self.aruco_markers_subscriber = message_filters.Subscriber(self, MarkerArray, "/aruco/marker_array")
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer([
             self.camera_rgb_subscriber, 
             self.point_cloud_subscriber,
-        #     # self.aruco_markers_subscriber
         ], 1, 1, allow_headerless=True)
         self.camera_synchronizer.registerCallback(self.realsense_cb)
 
-        # Service for requested image perspectives configured based on params file
-        self.camera_perspective_service = self.create_service(CameraPerspective, 'camera_perspective', self.camera_perspective_callback)
-
         # Default image perspectives
-        self.camera_perspective = {"overhead": "nav", "realsense": "default", "gripper": "d405"}
-        self.overhead_camera_perspective = 'nav'
-        self.realsense_camera_perspective = 'default'
-        self.gripper_camera_perspective = 'd405'
+        self.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
+        self.overhead_camera_perspective = "wide_angle_cam" if wide_angle_cam else "fixed"
+        self.realsense_camera_perspective = "default"
+        self.gripper_camera_perspective = "d405" if d405 else "default"
+        self.get_logger().info(self.gripper_camera_perspective)
 
         # Service for enabling the depth AR overlay on the realsense stream
         self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)
         self.depth_ar = False
         self.pcl_cloud_filtered = None
-
-        # Service for enabling aruco marker detection
-        self.aruco_markers_service = self.create_service(ArucoMarkers, 'aruco_markers', self.display_aruco_markers_callback)
-        self.aruco_markers = False
 
         self.roll_value = 0.0
 
@@ -156,45 +148,10 @@ class ConfigureVideoStreams(Node):
             # img[y_idx, x_idx, 3] = 0
 
         return img 
-    
-    def aruco_markers_callback(self, msg, img):
-        markers = msg.markers
-        for marker in markers:
-            position = marker.pose.position
-
-            center = np.matmul(self.P, np.transpose(np.array([position.x, position.y, position.z, 1]))) # 3 x 1
-            cx = (center[0]/center[2]).astype(int)
-            cy = (center[1]/center[2]).astype(int)
-            r = 25
-
-            # img[circle_coords] = [255, 191, 0]
-            mask = self.create_circular_mask(img.shape[0], img.shape[1], (cy, cx), 20)
-            masked_img = img.copy()
-            masked_img[np.fliplr(mask)] = [255, 191, 0, 50]
-            img = cv2.addWeighted(masked_img, 0.4, img, 0.5, 0)
-
-        return img
-
-    def camera_perspective_callback(self, req, res):
-        if req.camera not in self.camera_perspective: 
-            raise ValueError("CameraPerspective.srv camera must be overhead, realsense or gripper") 
-        
-        try: 
-            self.camera_perspective[req.camera] = req.perspective
-            res.success = True
-            return res
-        except:
-            res.success = False
-            return res
 
     def depth_ar_callback(self, req, res):
         print('depth')
         self.depth_ar = req.enable
-        res.success = True
-        return res
-
-    def display_aruco_markers_callback(self, req, res):
-        self.aruco_markers = req.enable
         res.success = True
         return res
 
@@ -272,25 +229,18 @@ class ConfigureVideoStreams(Node):
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
         
-        self.realsense_rgb_image = self.realsense_images[self.camera_perspective["realsense"]]
+        self.realsense_rgb_image = self.realsense_images[self.realsense_camera_perspective]
         self.publish_compressed_msg(self.realsense_rgb_image, self.publisher_realsense_cmp)
 
     def gripper_camera_cb(self, ros_image):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
-        for image_config_name in self.gripper_params:
-            img = self.rotate_image_around_center(image, -1*self.roll_value)
-            self.gripper_images[image_config_name] = \
-                self.configure_images(img, self.gripper_params[image_config_name])
-        self.gripper_camera_rgb_image = self.gripper_images[self.camera_perspective["gripper"]]
+        image = self.cv_bridge.imgmsg_to_cv2(ros_image, 'rgb8')
+        img = self.rotate_image_around_center(image, -1*self.roll_value) 
+        self.gripper_camera_rgb_image = self.configure_images(img, self.gripper_params[self.gripper_camera_perspective])
         self.publish_compressed_msg(self.gripper_camera_rgb_image, self.publisher_gripper_cmp)
 
     def navigation_camera_cb(self, ros_image):
         image = self.cv_bridge.imgmsg_to_cv2(ros_image, 'rgb8')
-        for image_config_name in self.overhead_params:
-            self.overhead_images[image_config_name] = \
-                self.configure_images(image, self.overhead_params[image_config_name])
-
-        self.overhead_camera_rgb_image = self.overhead_images[self.camera_perspective["overhead"]]
+        self.overhead_camera_rgb_image = self.configure_images(image, self.overhead_params[self.overhead_camera_perspective])
         self.publish_compressed_msg(self.overhead_camera_rgb_image, self.publisher_overhead_cmp)
 
     def rotate_image_around_center(self, image, angle):
@@ -313,6 +263,7 @@ class ConfigureVideoStreams(Node):
 
 if __name__ == '__main__':
     rclpy.init()
-    node = ConfigureVideoStreams(sys.argv[1])
+    print(sys.argv)
+    node = ConfigureVideoStreams(sys.argv[1], sys.argv[2] == 'true', sys.argv[3] == 'true')
     print("Publishing reconfigured video stream")
     rclpy.spin(node)

@@ -17,6 +17,7 @@
     "file-loader": "^6.2.0",
     "firebase": "^9.22.1",
     "html-webpack-plugin": "^4.5.2",
+    "jpeg-js": "^0.4.4",
     "latest-createjs": "^1.0.24",
     "nodejs": "^0.0.0",
     "nodemon": "^3.0.1",
