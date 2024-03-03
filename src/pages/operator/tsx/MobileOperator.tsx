@@ -34,6 +34,13 @@ export const MobileOperator = (props: {
     const [activeControlTab, setActiveControlTab] = React.useState<number>(0)
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
+    const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    
+    React.useEffect(()=>{
+        setTimeout(function() {
+            setShowAlert(false)
+        }, 5000);
+    }, [])
 
     FunctionProvider.actionMode = ActionMode.PressAndHold;
 
@@ -189,11 +196,15 @@ export const MobileOperator = (props: {
     return (
         <div id="mobile-operator" onContextMenu={(e)=> e.preventDefault()}>
             <div id="mobile-operator-body">
-                <div className="mobile-alert">
-                    <Alert type="error">
-                        <span>Beta feature, use at your own risk</span>
-                    </Alert>
-                </div>
+                {showAlert ? 
+                    <div className="mobile-alert">
+                        <Alert type="error">
+                            <span>Beta feature, use at your own risk</span>
+                        </Alert>
+                    </div>
+                    :
+                    <></>
+                }
                 <div className={className('controls', {hideControls})} >
                     <div className={'switch-camera'}>
                         <button onPointerDown={() => {
