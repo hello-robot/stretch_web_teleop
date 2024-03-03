@@ -23,17 +23,9 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.overhead,
-                                    displayButtons: false,
-                                    children: []
-                                } as CameraViewDefinition,
-                                // Realsense camera
-                                {
-                                    type: ComponentType.CameraView,
-                                    id: CameraViewId.realsense,
                                     displayButtons: true,
                                     children: []
                                 } as CameraViewDefinition,
-                                // Gripper camera
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.gripper,
@@ -68,7 +60,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.WristGripper,
+                                    id: ButtonPadId.DexWrist,
                                 } as ButtonPadDefinition
                             ]
                         } as TabDefinition,
