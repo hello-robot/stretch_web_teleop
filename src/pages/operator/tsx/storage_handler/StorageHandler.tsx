@@ -149,6 +149,6 @@ export abstract class StorageHandler {
      * @returns the layout definition for the default layout
      */
     public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
-        return DEFAULT_LAYOUTS[layoutName];
+        return JSON.parse(JSON.stringify(DEFAULT_LAYOUTS[layoutName]));
     }
 }

@@ -150,6 +150,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
             />
             <SaveLayoutModal
                 saveLayout={props.saveLayout}
+                customLayouts={props.customLayouts}
                 setShow={setShowSaveLayoutModal}
                 show={showSaveLayoutModal}
             />
@@ -214,12 +215,16 @@ const LoadLayoutModal = (props: {
 /** Popup so the user can save their current layout. */
 const SaveLayoutModal = (props: {
     saveLayout: (layoutName: string) => void,
+    customLayouts: string[],
     setShow: (show: boolean) => void,
     show: boolean,
 }) => {
     const [name, setName] = React.useState<string>("");
     function handleAccept() {
-        if (name.length > 0) props.saveLayout(name);
+        if (name.length > 0) {
+            props.saveLayout(name);
+            props.customLayouts.push(name)
+        }
         setName("");
     }
     return (
