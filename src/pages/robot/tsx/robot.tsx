@@ -91,7 +91,6 @@ export class Robot extends React.Component {
         this.createCmdVelTopic()
         this.createSwitchToNavigationService()
         this.createSwitchToPositionService()
-        this.createSetCameraPerspectiveService()
         this.createDepthSensingService()
         this.createRunStopService()
         this.createRobotFrameTFClient()
@@ -284,20 +283,12 @@ export class Robot extends React.Component {
             serviceType: 'std_srvs/Trigger'
         });
     }
-    
-    createSetCameraPerspectiveService() {
-        this.setCameraPerspectiveService = new ROSLIB.Service({
-            ros: this.ros,
-            name: '/camera_perspective',
-            serviceType: 'stretch_teleop_interface/srv/CameraPerspective'
-        })
-    }
 
     createDepthSensingService() {
         this.setDepthSensingService = new ROSLIB.Service({
             ros: this.ros,
             name: '/depth_ar',
-            serviceType: 'stretch_teleop_interface/srv/DepthAR'
+            serviceType: 'std_srvs/srv/SetBool'
         })
     }
 
@@ -347,16 +338,8 @@ export class Robot extends React.Component {
         })
     }
 
-    setCameraPerspective(props: {camera: "overhead" | "realsense" | "gripper", perspective: string}) {
-        var request = new ROSLIB.ServiceRequest({camera: props.camera, perspective: props.perspective})
-        this.setCameraPerspectiveService?.callService(request, (response: boolean) => {
-            response ? console.log("Set " + props.camera + " to " + props.perspective + " perspective") 
-                     : console.error(props.perspective + " is not a valid perspective for " + props.camera + " camera!")
-        })
-    }
-
     setDepthSensing(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({enable: toggle})
+        var request = new ROSLIB.ServiceRequest({data: toggle})
         this.setDepthSensingService?.callService(request, (response: boolean) => {
             response ? console.log("Enable depth sensing") : console.log("Disabled depth sensing")
         })

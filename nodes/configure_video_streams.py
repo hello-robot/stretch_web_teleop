@@ -18,10 +18,10 @@ import math
 from sensor_msgs.msg import Image, CameraInfo, CompressedImage, PointCloud2, CameraInfo, JointState
 from sensor_msgs_py.point_cloud2 import read_points, create_cloud
 from cv_bridge import CvBridge
-from stretch_teleop_interface_msgs.srv import CameraPerspective, DepthAR, ArucoMarkers
 from visualization_msgs.msg import MarkerArray
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
+from std_srvs.srv import SetBool
 
 class ConfigureVideoStreams(Node):
     def __init__(self, params_file, has_beta_teleop_kit):
@@ -76,7 +76,7 @@ class ConfigureVideoStreams(Node):
         self.get_logger().info(self.gripper_camera_perspective)
 
         # Service for enabling the depth AR overlay on the realsense stream
-        self.depth_ar_service = self.create_service(DepthAR, 'depth_ar', self.depth_ar_callback)
+        self.depth_ar_service = self.create_service(SetBool, 'depth_ar', self.depth_ar_callback)
         self.depth_ar = False
         self.pcl_cloud_filtered = None
 
@@ -152,8 +152,7 @@ class ConfigureVideoStreams(Node):
         return img 
 
     def depth_ar_callback(self, req, res):
-        print('depth')
-        self.depth_ar = req.enable
+        self.depth_ar = req.data
         res.success = True
         return res
 
