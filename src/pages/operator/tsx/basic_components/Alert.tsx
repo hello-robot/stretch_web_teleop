@@ -15,10 +15,10 @@ export const Alert = (props: {
         return React.cloneElement(props.children!);
     };
 
-    function handleClose(e: MouseEvent<HTMLSpanElement, MouseEvent>) {
-        e.preventDefault();
-        setIsShow(false);
-    };
+    React.useEffect(() => {
+        console.log("change")
+        setIsShow(true)
+    }, [props])
 
     return (
         <div className={className("alert " + props.type, {"hide": !isShow})}>

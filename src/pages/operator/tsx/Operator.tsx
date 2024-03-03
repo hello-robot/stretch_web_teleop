@@ -226,25 +226,25 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
+            {
+                <div className="operator-collision-alerts">
+                    <div className={className('operator-alert', { fadeIn: buttonCollision.length > 0, fadeOut: buttonCollision.length == 0 })}>
+                        <Alert type="warning">
+                            <span>
+                                {buttonCollision.length > 0 ? buttonCollision.join(', ') + " in collision!" : ""}
+                            </span>
+                        </Alert>
+                    </div>
+                </div>
+            }
+            {moveBaseState && 
+                <div className="operator-collision-alerts">
+                    <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
+                        <Alert type={moveBaseState.alert_type} message={moveBaseState.state} />
+                    </div>
+                </div>
+            }
             <div id="operator-global-controls">
-                {
-                    <div className="operator-collision-alerts">
-                        <div className={className('operator-alert', { fadeIn: buttonCollision.length > 0, fadeOut: buttonCollision.length == 0 })}>
-                            <Alert type="warning">
-                                <span>
-                                    {buttonCollision.length > 0 ? buttonCollision.join(', ') + " in collision!" : ""}
-                                </span>
-                            </Alert>
-                        </div>
-                    </div>
-                }
-                {moveBaseState && 
-                    <div className="operator-collision-alerts">
-                        <div className={className('operator-alert', { fadeIn: moveBaseState !== undefined, fadeOut: moveBaseState == undefined })}>
-                            <Alert type={moveBaseState.alert_type} message={moveBaseState.state} />
-                        </div>
-                    </div>
-                }
                 <div className={className("operator-pose-recorder", {hideLabels: !layout.current.displayLabels})} hidden={!layout.current.displayMovementRecorder}>
                     <MovementRecorder hideLabels={!layout.current.displayLabels} />
                 </div>

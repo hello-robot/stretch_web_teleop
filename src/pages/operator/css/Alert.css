@@ -1,10 +1,12 @@
 /* The alert message box */
 .alert {
   position: relative;
-  padding: 1rem 1rem;
+  padding: 2rem 1rem;
   /* margin-bottom: 1rem; */
   border: 1px solid transparent;
   border-radius: 0.25rem;
+  height: 5.5rem;
+  text-align: center;
 }
 
 .error {
@@ -45,11 +47,11 @@
 /* The close button */
 .closebtn {
   margin-left: 15px;
-  color: white;
+  /* color: white; */
   font-weight: bold;
   float: right;
-  font-size: 22px;
-  line-height: 20px;
+  font-size: 3rem;
+  line-height: 0.75rem;
   cursor: pointer;
   transition: 0.3s;
 }
