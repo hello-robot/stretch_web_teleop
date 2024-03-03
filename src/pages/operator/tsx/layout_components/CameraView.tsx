@@ -96,11 +96,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
             if (!videoRef?.current) return;
             const videoRect = videoRef.current.getBoundingClientRect();
 
-            if (videoRect.height > height) {
+            if (Math.abs(videoRect.height - height) > 1.0) {
                 setConstrainedHeight(true);
-            } else if (videoRect.width > width) {
+            } else if (Math.abs(videoRect.width - width) > 1.0) {
                 setConstrainedHeight(false);
-            }
+            }  
         });
         if (!videoAreaRef?.current) return;
         resizeObserver.observe(videoAreaRef.current);
