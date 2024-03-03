@@ -61,7 +61,7 @@ export function percent2Pixel(percentage: number) {
 export const OVERHEAD_ROBOT_BASE = {
     centerX: percent2Pixel(49),
     centerY: percent2Pixel(75),
-    height: percent2Pixel(10),
+    height: percent2Pixel(12),
     width: percent2Pixel(18)
 }
 

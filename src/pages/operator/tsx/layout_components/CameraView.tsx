@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "shared/util";
+import React from "react";
+import { className, gripperProps, navigationProps, realsenseProps, RemoteStream } from "../../../../shared/util";
 import { CameraViewDefinition, ComponentType, CameraViewId, ComponentDefinition, FixedOverheadVideoStreamDef, RealsenseVideoStreamDef, AdjustableOverheadVideoStreamDef, GripperVideoStreamDef } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import { CustomizableComponentProps, isSelected, SharedState } from "./CustomizableComponent";
@@ -9,9 +9,8 @@ import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFunctionProvider";
 import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton, wristButtons } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
-import "operator/css/CameraView.css"
-import { Dropdown } from "../basic_components/Dropdown";
 import { AccordionSelect } from "../basic_components/AccordionSelect";
+import "operator/css/CameraView.css"
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -32,13 +31,14 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // Boolean representing if the video stream needs to be constrained by height
     // (constrained by width otherwise)
     const [constrainedHeight, setConstrainedHeight] = React.useState<boolean>(false);
+    const [predictiveDisplay, setPredictiveDisplay] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         executeVideoSettings(definition);
     }, [definition])
-    
+
     // Create the overlay
-    const overlayDefinition = props.definition.predictiveDisplay ? { type: ComponentType.PredictiveDisplay } : (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
+    const overlayDefinition = predictiveDisplay ? { type: ComponentType.PredictiveDisplay } : (definition.children && definition.children.length > 0) ? definition.children[0] : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
     const overlay = createOverlay(overlayDefinition, props.path, props.sharedState, videoAspectRatio);
 
@@ -53,7 +53,6 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const videoClass = className("video-canvas", { customizing, selected })
     const realsense = props.definition.id === CameraViewId.realsense
     const overhead = props.definition.id === CameraViewId.overhead
-    const predictiveDisplay = props.definition.predictiveDisplay
 
     /** Mark this video stream as selected */
     function selectSelf() {
@@ -181,7 +180,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             {
                 definition.displayButtons ? 
                     <div className="under-video-area">
-                        <UnderVideoButtons definition={definition}/>
+                        <UnderVideoButtons definition={definition} setPredictiveDisplay={setPredictiveDisplay}/>
                     </div>
                 :
                     <></>
@@ -498,14 +497,14 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
  * Buttons to display under a video stream (e.g. toggle cropping of overhead 
  * stream, display depth sensing on Realsense, etc.)
  */
-const UnderVideoButtons = (props: {definition: CameraViewDefinition}) => {
+const UnderVideoButtons = (props: {definition: CameraViewDefinition, setPredictiveDisplay: (enabled: boolean) => void}) => {
     let buttons: JSX.Element | null;
     switch (props.definition.id) {
         case (CameraViewId.gripper):
             buttons = <UnderGripperButtons definition={props.definition}/>;
             break;
         case (CameraViewId.overhead):
-            buttons = <UnderAdjustableOverheadButtons definition={props.definition}/>;
+            buttons = <UnderAdjustableOverheadButtons definition={props.definition} setPredictiveDisplay={props.setPredictiveDisplay}/>;
             break;
         case (CameraViewId.realsense):
             buttons = <UnderRealsenseButtons definition={props.definition}/>;
@@ -539,7 +538,7 @@ const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef}) 
 /**
  * Buttons to display under the adjustable overhead video stream.
  */
- const UnderAdjustableOverheadButtons = (props: {definition: AdjustableOverheadVideoStreamDef}) => {
+ const UnderAdjustableOverheadButtons = (props: {definition: AdjustableOverheadVideoStreamDef, setPredictiveDisplay: (enabled: boolean) => void}) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
     
     return (
@@ -565,8 +564,10 @@ const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef}) 
                 onClick={() => {
                     if (!props.definition.predictiveDisplay) {
                         underVideoFunctionProvider.provideFunctions(UnderVideoButton.LookAtBase).onClick!();
+                        props.setPredictiveDisplay(true)
                         props.definition.predictiveDisplay = true
                     } else {
+                        props.setPredictiveDisplay(false)
                         props.definition.predictiveDisplay = false
                     }
                     setRerender(!rerender);

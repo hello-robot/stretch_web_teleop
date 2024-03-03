@@ -1,5 +1,5 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { CENTER_WRIST, Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE, STOW_WRIST } from "shared/util"
+import { CENTER_WRIST, Marker, REALSENSE_BASE_POSE, REALSENSE_FORWARD_POSE, REALSENSE_GRIPPER_POSE, STOW_WRIST } from "../../../../shared/util"
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
