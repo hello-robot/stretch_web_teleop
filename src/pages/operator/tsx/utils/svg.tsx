@@ -61,8 +61,8 @@ export function percent2Pixel(percentage: number) {
 export const OVERHEAD_ROBOT_BASE = {
     centerX: percent2Pixel(49),
     centerY: percent2Pixel(75),
-    height: percent2Pixel(12),
-    width: percent2Pixel(18)
+    height: percent2Pixel(10),
+    width: percent2Pixel(15)
 }
 
 /**Creates the SVG path for a rectangle
