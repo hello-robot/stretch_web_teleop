@@ -299,7 +299,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     
     function toggleButtons() {
         setShowButtons(!showButtons);
-        definition.displayButtons = showButtons ? true : false
+        definition.displayButtons = showButtons
         props.updateLayout();
     }
 
@@ -311,7 +311,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
                 label="Predictive Display"
             /> */}
             <OnOffToggleButton
-                on={showButtons}
+                on={!definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
             />
@@ -326,14 +326,14 @@ const VideoStreamOptions = (props: OptionsProps) => {
     
     function toggleButtons() {
         setShowButtons(!showButtons);
-        definition.displayButtons = showButtons ? true : false
+        definition.displayButtons = showButtons
         props.updateLayout();
     }
 
     return (
         <React.Fragment>
             <OnOffToggleButton
-                on={showButtons}
+                on={!definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
             />
