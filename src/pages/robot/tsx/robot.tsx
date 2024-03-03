@@ -657,9 +657,9 @@ export class Robot extends React.Component {
             "joint_head_pan": [-50, 50],
             "wrist_extension": [-40, 40],
             "joint_lift": [0, 70],
-            "joint_wrist_yaw": [-10, 10],
-            "joint_wrist_pitch": [-10, 10],
-            "joint_wrist_roll": [-10, 10],
+            // "joint_wrist_yaw": [-10, 10],
+            // "joint_wrist_pitch": [-10, 10],
+            // "joint_wrist_roll": [-10, 10],
         }
         
         if (!(jointName in MAX_EFFORTS)) return inCollision;
