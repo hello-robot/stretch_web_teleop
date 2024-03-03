@@ -41,25 +41,27 @@ export enum CameraViewId {
  */
 export enum ButtonPadId {
     // Drive = "Drive",
-    ManipRealsense = "Drive/Arm/Gripper/Wrist",
-    Gripper = "Gripper",
-    WristGripper = "Wrist & Gripper",
     Base = "Drive",
-    Camera = "Camera",
-    Wrist = "Wrist",
     Arm = "Arm & Lift",
-    ArmMobile = "Arm Mobile",
-    GripperMobile = "Gripper Mobile",
-    DriveMobile = "Drive Mobile"
+    DexWrist = "Dex Wrist",
+    GripperLift = "Gripper & Lift",
+    ManipRealsense = "Drive/Arm/Gripper/Wrist",
+    Camera = "Camera",
+    // Wrist = "Wrist",
 }
 
+export enum ButtonPadIdMobile {
+    Arm = "Arm Mobile",
+    Gripper = "Gripper Mobile",
+    Drive = "Drive Mobile"
+}
 
 /**
  * Identifier for the subtype of the component 
  * (e.g. which video stream camera, or which button pad)
  * @note any new components with ID fields should be added to this type
  */
-export type ComponentId = CameraViewId | ButtonPadId;
+export type ComponentId = CameraViewId | ButtonPadId | ButtonPadIdMobile;
 
 /**
  * Definition for any interface component. Any video stream, button pad, 
@@ -77,7 +79,7 @@ export type ComponentDefinition = {
  */
 export type ButtonPadDefinition = ComponentDefinition & {
     /** Indicates the shape and functions on the button pad*/
-    id: ButtonPadId;
+    id: ButtonPadId | ButtonPadIdMobile;
 }
 
 export type ParentComponentDefinition = ComponentDefinition & {

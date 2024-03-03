@@ -37,8 +37,8 @@ export const SVG_RESOLUTION = 500;
 export enum ButtonPadShape {
     Directional,
     ManipRealsense,
-    Gripper,
-    WristGripper,
+    GripperLift,
+    DexWrist,
     SimpleButtonPad,
     RowButtonPad,
     StackedButtonPad
@@ -125,10 +125,10 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
             return getDirectionalPaths(width, height);
         case ButtonPadShape.ManipRealsense:
             return getManipRealsensePaths(width, height);
-        case ButtonPadShape.Gripper:
-            return getGripperPaths(width, height);
-        case ButtonPadShape.WristGripper:
-            return getWristGripperPaths(width, height);
+        case ButtonPadShape.GripperLift:
+            return getGripperLiftPaths(width, height);
+        case ButtonPadShape.DexWrist:
+            return getDexWristPaths(width, height);
         case ButtonPadShape.SimpleButtonPad:
             return getSimpleButtonPadPaths(width, height);
         case ButtonPadShape.RowButtonPad:
@@ -228,7 +228,7 @@ function getManipRealsensePaths(width: number, height: number): [string[], { x: 
 /**
  * Ordered top, botton, left, right, larger center, smaller center
  */
-function getGripperPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+function getGripperLiftPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
     /**Number of button layers from top to bottom in the display*/
     const numLayers = 5;
     /**How wide each layer of buttons should be.*/
@@ -272,7 +272,7 @@ function getGripperPaths(width: number, height: number): [string[], { x: number,
 /**
  * Ordered top, bottom, far left, far right, inside left, inside right
  */
-function getWristGripperPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+function getDexWristPaths(width: number, height: number): [string[], { x: number, y: number }[]] {
     const sidesPercent = 0.25;
     const sideWidth = width * sidesPercent;
     const centerWidth = width - 2 * sideWidth;

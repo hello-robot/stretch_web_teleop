@@ -1,7 +1,7 @@
 import React, { PointerEventHandler, useState } from "react";
-import { ActionMode, ButtonPadId, CameraViewId, ComponentDefinition, ComponentType, MapDefinition } from "./utils/component_definitions";
+import { ActionMode, ButtonPadIdMobile, CameraViewId, ComponentDefinition, ComponentType, MapDefinition } from "./utils/component_definitions";
 import { className, MoveBaseState, RemoteStream } from "shared/util";
-import { buttonFunctionProvider, movementRecorderFunctionProvider, underMapFunctionProvider, underVideoFunctionProvider } from ".";
+import { buttonFunctionProvider, hasBetaTeleopKit, movementRecorderFunctionProvider, underMapFunctionProvider, underVideoFunctionProvider } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
@@ -80,7 +80,8 @@ export const MobileOperator = (props: {
             selectedDefinition: undefined
         },
         buttonStateMap: buttonStateMap.current,
-        hideLabels: false
+        hideLabels: false,
+        hasBetaTeleopKit: hasBetaTeleopKit
     }
 
     function updateScreens() {
@@ -112,7 +113,7 @@ export const MobileOperator = (props: {
                     path: "",
                     definition: { 
                         type: ComponentType.ButtonPad,
-                    id: ButtonPadId.DriveMobile 
+                    id: ButtonPadIdMobile.Drive 
                     },
                     sharedState: sharedState,
                     overlay: false,
@@ -131,7 +132,7 @@ export const MobileOperator = (props: {
                     path: "",
                     definition: { 
                         type: ComponentType.ButtonPad,
-                    id: ButtonPadId.ArmMobile 
+                    id: ButtonPadIdMobile.Arm 
                     },
                     sharedState: sharedState,
                     overlay: false,
@@ -150,7 +151,7 @@ export const MobileOperator = (props: {
                     path: "",
                     definition: { 
                         type: ComponentType.ButtonPad,
-                        id: ButtonPadId.GripperMobile 
+                        id: ButtonPadIdMobile.Gripper 
                     },
                     sharedState: sharedState,
                     overlay: false,

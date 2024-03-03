@@ -1,6 +1,6 @@
 import React from "react";
 import { CustomizableComponentProps, SharedState, isSelected } from "./CustomizableComponent";
-import { ButtonPadDefinition, ButtonPadId } from "../utils/component_definitions";
+import { ButtonPadDefinition, ButtonPadId, ButtonPadIdMobile } from "../utils/component_definitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
@@ -124,7 +124,7 @@ const SingleButton = (props: SingleButtonProps) => {
  * {@link ButtonPadButton} where each element informs the function of
  * the corresponding button on the button pad
  */
-function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPadButton[]] {
+function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
     let functions: ButtonPadButton[];
     const B = ButtonPadButton;
@@ -153,7 +153,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ]
             shape = ButtonPadShape.ManipRealsense;
             break;
-        case ButtonPadId.Gripper:
+        case ButtonPadId.GripperLift:
             functions = [
                 B.ArmLift,
                 B.ArmLower,
@@ -162,9 +162,9 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
                 B.GripperOpen,
                 B.GripperClose,
             ]
-            shape = ButtonPadShape.Gripper;
+            shape = ButtonPadShape.GripperLift;
             break;
-        case ButtonPadId.WristGripper:
+        case ButtonPadId.DexWrist:
             functions = [
                 B.WristPitchUp,
                 B.WristPitchDown,
@@ -175,7 +175,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
                 B.GripperOpen,
                 B.GripperClose
             ];
-            shape = ButtonPadShape.WristGripper;
+            shape = ButtonPadShape.DexWrist;
             break;
         case ButtonPadId.Base:
             functions = [
@@ -195,27 +195,19 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
-        case ButtonPadId.Wrist:
-            // functions = [
-            //     B.GripperOpen,
-            //     B.GripperClose,
-            //     B.WristRotateIn,
-            //     B.WristRotateOut
-            // ];
-            // shape = ButtonPadShape.SimpleButtonPad;
-            // break;
-            functions = [
-                B.WristRollLeft,
-                B.WristRollRight,
-                B.WristPitchUp,
-                B.WristPitchDown,
-                B.WristRotateIn,
-                B.WristRotateOut,
-                B.GripperOpen,
-                B.GripperClose
-            ];
-            shape = ButtonPadShape.StackedButtonPad;
-            break;
+        // case ButtonPadId.Wrist:
+        //     functions = [
+        //         B.WristRollLeft,
+        //         B.WristRollRight,
+        //         B.WristPitchUp,
+        //         B.WristPitchDown,
+        //         B.WristRotateIn,
+        //         B.WristRotateOut,
+        //         B.GripperOpen,
+        //         B.GripperClose
+        //     ];
+        //     shape = ButtonPadShape.StackedButtonPad;
+        //     break;
         case ButtonPadId.Arm:
             functions = [
                 B.ArmLift,
@@ -225,7 +217,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
-        case ButtonPadId.ArmMobile:
+        case ButtonPadIdMobile.Arm:
             functions = [
                 B.ArmLift,
                 B.ArmLower,
@@ -234,7 +226,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
-        case ButtonPadId.GripperMobile:
+        case ButtonPadIdMobile.Gripper:
             functions = [
                 B.WristRotateIn,
                 B.WristRotateOut,
@@ -243,7 +235,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId): [ButtonPadShape, ButtonPad
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
-        case ButtonPadId.DriveMobile:
+        case ButtonPadIdMobile.Drive:
             functions = [
                 B.BaseForward,
                 B.BaseReverse,
