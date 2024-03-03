@@ -4,12 +4,17 @@
 }
 
 .enabled {
-    animation: blinker 1.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
+    /* animation: blinker 1.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;   */
+    animation: blinker 1s linear infinite;
+    filter: brightness(30%) saturate(100%) invert(10%) sepia(28%) saturate(4155%) hue-rotate(346deg) contrast(119%);
 }
 
 @keyframes blinker {  
-    from { opacity: 1; }
-    to { opacity: 0; }
+    /* from { opacity: 1; }
+    to { opacity: 0; } */
+    50% {
+        opacity: 0;
+    }
 }
 
 .runStopContainer {
