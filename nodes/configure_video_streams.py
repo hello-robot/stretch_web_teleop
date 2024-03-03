@@ -24,11 +24,13 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
 
 class ConfigureVideoStreams(Node):
-    def __init__(self, params_file, d405, wide_angle_cam):
+    def __init__(self, params_file, has_beta_teleop_kit):
         super().__init__('configure_video_streams')
         
         with open(params_file, 'r') as params:
             self.image_params = yaml.safe_load(params)
+
+        self.declare_parameter("has_beta_teleop_kit", rclpy.Parameter.Type.BOOL)
 
         self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
         self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
@@ -67,10 +69,10 @@ class ConfigureVideoStreams(Node):
         self.camera_synchronizer.registerCallback(self.realsense_cb)
 
         # Default image perspectives
-        self.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
-        self.overhead_camera_perspective = "wide_angle_cam" if wide_angle_cam else "fixed"
+        # self.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
+        self.overhead_camera_perspective = "fixed" if has_beta_teleop_kit else "wide_angle_cam"
         self.realsense_camera_perspective = "default"
-        self.gripper_camera_perspective = "d405" if d405 else "default"
+        self.gripper_camera_perspective = "default" if has_beta_teleop_kit else "d405"
         self.get_logger().info(self.gripper_camera_perspective)
 
         # Service for enabling the depth AR overlay on the realsense stream
@@ -264,6 +266,6 @@ class ConfigureVideoStreams(Node):
 if __name__ == '__main__':
     rclpy.init()
     print(sys.argv)
-    node = ConfigureVideoStreams(sys.argv[1], sys.argv[2] == 'true', sys.argv[3] == 'true')
+    node = ConfigureVideoStreams(sys.argv[1], sys.argv[2] == "True")
     print("Publishing reconfigured video stream")
     rclpy.spin(node)

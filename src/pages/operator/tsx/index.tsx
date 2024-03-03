@@ -28,6 +28,7 @@ let allRemoteStreams: Map<string, RemoteStream> = new Map<string, RemoteStream>(
 let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
+export let hasBetaTeleopKit: boolean;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -131,6 +132,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         case 'isRunStopped':
             remoteRobot.sensors.setRunStopState(message.enabled)
             break;
+        case 'hasBetaTeleopKit':
+            hasBetaTeleopKit = message.value
+            break;
         case 'occupancyGrid':
             if (!occupancyGrid) {
                 occupancyGrid = message.message
@@ -184,7 +188,7 @@ function configureRemoteRobot() {
         robotChannel: (message: cmd) => connection.sendData(message),
     });
     occupancyGrid = undefined;
-    // remoteRobot.getOccupancyGrid("getOccupancyGrid")
+    remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit")
     FunctionProvider.addRemoteRobot(remoteRobot);
     mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(buttonFunctionProvider.updateJointStates);

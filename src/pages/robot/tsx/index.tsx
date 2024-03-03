@@ -6,6 +6,7 @@ import { WebRTCConnection } from '../../../shared/webrtcconnections'
 import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatusMessage, MoveBaseState, MoveBaseStateMessage, ROSBatteryState, BatteryVoltageMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
+import { HasBetaTeleopKitMessage } from '../../../shared/util';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
@@ -13,7 +14,8 @@ export const robot = new Robot({
     occupancyGridCallback: forwardOccupancyGrid,
     moveBaseResultCallback: forwardMoveBaseState,
     amclPoseCallback: forwardAMCLPose,
-    isRunStoppedCallback: forwardIsRunStopped
+    isRunStoppedCallback: forwardIsRunStopped,
+    hasBetaTeleopKitCallback: forwardHasBetaTeleopKit
 })
 
 export let connection: WebRTCConnection;
@@ -95,6 +97,15 @@ function forwardIsRunStopped(isRunStopped: boolean) {
         type: "isRunStopped",
         enabled: isRunStopped,
     } as IsRunStoppedMessage);
+}
+
+function forwardHasBetaTeleopKit(value: boolean) {
+    if (!connection) throw 'WebRTC connection undefined!'
+
+    connection.sendData({
+        type: "hasBetaTeleopKit",
+        value: value,
+    } as HasBetaTeleopKitMessage);
 }
 
 function forwardJointStates(robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
@@ -202,6 +213,8 @@ function handleMessage(message: WebRTCMessage) {
         case "getOccupancyGrid":
             robot.getOccupancyGrid()
             break 
+        case "getHasBetaTeleopKit":
+            robot.getHasBetaTeleopKit()
     }
 };
 

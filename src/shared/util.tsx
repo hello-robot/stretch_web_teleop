@@ -45,7 +45,7 @@ export interface Transform {
     transform: ROSLIB.Transform
 }
 
-export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | BatteryVoltageMessage | MoveBaseStateMessage | IsRunStoppedMessage | cmd;
+export type WebRTCMessage = ValidJointStateMessage | OccupancyGridMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | BatteryVoltageMessage | MoveBaseStateMessage | IsRunStoppedMessage | HasBetaTeleopKitMessage | cmd;
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory"
@@ -67,6 +67,11 @@ export interface ValidJointStateMessage {
 export interface IsRunStoppedMessage {
     type: "isRunStopped",
     enabled: boolean
+}
+
+export interface HasBetaTeleopKitMessage {
+    type: "hasBetaTeleopKit",
+    value: boolean
 }
 
 export interface FollowJointTrajectoryActionResultMessage {

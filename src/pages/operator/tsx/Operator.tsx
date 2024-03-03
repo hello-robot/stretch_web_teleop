@@ -6,7 +6,7 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { ActionMode, ComponentDefinition, LayoutDefinition } from "./utils/component_definitions";
 import { className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
-import { buttonFunctionProvider, underMapFunctionProvider } from ".";
+import { buttonFunctionProvider, underMapFunctionProvider, hasBetaTeleopKit } from ".";
 import { ButtonPadButton, ButtonState, ButtonStateMap } from "./function_providers/ButtonFunctionProvider";
 import { Dropdown } from "./basic_components/Dropdown";
 import { DEFAULT_LAYOUTS, DefaultLayoutName, StorageHandler } from "./storage_handler/StorageHandler";
@@ -183,7 +183,8 @@ export const Operator = (props: {
             selectedDefinition: selectedDefinition
         },
         buttonStateMap: buttonStateMap.current,
-        hideLabels: !layout.current.displayLabels
+        hideLabels: !layout.current.displayLabels,
+        hasBetaTeleopKit: hasBetaTeleopKit
     }
 
     /** Properties for the global options area of the sidebar */

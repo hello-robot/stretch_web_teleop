@@ -140,11 +140,10 @@ export type CameraViewDefinition = ParentComponentDefinition & {
  * all views.
  */
 export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
-    /** 
-     * If true, the view should be cropped and rotated to focus on the gripper.
-     * Otherwise, camera view should be unchanged
-     * */
-    gripperView?: boolean;
+    /**
+     * Predictive display toggle
+     */
+     predictiveDisplay?: boolean;
 }
 
 /**
@@ -161,6 +160,9 @@ export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
      * in the view.
      */
      followGripper?: boolean;
+    /**
+     * Predictive display toggle
+     */
      predictiveDisplay?: boolean;
 }
 

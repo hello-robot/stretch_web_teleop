@@ -2,7 +2,7 @@ import ROSLIB from "roslib"
 import { ROSPose, RobotPose } from "./util"
 import { ValidJoints } from "./util"
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | GetBatteryVoltageCommand
+export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | GetBatteryVoltageCommand | GetHasBetaTeleopKit
 
 export interface VelocityCommand {
     stop: () => void,
@@ -55,6 +55,10 @@ export interface LookAtGripper {
 
 export interface GetOccupancyGrid {
     type: "getOccupancyGrid"
+}
+
+export interface GetHasBetaTeleopKit {
+    type: "getHasBetaTeleopKit"
 }
 
 export interface MoveBaseCommand {

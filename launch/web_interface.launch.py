@@ -243,9 +243,9 @@ def generate_launch_description():
     configure_video_streams_node = Node(
         package='stretch_web_teleop',
         executable='configure_video_streams.py',
-        # name='configure_video_streams_node',
         output='screen',
-        arguments=[LaunchConfiguration('params'), 'true' if drivers_realsense == 'both' else '', 'true' if driver_nav_head_cam else '']
+        arguments=[LaunchConfiguration('params'), str(stretch_has_beta_teleop_kit)],
+        parameters=[{'has_beta_teleop_kit': stretch_has_beta_teleop_kit}]
     )
     ld.add_action(configure_video_streams_node)
 

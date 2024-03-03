@@ -5,7 +5,7 @@ import { ButtonPad } from "./ButtonPad";
 import { CustomizableComponentProps, isSelected, SharedState } from "./CustomizableComponent";
 import { DropZone } from "./DropZone";
 import { PredictiveDisplay } from "./PredictiveDisplay";
-import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
+import { buttonFunctionProvider, hasBetaTeleopKit, underVideoFunctionProvider } from "..";
 import { ButtonPadButton, panTiltButtons } from "../function_providers/ButtonFunctionProvider";
 import { OverheadButtons, realsenseButtons, RealsenseButtons, UnderVideoButton, wristButtons } from "../function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
@@ -136,43 +136,41 @@ export const CameraView = (props: CustomizableComponentProps) => {
     )
     // If the video is from the Realsense camera then include the pan-tilt 
     // buttons around the video, otherwise return the video
-    const videoComponent = (props.definition.id === CameraViewId.realsense || props.definition.id === CameraViewId.overhead) ?
-        (
+    let videoOverlay = (<></>)
+    if (props.definition.id === CameraViewId.realsense) {
+        videoOverlay = (
             <>
-                {/* <h4 className="title">Adjustable Camera</h4> */}
-                <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
-                    { overlayDefinition?.type !== ComponentType.PredictiveDisplay ? 
-                        <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
-                            {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
-                        </div>
-                        :
-                        <></>
-                    }
-                    <video
-                        ref={videoRef}
-                        autoPlay
-                        muted={true}
-                        className={className(videoClass, { constrainedHeight })}
-                    />
-                    {overlayContainer}
+                <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                    {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
                 </div>
             </>
         )
-        :
-        (
+    } else if (props.definition.id == CameraViewId.overhead) {
+        videoOverlay = (
             <>
-                {/* <h4 className="title">{props.definition.id} Camera</h4> */}
-                <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
-                    <video
-                        ref={videoRef}
-                        autoPlay
-                        muted={true}
-                        className={className(videoClass, { constrainedHeight })}
-                    />
-                    {overlayContainer}
-                </div>
+                { overlayDefinition?.type !== ComponentType.PredictiveDisplay && !props.sharedState.hasBetaTeleopKit ? 
+                    <div className={className("realsense-pan-tilt-grid", { constrainedHeight })}>
+                        {panTiltButtons.map(dir => <PanTiltButton direction={dir} key={dir} />)}
+                    </div>
+                    :
+                    <></>
+                }
             </>
         )
+    }
+
+    const videoComponent = (
+        <div className="video-area" style={{ gridRow: 2, gridColumn: 1 }} ref={videoAreaRef}>
+            {videoOverlay}
+            <video
+                ref={videoRef}
+                autoPlay
+                muted={true}
+                className={className(videoClass, { constrainedHeight })}
+            />
+            {overlayContainer}
+        </div>
+    )
 
     return (
         <div className='video-container' draggable={false}>
@@ -180,7 +178,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
             {
                 definition.displayButtons ? 
                     <div className="under-video-area">
-                        <UnderVideoButtons definition={definition} setPredictiveDisplay={setPredictiveDisplay}/>
+                        <UnderVideoButtons 
+                            definition={definition} 
+                            setPredictiveDisplay={setPredictiveDisplay}
+                            betaTeleopKit={props.sharedState.hasBetaTeleopKit}
+                        />
                     </div>
                 :
                     <></>
@@ -497,14 +499,21 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
  * Buttons to display under a video stream (e.g. toggle cropping of overhead 
  * stream, display depth sensing on Realsense, etc.)
  */
-const UnderVideoButtons = (props: {definition: CameraViewDefinition, setPredictiveDisplay: (enabled: boolean) => void}) => {
+const UnderVideoButtons = (props: {
+    definition: CameraViewDefinition, 
+    setPredictiveDisplay: (enabled: boolean) => void,
+    betaTeleopKit: boolean,
+}) => {
     let buttons: JSX.Element | null;
     switch (props.definition.id) {
         case (CameraViewId.gripper):
             buttons = <UnderGripperButtons definition={props.definition}/>;
             break;
         case (CameraViewId.overhead):
-            buttons = <UnderAdjustableOverheadButtons definition={props.definition} setPredictiveDisplay={props.setPredictiveDisplay}/>;
+            buttons = hasBetaTeleopKit ? 
+                <UnderOverheadButtons definition={props.definition} setPredictiveDisplay={props.setPredictiveDisplay}/>
+                :
+                <UnderAdjustableOverheadButtons definition={props.definition} setPredictiveDisplay={props.setPredictiveDisplay}/>
             break;
         case (CameraViewId.realsense):
             buttons = <UnderRealsenseButtons definition={props.definition}/>;
@@ -518,20 +527,26 @@ const UnderVideoButtons = (props: {definition: CameraViewDefinition, setPredicti
 /**
  * Buttons to display under the overhead video stream.
  */
-const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef}) => {
-    const [gripperView, setGripperView] = React.useState<boolean>(props.definition.gripperView || false);
-    const buttonText = "Switch to " + (props.definition.gripperView  ? "Drive View" : "Gripper View");
-
-    /** Toggle the gripper view flag in the overhead definition */
-    function handleClick() {
-        console.log('click toggle overhead view', props.definition.gripperView, gripperView);
-        props.definition.gripperView = !props.definition.gripperView;
-        setGripperView(!gripperView);
-        underVideoFunctionProvider.provideFunctions(props.definition.gripperView ? UnderVideoButton.GripperView : UnderVideoButton.DriveView).onClick!();
-    }
-
+const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef, setPredictiveDisplay: (enabled: boolean) => void}) => {
+    const [rerender, setRerender] = React.useState<boolean>(false);
+    
     return (
-        <button onClick={handleClick} >{buttonText}</button>
+        <React.Fragment >
+            <CheckToggleButton
+                checked={props.definition.predictiveDisplay || false}
+                onClick={() => {
+                    if (!props.definition.predictiveDisplay) {
+                        props.definition.predictiveDisplay = true
+                        props.setPredictiveDisplay(true)
+                    } else {
+                        props.definition.predictiveDisplay = false
+                        props.setPredictiveDisplay(false)
+                    }
+                    setRerender(!rerender);
+                }}
+                label="Predictive Display"
+            />
+        </React.Fragment>
     )
 }
 

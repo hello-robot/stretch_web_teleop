@@ -32,8 +32,10 @@ export class Robot extends React.Component {
     private moveBaseResultCallback: (goalState: MoveBaseState) => void
     private amclPoseCallback: (pose: ROSLIB.Transform) => void
     private isRunStoppedCallback: (isRunStopped: boolean) => void
+    private hasBetaTeleopKitCallback: (value: boolean) => void
     private lookAtGripperInterval?: number // ReturnType<typeof setInterval>
     private subscriptions: ROSLIB.Topic[] = []
+    private hasBetaTeleopKitParam: ROSLIB.Param;
 
     constructor(props: {
         jointStateCallback: (robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) => void,
@@ -41,7 +43,8 @@ export class Robot extends React.Component {
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
         moveBaseResultCallback: (goalState: MoveBaseState) => void,
         amclPoseCallback: (pose: ROSLIB.Transform) => void,
-        isRunStoppedCallback: (isRunStopped: boolean) => void
+        isRunStoppedCallback: (isRunStopped: boolean) => void,
+        hasBetaTeleopKitCallback: (value: boolean) => void
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback
@@ -50,6 +53,7 @@ export class Robot extends React.Component {
         this.moveBaseResultCallback = props.moveBaseResultCallback
         this.amclPoseCallback = props.amclPoseCallback
         this.isRunStoppedCallback = props.isRunStoppedCallback
+        this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback
     }
     
     async connect(): Promise<void> {
@@ -173,6 +177,18 @@ export class Robot extends React.Component {
         this.subscriptions.push(topic)
     }
     
+    getHasBetaTeleopKit() {
+        this.hasBetaTeleopKitParam = new ROSLIB.Param({
+            ros : this.ros,
+            name : '/configure_video_streams:has_beta_teleop_kit'
+        });
+
+        this.hasBetaTeleopKitParam.get((value: boolean) => {
+            console.log("has beta teleop kit: ", value)
+            if (this.hasBetaTeleopKitCallback) this.hasBetaTeleopKitCallback(value)
+        })
+    }
+
     getOccupancyGrid() {
         let getMapService = new ROSLIB.Service({
             ros: this.ros,

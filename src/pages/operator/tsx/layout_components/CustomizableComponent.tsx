@@ -27,7 +27,9 @@ export type SharedState = {
     /** Mapping of each button pad function to a {@link ButtonState} */
     buttonStateMap?: ButtonStateMap,
     /** Whether or not to hide the button labels */
-    hideLabels?: boolean
+    hideLabels?: boolean,
+    /** Whether or not the beta teleop cameras are being used */
+    hasBetaTeleopKit: boolean
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
