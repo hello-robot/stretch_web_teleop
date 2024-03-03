@@ -16,7 +16,6 @@ export const Alert = (props: {
     };
 
     React.useEffect(() => {
-        console.log("change")
         setIsShow(true)
     }, [props])
 

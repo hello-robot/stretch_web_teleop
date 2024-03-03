@@ -71,6 +71,12 @@
     /* grid-row: 3; */
 }
 
+.mobile-alert {
+    position: absolute;
+    width: 100%;
+    z-index: 6;
+}
+
 /** https://stackoverflow.com/a/40989121 **/
 .loader {
     position: absolute;

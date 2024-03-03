@@ -17,6 +17,7 @@ import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
 import { MovementRecorder, MovementRecorderFunction } from "./layout_components/MovementRecorder";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
+import { Alert } from "./basic_components/Alert";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -188,6 +189,11 @@ export const MobileOperator = (props: {
     return (
         <div id="mobile-operator" onContextMenu={(e)=> e.preventDefault()}>
             <div id="mobile-operator-body">
+                <div className="mobile-alert">
+                    <Alert type="error">
+                        <span>Beta feature, use at your own risk</span>
+                    </Alert>
+                </div>
                 <div className={className('controls', {hideControls})} >
                     <div className={'switch-camera'}>
                         <button onPointerDown={() => {
