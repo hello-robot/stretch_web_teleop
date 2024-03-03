@@ -1,13 +1,14 @@
 import React from 'react'
-import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, MoveBaseState, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ROSBatteryState } from 'shared/util';
 import ROSLIB from "roslib";
-import { JOINT_LIMITS, RobotPose } from 'shared/util';
+import { ROSJointState, ROSCompressedImage, ValidJoints, VideoProps, ROSOccupancyGrid, ROSPose, MoveBaseState, NavigateToPoseActionResult, NavigateToPoseActionStatusList, ROSBatteryState } from 'shared/util';
+import { rosJointStatetoRobotPose, ValidJointStateDict, RobotPose, IsRunStoppedMessage } from '../../../shared/util';
 
 export var robotMode: "navigation" | "position" = "position"
 export var rosConnected = false;
 
 export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
+    private jointLimits: { [key in ValidJoints]?: [number, number] } = {}
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.ActionGoal;
     private poseGoalComplete?: boolean;
@@ -25,7 +26,7 @@ export class Robot extends React.Component {
     private mapFrameTfClient?: ROSLIB.TFClient;
     private linkGripperFingerLeftTF?: ROSLIB.Transform
     private linkHeadTiltTF?: ROSLIB.Transform
-    private jointStateCallback: (jointState: ROSJointState) => void
+    private jointStateCallback: (robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) => void
     private batteryStateCallback: (batteryState: ROSBatteryState) => void
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void
     private moveBaseResultCallback: (goalState: MoveBaseState) => void
@@ -35,7 +36,7 @@ export class Robot extends React.Component {
     private subscriptions: ROSLIB.Topic[] = []
 
     constructor(props: {
-        jointStateCallback: (jointState: ROSJointState) => void,
+        jointStateCallback: (robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) => void,
         batteryStateCallback: (batteryState: ROSBatteryState) => void,
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void,
         moveBaseResultCallback: (goalState: MoveBaseState) => void,
@@ -77,6 +78,7 @@ export class Robot extends React.Component {
 
     async onConnect() {
         this.subscribeToJointState()
+        this.subscribeToJointLimits()
         this.subscribeToBatteryState()
         this.subscribeToMoveBaseResult()
         this.subscribeToIsRunStopped()
@@ -118,10 +120,36 @@ export class Robot extends React.Component {
 
         jointStateTopic.subscribe((msg: ROSJointState) => {
             this.jointState = msg
-            if (this.jointStateCallback) this.jointStateCallback(msg)
+            let robotPose: RobotPose = rosJointStatetoRobotPose(this.jointState)
+            let jointValues: ValidJointStateDict = {}
+            let effortValues: ValidJointStateDict = {}
+            this.jointState.name.forEach((name?: ValidJoints) => {
+                let inLimits = this.inJointLimits(name);
+                let collision = this.inCollision(name);
+                if (inLimits) jointValues[name!] = inLimits;
+                if (collision) effortValues[name!] = collision;
+            })
+
+            if (this.jointStateCallback) this.jointStateCallback(robotPose, jointValues, effortValues)
         });
     };
     
+    subscribeToJointLimits() {
+        const jointLimitsTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
+            ros: this.ros,
+            name: '/joint_limits',
+            messageType: 'sensor_msgs/msg/JointState'
+        });
+        this.subscriptions.push(jointLimitsTopic)
+
+        jointLimitsTopic.subscribe((msg: ROSJointState) => {
+            msg.name.forEach((name, idx) => {
+                if (name == "joint_arm") name = "wrist_extension"
+                this.jointLimits[name] = [msg.position[idx], msg.velocity[idx]]
+            })
+        });
+    };
+
     subscribeToBatteryState() {
         const batteryStateTopic: ROSLIB.Topic<ROSBatteryState> = new ROSLIB.Topic({
             ros: this.ros,
@@ -156,6 +184,17 @@ export class Robot extends React.Component {
         getMapService?.callService(request, (response: {map: ROSOccupancyGrid}) => {
             if (this.occupancyGridCallback) this.occupancyGridCallback(response.map)
         })
+    }
+
+    getJointLimits() {
+        let getJointLimitsService = new ROSLIB.Service({
+            ros: this.ros,
+            name: '/get_joint_states',
+            serviceType: 'std_srvs/Trigger'
+        });
+        
+        var request = new ROSLIB.ServiceRequest({});
+        getJointLimitsService.callService(request, () => {});
     }
 
     subscribeToMoveBaseResult() {
@@ -353,14 +392,14 @@ export class Robot extends React.Component {
 
     makeIncrementalMoveGoal(jointName: ValidJoints, jointValueInc: number): ROSLIB.Goal | undefined {
         if (!this.jointState) throw 'jointState is undefined';
-        let newJointValue = GetJointValue({ jointStateMessage: this.jointState, jointName: jointName })
+        let newJointValue = this.getJointValue(jointName)
         // Paper over Hello's fake joints
         if (jointName === "translate_mobile_base" || jointName === "rotate_mobile_base") {
             // These imaginary joints are floating, always have 0 as their reference
             newJointValue = 0
         } 
 
-        let collision = inCollision({ jointStateMessage: this.jointState, jointName: jointName })
+        let collision = this.inCollision({ jointStateMessage: this.jointState, jointName: jointName })
         let collisionIndex = jointValueInc <= 0 ? 0 : 1
         if (jointName === "joint_wrist_yaw") {
             collisionIndex = jointValueInc <= 0 ? 1 : 0
@@ -374,11 +413,11 @@ export class Robot extends React.Component {
         newJointValue = newJointValue + jointValueInc
 
         // Make sure new joint value is within limits
-        if (jointName in JOINT_LIMITS) {
-            let inLimits = inJointLimitsHelper({ jointValue: newJointValue, jointName: jointName })
+        if (jointName in this.jointLimits) {
+            let inLimits = this.inJointLimitsHelper(newJointValue, jointName)
             if (!inLimits) throw 'invalid joint name'
-            // console.log(newJointValue, JOINT_LIMITS[jointName]![index], inLimits[index])
-            if (!inLimits[index]) newJointValue = JOINT_LIMITS[jointName]![index]
+            // console.log(newJointValue, this.jointLimits[jointName]![index], inLimits[index])
+            if (!inLimits[index]) newJointValue = this.jointLimits[jointName]![index]
         }
 
         let pose = { [jointName]: newJointValue }
@@ -569,14 +608,8 @@ export class Robot extends React.Component {
         // Goals really close to current state cause some whiplash in these joints in simulation. 
         // Ignoring small goals is a temporary fix
         if (!this.jointState) throw 'jointState is undefined';
-        let panDiff = Math.abs(GetJointValue({
-            jointStateMessage: this.jointState, 
-            jointName: "joint_head_pan"
-        }) - pan);
-        let tiltDiff = Math.abs(GetJointValue({
-            jointStateMessage: this.jointState, 
-            jointName: "joint_head_tilt"
-        }) - tilt);
+        let panDiff = Math.abs(this.getJointValue("joint_head_pan") - pan);
+        let tiltDiff = Math.abs(this.getJointValue("joint_head_tilt") - tilt);
         if (panDiff < 0.02 && tiltDiff < 0.02) {
             return
         }
@@ -586,58 +619,58 @@ export class Robot extends React.Component {
             'joint_head_tilt': tilt + tiltOffset
         })
     }
-}
 
-export const GetJointValue = (props: { jointStateMessage: ROSJointState, jointName: ValidJoints }): number => {
-    // Paper over Hello's fake joint implementation
-    if (props.jointName === "wrist_extension") {
-        return GetJointValue({jointStateMessage: props.jointStateMessage, jointName: "joint_arm_l0"}) +
-               GetJointValue({jointStateMessage: props.jointStateMessage, jointName: "joint_arm_l1"}) +
-               GetJointValue({jointStateMessage: props.jointStateMessage, jointName: "joint_arm_l2"}) +
-               GetJointValue({jointStateMessage: props.jointStateMessage, jointName: "joint_arm_l3"});
-    } else if (props.jointName === "translate_mobile_base" || props.jointName === "rotate_mobile_base") {
-        return 0;
-    }
-
-    let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
-    return props.jointStateMessage.position[jointIndex]
-}
-
-export function inJointLimits(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
-    let jointValue = GetJointValue(props)
-    return inJointLimitsHelper({ jointValue: jointValue, jointName: props.jointName})
-}
-
-function inJointLimitsHelper(props: { jointValue: number, jointName: ValidJoints }) {
-    let jointLimits = JOINT_LIMITS[props.jointName]
-    if (!jointLimits) return;
-
-    var eps = 0.03
-    let inLimits: [boolean, boolean] = [true, true]
-    inLimits[0] = props.jointValue - eps >= jointLimits[0] // Lower joint limit
-    inLimits[1] = props.jointValue + eps <= jointLimits[1] // Upper joint limit
-    return inLimits
-}
-
-export function inCollision(props: { jointStateMessage: ROSJointState, jointName: ValidJoints }) {
-    let inCollision: [boolean, boolean] = [false, false]
-    const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
-        "joint_head_tilt": [-50, 50],
-        "joint_head_pan": [-50, 50],
-        "wrist_extension": [-40, 40],
-        "joint_lift": [0, 70],
-        "joint_wrist_yaw": [-10, 10],
-        "joint_wrist_pitch": [-10, 10],
-        "joint_wrist_roll": [-10, 10],
-    }
+    getJointValue(jointName: ValidJoints): number {
+        // Paper over Hello's fake joint implementation
+        if (jointName === "joint_arm" || jointName === "wrist_extension") {
+            return this.getJointValue("joint_arm_l0") +
+                   this.getJointValue("joint_arm_l1") +
+                   this.getJointValue("joint_arm_l2") +
+                   this.getJointValue("joint_arm_l3");
+        } else if (jointName === "translate_mobile_base" || jointName === "rotate_mobile_base") {
+            return 0;
+        }
     
-    if (!(props.jointName in MAX_EFFORTS)) return inCollision;
+        let jointIndex = this.jointState.name.indexOf(jointName)
+        return this.jointState.position[jointIndex]
+    }
 
-    let jointIndex = props.jointStateMessage.name.indexOf(props.jointName)
-    // In collision if joint is applying more than 50% effort when moving downward/inward/backward
-    inCollision[0] = props.jointStateMessage.effort[jointIndex] < MAX_EFFORTS[props.jointName]![0]
-    // In collision if joint is applying more than 50% effort when moving upward/outward/forward
-    inCollision[1] = props.jointStateMessage.effort[jointIndex] > MAX_EFFORTS[props.jointName]![1]
+    inJointLimits(jointName: ValidJoints) {
+        let jointValue = this.getJointValue(jointName)
+        return this.inJointLimitsHelper(jointValue, jointName)
+    }
 
-    return inCollision
+    inJointLimitsHelper(jointValue: number, jointName: ValidJoints) {
+        let jointLimits = this.jointLimits[jointName]
+        if (!jointLimits) return;
+    
+        var eps = 0.03
+        let inLimits: [boolean, boolean] = [true, true]
+        inLimits[0] = jointValue - eps >= jointLimits[0] // Lower joint limit
+        inLimits[1] = jointValue + eps <= jointLimits[1] // Upper joint limit
+        return inLimits
+    }
+
+    inCollision(jointName: ValidJoints) {
+        let inCollision: [boolean, boolean] = [false, false]
+        const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
+            "joint_head_tilt": [-50, 50],
+            "joint_head_pan": [-50, 50],
+            "wrist_extension": [-40, 40],
+            "joint_lift": [0, 70],
+            "joint_wrist_yaw": [-10, 10],
+            "joint_wrist_pitch": [-10, 10],
+            "joint_wrist_roll": [-10, 10],
+        }
+        
+        if (!(jointName in MAX_EFFORTS)) return inCollision;
+    
+        let jointIndex = this.jointState.name.indexOf(jointName)
+        // In collision if joint is applying more than 50% effort when moving downward/inward/backward
+        inCollision[0] = this.jointState.effort[jointIndex] < MAX_EFFORTS[jointName]![0]
+        // In collision if joint is applying more than 50% effort when moving upward/outward/forward
+        inCollision[1] = this.jointState.effort[jointIndex] > MAX_EFFORTS[jointName]![1]
+    
+        return inCollision
+    }
 }

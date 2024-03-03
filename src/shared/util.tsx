@@ -1,7 +1,7 @@
 import ROSLIB, { Message } from 'roslib'
 import { cmd } from './commands';
 
-export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_roll' | 'joint_wrist_pitch' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
+export type ValidJoints = 'joint_head_tilt' | 'joint_head_pan' | 'joint_gripper_finger_left' | 'joint_arm' | 'wrist_extension' | 'joint_lift' | 'joint_wrist_roll' | 'joint_wrist_pitch' | 'joint_wrist_yaw' | "translate_mobile_base" | "rotate_mobile_base" | 'gripper_aperture' | 'joint_arm_l0' | 'joint_arm_l1' | 'joint_arm_l2' | 'joint_arm_l3';
 
 export type VelocityGoalArray = [{ [key in ValidJoints]?: number }, { [key in ValidJoints]?: number }]
 
@@ -10,7 +10,7 @@ export type RemoteStream = {
     track: MediaStreamTrack
 }
 
-export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
+export const AllJoints: ValidJoints[] = ['joint_head_tilt', 'joint_head_pan', 'joint_gripper_finger_left', 'joint_arm', 'wrist_extension', 'joint_lift', 'joint_wrist_roll', 'joint_wrist_pitch', 'joint_wrist_yaw', "translate_mobile_base", "rotate_mobile_base"];
 
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] }
 

@@ -1,12 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import 'robot/css/index.css';
-import { Robot, inJointLimits, inCollision, rosConnected } from 'robot/tsx/robot'
-import { WebRTCConnection } from 'shared/webrtcconnections'
-import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ROSJointState, ValidJoints, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, rosJointStatetoRobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatusMessage, MoveBaseState, MoveBaseStateMessage, ROSBatteryState, BatteryVoltageMessage } from 'shared/util'
+import { Robot } from '../../robot/tsx/robot'
+import { WebRTCConnection } from '../../../shared/webrtcconnections'
+import { navigationProps, realsenseProps, gripperProps, WebRTCMessage, ValidJointStateDict, ValidJointStateMessage, IsRunStoppedMessage, RobotPose, ROSOccupancyGrid, OccupancyGridMessage, MapPoseMessage, GoalStatusMessage, MoveBaseState, MoveBaseStateMessage, ROSBatteryState, BatteryVoltageMessage } from 'shared/util'
 import { AllVideoStreamComponent, VideoStream } from './videostreams';
 import ROSLIB from 'roslib';
-import { delay } from '../../../shared/util';
 
 export const robot = new Robot({ 
     jointStateCallback: forwardJointStates,
@@ -51,7 +50,8 @@ robot.connect().then(() => {
     gripperStream.start()
 
     robot.getOccupancyGrid()
-
+    robot.getJointLimits()
+    
     connection.joinRobotRoom()
 })
 
@@ -97,18 +97,8 @@ function forwardIsRunStopped(isRunStopped: boolean) {
     } as IsRunStoppedMessage);
 }
 
-function forwardJointStates(jointState: ROSJointState) {
+function forwardJointStates(robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
     if (!connection) throw 'WebRTC connection undefined!'
-
-    let robotPose: RobotPose = rosJointStatetoRobotPose(jointState)
-    let jointValues: ValidJointStateDict = {}
-    let effortValues: ValidJointStateDict = {}
-    jointState.name.forEach((name?: ValidJoints) => {
-        let inLimits = inJointLimits({ jointStateMessage: jointState, jointName: name! });
-        let collision = inCollision({ jointStateMessage: jointState, jointName: name! });
-        if (inLimits) jointValues[name!] = inLimits;
-        if (collision) effortValues[name!] = collision;
-    })
 
     connection.sendData({
         type: "validJointState",
