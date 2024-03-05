@@ -4,11 +4,11 @@ import io, { Socket } from 'socket.io-client';
 import { safelyParseJSON, generateUUID } from 'shared/util'
 
 const peerConstraints = {
-    iceServers: [{
-        urls: [
-            'stun:stun.l.google.com:19302',
-        ],
-    }]
+    iceServers: [
+        {
+            urls: 'stun:stun1.l.google.com:19302'
+        }
+    ],
 };
 
 interface WebRTCProps {
@@ -214,7 +214,7 @@ export class WebRTCConnection extends React.Component {
             };
 
             this.peerConnection.onicecandidateerror = (event) => {
-                console.error('ICE candidate gathering error:', event.errorCode);
+                console.error('ICE candidate gathering error:', event.errorCode, ' ', event.errorText);
             };
 
             console.log('Created RTCPeerConnection');
