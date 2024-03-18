@@ -51,6 +51,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.Base,
+                                    displayIcons: true
                                 } as ButtonPadDefinition
                             ]
                         } as TabDefinition,
@@ -61,6 +62,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.DexWrist,
+                                    displayIcons: true
                                 } as ButtonPadDefinition
                             ]
                         } as TabDefinition,
@@ -71,6 +73,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                 {
                                     type: ComponentType.ButtonPad,
                                     id: ButtonPadId.Arm,
+                                    displayIcons: true
                                 } as ButtonPadDefinition
                             ]
                         } as TabDefinition

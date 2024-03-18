@@ -322,3 +322,35 @@ input[type='checkbox'] {
 .accordion-item:hover {
     background-color: #ccc;
 }
+
+/* SwitchButton **********************************************************/
+
+.switch-container {
+    display: flex;
+    background-color: black;
+    align-items: center;
+    border-radius: 35px;
+    width: max-content;
+    height: max-content;
+}
+  
+.toggle-item {
+    height: 3rem;
+    width: 9rem;
+    display: flex;
+    border-radius: 35px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: transparent;
+}
+  
+  .toggle-item.active {
+    background-color: #555;
+  }
+
+  .switch-text {
+    color: white;
+    font-size: 1.25rem;
+  }

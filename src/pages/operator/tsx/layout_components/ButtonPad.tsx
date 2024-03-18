@@ -27,10 +27,15 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const svgRef = React.useRef<SVGSVGElement>(null);
     /** List of path shapes for each button on the button pad */
     const definition = props.definition as ButtonPadDefinition;
-    const id: ButtonPadId = definition.id;
+    const id: ButtonPadId | ButtonPadIdMobile = definition.id;
     if (!id) throw Error("Undefined button pad ID at path " + props.path);
     const [shape, functions] = getShapeAndFunctionsFromId(definition.id);
     const [paths, iconPositions] = getPathsFromShape(shape, props.aspectRatio);
+    const [displayIcons, setDisplayIcons] = React.useState<boolean>(definition.displayIcons || true)
+    
+    React.useEffect(() => {
+        if (definition.displayIcons) setDisplayIcons(definition.displayIcons)
+    }, [definition.displayIcons])
 
     // Paths and functions should be the same length
     if (paths.length !== functions.length) {
@@ -47,7 +52,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
             iconPosition: iconPositions[i],
             svgPath,
             funct: functions[i],
-            sharedState: props.sharedState
+            sharedState: props.sharedState,
+            displayIcons: definition.displayIcons
         }
         // Buttons will not function during customization mode
         return <SingleButton {...buttonProps} key={i} />;
@@ -88,7 +94,8 @@ export type SingleButtonProps = {
     svgPath: string,
     funct: ButtonPadButton,
     sharedState: SharedState,
-    iconPosition: { x: number, y: number }
+    iconPosition: { x: number, y: number },
+    displayIcons: boolean
 }
 
 const SingleButton = (props: SingleButtonProps) => {
@@ -98,6 +105,8 @@ const SingleButton = (props: SingleButtonProps) => {
         onPointerUp: functs.onRelease,
         onPointerLeave: functs.onLeave
     }
+    /** Reference to the SVG which makes up the button */
+    let svgRef = React.useRef<SVGPathElement>(null);
     const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
@@ -105,13 +114,35 @@ const SingleButton = (props: SingleButtonProps) => {
     const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
+
+    const [textPosition, setTextPosition] = React.useState({ x: 0, y: 0 });
+
+    React.useEffect(() => {
+        const pathBoundingBox = svgRef?.current!.getBBox();
+        const centerX = pathBoundingBox.x + pathBoundingBox.width / 2;
+        const centerY = pathBoundingBox.y + pathBoundingBox.height / 2;
+
+        setTextPosition({ x: centerX, y: centerY });
+    }, [props]);
+
     return (
-        <React.Fragment >
-            <path d={props.svgPath} {...clickProps} className={buttonState}>
+        <React.Fragment>
+            <path d={props.svgPath} {...clickProps} className={buttonState} ref={svgRef}>
                 <title>{title}</title>
             </path>
-            <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
-            <p>{title}</p>
+            { 
+                props.displayIcons ?
+                <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
+                :
+                <text 
+                    dominantBaseline="middle"
+                    textAnchor="middle" 
+                    x={textPosition.x} 
+                    y={textPosition.y}
+                >
+                    {title}
+                </text>
+            }
         </React.Fragment>
     )
 }

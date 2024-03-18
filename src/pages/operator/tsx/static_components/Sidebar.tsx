@@ -1,10 +1,11 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { className } from "shared/util";
 import { ButtonPadDefinition, ButtonPadId, ComponentDefinition, ComponentId, ComponentType, LayoutDefinition, ParentComponentDefinition, TabDefinition, PanelDefinition, CameraViewDefinition, CameraViewId, MapDefinition } from "../utils/component_definitions";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css"
 import { storageHandler } from "operator/tsx/index";
+import { SwitchButton } from "../basic_components/SwitchButton";
 
 type SidebarProps = {
     hidden: boolean;
@@ -21,6 +22,7 @@ export const Sidebar = (props: SidebarProps) => {
     const deleteDisabled = props.selectedPath === undefined;
     const deleteTooltip = deleteDisabled ? "You must select an element before you can delete it" : "";
     const selectedDescription = props.selectedDefinition ? componentDescription(props.selectedDefinition) : "none";
+
     return (
         <div id="sidebar" hidden={props.hidden}>
             <div id="sidebar-header">
@@ -275,7 +277,12 @@ const SidebarOptions = (props: OptionsProps) => {
             break;
         case (ComponentType.SingleTab):
             contents = <TabOptions {...props} />;
+            break;
+        case (ComponentType.ButtonPad):
+            contents = <ButtonPadOptions {...props} />;
+            break;
     }
+
     return (
         <div id="sidebar-options">
             {contents}
@@ -341,6 +348,34 @@ const VideoStreamOptions = (props: OptionsProps) => {
                 on={!definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
+            />
+        </React.Fragment>
+    )
+}
+
+/** Options for the overhead camera video stream layout component. */
+const ButtonPadOptions = (props: OptionsProps) => {
+    const definition = props.selectedDefinition as ButtonPadDefinition;
+    const [activeOption, setActiveOption] = React.useState<string>(definition.displayIcons == undefined || definition.displayIcons ? "Icons" : "Text")
+    
+    React.useEffect(() => {
+        setActiveOption(definition.displayIcons == undefined || definition.displayIcons ? "Icons" : "Text")
+    }, [definition.displayIcons])
+
+    function toggleIcons(option: string) {
+        let toggle = option === "Icons"
+        setActiveOption(option)
+        definition.displayIcons = toggle
+        props.updateLayout();
+    }
+
+    return (
+        <React.Fragment>
+            <SwitchButton
+                option1={"Icons"}
+                option2={"Text"}
+                handleSwitchClick={(option: string) => toggleIcons(option)}
+                activeOption={activeOption}
             />
         </React.Fragment>
     )

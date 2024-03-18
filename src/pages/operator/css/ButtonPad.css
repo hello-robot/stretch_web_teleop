@@ -95,6 +95,12 @@
     justify-items: center;
 }
 
+.button-pad text {
+    font-weight: 100;
+    stroke-width: 1px;
+    font-size: x-large;
+}
+
 @media(max-width:1300px) {
     .title { 
         font-size: smaller;
