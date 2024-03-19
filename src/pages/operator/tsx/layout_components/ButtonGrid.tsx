@@ -1,24 +1,21 @@
+import React from "react";
 import { buttonFunctionProvider } from "operator/tsx/index";
 import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
 import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import { className } from "shared/util";
 import "operator/css/ButtonGrid.css"
+import { getIcon } from "../utils/svg";
+import { ButtonGridDefinition } from "../utils/component_definitions";
 
 const BUTTON_NAMES = [
-    "Forward",
-    "Backwards",
-    "Turn Left",
-    "Turn Right",
+    "Left",
+    "Right",
 
-    "Move Lift Up",
-    "Move Lift Down",
+    "Lift Up",
+    "Lift Down",
+    "Retract Arm",
     "Extend Arm",
-    "Collapse Arm",
 
-    "Roll Left",
-    "Roll Right",
-    "Pitch Up",
-    "Pitch Down",
     "Rotate Left",
     "Rotate Right",
 
@@ -29,16 +26,10 @@ const BUTTON_NAMES = [
 const BUTTON_FUNCTIONS = [
     ButtonPadButton.BaseForward,
     ButtonPadButton.BaseReverse,
-    ButtonPadButton.BaseRotateLeft,
-    ButtonPadButton.BaseRotateRight,
     ButtonPadButton.ArmLift,
     ButtonPadButton.ArmLower,
-    ButtonPadButton.ArmExtend,
     ButtonPadButton.ArmRetract,
-    ButtonPadButton.WristRollLeft,
-    ButtonPadButton.WristRollRight,
-    ButtonPadButton.WristPitchUp,
-    ButtonPadButton.WristPitchDown,
+    ButtonPadButton.ArmExtend,
     ButtonPadButton.WristRotateIn,
     ButtonPadButton.WristRotateOut,
     ButtonPadButton.GripperOpen,
@@ -46,8 +37,8 @@ const BUTTON_FUNCTIONS = [
 ]
 
 const HEADER_NAMES = [
-    "Basic Driving Controls",
-    "Basic Arm Controls",
+    "Driving Controls",
+    "Arm Controls",
     "Wrist Controls",
     "Gripper Controls"
 ]
@@ -59,16 +50,23 @@ for (let i = 0; i < 4; i++) {
             key={i}
             style={{
                 gridRow: (i + 1) * 2,
-                backgroundColor: `hsl(317, 79%, ${35 - (6 * i)}%)`
+                // backgroundColor: `hsl(210, 100%, ${10 + (i * 6)}%)`
             }}
             className="button-grid-bkg-color"
         />
     )
 }
 
-export const ButtonGrid = (props: CustomizableComponentProps) => {
+/** Properties for {@link ButtonGrid} */
+type ButtonGridProps = CustomizableComponentProps & {
+    /* Whether to display icons or text labels. */
+    displayIcons?: boolean;
+}
+
+export const ButtonGrid = (props: ButtonGridProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
+    const definition = props.definition as ButtonGridDefinition;
     function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
         event.stopPropagation();
         props.sharedState.onSelect(props.definition, props.path);
@@ -95,7 +93,11 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
                         {...clickProps}
                         className={buttonState}
                     >
-                        {buttonName}
+                        {definition.displayIcons == undefined || definition.displayIcons ? 
+                            <img height={50} width={50} src={getIcon(buttonFunction)} className={buttonState} />
+                        :
+                            buttonName
+                        }
                     </button>
                 );
             })}

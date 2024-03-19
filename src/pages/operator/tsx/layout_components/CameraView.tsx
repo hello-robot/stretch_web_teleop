@@ -574,7 +574,7 @@ const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef, s
                 }}
                 label="Follow Gripper"
             />
-            <CheckToggleButton
+            {/* <CheckToggleButton
                 checked={props.definition.predictiveDisplay || false}
                 onClick={() => {
                     if (!props.definition.predictiveDisplay) {
@@ -588,7 +588,7 @@ const UnderOverheadButtons = (props: {definition: FixedOverheadVideoStreamDef, s
                     setRerender(!rerender);
                 }}
                 label="Predictive Display"
-            />
+            /> */}
         </React.Fragment>
     )
 }

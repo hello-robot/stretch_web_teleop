@@ -41,11 +41,13 @@ export enum CameraViewId {
  */
 export enum ButtonPadId {
     // Drive = "Drive",
-    Base = "Drive",
-    Arm = "Arm & Lift",
-    DexWrist = "Dex Wrist",
-    GripperLift = "Gripper & Lift",
+    // Base = "Drive",
+    // Arm = "Arm & Lift",
+    StandardWrist = "Wrist & Gripper",
+    // DexWrist = "Dex Wrist",
+    // GripperLift = "Gripper & Lift",
     ManipRealsense = "Drive/Arm/Gripper/Wrist",
+    MinManipRealsense = "Arm & Lift",
     Camera = "Camera",
     // Wrist = "Wrist",
 }
@@ -80,7 +82,15 @@ export type ComponentDefinition = {
 export type ButtonPadDefinition = ComponentDefinition & {
     /** Indicates the shape and functions on the button pad*/
     id: ButtonPadId | ButtonPadIdMobile;
-    /** Whether to display the default buttons under the camera view */
+    /** Whether to display icons or text labels */
+    displayIcons?: boolean;
+}
+
+/**
+ * Definition for a button grid component
+ */
+export type ButtonGridDefinition = ComponentDefinition & {
+    /** Whether to icons or text labels */
     displayIcons?: boolean;
 }
 

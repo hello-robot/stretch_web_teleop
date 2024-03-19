@@ -122,7 +122,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
         <React.Fragment>
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
-                <OnOffToggleButton
+                {/* <OnOffToggleButton
                     on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
@@ -131,7 +131,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     on={!props.displayMovementRecorder}
                     onClick={() => props.setDisplayMovementRecorder(!props.displayMovementRecorder)}
                     label="Display movement recorder"
-                />
+                /> */}
                 <button
                     onClick={() => setShowLoadLayoutModal(true)}
                 >
@@ -279,6 +279,9 @@ const SidebarOptions = (props: OptionsProps) => {
             contents = <TabOptions {...props} />;
             break;
         case (ComponentType.ButtonPad):
+            contents = <ButtonPadOptions {...props} />;
+            break;
+        case (ComponentType.ButtonGrid):
             contents = <ButtonPadOptions {...props} />;
             break;
     }
@@ -465,7 +468,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
         { type: ComponentType.VirtualJoystick },
-        { type: ComponentType.Map }
+        // { type: ComponentType.Map }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {

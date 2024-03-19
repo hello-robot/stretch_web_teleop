@@ -1,17 +1,17 @@
 .button-grid {
-    flex: 2;
+    flex: 1;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, auto 1fr);
     grid-template-areas:
-        "header0 header0 header0 header0 header0 header0"
-        ". b0 b1 b2 b3 ."
-        "header1 header1 header1 header1 header1 header1"
-        ". b4 b5 b6 b7 ."
-        "header2 header2 header2 header2 header2 header2"
-        "b8 b9 b10 b11 b12 b13"
-        "header3 header3 header3 header3 header3 header3"
-        ". . b14 b15 . ."
+        "header0 header0 header0 header0"
+        ". b0 b1 ."
+        "header1 header1 header1 header1"
+        "b2 b3 b4 b5"
+        "header2 header2 header2 header2"
+        ". b6 b7 ."
+        "header3 header3 header3 header3"
+        ". b8 b9 ."
     ;
 
     padding: 0.4rem;
@@ -25,6 +25,7 @@
 }
 
 .button-grid p {
+    font-size: larger;
     text-align: center;
     margin: 1.5rem 0 0.5rem 0;
 }
@@ -39,6 +40,8 @@
     height: 4rem;
     justify-self: center;
     align-self: center;
+    background-color: gray;
+    color: white;
 }
 
 .button-grid button.active {
@@ -50,10 +53,12 @@
 }
 
 .button-grid button.limit {
-    background-color: red;
+    background-color: #fc9696;
+    color: black;
 }
 
 .button-grid-bkg-color {
     grid-column: 1 / 7;
     height: 5rem;
+    border: 2px solid black;
 }

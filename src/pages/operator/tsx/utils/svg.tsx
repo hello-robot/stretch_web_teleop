@@ -22,6 +22,8 @@ import pitchDown from "operator/icons/Pitch_Down.svg"
 import pitchUp from "operator/icons/Pitch_Up.svg"
 import yawLeft from "operator/icons/Yaw_Left.svg"
 import yawRight from "operator/icons/Yaw_Right.svg"
+import driveForwardLeft from "operator/icons/Drive_Forward_Left.svg"
+import driveBackwardRight from "operator/icons/Drive_Backward_Right.svg"
 
 import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider"
 import { isMobile } from "react-device-detect"
@@ -36,6 +38,7 @@ export const SVG_RESOLUTION = 500;
  */
 export enum ButtonPadShape {
     Directional,
+    MinManipRealsense,
     ManipRealsense,
     GripperLift,
     DexWrist,
@@ -125,6 +128,8 @@ export function getPathsFromShape(shape: ButtonPadShape, aspectRatio?: number): 
             return getDirectionalPaths(width, height);
         case ButtonPadShape.ManipRealsense:
             return getManipRealsensePaths(width, height);
+        case ButtonPadShape.MinManipRealsense:
+            return getMinManipRealsensePaths(width, height)
         case ButtonPadShape.GripperLift:
             return getGripperLiftPaths(width, height);
         case ButtonPadShape.DexWrist:
@@ -221,6 +226,58 @@ function getManipRealsensePaths(width: number, height: number): [string[], { x: 
         // Bottom two buttons
         { x: center / 2, y: layerHeight * 11 / 2 },
         { x: (width + center) / 2, y: layerHeight * 11 / 2 }
+    ]
+    return [paths, iconPositions];
+}
+
+/**
+ * Ordered: top left, top right, then top, bottom, left, right trapezoids, then 
+ * top and bottom center buttons, and finally bottom left and bottom right.
+ */
+function getMinManipRealsensePaths(width: number, height: number): [string[], { x: number, y: number }[]] {
+    /**Number of button layers from top to bottom in the display*/
+    const numVerticalLayers = 4;
+    /**How tall each layer of buttons should be.*/
+    const layerHeight = height / numVerticalLayers;
+    const centerWidth = percent2Pixel(30);
+    const centerLeft = (width - centerWidth) / 2;
+    const centerRight = centerLeft + centerWidth;
+    const center = percent2Pixel(50);
+    const paths = [
+        // Top two buttons: left, right
+        // rect(0, 0, center, layerHeight),
+        // rect(center, 0, center, layerHeight),
+        // Center directional trapezoid buttons: top, bottom, left, right
+        `M 0 0 ${width} 0 ${centerRight} ${layerHeight} 
+            ${centerLeft} ${layerHeight} Z`,
+        `M 0 ${layerHeight * 4} ${width} ${layerHeight * 4} 
+            ${centerRight},${layerHeight * 3} ${centerLeft},${layerHeight * 3} Z`,
+        `M 0 0 0 ${layerHeight * 4} ${centerLeft},${layerHeight * 3} 
+            ${centerLeft},${layerHeight} Z`,
+        `M ${width} 0 ${width} ${layerHeight * 4} 
+            ${centerRight},${layerHeight * 3} ${centerRight},${layerHeight} Z`,
+        // // Center two rectangle buttons: top, bottom
+        rect(centerLeft, layerHeight, centerWidth, layerHeight),
+        rect(centerLeft, layerHeight * 2, centerWidth, layerHeight),
+        // // Bottom two buttons: left, right
+        // rect(0, layerHeight * 5, center, layerHeight),
+        // rect(center, layerHeight * 5, center, layerHeight)
+    ]
+    const iconPositions = [
+        // Top two
+        // { x: center / 2, y: layerHeight / 2 },
+        // { x: (width + center) / 2, y: layerHeight / 2 },
+        // Center directional trapezoid buttons
+        { x: width / 2, y: layerHeight / 2 },
+        { x: width / 2, y: layerHeight * 7 / 2 },
+        { x: centerLeft / 2, y: layerHeight * 4 / 2 },
+        { x: (width + centerRight) / 2, y: layerHeight * 4 / 2 },
+        // Center two rectangle buttons
+        { x: width / 2, y: layerHeight * 3 / 2 },
+        { x: width / 2, y: layerHeight * 5 / 2 },
+        // Bottom two buttons
+        // { x: center / 2, y: layerHeight * 11 / 2 },
+        // { x: (width + center) / 2, y: layerHeight * 11 / 2 }
     ]
     return [paths, iconPositions];
 }
@@ -383,9 +440,9 @@ function getStackedButtonPadPaths(width: number, height: number): [string[], { x
 export function getIcon(buttonPadButton: ButtonPadButton) {
     switch (buttonPadButton) {
         case (ButtonPadButton.BaseForward):
-            return driveForward;
+            return driveForwardLeft;
         case (ButtonPadButton.BaseReverse):
-            return driveReverse;
+            return driveBackwardRight;
         case (ButtonPadButton.BaseRotateRight):
             return driveRight;
         case (ButtonPadButton.BaseRotateLeft):

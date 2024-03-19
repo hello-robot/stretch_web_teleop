@@ -44,13 +44,24 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                 {
                     type: ComponentType.Panel,
                     children: [
+                        // {
+                        //     type: ComponentType.SingleTab,
+                        //     label: 'Base',
+                        //     children: [
+                        //         {
+                        //             type: ComponentType.ButtonPad,
+                        //             id: ButtonPadId.Base,
+                        //             displayIcons: true
+                        //         } as ButtonPadDefinition
+                        //     ]
+                        // } as TabDefinition,
                         {
                             type: ComponentType.SingleTab,
-                            label: 'Base',
+                            label: 'Arm & Lift',
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Base,
+                                    id: ButtonPadId.MinManipRealsense,
                                     displayIcons: true
                                 } as ButtonPadDefinition
                             ]
@@ -61,22 +72,11 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             children: [
                                 {
                                     type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.DexWrist,
+                                    id: ButtonPadId.StandardWrist,
                                     displayIcons: true
                                 } as ButtonPadDefinition
                             ]
                         } as TabDefinition,
-                        {
-                            type: ComponentType.SingleTab,
-                            label: 'Arm & Lift',
-                            children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Arm,
-                                    displayIcons: true
-                                } as ButtonPadDefinition
-                            ]
-                        } as TabDefinition
                     ]
                 } as PanelDefinition,
                 {

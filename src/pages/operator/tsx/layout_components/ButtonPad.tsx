@@ -184,39 +184,50 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
             ]
             shape = ButtonPadShape.ManipRealsense;
             break;
-        case ButtonPadId.GripperLift:
+        case ButtonPadId.MinManipRealsense:
             functions = [
-                B.ArmLift,
-                B.ArmLower,
-                B.WristRotateIn,
-                B.WristRotateOut,
-                B.GripperOpen,
-                B.GripperClose,
-            ]
-            shape = ButtonPadShape.GripperLift;
-            break;
-        case ButtonPadId.DexWrist:
-            functions = [
-                B.WristPitchUp,
-                B.WristPitchDown,
-                B.WristRotateIn,
-                B.WristRotateOut,
-                B.WristRollLeft,
-                B.WristRollRight,
-                B.GripperOpen,
-                B.GripperClose
-            ];
-            shape = ButtonPadShape.DexWrist;
-            break;
-        case ButtonPadId.Base:
-            functions = [
+                B.ArmExtend,
+                B.ArmRetract,
                 B.BaseForward,
                 B.BaseReverse,
-                B.BaseRotateLeft,
-                B.BaseRotateRight
-            ];
-            shape = ButtonPadShape.SimpleButtonPad;
+                B.ArmLift,
+                B.ArmLower,
+            ]
+            shape = ButtonPadShape.MinManipRealsense;
             break;
+        // case ButtonPadId.GripperLift:
+        //     functions = [
+        //         B.ArmLift,
+        //         B.ArmLower,
+        //         B.WristRotateIn,
+        //         B.WristRotateOut,
+        //         B.GripperOpen,
+        //         B.GripperClose,
+        //     ]
+        //     shape = ButtonPadShape.GripperLift;
+        //     break;
+        // case ButtonPadId.DexWrist:
+        //     functions = [
+        //         B.WristPitchUp,
+        //         B.WristPitchDown,
+        //         B.WristRotateIn,
+        //         B.WristRotateOut,
+        //         B.WristRollLeft,
+        //         B.WristRollRight,
+        //         B.GripperOpen,
+        //         B.GripperClose
+        //     ];
+        //     shape = ButtonPadShape.DexWrist;
+        //     break;
+        // case ButtonPadId.Base:
+        //     functions = [
+        //         B.BaseForward,
+        //         B.BaseReverse,
+        //         B.BaseRotateLeft,
+        //         B.BaseRotateRight
+        //     ];
+        //     shape = ButtonPadShape.SimpleButtonPad;
+        //     break;
         case ButtonPadId.Camera:
             functions = [
                 B.CameraTiltUp,
@@ -239,15 +250,24 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
         //     ];
         //     shape = ButtonPadShape.StackedButtonPad;
         //     break;
-        case ButtonPadId.Arm:
+        case ButtonPadId.StandardWrist:
             functions = [
-                B.ArmLift,
-                B.ArmLower,
-                B.ArmRetract,
-                B.ArmExtend
+                B.GripperOpen,
+                B.GripperClose,
+                B.WristRotateIn,
+                B.WristRotateOut
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
+        // case ButtonPadId.Arm:
+        //     functions = [
+        //         B.ArmLift,
+        //         B.ArmLower,
+        //         B.ArmRetract,
+        //         B.ArmExtend
+        //     ];
+        //     shape = ButtonPadShape.SimpleButtonPad;
+        //     break;
         case ButtonPadIdMobile.Arm:
             functions = [
                 B.ArmLift,
