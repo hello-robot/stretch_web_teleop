@@ -131,7 +131,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 <title>{title}</title>
             </path>
             { 
-                props.displayIcons ?
+                props.displayIcons === undefined || props.displayIcons ?
                 <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
                 :
                 <text 
