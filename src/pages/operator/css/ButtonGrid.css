@@ -27,7 +27,7 @@
 .button-grid p {
     font-size: larger;
     text-align: center;
-    margin: 1.5rem 0 0.5rem 0;
+    margin: 0.45rem 0 0.5rem 0;
 }
 
 .button-grid p:first-of-type {

@@ -468,7 +468,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.ButtonPad, ids: Object.values(ButtonPadId) },
         { type: ComponentType.ButtonGrid },
         { type: ComponentType.VirtualJoystick },
-        // { type: ComponentType.Map }
+        { type: ComponentType.Map }
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {

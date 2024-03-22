@@ -182,7 +182,7 @@ const NewPanelModal = (props: {
  * @returns true if the active component is allowed to be dropped, false otherwise
  */
 function dropzoneRules(active: ComponentType, parent: ComponentType) {
-    // Tabs can only go into layout
+    // Panels can only go into layout
     if (active === ComponentType.Panel && parent !== ComponentType.LayoutGrid && parent !== ComponentType.Layout)
         return false;
 
