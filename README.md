@@ -4,10 +4,48 @@ This interface enables a user to remotely teleoperate a Stretch robot through a 
 # Setup
 The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions]()) and create a the Stretch ROS2 Humble workspace ([instructions]()). This will install all package dependencies and install the web teleop interface.  
 
-## Installing Teleop Cameras
+## Installing Beta Teleop Cameras
 
-TODO
- 
+To install the Beta teleop cameras, plug one camera in and run the following command:
+
+```
+REx_camera_set_symlink.py --list
+```
+
+You should see an output similar to:
+```
+For use with S T R E T C H (R) from Hello Robot Inc.
+---------------------------------------------------------------------
+
+Found the following Video Devices:
+
+
+Intel(R) RealSense(TM) Depth Ca (usb-0000:00:0d.0-1):
+Ports: ['/dev/video0', '/dev/video1', '/dev/video2', '/dev/video3', '/dev/video4', '/dev/video5', '/dev/media0', '/dev/media1']
+
+
+USB CAMERA: USB CAMERA (usb-0000:00:14.0-1.1.1):
+Ports: ['/dev/video6', '/dev/video7', '/dev/media2']
+```
+
+Note, it is important to make sure the cameras are not plugged in at the same time because they will have the same name: `USB CAMERA` and you will not be able to differentiate between the two. Next, set the camera symlink by running the following command:
+
+```
+REx_camera_set_symlink.py --port <PORT> --symlink <SYMLINK_NAME>
+```
+
+Replace `<PORT>` with the 0th element in the ports list for the `USB CAMERA` ouputted by `REx_camera_set_symlink.py --list` command. In the example above, that would be `/dev/video6`. Replace `<SYMLINK_NAME>` with `hello-navigation-camera` or `hello-gripper-camera` for the navigation and gripper camera respectively. For example, if we were setting up the navigation camera the command would look similar to:
+
+```
+REx_camera_set_symlink.py --port /dev/video6 --symlink hello-navigation-camera
+```
+
+Repeat this process for both cameras, then run:
+```
+ll /dev/hello-*
+```
+and verify the symlinks are setup correctly.
+
 # Launching the Interface
 
 First, navigate to the folder containing the codebase using:
