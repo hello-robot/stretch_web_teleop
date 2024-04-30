@@ -1,0 +1,58 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 1.3.8 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+-- Found rosbridge_server: 1.3.2 (/home/hello-robot/ament_ws/install/rosbridge_server/share/rosbridge_server/cmake)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/hello-robot/ament_ws/src/stretch_web_teleop/build/stretch_web_teleop
+-- Install configuration: ""
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/navigation_camera.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/navigation_camera.launch.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/gripper_camera.launch.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/web_interface.launch.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/multi_camera.launch.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/.gitkeep
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/rootCA.pem
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/stretch-se3-3031+6.pem
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/stretch-se3-3031+6-key.pem
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/rootCA-key.pem
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/configure_video_streams.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/navigation_camera.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/old_navigation_camera.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/gripper_camera.py
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/blank_image.png
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/config
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps/map.pgm
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps/map.yaml
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/package_run_dependencies/stretch_web_teleop
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/parent_prefix_path/stretch_web_teleop
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/ament_prefix_path.sh
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/ament_prefix_path.dsv
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/path.sh
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/path.dsv
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.bash
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.sh
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.zsh
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.dsv
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.dsv
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/packages/stretch_web_teleop
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleopConfig.cmake
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleopConfig-version.cmake
+-- Installing: /home/hello-robot/ament_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.xml
