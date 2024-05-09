@@ -37,12 +37,12 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                   displayButtons: true,
                   children: [],
                 } as CameraViewDefinition,
-                {
-                  type: ComponentType.CameraView,
-                  id: CameraViewId.gripper,
-                  displayButtons: true,
-                  children: [],
-                } as CameraViewDefinition,
+                // {
+                //   type: ComponentType.CameraView,
+                //   id: CameraViewId.gripper,
+                //   displayButtons: true,
+                //   children: [],
+                // } as CameraViewDefinition,
               ],
             },
           ],

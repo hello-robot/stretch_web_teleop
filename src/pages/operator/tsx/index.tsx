@@ -115,7 +115,6 @@ function handleRemoteTrackAdded(event: RTCTrackEvent) {
   console.log("Remote track added.");
   const track = event.track;
   const stream = event.streams[0];
-  console.log(stream.getVideoTracks()[0].getConstraints());
   console.log("got track id=" + track.id, track);
   if (stream) {
     console.log("stream id=" + stream.id, stream);
@@ -140,6 +139,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
   }
 
   switch (message.type) {
+    case 'ping':
+      console.log('received ping');
+      break;
     case "validJointState":
       remoteRobot.sensors.checkValidJointState(
         message.robotPose,
