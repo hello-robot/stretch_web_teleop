@@ -11,9 +11,7 @@ This guide contains instructions for getting started with the feature/nodejs bra
  3. Delete `node_modules` and regenerate it using:
 
 ```
-npm i node-pre-gyp
-npm i -D ts-node
-npm i
+npm install
 ```
 
  4. Ensure certificates are in the `~/ament_ws/src/stretch_web_teleop/certificates/` folder and that `.env` points to them.
