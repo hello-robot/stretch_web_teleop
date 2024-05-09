@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const dotenv = require("dotenv");
 
-const pages = ["robot", "operator"];
+const pages = ['operator'];
 
 // call dotenv and it will return an Object with a parsed key
 const env = dotenv.config().parsed;
