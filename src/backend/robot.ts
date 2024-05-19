@@ -138,20 +138,24 @@ export class Robot {
         await this.moveby_sock.receive();
     }
 
-    executeIncrementalMove(joint_name, delta) {
+    async executeIncrementalMove(joint_name, delta) {
         let cmd = {};
         cmd[joint_name] = delta;
-        this.moveby_sock.send(JSON.stringify(cmd));
-        this.moveby_sock.receive();
+        try {
+            await this.moveby_sock.send(JSON.stringify(cmd));
+            await this.moveby_sock.receive();
+        } catch { }
     }
 
-    executeBaseVelocity(linVel, angVel) {
+    async executeBaseVelocity(linVel, angVel) {
         let cmd = {
             'translational_vel': linVel,
             'rotational_vel': angVel,
         };
-        this.basevel_sock.send(JSON.stringify(cmd));
-        this.basevel_sock.receive();
+        try {
+            await this.basevel_sock.send(JSON.stringify(cmd));
+            await this.basevel_sock.receive();
+        } catch { }
     }
 }
 
