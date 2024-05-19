@@ -372,7 +372,7 @@ function getButtonsFromJointName(
   jointName: ValidJoints,
 ): [ButtonPadButton, ButtonPadButton] | undefined {
   switch (jointName) {
-    case "joint_gripper_finger_left":
+    case "joint_gripper":
       return [ButtonPadButton.GripperClose, ButtonPadButton.GripperOpen];
     case "wrist_extension":
       return [ButtonPadButton.ArmRetract, ButtonPadButton.ArmExtend];
@@ -425,11 +425,17 @@ function getJointNameFromButtonFunction(
 
     case ButtonPadButton.GripperClose:
     case ButtonPadButton.GripperOpen:
-      return "joint_gripper_finger_left";
+      return "joint_gripper";
 
+<<<<<<< HEAD
     case ButtonPadButton.WristRollLeft:
     case ButtonPadButton.WristRollRight:
       return "joint_wrist_roll";
+=======
+        case (ButtonPadButton.GripperClose):
+        case (ButtonPadButton.GripperOpen):
+            return "joint_gripper";
+>>>>>>> 1cfb3b0 (updated name for gripper joint)
 
     case ButtonPadButton.WristPitchUp:
     case ButtonPadButton.WristPitchDown:

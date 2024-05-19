@@ -4,7 +4,7 @@ import { cmd } from "./commands";
 export type ValidJoints =
   | "joint_head_tilt"
   | "joint_head_pan"
-  | "joint_gripper_finger_left"
+  | "joint_gripper"
   | "joint_arm"
   | "wrist_extension"
   | "joint_lift"
@@ -32,7 +32,7 @@ export type RemoteStream = {
 export const AllJoints: ValidJoints[] = [
   "joint_head_tilt",
   "joint_head_pan",
-  "joint_gripper_finger_left",
+  "joint_gripper",
   "joint_arm",
   "wrist_extension",
   "joint_lift",
@@ -262,7 +262,7 @@ export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
   joint_lift: [0.001, 1.1],
   translate_mobile_base: [-30.0, 30.0],
   rotate_mobile_base: [-3.14, 3.14],
-  joint_gripper_finger_left: [-0.37, 0.17],
+  joint_gripper: [-0.37, 0.17],
   joint_head_tilt: [-1.6, 0.3],
   joint_head_pan: [-3.95, 1.7],
 };
@@ -282,7 +282,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
   joint_head_tilt: 0.1,
   joint_head_pan: 0.1,
-  joint_gripper_finger_left: 0.075,
+  joint_gripper: 0.075,
   wrist_extension: 0.075,
   joint_lift: 0.075,
   joint_wrist_roll: 0.2,
