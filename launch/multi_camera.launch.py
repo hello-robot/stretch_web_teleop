@@ -39,7 +39,6 @@ configurable_parameters = [{'name': 'camera_namespace1',             'default': 
                            {'name': 'depth_module.enable_auto_exposure2', 'default': 'true', 'description': 'enable/disable auto exposure for depth image'},
                            {'name': 'enable_depth2',                 'default': 'true', 'description': 'enable depth stream'},
                            {'name': 'depth_module.color_profile2',           'default': '480x270x15', 'description': 'color image width'},
-                           {'name': 'depth_module.enable_auto_exposure2', 'default': 'true', 'description': 'enable/disable auto exposure for color image'},
                            {'name': 'enable_color2',                 'default': 'true', 'description': 'enable color stream'},
                            {'name': 'enable_infra12',                'default': 'false', 'description': 'enable infra1 stream'},
                            {'name': 'enable_infra22',                'default': 'false', 'description': 'enable infra2 stream'},
