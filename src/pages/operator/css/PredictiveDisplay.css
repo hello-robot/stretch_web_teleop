@@ -1,21 +1,21 @@
 .predictive-display {
-    width: 100%;
-    height: 100%;
-    stroke: gray;
-    cursor: crosshair;
-    fill: none;
+  width: 100%;
+  height: 100%;
+  stroke: gray;
+  cursor: crosshair;
+  fill: none;
 }
 
 .predictive-display.customizing {
-    cursor: default;
+  cursor: default;
 }
 
 .predictive-display path {
-    stroke-width: 8;
-    stroke: var(--path-blue);
-    stroke-linecap: round;
+  stroke-width: 8;
+  stroke: var(--path-blue);
+  stroke-linecap: round;
 }
 
 .predictive-display.moving path {
-    stroke: red;
+  stroke: red;
 }

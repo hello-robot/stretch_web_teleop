@@ -2,9 +2,9 @@ From https://github.com/hello-robot/stretch_web_interface/blob/master/WEBRTC_PRO
 
 The following license covers the original code from which some of the web interface code was derived (e.g., operator_acquire_av.js, robot_acquire_av.js). The original code was released in the following repository, which contains WebRTC example code.
 
-https://github.com/webrtc/samples 
+https://github.com/webrtc/samples
 
-======================================
+\======================================
 
 Copyright (c) 2014, The WebRTC project authors. All rights reserved.
 
