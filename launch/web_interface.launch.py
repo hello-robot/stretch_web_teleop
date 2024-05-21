@@ -13,19 +13,15 @@ from launch.actions import (
     GroupAction,
     IncludeLaunchDescription,
 )
-from launch.conditions import IfCondition, LaunchConfigurationNotEquals, UnlessCondition
+from launch.conditions import LaunchConfigurationNotEquals
 from launch.launch_description_sources import (
     FrontendLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
 )
 from launch.substitutions import (
-    AndSubstitution,
     FindExecutable,
     LaunchConfiguration,
-    NotSubstitution,
-    OrSubstitution,
     PathJoinSubstitution,
-    ThisLaunchFileDir,
 )
 
 
@@ -77,88 +73,88 @@ def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_
     if (
         model == "RE1V0"
         and tool == "tool_stretch_gripper"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is False
     ):
         return "d435-only", False, False, False
     elif (
         model == "RE1V0"
         and tool == "tool_stretch_gripper"
-        and has_beta_teleop_kit == True
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is True
+        and has_nav_head_cam is False
     ):
         return "d435-only", True, True, False
     elif (
         model == "RE1V0"
         and tool == "tool_stretch_dex_wrist"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is False
     ):
         return "d435-only", False, False, False
     elif (
         model == "RE1V0"
         and tool == "tool_stretch_dex_wrist"
-        and has_beta_teleop_kit == True
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is True
+        and has_nav_head_cam is False
     ):
         return "d435-only", True, True, False
     # Stretch 2
     elif (
         model == "RE2V0"
         and tool == "tool_stretch_gripper"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is False
     ):
         return "d435-only", False, False, False
     elif (
         model == "RE2V0"
         and tool == "tool_stretch_gripper"
-        and has_beta_teleop_kit == True
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is True
+        and has_nav_head_cam is False
     ):
         return "d435-only", True, True, False
     elif (
         model == "RE2V0"
         and tool == "tool_stretch_dex_wrist"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is False
     ):
         return "d435-only", False, False, False
     elif (
         model == "RE2V0"
         and tool == "tool_stretch_dex_wrist"
-        and has_beta_teleop_kit == True
-        and has_nav_head_cam == False
+        and has_beta_teleop_kit is True
+        and has_nav_head_cam is False
     ):
         return "d435-only", True, True, False
     # Stretch 2+ (upgraded Stretch 2)
     elif (
         model == "RE2V0"
         and tool == "eoa_wrist_dw3_tool_sg3"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == True
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
     ):
         return "both", False, False, True
     elif (
         model == "RE2V0"
         and tool == "eoa_wrist_dw3_tool_nil"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == True
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
     ):
         return "both", False, False, True
     # Stretch 3
     elif (
         model == "SE3"
         and tool == "eoa_wrist_dw3_tool_sg3"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == True
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
     ):
         return "both", False, False, True
     elif (
         model == "SE3"
         and tool == "eoa_wrist_dw3_tool_nil"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == True
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
     ):
         return "both", False, False, True
     elif (
@@ -170,7 +166,8 @@ def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_
         return "both", False, False, True
 
     raise ValueError(
-        f"cannot find valid configuration for model={model}, tool={tool}, has_beta_teleop_kit={has_beta_teleop_kit}, has_nav_head_cam={has_nav_head_cam}"
+        f"cannot find valid configuration for model={model}, tool={tool}, "
+        f"has_beta_teleop_kit={has_beta_teleop_kit}, has_nav_head_cam={has_nav_head_cam}"
     )
 
 
@@ -180,7 +177,6 @@ def generate_launch_description():
     rosbridge_package = str(get_package_share_path("rosbridge_server"))
     stretch_core_path = str(get_package_share_directory("stretch_core"))
     stretch_navigation_path = str(get_package_share_directory("stretch_nav2"))
-    navigation_bringup_path = str(get_package_share_directory("nav2_bringup"))
 
     _, robot_params = stretch_body.robot_params.RobotParams().get_params()
     stretch_serial_no = robot_params["robot"]["serial_no"]
@@ -228,10 +224,6 @@ def generate_launch_description():
             stretch_navigation_path, "config", "nav2_params.yaml"
         ),
         description="Full path to the ROS2 parameters file to use for all launched nodes",
-    )
-    dict_file_path = os.path.join(core_package, "config", "stretch_marker_dict.yaml")
-    depthimage_to_laserscan_config = os.path.join(
-        core_package, "config", "depthimage_to_laser_scan_params.yaml"
     )
 
     # Start collecting nodes to launch
@@ -284,7 +276,7 @@ def generate_launch_description():
             )
         )
 
-    if driver_navigation_cam == True:
+    if driver_navigation_cam is True:
         # Beta Teleop Kit Navigation Camera
         ld.add_action(
             GroupAction(
@@ -304,7 +296,7 @@ def generate_launch_description():
             )
         )
 
-    if driver_nav_head_cam == True:
+    if driver_nav_head_cam is True:
         # Nav Head Wide Angle Camera
         ld.add_action(
             GroupAction(
@@ -320,7 +312,7 @@ def generate_launch_description():
             )
         )
 
-    if driver_gripper_cam == True:
+    if driver_gripper_cam is True:
         # Beta Teleop Kit Gripper Camera
         ld.add_action(
             GroupAction(
@@ -340,7 +332,7 @@ def generate_launch_description():
             )
         )
 
-    if driver_navigation_cam == False and driver_nav_head_cam == False:
+    if driver_navigation_cam is False and driver_nav_head_cam is False:
         # Blank Navigation Camera Node
         # Publish blank image if no navigation camera exists
         ld.add_action(
@@ -359,7 +351,7 @@ def generate_launch_description():
             )
         )
 
-    if drivers_realsense == "d435-only" and driver_gripper_cam == False:
+    if drivers_realsense == "d435-only" and driver_gripper_cam is False:
         # Blank Gripper Camera Node
         # Publish blank image if there is no gripper camera exists
         ld.add_action(

@@ -10,20 +10,18 @@ import pcl
 import PyKDL
 import rclpy
 import ros2_numpy
+import tf2_py as tf2
 import tf2_ros
 import yaml
 from cv_bridge import CvBridge
 from rclpy.duration import Duration
-from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 from rclpy.time import Time
 
 # from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import CameraInfo, CompressedImage, Image, JointState, PointCloud2
-from sensor_msgs_py.point_cloud2 import create_cloud, read_points
 from std_srvs.srv import SetBool
-from visualization_msgs.msg import MarkerArray
 
 
 class ConfigureVideoStreams(Node):
@@ -170,11 +168,17 @@ class ConfigureVideoStreams(Node):
                 Time(),
                 timeout=Duration(seconds=0.1),
             )
-        except:
+        except (
+            tf2.ConnectivityException,
+            tf2.ExtrapolationException,
+            tf2.InvalidArgumentException,
+            tf2.LookupException,
+            tf2.TimeoutException,
+            tf2.TransformException,
+        ) as error:
             self.get_logger().warn(
-                "Could not find the transform between frames {} and {}".format(
-                    "base_link", "camera_color_optical_frame"
-                )
+                "Could not find the transform between frames base_link and "
+                f"camera_color_optical_frame. Error: {error}"
             )
             return img
 

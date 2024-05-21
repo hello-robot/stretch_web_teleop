@@ -1,6 +1,7 @@
 # Adapted from https://github.com/ros-planning/navigation/blob/noetic-devel/map_server/scripts/crop_map
 #
-# Example usage: python crop_map.py /home/hello-robot/stretch_user/maps/map.yaml /home/hello-robot/stretch_user/maps/cropped
+# Example usage:
+#   python crop_map.py /home/hello-robot/stretch_user/maps/map.yaml /home/hello-robot/stretch_user/maps/cropped
 
 from __future__ import print_function
 
