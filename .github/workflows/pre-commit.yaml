@@ -30,7 +30,6 @@ jobs:
         with:
           node-version: 21.x
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
       - name: NPM install dependencies
         working-directory: ./
         run: npm install
