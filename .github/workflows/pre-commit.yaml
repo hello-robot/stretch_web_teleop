@@ -31,7 +31,7 @@ jobs:
           node-version: 21.x
       - name: NPM install dependencies
         working-directory: ./
-        run: npm install
+        run: npm install --legacy-peer-deps
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
       - name: Apply fixes from pre-commit
