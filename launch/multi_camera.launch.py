@@ -6,6 +6,7 @@ from launch_ros.actions import Node, SetRemap
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 
 json_path = os.path.join(
     get_package_share_directory("stretch_core"), "config", "HighAccuracyPreset.json"

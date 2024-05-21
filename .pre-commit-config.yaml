@@ -34,6 +34,20 @@ repos:
     hooks:
       - id: black
 
+  # Flake8 lints Python code
+  - repo: https://github.com/pycqa/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+
+  # MyPy does static type-checking in Python
+  # Note: In practice this doesn't currently do much, since we don't have type hints in our Python scripts.
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.981
+    hooks:
+      - id: mypy
+        args: [--install-types, --non-interactive, --no-strict-optional, --ignore-missing-imports]
+
   # Beautysh formats Bash scripts
   - repo: https://github.com/lovesegfault/beautysh
     rev: v6.2.1
@@ -62,3 +76,11 @@ repos:
     hooks:
       - id: prettier
         types_or: [css, html, javascript, json, jsx, ts, tsx]
+
+  # # ESLint lints Javascript/Typescript files
+  # - repo: https://github.com/pre-commit/mirrors-eslint
+  #   rev: 'v8.56.0'  # Use the sha / tag you want to point at
+  #   hooks:
+  #   -   id: eslint
+  #       files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+  #       types: [file]
