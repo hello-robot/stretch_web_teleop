@@ -51,6 +51,10 @@ repos:
     rev: v2.2.4
     hooks:
       - id: codespell
+        exclude: >
+          (?x)^(
+              .*\.svg
+          )$
 
   # Prettier formats JS(X), TS(X), HTML, CSS, etc. files
   - repo: https://github.com/pre-commit/mirrors-prettier

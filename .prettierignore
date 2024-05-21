@@ -1,0 +1,2 @@
+# Prettier should not reformat any markdown files
+*.md
