@@ -180,6 +180,12 @@ The action modes can be selected in the dropdown in the top-left corner of the i
 - **Press-Release**: Stretch will move while you are pressing and holding the button and will stop when you release.
 - **Click-Click**: Stretch will start moving when you click and will stop when you click again. You can also stop Stretch by moving the cursor outside the button you clicked.
 
+# Contributing
+- This repository uses pre-commit hooks to enforce consistent formatting and style.
+    - Install pre-commit: `python3 -m pip install pre-commit`
+    - Install the hooks locally: `cd` to the top-level of this repository and run `pre-commit install`.
+    - Moving forward, pre-commit hooks will run before you create any commit.
+
 # Troubleshooting
 
 TODO
