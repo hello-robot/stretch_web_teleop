@@ -11,7 +11,6 @@
 From the top-level of this repository, run:
 
 - \[ \] `pre-commit run --all-files`
-- \[ \] `pylint --recursive=y --rcfile=.pylintrc .`. All warnings but `fixme` must be addressed.
 
 # To merge
 
