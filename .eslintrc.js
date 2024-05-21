@@ -23,7 +23,6 @@ module.exports = {
     "react-app",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "prettier",
     "plugin:prettier/recommended", // Make this the last element so prettier config overrides other formatting rules
   ],
   rules: {
