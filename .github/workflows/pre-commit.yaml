@@ -27,10 +27,11 @@ jobs:
       ## Run pre-commit and try to apply fixes
       - name: Install ESLint plugins
         run: |
-          npm install eslint-config-react-app --global
-          npm install eslint-plugin-react --global
-          npm install eslint-plugin-react-hooks --global
-          npm install eslint-plugin-prettier --global
+          npm install eslint-config-react-app
+          npm install eslint-plugin-react
+          npm install eslint-plugin-react-hooks
+          npm install eslint-config-prettier
+          npm install eslint-plugin-prettier
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
       - name: Apply fixes from pre-commit
