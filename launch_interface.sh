@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./launch_interface -m $HELLO_FLEET_PATH/maps/<map_name>.yaml
+# Usage: ./launch_interface.sh -m $HELLO_FLEET_PATH/maps/<map_name>.yaml
 MAP_ARG=""
 if getopts ":m:" opt && [[ $opt == "m" && -f $OPTARG ]]; then
     echo "Setting map..."

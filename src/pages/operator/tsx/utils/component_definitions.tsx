@@ -4,202 +4,202 @@
 
 /** Enumerator for the possible action modes */
 export enum ActionMode {
-    StepActions = 'Step-Actions',
-    PressAndHold = 'Press-And-Hold',
-    ClickClick = 'Click-Click'
+  StepActions = "Step-Actions",
+  PressAndHold = "Press-And-Hold",
+  ClickClick = "Click-Click",
 }
 
 /**
  * High-level type of the component
  */
 export enum ComponentType {
-    Layout = "Layout",
-    LayoutGrid = "Layout Grid",
-    Panel = "Panel",
-    SingleTab = "Tab",
-    CameraView = "Camera View",
-    ButtonPad = "Button Pad",
-    PredictiveDisplay = "Predictive Display",
-    ButtonGrid = "Button Grid",
-    VirtualJoystick = "Joystick",
-    Map = "Map",
-    RunStopButton = "Run Stop Button",
-    BatteryGuage = "Battery Gauge"
+  Layout = "Layout",
+  LayoutGrid = "Layout Grid",
+  Panel = "Panel",
+  SingleTab = "Tab",
+  CameraView = "Camera View",
+  ButtonPad = "Button Pad",
+  PredictiveDisplay = "Predictive Display",
+  ButtonGrid = "Button Grid",
+  VirtualJoystick = "Joystick",
+  Map = "Map",
+  RunStopButton = "Run Stop Button",
+  BatteryGuage = "Battery Gauge",
 }
 
 /**
  * ID for the video stream, one for each of the cameras
  */
 export enum CameraViewId {
-    overhead = "Overhead",
-    realsense = "Realsense",
-    gripper = "Gripper"
+  overhead = "Overhead",
+  realsense = "Realsense",
+  gripper = "Gripper",
 }
 
 /**
  * ID for a button pad describes the shape and button functions of the button pad
  */
 export enum ButtonPadId {
-    // Drive = "Drive",
-    Base = "Drive",
-    Arm = "Arm & Lift",
-    DexWrist = "Dex Wrist",
-    GripperLift = "Gripper & Lift",
-    ManipRealsense = "Drive/Arm/Gripper/Wrist",
-    Camera = "Camera",
-    // Wrist = "Wrist",
+  // Drive = "Drive",
+  Base = "Drive",
+  Arm = "Arm & Lift",
+  DexWrist = "Dex Wrist",
+  GripperLift = "Gripper & Lift",
+  ManipRealsense = "Drive/Arm/Gripper/Wrist",
+  Camera = "Camera",
+  // Wrist = "Wrist",
 }
 
 export enum ButtonPadIdMobile {
-    Arm = "Arm Mobile",
-    Gripper = "Gripper Mobile",
-    Drive = "Drive Mobile"
+  Arm = "Arm Mobile",
+  Gripper = "Gripper Mobile",
+  Drive = "Drive Mobile",
 }
 
 /**
- * Identifier for the subtype of the component 
+ * Identifier for the subtype of the component
  * (e.g. which video stream camera, or which button pad)
  * @note any new components with ID fields should be added to this type
  */
 export type ComponentId = CameraViewId | ButtonPadId | ButtonPadIdMobile;
 
 /**
- * Definition for any interface component. Any video stream, button pad, 
+ * Definition for any interface component. Any video stream, button pad,
  * tabs, etc. definition will have these fields.
  */
 export type ComponentDefinition = {
-    /** Indicates the type of the component */
-    type: ComponentType;
-    /** Indicates the identifier for the sub-type of the component */
-    id?: ComponentId;
-}
+  /** Indicates the type of the component */
+  type: ComponentType;
+  /** Indicates the identifier for the sub-type of the component */
+  id?: ComponentId;
+};
 
 /**
  * Definition for a button pad component
  */
 export type ButtonPadDefinition = ComponentDefinition & {
-    /** Indicates the shape and functions on the button pad*/
-    id: ButtonPadId | ButtonPadIdMobile;
-}
+  /** Indicates the shape and functions on the button pad*/
+  id: ButtonPadId | ButtonPadIdMobile;
+};
 
 export type ParentComponentDefinition = ComponentDefinition & {
-    children: ComponentDefinition[];
-}
+  children: ComponentDefinition[];
+};
 
 export type LayoutDefinition = ComponentDefinition & {
-    displayMovementRecorder: boolean;
-    displayLabels: boolean;
-    actionMode: ActionMode;
-    children: LayoutGridDefinition[];
-}
+  displayMovementRecorder: boolean;
+  displayLabels: boolean;
+  actionMode: ActionMode;
+  children: LayoutGridDefinition[];
+};
 
 export type LayoutGridDefinition = ComponentDefinition & {
-    children: PanelDefinition[];
+  children: PanelDefinition[];
 };
 
 /**
  * Definition for a tabs component
  */
 export type PanelDefinition = ComponentDefinition & {
-    /** List of definitions for individual tabs */
-    children: TabDefinition[];
-}
+  /** List of definitions for individual tabs */
+  children: TabDefinition[];
+};
 
 /**
  * Definition for a single tab in a tabs component
  */
- export type TabDefinition = ParentComponentDefinition & {
-    /** The label that appears at the top of the tabs object. */
-    label: string;
-}
+export type TabDefinition = ParentComponentDefinition & {
+  /** The label that appears at the top of the tabs object. */
+  label: string;
+};
 
 /**
  * Definition for a video stream component
  */
 export type CameraViewDefinition = ParentComponentDefinition & {
-    /** Indicates the camera video of the video stream */
-    id: CameraViewId;
-    /** Whether to display the default buttons under the camera view */
-    displayButtons: boolean;
-}
+  /** Indicates the camera video of the video stream */
+  id: CameraViewId;
+  /** Whether to display the default buttons under the camera view */
+  displayButtons: boolean;
+};
 
 /**
  * Definition for the gripper stream component
- * 
+ *
  * @note these modifications to the overhead view are implemented in the
- * backend, so if multiple overhead streams are visible to the user 
- * simultaneously, any change to this defintion for one view will impact
+ * backend, so if multiple overhead streams are visible to the user
+ * simultaneously, any change to this definition for one view will impact
  * all views.
  */
- export type GripperVideoStreamDef = CameraViewDefinition 
+export type GripperVideoStreamDef = CameraViewDefinition;
 
 /**
  * Definition for the fixed overhead stream component
- * 
+ *
  * @note these modifications to the overhead view are implemented in the
- * backend, so if multiple overhead streams are visible to the user 
- * simultaneously, any change to this defintion for one view will impact
+ * backend, so if multiple overhead streams are visible to the user
+ * simultaneously, any change to this definition for one view will impact
  * all views.
  */
 export type FixedOverheadVideoStreamDef = CameraViewDefinition & {
-    /**
-     * Predictive display toggle
-     */
-     predictiveDisplay?: boolean;
-}
+  /**
+   * Predictive display toggle
+   */
+  predictiveDisplay?: boolean;
+};
 
 /**
  * Definition for the adjustable overhead stream component
- * 
+ *
  * @note these modifications to the overhead view are implemented in the
- * backend, so if multiple overhead streams are visible to the user 
- * simultaneously, any change to this defintion for one view will impact
+ * backend, so if multiple overhead streams are visible to the user
+ * simultaneously, any change to this definition for one view will impact
  * all views.
  */
- export type AdjustableOverheadVideoStreamDef = CameraViewDefinition & {
-    /**
-     * If the Realsense camera should pan and tilt to keep the gripper centered 
-     * in the view.
-     */
-     followGripper?: boolean;
-    /**
-     * Predictive display toggle
-     */
-     predictiveDisplay?: boolean;
-}
+export type AdjustableOverheadVideoStreamDef = CameraViewDefinition & {
+  /**
+   * If the Realsense camera should pan and tilt to keep the gripper centered
+   * in the view.
+   */
+  followGripper?: boolean;
+  /**
+   * Predictive display toggle
+   */
+  predictiveDisplay?: boolean;
+};
 
 /**
  * Definition for the Realsense video stream component
- * 
+ *
  * @note these modifications to the Realsense view are implemented in the
- * backend, so if multiple Realsense streams are visible to the user 
- * simultaneously, any change to this defintion for one view will impact
+ * backend, so if multiple Realsense streams are visible to the user
+ * simultaneously, any change to this definition for one view will impact
  * all views.
  */
 export type RealsenseVideoStreamDef = CameraViewDefinition & {
-    /**
-     * If the Realsense camera should pan and tilt to keep the gripper centered 
-     * in the view.
-     */
-    followGripper?: boolean;
-    /**
-     * If the AR depth ring should be shown to indicate the extent of the 
-     * reachable area.
-     */
-    depthSensing?: boolean;
-}
+  /**
+   * If the Realsense camera should pan and tilt to keep the gripper centered
+   * in the view.
+   */
+  followGripper?: boolean;
+  /**
+   * If the AR depth ring should be shown to indicate the extent of the
+   * reachable area.
+   */
+  depthSensing?: boolean;
+};
 
 /**
  * Definition for the map component
  */
 export type MapDefinition = ComponentDefinition & {
-    /**
-     * Enable/disable the click listener on the map for settings a goal 
-     */
-    selectGoal?: boolean
-}
+  /**
+   * Enable/disable the click listener on the map for settings a goal
+   */
+  selectGoal?: boolean;
+};
 
 /**
  * Definition for the run stop button
  */
- export type RunStopDefinition = ComponentDefinition 
+export type RunStopDefinition = ComponentDefinition;

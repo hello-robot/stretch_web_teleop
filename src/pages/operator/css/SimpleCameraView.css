@@ -1,46 +1,46 @@
 .simple-video-container {
-    position: relative;
-    /* flex: 1 1 0; */
-    /* display: grid; */
-    justify-items: center;
-    /* padding: 0.4rem; */
-    /* height: 100%; */
-    /* grid-template-columns: auto; */
-    /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
-    object-fit: cover;
-    justify-content: center;
-    /* align-items: center;
+  position: relative;
+  /* flex: 1 1 0; */
+  /* display: grid; */
+  justify-items: center;
+  /* padding: 0.4rem; */
+  /* height: 100%; */
+  /* grid-template-columns: auto; */
+  /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
+  object-fit: cover;
+  justify-content: center;
+  /* align-items: center;
     flex-direction: column; */
-    text-align: -webkit-center
+  text-align: -webkit-center;
 }
 
 .simple-video-area {
-    position: relative;
-    grid-row: 2/2;
-    width: 100%;
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: cover;
-    display: inline-block;
-    text-align: center;
+  position: relative;
+  grid-row: 2/2;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  display: inline-block;
+  text-align: center;
 }
 
 .simple-video-canvas {
-    display: inline-block;
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+  display: inline-block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .simple-video-canvas.constrainedHeight {
-    display: inline-block;
-    /* width: auto;
+  display: inline-block;
+  /* width: auto;
     height: 100%; */
-    object-fit: cover;
+  object-fit: cover;
 }
 
 .simple-realsense {
-    /* margin-top: -75%; */
+  /* margin-top: -75%; */
 }
 
 /* @media screen and (max-height: 800px) {
@@ -49,89 +49,88 @@
     }
 } */
 .icon {
-    border-radius: 60px;
-    background-color: aliceblue;
-    font-size: 100px;
-    opacity: 0.5;
-    color: black;
+  border-radius: 60px;
+  background-color: aliceblue;
+  font-size: 100px;
+  opacity: 0.5;
+  color: black;
 }
 
 .simple-overlay {
-    font-size: 50px;
-    position: absolute;
-    z-index: 4;
-    /* margin-top: 75%; */
-    background-color: transparent;
-    touch-action: none;
-    box-shadow: none;
+  font-size: 50px;
+  position: absolute;
+  z-index: 4;
+  /* margin-top: 75%; */
+  background-color: transparent;
+  touch-action: none;
+  box-shadow: none;
 }
 
 .btn-left {
-    width: 20%;
-    height: 100%;
+  width: 20%;
+  height: 100%;
 }
 
 .btn-right {
-    width: 20%;
-    height: 100%;
-    margin-left: 80%;
+  width: 20%;
+  height: 100%;
+  margin-left: 80%;
 }
 
 .btn-up {
-    width: 100%;
+  width: 100%;
 }
 
 .btn-down {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* Context menu popup *********************************************************/
 .video-context-menu {
-    list-style-type: none;
-    position: absolute;
-    background-color: var(--background-color);
-    /* border: var(--btn-brdr); */
-    margin: 0;
-    padding: 0;
-    white-space: nowrap;
+  list-style-type: none;
+  position: absolute;
+  background-color: var(--background-color);
+  /* border: var(--btn-brdr); */
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
 
-    --padding: 1rem;
+  --padding: 1rem;
 
-    padding-top: var(--padding);
-    grid-row: 2/2;
+  padding-top: var(--padding);
+  grid-row: 2/2;
 }
 
-
 .video-context-menu li {
-    padding: var(--padding);
-    cursor: pointer;
-    background-color: inherit;
+  padding: var(--padding);
+  cursor: pointer;
+  background-color: inherit;
 }
 
 .video-context-menu li:hover {
-    filter: brightness(90%);
+  filter: brightness(90%);
 }
 
 .video-context-menu::before {
-    content: attr(aria-label);
-    font-weight: bold;
-    padding: var(--padding);
+  content: attr(aria-label);
+  font-weight: bold;
+  padding: var(--padding);
 }
 
 .title {
-    font-size: x-large;
-    align-self: flex-end;
-    text-align: center;
+  font-size: x-large;
+  align-self: flex-end;
+  text-align: center;
 }
 
-@media screen and (orientation:landscape) and (max-device-width: 900px) {
-    .realsense-pan-tilt-grid button .material-icons {
-        font-size: larger;
-    }
-    
-    .title {
-        font-size: smaller;
-    }
+@media screen and (orientation: landscape) and (max-device-width: 900px) {
+  .realsense-pan-tilt-grid button .material-icons {
+    font-size: larger;
+  }
+
+  .title {
+    font-size: smaller;
+  }
 }

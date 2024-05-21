@@ -1,83 +1,83 @@
 .tabs-component {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0;
-    /* margin: 0 0.5rem; */
-    margin-top: 0.5rem; /* new */
-    width: 100%; /* new */
-    box-shadow: var(--shadow);
-    position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  /* margin: 0 0.5rem; */
+  margin-top: 0.5rem; /* new */
+  width: 100%; /* new */
+  box-shadow: var(--shadow);
+  position: relative;
 
-    --radius: .3rem;
-    border-radius: var(--radius) var(--radius) 0px 0px;
+  --radius: 0.3rem;
+  border-radius: var(--radius) var(--radius) 0px 0px;
 }
 
 .tabs-component.customizing.selected::after {
-    background-color: var(--selected-color);
+  background-color: var(--selected-color);
 }
 
 .tabs-content {
-    border: 3px solid var(--btn-blue);
-    flex: 1 1 0;
-    background-color: var(--background-color);
+  border: 3px solid var(--btn-blue);
+  flex: 1 1 0;
+  background-color: var(--background-color);
 }
 
 /* Header *********************************************************************/
 
 .tabs-header {
-    display: flex;
-    flex-wrap: wrap;
-    overflow: hidden;
-    border-radius: var(--radius) var(--radius) 0px 0px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  border-radius: var(--radius) var(--radius) 0px 0px;
 }
 
 /* Apply to all the tabs in the header */
-.tabs-header>* {
-    flex: 1 0 auto;
-    background-color: var(--tab-inactive);
-    border-radius: var(--radius) var(--radius) 0px 0px;
+.tabs-header > * {
+  flex: 1 0 auto;
+  background-color: var(--tab-inactive);
+  border-radius: var(--radius) var(--radius) 0px 0px;
 }
 
 /* Format tabs with icons */
-.tabs-header>.material-icons {
-    vertical-align: bottom;
-    padding-top: 3px;
-    padding-bottom: 3px;
+.tabs-header > .material-icons {
+  vertical-align: bottom;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .tab-button {
-    border: none;
-    font-size: 1.5rem;
-    z-index: 0;
+  border: none;
+  font-size: 1.5rem;
+  z-index: 0;
 }
 
 .tab-button.active {
-    background-color: var(--btn-blue);
-    color: var(--font-white);
-    /* z-index: 2; */
-    box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
+  background-color: var(--btn-blue);
+  color: var(--font-white);
+  /* z-index: 2; */
+  box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
 }
 
 .tab-button.selected {
-    box-shadow: 0 0 0.2rem 0.2rem var(--selected-color);
+  box-shadow: 0 0 0.2rem 0.2rem var(--selected-color);
 }
 
 .add-tab:hover {
-    background-color: var(--btn-turquoise);
-    color: white;
+  background-color: var(--btn-turquoise);
+  color: white;
 }
 
 /* Popup for adding a new tab *************************************************/
 
-@media(max-width:900px) {
-    .tab-button {
-        font-size: medium;
-    }
+@media (max-width: 900px) {
+  .tab-button {
+    font-size: medium;
+  }
 }
 
-@media screen and (orientation:portrait) and (max-device-width: 900px) {
-    .tabs-component {
-        width: 100%;
-    }
+@media screen and (orientation: portrait) and (max-device-width: 900px) {
+  .tabs-component {
+    width: 100%;
+  }
 }
