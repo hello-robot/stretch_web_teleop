@@ -22,6 +22,7 @@ find_package(rosbridge_server REQUIRED)
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
+  nodes/compressed_image_visualizer.py
   nodes/configure_video_streams.py
   nodes/navigation_camera.py
   DESTINATION lib/${PROJECT_NAME}
