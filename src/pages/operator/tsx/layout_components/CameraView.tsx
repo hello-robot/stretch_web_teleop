@@ -1,6 +1,7 @@
 import React from "react";
 import {
   className,
+  expandedGripperProps,
   gripperProps,
   navigationProps,
   realsenseProps,
@@ -94,7 +95,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     : definition.children && definition.children.length > 0
       ? definition.children[0]
       : undefined;
-  const videoAspectRatio = getVideoAspectRatio(definition);
+  const videoAspectRatio = getVideoAspectRatio(definition, expandedGripperView);
   const overlay = createOverlay(
     overlayDefinition,
     props.path,
@@ -456,9 +457,15 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
  * @param definition definition of the video stream
  * @returns aspect ratio of the video stream
  */
-function getVideoAspectRatio(definition: CameraViewDefinition): number {
+function getVideoAspectRatio(
+  definition: CameraViewDefinition,
+  expandedGripperView: boolean,
+): number {
   switch (definition.id) {
     case CameraViewId.gripper:
+      if (expandedGripperView) {
+        return expandedGripperProps.width / expandedGripperProps.height;
+      }
       return gripperProps.width / gripperProps.height;
     case CameraViewId.overhead:
       return navigationProps.width / navigationProps.height;
