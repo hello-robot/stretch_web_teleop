@@ -59,19 +59,30 @@ export const CameraView = (props: CustomizableComponentProps) => {
     console.warn(
       `Video stream definition at ${props.path} should have a 'children' property.`,
     );
-  // Get the stream to display inside the video
-  const stream: MediaStream = getStream(
-    definition.id,
-    props.sharedState.remoteStreams,
-  );
   // Reference to the div immediately around the video element
   const videoAreaRef = React.useRef<HTMLDivElement>(null);
   // Boolean representing if the video stream needs to be constrained by height
   // (constrained by width otherwise)
   const [constrainedHeight, setConstrainedHeight] =
     React.useState<boolean>(false);
+  // State that is specific to certain camera views
   const [predictiveDisplay, setPredictiveDisplay] =
     React.useState<boolean>(false);
+  const [expandedGripperView, setExpandedGripperView] = React.useState<boolean>(
+    props.definition.hasOwnProperty("expandedGripperView") &&
+      ((props.definition as GripperVideoStreamDef).expandedGripperView ||
+        false),
+  );
+  // Get the stream to display inside the video
+  const stream: MediaStream = React.useMemo(
+    () =>
+      getStream(
+        definition.id,
+        props.sharedState.remoteStreams,
+        expandedGripperView,
+      ),
+    [expandedGripperView],
+  );
 
   React.useEffect(() => {
     executeVideoSettings(definition);
@@ -258,6 +269,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
           <UnderVideoButtons
             definition={definition}
             setPredictiveDisplay={setPredictiveDisplay}
+            setExpandedGripperView={setExpandedGripperView}
             betaTeleopKit={props.sharedState.hasBetaTeleopKit}
           />
         </div>
@@ -510,6 +522,7 @@ function createOverlay(
 function getStream(
   id: CameraViewId,
   remoteStreams: Map<string, RemoteStream>,
+  expandedGripperView: boolean,
 ): MediaStream {
   let streamName: string;
   switch (id) {
@@ -520,10 +533,14 @@ function getStream(
       streamName = "realsense";
       break;
     case CameraViewId.gripper:
-      streamName = "gripper";
+      if (expandedGripperView) {
+        streamName = "expandedGripper";
+      } else {
+        streamName = "gripper";
+      }
       break;
     default:
-      throw Error(`unknow video stream id: ${id}`);
+      throw Error(`unknown video stream id: ${id}`);
   }
   return remoteStreams.get(streamName)!.stream;
 }
@@ -600,12 +617,18 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
 const UnderVideoButtons = (props: {
   definition: CameraViewDefinition;
   setPredictiveDisplay: (enabled: boolean) => void;
+  setExpandedGripperView: (expanded: boolean) => void;
   betaTeleopKit: boolean;
 }) => {
   let buttons: JSX.Element | null;
   switch (props.definition.id) {
     case CameraViewId.gripper:
-      buttons = <UnderGripperButtons definition={props.definition} />;
+      buttons = (
+        <UnderGripperButtons
+          definition={props.definition}
+          setExpandedGripperView={props.setExpandedGripperView}
+        />
+      );
       break;
     case CameraViewId.overhead:
       buttons = hasBetaTeleopKit ? (
@@ -785,9 +808,14 @@ const UnderRealsenseButtons = (props: {
 };
 
 /**
- * Buttons to display under the overhead video stream.
+ * Buttons to display under the gripper video stream.
  */
-const UnderGripperButtons = (props: { definition: GripperVideoStreamDef }) => {
+const UnderGripperButtons = (props: {
+  definition: GripperVideoStreamDef;
+  setExpandedGripperView: (expanded: boolean) => void;
+}) => {
+  const [rerender, setRerender] = React.useState<boolean>(false);
+
   return (
     <React.Fragment>
       <AccordionSelect
@@ -797,6 +825,20 @@ const UnderGripperButtons = (props: { definition: GripperVideoStreamDef }) => {
           underVideoFunctionProvider.provideFunctions(wristButtons[idx])
             .onClick!();
         }}
+      />
+      <CheckToggleButton
+        checked={props.definition.expandedGripperView || false}
+        onClick={() => {
+          if (!props.definition.expandedGripperView) {
+            props.setExpandedGripperView(true);
+            props.definition.expandedGripperView = true;
+          } else {
+            props.setExpandedGripperView(false);
+            props.definition.expandedGripperView = false;
+          }
+          setRerender(!rerender);
+        }}
+        label="Expanded Gripper View"
       />
     </React.Fragment>
   );
