@@ -37,7 +37,8 @@
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.7.5",
     "style-loader": "^3.3.2",
-    "three": "^0.157.0"
+    "three": "^0.157.0",
+    "wrtc": "^0.4.7"
   },
   "scripts": {
     "firebase": "webpack --mode development --progress --env storage='firebase'",
@@ -76,7 +77,6 @@
     "typescript": "^5.4.3",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.0.2",
-    "wrtc": "^0.4.7",
     "zeromq": "^6.0.0-beta.19"
   }
 }
