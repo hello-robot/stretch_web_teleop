@@ -9,6 +9,7 @@ import {
     RobotPose, ValidJointStateDict, BatteryVoltageMessage, // Interfaces
     statustoRobotPose, statustoInJointLimits, statustoInCollision, statustoBatteryVoltageMessage, disallowConcurrency, // Methods
 } from '../shared/util_node';
+import { VideoStream } from './videostream';
 
 
 export class Robot {
@@ -118,6 +119,7 @@ export class Robot {
         (async function() {
             for await (const [hncb64_buff] of this.hncb64_sock) {
                 if (this.headNavCamStreamUncompressAndSendCallback) { this.headNavCamStreamUncompressAndSendCallback(hncb64_buff) }
+                await new Promise(r => setTimeout(r, 0.001))
             }
         }).call(this);
     }

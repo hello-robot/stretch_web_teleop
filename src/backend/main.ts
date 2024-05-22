@@ -17,7 +17,7 @@ export const robot = new Robot(
     // amclPoseCallback: forwardAMCLPose,
     forwardIsRunStopped,
     // hasBetaTeleopKitCallback: forwardHasBetaTeleopKit
-    headNavCamStream.uncompressAndSendImage
+    forwardImg
 )
 
 export let connection: WebRTCConnection;
@@ -68,7 +68,8 @@ robot.connect().then(() => {
 function handleSessionStart() {
     connection.removeTracks()
 
-    connection.addTrackWithoutStream(headNavCamStream.track, "overhead");
+    // connection.addTrackWithoutStream(headNavCamStream.track, "overhead");
+    connection.addTrack(headNavCamStream.track, headNavCamStream.stream, "overhead")
 
     // stream = realsenseStream.outputVideoStream!;
     // stream.getTracks().forEach(track => connection.addTrack(track, stream, "realsense"))
@@ -79,6 +80,11 @@ function handleSessionStart() {
     connection.openDataChannels()
 }
 
+function forwardImg(img) {
+    if (headNavCamStream) {
+        headNavCamStream.uncompressAndSendImage(img)
+    }
+}
 // function forwardMoveBaseState(state: MoveBaseState) {
 //     if (!connection) throw 'WebRTC connection undefined!'
     
