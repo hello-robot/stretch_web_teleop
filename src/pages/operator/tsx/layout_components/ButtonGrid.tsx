@@ -10,8 +10,8 @@ const BUTTON_NAMES = [
     "Turn Left",
     "Turn Right",
 
-    "Move Lift Up",
-    "Move Lift Down",
+    "Lift Up",
+    "Lift Down",
     "Extend Arm",
     "Collapse Arm",
 
@@ -59,7 +59,7 @@ for (let i = 0; i < 4; i++) {
             key={i}
             style={{
                 gridRow: (i + 1) * 2,
-                backgroundColor: `hsl(317, 79%, ${35 - (6 * i)}%)`
+                // backgroundColor: `hsl(210, 100%, ${10 + (i * 6)}%)`
             }}
             className="button-grid-bkg-color"
         />
@@ -76,9 +76,9 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
     return (
         <div className={className("button-grid", { selected, customizing })} onClick={handleSelect}>
             {BACKGROUND_COLORS}
-            {HEADER_NAMES.map((headerName, idx) => (
+            {/* {HEADER_NAMES.map((headerName, idx) => (
                 <p key={idx} style={{ gridArea: `header${idx}` }}>{headerName}</p>
-            ))}
+            ))} */}
             {BUTTON_NAMES.map((buttonName, idx) => {
                 const buttonFunction = BUTTON_FUNCTIONS[idx];
                 const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(buttonFunction) || ButtonState.Inactive;
