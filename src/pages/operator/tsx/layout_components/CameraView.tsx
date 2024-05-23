@@ -55,7 +55,10 @@ export const CameraView = (props: CustomizableComponentProps) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   // X and Y position of the cursor when user clicks on the video
   const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
-  const definition = props.definition as CameraViewDefinition;
+  const definition = React.useMemo(
+    () => props.definition as CameraViewDefinition,
+    [props.definition],
+  );
   if (!definition.children)
     console.warn(
       `Video stream definition at ${props.path} should have a 'children' property.`,
@@ -82,7 +85,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         props.sharedState.remoteStreams,
         expandedGripperView,
       ),
-    [expandedGripperView],
+    [definition, expandedGripperView],
   );
 
   React.useEffect(() => {
