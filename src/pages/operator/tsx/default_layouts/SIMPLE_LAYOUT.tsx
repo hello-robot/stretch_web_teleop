@@ -7,7 +7,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayMovementRecorder: false,
     displayLabels: true,
-    actionMode: ActionMode.PressAndHold,
+    actionMode: ActionMode.StepActions,
     children: [
         {
             type: ComponentType.LayoutGrid,
