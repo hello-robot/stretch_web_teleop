@@ -315,7 +315,7 @@ export const gripperProps = {
 
 export const expandedGripperProps = {
   width: 768, // 480
-  height: (768 * 270) / 420, // 270
+  height: 768, // 480
   scale: 1,
   fps: 6.0,
 };
