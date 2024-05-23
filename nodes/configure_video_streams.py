@@ -153,6 +153,7 @@ class ConfigureVideoStreams(Node):
         # self.camera_info_subscriber.destroy()
 
     def pc_callback(self, msg, img):
+        # Only keep points that are within 0.01m to 1.5m from the camera
         pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
         passthrough = pcl_cloud.make_passthrough_filter()
@@ -187,29 +188,33 @@ class ConfigureVideoStreams(Node):
         if self.pcl_cloud_filtered.to_array().size == 0:
             return img
 
-        # Transform points cloud to base link and points that are in robot's reach
+        # Transform point cloud to base link
         pc_in_base_link = self.do_transform_cloud(self.pcl_cloud_filtered, transform)
-        # pc_in_base_link = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(pc_in_base_link_msg)
+
+        # Only keep points that are between 0.25m and 1m from the base in the XY plane
         dist = np.sqrt(
             np.power(pc_in_base_link[:, 0], 2) + np.power(pc_in_base_link[:, 1], 2)
         )
         filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
 
         # Get filtered points in camera frame
-        # pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg) # N x 3
         pts_in_range = self.pcl_cloud_filtered.to_array()[filtered_indices, :]
-        pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
 
-        # Get pixel coordinates
-        coords = np.matmul(self.P, np.transpose(pts_in_range))  # 3 x N
-        x_idx = np.absolute((coords[0, :] / coords[2, :]).astype(int))
-        y_idx = np.absolute((coords[1, :] / coords[2, :]).astype(int))
-        # negative_indices = np.where((x_idx < 0) or (y_idx < 0))
+        # Convert to homogenous coordinates
+        pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
 
         # Change color of pixels in robot's reach
         if img is not None:
-            img[x_idx, img.shape[1] - 1 - y_idx, :] = [255, 191, 0, 50]
-            # img[y_idx, x_idx, 3] = 0
+            # Get pixel coordinates
+            coords = np.matmul(self.P, np.transpose(pts_in_range))  # 3 x N
+            u_idx = (coords[0, :] / coords[2, :]).astype(int)
+            v_idx = (coords[1, :] / coords[2, :]).astype(int)
+            in_bounds_idx = np.where(
+                (u_idx >= 0) & (u_idx < img.shape[1]) & 
+                (v_idx >= 0) & (v_idx < img.shape[0])
+            )
+            # Color the pixels in the robot's reach
+            img[v_idx[in_bounds_idx], u_idx[in_bounds_idx], :] = [0, 191, 255, 50]
 
         return img
 
@@ -233,7 +238,8 @@ class ConfigureVideoStreams(Node):
         y_min = params["y_min"]
         y_max = params["y_max"]
 
-        return image[x_min:x_max, y_min:y_max]
+        # x and y are swapped, since the first index is the rows (y) and the second index is the columns (x)
+        return image[y_min:y_max, x_min:x_max]
 
     # https://stackoverflow.com/questions/44865023/how-can-i-create-a-circular-mask-for-a-numpy-array
     def create_circular_mask(self, h, w, center=None, radius=None):
@@ -281,11 +287,8 @@ class ConfigureVideoStreams(Node):
             )
 
     def configure_images(self, rgb_image, params):
-        # if rgb_image.shape[-1] == 2:
-        #     rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_YUV2RGB_YVYU)
-        # else:
-
-        rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2RGB)
+        color_transform = cv2.COLOR_BGR2RGB if rgb_image.shape[-1] == 3 else cv2.COLOR_BGRA2RGBA
+        rgb_image = cv2.cvtColor(rgb_image, color_transform)
         if params:
             if params["crop"]:
                 rgb_image = self.crop_image(rgb_image, params["crop"])
@@ -298,10 +301,12 @@ class ConfigureVideoStreams(Node):
     def realsense_cb(self, ros_image, pc):
         image = self.cv_bridge.imgmsg_to_cv2(ros_image)
         for image_config_name in self.realsense_params:
-            img = self.configure_images(image, self.realsense_params[image_config_name])
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+            # Overlay the pointcloud *before* cropping/masking/rotating the image,
+            # for consistent (de)projection and transformations
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
             if self.depth_ar:
-                img = self.pc_callback(pc, img)
+                image = self.pc_callback(pc, image)
+            img = self.configure_images(image, self.realsense_params[image_config_name])
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
 
