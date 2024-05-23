@@ -25,6 +25,8 @@ from std_srvs.srv import SetBool
 
 
 class ConfigureVideoStreams(Node):
+    BACKGROUND_COLOR = (200, 200, 200)
+
     def __init__(self, params_file, has_beta_teleop_kit):
         super().__init__("configure_video_streams")
 
@@ -46,6 +48,11 @@ class ConfigureVideoStreams(Node):
         self.gripper_params = (
             self.image_params["gripper"] if "gripper" in self.image_params else None
         )
+        self.expanded_gripper_params = (
+            self.image_params["expandedGripper"]
+            if "expandedGripper" in self.image_params
+            else None
+        )
 
         # Stores all the images created using the loaded params
         self.overhead_images = {}
@@ -55,6 +62,7 @@ class ConfigureVideoStreams(Node):
         self.realsense_rgb_image = None
         self.overhead_camera_rgb_image = None
         self.gripper_camera_rgb_image = None
+        self.expanded_gripper_camera_rgb_image = None
         self.cv_bridge = CvBridge()
 
         # Compressed Image publishers
@@ -66,6 +74,9 @@ class ConfigureVideoStreams(Node):
         )
         self.publisher_gripper_cmp = self.create_publisher(
             CompressedImage, "/gripper_camera/image_raw/cropped/compressed", 15
+        )
+        self.publisher_expanded_gripper_cmp = self.create_publisher(
+            CompressedImage, "/gripper_camera/image_raw/expanded/compressed", 15
         )
 
         # Subscribers
@@ -200,7 +211,7 @@ class ConfigureVideoStreams(Node):
         # Get filtered points in camera frame
         pts_in_range = self.pcl_cloud_filtered.to_array()[filtered_indices, :]
 
-        # Convert to homogenous coordinates
+        # Convert to homogeneous coordinates
         pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
 
         # Change color of pixels in robot's reach
@@ -210,8 +221,10 @@ class ConfigureVideoStreams(Node):
             u_idx = (coords[0, :] / coords[2, :]).astype(int)
             v_idx = (coords[1, :] / coords[2, :]).astype(int)
             in_bounds_idx = np.where(
-                (u_idx >= 0) & (u_idx < img.shape[1]) & 
-                (v_idx >= 0) & (v_idx < img.shape[0])
+                (u_idx >= 0)
+                & (u_idx < img.shape[1])
+                & (v_idx >= 0)
+                & (v_idx < img.shape[0])
             )
             # Color the pixels in the robot's reach
             img[v_idx[in_bounds_idx], u_idx[in_bounds_idx], :] = [0, 191, 255, 50]
@@ -237,9 +250,31 @@ class ConfigureVideoStreams(Node):
         x_max = params["x_max"]
         y_min = params["y_min"]
         y_max = params["y_max"]
+        width = x_max - x_min
+        height = y_max - y_min
+
+        # It is possible that the "crop" expands the image beyond its original dimensions.
+        # Hence, we create a new image and fill it with a constant value for the background.
+        background_color = (
+            self.BACKGROUND_COLOR
+            if image.shape[-1] == 3
+            else (*self.BACKGROUND_COLOR, 255)
+        )
+        cropped_image = (
+            np.repeat(background_color, width * height, axis=0)
+            .reshape(height, width, image.shape[-1])
+            .astype(np.uint8)
+        )
 
         # x and y are swapped, since the first index is the rows (y) and the second index is the columns (x)
-        return image[y_min:y_max, x_min:x_max]
+        cropped_image[
+            max(-y_min, 0) : min(height - (y_max - image.shape[0]), height),
+            max(-x_min, 0) : min(width - (x_max - image.shape[1]), width),
+        ] = image[
+            max(y_min, 0) : min(y_max, image.shape[0]),
+            max(x_min, 0) : min(x_max, image.shape[1]),
+        ]
+        return cropped_image
 
     # https://stackoverflow.com/questions/44865023/how-can-i-create-a-circular-mask-for-a-numpy-array
     def create_circular_mask(self, h, w, center=None, radius=None):
@@ -271,7 +306,12 @@ class ConfigureVideoStreams(Node):
 
         mask = self.create_circular_mask(h, w, center, radius)
         img = image.copy()
-        img[~mask] = 200
+        background_color = (
+            self.BACKGROUND_COLOR
+            if image.shape[-1] == 3
+            else (*self.BACKGROUND_COLOR, 255)
+        )
+        img[~mask] = background_color
         return img
 
     def rotate_image(self, image, value):
@@ -287,7 +327,9 @@ class ConfigureVideoStreams(Node):
             )
 
     def configure_images(self, rgb_image, params):
-        color_transform = cv2.COLOR_BGR2RGB if rgb_image.shape[-1] == 3 else cv2.COLOR_BGRA2RGBA
+        color_transform = (
+            cv2.COLOR_BGR2RGB if rgb_image.shape[-1] == 3 else cv2.COLOR_BGRA2RGBA
+        )
         rgb_image = cv2.cvtColor(rgb_image, color_transform)
         if params:
             if params["crop"]:
@@ -319,12 +361,25 @@ class ConfigureVideoStreams(Node):
 
     def gripper_camera_cb(self, ros_image):
         image = self.cv_bridge.imgmsg_to_cv2(ros_image, "rgb8")
-        img = self.rotate_image_around_center(image, -1 * self.roll_value)
-        self.gripper_camera_rgb_image = self.configure_images(
-            img, self.gripper_params[self.gripper_camera_perspective]
+        # Compute and publish the standard gripper image
+        gripper_camera_rgb_image = self.configure_images(
+            image, self.gripper_params[self.gripper_camera_perspective]
+        )
+        self.gripper_camera_rgb_image = self.rotate_image_around_center(
+            gripper_camera_rgb_image, -1 * self.roll_value
         )
         self.publish_compressed_msg(
             self.gripper_camera_rgb_image, self.publisher_gripper_cmp
+        )
+        # Compute and publish the expanded gripper image
+        expanded_gripper_camera_rgb_image = self.configure_images(
+            image, self.expanded_gripper_params[self.gripper_camera_perspective]
+        )
+        self.expanded_gripper_camera_rgb_image = self.rotate_image_around_center(
+            expanded_gripper_camera_rgb_image, -1 * self.roll_value
+        )
+        self.publish_compressed_msg(
+            self.expanded_gripper_camera_rgb_image, self.publisher_expanded_gripper_cmp
         )
 
     def navigation_camera_cb(self, ros_image):
@@ -340,7 +395,11 @@ class ConfigureVideoStreams(Node):
         image_center = tuple(np.array(image.shape[1::-1]) / 2)
         rot_mat = cv2.getRotationMatrix2D(image_center, math.degrees(angle), 1.0)
         result = cv2.warpAffine(
-            image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR
+            image,
+            rot_mat,
+            image.shape[1::-1],
+            flags=cv2.INTER_LINEAR,
+            borderValue=self.BACKGROUND_COLOR,
         )
         return result
 

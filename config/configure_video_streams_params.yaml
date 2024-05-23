@@ -58,4 +58,31 @@
           "crop": { "y_min": 0, "y_max": 270, "x_min": 125, "x_max": 395 },
           "rotate": null,
         } },
+  # Images published to /gripper_camera/expanded/image_raw
+  # Image size is 768 x 1024
+  "expandedGripper": { "default": {
+          # The mask contain params to make a circular mask over the image
+          # For the mask the be circumscribed, its width/height must be:
+          # ((768**2) + (1024**2))**0.5
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 1280, "height": 1280, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "x_min": 128, "x_max": 896, "y_min": 0, "y_max": 768 },
+          "rotate": null,
+        }, "d405": {
+          # The mask contain params to make a circular mask over the image.
+          # For the mask the be circumscribed, its width/height must be:
+          # ((480**2) + (270**2))**0.5
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 550, "height": 550, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "y_min": -140, "y_max": 410, "x_min": -35, "x_max": 515 },
+          "rotate": null,
+        } },
 }

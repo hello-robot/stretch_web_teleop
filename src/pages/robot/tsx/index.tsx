@@ -71,7 +71,7 @@ robot.connect().then(() => {
   gripperStream.start();
 
   robot.subscribeToVideo({
-    topicName: "/gripper_camera/image_raw/compressed",
+    topicName: "/gripper_camera/image_raw/expanded/compressed",
     callback: expandedGripperStream.updateImage,
   });
   expandedGripperStream.start();

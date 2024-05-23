@@ -164,10 +164,6 @@ def generate_launch_description():
                 src="/gripper_camera/color/image_rect_raw",
                 dst="/gripper_camera/image_raw",
             ),
-            SetRemap(
-                src="/gripper_camera/color/image_rect_raw/compressed",
-                dst="/gripper_camera/image_raw/compressed",
-            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     [
