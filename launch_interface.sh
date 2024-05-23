@@ -8,6 +8,7 @@ if getopts ":m:" opt && [[ $opt == "m" && -f $OPTARG ]]; then
 fi
 
 stretch_free_robot_process.py;
+./stop_interface.sh
 sudo udevadm control --reload-rules && sudo udevadm trigger
 source /opt/ros/humble/setup.bash
 source ~/ament_ws/install/setup.bash
