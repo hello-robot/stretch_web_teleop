@@ -83,9 +83,7 @@ export type WebRTCMessage =
   | StopTrajectoryMessage
   | StopMoveBaseMessage
   | FollowJointTrajectoryActionResultMessage
-  | MoveBaseActionResultMessage
   | BatteryVoltageMessage
-  | MoveBaseStateMessage
   | IsRunStoppedMessage
   | HasBetaTeleopKitMessage
   | cmd;
@@ -128,11 +126,11 @@ export interface FollowJointTrajectoryActionResult {
   result: string;
 }
 
-export interface NavigateToPoseActionStatusList {
-  status_list: NavigateToPoseActionStatus[];
+export interface ActionStatusList {
+  status_list: ActionStatus[];
 }
 
-export interface NavigateToPoseActionStatus {
+export interface ActionStatus {
   status: number;
 }
 
@@ -142,25 +140,14 @@ export interface GoalStatus {
   text: string;
 }
 
-export interface MoveBaseState {
+export interface ActionState {
   state: string;
   alert_type: string;
 }
 
-export interface MoveBaseStateMessage {
-  type: "moveBaseState";
-  message: MoveBaseState;
-}
-
-export interface MoveBaseActionResultMessage {
-  type: "moveBaseActionResult";
-  message: MoveBaseActionResult;
-}
-
-export interface MoveBaseActionResult {
-  header: string;
-  status: GoalStatus;
-  result: string;
+export interface ActionStateMessage {
+  type: string;
+  message: ActionState;
 }
 
 export interface OccupancyGridMessage {

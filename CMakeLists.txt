@@ -9,8 +9,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosbridge_server REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 # find_package(tf2_web_republisher REQUIRED)
+
+##############################
+## Generate Custom Messages ##
+##############################
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/MoveToPregrasp.action"
+  DEPENDENCIES geometry_msgs
+)
+
 
 #############
 ## Install ##
@@ -24,6 +35,7 @@ find_package(rosbridge_server REQUIRED)
 install(PROGRAMS
   nodes/compressed_image_visualizer.py
   nodes/configure_video_streams.py
+  nodes/move_to_pregrasp.py
   nodes/navigation_camera.py
   DESTINATION lib/${PROJECT_NAME}
 )

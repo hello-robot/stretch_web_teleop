@@ -9,7 +9,12 @@ import {
   ComponentDefinition,
   LayoutDefinition,
 } from "./utils/component_definitions";
-import { className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
+import {
+  className,
+  ActionState as MoveBaseState,
+  RemoteStream,
+  RobotPose,
+} from "shared/util";
 import {
   buttonFunctionProvider,
   underMapFunctionProvider,

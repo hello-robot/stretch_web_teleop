@@ -148,6 +148,15 @@ export class RemoteRobot extends React.Component<{}, any> {
     this.robotChannel(cmd);
   }
 
+  moveToPregrasp(x: number, y: number) {
+    let cmd: MoveBaseCommand = {
+      type: "moveToPregrasp",
+      x: x,
+      y: y,
+    };
+    this.robotChannel(cmd);
+  }
+
   setToggle(
     type: "setFollowGripper" | "setDepthSensing" | "setRunStop",
     toggle: boolean,
@@ -194,6 +203,10 @@ export class RemoteRobot extends React.Component<{}, any> {
 
   stopMoveBase() {
     this.robotChannel({ type: "stopMoveBase" });
+  }
+
+  stopMoveToPregrasp() {
+    this.robotChannel({ type: "stopMoveToPregrasp" });
   }
 }
 

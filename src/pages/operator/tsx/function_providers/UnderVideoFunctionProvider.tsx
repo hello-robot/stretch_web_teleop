@@ -17,6 +17,8 @@ export enum UnderVideoButton {
   FollowGripper = "Follow Gripper",
   DepthSensing = "Depth Sensing",
   ToggleArucoMarkers = "Toggle Aruco Markers",
+  MoveToPregrasp = "Move to Pre-grasp",
+  CancelMoveToPregrasp = "Cancel Goal",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
 }
@@ -44,7 +46,7 @@ export const wristButtons: UnderVideoButton[] = [
 export type RealsenseButtons = (typeof realsenseButtons)[number];
 
 export type UnderVideoButtonFunctions = {
-  onClick?: () => void;
+  onClick?: (...args: any[]) => void;
   onCheck?: (toggle: boolean) => void;
   getMarkers?: () => string[];
   send?: (name: string) => void;
@@ -98,6 +100,16 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         return {
           onCheck: (toggle: boolean) =>
             FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle),
+        };
+      case UnderVideoButton.MoveToPregrasp:
+        return {
+          onClick: (x: number, y: number) => {
+            FunctionProvider.remoteRobot?.moveToPregrasp(x, y);
+          },
+        };
+      case UnderVideoButton.CancelMoveToPregrasp:
+        return {
+          onClick: () => FunctionProvider.remoteRobot?.stopMoveToPregrasp(),
         };
       case UnderVideoButton.ToggleArucoMarkers:
         return {

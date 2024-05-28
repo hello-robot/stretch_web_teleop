@@ -14,6 +14,8 @@ export type cmd =
   | MoveBaseCommand
   | StopTrajectoryCommand
   | StopMoveBaseCommand
+  | MoveToPregraspCommand
+  | StopMoveToPregraspCommand
   | PlaybackPosesCommand
   | GetBatteryVoltageCommand
   | GetHasBetaTeleopKit;
@@ -86,6 +88,16 @@ export interface StopTrajectoryCommand {
 
 export interface StopMoveBaseCommand {
   type: "stopMoveBase";
+}
+
+export interface MoveToPregraspCommand {
+  type: "moveToPregrasp";
+  x: number;
+  y: number;
+}
+
+export interface StopMoveToPregraspCommand {
+  type: "stopMoveToPregrasp";
 }
 
 export interface GetBatteryVoltageCommand {

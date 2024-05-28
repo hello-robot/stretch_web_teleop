@@ -500,4 +500,15 @@ def generate_launch_description():
     #         shell=True,
     #     )
     # )
+
+    # Move To Pre-grasp Action Server
+    move_to_pregrasp_node = Node(
+        package="stretch_web_teleop",
+        executable="move_to_pregrasp.py",
+        output="screen",
+        arguments=[],
+        parameters=[],
+    )
+    ld.add_action(move_to_pregrasp_node)
+
     return ld

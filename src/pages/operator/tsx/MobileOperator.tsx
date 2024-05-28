@@ -7,7 +7,11 @@ import {
   ComponentType,
   MapDefinition,
 } from "./utils/component_definitions";
-import { className, MoveBaseState, RemoteStream } from "shared/util";
+import {
+  className,
+  ActionState as MoveBaseState,
+  RemoteStream,
+} from "shared/util";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,

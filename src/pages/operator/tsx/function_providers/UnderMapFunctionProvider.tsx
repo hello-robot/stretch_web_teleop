@@ -1,4 +1,4 @@
-import { MoveBaseState, ROSPose, waitUntil } from "shared/util";
+import { ActionState as MoveBaseState, ROSPose, waitUntil } from "shared/util";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 import { FunctionProvider } from "./FunctionProvider";
 import { resolve } from "path";

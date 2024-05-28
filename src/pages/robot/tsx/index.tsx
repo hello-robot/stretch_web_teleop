@@ -17,8 +17,8 @@ import {
   OccupancyGridMessage,
   MapPoseMessage,
   GoalStatusMessage,
-  MoveBaseState,
-  MoveBaseStateMessage,
+  ActionState,
+  ActionStateMessage,
   ROSBatteryState,
   BatteryVoltageMessage,
 } from "shared/util";
@@ -30,7 +30,10 @@ export const robot = new Robot({
   jointStateCallback: forwardJointStates,
   batteryStateCallback: forwardBatteryState,
   occupancyGridCallback: forwardOccupancyGrid,
-  moveBaseResultCallback: forwardMoveBaseState,
+  moveBaseResultCallback: (goalState: ActionState) =>
+    forwardActionState(goalState, "moveBaseState"),
+  moveToPregraspResultCallback: (goalState: ActionState) =>
+    forwardActionState(goalState, "moveToPregraspState"),
   amclPoseCallback: forwardAMCLPose,
   isRunStoppedCallback: forwardIsRunStopped,
   hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
@@ -110,7 +113,7 @@ function handleSessionStart() {
   connection.openDataChannels();
 }
 
-function forwardMoveBaseState(state: MoveBaseState) {
+function forwardActionState(state: ActionState, type: string) {
   if (!connection) throw "WebRTC connection undefined!";
 
   if (state.alert_type != "info") {
@@ -121,9 +124,9 @@ function forwardMoveBaseState(state: MoveBaseState) {
   }
 
   connection.sendData({
-    type: "moveBaseState",
+    type: type,
     message: state,
-  } as MoveBaseStateMessage);
+  } as ActionStateMessage);
 }
 
 function forwardIsRunStopped(isRunStopped: boolean) {
@@ -260,6 +263,12 @@ function handleMessage(message: WebRTCMessage) {
       break;
     case "getHasBetaTeleopKit":
       robot.getHasBetaTeleopKit();
+    case "moveToPregrasp":
+      robot.executeMoveToPregraspGoal(message.x, message.y);
+      break;
+    case "stopMoveToPregrasp":
+      robot.stopMoveToPregraspClient();
+      break;
   }
 }
 

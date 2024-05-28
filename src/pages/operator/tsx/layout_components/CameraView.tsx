@@ -134,22 +134,41 @@ export const CameraView = (props: CustomizableComponentProps) => {
   function handleClick(event: React.MouseEvent<HTMLDivElement>) {
     event.stopPropagation();
 
-    // If no button pad overlay then select self and return
-    if (
-      !overlayDefinition ||
-      overlayDefinition.type !== ComponentType.ButtonPad
-    ) {
-      selectSelf();
-      return;
-    }
-
-    // Create context menu popup where user can choose between selecting
-    // the button pad or the video stream
+    // Get the coordinates of the click within the camera view
     const { clientX, clientY } = event;
     const { left, top } = videoRef.current!.getBoundingClientRect();
     const x = clientX - left;
     const y = clientY - top;
-    setClickXY([x, y]);
+
+    console.log("CameraView clicked at x", x, "y ", y);
+
+    // If you are customizing and there is a button pad on top of the
+    // video feed, display a dropdown letting users to specify which to
+    // select. Note that even clicks on overlaid components will trigger
+    // this (in addition to the overlaid component's click event).
+    if (customizing) {
+      // If no button pad overlay then select self and return
+      if (
+        !overlayDefinition ||
+        overlayDefinition.type !== ComponentType.ButtonPad
+      ) {
+        selectSelf();
+        return;
+      }
+
+      // Create context menu popup where user can choose between selecting
+      // the button pad or the video stream
+      setClickXY([x, y]);
+    }
+    // If there is no overlay and it is the RealSense camera, treat it as
+    // an input to click-to-pregrasp
+    // TODO: Make this be controlled by a checkbox/button below the camera view.
+    // TODO: add a way to stop it!
+    else if (props.definition.id === CameraViewId.realsense && !overlay) {
+      underVideoFunctionProvider.provideFunctions(
+        UnderVideoButton.MoveToPregrasp,
+      ).onClick!(x, y);
+    }
   }
 
   // Constrain the width or height when the stream gets too large
@@ -183,7 +202,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         predictiveDisplay,
       })}
       // style={overlayDimensions}
-      onClick={customizing ? handleClick : undefined}
+      onClick={handleClick}
     >
       {
         // Display overlay on top of video stream
