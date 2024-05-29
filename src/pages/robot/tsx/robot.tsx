@@ -297,17 +297,17 @@ export class Robot extends React.Component {
       if (callback) {
         if (status == 5)
           callback({
-            state: "Navigation cancelled!",
+            state: cancelMsg,
             alert_type: "error",
           });
         else if (status == 4)
           callback({
-            state: "Navigation succeeded!",
+            state: successMsg,
             alert_type: "success",
           });
         else if (status == 6)
           callback({
-            state: "Navigation failed!",
+            state: failureMsg,
             alert_type: "error",
           });
       }
@@ -549,8 +549,8 @@ export class Robot extends React.Component {
     if (!this.moveToPregraspClient) throw "moveToPregraspClient is undefined";
 
     let newGoal = new ROSLIB.ActionGoal({
-      x: x,
-      y: y,
+      u: x,
+      v: y,
     });
 
     return newGoal;

@@ -1,9 +1,9 @@
-# MoveToPregrasp takes in the (x,y) coordinates of a click on the Realsense camera,
+# MoveToPregrasp takes in the (u,v) coordinates of a click on the Realsense camera,
 # as well as some configuration such as the direction of the pregrasp. It then moves
 # the robot to the pregrasp configuration, giving feedback on the way.
 
-float64 x
-float64 y
+float64 u
+float64 v
 
 uint8 PREGRASP_DIRECTION_AUTO=0
 uint8 PREGRASP_DIRECTION_HORIZONTAL=1

@@ -506,7 +506,7 @@ def generate_launch_description():
         package="stretch_web_teleop",
         executable="move_to_pregrasp.py",
         output="screen",
-        arguments=[],
+        arguments=[LaunchConfiguration("params")],
         parameters=[],
     )
     ld.add_action(move_to_pregrasp_node)
