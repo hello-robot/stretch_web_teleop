@@ -1,6 +1,6 @@
 {
   # Images published to /navigation_camera/image_raw
-  # Image size is 768 x 1024
+  # Image size is 1024 x 768
   "overhead": { "fixed": {
           # The mask contain params to make a circular mask over the image
           # Pass "mask": null to not create mask
@@ -36,7 +36,7 @@
         { "mask": null, "crop": null, "rotate": "ROTATE_90_CLOCKWISE" },
     },
   # Images published to /gripper_camera/cropped/image_raw
-  # Image size is 768 x 1024
+  # Default image size is 1024 x 768. D405 is 480 x 270
   "gripper": { "default": {
           # The mask contain params to make a circular mask over the image
           # Pass "mask": null to not create mask
@@ -59,14 +59,16 @@
           "rotate": null,
         } },
   # Images published to /gripper_camera/expanded/image_raw
-  # Image size is 768 x 1024
+  # Default image size is 1024 x 768. D405 is 480 x 270.
+  # Since the default camera is fisheye, it is already circular. So we don't
+  # expand it.
   "expandedGripper": { "default": {
           # The mask contain params to make a circular mask over the image
           # For the mask the be circumscribed, its width/height must be:
           # ((768**2) + (1024**2))**0.5
           # Pass "mask": null to not create mask
           "mask":
-            { "width": 1280, "height": 1280, "radius": null, "center": null },
+            { "width": 768, "height": 768, "radius": null, "center": null },
           # The crop contain params to crop the image
           # x_max - x_min = mask_width and y_max - y_min = mask_height
           # Pass "crop": null to not crop image

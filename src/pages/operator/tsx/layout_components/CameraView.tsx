@@ -636,6 +636,7 @@ const UnderVideoButtons = (props: {
       buttons = (
         <UnderGripperButtons
           definition={props.definition}
+          betaTeleopKit={props.betaTeleopKit}
           setExpandedGripperView={props.setExpandedGripperView}
         />
       );
@@ -822,6 +823,7 @@ const UnderRealsenseButtons = (props: {
  */
 const UnderGripperButtons = (props: {
   definition: GripperVideoStreamDef;
+  betaTeleopKit: boolean;
   setExpandedGripperView: (expanded: boolean) => void;
 }) => {
   const [rerender, setRerender] = React.useState<boolean>(false);
@@ -836,20 +838,24 @@ const UnderGripperButtons = (props: {
             .onClick!();
         }}
       />
-      <CheckToggleButton
-        checked={props.definition.expandedGripperView || false}
-        onClick={() => {
-          if (!props.definition.expandedGripperView) {
-            props.setExpandedGripperView(true);
-            props.definition.expandedGripperView = true;
-          } else {
-            props.setExpandedGripperView(false);
-            props.definition.expandedGripperView = false;
-          }
-          setRerender(!rerender);
-        }}
-        label="Expanded Gripper View"
-      />
+      {props.betaTeleopKit ? (
+        <></>
+      ) : (
+        <CheckToggleButton
+          checked={props.definition.expandedGripperView || false}
+          onClick={() => {
+            if (!props.definition.expandedGripperView) {
+              props.setExpandedGripperView(true);
+              props.definition.expandedGripperView = true;
+            } else {
+              props.setExpandedGripperView(false);
+              props.definition.expandedGripperView = false;
+            }
+            setRerender(!rerender);
+          }}
+          label="Expanded Gripper View"
+        />
+      )}
     </React.Fragment>
   );
 };
