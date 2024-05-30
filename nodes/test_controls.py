@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
 import subprocess
 import time
-import numpy as np
 
-from urdf import treeFromString
+import numpy as np
 import PyKDL as kdl
+from urdf import treeFromString
+
 
 def jacobian_to_np(J):
-    return np.array([[J[i,j] for j in range(J.columns())] for i in range(J.rows())])
+    return np.array([[J[i, j] for j in range(J.columns())] for i in range(J.rows())])
+
 
 if __name__ == "__main__":
     investigation_1 = False
     if investigation_1:
         # Investigation 1: Is it possible to get a chain and Jacobian
         # without modifying the URDF?
-        urdf_string = subprocess.check_output([
-            "xacro",
-            "/home/hello-robot/ament_ws/src/stretch_ros2/stretch_description/"
-            "urdf/stretch_description_SE3_eoa_wrist_dw3_tool_sg3.xacro"
-        ])
+        urdf_string = subprocess.check_output(
+            [
+                "xacro",
+                "/home/hello-robot/ament_ws/src/stretch_ros2/stretch_description/"
+                "urdf/stretch_description_SE3_eoa_wrist_dw3_tool_sg3.xacro",
+            ]
+        )
         # print(urdf_string.decode())
         # raise Exception()
         ok, robot = treeFromString(urdf_string)
@@ -56,40 +60,40 @@ if __name__ == "__main__":
         #     RigidBodyIntertia 0.427734 [    0.033681,   -0.000847,   -0.031723]
         #     RotationalIntertia [0.0021197564274712923, -1.5797687000661998e-05, 0.000940017680375442, -1.5797687000661998e-05, 0.00302267519196166, -2.2492947812654e-05, 0.000940017680375442, -2.2492947812654e-05]
         chain = kdl.Chain()
-        chain.addSegment(kdl.Segment(
-            name="link_base_translation",
-            joint=kdl.Joint(
-                name="joint_base_translation",
-                origin=kdl.Vector(0, 0, 0),
-                axis=kdl.Vector(1, 0, 0),
-                type=kdl.Joint.TransAxis,
-            ),
-            f_tip=kdl.Frame(),
-            I=kdl.RigidBodyInertia(
-                m=1.0,
-                oc=kdl.Vector(0, 0, 0),
-                Ic=kdl.RotationalInertia(
-                    1.0, 1.0, 1.0, 0.0, 0.0, 0.0
+        chain.addSegment(
+            kdl.Segment(
+                name="link_base_translation",
+                joint=kdl.Joint(
+                    name="joint_base_translation",
+                    origin=kdl.Vector(0, 0, 0),
+                    axis=kdl.Vector(1, 0, 0),
+                    type=kdl.Joint.TransAxis,
                 ),
-            ),
-        ))
-        chain.addSegment(kdl.Segment(
-            name="link_base_revolution",
-            joint=kdl.Joint(
-                name="joint_base_revolution",
-                origin=kdl.Vector(0, 0, 0),
-                axis=kdl.Vector(1, 0, 0),
-                type=kdl.Joint.RotAxis,
-            ),
-            f_tip=kdl.Frame(),
-            I=kdl.RigidBodyInertia(
-                m=1.0,
-                oc=kdl.Vector(0, 0, 0),
-                Ic=kdl.RotationalInertia(
-                    1.0, 1.0, 1.0, 0.0, 0.0, 0.0
+                f_tip=kdl.Frame(),
+                I=kdl.RigidBodyInertia(
+                    m=1.0,
+                    oc=kdl.Vector(0, 0, 0),
+                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
                 ),
-            ),
-        ))
+            )
+        )
+        chain.addSegment(
+            kdl.Segment(
+                name="link_base_revolution",
+                joint=kdl.Joint(
+                    name="joint_base_revolution",
+                    origin=kdl.Vector(0, 0, 0),
+                    axis=kdl.Vector(1, 0, 0),
+                    type=kdl.Joint.RotAxis,
+                ),
+                f_tip=kdl.Frame(),
+                I=kdl.RigidBodyInertia(
+                    m=1.0,
+                    oc=kdl.Vector(0, 0, 0),
+                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+                ),
+            )
+        )
         chain.addChain(orig_chain)
 
         # Sample joints to test. Arm after homing.
@@ -181,7 +185,7 @@ if __name__ == "__main__":
         jac_solver = kdl.ChainJntToJacSolver(chain)
         for q in [q_kdl_1, q_kdl_2]:
             Js = []
-            for q01 in [(1.0, 3.14159/2), (q[0], q[1])]:
+            for q01 in [(1.0, 3.14159 / 2), (q[0], q[1])]:
                 J = kdl.Jacobian(chain.getNrOfJoints())
                 q[0] = q01[0]
                 q[1] = q01[1]
@@ -205,20 +209,20 @@ if __name__ == "__main__":
         controller = nvc.NormalizedVelocityControl(robot)
 
         zero_vel = {
-            'base_forward' : 0.0,
-            'base_counterclockwise' : 0.0,
-            'lift_up': 0.0,
-            'arm_out': 0.0,
-            'wrist_roll_counterclockwise' : 0.0,
-            'wrist_pitch_up' : 0.0,
-            'wrist_yaw_counterclockwise' : 0.0,
-            'head_pan_counterclockwise' : 0.0,
-            'head_tilt_up' : 0.0,
-            'gripper_open' : 0.0
+            "base_forward": 0.0,
+            "base_counterclockwise": 0.0,
+            "lift_up": 0.0,
+            "arm_out": 0.0,
+            "wrist_roll_counterclockwise": 0.0,
+            "wrist_pitch_up": 0.0,
+            "wrist_yaw_counterclockwise": 0.0,
+            "head_pan_counterclockwise": 0.0,
+            "head_tilt_up": 0.0,
+            "gripper_open": 0.0,
         }
 
         vel = zero_vel.copy()
-        vel['lift_up'] = -0.1
+        vel["lift_up"] = -0.1
         controller.set_command(vel)
         time.sleep(2.0)
         controller.set_command(zero_vel)

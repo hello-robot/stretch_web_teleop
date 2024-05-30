@@ -2,41 +2,63 @@
 
 # Standard Imports
 import os
+import pprint
 import subprocess
 import sys
 import threading
+from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-# Third-party Imports
-from ament_index_python.packages import get_package_share_directory
-from builtin_interfaces.msg import Time
-from geometry_msgs.msg import Point, Quaternion
+# Third-Party Imports
 import message_filters
 import numpy as np
 import numpy.typing as npt
 import pcl
 import PyKDL as kdl
 import rclpy
-from rclpy.action import ActionServer, CancelResponse, GoalResponse
+import ros2_numpy
+import tf2_py as tf2
+import tf2_ros
+import yaml
+from ament_index_python.packages import get_package_share_directory
+from builtin_interfaces.msg import Time
+from control_msgs.action import FollowJointTrajectory
+from geometry_msgs.msg import (
+    Point,
+    Quaternion,
+    Transform,
+    TransformStamped,
+    Twist,
+    Vector3,
+)
+from rclpy.action import ActionClient, ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-import ros2_numpy
 from sensor_msgs.msg import CameraInfo, Image, JointState, PointCloud2
 from std_msgs.msg import Header
-import stretch_body.robot as rb
-from tf2_geometry_msgs import PoseStamped
-import tf2_py as tf2
-import tf2_ros
-from tf_transformations import euler_from_quaternion
-import yaml
+from stretch_body.robot_params import RobotParams
+from tf2_geometry_msgs import PointStamped, PoseStamped
+from tf_transformations import euler_from_quaternion, quaternion_about_axis
+from trajectory_msgs.msg import JointTrajectoryPoint
+from urdf import treeFromString
 
 # Local Imports
-import normalized_velocity_control as nvc
 from stretch_web_teleop.action import MoveToPregrasp
-from urdf import treeFromString
+
+
+class MoveToPregraspState(Enum):
+    """
+    Move-to-pregrasp proceeds in the following sequential states:
+      1. Moving/rotating the base to the target pose.
+      2. Moving the arm & wrist to the target pose.
+
+    TODO: Consider adding an initial state that stows the arm.
+    """
+
+    pass
 
 
 def jacobian_to_np(J: kdl.Jacobian) -> npt.NDArray[np.float64]:
@@ -52,6 +74,7 @@ def jacobian_to_np(J: kdl.Jacobian) -> npt.NDArray[np.float64]:
     npt.NDArray[np.float64]: The Jacobian as a numpy array.
     """
     return np.array([[J[i, j] for j in range(J.columns())] for i in range(J.rows())])
+
 
 def np_to_joint_array(joint_state: npt.NDArray[np.float64]) -> kdl.JntArray:
     """
@@ -70,6 +93,7 @@ def np_to_joint_array(joint_state: npt.NDArray[np.float64]) -> kdl.JntArray:
         q[i] = q_i
     return q
 
+
 class MoveToPregraspNode(Node):
     """
     The MoveToPregrasp node exposes an action server that takes in the
@@ -78,10 +102,12 @@ class MoveToPregraspNode(Node):
     aligned with the clicked pixel, making it easy for the user to grasp
     the object the pixel is a part of.
     """
+
     BASE_LINK = "base_link"
     END_EFFECTOR_LINK = "link_grasp_center"
+    ODOM_FRAME = "odom"
 
-    def __init__(self, image_params_file: str):
+    def __init__(self, image_params_file: str, tf_timeout_secs: float = 0.5):
         """
         Initialize the MoveToPregraspNode
 
@@ -90,6 +116,7 @@ class MoveToPregraspNode(Node):
         image_params_file: The path to the YAML file configuring the video streams
             that are sent to the web app. This is necessary because this node has to undo
             the transforms before deprojecting the clicked pixel.
+        tf_timeout_secs: The timeout in seconds for TF lookups.
         """
         super().__init__("move_to_pregrasp")
 
@@ -97,19 +124,32 @@ class MoveToPregraspNode(Node):
         with open(image_params_file, "r") as params:
             self.image_params = yaml.safe_load(params)
 
+        # Load the robot parameters
+        self.robot_params = RobotParams().get_params()[1]
+
         # Load the Jacobian solver
-        # TODO: Reject goal if the below are still None/empty
         self.jacobian_solver = None
-        self.jacobian_joint_order = []
-        self.K = None
+        self.jacobian_joint_order: List[str] = []
+        self.K: Optional[npt.NDArray[np.float32]] = None
         self.load_jacobian_solver()
-        
+
         # Use masks to limit which joints we move and which cartesian dimensions we control
         # For starters, only control joint lift and z.
-        self.joint_mask = np.array([joint_name == "joint_lift" for joint_name in self.jacobian_joint_order])
-        self.cartesian_mask = np.array([False, False, True, False, False, False])
+        articulated_joints = [
+            "joint_lift",
+            # "joint_wrist_yaw",
+            "joint_wrist_roll",
+        ]
+        self.joint_mask = np.array(
+            [
+                joint_name in articulated_joints
+                for joint_name in self.jacobian_joint_order
+            ]
+        )
+        self.cartesian_mask = np.ones((6,), dtype=bool)
 
         # Initialize TF2
+        self.tf_timeout = Duration(seconds=tf_timeout_secs)
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
@@ -162,6 +202,20 @@ class MoveToPregraspNode(Node):
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
+        # Create a publisher and action client to command robot motion
+        self.base_vel_pub = self.create_publisher(
+            Twist,
+            "/stretch/cmd_vel",
+            qos_profile=1,
+        )
+        self.arm_client_future = None
+        self.arm_client = ActionClient(
+            self,
+            FollowJointTrajectory,
+            "/stretch_controller/follow_joint_trajectory",
+            callback_group=MutuallyExclusiveCallbackGroup(),
+        )
+
         # Create the shared resource to ensure that the action server rejects all
         # new goals while a goal is currently active.
         self.active_goal_request_lock = threading.Lock()
@@ -183,10 +237,10 @@ class MoveToPregraspNode(Node):
         Load the Jacobian solver for the robot.
         """
         # Get the path to the XACRO file
-        # TODO: Only enable this feature on the Stretch 3, modify the web app and launch file accordingly
+        # TODO: Get the URDF from a service, so this works on other robots other than the SE3
         stretch_description_dir = get_package_share_directory("stretch_description")
         urdf_file = os.path.join(
-            stretch_description_dir, 
+            stretch_description_dir,
             "urdf/stretch_description_SE3_eoa_wrist_dw3_tool_sg3.xacro",
         )
         # Get the URDF string
@@ -202,40 +256,40 @@ class MoveToPregraspNode(Node):
 
         # Add dummy links and joints for base translation and revolution
         chain = kdl.Chain()
-        chain.addSegment(kdl.Segment(
-            name="link_base_translation",
-            joint=kdl.Joint(
-                name="joint_base_translation",
-                origin=kdl.Vector(0, 0, 0),
-                axis=kdl.Vector(1, 0, 0),
-                type=kdl.Joint.TransAxis,
-            ),
-            f_tip=kdl.Frame(),
-            I=kdl.RigidBodyInertia(
-                m=1.0,
-                oc=kdl.Vector(0, 0, 0),
-                Ic=kdl.RotationalInertia(
-                    1.0, 1.0, 1.0, 0.0, 0.0, 0.0
+        chain.addSegment(
+            kdl.Segment(
+                name="link_base_translation",
+                joint=kdl.Joint(
+                    name="joint_base_translation",
+                    origin=kdl.Vector(0, 0, 0),
+                    axis=kdl.Vector(1, 0, 0),
+                    type=kdl.Joint.TransAxis,
                 ),
-            ),
-        ))
-        chain.addSegment(kdl.Segment(
-            name="link_base_revolution",
-            joint=kdl.Joint(
-                name="joint_base_revolution",
-                origin=kdl.Vector(0, 0, 0),
-                axis=kdl.Vector(1, 0, 0),
-                type=kdl.Joint.RotAxis,
-            ),
-            f_tip=kdl.Frame(),
-            I=kdl.RigidBodyInertia(
-                m=1.0,
-                oc=kdl.Vector(0, 0, 0),
-                Ic=kdl.RotationalInertia(
-                    1.0, 1.0, 1.0, 0.0, 0.0, 0.0
+                f_tip=kdl.Frame(),
+                I=kdl.RigidBodyInertia(
+                    m=1.0,
+                    oc=kdl.Vector(0, 0, 0),
+                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
                 ),
-            ),
-        ))
+            )
+        )
+        chain.addSegment(
+            kdl.Segment(
+                name="link_base_revolution",
+                joint=kdl.Joint(
+                    name="joint_base_revolution",
+                    origin=kdl.Vector(0, 0, 0),
+                    axis=kdl.Vector(1, 0, 0),
+                    type=kdl.Joint.RotAxis,
+                ),
+                f_tip=kdl.Frame(),
+                I=kdl.RigidBodyInertia(
+                    m=1.0,
+                    oc=kdl.Vector(0, 0, 0),
+                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+                ),
+            )
+        )
         chain.addChain(orig_chain)
         self.chain = chain
 
@@ -252,7 +306,12 @@ class MoveToPregraspNode(Node):
         # Store the control gains
         self.K = np.eye(len(self.jacobian_joint_order), dtype=np.float64)
         for i, joint_name in enumerate(self.jacobian_joint_order):
-            if joint_name in ["joint_arm_l3", "joint_arm_l2", "joint_arm_l1", "joint_arm_l0"]:
+            if joint_name in [
+                "joint_arm_l3",
+                "joint_arm_l2",
+                "joint_arm_l1",
+                "joint_arm_l0",
+            ]:
                 self.K[i, i] = 0.2
 
         return True
@@ -291,7 +350,8 @@ class MoveToPregraspNode(Node):
         with self.latest_joint_state_lock:
             self.latest_joint_state = [
                 msg.position[msg.name.index(joint_name)]
-                if joint_name in msg.name else 0.0 # TODO: Setting base translation and revolution to 0.0 seems suspect
+                if joint_name in msg.name
+                else 0.0  # TODO: Setting base translation and revolution to 0.0 seems suspect
                 for joint_name in self.jacobian_joint_order
             ]
 
@@ -304,6 +364,13 @@ class MoveToPregraspNode(Node):
         goal_request: The goal request message.
         """
         self.get_logger().info(f"Received request {goal_request}")
+
+        # Reject the goal if the jacobian solver has not been loaded
+        if self.jacobian_solver is None:
+            self.get_logger().info(
+                "Rejecting goal request since the Jacobian solver failed to load"
+            )
+            return GoalResponse.REJECT
 
         # Reject the goal if no camera info has been received yet
         with self.p_lock:
@@ -362,25 +429,7 @@ class MoveToPregraspNode(Node):
         """
         self.get_logger().info(f"Got request {goal_handle.request}")
 
-        # Determine how the robot should orient its gripper to align with the clicked pixel
-        if (
-            goal_handle.request.pregrasp_direction
-            == MoveToPregrasp.Goal.PREGRASP_DIRECTION_HORIZONTAL
-        ):
-            horizontal_grasp = True
-        elif (
-            goal_handle.request.pregrasp_direction
-            == MoveToPregrasp.Goal.PREGRASP_DIRECTION_VERTICAL
-        ):
-            self.get_logger().warn(
-                "Vertical grasp not implemented yet. Defaulting to horizontal grasp."
-            )
-            horizontal_grasp = True
-        else:  # auto
-            self.get_logger().warn(
-                "Auto grasp not implemented yet. Defaulting to horizontal grasp."
-            )
-            horizontal_grasp = True
+        # TODO: Add a timeout
 
         # Undo any transformation that were applied to the raw camera image before sending it
         # to the web app
@@ -409,42 +458,57 @@ class MoveToPregraspNode(Node):
         )
 
         # Get the goal end effector pose
-        goal_pose = self.get_goal_pose(x, y, z, pointcloud_msg.header)
+        ok, goal_pose = self.get_goal_pose(
+            x, y, z, pointcloud_msg.header, goal_handle.request
+        )
+        if not ok:
+            self.get_logger().error("Failed to get goal pose")
+            goal_handle.abort()
+            return MoveToPregrasp.Result()
+        self.get_logger().info(f"Goal Pose: {goal_pose}")
 
         # Keep moving the robot until the end effector is aligned with the clicked pixel
         rate = self.create_rate(10)
-        err = None
-        while err is None or not np.all(np.isclose(err, 0.0, atol=1e-2)):
+        joint_velocities = None
+        while joint_velocities is None or not np.all(
+            np.isclose(joint_velocities, 0.0, atol=5e-2)
+        ):
             ok, err = self.get_err(goal_pose)
             if not ok:
-                err = None
                 continue
             # TODO: test for cancellations and rclpy shutdown and such. And TF lookup errors.
+            # TODO: publish feedback
             self.get_logger().info(f"Error: {err}")
 
             # Get the current joint state
             with self.latest_joint_state_lock:
                 q = np_to_joint_array(self.latest_joint_state)
-            self.get_logger().info(f"Joint State: {list(zip(self.jacobian_joint_order, self.latest_joint_state))}")
+            self.get_logger().info(
+                f"Joint State: {list(zip(self.jacobian_joint_order, self.latest_joint_state))}"
+            )
 
             # Get the Jacobian matrix for the chain
             J = kdl.Jacobian(len(self.jacobian_joint_order))
             self.jacobian_solver.JntToJac(q, J)
             J = jacobian_to_np(J)
 
+            # Apply the mask
+            J[np.logical_not(self.cartesian_mask), :] = 0.0
+            J[:, np.logical_not(self.joint_mask)] = 0.0
+
             # Calculate the pseudo-inverse of the Jacobian
             J_pinv = np.linalg.pinv(J)
             self.get_logger().info(f"Jacobian Pseudo-Inverse: {J_pinv}")
-            
-            # Apply the mask
-            J_pinv[:, np.logical_not(self.cartesian_mask),] = 0.0
-            J_pinv[np.logical_not(self.joint_mask), :] = 0.0
-            self.get_logger().info(f"Jacobian Pseudo-Inverse (Masked): {J_pinv}")
 
             # Calculate the joint velocities
             joint_velocities = self.K @ (J_pinv @ err)
-            self.get_logger().info(f"Joint Velocities: {list(zip(self.jacobian_joint_order, joint_velocities))}")
-            
+            self.get_logger().info(
+                f"Joint Velocities: {list(zip(self.jacobian_joint_order, joint_velocities))}"
+            )
+
+            # Execute the velocities
+            self.execute_velocities(joint_velocities)
+
             rate.sleep()
 
         goal_handle.succeed()
@@ -483,7 +547,7 @@ class MoveToPregraspNode(Node):
             # Get the image dimensions. Note that (w, h) are dimensions of the raw image,
             # while (x, y) are coordinates on the transformed image.
             with self.latest_realsense_msgs_lock:
-                # An image is guarenteed to exist by the precondition of accepting the goal
+                # An image is guaranteed to exist by the precondition of accepting the goal
                 img_msg = self.latest_realsense_msgs[0]
             w, h = img_msg.width, img_msg.height
 
@@ -517,9 +581,7 @@ class MoveToPregraspNode(Node):
         Tuple[float, float, float]: The 3D coordinates of the clicked point.
         """
         # Get the ray from the camera origin to the clicked point
-        ray_dir = np.linalg.pinv(self.p)[:3, :] @ np.array(
-            [u, v, 1]
-        )
+        ray_dir = np.linalg.pinv(self.p)[:3, :] @ np.array([u, v, 1])
         ray_dir /= np.linalg.norm(ray_dir)
 
         # Find the point that is closest to the ray
@@ -533,8 +595,8 @@ class MoveToPregraspNode(Node):
         return p[closest_point_idx]
 
     def get_goal_pose(
-        self, x: float, y: float, z: float, header: Header
-    ) -> PoseStamped:
+        self, x: float, y: float, z: float, header: Header, request: MoveToPregrasp.Goal
+    ) -> Tuple[bool, PoseStamped]:
         """
         Get the goal end effector pose.
 
@@ -544,18 +606,123 @@ class MoveToPregraspNode(Node):
         y: The y-coordinate of the clicked point.
         z: The z-coordinate of the clicked point.
         header: The header of the pointcloud message.
+        request: The goal request.
 
         Returns
         -------
+        ok: Whether the goal pose was successfully calculated.
         PoseStamped: The goal end effector pose.
         """
-        goal_pose = PoseStamped()
-        goal_pose.header = header
-        goal_pose.pose.position = Point(x=x, y=y, z=z)
-        goal_pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
-        return goal_pose
+        stb = tf2_ros.StaticTransformBroadcaster(self)
 
-    def get_err(self, goal_pose: PoseStamped, use_mask: bool = True) -> Tuple[bool, npt.NDArray[np.float64]]:
+        # Get the goal position in camera frame
+        goal_position = PointStamped()
+        goal_position.header = header
+        goal_position.point = Point(x=x, y=y, z=z)
+
+        # Determine how the robot should orient its gripper to align with the clicked pixel
+        if (
+            request.pregrasp_direction
+            == MoveToPregrasp.Goal.PREGRASP_DIRECTION_HORIZONTAL
+        ):
+            horizontal_grasp = True
+        elif (
+            request.pregrasp_direction
+            == MoveToPregrasp.Goal.PREGRASP_DIRECTION_VERTICAL
+        ):
+            self.get_logger().warn(
+                "Vertical grasp not implemented yet. Defaulting to horizontal grasp."
+            )
+            horizontal_grasp = True
+        else:  # auto
+            self.get_logger().warn(
+                "Auto grasp not implemented yet. Defaulting to horizontal grasp."
+            )
+            horizontal_grasp = True
+
+        # Get the goal orientation in base frame
+        try:
+            self.get_logger().info(f"Pre1 {goal_position}")
+            goal_position_base = self.tf_buffer.transform(
+                goal_position, self.BASE_LINK, timeout=self.tf_timeout
+            )
+            self.get_logger().info(f"Post1 {goal_position_base}")
+            if horizontal_grasp:
+                # The goal orientation is (0,0,0,1) in base link frame, rotated
+                # so +x points towards the clicked point
+                theta = np.arctan2(
+                    goal_position_base.point.y, goal_position_base.point.x
+                )
+                self.get_logger().info(f"Theta: {theta}")
+                rot = quaternion_about_axis(theta, [0, 0, 1])
+                self.get_logger().info(f"Rot: {rot}")
+                # We have to treat the orientation as a pose since tf2_geometry_msgs.py
+                # doesn't register QuaternionStamped
+                goal_orientation = PoseStamped()
+                goal_orientation.header = header
+                goal_orientation.header.frame_id = self.BASE_LINK
+                goal_orientation.pose.orientation = Quaternion(
+                    x=rot[0], y=rot[1], z=rot[2], w=rot[3]
+                )
+        except (
+            tf2.ConnectivityException,
+            tf2.ExtrapolationException,
+            tf2.InvalidArgumentException,
+            tf2.LookupException,
+            tf2.TimeoutException,
+            tf2.TransformException,
+        ) as error:
+            self.get_logger().error(
+                f"Failed to transform goal pose to the odom frame: {error}"
+            )
+            return False, PoseStamped()
+
+        # Convert the goal pose to the odom frame so it stays fixed even as the robot moves
+        try:
+            goal_position_odom = self.tf_buffer.transform(
+                goal_position_base, self.ODOM_FRAME, timeout=self.tf_timeout
+            )
+            goal_orientation_odom = self.tf_buffer.transform(
+                goal_orientation, self.ODOM_FRAME, timeout=self.tf_timeout
+            )
+            goal_pose_odom = PoseStamped()
+            goal_pose_odom.header = goal_position_odom.header
+            goal_pose_odom.pose.position = goal_position_odom.point
+            goal_pose_odom.pose.orientation = goal_orientation_odom.pose.orientation
+        except (
+            tf2.ConnectivityException,
+            tf2.ExtrapolationException,
+            tf2.InvalidArgumentException,
+            tf2.LookupException,
+            tf2.TimeoutException,
+            tf2.TransformException,
+        ) as error:
+            self.get_logger().error(
+                f"Failed to transform goal pose to the odom frame: {error}"
+            )
+            return False, PoseStamped()
+
+        stb.sendTransform(
+            TransformStamped(
+                header=goal_pose_odom.header,
+                child_frame_id="goal",
+                transform=Transform(
+                    translation=Vector3(
+                        x=goal_pose_odom.pose.position.x,
+                        y=goal_pose_odom.pose.position.y,
+                        z=goal_pose_odom.pose.position.z,
+                    ),
+                    rotation=goal_pose_odom.pose.orientation,
+                ),
+            )
+        )
+
+        return True, goal_pose_odom
+
+    def get_err(
+        self,
+        goal_pose: PoseStamped,
+    ) -> Tuple[bool, npt.NDArray[np.float64]]:
         """
         Get the error between the goal pose and the current end effector pose.
         Returns the error in base link frame.
@@ -563,7 +730,6 @@ class MoveToPregraspNode(Node):
         Parameters
         ----------
         goal_pose: The goal end effector pose.
-        use_mask: Whether to apply the cartesian mask before outputting the error.
 
         Returns
         -------
@@ -571,12 +737,14 @@ class MoveToPregraspNode(Node):
         npt.NDArray[np.float64]: The error in base link frame. The error is a 6D vector
             consisting of the translation and rotation errors.
         """
-        timeout_secs = 0.5
 
         # Get the current end effector pose in base frame
         try:
             ee_transform = self.tf_buffer.lookup_transform(
-                self.BASE_LINK, self.END_EFFECTOR_LINK, Time(), timeout=Duration(seconds=timeout_secs),
+                self.BASE_LINK,
+                self.END_EFFECTOR_LINK,
+                Time(),
+                timeout=self.tf_timeout,
             )
         except (
             tf2.ConnectivityException,
@@ -591,8 +759,10 @@ class MoveToPregraspNode(Node):
 
         # Get the goal end effector pose in base frame
         try:
-            goal_pose.header.stamp = Time() # Get the most recent transform
-            goal_pose_base = self.tf_buffer.transform(goal_pose, self.BASE_LINK, timeout=Duration(seconds=timeout_secs))
+            goal_pose.header.stamp = Time()  # Get the most recent transform
+            goal_pose_base = self.tf_buffer.transform(
+                goal_pose, self.BASE_LINK, timeout=self.tf_timeout
+            )
         except (
             tf2.ConnectivityException,
             tf2.ExtrapolationException,
@@ -606,37 +776,167 @@ class MoveToPregraspNode(Node):
 
         # Get the error in base frame
         err = np.zeros(6)
-        err[:3] = np.array([
-            goal_pose_base.pose.position.x - ee_transform.transform.translation.x,
-            goal_pose_base.pose.position.y - ee_transform.transform.translation.y,
-            goal_pose_base.pose.position.z - ee_transform.transform.translation.z,
-        ])
-        ee_orientation = euler_from_quaternion([
-            ee_transform.transform.rotation.x,
-            ee_transform.transform.rotation.y,
-            ee_transform.transform.rotation.z,
-            ee_transform.transform.rotation.w,
-        
-        ])
-        goal_orientation = euler_from_quaternion([
-            goal_pose_base.pose.orientation.x,
-            goal_pose_base.pose.orientation.y,
-            goal_pose_base.pose.orientation.z,
-            goal_pose_base.pose.orientation.w,
-        ])
-        err[3:] = np.array([
-            goal_orientation[0] - ee_orientation[0], # roll
-            goal_orientation[1] - ee_orientation[1], # pitch
-            goal_orientation[2] - ee_orientation[2], # yaw
-        ])
-
-        # Apply the mask
-        if use_mask:
-            err = np.where(self.cartesian_mask, err, 0.0)
+        err[:3] = np.array(
+            [
+                goal_pose_base.pose.position.x - ee_transform.transform.translation.x,
+                goal_pose_base.pose.position.y - ee_transform.transform.translation.y,
+                goal_pose_base.pose.position.z - ee_transform.transform.translation.z,
+            ]
+        )
+        ee_orientation = euler_from_quaternion(
+            [
+                ee_transform.transform.rotation.x,
+                ee_transform.transform.rotation.y,
+                ee_transform.transform.rotation.z,
+                ee_transform.transform.rotation.w,
+            ]
+        )
+        goal_orientation = euler_from_quaternion(
+            [
+                goal_pose_base.pose.orientation.x,
+                goal_pose_base.pose.orientation.y,
+                goal_pose_base.pose.orientation.z,
+                goal_pose_base.pose.orientation.w,
+            ]
+        )
+        err[3:] = np.array(
+            [
+                goal_orientation[0] - ee_orientation[0],  # roll
+                goal_orientation[1] - ee_orientation[1],  # pitch
+                goal_orientation[2] - ee_orientation[2],  # yaw
+            ]
+        )
 
         return True, err
 
+    def execute_velocities(self, joint_velocities: npt.NDArray[np.float64]) -> None:
+        """
+        Execute the joint velocities.
 
+        Given the lack of a ROS2 velocity control interface for the arm, this function
+        currently sends velocity commands to the base, and sends position commands to
+        the arm as single-point "trajectories".
+
+        Parameters
+        ----------
+        joint_velocities: The joint velocities.
+        """
+        # How long to forward-project the velocity to convert to positions
+        duration = 1.0  # seconds
+
+        # Clip the velocities
+        clipped_velocities = self.clip_velocities(joint_velocities)
+
+        # Only send arm commands if the previous arm command has finished
+        send_arm_commands = (
+            self.arm_client_future is None
+        ) or self.arm_client_future.done()
+
+        # TODO: Add joint limits
+
+        # Get the current joint state
+        if send_arm_commands:
+            with self.latest_joint_state_lock:
+                latest_joint_state = self.latest_joint_state
+
+            # Create the action goal for the arm
+            arm_goal = FollowJointTrajectory.Goal()
+            arm_goal.trajectory.joint_names = [
+                joint_name
+                for i, joint_name in enumerate(self.jacobian_joint_order)
+                if (
+                    joint_name
+                    not in ["joint_base_translation", "joint_base_revolution"]
+                    and not np.isclose(joint_velocities[i], 0.0, atol=5e-2)
+                )
+            ]
+            arm_goal.trajectory.points = [JointTrajectoryPoint()]
+            arm_goal.trajectory.points[0].positions = []
+            arm_goal.trajectory.points[0].time_from_start = Duration(
+                seconds=duration
+            ).to_msg()
+            for joint_name in arm_goal.trajectory.joint_names:
+                pos = latest_joint_state[self.jacobian_joint_order.index(joint_name)]
+                vel = clipped_velocities[self.jacobian_joint_order.index(joint_name)]
+                arm_goal.trajectory.points[0].positions.append(pos + vel * duration)
+
+        # Create the base velocity message
+        base_vel = Twist()
+        base_vel.linear.x = clipped_velocities[
+            self.jacobian_joint_order.index("joint_base_translation")
+        ]
+        base_vel.angular.z = clipped_velocities[
+            self.jacobian_joint_order.index("joint_base_revolution")
+        ]
+
+        # Send the commands
+        if send_arm_commands:
+            self.arm_client_future = self.arm_client.send_goal_async(arm_goal)
+        self.base_vel_pub.publish(base_vel)
+
+    def clip_velocities(
+        self, joint_velocities: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
+        """
+        Clip the joint velocities to the robot's velocity limits.
+
+        Parameters
+        ----------
+        joint_velocities: The joint velocities.
+
+        Returns
+        -------
+        npt.NDArray[np.float64]: The clipped joint velocities.
+        """
+        speed = "fast"  # options: slow, default, fast, max
+
+        # Arm joints need to be treated separately since the max velocity is
+        # for the entire arm, not individual joints.
+        arm_joints = [
+            "joint_arm_l3",
+            "joint_arm_l2",
+            "joint_arm_l1",
+            "joint_arm_l0",
+        ]
+        arm_i = [
+            self.jacobian_joint_order.index(joint_name) for joint_name in arm_joints
+        ]
+
+        # Clip the velocities
+        clipped_vel = np.zeros(joint_velocities.shape, dtype=np.float64)
+        for i, joint_name in enumerate(self.jacobian_joint_order):
+            # Get the max velocity
+            if joint_name == "joint_base_translation":
+                max_vel = self.robot_params["base"]["motion"][speed]["vel_m"]
+            elif joint_name == "joint_base_revolution":
+                max_vel = 0.5  # rad/s
+            elif joint_name == "joint_lift":
+                max_vel = self.robot_params["lift"]["motion"][speed]["vel_m"]
+            elif joint_name in arm_joints:
+                # Clip arm joints separately, as then have to be treated as a vector
+                continue
+            elif joint_name == "joint_wrist_yaw":
+                max_vel = self.robot_params["wrist_yaw"]["motion"][speed]["vel"]
+            elif joint_name == "joint_wrist_pitch":
+                max_vel = self.robot_params["wrist_pitch"]["motion"][speed]["vel"]
+            elif joint_name == "joint_wrist_roll":
+                max_vel = self.robot_params["wrist_roll"]["motion"][speed]["vel"]
+            else:
+                self.get_logger().warn(f"Unknown joint name: {joint_name}")
+                max_vel = 0.0
+
+            # Clip the velocity
+            vel = joint_velocities[i]
+            clipped_vel[i] = np.clip(vel, -max_vel, max_vel)
+        # Clip arm joints separately, as then have to be treated as a vector
+        arm_joints_vel = np.array(joint_velocities[arm_i])
+        arm_speed = np.linalg.norm(arm_joints_vel, ord=1)
+        arm_max_vel = self.robot_params["arm"]["motion"][speed]["vel_m"]
+        if arm_speed > arm_max_vel:
+            arm_joints_vel = arm_joints_vel / arm_speed * arm_max_vel
+        clipped_vel[arm_i] = arm_joints_vel
+
+        return clipped_vel
 
 
 def main(args: Optional[List[str]] = None):

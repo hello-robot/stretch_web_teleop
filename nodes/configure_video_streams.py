@@ -65,6 +65,9 @@ class ConfigureVideoStreams(Node):
         self.expanded_gripper_camera_rgb_image = None
         self.cv_bridge = CvBridge()
 
+        # Stores the camera projection matrix
+        self.P = None
+
         # Compressed Image publishers
         self.publisher_realsense_cmp = self.create_publisher(
             CompressedImage, "/camera/color/image_raw/rotated/compressed", 15
@@ -165,6 +168,12 @@ class ConfigureVideoStreams(Node):
 
     def pc_callback(self, msg, img):
         # Only keep points that are within 0.01m to 1.5m from the camera
+        if self.P is None:
+            self.get_logger().warn(
+                "Camera projection matrix is not available. Skipping point cloud processing."
+            )
+            return img
+
         pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
         passthrough = pcl_cloud.make_passthrough_filter()
