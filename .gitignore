@@ -33,3 +33,6 @@ mkcert*
 dist/*
 
 outcomes/*
+
+# Compiled Python
+*/__pycache__

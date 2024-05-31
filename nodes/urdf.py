@@ -1,6 +1,6 @@
-# NOTE: This file was copied from 
+# NOTE: This file was copied from
 # https://github.com/ros/kdl_parser/blob/9ee36a0/kdl_parser_py/kdl_parser_py/urdf.py
-# to account for the face that kdl_parser_py has not yet been ported to 
+# to account for the face that kdl_parser_py has not yet been ported to
 # ROS 2 (https://github.com/ros/kdl_parser/pull/55).
 # The only other change is formatting.
 
