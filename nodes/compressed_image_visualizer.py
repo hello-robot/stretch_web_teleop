@@ -72,6 +72,8 @@ class CompressedImageVisualizer(Node):
                 cv2.waitKey(1)
             rate.sleep()
 
+        cv2.destroyAllWindows()
+
 
 def main(args=None):
     """
