@@ -264,7 +264,8 @@ function handleMessage(message: WebRTCMessage) {
     case "getHasBetaTeleopKit":
       robot.getHasBetaTeleopKit();
     case "moveToPregrasp":
-      robot.executeMoveToPregraspGoal(message.x, message.y);
+      console.log("moveToPregrasp", message.scaled_x, message.scaled_y);
+      robot.executeMoveToPregraspGoal(message.scaled_x, message.scaled_y);
       break;
     case "stopMoveToPregrasp":
       robot.stopMoveToPregraspClient();

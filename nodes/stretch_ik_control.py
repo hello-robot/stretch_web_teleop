@@ -1,12 +1,12 @@
 """
-This module contains an implementation of inverse Jacobian control
+This module contains an implementation of FK, IK, and inverse jacobian control
 for the Stretch robot. In order to include base rotation, this
 controller adds a fake revolute joint between the the base and mast.
 This approach is inspired from:
 https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
 
 Note that because the ROS2 interface currently only provides velocity control
-for the base and position control for the arm, this module:
+for the base and position control for the arm, the inverse jacobian control:
   (a) Moves the base separately from the arm, as the drivers do not allow the
       position and velocity hardware interfaces to be claimed simultaneously.
   (b) Forward-projects velocity commands to the arm into position commands.
@@ -15,7 +15,7 @@ for the base and position control for the arm, this module:
 import asyncio
 import threading
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 # Third-Party Imports
 import numpy as np
@@ -32,11 +32,16 @@ from rclpy.action import ActionClient
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.task import Future
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Trigger
 from stretch_body.robot_params import RobotParams
 from tf2_geometry_msgs import PoseStamped
-from tf_transformations import euler_from_quaternion
+from tf_transformations import (
+    euler_from_quaternion,
+    quaternion_inverse,
+    quaternion_multiply,
+)
 from trajectory_msgs.msg import JointTrajectoryPoint
 from urdf import treeFromString
 
@@ -78,7 +83,7 @@ class TerminationCriteria(Enum):
     # transform.
 
 
-class InverseJacobianController:
+class StretchIKControl:
     """
     This class implements an inverse Jacobian controller for the Stretch robot.
     """
@@ -106,6 +111,7 @@ class InverseJacobianController:
     JOINT_WRIST_YAW = "joint_wrist_yaw"
     JOINT_WRIST_PITCH = "joint_wrist_pitch"
     JOINT_WRIST_ROLL = "joint_wrist_roll"
+    JOINT_GRIPPER = "joint_gripper_finger_left"
 
     def __init__(
         self,
@@ -175,8 +181,8 @@ class InverseJacobianController:
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-        # Initialize the control mode
-        self.control_mode = None
+        # # Initialize the control mode
+        # self.control_mode = None
 
         # Create a publisher and action client to command robot motion
         self.base_vel_pub = self.node.create_publisher(
@@ -215,11 +221,11 @@ class InverseJacobianController:
                 names=["robot_description"],
             )
         )
-        self.node.get_logger().info("Received the robot URDF string.")
         urdf_string = response.values[0].string_value
         if len(urdf_string) == 0:
             self.node.get_logger().error("Failed to get robot URDF.")
             return False
+        self.node.get_logger().info("Received the robot URDF string.")
 
         # Load the URDF
         ok, robot = treeFromString(urdf_string)
@@ -269,21 +275,6 @@ class InverseJacobianController:
         chain.addChain(orig_chain)
         self.chain = chain
 
-        # # TODO: Remove!
-        # old_jacobian_joint_order = []
-        # for i in range(self.chain.getNrOfSegments()):
-        #     joint = self.chain.getSegment(i).getJoint()
-        #     if joint.getType() != kdl.Joint.Fixed:
-        #         old_jacobian_joint_order.append(joint.getName())
-        # self.chain = kdl_chain_fix_joints(
-        #     self.chain,
-        #     [
-        #         joint_name
-        #         for joint_name in old_jacobian_joint_order
-        #         if joint_name not in self.articulated_joints
-        #     ],
-        # )
-
         # Get the joint order
         self.jacobian_joint_order = []
         for i in range(self.chain.getNrOfSegments()):
@@ -295,8 +286,13 @@ class InverseJacobianController:
             for joint_name in self.JOINTS_ARM
         ]
 
-        # Get the Jacobian solver
+        # Get the Jacobian solver and FK/IK solvers
         self.jacobian_solver = kdl.ChainJntToJacSolver(self.chain)
+        self.fk_solver = kdl.ChainFkSolverPos_recursive(self.chain)
+        self.ik_vel_solver = kdl.ChainIkSolverVel_pinv(self.chain)
+        self.ik_solver = kdl.ChainIkSolverPos_NR(
+            self.chain, self.fk_solver, self.ik_vel_solver
+        )
 
         # Store the control gains
         # NOTE: The CMU implementation had controller gains of 0.2 on the
@@ -336,40 +332,62 @@ class InverseJacobianController:
         if not response.success:
             self.node.get_logger().error("Failed to get joint limits.")
             return False
+        self.node.get_logger().info("Received the joint limits.")
 
         # Get the robot parameters
         robot_params = RobotParams().get_params()[1]
         speed_profile_str = speed_profile.value
+        speed_profile_slow_str = SpeedProfile.SLOW.value
         self.joint_pos_lim: Dict[str, Tuple[float, float]] = {}
-        self.joint_vel_lim: Dict[str, Tuple[float, float]] = {}
+        self.joint_vel_abs_lim: Dict[str, Tuple[float, float]] = {}
 
         # Get the velocity limits from the robot's parameters
         for i, joint_name in enumerate(self.jacobian_joint_order):
             # Get the max velocity
             if joint_name == self.JOINT_BASE_TRANSLATION:
                 max_vel = robot_params["base"]["motion"][speed_profile_str]["vel_m"]
+                min_vel = robot_params["base"]["motion"][speed_profile_slow_str][
+                    "vel_m"
+                ]
             elif joint_name == self.JOINT_BASE_REVOLUTION:
                 # From https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
                 max_vel = 0.5  # rad/s
+                min_vel = 0.05  # rad/s
             elif joint_name == self.JOINT_ARM_LIFT:
                 max_vel = robot_params["lift"]["motion"][speed_profile_str]["vel_m"]
+                min_vel = robot_params["lift"]["motion"][speed_profile_slow_str][
+                    "vel_m"
+                ]
             elif joint_name in self.JOINTS_ARM:
                 continue
             elif joint_name == self.JOINT_WRIST_YAW:
                 max_vel = robot_params["wrist_yaw"]["motion"][speed_profile_str]["vel"]
+                min_vel = robot_params["wrist_yaw"]["motion"][speed_profile_slow_str][
+                    "vel"
+                ]
             elif joint_name == self.JOINT_WRIST_PITCH:
                 max_vel = robot_params["wrist_pitch"]["motion"][speed_profile_str][
                     "vel"
                 ]
+                min_vel = robot_params["wrist_pitch"]["motion"][speed_profile_slow_str][
+                    "vel"
+                ]
             elif joint_name == self.JOINT_WRIST_ROLL:
                 max_vel = robot_params["wrist_roll"]["motion"][speed_profile_str]["vel"]
+                min_vel = robot_params["wrist_roll"]["motion"][speed_profile_slow_str][
+                    "vel"
+                ]
             else:
                 self.node.get_logger().warn(f"Unknown joint name: {joint_name}")
                 max_vel = 0.0
-            self.joint_vel_lim[joint_name] = (-max_vel, max_vel)
+                min_vel = 0.0
+            self.joint_vel_abs_lim[joint_name] = (min_vel, max_vel)
         combined_arm_max_vel = robot_params["arm"]["motion"][speed_profile_str]["vel_m"]
-        self.joint_vel_lim[self.JOINT_COMBINED_ARM] = (
-            -combined_arm_max_vel,
+        combined_arm_min_vel = robot_params["arm"]["motion"][speed_profile_slow_str][
+            "vel_m"
+        ]
+        self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM] = (
+            combined_arm_min_vel,
             combined_arm_max_vel,
         )
 
@@ -401,12 +419,15 @@ class InverseJacobianController:
         msg: The joint state message.
         """
         with self.latest_joint_state_lock:
-            self.latest_joint_state = [
-                msg.position[msg.name.index(joint_name)]
-                if joint_name in msg.name
-                else 0.0
-                for joint_name in self.jacobian_joint_order
-            ]
+            # self.latest_joint_state = [
+            #     msg.position[msg.name.index(joint_name)]
+            #     if joint_name in msg.name
+            #     else 0.0
+            #     for joint_name in self.jacobian_joint_order
+            # ]
+            self.latest_joint_state = {
+                msg.name[i]: msg.position[i] for i in range(len(msg.name))
+            }
 
     def __joint_limits_cb(self, msg: JointState) -> None:
         """
@@ -426,6 +447,98 @@ class InverseJacobianController:
                 if joint_name in self.jacobian_joint_order
             }
 
+    async def move_to_joint_positions(
+        self,
+        joint_positions: Dict[str, float],
+        rate_hz: float = 10.0,
+        timeout_secs: float = 10.0,
+        check_cancel: Callable[[], bool] = lambda: False,
+    ) -> bool:
+        """
+        Move the arm joints to a specific position. This function is closed-loop, and
+        terminates once the joint posiiton has been reached.
+
+        Parameters
+        ----------
+        joint_positions: The target joint positions.
+        rate_hz: The rate in Hz at which to control the robot.
+        timeout_secs: The timeout in seconds.
+        check_cancel: A function that returns True if the action should be cancelled.
+
+        Returns
+        -------
+        bool: True if the target joint positions were reached, else False.
+        """
+        # Check if the controller is initialized
+        if not self.initialized:
+            self.node.get_logger().error("Controller is not initialized.")
+            return False
+
+        # Start the timer
+        start_time = self.node.get_clock().now()
+        timeout = Duration(seconds=timeout_secs)
+
+        # Convert to the appropriate control mode
+        self.__set_control_mode(
+            ControlMode.POSITION,
+            timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
+        )
+
+        # The duration of each trajectory command
+        duration = 1.0  # seconds
+
+        # Command motion until the termination criteria is reached
+        rate = self.node.create_rate(rate_hz)
+        future = None
+        while not check_cancel():
+            # Leave early if ROS shuts down or timeout is reached
+            if not rclpy.ok() or remaining_time(
+                self.node.get_clock().now(), start_time, timeout
+            ) <= Duration(seconds=0.0):
+                return False
+
+            # Command the robot to move to the joint positions
+            if future is None:
+                # Get the current joint state
+                with self.latest_joint_state_lock:
+                    latest_joint_state = self.latest_joint_state
+
+                # Remove joints that have reached their set point
+                joint_positions_cmd = {}
+                for joint_name, joint_position in joint_positions.items():
+                    if joint_name in latest_joint_state:
+                        joint_err = joint_position - latest_joint_state[joint_name]
+                        tolerance = 0.05
+                        if joint_name in self.joint_pos_lim:
+                            min_pos, max_pos = self.joint_pos_lim[joint_name]
+                            tolerance = (max_pos - min_pos) / 20.0
+                        if abs(joint_err) > tolerance:
+                            joint_positions_cmd[joint_name] = joint_position
+
+                # If no joints to move, break
+                if len(joint_positions_cmd) == 0:
+                    return True
+
+                # Command the robot to move to the joint positions
+                future = self.__command_move_to_joint_position(
+                    joint_positions_cmd, duration
+                )
+            # Wait for the previous command to finish
+            elif future.done():
+                try:
+                    ok = future.result()
+                    if not ok:
+                        raise Exception("Failed to move to joint positions")
+                except Exception as e:
+                    self.get_logger().error(f"{e}")
+                    return False
+                future = None
+
+            # Sleep
+            rate.sleep()
+
+        return not check_cancel()
+
     async def move_to_end_effector_pose(
         self,
         goal: PoseStamped,
@@ -434,9 +547,12 @@ class InverseJacobianController:
         additional_joint_positions: Dict[str, float] = {},
         rate_hz: float = 10.0,
         timeout_secs: float = 10.0,
+        check_cancel: Callable[[], bool] = lambda: False,
+        err_callback: Optional[Callable[[npt.NDArray[np.float64]], None]] = None,
     ) -> bool:
         """
-        Move the end-effector to the goal pose.
+        Move the end-effector to the goal pose. This function uses closed-loop inverse
+        Jacobian control to determine target velocities for the robot's joints.
 
         Parameters
         ----------
@@ -447,6 +563,9 @@ class InverseJacobianController:
             articulated joints when commanding arm motion.
         rate_hz: The rate in Hz at which to control the robot.
         timeout_secs: The timeout in seconds.
+        check_cancel: A function that returns True if the action should be cancelled.
+        err_callback: A callback that is called with the error between the end-effector pose
+            and the goal pose.
 
         Returns
         -------
@@ -525,7 +644,9 @@ class InverseJacobianController:
         rate = self.node.create_rate(rate_hz)
         err = None
         vel = None
-        while not self.__reached_termination(termination, err, vel):
+        while not check_cancel() and not self.__reached_termination(
+            termination, err, vel
+        ):
             # Leave early if ROS shuts down or timeout is reached
             if not rclpy.ok() or remaining_time(
                 self.node.get_clock().now(), start_time, timeout
@@ -533,33 +654,31 @@ class InverseJacobianController:
                 return False
 
             # Get the error between the end-effector pose and the goal pose
-            ok, err = self.__get_err(
+            ok, err = self.get_err(
                 goal_odom,
                 remaining_time(self.node.get_clock().now(), start_time, timeout),
             )
             if not ok:
                 return False
-            self.node.get_logger().info(f"Error: {err}")
+            if err_callback is not None:
+                err_callback(err)
+            self.node.get_logger().info(f" Error: {err}")
 
             # Get the current joint state
-            with self.latest_joint_state_lock:
-                q = np_to_joint_array(self.latest_joint_state)
-            self.node.get_logger().info(
-                f"Joint State: {list(zip(self.jacobian_joint_order, self.latest_joint_state))}"
-            )
+            q = self.__get_kdl_joint_array()
 
             # Get the Jacobian matrix for the chain
             J = kdl.Jacobian(len(self.jacobian_joint_order))
             self.jacobian_solver.JntToJac(q, J)
             J = jacobian_to_np(J)
-            self.node.get_logger().info(f"Jacobian: {J}")
+            self.node.get_logger().info(f" Jacobian: {J}")
 
             # Mask the Jacobian matrix to only include the articulated joints
             J[:, non_articulated_joints_mask] = 0.0
 
             # Calculate the pseudo-inverse of the Jacobian
             J_pinv = np.linalg.pinv(J, rcond=1e-6)
-            self.node.get_logger().info(f"Jacobian Pseudo-Inverse: {J_pinv}")
+            self.node.get_logger().info(f" Jacobian Pseudo-Inverse: {J_pinv}")
 
             # Re-mask the pseudo-inverse to address any numerical issues
             J_pinv[non_articulated_joints_mask, :] = 0.0
@@ -567,21 +686,18 @@ class InverseJacobianController:
             # Calculate the joint velocities
             vel = self.K @ J_pinv @ err
             self.node.get_logger().info(
-                f"Joint Velocities: {list(zip(self.jacobian_joint_order, vel))}"
+                f" Joint Velocities: {list(zip(self.jacobian_joint_order, vel))}"
             )
 
             # Execute the velocities
             self.__execute_velocities(
-                vel, move_base, move_arm, additional_joint_positions
+                vel, move_base, move_arm, additional_joint_positions, rate_hz
             )
 
-            # # Sleep. Note we can't use ROS's rate.sleep as that blocks. However, as a result,
-            # # It is likely that our control rate will actually be lower than rate_hz.
-            # await asyncio.sleep(1.0 / rate_hz)
-            # TODO: Verify this yields control back to the action correctly for sending feedback!
+            # Sleep
             rate.sleep()
 
-        return True
+        return not check_cancel()
 
     def __set_control_mode(self, control_mode: ControlMode, timeout: Duration) -> bool:
         """
@@ -596,9 +712,9 @@ class InverseJacobianController:
         -------
         bool: True if the control mode was successfully set.
         """
-        # Check if the control mode is already set
-        if control_mode == self.control_mode:
-            return True
+        # # Check if the control mode is already set
+        # if control_mode == self.control_mode:
+        #     return True
         # Get the appropriate client
         if control_mode == ControlMode.POSITION:
             client = self.switch_to_position_client
@@ -615,8 +731,8 @@ class InverseJacobianController:
                 f"Failed to switch to {control_mode.value} mode."
             )
             return False
-        # Update the control mode
-        self.control_mode = control_mode
+        # # Update the control mode
+        # self.control_mode = control_mode
         return True
 
     def __reached_termination(
@@ -639,15 +755,24 @@ class InverseJacobianController:
         bool: True if the termination criteria has been reached.
         """
 
-        # TODO: Add different tolerances per-joint depending on the joint limits.
-        # This is because for some small velocity commands, some joints will be able
-        # to execute them but others will not.
-
         if err is None or vel is None:
             return False  # Always allow the first iteration
         if termination == TerminationCriteria.ZERO_VEL:
-            retval = np.allclose(vel, 0.0, atol=1.0e-2)
-            self.node.get_logger().info(f"Reached Termination {retval}")
+            # We have reached termination when every joint's commanded
+            # velocity is lower than their slowest speed (because after
+            # that point, they will no longer move).
+            retval = True
+            for i, joint_name in enumerate(self.jacobian_joint_order):
+                if joint_name in self.JOINTS_ARM:
+                    continue
+                abs_vel = np.abs(vel[i])
+                if abs_vel > self.joint_vel_abs_lim[joint_name][0]:
+                    retval = False
+                    break
+            arm_vel = sum(vel[self.JOINTS_ARM_I])
+            if arm_vel > self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM][0]:
+                retval = False
+            self.node.get_logger().info(f" Reached Termination {retval}")
             return retval
         elif termination == TerminationCriteria.ZERO_ERR:
             return np.allclose(err, 0.0, atol=1.0e-2)
@@ -655,7 +780,7 @@ class InverseJacobianController:
             self.node.get_logger().error(f"Unknown termination criteria: {termination}")
             return True  # auto-terminate
 
-    def __get_err(
+    def get_err(
         self,
         goal: PoseStamped,
         timeout: Duration,
@@ -675,15 +800,18 @@ class InverseJacobianController:
         npt.NDArray[np.float64]: The error in base link frame. The error is a 6D vector
             consisting of the translation and rotation errors.
         """
+        # Start the timer
+        start_time = self.node.get_clock().now()
 
         # Get the current end effector pose in base frame
-        # TODO: Technically, the timeout here is double. Fix that!
         try:
             ee_transform = self.tf_buffer.lookup_transform(
                 self.FRAME_BASE_LINK,
                 self.FRAME_END_EFFECTOR_LINK,
                 Time(),
-                timeout=timeout,
+                timeout=remaining_time(
+                    self.node.get_clock().now(), start_time, timeout
+                ),
             )
         except (
             tf2.ConnectivityException,
@@ -700,7 +828,11 @@ class InverseJacobianController:
         try:
             goal.header.stamp = Time()  # Get the most recent transform
             goal_base = self.tf_buffer.transform(
-                goal, self.FRAME_BASE_LINK, timeout=timeout
+                goal,
+                self.FRAME_BASE_LINK,
+                timeout=remaining_time(
+                    self.node.get_clock().now(), start_time, timeout
+                ),
             )
         except (
             tf2.ConnectivityException,
@@ -722,31 +854,26 @@ class InverseJacobianController:
                 goal_base.pose.position.z - ee_transform.transform.translation.z,
             ]
         )
-        ee_orientation = euler_from_quaternion(
-            [
-                ee_transform.transform.rotation.x,
-                ee_transform.transform.rotation.y,
-                ee_transform.transform.rotation.z,
-                ee_transform.transform.rotation.w,
-            ],
+        ee_quaternion = [
+            ee_transform.transform.rotation.x,
+            ee_transform.transform.rotation.y,
+            ee_transform.transform.rotation.z,
+            ee_transform.transform.rotation.w,
+        ]
+        goal_quaternion = [
+            goal_base.pose.orientation.x,
+            goal_base.pose.orientation.y,
+            goal_base.pose.orientation.z,
+            goal_base.pose.orientation.w,
+        ]
+        err_quaternion = quaternion_multiply(
+            goal_quaternion, quaternion_inverse(ee_quaternion)
+        )
+        yaw, pitch, roll = euler_from_quaternion(
+            err_quaternion,
             axes="rzyx",  # https://wiki.ros.org/geometry2/RotationMethods#Fixed_Axis_vs_Euler_Angles
         )
-        goal_orientation = euler_from_quaternion(
-            [
-                goal_base.pose.orientation.x,
-                goal_base.pose.orientation.y,
-                goal_base.pose.orientation.z,
-                goal_base.pose.orientation.w,
-            ],
-            axes="rzyx",  # https://wiki.ros.org/geometry2/RotationMethods#Fixed_Axis_vs_Euler_Angles
-        )
-        err[3:] = np.array(
-            [
-                goal_orientation[2] - ee_orientation[2],  # roll
-                goal_orientation[1] - ee_orientation[1],  # pitch
-                goal_orientation[0] - ee_orientation[0],  # yaw
-            ]
-        )
+        err[3:] = np.array([roll, pitch, yaw])
 
         return True, err
 
@@ -756,6 +883,7 @@ class InverseJacobianController:
         move_base: bool,
         move_arm: bool,
         additional_joint_positions: Dict[str, float] = {},
+        rate_hz: float = 10.0,
     ) -> bool:
         """
         Send the velocities to the ROS2 controllers.
@@ -767,6 +895,7 @@ class InverseJacobianController:
         move_arm: Whether to move the arm.
         additional_joint_positions: The joint names and positions here will be appended to the
             articulated joints when commanding arm motion.
+        rate_hz: The rate in Hz at which to control the robot.
 
         Returns
         -------
@@ -788,19 +917,31 @@ class InverseJacobianController:
             return True
 
         # Clip the velocities
+        zero_thresh = 1.0e-3
         clipped_velocities = np.zeros(len(self.jacobian_joint_order), dtype=np.float64)
         for i, vel in enumerate(joint_velocities):
             joint_name = self.jacobian_joint_order[i]
             if i not in self.JOINTS_ARM_I:
-                min_vel, max_vel = self.joint_vel_lim[joint_name]
-                clipped_velocities[i] = np.clip(vel, min_vel, max_vel)
+                min_vel, max_vel = self.joint_vel_abs_lim[joint_name]
+                if vel >= zero_thresh:
+                    clipped_velocities[i] = np.clip(vel, min_vel, max_vel)
+                elif vel <= -zero_thresh:
+                    clipped_velocities[i] = np.clip(vel, -max_vel, -min_vel)
         arm_joints_vel = joint_velocities[self.JOINTS_ARM_I]
         arm_vel = sum(joint_velocities[self.JOINTS_ARM_I])
-        arm_min_vel, arm_max_vel = self.joint_vel_lim[self.JOINT_COMBINED_ARM]
-        clipped_arm_vel = np.clip(arm_vel, arm_min_vel, arm_max_vel)
-        clipped_velocities[self.JOINTS_ARM_I] = (
-            arm_joints_vel / arm_vel * clipped_arm_vel
-        )
+        if np.isclose(arm_vel, 0.0, atol=zero_thresh):
+            clipped_velocities[self.JOINTS_ARM_I] = 0.0
+        else:
+            arm_min_vel, arm_max_vel = self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM]
+            if arm_vel >= zero_thresh:
+                clipped_arm_vel = np.clip(arm_vel, arm_min_vel, arm_max_vel)
+            elif arm_vel <= -zero_thresh:
+                clipped_arm_vel = np.clip(arm_vel, -arm_max_vel, -arm_min_vel)
+            else:
+                clipped_arm_vel = 0.0
+            clipped_velocities[self.JOINTS_ARM_I] = (
+                arm_joints_vel / arm_vel * clipped_arm_vel
+            )
 
         # Send base commands
         if move_base:
@@ -815,36 +956,144 @@ class InverseJacobianController:
             return True
 
         # Send arm commands
-        duration = 0.5  # seconds, how long to forward-project velocities for
+        duration = 5.0 / rate_hz  # seconds, how long to forward-project velocities for
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
-        arm_goal = FollowJointTrajectory.Goal()
-        arm_goal.trajectory.joint_names = [
-            joint_name
-            for i, joint_name in enumerate(self.jacobian_joint_order)
+        joint_positions = {}
+        for i, joint_name in enumerate(self.jacobian_joint_order):
             if (
                 joint_name not in self.JOINTS_BASE
-                and not np.isclose(clipped_velocities[i], 0.0, atol=5e-2)
-            )
-        ]
-        arm_goal.trajectory.points = [JointTrajectoryPoint()]
-        arm_goal.trajectory.points[0].positions = []
-        arm_goal.trajectory.points[0].time_from_start = Duration(
-            seconds=duration
-        ).to_msg()
-        for joint_name in arm_goal.trajectory.joint_names:
-            pos = latest_joint_state[self.jacobian_joint_order.index(joint_name)]
-            vel = clipped_velocities[self.jacobian_joint_order.index(joint_name)]
-            arm_goal.trajectory.points[0].positions.append(pos + vel * duration)
-        # Add the additional joint positions
-        arm_goal.trajectory.joint_names.extend(additional_joint_positions.keys())
-        arm_goal.trajectory.points[0].positions.extend(
-            additional_joint_positions.values()
+                and joint_name in latest_joint_state
+                and not np.isclose(clipped_velocities[i], 0.0, atol=zero_thresh)
+            ):
+                pos = latest_joint_state[joint_name]
+                vel = clipped_velocities[i]
+                joint_positions[joint_name] = pos + vel * duration
+        joint_positions.update(additional_joint_positions)
+        self.arm_client_future = self.__command_move_to_joint_position(
+            joint_positions, duration
         )
-        # Send the command
-        self.arm_client_future = self.arm_client.send_goal_async(arm_goal)
 
         return True
+
+    def __command_move_to_joint_position(
+        self, joint_positions: Dict[str, float], duration_sec: float
+    ) -> Future:
+        """
+        Commands the robot arm to move to the specified joint positions.
+
+        Parameters
+        ----------
+        joint_positions: The joint positions.
+        duration_sec: The duration in seconds to reach the joint positions.
+
+        Returns
+        -------
+        Future: The future object.
+        """
+        # Limit the joint positions
+        for joint_name, (min_pos, max_pos) in self.joint_pos_lim.items():
+            if joint_name in joint_positions:
+                joint_positions[joint_name] = np.clip(
+                    joint_positions[joint_name], min_pos, max_pos
+                )
+        # TODO: Do it for arm length as well!
+
+        # Create the goal
+        arm_goal = FollowJointTrajectory.Goal()
+        arm_goal.trajectory.joint_names = list(joint_positions.keys())
+        arm_goal.trajectory.points = [JointTrajectoryPoint()]
+        arm_goal.trajectory.points[0].positions = list(joint_positions.values())
+        arm_goal.trajectory.points[0].time_from_start = Duration(
+            seconds=duration_sec,
+        ).to_msg()
+        self.node.get_logger().info(f"Commanding arm to {arm_goal}")
+        return self.arm_client.send_goal_async(arm_goal)
+
+    def solve_ik(
+        goal: npt.NDArray[np.float64], joint_position_overrides: Dict[str, float] = {}
+    ) -> Tuple[bool, Dict[str, float]]:
+        """
+        Solve the inverse kinematics problem.
+
+        TODO: TEST!!!
+
+        Parameters
+        ----------
+        goal: The goal pose. (x, y, z, roll, pitch, yaw)
+        joint_position_overrides: joint positions to use. Any joint positions
+            not in here will use the latest joint state.
+
+        Returns
+        -------
+        Dict[str, float]: The joint positions.
+        """
+        q_in = self.__get_kdl_joint_array(joint_position_overrides)
+        q_out = kdl.JntArray(len(self.jacobian_joint_order))
+        ok = self.ik_solver.CartToJnt(q_in, goal, q_out)
+        if ok == 0:  # E_NOERROR
+            out_positions = {
+                joint_name: q_out[i]
+                for i, joint_name in enumerate(self.jacobian_joint_order)
+            }
+            return True, out_positions
+        else:
+            return False, {}
+
+    def solve_fk(
+        joint_position_overrides: Dict[str, float] = {},
+    ) -> Tuple[bool, npt.NDArray[np.float64]]:
+        """
+        Solve the forward kinematics problem.
+
+        TODO: IMPLEMENT AND TEST!!!
+
+        Parameters
+        ----------
+        joint_position_overrides: joint positions to use. Any joint positions
+            not in here will use the latest joint state.
+
+        Returns
+        -------
+        npt.NDArray[np.float64]: The end effector pose, (x, y, z, roll, pitch, yaw).
+        """
+        p_out = kdl.Frame()
+        ok = self.fk_solver.JntToCart()
+        pass
+
+    def __get_kdl_joint_array(
+        self, joint_position_overrides: Dict[str, float] = {}
+    ) -> kdl.JntArray:
+        """
+        Get a KDL joint array from the latest joint state and the joint position overrides.
+
+        Parameters
+        ----------
+        joint_position_overrides: The joint position overrides.
+
+        Returns
+        -------
+        kdl.JntArray: The KDL joint array.
+        """
+        with self.latest_joint_state_lock:
+            latest_joint_state = self.latest_joint_state
+        joint_positions = {}
+        for joint_name in self.jacobian_joint_order:
+            if joint_name in joint_position_overrides:
+                joint_positions[joint_name] = joint_position_overrides[joint_name]
+            elif joint_name in latest_joint_state:
+                joint_positions[joint_name] = latest_joint_state[joint_name]
+            else:
+                # Set dummy joints to 0.0
+                joint_positions[joint_name] = 0.0
+        return np_to_joint_array(
+            np.array(
+                [
+                    latest_joint_state[name] if name in latest_joint_state else 0.0
+                    for name in self.jacobian_joint_order
+                ]
+            )
+        )
 
     @property
     def articulable_joints(self) -> List[str]:

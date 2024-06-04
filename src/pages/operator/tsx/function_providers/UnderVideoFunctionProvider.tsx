@@ -103,8 +103,8 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         };
       case UnderVideoButton.MoveToPregrasp:
         return {
-          onClick: (x: number, y: number) => {
-            FunctionProvider.remoteRobot?.moveToPregrasp(x, y);
+          onClick: (scaled_x: number, scaled_y: number) => {
+            FunctionProvider.remoteRobot?.moveToPregrasp(scaled_x, scaled_y);
           },
         };
       case UnderVideoButton.CancelMoveToPregrasp:

@@ -136,7 +136,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
     // Get the coordinates of the click within the camera view
     const { clientX, clientY } = event;
-    const { left, top } = videoRef.current!.getBoundingClientRect();
+    const { left, top, right, bottom } =
+      videoRef.current!.getBoundingClientRect();
     const x = clientX - left;
     const y = clientY - top;
 
@@ -165,9 +166,12 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // TODO: Make this be controlled by a checkbox/button below the camera view.
     // TODO: add a way to stop it!
     else if (props.definition.id === CameraViewId.realsense && !overlay) {
+      let scaled_x = x / (right - left);
+      let scaled_y = y / (bottom - top);
+      console.log("scaled x", scaled_x, "scaled y", scaled_y);
       underVideoFunctionProvider.provideFunctions(
         UnderVideoButton.MoveToPregrasp,
-      ).onClick!(x, y);
+      ).onClick!(scaled_x, scaled_y);
     }
   }
 

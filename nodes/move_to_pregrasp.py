@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 # Standard Imports
+from __future__ import annotations  # Required for type hinting MoveToPregraspState.next
+
 import sys
 import threading
 from enum import Enum
@@ -17,11 +19,6 @@ import tf2_py as tf2
 import tf2_ros
 import yaml
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
-from inverse_jacobian_controller import (
-    InverseJacobianController,
-    TerminationCriteria,
-    remaining_time,
-)
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
@@ -30,6 +27,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2
 from std_msgs.msg import Header
+from stretch_ik_control import StretchIKControl, TerminationCriteria, remaining_time
 from tf2_geometry_msgs import PointStamped, PoseStamped
 from tf_transformations import quaternion_about_axis, quaternion_multiply
 
@@ -40,31 +38,26 @@ from stretch_web_teleop.action import MoveToPregrasp
 class MoveToPregraspState(Enum):
     """
     Move-to-pregrasp proceeds in the following sequential states:
-      1. Moving/rotating the base to the target pose.
-      2. Moving the arm & wrist to the target pose.
-
-    TODO: Consider adding an initial state that stows the arm.
+      1. Opens the wrist and moves it to either the horizontal or vertical pre-grasp position.
+      2. Rotates the robot's base to align the end-effector with the clicked pixel.
+      3. Adjusts the arm's lift/length to align the end-effector with the clicked pixel.
     """
 
+    MOVE_WRIST = 0
     ROTATE_BASE = 1
     MOVE_ARM = 2
-    MOVE_WRIST = 3
-    # TODO: Instead, make a terminal state.
+    TERMINAL = 3
 
-    def next(self) -> Tuple[bool, MoveToPregraspState]:
+    def next(self) -> MoveToPregraspState:
         """
         Get the next state.
 
         Returns
         -------
-        Tuple[bool, MoveToPregraspState]: Whether the sequence is done, and the next state.
+        MoveToPregraspState: The next state.
         """
-        if self == MoveToPregraspState.ROTATE_BASE:
-            return False, MoveToPregraspState.MOVE_ARM
-        elif self == MoveToPregraspState.MOVE_ARM:
-            return False, MoveToPregraspState.MOVE_WRIST
-        elif self == MoveToPregraspState.MOVE_WRIST:
-            return True, MoveToPregraspState.ROTATE_BASE
+        if self != MoveToPregraspState.TERMINAL:
+            return MoveToPregraspState(self.value + 1)
 
 
 class MoveToPregraspNode(Node):
@@ -84,7 +77,7 @@ class MoveToPregraspNode(Node):
         self,
         image_params_file: str,
         tf_timeout_secs: float = 0.5,
-        action_timeout_secs: float = 100.0,  # TODO: lower!
+        action_timeout_secs: float = 15.0,
     ):
         """
         Initialize the MoveToPregraspNode
@@ -109,7 +102,7 @@ class MoveToPregraspNode(Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
         # Create the inverse jacobian controller to execute motions
-        self.controller = InverseJacobianController(self, self.tf_buffer)
+        self.controller = StretchIKControl(self, self.tf_buffer)
 
         # Subscribe to the Realsense's RGB, pointcloud, and camera info feeds
         self.latest_realsense_msgs_lock = threading.Lock()
@@ -276,20 +269,39 @@ class MoveToPregraspNode(Node):
         MoveToPregrasp.Result: The result message.
         """
         self.get_logger().info(f"Got request {goal_handle.request}")
+
+        # Start the timer
         start_time = self.get_clock().now()
+
+        # Initialize the feedback
+        feedback = MoveToPregrasp.Feedback()
+        feedback.initial_distance_m = -1.0
+
+        def distance_callback(err: npt.NDArray[np.float32]) -> None:
+            self.get_logger().error(f"Distance error: {err}")
+            distance = np.linalg.norm(err[:3])
+            if feedback.initial_distance_m < 0.0:
+                feedback.initial_distance_m = distance
+            else:
+                feedback.remaining_distance_m = distance
 
         # Undo any transformation that were applied to the raw camera image before sending it
         # to the web app
-        raw_u, raw_v = goal_handle.request.u, goal_handle.request.v
+        raw_scaled_u, raw_scaled_v = (
+            goal_handle.request.scaled_u,
+            goal_handle.request.scaled_v,
+        )
         if (
             "realsense" in self.image_params
             and "default" in self.image_params["realsense"]
         ):
-            u, v = self.inverse_transform_pixel(
-                raw_u, raw_v, self.image_params["realsense"]["default"]
-            )
+            params = self.image_params["realsense"]["default"]
         else:
-            u, v = raw_u, raw_v
+            params = None
+        u, v = self.inverse_transform_pixel(raw_scaled_u, raw_scaled_v, params)
+        self.get_logger().info(
+            f"Clicked pixel after inverse transform (camera frame): {(u, v)}"
+        )
 
         # Get the latest Realsense messages
         with self.latest_realsense_msgs_lock:
@@ -314,9 +326,6 @@ class MoveToPregraspNode(Node):
             goal_handle.request.pregrasp_direction
             == MoveToPregrasp.Goal.PREGRASP_DIRECTION_VERTICAL
         ):
-            self.get_logger().warn(
-                "Vertical grasp not implemented yet. Defaulting to horizontal grasp."
-            )
             horizontal_grasp = False
         else:  # auto
             self.get_logger().warn(
@@ -326,7 +335,7 @@ class MoveToPregraspNode(Node):
 
         # Get the goal end effector pose
         ok, goal_pose = self.get_goal_pose(
-            x, y, z, pointcloud_msg.header, horizontal_grasp
+            x, y, z, pointcloud_msg.header, horizontal_grasp, publish_tf=True
         )
         if not ok:
             self.get_logger().error("Failed to get goal pose")
@@ -334,64 +343,89 @@ class MoveToPregraspNode(Node):
             return MoveToPregrasp.Result()
         self.get_logger().info(f"Goal Pose: {goal_pose}")
 
-        state = MoveToPregraspState.MOVE_WRIST  # TODO: change!
+        state = MoveToPregraspState(0)
         future = None
+        terminate_future = False
+        result = MoveToPregrasp.Result()
+        rate = self.create_rate(10.0)
         while rclpy.ok():
             self.get_logger().info(f"State: {state}", throttle_duration_sec=1.0)
             # Check if a cancel has been requested
             if goal_handle.is_cancel_requested:
                 self.get_logger().info("Goal canceled")
+                result.status = MoveToPregrasp.Result.STATUS_CANCELLED
                 goal_handle.canceled()
+                break
             # Check if the action has timed out
             if (self.get_clock().now() - start_time) > self.action_timeout:
                 self.get_logger().error("Goal timed out")
+                result.status = MoveToPregrasp.Result.STATUS_TIMEOUT
                 goal_handle.abort()
-                return MoveToPregrasp.Result()
+                break
 
             # Move the robot
             if future is None:
-                if state == MoveToPregraspState.ROTATE_BASE:
-                    articulated_joints = [
-                        InverseJacobianController.JOINT_BASE_REVOLUTION
-                    ]
-                    additional_joint_positions = {}
-                elif state == MoveToPregraspState.MOVE_WRIST:
-                    articulated_joints = [
-                        InverseJacobianController.JOINT_WRIST_YAW,
-                        InverseJacobianController.JOINT_WRIST_PITCH,
-                        InverseJacobianController.JOINT_WRIST_ROLL,
-                    ]
-                    additional_joint_positions = {
-                        # We only have to command one finger since they are controlled by the same motor
-                        "joint_gripper_finger_left": 0.165,
-                    }
+                articulated_joints = []
+                additional_joint_positions = {}
+                if state == MoveToPregraspState.MOVE_WRIST:
+                    additional_joint_positions[StretchIKControl.JOINT_GRIPPER] = 0.84
+                    if horizontal_grasp:
+                        additional_joint_positions.update(
+                            {
+                                StretchIKControl.JOINT_WRIST_YAW: 0.0,
+                                StretchIKControl.JOINT_WRIST_PITCH: 0.0,
+                                StretchIKControl.JOINT_WRIST_ROLL: 0.0,
+                            }
+                        )
+                    else:
+                        additional_joint_positions.update(
+                            {
+                                StretchIKControl.JOINT_WRIST_YAW: 0.0,
+                                StretchIKControl.JOINT_WRIST_PITCH: -np.pi / 2.0,
+                                StretchIKControl.JOINT_WRIST_ROLL: 0.0,
+                            }
+                        )
+                elif state == MoveToPregraspState.ROTATE_BASE:
+                    articulated_joints += [StretchIKControl.JOINT_BASE_REVOLUTION]
                 elif state == MoveToPregraspState.MOVE_ARM:
                     if horizontal_grasp:
-                        articulated_joints = [
-                            InverseJacobianController.JOINT_ARM_LIFT,
+                        articulated_joints += [
+                            StretchIKControl.JOINT_ARM_LIFT,
                         ]
                     else:
-                        articulated_joints = [
-                            InverseJacobianController.JOINT_ARM_L3,
-                            InverseJacobianController.JOINT_ARM_L2,
-                            InverseJacobianController.JOINT_ARM_L1,
-                            InverseJacobianController.JOINT_ARM_L0,
+                        articulated_joints += [
+                            *StretchIKControl.JOINTS_ARM,
                         ]
-                    additional_joint_positions = {}
-                future = self.executor.create_task(
-                    self.controller.move_to_end_effector_pose(
-                        goal=goal_pose,
-                        articulated_joints=articulated_joints,
-                        termination=TerminationCriteria.ZERO_VEL,
-                        additional_joint_positions=additional_joint_positions,
-                        timeout_secs=remaining_time(
-                            self.get_clock().now(),
-                            start_time,
-                            self.action_timeout,
-                            return_secs=True,
-                        ),
+                if len(articulated_joints) > 0:
+                    future = self.executor.create_task(
+                        self.controller.move_to_end_effector_pose(
+                            goal=goal_pose,
+                            articulated_joints=articulated_joints,
+                            termination=TerminationCriteria.ZERO_VEL,
+                            additional_joint_positions=additional_joint_positions,
+                            timeout_secs=remaining_time(
+                                self.get_clock().now(),
+                                start_time,
+                                self.action_timeout,
+                                return_secs=True,
+                            ),
+                            check_cancel=lambda: terminate_future,
+                            err_callback=distance_callback,
+                        )
                     )
-                )
+                else:
+                    future = self.executor.create_task(
+                        self.controller.move_to_joint_positions(
+                            joint_positions=additional_joint_positions,
+                            timeout_secs=remaining_time(
+                                self.get_clock().now(),
+                                start_time,
+                                self.action_timeout,
+                                return_secs=True,
+                            ),
+                            check_cancel=lambda: terminate_future,
+                        )
+                    )
             # Check if the robot is done moving
             elif future.done():
                 try:
@@ -400,27 +434,52 @@ class MoveToPregraspNode(Node):
                         raise Exception("Failed to move to goal pose")
                 except Exception as e:
                     self.get_logger().error(f"{e}")
+                    result.status = MoveToPregrasp.Result.STATUS_FAILURE
                     goal_handle.abort()
-                    return MoveToPregrasp.Result()
-                done, state = state.next()
-                if done:
+                    break
+                state = state.next()
+                if state == MoveToPregraspState.TERMINAL:
+                    self.get_logger().info("Goal succeeded")
+                    result.status = MoveToPregrasp.Result.STATUS_SUCCESS
+                    goal_handle.succeed()
                     break
                 else:
                     future = None
 
-            # TODO: Send feedback!
+            # Send feedback. If we are not controlling any joints with the inverse
+            # Jacobian, then we need to calculate the error here.
+            if len(articulated_joints) == 0:
+                ok, err = self.controller.get_err(
+                    goal_pose,
+                    timeout=remaining_time(
+                        self.get_clock().now(),
+                        start_time,
+                        self.action_timeout,
+                    ),
+                )
+                if ok:
+                    distance_callback(err)
+            feedback.elapsed_time = (self.get_clock().now() - start_time).to_msg()
+            goal_handle.publish_feedback(feedback)
 
-        goal_handle.succeed()
-        result = MoveToPregrasp.Result()
+            # Sleep
+            rate.sleep()
+
+        # Perform cleanup
         self.active_goal_request = None
-        self.get_logger().info("Goal succeeded!")
+        if future is not None:
+            terminate_future = True
+            future.cancel()
         return result
 
-    def inverse_transform_pixel(self, u: int, v: int, params: Dict) -> Tuple[int, int]:
+    def inverse_transform_pixel(
+        self, scaled_u: int, scaled_v: int, params: Optional[Dict]
+    ) -> Tuple[int, int]:
         """
-        Undo the transformations applied to the raw camera image before
-        sending it to the web app. This is necessary so the pixel coordinates
-        of the click correspond to the camera's intrinsic parameters.
+        First, unscale the u and v coordinates. Then, undo the transformations
+        applied to the raw camera image before sending it to the web app.
+        This is necessary so the pixel coordinates of the click correspond to
+        the camera's intrinsic parameters.
 
         TODO: Eventually the forward transforms (in configure_video_streams.py) and
         inverse transforms (here) should be combined into one helper file, to
@@ -428,28 +487,42 @@ class MoveToPregraspNode(Node):
 
         Parameters
         ----------
-        u: The horizontal coordinate of the clicked pixel in the web app.
-        v: The vertical coordinate of the clicked pixel in the web app.
+        scaled_u: The horizontal coordinate of the clicked pixel in the web app, in [0.0, 1.0].
+        scaled_v: The vertical coordinate of the clicked pixel in the web app, in [0.0, 1.0].
         params: The transformation parameters.
 
         Returns
         -------
         Tuple[int, int]: The transformed pixel coordinates.
         """
+        # Get the image dimensions. Note that (w, h) are dimensions of the raw image,
+        # while (u, v) are coordinates on the transformed image.
+        with self.latest_realsense_msgs_lock:
+            # An image is guaranteed to exist by the precondition of accepting the goal
+            img_msg = self.latest_realsense_msgs[0]
+        w, h = img_msg.width, img_msg.height
+
+        # First, unscale the u and v coordinates
+        if (
+            "rotate" in params
+            and params["rotate"] is not None
+            and "ROTATE_90" in params["rotate"]
+        ):
+            u = scaled_u * h
+            v = scaled_v * w
+        else:
+            u = scaled_u * w
+            v = scaled_v * h
+
+        # Then, undo the crop
         if "crop" in params and params["crop"] is not None:
             if "x_min" in params["crop"]:
                 u += params["crop"]["x_min"]
             if "y_min" in params["crop"]:
                 v += params["crop"]["y_min"]
 
+        # Then, undo the rotate
         if "rotate" in params and params["rotate"] is not None:
-            # Get the image dimensions. Note that (w, h) are dimensions of the raw image,
-            # while (x, y) are coordinates on the transformed image.
-            with self.latest_realsense_msgs_lock:
-                # An image is guaranteed to exist by the precondition of accepting the goal
-                img_msg = self.latest_realsense_msgs[0]
-            w, h = img_msg.width, img_msg.height
-
             if params["rotate"] == "ROTATE_90_CLOCKWISE":
                 u, v = v, h - u
             elif params["rotate"] == "ROTATE_180":
@@ -500,6 +573,7 @@ class MoveToPregraspNode(Node):
         z: float,
         header: Header,
         horizontal_grasp: bool,
+        publish_tf: bool = False,
     ) -> Tuple[bool, PoseStamped]:
         """
         Get the goal end effector pose.
@@ -511,13 +585,15 @@ class MoveToPregraspNode(Node):
         z: The z-coordinate of the clicked point.
         header: The header of the pointcloud message.
         horizontal_grasp: Whether the goal pose should be horizontal.
+        publish_tf: Whether to publish the goal pose as a TF frame.
 
         Returns
         -------
         ok: Whether the goal pose was successfully calculated.
         PoseStamped: The goal end effector pose.
         """
-        stb = tf2_ros.StaticTransformBroadcaster(self)
+        if publish_tf:
+            static_transform_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
 
         # Get the goal position in camera frame
         goal_position = PointStamped()
@@ -529,19 +605,15 @@ class MoveToPregraspNode(Node):
             goal_position_base = self.tf_buffer.transform(
                 goal_position, self.BASE_LINK, timeout=self.tf_timeout
             )
-            if horizontal_grasp:
-                # The goal orientation is (0,0,0,1) in base link frame, rotated
-                # so +x points towards the clicked point
-                theta = np.arctan2(
-                    goal_position_base.point.y, goal_position_base.point.x
-                )
-                rot = quaternion_about_axis(theta, [0, 0, 1])
-            else:
-                # The goal orientation is rotated -90deg around z and +90deg around y
-                # in base link frame
-                rot = quaternion_about_axis(np.pi / 2, [0, 1, 0])
+
+            # The goal orientation is (0,0,0,1) in base link frame, rotated
+            # so +x points towards the clicked point
+            theta = np.arctan2(goal_position_base.point.y, goal_position_base.point.x)
+            rot = quaternion_about_axis(theta, [0, 0, 1])
+            if not horizontal_grasp:
+                # For vertical grasp, the goal orientation is also rotated +90deg around y
                 rot = quaternion_multiply(
-                    quaternion_about_axis(-np.pi / 2, [0, 0, 1]), rot
+                    rot, quaternion_about_axis(np.pi / 2, [0, 1, 0])
                 )
             # We have to treat the orientation as a pose since tf2_geometry_msgs.py
             # doesn't register QuaternionStamped
@@ -589,20 +661,21 @@ class MoveToPregraspNode(Node):
             )
             return False, PoseStamped()
 
-        stb.sendTransform(
-            TransformStamped(
-                header=goal_pose_odom.header,
-                child_frame_id="goal",
-                transform=Transform(
-                    translation=Vector3(
-                        x=goal_pose_odom.pose.position.x,
-                        y=goal_pose_odom.pose.position.y,
-                        z=goal_pose_odom.pose.position.z,
+        if publish_tf:
+            static_transform_broadcaster.sendTransform(
+                TransformStamped(
+                    header=goal_pose_odom.header,
+                    child_frame_id="goal",
+                    transform=Transform(
+                        translation=Vector3(
+                            x=goal_pose_odom.pose.position.x,
+                            y=goal_pose_odom.pose.position.y,
+                            z=goal_pose_odom.pose.position.z,
+                        ),
+                        rotation=goal_pose_odom.pose.orientation,
                     ),
-                    rotation=goal_pose_odom.pose.orientation,
-                ),
+                )
             )
-        )
 
         return True, goal_pose_odom
 
@@ -616,7 +689,7 @@ def main(args: Optional[List[str]] = None):
 
     # Use a MultiThreadedExecutor so that subscriptions, actions, etc. can be
     # processed in parallel.
-    executor = MultiThreadedExecutor(num_threads=4)
+    executor = MultiThreadedExecutor()
 
     # Spin in the background, as the node initializes
     spin_thread = threading.Thread(

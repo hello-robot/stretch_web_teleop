@@ -545,12 +545,13 @@ export class Robot extends React.Component {
     return newGoal;
   }
 
-  makeMoveToPregraspGoal(x: number, y: number) {
+  makeMoveToPregraspGoal(scaled_x: number, scaled_y: number) {
     if (!this.moveToPregraspClient) throw "moveToPregraspClient is undefined";
 
     let newGoal = new ROSLIB.ActionGoal({
-      u: x,
-      v: y,
+      scaled_u: scaled_x,
+      scaled_v: scaled_y,
+      pregrasp_direction: 2,
     });
 
     return newGoal;
@@ -686,13 +687,13 @@ export class Robot extends React.Component {
    * @param x The x coordinate of the click on the Realsense camera
    * @param y The y coordinate of the click on the Realsense camera
    */
-  executeMoveToPregraspGoal(x?: number, y?: number) {
-    if (x === undefined || y === undefined) {
+  executeMoveToPregraspGoal(scaled_x?: number, scaled_y?: number) {
+    if (scaled_x === undefined || scaled_y === undefined) {
       return;
     }
-    console.log("Got move to pregrasp goal", x, y);
+    console.log("Got move to pregrasp goal", scaled_x, scaled_y);
     this.switchToPositionMode();
-    this.moveToPregraspGoal = this.makeMoveToPregraspGoal(x, y);
+    this.moveToPregraspGoal = this.makeMoveToPregraspGoal(scaled_x, scaled_y);
     this.moveToPregraspClient.createClient(this.moveToPregraspGoal);
   }
 
