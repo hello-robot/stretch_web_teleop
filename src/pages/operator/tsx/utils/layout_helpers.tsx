@@ -139,6 +139,10 @@ function removeChildFromParent(
   let i = -2;
   let parentIdx: number;
   while (i >= -childSplitPath.length && parent.children.length === 0) {
+    // A tab is the only parent type that can have no children
+    if (parent.type === ComponentType.SingleTab) {
+      break;
+    }
     parentIdx = +childSplitPath.slice(i, i + 1);
     const grandparent = getParent(childSplitPath.slice(0, i + 1), layout);
     grandparent.children.splice(parentIdx, 1);
