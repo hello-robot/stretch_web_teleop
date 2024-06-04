@@ -1,38 +1,38 @@
 #layout-area {
-    /* padding: var(--screen-padding);
+  /* padding: var(--screen-padding);
     flex: 1 1 0; */
-    padding: var(--screen-padding);
-    flex-direction: column;
-    height: auto;
+  padding: var(--screen-padding);
+  flex-direction: column;
+  height: auto;
 }
 
 /* Remove margin for elements at edges of the layout area */
-#layout-area > *:first-of-type{
-    margin-left: 0;
+#layout-area > *:first-of-type {
+  margin-left: 0;
 }
-#layout-area > *:last-of-type{
-    margin-right: 0;
+#layout-area > *:last-of-type {
+  margin-right: 0;
 }
 
 #layout-area,
 .tabs-content {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
-@media screen and (orientation:portrait) and (max-device-width: 900px) {
-    #layout-area,
-    .tabs-content {
-        flex-direction: column;
-        padding: 1rem;
-        grid-gap: 0.3rem;
-    }
+@media screen and (orientation: portrait) and (max-device-width: 900px) {
+  #layout-area,
+  .tabs-content {
+    flex-direction: column;
+    padding: 1rem;
+    grid-gap: 0.3rem;
+  }
 }
 
-@media screen and (orientation:landscape) and (max-device-width: 900px) {
-    #layout-area,
-    .tabs-content {
-        overflow: scroll;
-    }
+@media screen and (orientation: landscape) and (max-device-width: 900px) {
+  #layout-area,
+  .tabs-content {
+    overflow: scroll;
+  }
 }

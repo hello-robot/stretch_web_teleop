@@ -1,4 +1,4 @@
-From https://github.com/hello-robot/stretch_web_interface/blob/master/LICENSE.md 
+From https://github.com/hello-robot/stretch_web_interface/blob/master/LICENSE.md
 
 The following license applies to the contents of this directory created by Hello Robot Inc. (the "Contents"), but does not cover materials from other sources. This software is intended for use with the Stretch RE1 mobile manipulator, which is a robot produced and sold by Hello Robot Inc.
 
