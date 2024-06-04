@@ -133,20 +133,17 @@ function removeChildFromParent(
   childIdx: number,
   layout: LayoutDefinition,
 ) {
-  // If this is the last tab in a panel, then delete the entire panel
-  if (parent.type === ComponentType.Panel && parent.children.length === 1) {
-    const parentIdx = +childSplitPath.slice(-2, -1);
-    // note: since tabs cannot be nested, we can assume the layout is the
-    //       is the parent of the tabs component
-    layout.children.splice(parentIdx, 1);
-  }
+  // Remove the child from the parent
   parent.children.splice(childIdx, 1);
-  console.log(parent.type, parent.children.length);
-
-  if (parent.type == ComponentType.LayoutGrid && parent.children.length === 0) {
-    const parentIdx = +childSplitPath.slice(0, 1);
-    console.log(layout.children, childSplitPath, parentIdx);
-    layout.children.splice(parentIdx, 1);
+  // If it was the last child, also remove the parent. Continue iteratively.
+  let i = -2;
+  let parentIdx: number;
+  while (i >= -childSplitPath.length && parent.children.length === 0) {
+    parentIdx = +childSplitPath.slice(i, i + 1);
+    const grandparent = getParent(childSplitPath.slice(0, i + 1), layout);
+    grandparent.children.splice(parentIdx, 1);
+    parent = grandparent;
+    i -= 1;
   }
 }
 
