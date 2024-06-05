@@ -15,7 +15,7 @@ for the base and position control for the arm, the inverse jacobian control:
 import asyncio
 import threading
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 # Third-Party Imports
 import numpy as np
@@ -26,7 +26,7 @@ import tf2_py as tf2
 import tf2_ros
 from builtin_interfaces.msg import Time
 from control_msgs.action import FollowJointTrajectory
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose, Twist
 from rcl_interfaces.srv import GetParameters
 from rclpy.action import ActionClient
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
@@ -40,6 +40,7 @@ from tf2_geometry_msgs import PoseStamped
 from tf_transformations import (
     euler_from_quaternion,
     quaternion_inverse,
+    quaternion_matrix,
     quaternion_multiply,
 )
 from trajectory_msgs.msg import JointTrajectoryPoint
@@ -81,6 +82,7 @@ class TerminationCriteria(Enum):
     # TODO: Consider adding another termination criteria for if the joints don't move for n seconds.
     # This becomes slightly challenging with the base though, since that relies on the odom -> base_link
     # transform.
+    # TODO: Consider adding another that stops upon overshoot / sign change
 
 
 class StretchIKControl:
@@ -201,11 +203,19 @@ class StretchIKControl:
         self.initialized = True
         return True
 
-    def __load_jacobian_solver(self) -> bool:
+    def __load_jacobian_solver(self, use_translation: bool = False) -> bool:
         """
         Load the Jacobian solver for the robot.
 
         Note that this function blocks until the URDF is received.
+
+        Parameters
+        ----------
+        use_translation: Whether to include the translation joint.
+
+        Returns
+        -------
+        bool: True if the Jacobian solver was successfully loaded.
         """
         # Get the robot URDF.
         robot_state_param_client = self.node.create_client(
@@ -238,23 +248,24 @@ class StretchIKControl:
 
         # Prepend two "dummy links" to the chain: for base translation and revolution
         chain = kdl.Chain()
-        chain.addSegment(
-            kdl.Segment(
-                name="link_base_translation",
-                joint=kdl.Joint(
-                    name=self.JOINT_BASE_TRANSLATION,
-                    origin=kdl.Vector(0, 0, 0),
-                    axis=kdl.Vector(1, 0, 0),
-                    type=kdl.Joint.TransAxis,
-                ),
-                f_tip=kdl.Frame(),
-                I=kdl.RigidBodyInertia(
-                    m=1.0,
-                    oc=kdl.Vector(0, 0, 0),
-                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
-                ),
+        if use_translation:
+            chain.addSegment(
+                kdl.Segment(
+                    name="link_base_translation",
+                    joint=kdl.Joint(
+                        name=self.JOINT_BASE_TRANSLATION,
+                        origin=kdl.Vector(0, 0, 0),
+                        axis=kdl.Vector(1, 0, 0),
+                        type=kdl.Joint.TransAxis,
+                    ),
+                    f_tip=kdl.Frame(),
+                    I=kdl.RigidBodyInertia(
+                        m=1.0,
+                        oc=kdl.Vector(0, 0, 0),
+                        Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
+                    ),
+                )
             )
-        )
         chain.addSegment(
             kdl.Segment(
                 name="link_base_revolution",
@@ -345,50 +356,56 @@ class StretchIKControl:
         for i, joint_name in enumerate(self.jacobian_joint_order):
             # Get the max velocity
             if joint_name == self.JOINT_BASE_TRANSLATION:
-                max_vel = robot_params["base"]["motion"][speed_profile_str]["vel_m"]
-                min_vel = robot_params["base"]["motion"][speed_profile_slow_str][
+                max_abs_vel = robot_params["base"]["motion"][speed_profile_str]["vel_m"]
+                min_abs_vel = robot_params["base"]["motion"][speed_profile_slow_str][
                     "vel_m"
                 ]
             elif joint_name == self.JOINT_BASE_REVOLUTION:
                 # From https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
-                max_vel = 0.5  # rad/s
-                min_vel = 0.05  # rad/s
+                max_abs_vel = 0.5  # rad/s
+                min_abs_vel = 0.05  # rad/s
             elif joint_name == self.JOINT_ARM_LIFT:
-                max_vel = robot_params["lift"]["motion"][speed_profile_str]["vel_m"]
-                min_vel = robot_params["lift"]["motion"][speed_profile_slow_str][
+                max_abs_vel = robot_params["lift"]["motion"][speed_profile_str]["vel_m"]
+                min_abs_vel = robot_params["lift"]["motion"][speed_profile_slow_str][
                     "vel_m"
                 ]
             elif joint_name in self.JOINTS_ARM:
                 continue
             elif joint_name == self.JOINT_WRIST_YAW:
-                max_vel = robot_params["wrist_yaw"]["motion"][speed_profile_str]["vel"]
-                min_vel = robot_params["wrist_yaw"]["motion"][speed_profile_slow_str][
+                max_abs_vel = robot_params["wrist_yaw"]["motion"][speed_profile_str][
                     "vel"
                 ]
+                min_abs_vel = robot_params["wrist_yaw"]["motion"][
+                    speed_profile_slow_str
+                ]["vel"]
             elif joint_name == self.JOINT_WRIST_PITCH:
-                max_vel = robot_params["wrist_pitch"]["motion"][speed_profile_str][
+                max_abs_vel = robot_params["wrist_pitch"]["motion"][speed_profile_str][
                     "vel"
                 ]
-                min_vel = robot_params["wrist_pitch"]["motion"][speed_profile_slow_str][
-                    "vel"
-                ]
+                min_abs_vel = robot_params["wrist_pitch"]["motion"][
+                    speed_profile_slow_str
+                ]["vel"]
             elif joint_name == self.JOINT_WRIST_ROLL:
-                max_vel = robot_params["wrist_roll"]["motion"][speed_profile_str]["vel"]
-                min_vel = robot_params["wrist_roll"]["motion"][speed_profile_slow_str][
+                max_abs_vel = robot_params["wrist_roll"]["motion"][speed_profile_str][
                     "vel"
                 ]
+                min_abs_vel = robot_params["wrist_roll"]["motion"][
+                    speed_profile_slow_str
+                ]["vel"]
             else:
                 self.node.get_logger().warn(f"Unknown joint name: {joint_name}")
-                max_vel = 0.0
-                min_vel = 0.0
-            self.joint_vel_abs_lim[joint_name] = (min_vel, max_vel)
-        combined_arm_max_vel = robot_params["arm"]["motion"][speed_profile_str]["vel_m"]
-        combined_arm_min_vel = robot_params["arm"]["motion"][speed_profile_slow_str][
+                max_abs_vel = 0.0
+                min_abs_vel = 0.0
+            self.joint_vel_abs_lim[joint_name] = (min_abs_vel, max_abs_vel)
+        combined_arm_max_abs_vel = robot_params["arm"]["motion"][speed_profile_str][
             "vel_m"
         ]
+        combined_arm_min_abs_vel = robot_params["arm"]["motion"][
+            speed_profile_slow_str
+        ]["vel_m"]
         self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM] = (
-            combined_arm_min_vel,
-            combined_arm_max_vel,
+            combined_arm_min_abs_vel,
+            combined_arm_max_abs_vel,
         )
 
         with self.latest_joint_limits_lock:
@@ -398,8 +415,7 @@ class StretchIKControl:
             return False
 
         for joint_name, (min_pos, max_pos) in joint_pos_lim.items():
-            if joint_name in self.jacobian_joint_order:
-                self.joint_pos_lim[joint_name] = (min_pos, max_pos)
+            self.joint_pos_lim[joint_name] = (min_pos, max_pos)
 
         return True
 
@@ -444,7 +460,6 @@ class StretchIKControl:
             self.latest_joint_limits = {
                 msg.name[i]: (msg.position[i], msg.velocity[i])
                 for i, joint_name in enumerate(msg.name)
-                if joint_name in self.jacobian_joint_order
             }
 
     async def move_to_joint_positions(
@@ -483,6 +498,11 @@ class StretchIKControl:
             ControlMode.POSITION,
             timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
         )
+
+        # Combine the arm joint positions into one
+        self.node.get_logger().info(f"Joint Positions: {joint_positions}")
+        joint_positions = self.combine_arm(joint_positions)
+        self.node.get_logger().info(f"Combined Joint Positions: {joint_positions}")
 
         # The duration of each trajectory command
         duration = 1.0  # seconds
@@ -639,6 +659,11 @@ class StretchIKControl:
                 f"Failed to transform goal pose to odom frame: {e}"
             )
             return False
+
+        # TODO: Remove!
+        ok, joints = self.solve_ik(goal_odom)
+        self.node.get_logger().info(f"IK Solution: {ok}, {joints}")
+        return True
 
         # Command motion until the termination criteria is reached
         rate = self.node.create_rate(rate_hz)
@@ -879,7 +904,7 @@ class StretchIKControl:
 
     def __execute_velocities(
         self,
-        joint_velocities: npt.NDArray[np.float64],
+        velocities: npt.NDArray[np.float64],
         move_base: bool,
         move_arm: bool,
         additional_joint_positions: Dict[str, float] = {},
@@ -916,42 +941,20 @@ class StretchIKControl:
         ):
             return True
 
+        # Combine the arm velocities into one
+        joint_velocities = dict(zip(self.jacobian_joint_order, velocities))
+        joint_velocities = self.combine_arm(joint_velocities)
+
         # Clip the velocities
-        zero_thresh = 1.0e-3
-        clipped_velocities = np.zeros(len(self.jacobian_joint_order), dtype=np.float64)
-        for i, vel in enumerate(joint_velocities):
-            joint_name = self.jacobian_joint_order[i]
-            if i not in self.JOINTS_ARM_I:
-                min_vel, max_vel = self.joint_vel_abs_lim[joint_name]
-                if vel >= zero_thresh:
-                    clipped_velocities[i] = np.clip(vel, min_vel, max_vel)
-                elif vel <= -zero_thresh:
-                    clipped_velocities[i] = np.clip(vel, -max_vel, -min_vel)
-        arm_joints_vel = joint_velocities[self.JOINTS_ARM_I]
-        arm_vel = sum(joint_velocities[self.JOINTS_ARM_I])
-        if np.isclose(arm_vel, 0.0, atol=zero_thresh):
-            clipped_velocities[self.JOINTS_ARM_I] = 0.0
-        else:
-            arm_min_vel, arm_max_vel = self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM]
-            if arm_vel >= zero_thresh:
-                clipped_arm_vel = np.clip(arm_vel, arm_min_vel, arm_max_vel)
-            elif arm_vel <= -zero_thresh:
-                clipped_arm_vel = np.clip(arm_vel, -arm_max_vel, -arm_min_vel)
-            else:
-                clipped_arm_vel = 0.0
-            clipped_velocities[self.JOINTS_ARM_I] = (
-                arm_joints_vel / arm_vel * clipped_arm_vel
-            )
+        _, clipped_velocities = self.check_velocity_limits(joint_velocities)
 
         # Send base commands
         if move_base:
             base_vel = Twist()
-            base_vel.linear.x = clipped_velocities[
-                self.jacobian_joint_order.index(self.JOINT_BASE_TRANSLATION)
-            ]
-            base_vel.angular.z = clipped_velocities[
-                self.jacobian_joint_order.index(self.JOINT_BASE_REVOLUTION)
-            ]
+            if self.JOINT_BASE_TRANSLATION in clipped_velocities:
+                base_vel.linear.x = clipped_velocities[self.JOINT_BASE_TRANSLATION]
+            if self.JOINT_BASE_REVOLUTION in clipped_velocities:
+                base_vel.angular.z = clipped_velocities[self.JOINT_BASE_REVOLUTION]
             self.base_vel_pub.publish(base_vel)
             return True
 
@@ -960,14 +963,13 @@ class StretchIKControl:
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
         joint_positions = {}
-        for i, joint_name in enumerate(self.jacobian_joint_order):
+        for joint_name, vel in clipped_velocities.items():
             if (
                 joint_name not in self.JOINTS_BASE
                 and joint_name in latest_joint_state
-                and not np.isclose(clipped_velocities[i], 0.0, atol=zero_thresh)
+                and not np.isclose(clipped_velocities[joint_name], 0.0)
             ):
                 pos = latest_joint_state[joint_name]
-                vel = clipped_velocities[i]
                 joint_positions[joint_name] = pos + vel * duration
         joint_positions.update(additional_joint_positions)
         self.arm_client_future = self.__command_move_to_joint_position(
@@ -992,12 +994,8 @@ class StretchIKControl:
         Future: The future object.
         """
         # Limit the joint positions
-        for joint_name, (min_pos, max_pos) in self.joint_pos_lim.items():
-            if joint_name in joint_positions:
-                joint_positions[joint_name] = np.clip(
-                    joint_positions[joint_name], min_pos, max_pos
-                )
-        # TODO: Do it for arm length as well!
+        _, joint_positions = self.check_joint_limits(joint_positions)
+        self.node.get_logger().info(f"Commanding arm to {joint_positions}")
 
         # Create the goal
         arm_goal = FollowJointTrajectory.Goal()
@@ -1010,8 +1008,131 @@ class StretchIKControl:
         self.node.get_logger().info(f"Commanding arm to {arm_goal}")
         return self.arm_client.send_goal_async(arm_goal)
 
+    def combine_arm(self, joint_values: Dict[str, float]) -> Dict[str, float]:
+        """
+        Combine the telescoping arm joints into a single joint.
+
+        Parameters
+        ----------
+        joint_values: The joint values.
+
+        Returns
+        -------
+        Dict[str, float]: The joint values with the telescoping arm joints combined.
+        """
+        combined_values = {
+            name: value
+            for name, value in joint_values.items()
+            if name not in self.JOINTS_ARM
+        }
+        arm_pos = [
+            joint_values[joint_name]
+            for joint_name in self.JOINTS_ARM
+            if joint_name in joint_values
+        ]
+        if len(arm_pos) == len(self.JOINTS_ARM):
+            combined_values[self.JOINT_COMBINED_ARM] = sum(arm_pos)
+        elif len(arm_pos) > 0:
+            self.node.get_logger().warn(
+                "Not all arm joints are present. Cannot combine arm joints."
+            )
+        return combined_values
+
+    def check_joint_limits(
+        self,
+        joint_positions: Dict[str, float],
+        clip: bool = True,
+    ) -> Tuple[bool, Dict[str, float]]:
+        """
+        Check if the joint positions are within the limits. Optionally clip the positions.
+
+        Parameters
+        ----------
+        joint_positions: The joint positions.
+        clip: Whether to clip the joint positions to the limits. IF false,
+            returns the joint positions as is.
+
+        Returns
+        -------
+        Tuple[bool, Dict[str, float]]: Whether the joint positions are within the limits
+            and the joint positions (clipped if requested).
+        """
+        # Check and clip the joint positions
+        in_limits = True
+        clipped_joint_positions = {}
+        for joint_name, pos in joint_positions.items():
+            if joint_name in self.joint_pos_lim:
+                min_pos, max_pos = self.joint_pos_lim[joint_name]
+                if pos < min_pos or pos > max_pos:
+                    in_limits = False
+                if clip:
+                    clipped_joint_positions[joint_name] = np.clip(pos, min_pos, max_pos)
+            else:
+                if (
+                    joint_name not in self.JOINTS_BASE
+                    and joint_name != self.JOINT_GRIPPER
+                ):
+                    self.node.get_logger().warn(
+                        f"Unknown joint name: {joint_name}. Be sure to combine arm joints."
+                    )
+                clipped_joint_positions[joint_name] = pos
+
+        return in_limits, clipped_joint_positions if clip else joint_positions
+
+    def check_velocity_limits(
+        self,
+        joint_velocities: Dict[str, float],
+        clip: bool = True,
+        zero_thresh: float = 1.0e-3,
+    ) -> Tuple[bool, Dict[str, float]]:
+        """
+        Check if the joint velocities are within the limits. Optionally clip the velocities.
+
+        Parameters
+        ----------
+        joint_velocities: The joint velocities.
+        clip: Whether to clip the joint velocities to the limits.
+        zero_thresh: The threshold below which a velocity is considered zero.
+
+        Returns
+        -------
+        Tuple[bool, Dict[str, float]]: Whether the joint velocities are within the limits
+        """
+        # Check and clip the joint velocities
+        in_limits = True
+        clipped_joint_velocities = {}
+        for joint_name, vel in joint_velocities.items():
+            if joint_name in self.joint_vel_abs_lim:
+                min_abs_vel, max_abs_vel = self.joint_vel_abs_lim[joint_name]
+                if vel < min_abs_vel or vel > max_abs_vel:
+                    in_limits = False
+                if clip:
+                    if vel >= zero_thresh:
+                        clipped_joint_velocities[joint_name] = np.clip(
+                            vel, min_abs_vel, max_abs_vel
+                        )
+                    elif vel <= -zero_thresh:
+                        clipped_joint_velocities[joint_name] = np.clip(
+                            vel, -max_abs_vel, -min_abs_vel
+                        )
+                    else:
+                        clipped_joint_velocities[joint_name] = 0.0
+            else:
+                if (
+                    joint_name not in self.JOINTS_BASE
+                    and joint_name != self.JOINT_GRIPPER
+                ):
+                    self.node.get_logger().warn(
+                        f"Unknown joint name: {joint_name}. Be sure to combine arm joints."
+                    )
+                clipped_joint_velocities[joint_name] = vel
+
+        return in_limits, clipped_joint_velocities if clip else joint_velocities
+
     def solve_ik(
-        goal: npt.NDArray[np.float64], joint_position_overrides: Dict[str, float] = {}
+        self,
+        goal: Union[Pose, PoseStamped],
+        joint_position_overrides: Dict[str, float] = {},
     ) -> Tuple[bool, Dict[str, float]]:
         """
         Solve the inverse kinematics problem.
@@ -1020,7 +1141,7 @@ class StretchIKControl:
 
         Parameters
         ----------
-        goal: The goal pose. (x, y, z, roll, pitch, yaw)
+        goal: The goal pose.
         joint_position_overrides: joint positions to use. Any joint positions
             not in here will use the latest joint state.
 
@@ -1028,19 +1149,30 @@ class StretchIKControl:
         -------
         Dict[str, float]: The joint positions.
         """
+        # Get the inputs
+        p_in = ros_pose_to_kdl_frame(goal)
         q_in = self.__get_kdl_joint_array(joint_position_overrides)
         q_out = kdl.JntArray(len(self.jacobian_joint_order))
-        ok = self.ik_solver.CartToJnt(q_in, goal, q_out)
+
+        # Solve the IK problem
+        ok = self.ik_solver.CartToJnt(q_in, p_in, q_out)
         if ok == 0:  # E_NOERROR
             out_positions = {
                 joint_name: q_out[i]
                 for i, joint_name in enumerate(self.jacobian_joint_order)
             }
-            return True, out_positions
-        else:
-            return False, {}
+            self.node.get_logger().info(f"Initial IK Solution: {out_positions}")
+            out_positions = self.combine_arm(out_positions)
+            out_positions = self.standardize_radians(out_positions)
+            self.node.get_logger().info(f"Standardized IK Solution: {out_positions}")
+            within_limits, _ = self.check_joint_limits(out_positions, clip=False)
+            if within_limits:
+                return True, out_positions
+
+        return False, {}
 
     def solve_fk(
+        self,
         joint_position_overrides: Dict[str, float] = {},
     ) -> Tuple[bool, npt.NDArray[np.float64]]:
         """
@@ -1060,6 +1192,40 @@ class StretchIKControl:
         p_out = kdl.Frame()
         ok = self.fk_solver.JntToCart()
         pass
+
+    def standardize_radians(
+        self, joint_positions: Dict[str, float]
+    ) -> Dict[str, float]:
+        """
+        Standardize the joint positions to be within the correct range for their joint limits.
+
+        Parameters
+        ----------
+        joint_positions: The joint positions.
+
+        Returns
+        -------
+        Dict[str, float]: The standardized joint positions.
+        """
+        radian_joints = [
+            self.JOINT_BASE_REVOLUTION,
+            self.JOINT_WRIST_YAW,
+            self.JOINT_WRIST_PITCH,
+            self.JOINT_WRIST_ROLL,
+        ]
+        standardized_positions = {}
+        for joint_name, pos in joint_positions.items():
+            if joint_name in radian_joints:
+                standardized_position = np.mod(pos + np.pi, 2 * np.pi)
+                if (
+                    joint_name in self.joint_pos_lim
+                    and standardized_position > self.joint_pos_lim[joint_name][1]
+                ):
+                    standardized_position -= 2 * np.pi
+            else:
+                standardized_position = pos
+            standardized_positions[joint_name] = standardized_position
+        return standardized_positions
 
     def __get_kdl_joint_array(
         self, joint_position_overrides: Dict[str, float] = {}
@@ -1165,6 +1331,40 @@ def np_to_joint_array(joint_state: npt.NDArray[np.float64]) -> kdl.JntArray:
     for i, q_i in enumerate(joint_state):
         q[i] = q_i
     return q
+
+
+def ros_pose_to_kdl_frame(pose: Union[Pose, PoseStamped]) -> kdl.Frame:
+    """
+    Convert a ROS pose to a numpy array of (x, y, z, roll, pitch , yaw).
+
+    Parameters
+    ----------
+    pose: The ROS pose.
+
+    Returns
+    -------
+    kdl.Frame: The KDL frame corresponding to the pose
+    """
+    if isinstance(pose, PoseStamped):
+        pose = pose.pose
+    R = np.array(
+        quaternion_matrix(
+            [
+                pose.orientation.x,
+                pose.orientation.y,
+                pose.orientation.z,
+                pose.orientation.w,
+            ]
+        )
+    )[:3, :3].flatten()
+    return kdl.Frame(
+        R=kdl.Rotation(*R),
+        V=kdl.Vector(
+            pose.position.x,
+            pose.position.y,
+            pose.position.z,
+        ),
+    )
 
 
 def kdl_chain_fix_joints(chain: kdl.Chain, fixed_joints: List[str]) -> kdl.Chain:

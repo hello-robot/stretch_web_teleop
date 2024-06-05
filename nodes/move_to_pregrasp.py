@@ -43,6 +43,8 @@ class MoveToPregraspState(Enum):
       3. Adjusts the arm's lift/length to align the end-effector with the clicked pixel.
     """
 
+    # TODO: Stow wrist first!
+
     MOVE_WRIST = 0
     ROTATE_BASE = 1
     MOVE_ARM = 2
@@ -72,6 +74,8 @@ class MoveToPregraspNode(Node):
     BASE_LINK = "base_link"
     END_EFFECTOR_LINK = "link_grasp_center"
     ODOM_FRAME = "odom"
+
+    DISTANCE_TO_OBJECT = 0.1  # meters
 
     def __init__(
         self,
@@ -342,6 +346,9 @@ class MoveToPregraspNode(Node):
             goal_handle.abort()
             return MoveToPregrasp.Result()
         self.get_logger().info(f"Goal Pose: {goal_pose}")
+        # goal_handle.succeed()
+        # self.active_goal_request = None
+        # return MoveToPregrasp.Result()
 
         state = MoveToPregraspState(0)
         future = None
@@ -596,32 +603,15 @@ class MoveToPregraspNode(Node):
             static_transform_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
 
         # Get the goal position in camera frame
-        goal_position = PointStamped()
-        goal_position.header = header
-        goal_position.point = Point(x=x, y=y, z=z)
+        goal_pose = PoseStamped()
+        goal_pose.header = header
+        goal_pose.pose.position = Point(x=x, y=y, z=z)
+        goal_pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
 
-        # Get the goal orientation in base frame
+        # Convert to base frame
         try:
-            goal_position_base = self.tf_buffer.transform(
-                goal_position, self.BASE_LINK, timeout=self.tf_timeout
-            )
-
-            # The goal orientation is (0,0,0,1) in base link frame, rotated
-            # so +x points towards the clicked point
-            theta = np.arctan2(goal_position_base.point.y, goal_position_base.point.x)
-            rot = quaternion_about_axis(theta, [0, 0, 1])
-            if not horizontal_grasp:
-                # For vertical grasp, the goal orientation is also rotated +90deg around y
-                rot = quaternion_multiply(
-                    rot, quaternion_about_axis(np.pi / 2, [0, 1, 0])
-                )
-            # We have to treat the orientation as a pose since tf2_geometry_msgs.py
-            # doesn't register QuaternionStamped
-            goal_orientation = PoseStamped()
-            goal_orientation.header = header
-            goal_orientation.header.frame_id = self.BASE_LINK
-            goal_orientation.pose.orientation = Quaternion(
-                x=rot[0], y=rot[1], z=rot[2], w=rot[3]
+            goal_pose_base = self.tf_buffer.transform(
+                goal_pose, self.BASE_LINK, timeout=self.tf_timeout
             )
         except (
             tf2.ConnectivityException,
@@ -636,18 +626,40 @@ class MoveToPregraspNode(Node):
             )
             return False, PoseStamped()
 
+        # The goal orientation is (0,0,0,1) in base link frame, rotated
+        # so +x points towards the clicked point
+        theta = np.arctan2(
+            goal_pose_base.pose.position.y, goal_pose_base.pose.position.x
+        )
+        rot = quaternion_about_axis(theta, [0, 0, 1])
+        if not horizontal_grasp:
+            # For vertical grasp, the goal orientation is also rotated +90deg around y
+            rot = quaternion_multiply(rot, quaternion_about_axis(np.pi / 2, [0, 1, 0]))
+        goal_pose_base.pose.orientation = Quaternion(
+            x=rot[0], y=rot[1], z=rot[2], w=rot[3]
+        )
+
+        # Adjust the goal position by the distance to the object
+        if horizontal_grasp:
+            xy = np.array(
+                [goal_pose_base.pose.position.x, goal_pose_base.pose.position.y]
+            )
+            xy_dist = np.linalg.norm(xy)
+            if xy_dist < self.DISTANCE_TO_OBJECT:
+                self.get_logger().error(
+                    f"Clicked point is too close to the robot: {xy_dist} < {self.DISTANCE_TO_OBJECT}"
+                )
+                return False, PoseStamped()
+            xy = xy / xy_dist * (xy_dist - self.DISTANCE_TO_OBJECT)
+            goal_pose_base.pose.position.x, goal_pose_base.pose.position.y = xy
+        else:
+            goal_pose_base.pose.position.z += self.DISTANCE_TO_OBJECT
+
         # Convert the goal pose to the odom frame so it stays fixed even as the robot moves
         try:
-            goal_position_odom = self.tf_buffer.transform(
-                goal_position_base, self.ODOM_FRAME, timeout=self.tf_timeout
+            goal_pose_odom = self.tf_buffer.transform(
+                goal_pose_base, self.ODOM_FRAME, timeout=self.tf_timeout
             )
-            goal_orientation_odom = self.tf_buffer.transform(
-                goal_orientation, self.ODOM_FRAME, timeout=self.tf_timeout
-            )
-            goal_pose_odom = PoseStamped()
-            goal_pose_odom.header = goal_position_odom.header
-            goal_pose_odom.pose.position = goal_position_odom.point
-            goal_pose_odom.pose.orientation = goal_orientation_odom.pose.orientation
         except (
             tf2.ConnectivityException,
             tf2.ExtrapolationException,
