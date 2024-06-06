@@ -196,7 +196,7 @@ if __name__ == "__main__":
             print(Js[1])
             print(np.isclose(Js[0], Js[1], atol=1e-6))
 
-    investigation_2 = True
+    investigation_2 = False
     # Investigation 2: Try out controlling the robot using the velocity
     # controller from visual servoing.
     if investigation_2:
@@ -227,3 +227,139 @@ if __name__ == "__main__":
         time.sleep(2.0)
         controller.set_command(zero_vel)
         time.sleep(1.0)
+
+    investigation_3 = True
+    # Investigation 3: Test Pinocchio IK
+    if investigation_3:
+        from stretch.motion.pinocchio_ik_solver import PinocchioIKSolver
+
+        urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
+        ee_link = "link_grasp_center"
+        # Note the distal telescoping joint is meant to act as all of them.
+        all_joints = [
+            "joint_mobile_base_rotation",
+            "joint_lift",
+            "joint_arm_l0",
+            "joint_wrist_yaw",
+            "joint_wrist_pitch",
+            "joint_wrist_roll",
+        ]
+        controllable_joints = [
+            "joint_mobile_base_rotation",
+            "joint_lift",
+            "joint_arm_l0",
+            # "joint_wrist_yaw",
+            # "joint_wrist_pitch",
+            # "joint_wrist_roll"
+        ]
+        ik_solver = PinocchioIKSolver(urdf_abs_path, ee_link, controllable_joints)
+        # raise Exception(list(ik_solver.model.names), ik_solver.model.nq)
+
+        # Hardcoded joint limits
+        joint_limits = {
+            "joint_head_tilt": [-2.050932313403102, 0.440252486123179],
+            "joint_head_pan": [-4.011359760320952, 1.6597672124922638],
+            "joint_lift": [0.0, 1.100079983666348],
+            "joint_wrist_pitch": [-1.5707963267948966, 0.45099035163837853],
+            "joint_arm_l0": [
+                0.0,
+                0.5149896872699868,
+            ],  # NOTE: The actual joint limits message had this for "joint_arm" instead
+            "joint_wrist_roll": [-2.9114955354069467, 2.9176314585584895],
+            "joint_wrist_yaw": [-1.227184630308513, 4.5003161364595],
+            "gripper_aperture": [-0.12857142857142856, 0.28998923573735197],
+            "joint_gripper_finger_left": [-0.3759398496240601, 0.8479217419220817],
+            "joint_gripper_finger_right": [-0.3759398496240601, 0.8479217419220817],
+        }
+
+        non_wrist_init = {
+            "joint_mobile_base_rotation": 0.0,
+            "joint_lift": 0.0,  # 0.6957399712989648,
+            "joint_arm_l0": 0.0,
+        }
+        vertical_grasp_wrist = {
+            "joint_wrist_yaw": 0.0,  # -0.1195226697227562,
+            "joint_wrist_pitch": -np.pi / 2.0,  # -1.560058461279697,
+            "joint_wrist_roll": 0.0,  # -0.009203884727313847,
+        }
+        horizontal_grasp_wrist = {
+            "joint_wrist_yaw": 0.0,  # -0.009587379924285258,
+            "joint_wrist_pitch": 0.0,  # -0.03681553890925539,
+            "joint_wrist_roll": 0.0,  # -0.0015339807878856412,
+        }
+        goals = [
+            # Should not be reachable. This is a pose above a tennis ball a bit too far behind the robot. Vertical grasp.
+            # Goal pose in base link frame: geometry_msgs.msg.PoseStamped(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1717621762, nanosec=82198975), frame_id='base_link'), pose=geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.6382754335421884, y=-0.23710846176695716, z=0.12130922975443773), orientation=geometry_msgs.msg.Quaternion(x=0.6959541333313253, y=0.1250913438214004, z=-0.6959541333313254, w=0.12509134382140044)))
+            {
+                "q_init": non_wrist_init | vertical_grasp_wrist,
+                "pos": [-0.6382754335421884, -0.23710846176695716, 0.12130922975443773],
+                "quat": [
+                    0.6959541333313253,
+                    0.1250913438214004,
+                    -0.6959541333313254,
+                    0.12509134382140044,
+                ],
+                "reachable": False,
+            },
+            # Should be reachable. Similar to the above, but the tennis ball is closer. Vertical grasp.
+            # Goal pose in base link frame: geometry_msgs.msg.PoseStamped(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1717625858, nanosec=865458496), frame_id='base_link'), pose=geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.45058882040516846, y=-0.21159535596143234, z=0.10690844806130442), orientation=geometry_msgs.msg.Quaternion(x=0.6901383786048245, y=0.1539773307234015, z=-0.6901383786048246, w=0.1539773307234015)))
+            {
+                "q_init": non_wrist_init | vertical_grasp_wrist,
+                "pos": [
+                    -0.45058882040516846,
+                    -0.21159535596143234,
+                    0.10690844806130442,
+                ],
+                "quat": [
+                    0.6901383786048245,
+                    0.1539773307234015,
+                    -0.6901383786048246,
+                    0.1539773307234015,
+                ],
+                "reachable": True,
+            },
+            # Should be reachable. An object on the table in front of the arm. Horizontal grasp.
+            # Goal pose in base link frame: geometry_msgs.msg.PoseStamped(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1717621522, nanosec=842120361), frame_id='base_link'), pose=geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.053576778904789735, y=-0.5557921114276037, z=0.8378904578910882), orientation=geometry_msgs.msg.Quaternion(x=-0.0, y=-0.0, z=-0.7402541362529396, w=0.6723271627417818)))
+            {
+                "q_init": non_wrist_init | horizontal_grasp_wrist,
+                "pos": [-0.053576778904789735, -0.5557921114276037, 0.8378904578910882],
+                "quat": [0.0, 0.0, -0.7402541362529396, 0.6723271627417818],
+                "reachable": True,
+            },
+            # Should not be reachable. This is the plastic box, and is too far from the robot. Horizontal grasp.
+            # Goal pose in base link frame: geometry_msgs.msg.PoseStamped(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=1717621655, nanosec=803832275), frame_id='base_link'), pose=geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.5007274996562687, y=0.38194357599373563, z=0.24187051527438452), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.1242851503754816, w=0.9922465426476144)))
+            {
+                "q_init": non_wrist_init | horizontal_grasp_wrist,
+                "pos": [1.5007274996562687, 0.38194357599373563, 0.24187051527438452],
+                "quat": [0.0, 0.0, 0.1242851503754816, 0.9922465426476144],
+                "reachable": False,
+            },
+        ]
+        # Takes < 10ms each, while the web app code is running latently in the background.
+        for i, goal in enumerate(goals):
+            start_time = time.time()
+            q_init = np.array([goal["q_init"][joint] for joint in controllable_joints])
+            pos = np.array(goal["pos"])
+            quat = np.array(goal["quat"])
+            reachable = goal["reachable"]
+            ik_solver.q_neutral = np.array(
+                [goal["q_init"][joint] for joint in all_joints]
+            )
+            q, success, debug_info = ik_solver.compute_ik(pos, quat, q_init=q_init)
+            joint_positions = dict(zip(controllable_joints, q))
+            for joint_name, joint_position in joint_positions.items():
+                if joint_name in joint_limits:
+                    if (
+                        not joint_limits[joint_name][0]
+                        <= joint_position
+                        <= joint_limits[joint_name][1]
+                    ):
+                        print(f"Joint {joint_name} out of bounds: {joint_position}")
+                        success = False
+            duration = time.time() - start_time
+            print(f"Goal {i}")
+            print("    Goal Pose:", pos, quat)
+            print("    Expected:", goal["reachable"], "Actual:", success)
+            print("    Joint Values:", joint_positions)
+            print("    Debug Info:", debug_info)
+            print("    Duration:", duration)

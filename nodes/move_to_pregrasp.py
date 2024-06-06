@@ -60,6 +60,7 @@ class MoveToPregraspState(Enum):
         """
         if self != MoveToPregraspState.TERMINAL:
             return MoveToPregraspState(self.value + 1)
+        return MoveToPregraspState.TERMINAL
 
 
 class MoveToPregraspNode(Node):
@@ -106,11 +107,13 @@ class MoveToPregraspNode(Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
         # Create the inverse jacobian controller to execute motions
-        self.controller = StretchIKControl(self, self.tf_buffer)
+        # TODO: Figure out where the URDF should go!
+        urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
+        self.controller = StretchIKControl(self, self.tf_buffer, urdf_abs_path)
 
         # Subscribe to the Realsense's RGB, pointcloud, and camera info feeds
         self.latest_realsense_msgs_lock = threading.Lock()
-        self.latest_realsense_msgs = None
+        self.latest_realsense_msgs: Optional[Tuple[Image, PointCloud2]] = None
         camera_rgb_subscriber = message_filters.Subscriber(
             self,
             Image,
@@ -393,7 +396,7 @@ class MoveToPregraspNode(Node):
                             }
                         )
                 elif state == MoveToPregraspState.ROTATE_BASE:
-                    articulated_joints += [StretchIKControl.JOINT_BASE_REVOLUTION]
+                    articulated_joints += [StretchIKControl.JOINT_BASE_ROTATION]
                 elif state == MoveToPregraspState.MOVE_ARM:
                     if horizontal_grasp:
                         articulated_joints += [
@@ -405,7 +408,7 @@ class MoveToPregraspNode(Node):
                         ]
                 if len(articulated_joints) > 0:
                     future = self.executor.create_task(
-                        self.controller.move_to_end_effector_pose(
+                        self.controller.move_to_ee_pose_inverse_jacobian(
                             goal=goal_pose,
                             articulated_joints=articulated_joints,
                             termination=TerminationCriteria.ZERO_VEL,
@@ -654,6 +657,8 @@ class MoveToPregraspNode(Node):
             goal_pose_base.pose.position.x, goal_pose_base.pose.position.y = xy
         else:
             goal_pose_base.pose.position.z += self.DISTANCE_TO_OBJECT
+
+        self.get_logger().info(f"Goal pose in base link frame: {goal_pose_base}")
 
         # Convert the goal pose to the odom frame so it stays fixed even as the robot moves
         try:

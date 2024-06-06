@@ -1,15 +1,9 @@
 """
-This module contains an implementation of FK, IK, and inverse jacobian control
-for the Stretch robot. In order to include base rotation, this
-controller adds a fake revolute joint between the the base and mast.
-This approach is inspired from:
-https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
+This module contains the StretchIKControl class, which allows users to compute Stretch's FK and IK,
+command the robot using an inverse Jacobian velocity controller, and command the arm to a desired pose.
 
-Note that because the ROS2 interface currently only provides velocity control
-for the base and position control for the arm, the inverse jacobian control:
-  (a) Moves the base separately from the arm, as the drivers do not allow the
-      position and velocity hardware interfaces to be claimed simultaneously.
-  (b) Forward-projects velocity commands to the arm into position commands.
+Parts of this approach are inspired from:
+https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
 """
 # Standard Imports
 import asyncio
@@ -20,7 +14,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 # Third-Party Imports
 import numpy as np
 import numpy.typing as npt
-import PyKDL as kdl
+import pinocchio
 import rclpy
 import tf2_py as tf2
 import tf2_ros
@@ -35,6 +29,7 @@ from rclpy.node import Node
 from rclpy.task import Future
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Trigger
+from stretch.motion.pinocchio_ik_solver import PinocchioIKSolver
 from stretch_body.robot_params import RobotParams
 from tf2_geometry_msgs import PoseStamped
 from tf_transformations import (
@@ -51,7 +46,7 @@ from urdf import treeFromString
 
 class ControlMode(Enum):
     """
-    The control modes for the inverse Jacobian controller.
+    The control modes for the Stretch Driver.
     """
 
     POSITION = "position"
@@ -79,15 +74,15 @@ class TerminationCriteria(Enum):
     # Terminate when the error between the end-effector pose and the goal pose is (near) zero.
     # NOTE: This will not converge if the goal pose is unreachable.
     ZERO_ERR = "zero_err"
-    # TODO: Consider adding another termination criteria for if the joints don't move for n seconds.
-    # This becomes slightly challenging with the base though, since that relies on the odom -> base_link
-    # transform.
-    # TODO: Consider adding another that stops upon overshoot / sign change
+    # Stop commanding each joint once it has overshot its goal position.
+    # Terminate once all joints have overshot their goal positions.
+    OVERSHOOT = "overshoot"
 
 
 class StretchIKControl:
     """
-    This class implements an inverse Jacobian controller for the Stretch robot.
+    The StretchIKControl class allows users to compute Stretch's FK and IK, command the robot using an inverse
+    Jacobian velocity controller, and command the arm to a desired pose.
     """
 
     # Frames of reference
@@ -96,18 +91,13 @@ class StretchIKControl:
     FRAME_ODOM = "odom"
 
     # Joint names
-    JOINT_BASE_TRANSLATION = "joint_base_translation"
-    JOINT_BASE_REVOLUTION = "joint_base_revolution"
-    JOINTS_BASE = [
-        JOINT_BASE_TRANSLATION,
-        JOINT_BASE_REVOLUTION,
-    ]
+    JOINT_BASE_ROTATION = "joint_mobile_base_rotation"
     JOINT_ARM_LIFT = "joint_lift"
     JOINTS_ARM = [
-        "joint_arm_l3",
+        "joint_arm_l3",  # closest from base
         "joint_arm_l2",
         "joint_arm_l1",
-        "joint_arm_l0",
+        "joint_arm_l0",  # furthest from base
     ]
     JOINT_COMBINED_ARM = "joint_arm"
     JOINT_WRIST_YAW = "joint_wrist_yaw"
@@ -119,32 +109,57 @@ class StretchIKControl:
         self,
         node: Node,
         tf_buffer: tf2_ros.Buffer,
-        speed_profile: SpeedProfile = SpeedProfile.FAST,
+        urdf_path: str,
+        speed_profile: SpeedProfile = SpeedProfile.FAST,  # TODO: consider allowing users to set this in the message!
     ):
         """
-        Create the inverse Jacobian controller.
+        Create the StretchIKControl object.
 
-        Parameters
+        Parameters:
         ----------
         node: The ROS2 node that will run the controller.
         tf_buffer: The tf2 buffer to use to transform poses.
+        urdf_path: The path to the URDF file for the robot.
         speed_profile: The speed profile to use to get max velocities and accelerations.
         """
         # Store the parameters
         self.node = node
         self.tf_buffer = tf_buffer
+        self.urdf_path = urdf_path
         self.speed_profile = speed_profile
         self.initialized = False
 
-    def initialize(self) -> bool:
+    def initialize(self):
         """
-        Initialize the inverse Jacobian controller.
+        Initialize the StretchIKControl object.
         """
-        # Load the Jacobian solver
-        self.jacobian_joint_order = []
-        ok = self.__load_jacobian_solver()
-        if not ok:
-            return False
+        # Load the IK solver.
+        # We restrict IK to the base rotation, arm lift, and arm joints,
+        # to avoid non-ideal IK solutions that either take advantage of
+        # joint redundancies (e.g., base rotation and wrist yaw) or get
+        # stuck in the gimbal lock that occurs when the wrist pitch is
+        # -pi/2. Note that this also means we can only control the below
+        # joints with inverse jacobian control.
+        self.controllable_joints = [
+            self.JOINT_BASE_ROTATION,
+            self.JOINT_ARM_LIFT,
+            self.JOINTS_ARM[
+                -1
+            ],  # The URDF uses the most distal of the telescoping joints
+        ]
+        self.ik_solver = PinocchioIKSolver(
+            self.urdf_path, self.FRAME_END_EFFECTOR_LINK, self.controllable_joints
+        )
+        self.all_joints = [
+            self.ik_solver.model.names[i + 1] for i in range(self.ik_solver.model.nq)
+        ]
+        # Store the control gains
+        # NOTE: The CMU implementation had controller gains of 0.2 on the
+        # telescoping arm joints and 1.0 otherwise, but for this implementation
+        # 1.0 everywhere seems to work fine.
+        self.K = np.eye(len(self.all_joints), dtype=np.float64)
+        base_rotation_i = self.all_joints.index(self.JOINT_BASE_ROTATION)
+        self.K[base_rotation_i, base_rotation_i] = 3.0
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
@@ -183,9 +198,6 @@ class StretchIKControl:
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-        # # Initialize the control mode
-        # self.control_mode = None
-
         # Create a publisher and action client to command robot motion
         self.base_vel_pub = self.node.create_publisher(
             Twist,
@@ -201,116 +213,6 @@ class StretchIKControl:
         )
 
         self.initialized = True
-        return True
-
-    def __load_jacobian_solver(self, use_translation: bool = False) -> bool:
-        """
-        Load the Jacobian solver for the robot.
-
-        Note that this function blocks until the URDF is received.
-
-        Parameters
-        ----------
-        use_translation: Whether to include the translation joint.
-
-        Returns
-        -------
-        bool: True if the Jacobian solver was successfully loaded.
-        """
-        # Get the robot URDF.
-        robot_state_param_client = self.node.create_client(
-            GetParameters,
-            "robot_state_publisher/get_parameters",
-            callback_group=MutuallyExclusiveCallbackGroup(),
-        )
-        # TODO: Sometimes the below wait_for_service blocks indefinetely.
-        self.node.get_logger().info("Waiting for the robot state publisher...")
-        robot_state_param_client.wait_for_service()
-        response = robot_state_param_client.call(
-            GetParameters.Request(
-                names=["robot_description"],
-            )
-        )
-        urdf_string = response.values[0].string_value
-        if len(urdf_string) == 0:
-            self.node.get_logger().error("Failed to get robot URDF.")
-            return False
-        self.node.get_logger().info("Received the robot URDF string.")
-
-        # Load the URDF
-        ok, robot = treeFromString(urdf_string)
-        if not ok:
-            self.node.get_logger().error("Failed to load the URDF")
-            return False
-
-        # Get the original chain as specified in the URDF
-        orig_chain = robot.getChain(self.FRAME_BASE_LINK, self.FRAME_END_EFFECTOR_LINK)
-
-        # Prepend two "dummy links" to the chain: for base translation and revolution
-        chain = kdl.Chain()
-        if use_translation:
-            chain.addSegment(
-                kdl.Segment(
-                    name="link_base_translation",
-                    joint=kdl.Joint(
-                        name=self.JOINT_BASE_TRANSLATION,
-                        origin=kdl.Vector(0, 0, 0),
-                        axis=kdl.Vector(1, 0, 0),
-                        type=kdl.Joint.TransAxis,
-                    ),
-                    f_tip=kdl.Frame(),
-                    I=kdl.RigidBodyInertia(
-                        m=1.0,
-                        oc=kdl.Vector(0, 0, 0),
-                        Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
-                    ),
-                )
-            )
-        chain.addSegment(
-            kdl.Segment(
-                name="link_base_revolution",
-                joint=kdl.Joint(
-                    name=self.JOINT_BASE_REVOLUTION,
-                    origin=kdl.Vector(0, 0, 0),
-                    axis=kdl.Vector(0, 0, 1),
-                    type=kdl.Joint.RotAxis,
-                ),
-                f_tip=kdl.Frame(),
-                I=kdl.RigidBodyInertia(
-                    m=1.0,
-                    oc=kdl.Vector(0, 0, 0),
-                    Ic=kdl.RotationalInertia(1.0, 1.0, 1.0, 0.0, 0.0, 0.0),
-                ),
-            )
-        )
-        chain.addChain(orig_chain)
-        self.chain = chain
-
-        # Get the joint order
-        self.jacobian_joint_order = []
-        for i in range(self.chain.getNrOfSegments()):
-            joint = self.chain.getSegment(i).getJoint()
-            if joint.getType() != kdl.Joint.Fixed:
-                self.jacobian_joint_order.append(joint.getName())
-        self.JOINTS_ARM_I = [
-            self.jacobian_joint_order.index(joint_name)
-            for joint_name in self.JOINTS_ARM
-        ]
-
-        # Get the Jacobian solver and FK/IK solvers
-        self.jacobian_solver = kdl.ChainJntToJacSolver(self.chain)
-        self.fk_solver = kdl.ChainFkSolverPos_recursive(self.chain)
-        self.ik_vel_solver = kdl.ChainIkSolverVel_pinv(self.chain)
-        self.ik_solver = kdl.ChainIkSolverPos_NR(
-            self.chain, self.fk_solver, self.ik_vel_solver
-        )
-
-        # Store the control gains
-        # NOTE: The CMU implementation had controller gains of 0.2 on the
-        # telescoping arm joints and 1.0 otherwise, but for this implementation
-        # 1.0 everywhere seems to work fine.
-        self.K = np.eye(len(self.jacobian_joint_order), dtype=np.float64)
-
         return True
 
     def __load_joint_limits(self, speed_profile: SpeedProfile) -> bool:
@@ -338,7 +240,7 @@ class StretchIKControl:
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.node.get_logger().info("Waiting for the get joint states service...")
-        get_joint_limits_client.wait_for_service()
+        get_joint_limits_client.wait_for_service()  # TODO: This can block!
         response = get_joint_limits_client.call(Trigger.Request())
         if not response.success:
             self.node.get_logger().error("Failed to get joint limits.")
@@ -352,15 +254,10 @@ class StretchIKControl:
         self.joint_pos_lim: Dict[str, Tuple[float, float]] = {}
         self.joint_vel_abs_lim: Dict[str, Tuple[float, float]] = {}
 
-        # Get the velocity limits from the robot's parameters
-        for i, joint_name in enumerate(self.jacobian_joint_order):
+        # Get the velocity limits for the controllable joints
+        for i, joint_name in enumerate(self.controllable_joints):
             # Get the max velocity
-            if joint_name == self.JOINT_BASE_TRANSLATION:
-                max_abs_vel = robot_params["base"]["motion"][speed_profile_str]["vel_m"]
-                min_abs_vel = robot_params["base"]["motion"][speed_profile_slow_str][
-                    "vel_m"
-                ]
-            elif joint_name == self.JOINT_BASE_REVOLUTION:
+            if joint_name == self.JOINT_BASE_ROTATION:
                 # From https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
                 max_abs_vel = 0.5  # rad/s
                 min_abs_vel = 0.05  # rad/s
@@ -369,8 +266,11 @@ class StretchIKControl:
                 min_abs_vel = robot_params["lift"]["motion"][speed_profile_slow_str][
                     "vel_m"
                 ]
-            elif joint_name in self.JOINTS_ARM:
-                continue
+            elif joint_name == self.JOINTS_ARM[-1]:
+                max_abs_vel = robot_params["arm"]["motion"][speed_profile_str]["vel_m"]
+                min_abs_vel = robot_params["arm"]["motion"][speed_profile_slow_str][
+                    "vel_m"
+                ]
             elif joint_name == self.JOINT_WRIST_YAW:
                 max_abs_vel = robot_params["wrist_yaw"]["motion"][speed_profile_str][
                     "vel"
@@ -397,17 +297,8 @@ class StretchIKControl:
                 max_abs_vel = 0.0
                 min_abs_vel = 0.0
             self.joint_vel_abs_lim[joint_name] = (min_abs_vel, max_abs_vel)
-        combined_arm_max_abs_vel = robot_params["arm"]["motion"][speed_profile_str][
-            "vel_m"
-        ]
-        combined_arm_min_abs_vel = robot_params["arm"]["motion"][
-            speed_profile_slow_str
-        ]["vel_m"]
-        self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM] = (
-            combined_arm_min_abs_vel,
-            combined_arm_max_abs_vel,
-        )
 
+        # Get the position limits for all joints.
         with self.latest_joint_limits_lock:
             joint_pos_lim = self.latest_joint_limits
         if joint_pos_lim is None:
@@ -435,12 +326,6 @@ class StretchIKControl:
         msg: The joint state message.
         """
         with self.latest_joint_state_lock:
-            # self.latest_joint_state = [
-            #     msg.position[msg.name.index(joint_name)]
-            #     if joint_name in msg.name
-            #     else 0.0
-            #     for joint_name in self.jacobian_joint_order
-            # ]
             self.latest_joint_state = {
                 msg.name[i]: msg.position[i] for i in range(len(msg.name))
             }
@@ -468,6 +353,7 @@ class StretchIKControl:
         rate_hz: float = 10.0,
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
+        threshold_factor: float = 20.0,
     ) -> bool:
         """
         Move the arm joints to a specific position. This function is closed-loop, and
@@ -479,6 +365,9 @@ class StretchIKControl:
         rate_hz: The rate in Hz at which to control the robot.
         timeout_secs: The timeout in seconds.
         check_cancel: A function that returns True if the action should be cancelled.
+        threshold_factor: The factor by which to divide the joint range to get the tolerance.
+            A larger number results in a smaller tolerance and more precise motion. But
+            too large may result in the robot never reaching the target position.
 
         Returns
         -------
@@ -499,10 +388,7 @@ class StretchIKControl:
             timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
         )
 
-        # Combine the arm joint positions into one
-        self.node.get_logger().info(f"Joint Positions: {joint_positions}")
-        joint_positions = self.combine_arm(joint_positions)
-        self.node.get_logger().info(f"Combined Joint Positions: {joint_positions}")
+        self.node.get_logger().info(f" Joint Positions: {joint_positions}")
 
         # The duration of each trajectory command
         duration = 1.0  # seconds
@@ -531,7 +417,7 @@ class StretchIKControl:
                         tolerance = 0.05
                         if joint_name in self.joint_pos_lim:
                             min_pos, max_pos = self.joint_pos_lim[joint_name]
-                            tolerance = (max_pos - min_pos) / 20.0
+                            tolerance = (max_pos - min_pos) / threshold_factor
                         if abs(joint_err) > tolerance:
                             joint_positions_cmd[joint_name] = joint_position
 
@@ -559,7 +445,7 @@ class StretchIKControl:
 
         return not check_cancel()
 
-    async def move_to_end_effector_pose(
+    async def move_to_ee_pose_inverse_jacobian(
         self,
         goal: PoseStamped,
         articulated_joints: List[str],
@@ -600,11 +486,11 @@ class StretchIKControl:
         start_time = self.node.get_clock().now()
         timeout = Duration(seconds=timeout_secs)
 
-        # Check the articulated joints. Base and arm/wrist joints cannot co-exist.
+        # Check the articulated joints.
         articulated_joints = [
             joint_name
             for joint_name in articulated_joints
-            if joint_name in self.jacobian_joint_order
+            if joint_name in self.controllable_joints
         ]
         if len(articulated_joints) == 0:
             self.node.get_logger().error("No articulated joints specified.")
@@ -616,15 +502,15 @@ class StretchIKControl:
                 )
                 return False
         non_articulated_joints_mask = np.array(
-            [
-                joint_name not in articulated_joints
-                for joint_name in self.jacobian_joint_order
-            ]
+            [joint_name not in articulated_joints for joint_name in self.all_joints]
         )
+
+        # Ensure we are only moving either the base (velocity control) or the arm
+        # (position control).
         move_base = False
         move_arm = False
         for joint_name in articulated_joints:
-            if joint_name in self.JOINTS_BASE:
+            if joint_name == self.JOINT_BASE_ROTATION:
                 move_base = True
             else:
                 move_arm = True
@@ -641,23 +527,10 @@ class StretchIKControl:
         )
 
         # Convert the goal pose to the odom frame, so it stays stationary as the robot moves.
-        try:
-            goal_odom = self.tf_buffer.transform(
-                goal,
-                self.FRAME_ODOM,
-                remaining_time(self.node.get_clock().now(), start_time, timeout),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as e:
-            self.node.get_logger().error(
-                f"Failed to transform goal pose to odom frame: {e}"
-            )
+        ok, goal_odom = self.__transform_pose(
+            goal, self.FRAME_ODOM, start_time, timeout
+        )
+        if not ok:
             return False
 
         # TODO: Remove!
@@ -690,12 +563,16 @@ class StretchIKControl:
             self.node.get_logger().info(f" Error: {err}")
 
             # Get the current joint state
-            q = self.__get_kdl_joint_array()
+            q = self.__get_current_joints(all_joints=True)
 
             # Get the Jacobian matrix for the chain
-            J = kdl.Jacobian(len(self.jacobian_joint_order))
-            self.jacobian_solver.JntToJac(q, J)
-            J = jacobian_to_np(J)
+            J = pinocchio.computeFrameJacobian(
+                self.ik_solver.model,
+                self.ik_solver.data,
+                q,
+                self.ik_solver.ee_frame_idx,
+                pinocchio.ReferenceFrame.LOCAL,
+            )
             self.node.get_logger().info(f" Jacobian: {J}")
 
             # Mask the Jacobian matrix to only include the articulated joints
@@ -711,7 +588,7 @@ class StretchIKControl:
             # Calculate the joint velocities
             vel = self.K @ J_pinv @ err
             self.node.get_logger().info(
-                f" Joint Velocities: {list(zip(self.jacobian_joint_order, vel))}"
+                f" Joint Velocities: {list(zip(self.controllable_joints, vel))}"
             )
 
             # Execute the velocities
@@ -760,6 +637,46 @@ class StretchIKControl:
         # self.control_mode = control_mode
         return True
 
+    def __transform_pose(
+        self, pose: PoseStamped, target_frame: str, start_time: Time, timeout: Duration
+    ) -> Tuple[bool, PoseStamped]:
+        """
+        Transform a pose stamped to the target frame.
+
+        Note that this function may destructively modify the input pose.
+
+        Parameters
+        ----------
+        pose: The pose to transform.
+        target_frame: The target frame.
+        start_time: The start time.
+        timeout: The timeout.
+
+        Returns
+        -------
+        PoseStamped: The transformed pose.
+        """
+        try:
+            pose_transformed = self.tf_buffer.transform(
+                pose,
+                target_frame,
+                remaining_time(self.node.get_clock().now(), start_time, timeout),
+            )
+        except (
+            tf2.ConnectivityException,
+            tf2.ExtrapolationException,
+            tf2.InvalidArgumentException,
+            tf2.LookupException,
+            tf2.TimeoutException,
+            tf2.TransformException,
+        ) as e:
+            self.node.get_logger().error(
+                f"Failed to transform pose {pose} to frame {target_frame}: {e}"
+            )
+            return False, PoseStamped()
+
+        return True, pose_transformed
+
     def __reached_termination(
         self,
         termination: TerminationCriteria,
@@ -787,20 +704,16 @@ class StretchIKControl:
             # velocity is lower than their slowest speed (because after
             # that point, they will no longer move).
             retval = True
-            for i, joint_name in enumerate(self.jacobian_joint_order):
-                if joint_name in self.JOINTS_ARM:
-                    continue
+            for i, joint_name in enumerate(self.controllable_joints):
                 abs_vel = np.abs(vel[i])
                 if abs_vel > self.joint_vel_abs_lim[joint_name][0]:
                     retval = False
                     break
-            arm_vel = sum(vel[self.JOINTS_ARM_I])
-            if arm_vel > self.joint_vel_abs_lim[self.JOINT_COMBINED_ARM][0]:
-                retval = False
             self.node.get_logger().info(f" Reached Termination {retval}")
             return retval
         elif termination == TerminationCriteria.ZERO_ERR:
             return np.allclose(err, 0.0, atol=1.0e-2)
+        # TODO: Implement overshoot-based termination.
         else:
             self.node.get_logger().error(f"Unknown termination criteria: {termination}")
             return True  # auto-terminate
@@ -829,61 +742,41 @@ class StretchIKControl:
         start_time = self.node.get_clock().now()
 
         # Get the current end effector pose in base frame
-        try:
-            ee_transform = self.tf_buffer.lookup_transform(
-                self.FRAME_BASE_LINK,
-                self.FRAME_END_EFFECTOR_LINK,
-                Time(),
-                timeout=remaining_time(
-                    self.node.get_clock().now(), start_time, timeout
-                ),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
-            self.node.get_logger().error(f"Failed to lookup transform: {error}")
+        ee_origin = PoseStamped()
+        ee_origin.header.frame_id = self.FRAME_END_EFFECTOR_LINK
+        ee_origin.header.stamp = Time()  # Get the most recent transform
+        ee_origin.pose.orientation.w = 1.0
+        ok, ee_base = self.__transform_pose(
+            ee_origin,
+            self.FRAME_BASE_LINK,
+            start_time,
+            timeout,
+        )
+        if not ok:
             return False, np.zeros(6)
 
         # Get the goal end effector pose in base frame
-        try:
-            goal.header.stamp = Time()  # Get the most recent transform
-            goal_base = self.tf_buffer.transform(
-                goal,
-                self.FRAME_BASE_LINK,
-                timeout=remaining_time(
-                    self.node.get_clock().now(), start_time, timeout
-                ),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
-            self.node.get_logger().error(f"Failed to transform goal pose: {error}")
+        goal.header.stamp = Time()  # Get the most recent transform
+        ok, goal_base = self.__transform_pose(
+            goal, self.FRAME_BASE_LINK, start_time, timeout
+        )
+        if not ok:
             return False, np.zeros(6)
 
         # Get the error in base frame
         err = np.zeros(6, dtype=np.float64)
         err[:3] = np.array(
             [
-                goal_base.pose.position.x - ee_transform.transform.translation.x,
-                goal_base.pose.position.y - ee_transform.transform.translation.y,
-                goal_base.pose.position.z - ee_transform.transform.translation.z,
+                goal_base.pose.position.x - ee_base.pose.position.x,
+                goal_base.pose.position.y - ee_base.pose.position.y,
+                goal_base.pose.position.z - ee_base.pose.position.z,
             ]
         )
         ee_quaternion = [
-            ee_transform.transform.rotation.x,
-            ee_transform.transform.rotation.y,
-            ee_transform.transform.rotation.z,
-            ee_transform.transform.rotation.w,
+            ee_base.pose.orientation.x,
+            ee_base.pose.orientation.y,
+            ee_base.pose.orientation.z,
+            ee_base.pose.orientation.w,
         ]
         goal_quaternion = [
             goal_base.pose.orientation.x,
@@ -909,6 +802,7 @@ class StretchIKControl:
         move_arm: bool,
         additional_joint_positions: Dict[str, float] = {},
         rate_hz: float = 10.0,
+        forward_project_velocities_secs: float = 0.5,
     ) -> bool:
         """
         Send the velocities to the ROS2 controllers.
@@ -921,6 +815,8 @@ class StretchIKControl:
         additional_joint_positions: The joint names and positions here will be appended to the
             articulated joints when commanding arm motion.
         rate_hz: The rate in Hz at which to control the robot.
+        forward_project_velocities_secs: How many seconds to forward-project velocities for
+            when commanding the arm in position mode.
 
         Returns
         -------
@@ -941,39 +837,34 @@ class StretchIKControl:
         ):
             return True
 
-        # Combine the arm velocities into one
-        joint_velocities = dict(zip(self.jacobian_joint_order, velocities))
-        joint_velocities = self.combine_arm(joint_velocities)
-
         # Clip the velocities
+        joint_velocities = dict(zip(self.controllable_joints, velocities))
         _, clipped_velocities = self.check_velocity_limits(joint_velocities)
 
         # Send base commands
         if move_base:
             base_vel = Twist()
-            if self.JOINT_BASE_TRANSLATION in clipped_velocities:
-                base_vel.linear.x = clipped_velocities[self.JOINT_BASE_TRANSLATION]
-            if self.JOINT_BASE_REVOLUTION in clipped_velocities:
-                base_vel.angular.z = clipped_velocities[self.JOINT_BASE_REVOLUTION]
+            base_vel.angular.z = clipped_velocities[self.JOINT_BASE_ROTATION]
             self.base_vel_pub.publish(base_vel)
             return True
 
         # Send arm commands
-        duration = 5.0 / rate_hz  # seconds, how long to forward-project velocities for
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
         joint_positions = {}
         for joint_name, vel in clipped_velocities.items():
             if (
-                joint_name not in self.JOINTS_BASE
+                joint_name != self.JOINT_BASE_ROTATION
                 and joint_name in latest_joint_state
                 and not np.isclose(clipped_velocities[joint_name], 0.0)
             ):
                 pos = latest_joint_state[joint_name]
-                joint_positions[joint_name] = pos + vel * duration
+                joint_positions[joint_name] = (
+                    pos + vel * forward_project_velocities_secs
+                )
         joint_positions.update(additional_joint_positions)
         self.arm_client_future = self.__command_move_to_joint_position(
-            joint_positions, duration
+            joint_positions, forward_project_velocities_secs
         )
 
         return True
@@ -997,6 +888,12 @@ class StretchIKControl:
         _, joint_positions = self.check_joint_limits(joint_positions)
         self.node.get_logger().info(f"Commanding arm to {joint_positions}")
 
+        # Replace the distal arm joint with the combined joint
+        if self.JOINTS_ARM[-1] in joint_positions:
+            joint_positions[self.JOINT_COMBINED_ARM] = joint_positions.pop(
+                self.JOINTS_ARM[-1]
+            )
+
         # Create the goal
         arm_goal = FollowJointTrajectory.Goal()
         arm_goal.trajectory.joint_names = list(joint_positions.keys())
@@ -1007,36 +904,6 @@ class StretchIKControl:
         ).to_msg()
         self.node.get_logger().info(f"Commanding arm to {arm_goal}")
         return self.arm_client.send_goal_async(arm_goal)
-
-    def combine_arm(self, joint_values: Dict[str, float]) -> Dict[str, float]:
-        """
-        Combine the telescoping arm joints into a single joint.
-
-        Parameters
-        ----------
-        joint_values: The joint values.
-
-        Returns
-        -------
-        Dict[str, float]: The joint values with the telescoping arm joints combined.
-        """
-        combined_values = {
-            name: value
-            for name, value in joint_values.items()
-            if name not in self.JOINTS_ARM
-        }
-        arm_pos = [
-            joint_values[joint_name]
-            for joint_name in self.JOINTS_ARM
-            if joint_name in joint_values
-        ]
-        if len(arm_pos) == len(self.JOINTS_ARM):
-            combined_values[self.JOINT_COMBINED_ARM] = sum(arm_pos)
-        elif len(arm_pos) > 0:
-            self.node.get_logger().warn(
-                "Not all arm joints are present. Cannot combine arm joints."
-            )
-        return combined_values
 
     def check_joint_limits(
         self,
@@ -1068,12 +935,9 @@ class StretchIKControl:
                 if clip:
                     clipped_joint_positions[joint_name] = np.clip(pos, min_pos, max_pos)
             else:
-                if (
-                    joint_name not in self.JOINTS_BASE
-                    and joint_name != self.JOINT_GRIPPER
-                ):
+                if joint_name != self.JOINT_GRIPPER:
                     self.node.get_logger().warn(
-                        f"Unknown joint name: {joint_name}. Be sure to combine arm joints."
+                        f"Unknown joint name: {joint_name}. Won't clip positions."
                     )
                 clipped_joint_positions[joint_name] = pos
 
@@ -1118,12 +982,9 @@ class StretchIKControl:
                     else:
                         clipped_joint_velocities[joint_name] = 0.0
             else:
-                if (
-                    joint_name not in self.JOINTS_BASE
-                    and joint_name != self.JOINT_GRIPPER
-                ):
+                if joint_name != self.JOINT_GRIPPER:
                     self.node.get_logger().warn(
-                        f"Unknown joint name: {joint_name}. Be sure to combine arm joints."
+                        f"Unknown joint name: {joint_name}. Won't clip velocities."
                     )
                 clipped_joint_velocities[joint_name] = vel
 
@@ -1131,7 +992,7 @@ class StretchIKControl:
 
     def solve_ik(
         self,
-        goal: Union[Pose, PoseStamped],
+        goal: PoseStamped,
         joint_position_overrides: Dict[str, float] = {},
     ) -> Tuple[bool, Dict[str, float]]:
         """
@@ -1149,131 +1010,89 @@ class StretchIKControl:
         -------
         Dict[str, float]: The joint positions.
         """
+        # Convert the goal to base link frame
+        if goal.header.frame_id != self.FRAME_BASE_LINK:
+            ok, goal_base = self.__transform_pose(
+                goal,
+                self.FRAME_BASE_LINK,
+                self.node.get_clock().now(),
+                Duration(seconds=0.5),
+            )
+            if not ok:
+                return False, {}
+        else:
+            goal_base = goal
+
         # Get the inputs
-        p_in = ros_pose_to_kdl_frame(goal)
-        q_in = self.__get_kdl_joint_array(joint_position_overrides)
-        q_out = kdl.JntArray(len(self.jacobian_joint_order))
+        pos = np.array(
+            [
+                goal_base.pose.position.x,
+                goal_base.pose.position.y,
+                goal_base.pose.position.z,
+            ]
+        )
+        quat = np.array(
+            [
+                goal_base.pose.orientation.x,
+                goal_base.pose.orientation.y,
+                goal_base.pose.orientation.z,
+                goal_base.pose.orientation.w,
+            ]
+        )
+        q_controllable = self.__get_current_joints(joint_position_overrides)
+        q_all = self.__get_current_joints(joint_position_overrides, all_joints=True)
+
+        # Set the positions that are used for non-controllable joints
+        self.ik_solver.q_neutral = q_all
 
         # Solve the IK problem
-        ok = self.ik_solver.CartToJnt(q_in, p_in, q_out)
-        if ok == 0:  # E_NOERROR
-            out_positions = {
-                joint_name: q_out[i]
-                for i, joint_name in enumerate(self.jacobian_joint_order)
-            }
-            self.node.get_logger().info(f"Initial IK Solution: {out_positions}")
-            out_positions = self.combine_arm(out_positions)
-            out_positions = self.standardize_radians(out_positions)
-            self.node.get_logger().info(f"Standardized IK Solution: {out_positions}")
-            within_limits, _ = self.check_joint_limits(out_positions, clip=False)
+        q, success, _ = self.ik_solver.compute_ik(pos, quat, q_init=q_controllable)
+        if success:
+            # Check whether the controllable joints are within their limits
+            joint_positions = dict(zip(self.controllable_joints, q))
+            within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
             if within_limits:
-                return True, out_positions
+                return True, joint_positions
 
         return False, {}
 
-    def solve_fk(
-        self,
-        joint_position_overrides: Dict[str, float] = {},
-    ) -> Tuple[bool, npt.NDArray[np.float64]]:
+    def __get_current_joints(
+        self, joint_position_overrides: Dict[str, float] = {}, all_joints: bool = False
+    ) -> npt.NDArray[np.float64]:
         """
-        Solve the forward kinematics problem.
-
-        TODO: IMPLEMENT AND TEST!!!
+        Get the current states of the controllable joints.
 
         Parameters
         ----------
-        joint_position_overrides: joint positions to use. Any joint positions
-            not in here will use the latest joint state.
+        joint_position_overrides: override the joint positions with these values.
+        all_joints: whether to use all joints or only the controllable ones.
 
         Returns
         -------
-        npt.NDArray[np.float64]: The end effector pose, (x, y, z, roll, pitch, yaw).
+        npt.NDArray: The joint positions
         """
-        p_out = kdl.Frame()
-        ok = self.fk_solver.JntToCart()
-        pass
+        # Determine which joints we are returning
+        if all_joints:
+            joints = self.all_joints
+        else:
+            joints = self.controllable_joints
 
-    def standardize_radians(
-        self, joint_positions: Dict[str, float]
-    ) -> Dict[str, float]:
-        """
-        Standardize the joint positions to be within the correct range for their joint limits.
-
-        Parameters
-        ----------
-        joint_positions: The joint positions.
-
-        Returns
-        -------
-        Dict[str, float]: The standardized joint positions.
-        """
-        radian_joints = [
-            self.JOINT_BASE_REVOLUTION,
-            self.JOINT_WRIST_YAW,
-            self.JOINT_WRIST_PITCH,
-            self.JOINT_WRIST_ROLL,
-        ]
-        standardized_positions = {}
-        for joint_name, pos in joint_positions.items():
-            if joint_name in radian_joints:
-                standardized_position = np.mod(pos + np.pi, 2 * np.pi)
-                if (
-                    joint_name in self.joint_pos_lim
-                    and standardized_position > self.joint_pos_lim[joint_name][1]
-                ):
-                    standardized_position -= 2 * np.pi
-            else:
-                standardized_position = pos
-            standardized_positions[joint_name] = standardized_position
-        return standardized_positions
-
-    def __get_kdl_joint_array(
-        self, joint_position_overrides: Dict[str, float] = {}
-    ) -> kdl.JntArray:
-        """
-        Get a KDL joint array from the latest joint state and the joint position overrides.
-
-        Parameters
-        ----------
-        joint_position_overrides: The joint position overrides.
-
-        Returns
-        -------
-        kdl.JntArray: The KDL joint array.
-        """
+        # Get the latest joints
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
-        joint_positions = {}
-        for joint_name in self.jacobian_joint_order:
+
+        # Get the positions
+        joint_positions = []
+        for joint_name in joints:
             if joint_name in joint_position_overrides:
-                joint_positions[joint_name] = joint_position_overrides[joint_name]
+                joint_positions.append(joint_position_overrides[joint_name])
             elif joint_name in latest_joint_state:
-                joint_positions[joint_name] = latest_joint_state[joint_name]
+                joint_positions.append(latest_joint_state[joint_name])
             else:
                 # Set dummy joints to 0.0
-                joint_positions[joint_name] = 0.0
-        return np_to_joint_array(
-            np.array(
-                [
-                    latest_joint_state[name] if name in latest_joint_state else 0.0
-                    for name in self.jacobian_joint_order
-                ]
-            )
-        )
+                joint_positions.append(0.0)
 
-    @property
-    def articulable_joints(self) -> List[str]:
-        """
-        Get the articulable joints.
-
-        Returns
-        -------
-        List[str]: The articulable joints.
-        """
-        if len(self.jacobian_joint_order) == 0:
-            self.node.get_logger().error("Jacobian solver not loaded.")
-            return []
-        return self.jacobian_joint_order
+        return np.array(joint_positions, dtype=np.float64)
 
 
 def remaining_time(
@@ -1298,124 +1117,3 @@ def remaining_time(
     if return_secs:
         return diff.nanoseconds / 1.0e9
     return diff
-
-
-def jacobian_to_np(J: kdl.Jacobian) -> npt.NDArray[np.float64]:
-    """
-    Convert a KDL Jacobian to a numpy array.
-
-    Parameters
-    ----------
-    J: The KDL Jacobian.
-
-    Returns
-    -------
-    npt.NDArray[np.float64]: The Jacobian as a numpy array.
-    """
-    return np.array([[J[i, j] for j in range(J.columns())] for i in range(J.rows())])
-
-
-def np_to_joint_array(joint_state: npt.NDArray[np.float64]) -> kdl.JntArray:
-    """
-    Convert a numpy array to a KDL joint array.
-
-    Parameters
-    ----------
-    joint_state: The numpy array.
-
-    Returns
-    -------
-    kdl.JntArray: The KDL joint array.
-    """
-    q = kdl.JntArray(len(joint_state))
-    for i, q_i in enumerate(joint_state):
-        q[i] = q_i
-    return q
-
-
-def ros_pose_to_kdl_frame(pose: Union[Pose, PoseStamped]) -> kdl.Frame:
-    """
-    Convert a ROS pose to a numpy array of (x, y, z, roll, pitch , yaw).
-
-    Parameters
-    ----------
-    pose: The ROS pose.
-
-    Returns
-    -------
-    kdl.Frame: The KDL frame corresponding to the pose
-    """
-    if isinstance(pose, PoseStamped):
-        pose = pose.pose
-    R = np.array(
-        quaternion_matrix(
-            [
-                pose.orientation.x,
-                pose.orientation.y,
-                pose.orientation.z,
-                pose.orientation.w,
-            ]
-        )
-    )[:3, :3].flatten()
-    return kdl.Frame(
-        R=kdl.Rotation(*R),
-        V=kdl.Vector(
-            pose.position.x,
-            pose.position.y,
-            pose.position.z,
-        ),
-    )
-
-
-def kdl_chain_fix_joints(chain: kdl.Chain, fixed_joints: List[str]) -> kdl.Chain:
-    """
-    Takes in a KDL chain, and returns a new chain with the specified joints fixed.
-
-    Parameters
-    ----------
-    chain: The KDL chain.
-    fixed_joints: The list of joint names to fix.
-
-    Returns
-    -------
-    kdl.Chain: The fixed KDL chain.
-    """
-
-    fixed_chain = kdl.Chain()
-    for i in range(chain.getNrOfSegments()):
-        segment = chain.getSegment(i)
-        joint = segment.getJoint()
-        joint_type = (
-            kdl.Joint.Fixed
-            if (joint.getName() in fixed_joints or "Fixed" in joint.getTypeName())
-            else kdl.Joint.RotAxis
-            if "RotAxis" in joint.getTypeName()
-            else kdl.Joint.TransAxis
-        )
-        if joint_type == kdl.Joint.Fixed:
-            new_joint = kdl.Joint(
-                name=joint.getName(),
-                type=joint_type,
-            )
-        else:
-            new_joint = kdl.Joint(
-                name=joint.getName(),
-                origin=joint.JointOrigin(),
-                axis=joint.JointAxis(),
-                type=joint_type,
-            )
-        try:
-            fixed_chain.addSegment(
-                kdl.Segment(
-                    name=segment.getName(),
-                    joint=new_joint,
-                    f_tip=segment.getFrameToTip(),
-                    I=segment.getInertia(),
-                )
-            )
-        except Exception as e:
-            raise Exception(
-                f"Failed to add joint {joint.getName()} {joint.getType()} {joint.getTypeName()} {joint_type}: {e}"
-            )
-
-    return fixed_chain
