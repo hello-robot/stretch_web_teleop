@@ -160,8 +160,8 @@ def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_
     elif (
         model == "SE3"
         and tool == "eoa_wrist_dw3_tool_tablet_12in"
-        and has_beta_teleop_kit == False
-        and has_nav_head_cam == True
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
     ):
         return "both", False, False, True
 
