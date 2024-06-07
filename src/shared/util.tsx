@@ -313,6 +313,13 @@ export const gripperProps = {
   fps: 6.0,
 };
 
+export const expandedGripperProps = {
+  width: 768, // 480
+  height: 768, // 480
+  scale: 1,
+  fps: 6.0,
+};
+
 export interface VideoProps {
   topicName: string;
   callback: (message: ROSCompressedImage) => void;

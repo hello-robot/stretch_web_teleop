@@ -131,7 +131,12 @@ export type CameraViewDefinition = ParentComponentDefinition & {
  * simultaneously, any change to this definition for one view will impact
  * all views.
  */
-export type GripperVideoStreamDef = CameraViewDefinition;
+export type GripperVideoStreamDef = CameraViewDefinition & {
+  /**
+   * Whether to display the expanded gripper view or the default one
+   */
+  expandedGripperView?: boolean;
+};
 
 /**
  * Definition for the fixed overhead stream component
