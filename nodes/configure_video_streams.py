@@ -1,42 +1,64 @@
 #!/usr/bin/env python3
 
+# Standard Imports
 import math
-import sys
+from typing import Dict, Optional, Tuple
 
+# Third-party Imports
 import cv2
 import message_filters
 import numpy as np
+import numpy.typing as npt
 import pcl
-import PyKDL
-import rclpy
+import PyKDL  # TODO: PyKDL is only used for pointcloud transforms and can be replaced with numpy.
 import ros2_numpy
 import tf2_py as tf2
 import tf2_ros
 import yaml
 from cv_bridge import CvBridge
+from geometry_msgs.msg import TransformStamped
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
 from rclpy.node import Node
+from rclpy.publisher import Publisher
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 from rclpy.time import Time
-
-# from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs.msg import CameraInfo, CompressedImage, Image, JointState, PointCloud2
 from std_srvs.srv import SetBool
 
 
-class ConfigureVideoStreams(Node):
+class ConfigureVideoStreams:
+    """
+    This class handles all the image streams for the web teleop node. This includes
+    getting the latest images (and exposing them to other parts of the web teleop
+    node), rotating/cropping/masking the images, and publishing the images for the
+    web interface to consume.
+    """
+
     BACKGROUND_COLOR = (200, 200, 200)
 
-    def __init__(self, params_file, has_beta_teleop_kit):
-        super().__init__("configure_video_streams")
+    def __init__(
+        self,
+        node: Node,
+        params_file: str,
+        has_beta_teleop_kit: bool,
+        tf_buffer: tf2_ros.Buffer,
+    ):
+        """
+        Initialize the ConfigureVideoStreams class.
 
+        Parameters
+        ----------
+        node: The ROS node that this class is a part of.
+        params_file: The path to the YAML file containing the image parameters.
+        has_beta_teleop_kit: Whether the robot has the beta teleop kit.
+        tf_buffer: The tf2_ros.Buffer object to use for transforming point clouds.
+        """
+        # Store the parameters
+        self.node = node
         with open(params_file, "r") as params:
             self.image_params = yaml.safe_load(params)
-
-        self.declare_parameter("has_beta_teleop_kit", rclpy.Parameter.Type.BOOL)
-
-        self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
-        self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.tf_buffer = tf_buffer
 
         # Loaded params for each video stream
         self.overhead_params = (
@@ -55,9 +77,9 @@ class ConfigureVideoStreams(Node):
         )
 
         # Stores all the images created using the loaded params
-        self.overhead_images = {}
-        self.realsense_images = {}
-        self.gripper_images = {}
+        self.overhead_images: Dict[str, npt.NDArray[np.uint8]] = {}
+        self.realsense_images: Dict[str, npt.NDArray[np.uint8]] = {}
+        self.gripper_images: Dict[str, npt.NDArray[np.uint8]] = {}
 
         self.realsense_rgb_image = None
         self.overhead_camera_rgb_image = None
@@ -69,43 +91,61 @@ class ConfigureVideoStreams(Node):
         self.P = None
 
         # Compressed Image publishers
-        self.publisher_realsense_cmp = self.create_publisher(
+        self.publisher_realsense_cmp = self.node.create_publisher(
             CompressedImage, "/camera/color/image_raw/rotated/compressed", 15
         )
-        self.publisher_overhead_cmp = self.create_publisher(
+        self.publisher_overhead_cmp = self.node.create_publisher(
             CompressedImage, "/navigation_camera/image_raw/rotated/compressed", 15
         )
-        self.publisher_gripper_cmp = self.create_publisher(
+        self.publisher_gripper_cmp = self.node.create_publisher(
             CompressedImage, "/gripper_camera/image_raw/cropped/compressed", 15
         )
-        self.publisher_expanded_gripper_cmp = self.create_publisher(
+        self.publisher_expanded_gripper_cmp = self.node.create_publisher(
             CompressedImage, "/gripper_camera/image_raw/expanded/compressed", 15
         )
 
         # Subscribers
+        # TODO: Move these to compressed image subscribers!
         self.camera_rgb_subscriber = message_filters.Subscriber(
-            self, Image, "/camera/color/image_raw"
+            self.node,
+            Image,
+            "/camera/color/image_raw",
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        self.overhead_camera_rgb_subscriber = self.create_subscription(
+        self.overhead_camera_rgb_subscriber = self.node.create_subscription(
             Image,
             "/navigation_camera/image_raw",
             self.navigation_camera_cb,
             QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE),
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        self.gripper_camera_rgb_subscriber = self.create_subscription(
-            Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1
+        self.gripper_camera_rgb_subscriber = self.node.create_subscription(
+            Image,
+            "/gripper_camera/image_raw",
+            self.gripper_camera_cb,
+            1,
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        self.joint_state_subscription = self.create_subscription(
-            JointState, "/stretch/joint_states", self.joint_state_cb, 1
+        # TODO: Get the joint state from Stretch Controls instead.
+        self.joint_state_subscription = self.node.create_subscription(
+            JointState,
+            "/stretch/joint_states",
+            self.joint_state_cb,
+            1,
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.point_cloud_subscriber = message_filters.Subscriber(
-            self, PointCloud2, "/camera/depth/color/points"
+            self.node,
+            PointCloud2,
+            "/camera/depth/color/points",
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        self.camera_info_subscriber = self.create_subscription(
+        self.camera_info_subscriber = self.node.create_subscription(
             CameraInfo,
             "/camera/aligned_depth_to_color/camera_info",
             self.camera_info_cb,
             1,
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer(
             [
@@ -119,16 +159,16 @@ class ConfigureVideoStreams(Node):
         self.camera_synchronizer.registerCallback(self.realsense_cb)
 
         # Default image perspectives
-        # self.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
+        # self.node.get_logger().info(f"wide_angle_cam={wide_angle_cam} d405={d405}")
         self.overhead_camera_perspective = (
             "fixed" if has_beta_teleop_kit else "wide_angle_cam"
         )
         self.realsense_camera_perspective = "default"
         self.gripper_camera_perspective = "default" if has_beta_teleop_kit else "d405"
-        self.get_logger().info(self.gripper_camera_perspective)
+        self.node.get_logger().info(self.gripper_camera_perspective)
 
         # Service for enabling the depth AR overlay on the realsense stream
-        self.depth_ar_service = self.create_service(
+        self.depth_ar_service = self.node.create_service(
             SetBool, "depth_ar", self.depth_ar_callback
         )
         self.depth_ar = False
@@ -136,8 +176,25 @@ class ConfigureVideoStreams(Node):
 
         self.roll_value = 0.0
 
+    def initialize(self):
+        """
+        Initialize parts of this class that require ROS to be spinning in the background.
+        """
+        pass
+
     # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L44
-    def transform_to_kdl(self, t):
+    def transform_to_kdl(self, t: TransformStamped) -> PyKDL.Frame:
+        """
+        Convert a TransformStamped message to a PyKDL.Frame object.
+
+        Parameters
+        ----------
+        t: The TransformStamped message to convert.
+
+        Returns
+        -------
+        PyKDL.Frame: The corresponding PyKDL.Frame object.
+        """
         return PyKDL.Frame(
             PyKDL.Rotation.Quaternion(
                 t.transform.rotation.x,
@@ -153,7 +210,21 @@ class ConfigureVideoStreams(Node):
         )
 
     # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L52
-    def do_transform_cloud(self, cloud, transform):
+    def do_transform_cloud(
+        self, cloud: pcl.PointCloud, transform: TransformStamped
+    ) -> npt.NDArray[float]:
+        """
+        Transform a point cloud using a TransformStamped message.
+
+        Parameters
+        ----------
+        cloud: The point cloud to transform.
+        transform: The TransformStamped message to use for the transformation.
+
+        Returns
+        -------
+        np.ndarray: The transformed point cloud.
+        """
         t_kdl = self.transform_to_kdl(transform)
         points_out = []
         points = cloud.to_array()
@@ -162,14 +233,36 @@ class ConfigureVideoStreams(Node):
             points_out.append([p_out[0], p_out[1], p_out[2]])
         return np.array(points_out)
 
-    def camera_info_cb(self, msg):
-        self.P = np.array(msg.p).reshape(3, 4)
-        # self.camera_info_subscriber.destroy()
+    def camera_info_cb(self, msg: CameraInfo) -> None:
+        """
+        Callback for the camera info subscriber. Stores the camera projection matrix.
 
-    def pc_callback(self, msg, img):
-        # Only keep points that are within 0.01m to 1.5m from the camera
+        Parameters
+        ----------
+        msg: The CameraInfo message containing the camera projection matrix.
+        """
+        self.P = np.array(msg.p).reshape(3, 4)
+
+    def pc_callback(
+        self, msg: PointCloud2, img: npt.NDArray[np.uint8]
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Uses a heuristic to determine which points in the point cloud are in the robot's
+        reach, and changes the color of the corresponding pixels in the image. The heuristic
+        keeps points that are within 0.01m to 1.5m from the camera, and within 0.25m to 1m
+        from the robot in the XY plane.
+
+        Parameters
+        ----------
+        msg: The PointCloud2 message containing the point cloud.
+        img: The image to change the color of.
+
+        Returns
+        -------
+        np.ndarray: The image with the color of the pixels in the robot's reach changed.
+        """
         if self.P is None:
-            self.get_logger().warn(
+            self.node.get_logger().warn(
                 "Camera projection matrix is not available. Skipping point cloud processing."
             )
             return img
@@ -197,7 +290,7 @@ class ConfigureVideoStreams(Node):
             tf2.TimeoutException,
             tf2.TransformException,
         ) as error:
-            self.get_logger().warn(
+            self.node.get_logger().warn(
                 "Could not find the transform between frames base_link and "
                 f"camera_color_optical_frame. Error: {error}"
             )
@@ -240,12 +333,41 @@ class ConfigureVideoStreams(Node):
 
         return img
 
-    def depth_ar_callback(self, req, res):
+    def depth_ar_callback(
+        self, req: SetBool.Request, res: SetBool.Response
+    ) -> SetBool.Response:
+        """
+        Callback for the depth augmented reality (AR) service. Enables or disables the
+        depth AR overlay on the realsense RGB stream.
+
+        Parameters
+        ----------
+        req: The request object containing the data.
+        res: The response object to populate with the result.
+
+        Returns
+        -------
+        SetBool.Response: The response object.
+        """
         self.depth_ar = req.data
         res.success = True
         return res
 
-    def crop_image(self, image, params):
+    def crop_image(
+        self, image: npt.NDArray[np.uint8], params: Dict
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Crop an image.
+
+        Parameters
+        ----------
+        image: The image to crop.
+        params: The parameters for cropping the image.
+
+        Returns
+        -------
+        np.ndarray: The cropped image.
+        """
         if params["x_min"] is None:
             raise ValueError("Crop x_min is not defined!")
         if params["x_max"] is None:
@@ -286,7 +408,28 @@ class ConfigureVideoStreams(Node):
         return cropped_image
 
     # https://stackoverflow.com/questions/44865023/how-can-i-create-a-circular-mask-for-a-numpy-array
-    def create_circular_mask(self, h, w, center=None, radius=None):
+    def create_circular_mask(
+        self,
+        h: int,
+        w: int,
+        center: Optional[Tuple[int, int]] = None,
+        radius: Optional[int] = None,
+    ) -> npt.NDArray[np.bool]:
+        """
+        Create a circular mask.
+
+        Parameters
+        ----------
+        h: The height of the mask.
+        w: The width of the mask.
+        center: The center of the circle. If None, use half-way between the width and height.
+        radius: The radius of the circle. If None, use the smallest length between the center
+            and an edge.
+
+        Returns
+        -------
+        np.ndarray: The circular image.
+        """
         if center is None:  # use the middle of the image
             center = (int(w / 2), int(h / 2))
         if (
@@ -300,7 +443,21 @@ class ConfigureVideoStreams(Node):
         mask = dist_from_center <= radius
         return mask
 
-    def mask_image(self, image, params):
+    def mask_image(
+        self, image: npt.NDArray[np.uint8], params: Dict
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Mask an image.
+
+        Parameters
+        ----------
+        image: The image to mask.
+        params: The parameters for masking the image.
+
+        Returns
+        -------
+        np.ndarray: The masked image.
+        """
         if params["width"] is None:
             raise ValueError("Mask width is not defined!")
         if params["height"] is None:
@@ -323,7 +480,27 @@ class ConfigureVideoStreams(Node):
         img[~mask] = background_color
         return img
 
-    def rotate_image(self, image, value):
+    def rotate_image(
+        self, image: npt.NDArray[np.uint8], value: str
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Rotate an image.
+
+        Parameters
+        ----------
+        image: The image to rotate.
+        value: The value to rotate the image by. Either ROTATE_90_CLOCKWISE, ROTATE_180, or
+            ROTATE_90_COUNTERCLOCKWISE.
+
+        Returns
+        -------
+        np.ndarray: The rotated image.
+
+        Raises
+        ------
+        ValueError: If the value is not one of ROTATE_90_CLOCKWISE, ROTATE_180, or
+            ROTATE_90_COUNTERCLOCKWISE.
+        """
         if value == "ROTATE_90_CLOCKWISE":
             return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         elif value == "ROTATE_180":
@@ -335,11 +512,26 @@ class ConfigureVideoStreams(Node):
                 "Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE"
             )
 
-    def configure_images(self, rgb_image, params):
+    def configure_images(
+        self, bgr_image: npt.NDArray[np.uint8], params: Dict
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Configure an image by cropping, masking, and/or rotating it, as specified by the
+        parameters. Also converts the image to RGB(A).
+
+        Parameters
+        ----------
+        bgr_image: The image to configure, in BGR.
+        params: The parameters for configuring the image.
+
+        Returns
+        -------
+        np.ndarray: The configured image, in RGB.
+        """
         color_transform = (
-            cv2.COLOR_BGR2RGB if rgb_image.shape[-1] == 3 else cv2.COLOR_BGRA2RGBA
+            cv2.COLOR_BGR2RGB if bgr_image.shape[-1] == 3 else cv2.COLOR_BGRA2RGBA
         )
-        rgb_image = cv2.cvtColor(rgb_image, color_transform)
+        rgb_image = cv2.cvtColor(bgr_image, color_transform)
         if params:
             if params["crop"]:
                 rgb_image = self.crop_image(rgb_image, params["crop"])
@@ -349,7 +541,17 @@ class ConfigureVideoStreams(Node):
                 rgb_image = self.rotate_image(rgb_image, params["rotate"])
         return rgb_image
 
-    def realsense_cb(self, ros_image, pc):
+    def realsense_cb(self, ros_image: Image, pc: PointCloud2) -> None:
+        """
+        Callback for the realsense camera subscriber. Configures the images,
+        overlays the pointcloud if that mode is enabled, and publishes the
+        compressed image.
+
+        Parameters
+        ----------
+        ros_image: The ROS Image message containing the realsense image.
+        pc: The ROS PointCloud2 message containing the realsense point cloud.
+        """
         image = self.cv_bridge.imgmsg_to_cv2(ros_image)
         for image_config_name in self.realsense_params:
             # Overlay the pointcloud *before* cropping/masking/rotating the image,
@@ -368,7 +570,15 @@ class ConfigureVideoStreams(Node):
             self.realsense_rgb_image, self.publisher_realsense_cmp
         )
 
-    def gripper_camera_cb(self, ros_image):
+    def gripper_camera_cb(self, ros_image: Image):
+        """
+        Callback for the gripper camera subscriber. Configures the images and publishes
+        the compressed image.
+
+        Parameters
+        ----------
+        ros_image: The ROS Image message containing the gripper camera image.
+        """
         image = self.cv_bridge.imgmsg_to_cv2(ros_image, "rgb8")
         # Compute and publish the standard gripper image
         gripper_camera_rgb_image = self.configure_images(
@@ -391,7 +601,15 @@ class ConfigureVideoStreams(Node):
             self.expanded_gripper_camera_rgb_image, self.publisher_expanded_gripper_cmp
         )
 
-    def navigation_camera_cb(self, ros_image):
+    def navigation_camera_cb(self, ros_image: Image):
+        """
+        Callback for the overhead camera subscriber. Configures the images and publishes
+        the compressed image.
+
+        Parameters
+        ----------
+        ros_image: The ROS Image message containing the overhead camera image.
+        """
         image = self.cv_bridge.imgmsg_to_cv2(ros_image, "rgb8")
         self.overhead_camera_rgb_image = self.configure_images(
             image, self.overhead_params[self.overhead_camera_perspective]
@@ -400,7 +618,21 @@ class ConfigureVideoStreams(Node):
             self.overhead_camera_rgb_image, self.publisher_overhead_cmp
         )
 
-    def rotate_image_around_center(self, image, angle):
+    def rotate_image_around_center(
+        self, image: npt.NDArray[np.uint8], angle: float
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Rotate an image around its center.
+
+        Parameters
+        ----------
+        image: The image to rotate.
+        angle: The angle to rotate the image by (rad).
+
+        Returns
+        -------
+        np.ndarray: The rotated image.
+        """
         image_center = tuple(np.array(image.shape[1::-1]) / 2)
         rot_mat = cv2.getRotationMatrix2D(image_center, math.degrees(angle), 1.0)
         result = cv2.warpAffine(
@@ -412,22 +644,31 @@ class ConfigureVideoStreams(Node):
         )
         return result
 
-    def joint_state_cb(self, joint_state):
+    def joint_state_cb(self, joint_state: JointState) -> None:
+        """
+        Callback for the joint state subscriber. Stores the roll value of the wrist.
+
+        Parameters
+        ----------
+        joint_state: The JointState message containing the joint states.
+        """
         if "joint_wrist_roll" in joint_state.name:
             roll_index = joint_state.name.index("joint_wrist_roll")
             self.roll_value = joint_state.position[roll_index]
 
-    def publish_compressed_msg(self, image, publisher):
+    def publish_compressed_msg(
+        self, image: npt.NDArray[np.uint8], publisher: Publisher
+    ) -> None:
+        """
+        Publish a compressed image message.
+
+        Parameters
+        ----------
+        image: The image to publish.
+        publisher: The publisher to publish the image to.
+        """
         msg = CompressedImage()
-        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
         msg.format = "jpeg"
         msg.data = np.array(cv2.imencode(".jpg", image)[1]).tobytes()
         publisher.publish(msg)
-
-
-if __name__ == "__main__":
-    rclpy.init()
-    print(sys.argv)
-    node = ConfigureVideoStreams(sys.argv[1], sys.argv[2] == "True")
-    print("Publishing reconfigured video stream")
-    rclpy.spin(node)
