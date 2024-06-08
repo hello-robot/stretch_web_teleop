@@ -12,7 +12,7 @@ json_path = os.path.join(
     get_package_share_directory("stretch_core"), "config", "HighAccuracyPreset.json"
 )
 
-D435_RESOLUTION = "848x480x15"
+D435_RESOLUTION = "424x240x15"
 D405_RESOLUTION = "480x270x15"
 
 configurable_parameters = [

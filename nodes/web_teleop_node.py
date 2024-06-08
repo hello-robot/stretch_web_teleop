@@ -9,15 +9,15 @@ from typing import List, Optional
 import rclpy
 import tf2_ros
 from configure_video_streams import ConfigureVideoStreams
-
-# from move_to_pregrasp import MoveToPregrasp
+from move_to_pregrasp import MoveToPregrasp
+from rclpy.action import ActionServer
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-
-# from stretch_controls import StretchControls
+from stretch_controls import StretchControls
 
 # Local Imports
+from stretch_web_teleop.action import MoveToPregrasp as MoveToPregraspAction
 
 
 class WebTeleopNode(Node):
@@ -49,16 +49,37 @@ class WebTeleopNode(Node):
         """
         super().__init__("web_teleop")
 
+        # # Create a dummy action server
+        # self.action_server = ActionServer(
+        #     self,
+        #     MoveToPregraspAction,
+        #     "dummy_move_to_pregrasp",
+        #     lambda goal_handle: self.get_logger().info("Executing goal."),
+        #     goal_callback=lambda goal_handle: self.get_logger().info("Received goal."),
+        #     cancel_callback=lambda goal_handle: self.get_logger().info("Cancelled goal."),
+        # )
+
         # Create the shared resources that each component of this node needs.
         self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=tf_buffer_secs))
         self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
+        # TODO: Figure out where the URDF should go!
+        urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
+
         # Create the components of this node.
-        # self.stretch_controls = StretchControls(self)
-        self.video_streams = ConfigureVideoStreams(
-            self, image_params_file, has_beta_teleop_kit, self.tf_buffer
+        self.stretch_controls = StretchControls(
+            self, tf_buffer=self.tf_buffer, urdf_path=urdf_abs_path
         )
-        # self.move_to_pregrasp = MoveToPregrasp(self, self.video_streams, self.tf_buffer)
+        self.video_streams = ConfigureVideoStreams(
+            self,
+            image_params_file,
+            has_beta_teleop_kit,
+            self.tf_buffer,
+            self.stretch_controls,
+        )
+        self.move_to_pregrasp = MoveToPregrasp(
+            self, self.video_streams, self.stretch_controls, self.tf_buffer
+        )
 
     def initialize(self):
         """
@@ -66,9 +87,19 @@ class WebTeleopNode(Node):
         initialization that requires ROS spinning to be occurring in the background,
         e.g., invoking a service during initialization.
         """
-        # self.stretch_controls.initialize()
+        self.stretch_controls.initialize()
         self.video_streams.initialize()
-        # self.move_to_pregrasp.initialize()
+        self.move_to_pregrasp.initialize()
+
+        # Create a dummy action server
+        self.action_server = ActionServer(
+            self,
+            MoveToPregraspAction,
+            "dummy_move_to_pregrasp",
+            lambda goal_handle: self.get_logger().info("Executing goal."),
+            goal_callback=lambda goal_handle: self.get_logger().info("Received goal."),
+            cancel_callback=lambda goal_handle: self.get_logger().info("Cancelled goal."),
+        )
 
 
 def main(args: Optional[List[str]] = None):

@@ -692,14 +692,16 @@ class StretchIKControl:
 
             # Get the current joint state
             q = self.__get_kdl_joint_array()
-            self.node.get_logger().info(f" Joint Positions: {list(zip(self.jacobian_joint_order, q))}")
+            self.node.get_logger().info(
+                f" Joint Positions: {list(zip(self.jacobian_joint_order, q))}"
+            )
 
             # Get the Jacobian matrix for the chain
             J = kdl.Jacobian(len(self.jacobian_joint_order))
             self.jacobian_solver.JntToJac(q, J)
             J = jacobian_to_np(J)
             self.node.get_logger().info(f" Jacobian: {J}")
-            return True # TODO: Remove!
+            return True  # TODO: Remove!
 
             # Mask the Jacobian matrix to only include the articulated joints
             J[:, non_articulated_joints_mask] = 0.0

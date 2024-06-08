@@ -1,6 +1,12 @@
 """
-This module contains the StretchIKControl class, which allows users to compute Stretch's FK and IK,
-command the robot using an inverse Jacobian velocity controller, and command the arm to a desired pose.
+This module contains the StretchControls class, which provides various useful functions for working
+with and controlling Stretch:
+    1. Moving to an end effector pose using inverse jacobian control.
+    2. Moving to a joint position in a closed-loop format (i.e., keep trying until the joint
+       reaches there or times out).
+    3. Get the current joint state.
+    4. Run inverse kinematics (IK) on the robot.
+    5. Get the distance to a target end effector pose.
 
 Parts of this approach are inspired from:
 https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
@@ -9,7 +15,7 @@ https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/str
 import asyncio
 import threading
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 # Third-Party Imports
 import numpy as np
@@ -79,12 +85,18 @@ class TerminationCriteria(Enum):
     OVERSHOOT = "overshoot"
 
 
-class StretchIKControl:
+class StretchControls:
     """
-    The StretchIKControl class allows users to compute Stretch's FK and IK, command the robot using an inverse
-    Jacobian velocity controller, and command the arm to a desired pose.
+    The StretchControls class provides various useful functions for working with and controlling Stretch:
+        1. Moving to an end effector pose using closed-loop inverse jacobian control.
+        2. Moving to a joint position in a closed-loop format (i.e., keep trying until the joint
+           reaches there or times out).
+        3. Get the current joint state.
+        4. Run inverse kinematics (IK) on the robot.
+        5. Get the distance to a target end effector pose.
     """
 
+    # TODO: Move these names and thestow configurations to a constants file.
     # Frames of reference
     FRAME_BASE_LINK = "base_link"
     FRAME_END_EFFECTOR_LINK = "link_grasp_center"
@@ -411,6 +423,11 @@ class StretchIKControl:
                 latest_joint_state_combined_arm = self.get_current_joints(
                     combine_arm=True
                 )
+                if latest_joint_state_combined_arm is None:
+                    self.node.get_logger().error(
+                        "Failed to get the current joint state."
+                    )
+                    return False
 
                 # Remove joints that have reached their set point
                 joint_positions_cmd = {}
@@ -554,6 +571,9 @@ class StretchIKControl:
 
             # Get the current joint state
             q = self.__get_q(joint_position_overrides, all_joints=True)
+            if q is None:
+                self.node.get_logger().error("Failed to get the current joint state.")
+                return False
             self.node.get_logger().debug(
                 f"Joint Positions: {list(zip(self.all_joints, q))}"
             )
@@ -617,9 +637,6 @@ class StretchIKControl:
         -------
         bool: True if the control mode was successfully set.
         """
-        # # Check if the control mode is already set
-        # if control_mode == self.control_mode:
-        #     return True
         # Get the appropriate client
         if control_mode == ControlMode.POSITION:
             client = self.switch_to_position_client
@@ -636,8 +653,6 @@ class StretchIKControl:
                 f"Failed to switch to {control_mode.value} mode."
             )
             return False
-        # # Update the control mode
-        # self.control_mode = control_mode
         return True
 
     def __transform_pose(
@@ -742,14 +757,18 @@ class StretchIKControl:
         -------
         bool: Whether the error was successfully calculated.
         npt.NDArray[np.float64]: The error in base link frame. The error is a 6D vector
-            consisting of the translation and rotation errors.
+            consisting of the translation and rotation (RPY) errors.
         """
         # Start the timer
         start_time = self.node.get_clock().now()
 
         # Get the current end effector pose in base frame
+        # TODO: Make this a separate function for solving FK.
         if q_all is None:
             q_all = self.__get_q(all_joints=True)
+            if q_all is None:
+                self.node.get_logger().error("Failed to get the current joint state.")
+                return False, np.zeros(6)
         self.ik_solver.q_neutral = q_all
         ee_pos, ee_quat = self.ik_solver.compute_fk(config=q_all)
 
@@ -828,7 +847,7 @@ class StretchIKControl:
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
-        _, clipped_velocities = self.check_velocity_limits(joint_velocities)
+        _, clipped_velocities = self.__check_velocity_limits(joint_velocities)
         self.node.get_logger().debug(f"Clipped Velocities: {clipped_velocities}")
 
         # Send base commands
@@ -840,6 +859,9 @@ class StretchIKControl:
 
         # Send arm commands
         q = self.__get_q(all_joints=True)
+        if q is None:
+            self.node.get_logger().error("Failed to get the current joint state.")
+            return False
         joint_positions = {}
         for joint_name, vel in clipped_velocities.items():
             if (
@@ -873,7 +895,7 @@ class StretchIKControl:
         Future: The future object.
         """
         # Limit the joint positions
-        _, joint_positions = self.check_joint_limits(joint_positions)
+        _, joint_positions = self.__check_joint_limits(joint_positions)
         self.node.get_logger().info(f" Commanding arm to {joint_positions}")
 
         # Replace the distal arm joint with the combined joint
@@ -893,7 +915,7 @@ class StretchIKControl:
         self.node.get_logger().info(f" Commanding arm to {arm_goal}")
         return self.arm_client.send_goal_async(arm_goal)
 
-    def check_joint_limits(
+    def __check_joint_limits(
         self,
         joint_positions: Dict[str, float],
         clip: bool = True,
@@ -934,7 +956,7 @@ class StretchIKControl:
 
         return in_limits, clipped_joint_positions if clip else joint_positions
 
-    def check_velocity_limits(
+    def __check_velocity_limits(
         self,
         joint_velocities: Dict[str, float],
         clip: bool = True,
@@ -1030,6 +1052,8 @@ class StretchIKControl:
         )
         q_controllable = self.__get_q(joint_position_overrides)
         q_all = self.__get_q(joint_position_overrides, all_joints=True)
+        if q_controllable is None or q_all is None:
+            return False, {}
 
         # Set the positions that are used for non-controllable joints
         self.ik_solver.q_neutral = q_all
@@ -1039,7 +1063,7 @@ class StretchIKControl:
         if success:
             # Check whether the controllable joints are within their limits
             joint_positions = dict(zip(self.controllable_joints, q))
-            within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
+            within_limits, _ = self.__check_joint_limits(joint_positions, clip=False)
             if within_limits:
                 return True, joint_positions
             else:
@@ -1047,25 +1071,34 @@ class StretchIKControl:
 
         return False, {}
 
-    def get_current_joints(self, combine_arm: bool = True) -> Dict[str, float]:
+    def get_current_joints(
+        self, combine_arm: bool = True, joint_names: Optional[Set[str]] = None
+    ) -> Optional[Dict[str, float]]:
         """
         Get the current states of the controllable joints.
 
         Parameters
         ----------
         combine_arm: Whether to combine the telescoping joints into a single joint.
+        joint_names: The joint names to get. If None, get all joints.
 
         Returns
         -------
-        Dict[str, float]: The joint positions
+        Optional[Dict[str, float]]: The joint positions, or None if they are not available.
         """
         # Get the latest joints
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
+        if latest_joint_state is None:
+            return None
 
         # Get the positions
-        joint_positions = {self.JOINTS_ARM[-1]: 0.0}
+        joint_positions = {}
+        if joint_names is None or self.JOINTS_ARM[-1] in joint_names:
+            joint_positions[self.JOINTS_ARM[-1]] = 0.0
         for joint_name in latest_joint_state:
+            if joint_names is not None and joint_name not in joint_names:
+                continue
             pos = latest_joint_state[joint_name]
             if combine_arm and joint_name in self.JOINTS_ARM:
                 joint_positions[self.JOINTS_ARM[-1]] += pos
@@ -1076,7 +1109,7 @@ class StretchIKControl:
 
     def __get_q(
         self, joint_position_overrides: Dict[str, float] = {}, all_joints: bool = False
-    ) -> npt.NDArray[np.float64]:
+    ) -> Optional[npt.NDArray[np.float64]]:
         """
         Get the current states of the controllable joints.
 
@@ -1087,7 +1120,7 @@ class StretchIKControl:
 
         Returns
         -------
-        npt.NDArray: The joint positions
+        Optional[npt.NDArray]: The joint positions, or None if they are not available.
         """
         # Determine which joints we are returning
         if all_joints:
@@ -1097,6 +1130,8 @@ class StretchIKControl:
 
         # Get the latest joints
         latest_joint_state_combined_arm = self.get_current_joints(combine_arm=True)
+        if latest_joint_state_combined_arm is None:
+            return None
 
         # Get the positions
         joint_positions = []
