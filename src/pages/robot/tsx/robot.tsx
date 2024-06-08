@@ -551,7 +551,7 @@ export class Robot extends React.Component {
     let newGoal = new ROSLIB.ActionGoal({
       scaled_u: scaled_x,
       scaled_v: scaled_y,
-      pregrasp_direction: 1,
+      pregrasp_direction: 2,
     });
 
     return newGoal;

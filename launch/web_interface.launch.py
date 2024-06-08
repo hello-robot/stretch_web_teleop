@@ -196,8 +196,7 @@ def generate_launch_description():
         stretch_has_nav_head_cam,
     )
 
-    # Declare launch arguments.
-    # TODO: To align with ROS norms, all of these should be parameters, not arguments.
+    # Declare launch arguments
     params_file = DeclareLaunchArgument(
         "params",
         default_value=[
@@ -418,14 +417,14 @@ def generate_launch_description():
     ld.add_action(rosbridge_launch)
 
     # Configure Video Streams
-    web_teleop_node = Node(
+    configure_video_streams_node = Node(
         package="stretch_web_teleop",
-        executable="web_teleop_node.py",
+        executable="configure_video_streams.py",
         output="screen",
         arguments=[LaunchConfiguration("params"), str(stretch_has_beta_teleop_kit)],
         parameters=[{"has_beta_teleop_kit": stretch_has_beta_teleop_kit}],
     )
-    ld.add_action(web_teleop_node)
+    ld.add_action(configure_video_streams_node)
 
     rplidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
@@ -501,5 +500,15 @@ def generate_launch_description():
     #         shell=True,
     #     )
     # )
+
+    # Move To Pre-grasp Action Server
+    move_to_pregrasp_node = Node(
+        package="stretch_web_teleop",
+        executable="move_to_pregrasp.py",
+        output="screen",
+        arguments=[LaunchConfiguration("params")],
+        parameters=[],
+    )
+    ld.add_action(move_to_pregrasp_node)
 
     return ld

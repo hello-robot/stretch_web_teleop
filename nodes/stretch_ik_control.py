@@ -1,12 +1,6 @@
 """
-This module contains the StretchControls class, which provides various useful functions for working
-with and controlling Stretch:
-    1. Moving to an end effector pose using inverse jacobian control.
-    2. Moving to a joint position in a closed-loop format (i.e., keep trying until the joint
-       reaches there or times out).
-    3. Get the current joint state.
-    4. Run inverse kinematics (IK) on the robot.
-    5. Get the distance to a target end effector pose.
+This module contains the StretchIKControl class, which allows users to compute Stretch's FK and IK,
+command the robot using an inverse Jacobian velocity controller, and command the arm to a desired pose.
 
 Parts of this approach are inspired from:
 https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
@@ -15,7 +9,7 @@ https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/str
 import asyncio
 import threading
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
 # Third-Party Imports
 import numpy as np
@@ -55,7 +49,7 @@ class ControlMode(Enum):
     The control modes for the Stretch Driver.
     """
 
-    POSITION = "position"
+    # POSITION = "position"
     NAVIGATION = "navigation"
 
 
@@ -85,18 +79,22 @@ class TerminationCriteria(Enum):
     OVERSHOOT = "overshoot"
 
 
-class StretchControls:
+class ActionRetval(Enum):
     """
-    The StretchControls class provides various useful functions for working with and controlling Stretch:
-        1. Moving to an end effector pose using closed-loop inverse jacobian control.
-        2. Moving to a joint position in a closed-loop format (i.e., keep trying until the joint
-           reaches there or times out).
-        3. Get the current joint state.
-        4. Run inverse kinematics (IK) on the robot.
-        5. Get the distance to a target end effector pose.
+    The return values for the motion actions.
     """
 
-    # TODO: Move these names and thestow configurations to a constants file.
+    CONTINUE = 0
+    SUCCESS = 1
+    FAILURE = 2
+
+
+class StretchIKControl:
+    """
+    The StretchIKControl class allows users to compute Stretch's FK and IK, command the robot using an inverse
+    Jacobian velocity controller, and command the arm to a desired pose.
+    """
+
     # Frames of reference
     FRAME_BASE_LINK = "base_link"
     FRAME_END_EFFECTOR_LINK = "link_grasp_center"
@@ -181,7 +179,7 @@ class StretchControls:
             "/joint_limits",
             self.__joint_limits_cb,
             qos_profile=1,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.latest_joint_state_lock = threading.Lock()
         self.latest_joint_state = None
@@ -249,7 +247,7 @@ class StretchControls:
         get_joint_limits_client = self.node.create_client(
             Trigger,
             "get_joint_states",
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.node.get_logger().info("Waiting for the get joint states service...")
         get_joint_limits_client.wait_for_service()  # TODO: This can block!
@@ -361,14 +359,14 @@ class StretchControls:
                 for i, joint_name in enumerate(msg.name)
             }
 
-    async def move_to_joint_positions(
+    def move_to_joint_positions(
         self,
         joint_positions: Dict[str, float],
-        rate_hz: float = 10.0,
+        rate_hz: float = 15.0,
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         threshold_factor: float = 20.0,
-    ) -> bool:
+    ) -> Generator[ActionRetval, None, None]:
         """
         Move the arm joints to a specific position. This function is closed-loop, and
         terminates once the joint posiiton has been reached.
@@ -385,22 +383,38 @@ class StretchControls:
 
         Returns
         -------
-        bool: True if the target joint positions were reached, else False.
+        ActionRetval: The return value for the action.
         """
         # Check if the controller is initialized
         if not self.initialized:
             self.node.get_logger().error("Controller is not initialized.")
-            return False
+            yield ActionRetval.FAILURE
+            return
 
         # Start the timer
         start_time = self.node.get_clock().now()
         timeout = Duration(seconds=timeout_secs)
 
-        # Convert to the appropriate control mode
-        self.__set_control_mode(
-            ControlMode.POSITION,
-            timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
-        )
+        # # Convert to the appropriate control mode
+        # # TODO: Store the last mode to avoid re-doing this!
+        # future = self.__set_control_mode(
+        #     ControlMode.NAVIGATION,
+        #     timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
+        # )
+        # if future is None:
+        #     yield ActionRetval.FAILURE
+        #     return
+        # while not check_cancel():
+        #     if future.done():
+        #         result = future.result()
+        #         if not result.success:
+        #             self.node.get_logger().error(
+        #                 f"Failed to switch to {control_mode.value} mode."
+        #             )
+        #             yield ActionRetval.FAILURE
+        #             return
+        #         break
+        #     yield ActionRetval.CONTINUE
 
         self.node.get_logger().info(f"Joint Positions: {joint_positions}")
 
@@ -411,11 +425,13 @@ class StretchControls:
         rate = self.node.create_rate(rate_hz)
         future = None
         while not check_cancel():
+            self.node.get_logger().info("Loop Started...")
             # Leave early if ROS shuts down or timeout is reached
             if not rclpy.ok() or remaining_time(
                 self.node.get_clock().now(), start_time, timeout
             ) <= Duration(seconds=0.0):
-                return False
+                yield ActionRetval.FAILURE
+                return
 
             # Command the robot to move to the joint positions
             if future is None:
@@ -423,11 +439,6 @@ class StretchControls:
                 latest_joint_state_combined_arm = self.get_current_joints(
                     combine_arm=True
                 )
-                if latest_joint_state_combined_arm is None:
-                    self.node.get_logger().error(
-                        "Failed to get the current joint state."
-                    )
-                    return False
 
                 # Remove joints that have reached their set point
                 joint_positions_cmd = {}
@@ -447,7 +458,8 @@ class StretchControls:
 
                 # If no joints to move, break
                 if len(joint_positions_cmd) == 0:
-                    return True
+                    yield ActionRetval.SUCCESS
+                    return
 
                 # Command the robot to move to the joint positions
                 future = self.__command_move_to_joint_position(
@@ -461,25 +473,29 @@ class StretchControls:
                         raise Exception("Failed to move to joint positions")
                 except Exception as e:
                     self.get_logger().error(f"{e}")
-                    return False
+                    yield ActionRetval.FAILURE
+                    return
                 future = None
+            else:
+                self.node.get_logger().info("Waiting for previous command to finish...")
 
-            # Sleep
-            rate.sleep()
+            yield ActionRetval.CONTINUE
 
-        return not check_cancel()
+        yield ActionRetval.FAILURE if check_cancel() else ActionRetval.SUCCESS
+        return
 
-    async def move_to_ee_pose_inverse_jacobian(
+    def move_to_ee_pose_inverse_jacobian(
         self,
         goal: PoseStamped,
         articulated_joints: List[str],
         termination: TerminationCriteria,
         joint_position_overrides: Dict[str, float] = {},
-        rate_hz: float = 10.0,
+        rate_hz: float = 15.0,
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         err_callback: Optional[Callable[[npt.NDArray[np.float64]], None]] = None,
-    ) -> bool:
+        cartesian_mask: Optional[npt.NDArray[np.bool]] = None,
+    ) -> Generator[ActionRetval, None, None]:
         """
         Move the end-effector to the goal pose. This function uses closed-loop inverse
         Jacobian control to determine target velocities for the robot's joints.
@@ -495,15 +511,18 @@ class StretchControls:
         check_cancel: A function that returns True if the action should be cancelled.
         err_callback: A callback that is called with the error between the end-effector pose
             and the goal pose.
+        cartesian_mask: A mask to apply to the Jacobian matrix. If None, the Jacobian matrix
+            is not masked.
 
         Returns
         -------
-        bool: True if the termination criteria was reached, else False.
+        ActionRetval: The return value for the action.
         """
         # Check if the controller is initialized
         if not self.initialized:
             self.node.get_logger().error("Controller is not initialized.")
-            return False
+            yield ActionRetval.FAILURE
+            return
 
         # Start the timer
         start_time = self.node.get_clock().now()
@@ -517,13 +536,15 @@ class StretchControls:
         ]
         if len(articulated_joints) == 0:
             self.node.get_logger().error("No articulated joints specified.")
-            return False
+            yield ActionRetval.FAILURE
+            return
         for joint_name in joint_position_overrides.keys():
             if joint_name in articulated_joints:
                 self.node.get_logger().error(
                     f"Cannot pass a fixed position for articulated joint {joint_name}."
                 )
-                return False
+                yield ActionRetval.FAILURE
+                return
         non_articulated_joints_mask = np.array(
             [joint_name not in articulated_joints for joint_name in self.all_joints]
         )
@@ -541,39 +562,54 @@ class StretchControls:
             self.node.get_logger().error(
                 "Cannot articulate base and arm/wrist joints at the same time."
             )
-            return False
+            yield ActionRetval.FAILURE
+            return
 
-        # Convert to the appropriate control mode
-        self.__set_control_mode(
-            ControlMode.POSITION if move_arm else ControlMode.NAVIGATION,
-            timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
-        )
+        # # Convert to the appropriate control mode
+        # # TODO: Store the last mode to avoid re-doing this!
+        # future = self.__set_control_mode(
+        #     ControlMode.POSITION if move_arm else ControlMode.NAVIGATION,
+        #     timeout=remaining_time(self.node.get_clock().now(), start_time, timeout),
+        # )
+        # if future is None:
+        #     yield ActionRetval.FAILURE
+        #     return
+        # while not check_cancel():
+        #     if future.done():
+        #         result = future.result()
+        #         if not result.success:
+        #             self.node.get_logger().error(
+        #                 f"Failed to switch to {control_mode.value} mode."
+        #             )
+        #             yield ActionRetval.FAILURE
+        #             return
+        #         break
+        #     yield ActionRetval.CONTINUE
 
         # Convert the goal pose to the odom frame, so it stays stationary as the robot moves.
         ok, goal_odom = self.__transform_pose(
             goal, self.FRAME_ODOM, start_time, timeout
         )
         if not ok:
-            return False
+            yield ActionRetval.FAILURE
+            return
 
         # Command motion until the termination criteria is reached
-        rate = self.node.create_rate(rate_hz)
         err = None
         vel = None
         while not check_cancel() and not self.__reached_termination(
             termination, err, vel
         ):
+            self.node.get_logger().info("Loop Started...")
             # Leave early if ROS shuts down or timeout is reached
             if not rclpy.ok() or remaining_time(
                 self.node.get_clock().now(), start_time, timeout
             ) <= Duration(seconds=0.0):
-                return False
+                yield ActionRetval.FAILURE
+                return
 
             # Get the current joint state
             q = self.__get_q(joint_position_overrides, all_joints=True)
-            if q is None:
-                self.node.get_logger().error("Failed to get the current joint state.")
-                return False
             self.node.get_logger().debug(
                 f"Joint Positions: {list(zip(self.all_joints, q))}"
             )
@@ -585,10 +621,11 @@ class StretchControls:
                 q_all=q,
             )
             if not ok:
-                return False
+                yield ActionRetval.FAILURE
+                return
             if err_callback is not None:
                 err_callback(err)
-            self.node.get_logger().debug(f"Error: {err}")
+            self.node.get_logger().info(f"Error: {err}")
 
             # Get the Jacobian matrix for the chain
             J = pinocchio.computeFrameJacobian(
@@ -598,61 +635,81 @@ class StretchControls:
                 self.ik_solver.ee_frame_idx,
                 pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
             )
-            self.node.get_logger().debug(f"Jacobian: {J}")
+            self.node.get_logger().info(f"Jacobian: {J}")
 
             # Mask the Jacobian matrix to only include the articulated joints
             J[:, non_articulated_joints_mask] = 0.0
+            if cartesian_mask is not None:
+                J[cartesian_mask, :] = 0.0
 
             # Calculate the pseudo-inverse of the Jacobian
             J_pinv = np.linalg.pinv(J, rcond=1e-6)
-            self.node.get_logger().debug(f"Jacobian Pseudo-Inverse: {J_pinv}")
+            self.node.get_logger().info(f"Jacobian Pseudo-Inverse: {J_pinv}")
 
             # Re-mask the pseudo-inverse to address any numerical issues
             J_pinv[non_articulated_joints_mask, :] = 0.0
+            if cartesian_mask is not None:
+                J_pinv[:, cartesian_mask] = 0.0
 
             # Calculate the joint velocities
             vel = self.K @ J_pinv @ err
-            self.node.get_logger().debug(
+            self.node.get_logger().info(
                 f"Joint Velocities: {list(zip(self.controllable_joints, vel))}"
             )
 
             # Execute the velocities
             self.__execute_velocities(vel, move_base, move_arm, rate_hz)
 
-            # Sleep
-            rate.sleep()
+            # Yield control back to the main action loop
+            yield ActionRetval.CONTINUE
 
-        return not check_cancel()
+        yield ActionRetval.FAILURE if check_cancel() else ActionRetval.SUCCESS
+        return
 
-    def __set_control_mode(self, control_mode: ControlMode, timeout: Duration) -> bool:
+    def set_navigation_mode(self, timeout: Duration, rate_hz: float = 10.0) -> bool:
         """
-        Set the control mode.
+        Set the control mode to navigation.
 
         Parameters
         ----------
-        control_mode: The control mode.
         timeout: The timeout.
+        rate_hz: The rate in Hz at which to control the robot.
 
         Returns
         -------
         bool: True if the control mode was successfully set.
         """
-        # Get the appropriate client
-        if control_mode == ControlMode.POSITION:
-            client = self.switch_to_position_client
-        else:
-            client = self.switch_to_navigation_client
+        start_time = self.node.get_clock().now()
         # Invoke the service
-        ready = client.wait_for_service(timeout_sec=timeout.nanoseconds / 1.0e9)
+        self.node.get_logger().info(f"Switching to navigation mode...")
+        ready = self.switch_to_navigation_client.wait_for_service(
+            timeout_sec=timeout.nanoseconds / 1.0e9
+        )
         if not ready:
-            self.node.get_logger().error(f"Service {client.srv_name} not available.")
-            return False
-        result = client.call(Trigger.Request())
-        if not result.success:
             self.node.get_logger().error(
-                f"Failed to switch to {control_mode.value} mode."
+                f"Service {self.switch_to_navigation_client.srv_name} not available."
             )
             return False
+        future = self.switch_to_navigation_client.call_async(Trigger.Request())
+        rate = self.node.create_rate(rate_hz)
+        while rclpy.ok() and not future.done():
+            # Check if we've reached timeout
+            if (
+                remaining_time(
+                    self.node.get_clock().now(), start_time, timeout, return_secs=True
+                )
+                <= 0.0
+            ):
+                self.node.get_logger().error(f"Failed to switch to navigation mode.")
+                return False
+            rate.sleep()
+        if future.done():
+            result = future.result()
+            if not result.success:
+                self.node.get_logger().error(
+                    f"Failed to switch to {control_mode.value} mode."
+                )
+                return False
         return True
 
     def __transform_pose(
@@ -757,18 +814,14 @@ class StretchControls:
         -------
         bool: Whether the error was successfully calculated.
         npt.NDArray[np.float64]: The error in base link frame. The error is a 6D vector
-            consisting of the translation and rotation (RPY) errors.
+            consisting of the translation and rotation errors.
         """
         # Start the timer
         start_time = self.node.get_clock().now()
 
         # Get the current end effector pose in base frame
-        # TODO: Make this a separate function for solving FK.
         if q_all is None:
             q_all = self.__get_q(all_joints=True)
-            if q_all is None:
-                self.node.get_logger().error("Failed to get the current joint state.")
-                return False, np.zeros(6)
         self.ik_solver.q_neutral = q_all
         ee_pos, ee_quat = self.ik_solver.compute_fk(config=q_all)
 
@@ -847,8 +900,8 @@ class StretchControls:
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
-        _, clipped_velocities = self.__check_velocity_limits(joint_velocities)
-        self.node.get_logger().debug(f"Clipped Velocities: {clipped_velocities}")
+        _, clipped_velocities = self.check_velocity_limits(joint_velocities)
+        self.node.get_logger().info(f"Clipped Velocities: {clipped_velocities}")
 
         # Send base commands
         if move_base:
@@ -859,9 +912,6 @@ class StretchControls:
 
         # Send arm commands
         q = self.__get_q(all_joints=True)
-        if q is None:
-            self.node.get_logger().error("Failed to get the current joint state.")
-            return False
         joint_positions = {}
         for joint_name, vel in clipped_velocities.items():
             if (
@@ -895,7 +945,7 @@ class StretchControls:
         Future: The future object.
         """
         # Limit the joint positions
-        _, joint_positions = self.__check_joint_limits(joint_positions)
+        _, joint_positions = self.check_joint_limits(joint_positions)
         self.node.get_logger().info(f" Commanding arm to {joint_positions}")
 
         # Replace the distal arm joint with the combined joint
@@ -915,7 +965,7 @@ class StretchControls:
         self.node.get_logger().info(f" Commanding arm to {arm_goal}")
         return self.arm_client.send_goal_async(arm_goal)
 
-    def __check_joint_limits(
+    def check_joint_limits(
         self,
         joint_positions: Dict[str, float],
         clip: bool = True,
@@ -956,7 +1006,7 @@ class StretchControls:
 
         return in_limits, clipped_joint_positions if clip else joint_positions
 
-    def __check_velocity_limits(
+    def check_velocity_limits(
         self,
         joint_velocities: Dict[str, float],
         clip: bool = True,
@@ -1052,8 +1102,6 @@ class StretchControls:
         )
         q_controllable = self.__get_q(joint_position_overrides)
         q_all = self.__get_q(joint_position_overrides, all_joints=True)
-        if q_controllable is None or q_all is None:
-            return False, {}
 
         # Set the positions that are used for non-controllable joints
         self.ik_solver.q_neutral = q_all
@@ -1063,7 +1111,7 @@ class StretchControls:
         if success:
             # Check whether the controllable joints are within their limits
             joint_positions = dict(zip(self.controllable_joints, q))
-            within_limits, _ = self.__check_joint_limits(joint_positions, clip=False)
+            within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
             if within_limits:
                 return True, joint_positions
             else:
@@ -1071,34 +1119,25 @@ class StretchControls:
 
         return False, {}
 
-    def get_current_joints(
-        self, combine_arm: bool = True, joint_names: Optional[Set[str]] = None
-    ) -> Optional[Dict[str, float]]:
+    def get_current_joints(self, combine_arm: bool = True) -> Dict[str, float]:
         """
         Get the current states of the controllable joints.
 
         Parameters
         ----------
         combine_arm: Whether to combine the telescoping joints into a single joint.
-        joint_names: The joint names to get. If None, get all joints.
 
         Returns
         -------
-        Optional[Dict[str, float]]: The joint positions, or None if they are not available.
+        Dict[str, float]: The joint positions
         """
         # Get the latest joints
         with self.latest_joint_state_lock:
             latest_joint_state = self.latest_joint_state
-        if latest_joint_state is None:
-            return None
 
         # Get the positions
-        joint_positions = {}
-        if joint_names is None or self.JOINTS_ARM[-1] in joint_names:
-            joint_positions[self.JOINTS_ARM[-1]] = 0.0
+        joint_positions = {self.JOINTS_ARM[-1]: 0.0}
         for joint_name in latest_joint_state:
-            if joint_names is not None and joint_name not in joint_names:
-                continue
             pos = latest_joint_state[joint_name]
             if combine_arm and joint_name in self.JOINTS_ARM:
                 joint_positions[self.JOINTS_ARM[-1]] += pos
@@ -1109,7 +1148,7 @@ class StretchControls:
 
     def __get_q(
         self, joint_position_overrides: Dict[str, float] = {}, all_joints: bool = False
-    ) -> Optional[npt.NDArray[np.float64]]:
+    ) -> npt.NDArray[np.float64]:
         """
         Get the current states of the controllable joints.
 
@@ -1120,7 +1159,7 @@ class StretchControls:
 
         Returns
         -------
-        Optional[npt.NDArray]: The joint positions, or None if they are not available.
+        npt.NDArray: The joint positions
         """
         # Determine which joints we are returning
         if all_joints:
@@ -1130,8 +1169,6 @@ class StretchControls:
 
         # Get the latest joints
         latest_joint_state_combined_arm = self.get_current_joints(combine_arm=True)
-        if latest_joint_state_combined_arm is None:
-            return None
 
         # Get the positions
         joint_positions = []
