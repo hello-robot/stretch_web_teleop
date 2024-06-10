@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# Standard Imports
-from __future__ import annotations  # Required for type hinting MoveToPregraspState.next
+from __future__ import annotations  # Required for type hinting a class within itself
 
+# Standard Imports
 import sys
 import threading
 from enum import Enum
@@ -12,28 +12,34 @@ from typing import Dict, List, Optional, Tuple
 import message_filters
 import numpy as np
 import numpy.typing as npt
-import pcl
 import rclpy
 import ros2_numpy
 import tf2_py as tf2
 import tf2_ros
 import yaml
+from constants import (
+    Frame,
+    Joint,
+    get_gripper_configuration,
+    get_pregrasp_wrist_configuration,
+    get_stow_configuration,
+)
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image, PointCloud2
 from std_msgs.msg import Header
 from stretch_ik_control import (
-    ActionRetval,
+    MotionGeneratorRetval,
     StretchIKControl,
     TerminationCriteria,
     remaining_time,
 )
-from tf2_geometry_msgs import PointStamped, PoseStamped
+from tf2_geometry_msgs import PoseStamped
 from tf_transformations import quaternion_about_axis, quaternion_multiply
 
 # Local Imports
@@ -42,13 +48,16 @@ from stretch_web_teleop.action import MoveToPregrasp
 
 class MoveToPregraspState(Enum):
     """
-    Move-to-pregrasp proceeds in the following sequential states:
-      1. Opens the wrist and moves it to either the horizontal or vertical pre-grasp position.
-      2. Rotates the robot's base to align the end-effector with the clicked pixel.
-      3. Adjusts the arm's lift/length to align the end-effector with the clicked pixel.
+    The below states can be strung together to form a state machine that moves the robot
+    to a pregrasp position. The general principle we follow is that the robot should only
+    rotate its base and move the lift when its arm is within the base footprint of the robot
+    (i.e., the arm length is fully in and the wrist is stowed).
     """
 
-    STOW_ARM_LENGTH = 0
+    STOW_ARM_LENGTH_PARTIAL = (
+        -1
+    )  # Stow the arm until the gripper would collide with the base if the gripper were vertically down.
+    STOW_ARM_LENGTH_FULL = 0  # Stow the arm fully.
     STOW_WRIST = 1
     STOW_ARM_LIFT = 2
     ROTATE_BASE = 3
@@ -76,11 +85,17 @@ class MoveToPregraspState(Enum):
         List[MoveToPregraspState]: The default state machine.
         """
         states = []
-        states.append(MoveToPregraspState.STOW_ARM_LENGTH)
-        # If the arm lift is currently near the base, raise it up so there is space to stow the wrist.
+        # If the current arm lift is near the base, move up so there is space to stow the wrist.
         if init_lift_near_base:
+            states.append(MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL)
             states.append(MoveToPregraspState.STOW_ARM_LIFT)
+            states.append(MoveToPregraspState.STOW_ARM_LENGTH_FULL)
+        else:
+            states.append(MoveToPregraspState.STOW_ARM_LENGTH_FULL)
         states.append(MoveToPregraspState.STOW_WRIST)
+        # If the goal arm lift is near the base and we haven't already stowed the arm lift, stow the arm lift.
+        if goal_lift_near_base and MoveToPregraspState.STOW_ARM_LIFT not in states:
+            states.append(MoveToPregraspState.STOW_ARM_LIFT)
         states.append(MoveToPregraspState.ROTATE_BASE)
         # If the goal is near the base and we're doing a vertical grasp, lengthen the arm before deploying the wrist.
         if goal_lift_near_base and not horizontal_grasp:
@@ -118,25 +133,7 @@ class MoveToPregraspNode(Node):
     the object the pixel is a part of.
     """
 
-    BASE_LINK = "base_link"
-    END_EFFECTOR_LINK = "link_grasp_center"
-    ODOM_FRAME = "odom"
-
     DISTANCE_TO_OBJECT = 0.1  # meters
-
-    STOW_CONFIGURATION_ARM_LENGTH = {
-        StretchIKControl.JOINTS_ARM[-1]: 0.0,
-    }
-    STOW_CONFIGURATION_ARM_LIFT = {
-        StretchIKControl.JOINT_ARM_LIFT: 0.35,
-    }
-    STOW_CONFIGURATION_WRIST = {
-        StretchIKControl.JOINT_GRIPPER: 0.0,
-        # Wrist rotation should match src/shared/util.tsx
-        StretchIKControl.JOINT_WRIST_ROLL: 0.0,
-        StretchIKControl.JOINT_WRIST_PITCH: -0.497,
-        StretchIKControl.JOINT_WRIST_YAW: 3.19579,
-    }
 
     def __init__(
         self,
@@ -248,6 +245,8 @@ class MoveToPregraspNode(Node):
             cancel_callback=self.cancel_callback,
             callback_group=ReentrantCallbackGroup(),
         )
+
+        return True
 
     def camera_info_cb(self, msg: CameraInfo) -> None:
         """
@@ -399,23 +398,8 @@ class MoveToPregraspNode(Node):
             return MoveToPregrasp.Result()
         self.get_logger().info(f"Goal Pose: {goal_pose}")
 
-        # ok, err = self.controller.get_err(
-        #     goal_pose,
-        #     timeout=remaining_time(
-        #         self.get_clock().now(),
-        #         start_time,
-        #         self.action_timeout,
-        #     ),
-        # )
-        # if ok:
-        #     distance_callback(err)
-        # self.get_logger().error("Failed to get goal pose")
-        # goal_handle.abort()
-        # self.active_goal_request = None
-        # return MoveToPregrasp.Result()
-
         # Verify the goal is reachable
-        wrist_rotation = self.get_wrist_rotation(horizontal_grasp)
+        wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
         reachable, ik_solution = self.controller.solve_ik(
             goal_pose, joint_position_overrides=wrist_rotation
         )
@@ -433,12 +417,11 @@ class MoveToPregraspNode(Node):
         # Get the states.
         # If the robot is in a vertical grasp position and the arm needs to descend,
         # lengthn the arm before deploying the wrist.
+        arm_lift_when_stowed = get_stow_configuration([Joint.ARM_LIFT])[Joint.ARM_LIFT]
         states = MoveToPregraspState.get_state_machine(
             horizontal_grasp=horizontal_grasp,
-            init_lift_near_base=init_joints[StretchIKControl.JOINT_ARM_LIFT]
-            < self.STOW_CONFIGURATION_ARM_LIFT[StretchIKControl.JOINT_ARM_LIFT],
-            goal_lift_near_base=ik_solution[StretchIKControl.JOINT_ARM_LIFT]
-            < self.STOW_CONFIGURATION_ARM_LIFT[StretchIKControl.JOINT_ARM_LIFT],
+            init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
+            goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
         )
         self.get_logger().info(f" States: {states}")
 
@@ -495,37 +478,58 @@ class MoveToPregraspNode(Node):
                 joint_position_overrides = {}
                 joints_for_position_control = {}
                 cartesian_mask = None
-                if state == MoveToPregraspState.STOW_ARM_LENGTH:
+                if state == MoveToPregraspState.STOW_ARM_LENGTH_FULL:
                     joints_for_position_control.update(
-                        self.STOW_CONFIGURATION_ARM_LENGTH
+                        get_stow_configuration([Joint.ARM_L0])
+                    )
+                elif state == MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL:
+                    joints_for_position_control.update(
+                        get_stow_configuration([Joint.ARM_L0], partial=True)
                     )
                 elif state == MoveToPregraspState.STOW_ARM_LIFT:
-                    joints_for_position_control.update(self.STOW_CONFIGURATION_ARM_LIFT)
+                    joints_for_position_control.update(
+                        get_stow_configuration([Joint.ARM_LIFT])
+                    )
                 elif state == MoveToPregraspState.STOW_WRIST:
-                    joints_for_position_control.update(self.STOW_CONFIGURATION_WRIST)
+                    joints_for_position_control.update(
+                        get_stow_configuration(
+                            Joint.get_wrist_joints() + [Joint.GRIPPER_LEFT]
+                        )
+                    )
                 elif state == MoveToPregraspState.ROTATE_BASE:
-                    joints_for_velocity_control += [
-                        StretchIKControl.JOINT_BASE_ROTATION
-                    ]
+                    # TODO: This sometimes ends up a few degrees off. The object is
+                    # still in the gripper camera view, so users can resolve this,
+                    # but we should look into why (odom -> base_link TF delay?
+                    # issue with termination thresholds? etc.)
+                    joints_for_velocity_control += [Joint.BASE_ROTATION]
                     joint_position_overrides.update(
-                        self.get_wrist_rotation(horizontal_grasp)
+                        {
+                            joint: position
+                            for joint, position in ik_solution.items()
+                            if joint != Joint.BASE_ROTATION
+                        }
+                    )
+                    joint_position_overrides.update(
+                        get_pregrasp_wrist_configuration(horizontal_grasp)
                     )
                     # Only care about x and yaw in base frame. y and z are adjusted by
                     # arm length/lift
                     cartesian_mask = np.array([True, False, False, False, False, True])
                 elif state == MoveToPregraspState.LIFT_ARM:
-                    joints_for_position_control[
-                        StretchIKControl.JOINT_ARM_LIFT
-                    ] = ik_solution[StretchIKControl.JOINT_ARM_LIFT]
+                    joints_for_position_control[Joint.ARM_LIFT] = ik_solution[
+                        Joint.ARM_LIFT
+                    ]
                 elif state == MoveToPregraspState.MOVE_WRIST:
-                    joints_for_position_control[StretchIKControl.JOINT_GRIPPER] = 0.84
                     joints_for_position_control.update(
-                        self.get_wrist_rotation(horizontal_grasp)
+                        get_gripper_configuration(closed=False)
+                    )
+                    joints_for_position_control.update(
+                        get_pregrasp_wrist_configuration(horizontal_grasp)
                     )
                 elif state == MoveToPregraspState.LENGTHEN_ARM:
-                    joints_for_position_control[
-                        StretchIKControl.JOINTS_ARM[-1]
-                    ] = ik_solution[StretchIKControl.JOINTS_ARM[-1]]
+                    joints_for_position_control[Joint.ARM_L0] = ik_solution[
+                        Joint.ARM_L0
+                    ]
                 else:  # TERMINAL
                     self.get_logger().info("Goal succeeded")
                     result.status = MoveToPregrasp.Result.STATUS_SUCCESS
@@ -535,7 +539,7 @@ class MoveToPregraspNode(Node):
                     motion_executor = self.controller.move_to_ee_pose_inverse_jacobian(
                         goal=goal_pose,
                         articulated_joints=joints_for_velocity_control,
-                        termination=TerminationCriteria.ZERO_VEL,
+                        termination=TerminationCriteria.ZERO_ERR,
                         joint_position_overrides=joint_position_overrides,
                         timeout_secs=remaining_time(
                             self.get_clock().now(),
@@ -545,6 +549,7 @@ class MoveToPregraspNode(Node):
                         ),
                         check_cancel=lambda: terminate_future,
                         err_callback=distance_callback,
+                        cartesian_mask=cartesian_mask,
                     )
                 else:
                     motion_executor = self.controller.move_to_joint_positions(
@@ -562,15 +567,17 @@ class MoveToPregraspNode(Node):
                 try:
                     retval = next(motion_executor)
                     self.get_logger().info(f"Motion executor returned {retval}")
-                    if retval == ActionRetval.SUCCESS:
+                    if retval == MotionGeneratorRetval.SUCCESS:
                         state_i += 1
                         motion_executor = None
-                    elif retval == ActionRetval.FAILURE:
+                    elif retval == MotionGeneratorRetval.FAILURE:
                         raise Exception("Failed to move to goal pose")
                     else:  # CONTINUE
                         pass
                 except Exception as e:
-                    self.get_logger().error(f"Error: {e}")
+                    self.get_logger().error(
+                        f"Error executing the motion generator: {e}"
+                    )
                     result.status = MoveToPregrasp.Result.STATUS_FAILURE
                     goal_handle.abort()
                     break
@@ -624,31 +631,6 @@ class MoveToPregraspNode(Node):
                 "Auto grasp not implemented yet. Defaulting to horizontal grasp."
             )
             return True
-
-    def get_wrist_rotation(self, horizontal_grasp: bool) -> Dict[str, float]:
-        """
-        Get the wrist rotation for the pregrasp position.
-
-        Parameters
-        ----------
-        horizontal_grasp: Whether the pregrasp position is horizontal.
-
-        Returns
-        -------
-        Dict[str, float]: The wrist rotation.
-        """
-        if horizontal_grasp:
-            return {
-                StretchIKControl.JOINT_WRIST_YAW: 0.0,
-                StretchIKControl.JOINT_WRIST_PITCH: 0.0,
-                StretchIKControl.JOINT_WRIST_ROLL: 0.0,
-            }
-        else:
-            return {
-                StretchIKControl.JOINT_WRIST_YAW: 0.0,
-                StretchIKControl.JOINT_WRIST_PITCH: -np.pi / 2.0,
-                StretchIKControl.JOINT_WRIST_ROLL: 0.0,
-            }
 
     def inverse_transform_pixel(
         self, scaled_u: int, scaled_v: int, params: Optional[Dict]
@@ -709,7 +691,8 @@ class MoveToPregraspNode(Node):
                 u, v = w - v, u
             else:
                 raise ValueError(
-                    "Invalid rotate image value: options are ROTATE_90_CLOCKWISE, ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE"
+                    "Invalid rotate image value: options are ROTATE_90_CLOCKWISE, "
+                    "ROTATE_180, or ROTATE_90_COUNTERCLOCKWISE"
                 )
 
         return u, v
@@ -782,7 +765,7 @@ class MoveToPregraspNode(Node):
         # Convert to base frame
         try:
             goal_pose_base = self.tf_buffer.transform(
-                goal_pose, self.BASE_LINK, timeout=self.tf_timeout
+                goal_pose, Frame.BASE_LINK.value, timeout=self.tf_timeout
             )
         except (
             tf2.ConnectivityException,
@@ -831,7 +814,7 @@ class MoveToPregraspNode(Node):
         # Convert the goal pose to the odom frame so it stays fixed even as the robot moves
         try:
             goal_pose_odom = self.tf_buffer.transform(
-                goal_pose_base, self.ODOM_FRAME, timeout=self.tf_timeout
+                goal_pose_base, Frame.ODOM.value, timeout=self.tf_timeout
             )
         except (
             tf2.ConnectivityException,

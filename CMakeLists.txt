@@ -34,8 +34,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
   nodes/compressed_image_visualizer.py
+  nodes/configure_video_streams.py
+  nodes/move_to_pregrasp.py
   nodes/navigation_camera.py
-  nodes/web_teleop_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

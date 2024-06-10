@@ -23,6 +23,8 @@ from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, CompressedImage, Image, JointState, PointCloud2
 from std_srvs.srv import SetBool
 
+# TODO: Add docstrings to this file.
+
 
 class ConfigureVideoStreams(Node):
     BACKGROUND_COLOR = (200, 200, 200)

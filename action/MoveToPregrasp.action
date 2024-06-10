@@ -15,7 +15,6 @@ uint8 pregrasp_direction
 ---
 # Result
 
-# TODO: Add more granular statuses based on the reason for failure.
 uint8 STATUS_SUCCESS=0
 uint8 STATUS_FAILURE=1
 uint8 STATUS_CANCELLED = 2
