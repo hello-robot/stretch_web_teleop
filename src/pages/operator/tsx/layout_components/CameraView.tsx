@@ -37,6 +37,7 @@ import {
 import {
   OverheadButtons,
   realsenseButtons,
+  realsenseMoveToPregraspButtons,
   RealsenseButtons,
   UnderVideoButton,
   wristButtons,
@@ -180,14 +181,17 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const resizeObserver = new ResizeObserver((entries) => {
       // height and width of area around the video stream
       const { height, width } = entries[0].contentRect;
+      const areaAspectRatio = width / height;
 
       // height and width of video stream
       if (!videoRef?.current) return;
       const videoRect = videoRef.current.getBoundingClientRect();
+      const videoAspectRatio = videoRect.width / videoRect.height;
 
-      if (Math.abs(videoRect.height - height) > 1.0) {
+      // Set whether the height or width is the constraining factor
+      if (areaAspectRatio > videoAspectRatio) {
         setConstrainedHeight(true);
-      } else if (Math.abs(videoRect.width - width) > 1.0) {
+      } else if (areaAspectRatio < videoAspectRatio) {
         setConstrainedHeight(false);
       }
     });
@@ -808,6 +812,38 @@ const UnderRealsenseButtons = (props: {
         }}
         label="Depth Sensing"
       />
+      <CheckToggleButton
+        checked={props.definition.depthSensing || false}
+        onClick={() => {
+          props.definition.depthSensing = !props.definition.depthSensing;
+          setRerender(!rerender);
+          underVideoFunctionProvider.provideFunctions(
+            UnderVideoButton.DepthSensing,
+          ).onCheck!(props.definition.depthSensing);
+        }}
+        label="Select Object"
+      />
+      <AccordionSelect
+        title="Align Gripper to Object"
+        possibleOptions={Object.values(realsenseMoveToPregraspButtons)}
+        backgroundColor="var(--selected-color"
+        onChange={(idx: number) => {
+          underVideoFunctionProvider.provideFunctions(
+            realsenseMoveToPregraspButtons[idx],
+          ).onClick!();
+        }}
+      />
+      <button className="map-cancel-btn" onPointerDown={() => {}}>
+        <span>Cancel</span>
+        <span className="material-icons">cancel</span>
+      </button>
+      {/* <button
+        className="map-play-btn"
+        onPointerDown={() => {}}
+      >
+        <span>Start</span>
+        <span className="material-icons">play_circle</span>
+      </button> */}
       {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {

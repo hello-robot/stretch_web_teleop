@@ -500,7 +500,7 @@ class MoveToPregraspNode(Node):
                     # TODO: This sometimes ends up a few degrees off. The object is
                     # still in the gripper camera view, so users can resolve this,
                     # but we should look into why (odom -> base_link TF delay?
-                    # issue with termination thresholds? etc.)
+                    # issue with termination thresholds? robot's center of rotation? etc.)
                     joints_for_velocity_control += [Joint.BASE_ROTATION]
                     joint_position_overrides.update(
                         {

@@ -21,6 +21,8 @@ export enum UnderVideoButton {
   CancelMoveToPregrasp = "Cancel Goal",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
+  StartMoveToPregraspHorizontal = "Gripper Horizontal",
+  StartMoveToPregraspVertical = "Gripper Vertical",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -35,6 +37,12 @@ export const realsenseButtons: UnderVideoButton[] = [
   UnderVideoButton.LookAhead,
   UnderVideoButton.LookAtBase,
   UnderVideoButton.LookAtGripper,
+];
+
+/** Array of different options for the MoveToPregrasp feature on the realsense camera */
+export const realsenseMoveToPregraspButtons: UnderVideoButton[] = [
+  UnderVideoButton.StartMoveToPregraspHorizontal,
+  UnderVideoButton.StartMoveToPregraspVertical,
 ];
 
 /** Array of different actions for the wrist */

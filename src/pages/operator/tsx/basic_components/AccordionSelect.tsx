@@ -5,6 +5,7 @@ import { className } from "shared/util";
 export const AccordionSelect = <T extends string | JSX.Element>(props: {
   title: string;
   possibleOptions: T[];
+  backgroundColor?: string;
   onChange: (selectedIndex: number) => void;
 }) => {
   const [active, setActiveState] = useState<boolean>(false);
@@ -38,13 +39,17 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
       <button
         className={className("accordion", { active })}
         onClick={toggleAccordion}
+        style={{ backgroundColor: props.backgroundColor }}
       >
         {props.title}
         <span className="material-icons">expand_more</span>
       </button>
       <div
         ref={content}
-        style={{ maxHeight: `${height}` }}
+        style={{
+          maxHeight: `${height}`,
+          backgroundColor: props.backgroundColor,
+        }}
         className="accordion_content"
       >
         <div>{props.possibleOptions.map(mapFunc)}</div>
