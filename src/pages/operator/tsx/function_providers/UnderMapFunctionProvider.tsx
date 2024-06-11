@@ -1,4 +1,4 @@
-import { ActionState as MoveBaseState, ROSPose, waitUntil } from "shared/util";
+import { ActionState, ROSPose, waitUntil } from "shared/util";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 import { FunctionProvider } from "./FunctionProvider";
 import { resolve } from "path";
@@ -24,7 +24,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
   /**
    * Callback function to update the move base state in the operator
    */
-  private operatorCallback?: (state: MoveBaseState) => void = undefined;
+  private operatorCallback?: (state: ActionState) => void = undefined;
 
   constructor(storageHandler: StorageHandler) {
     super();
@@ -33,7 +33,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
     this.storageHandler = storageHandler;
   }
 
-  public setMoveBaseState(state: MoveBaseState) {
+  public setMoveBaseState(state: ActionState) {
     if (state.alert_type == "success") this.navigationSuccess = true;
     if (this.operatorCallback) this.operatorCallback(state);
   }
@@ -157,7 +157,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
    *
    * @param callback operator's callback function to update aruco navigation state
    */
-  public setOperatorCallback(callback: (state: MoveBaseState) => void) {
+  public setOperatorCallback(callback: (state: ActionState) => void) {
     this.operatorCallback = callback;
   }
 }

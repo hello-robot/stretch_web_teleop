@@ -292,6 +292,7 @@ export class Robot extends React.Component {
 
     // Subscribe to the topic
     topic.subscribe((msg: ActionStatusList) => {
+      console.log("Got action status msg", msg);
       let status = msg.status_list.pop()?.status;
       console.log("For action ", actionName, "got status ", status);
       if (callback) {
@@ -545,13 +546,17 @@ export class Robot extends React.Component {
     return newGoal;
   }
 
-  makeMoveToPregraspGoal(scaled_x: number, scaled_y: number) {
+  makeMoveToPregraspGoal(
+    scaled_x: number,
+    scaled_y: number,
+    horizontal: boolean,
+  ) {
     if (!this.moveToPregraspClient) throw "moveToPregraspClient is undefined";
 
     let newGoal = new ROSLIB.ActionGoal({
       scaled_u: scaled_x,
       scaled_v: scaled_y,
-      pregrasp_direction: 2,
+      pregrasp_direction: horizontal ? 1 : 2,
     });
 
     return newGoal;
@@ -686,14 +691,26 @@ export class Robot extends React.Component {
   /**
    * @param x The x coordinate of the click on the Realsense camera
    * @param y The y coordinate of the click on the Realsense camera
+   * @param horizontal Whether the gripper should orient horizontally or vertically.
    */
-  executeMoveToPregraspGoal(scaled_x?: number, scaled_y?: number) {
-    if (scaled_x === undefined || scaled_y === undefined) {
+  executeMoveToPregraspGoal(
+    scaled_x?: number,
+    scaled_y?: number,
+    horizontal?: boolean,
+  ) {
+    if (
+      scaled_x === undefined ||
+      scaled_y === undefined ||
+      horizontal === undefined
+    ) {
       return;
     }
-    console.log("Got move to pregrasp goal", scaled_x, scaled_y);
-    this.switchToPositionMode();
-    this.moveToPregraspGoal = this.makeMoveToPregraspGoal(scaled_x, scaled_y);
+    console.log("Got move to pregrasp goal", scaled_x, scaled_y, horizontal);
+    this.moveToPregraspGoal = this.makeMoveToPregraspGoal(
+      scaled_x,
+      scaled_y,
+      horizontal,
+    );
     this.moveToPregraspClient.createClient(this.moveToPregraspGoal);
   }
 

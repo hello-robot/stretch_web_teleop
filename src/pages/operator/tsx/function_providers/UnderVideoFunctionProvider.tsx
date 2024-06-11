@@ -1,5 +1,6 @@
 import { FunctionProvider } from "./FunctionProvider";
 import {
+  ActionState,
   CENTER_WRIST,
   Marker,
   REALSENSE_BASE_POSE,
@@ -17,12 +18,12 @@ export enum UnderVideoButton {
   FollowGripper = "Follow Gripper",
   DepthSensing = "Depth Sensing",
   ToggleArucoMarkers = "Toggle Aruco Markers",
-  MoveToPregrasp = "Move to Pre-grasp",
-  CancelMoveToPregrasp = "Cancel Goal",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
   StartMoveToPregraspHorizontal = "Gripper Horizontal",
   StartMoveToPregraspVertical = "Gripper Vertical",
+  CancelMoveToPregrasp = "Cancel Goal",
+  MoveToPregraspGoalReached = "Goal Reached",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -58,6 +59,7 @@ export type UnderVideoButtonFunctions = {
   onCheck?: (toggle: boolean) => void;
   getMarkers?: () => string[];
   send?: (name: string) => void;
+  getFuture?: () => Promise<any>;
 };
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
@@ -66,7 +68,27 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
     this.provideFunctions = this.provideFunctions.bind(this);
   }
 
+  /**
+   * Callback function to update the move base state in the operator
+   * interface (e.g., show alerts).
+   */
+  private operatorCallback?: (state: ActionState) => void = undefined;
+  /**
+   * Store the timestam at which the last moveToPregrasp state was received
+   */
+  private lastMoveToPregraspStateTimestamp: number = 0;
+
+  /**
+   * Called when a response is received from the robot for the move to pregrasp.
+   * @param state the move to pregrasp state to set
+   */
+  public setMoveToPregraspState(state: ActionState) {
+    this.lastMoveToPregraspStateTimestamp = Date.now();
+    if (this.operatorCallback) this.operatorCallback(state);
+  }
+
   public provideFunctions(button: UnderVideoButton): UnderVideoButtonFunctions {
+    let horizontal = false;
     switch (button) {
       case UnderVideoButton.DriveView:
         return {
@@ -109,10 +131,39 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
           onCheck: (toggle: boolean) =>
             FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle),
         };
-      case UnderVideoButton.MoveToPregrasp:
+      case UnderVideoButton.StartMoveToPregraspHorizontal:
+        horizontal = true;
+      case UnderVideoButton.StartMoveToPregraspVertical:
         return {
-          onClick: (scaled_x: number, scaled_y: number) => {
-            FunctionProvider.remoteRobot?.moveToPregrasp(scaled_x, scaled_y);
+          onClick: (scaledXY: [number, number] | null) => {
+            if (!scaledXY) {
+              console.log("No scaledXY");
+              return;
+            }
+            FunctionProvider.remoteRobot?.moveToPregrasp(
+              scaledXY[0],
+              scaledXY[1],
+              horizontal,
+            );
+          },
+        };
+      case UnderVideoButton.MoveToPregraspGoalReached:
+        // TODO: Add timeouts to this and the other GoalReached promises!
+        return {
+          getFuture: () => {
+            let currentTimestamp = Date.now();
+            let that = this;
+            const promise = new Promise((resolve, reject) => {
+              let interval = setInterval(() => {
+                let goalReached =
+                  that.lastMoveToPregraspStateTimestamp > currentTimestamp;
+                if (goalReached) {
+                  clearInterval(interval);
+                  resolve(true);
+                }
+              });
+            });
+            return promise;
           },
         };
       case UnderVideoButton.CancelMoveToPregrasp:
@@ -138,5 +189,15 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
           `Cannot get function for unknown UnderVideoButton ${button}`,
         );
     }
+  }
+
+  /**
+   * Sets the local pointer to the operator's callback function, to be called
+   * whenever the move to pregrasp state changes.
+   *
+   * @param callback operator's callback function to update aruco navigation state
+   */
+  public setOperatorCallback(callback: (state: ActionState) => void) {
+    this.operatorCallback = callback;
   }
 }

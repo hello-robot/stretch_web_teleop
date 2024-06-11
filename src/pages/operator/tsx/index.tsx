@@ -164,15 +164,16 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
       remoteRobot.setMapPose(message.message);
       break;
     case "goalStatus":
+      console.log("goalStatus", message.message);
       remoteRobot.setGoalReached(true);
       break;
     case "moveBaseState":
-      console.log(message.message);
+      console.log("moveBaseState", message.message);
       underMapFunctionProvider.setMoveBaseState(message.message);
       break;
     case "moveToPregraspState":
-      console.log(message.message);
-      // TODO
+      console.log("moveToPregraspState", message.message);
+      underVideoFunctionProvider.setMoveToPregraspState(message.message);
       break;
     case "relativePose":
       remoteRobot.setRelativePose(message.message);

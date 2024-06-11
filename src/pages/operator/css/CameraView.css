@@ -6,7 +6,7 @@
   padding: 0.4rem;
   height: 100%;
   grid-template-columns: auto;
-  grid-template-rows: 1fr auto minmax(9rem, 2fr);
+  grid-template-rows: 1fr auto minmax(15rem, 2fr);
   object-fit: cover;
   justify-content: center;
   /* align-items: center;
@@ -37,6 +37,13 @@
   top: 51px;
   display: flex;
   align-items: center;
+}
+
+/* The style for the plus icon overlay for click-to-pregrasp */
+.realsense.material-icons {
+  color: rgba(255, 0, 0, 0.6);
+  position: absolute;
+  transform: translate(-50%, -50%);
 }
 
 .video-overlay-container.overhead.predictiveDisplay {
