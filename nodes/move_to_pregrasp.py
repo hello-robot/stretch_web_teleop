@@ -5,6 +5,7 @@ from __future__ import annotations  # Required for type hinting a class within i
 # Standard Imports
 import sys
 import threading
+import traceback
 from enum import Enum
 from typing import Dict, Generator, List, Optional, Tuple
 
@@ -13,7 +14,6 @@ import message_filters
 import numpy as np
 import numpy.typing as npt
 import rclpy
-import ros2_numpy
 import tf2_py as tf2
 import tf2_ros
 import yaml
@@ -24,14 +24,16 @@ from constants import (
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
 )
+from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
+from helpers import depth_img_to_pointcloud, ros_msg_to_cv2_image
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from sensor_msgs.msg import CameraInfo, Image, PointCloud2
+from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
 from stretch_ik_control import (
     MotionGeneratorRetval,
@@ -174,35 +176,36 @@ class MoveToPregraspNode(Node):
         self.tf_timeout = Duration(seconds=tf_timeout_secs)
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        self.static_transform_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
 
         # Create the inverse jacobian controller to execute motions
         # TODO: Figure out where the specialized URDF should go!
         urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
         self.controller = StretchIKControl(
-            self, tf_buffer=self.tf_buffer, urdf_path=urdf_abs_path
+            self,
+            tf_buffer=self.tf_buffer,
+            urdf_path=urdf_abs_path,
+            static_transform_broadcaster=self.static_transform_broadcaster,
         )
 
         # Subscribe to the Realsense's RGB, pointcloud, and camera info feeds
+        self.cv_bridge = CvBridge()
         self.latest_realsense_msgs_lock = threading.Lock()
-        self.latest_realsense_msgs: Optional[Tuple[Image, PointCloud2]] = None
-        camera_rgb_subscriber = message_filters.Subscriber(
+        self.latest_realsense_msgs: Optional[Tuple[CompressedImage, CameraInfo]] = None
+        depth_image_subscriber = message_filters.Subscriber(
             self,
-            Image,
-            "/camera/color/image_raw",
-            qos_profile=1,
-            # callback_group=MutuallyExclusiveCallbackGroup(),
+            CompressedImage,
+            "/camera/aligned_depth_to_color/image_raw/compressedDepth",
         )
-        point_cloud_subscriber = message_filters.Subscriber(
+        camera_info_subscriber = message_filters.Subscriber(
             self,
-            PointCloud2,
-            "/camera/depth/color/points",
-            qos_profile=1,
-            # callback_group=MutuallyExclusiveCallbackGroup(),
+            CameraInfo,
+            "/camera/aligned_depth_to_color/camera_info",
         )
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer(
             [
-                camera_rgb_subscriber,
-                point_cloud_subscriber,
+                depth_image_subscriber,
+                camera_info_subscriber,
             ],
             queue_size=1,
             # TODO: Tune the max allowable delay between RGB and pointcloud messages
@@ -271,17 +274,20 @@ class MoveToPregraspNode(Node):
         with self.p_lock:
             self.p = np.array(msg.p).reshape(3, 4)
 
-    def realsense_cb(self, rgb_msg: Image, pointcloud_msg: PointCloud2) -> None:
+    def realsense_cb(
+        self, depth_msg: CompressedImage, camera_info_msg: CameraInfo
+    ) -> None:
         """
-        Callback for the Realsense camera feed subscriber. Save the latest RGB and pointcloud messages.
+        Callback for the Realsense camera feed subscriber. Save the latest depth image
+        and camera info messages.
 
         Parameters
         ----------
-        rgb_msg: The RGB image message.
-        pointcloud_msg: The pointcloud message.
+        depth_msg: The depth image message.
+        camera_info_msg: The camera info message.
         """
         with self.latest_realsense_msgs_lock:
-            self.latest_realsense_msgs = (rgb_msg, pointcloud_msg)
+            self.latest_realsense_msgs = (depth_msg, camera_info_msg)
 
     def goal_callback(self, goal_request: MoveToPregrasp.Goal) -> GoalResponse:
         """
@@ -398,6 +404,18 @@ class MoveToPregraspNode(Node):
             cleanup()
             return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_CANCELLED)
 
+        # Get the latest Realsense messages
+        with self.latest_realsense_msgs_lock:
+            depth_msg, camera_info_msg = self.latest_realsense_msgs
+        depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
+        pointcloud = depth_img_to_pointcloud(
+            depth_image,
+            f_x=camera_info_msg.k[0],
+            f_y=camera_info_msg.k[4],
+            c_x=camera_info_msg.k[2],
+            c_y=camera_info_msg.k[5],
+        )  # N x 3 array
+
         # Undo any transformation that were applied to the raw camera image before sending it
         # to the web app
         raw_scaled_u, raw_scaled_v = (
@@ -411,17 +429,12 @@ class MoveToPregraspNode(Node):
             params = self.image_params["realsense"]["default"]
         else:
             params = None
-        u, v = self.inverse_transform_pixel(raw_scaled_u, raw_scaled_v, params)
+        u, v = self.inverse_transform_pixel(
+            raw_scaled_u, raw_scaled_v, params, camera_info_msg
+        )
         self.get_logger().info(
             f"Clicked pixel after inverse transform (camera frame): {(u, v)}"
         )
-
-        # Get the latest Realsense messages
-        with self.latest_realsense_msgs_lock:
-            rgb_msg, pointcloud_msg = self.latest_realsense_msgs
-        pointcloud = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(
-            pointcloud_msg
-        )  # N x 3 array
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
         x, y, z = self.deproject_pixel_to_point(u, v, pointcloud)
@@ -434,7 +447,7 @@ class MoveToPregraspNode(Node):
 
         # Get the goal end effector pose
         ok, goal_pose = self.get_goal_pose(
-            x, y, z, pointcloud_msg.header, horizontal_grasp, publish_tf=True
+            x, y, z, depth_msg.header, horizontal_grasp, publish_tf=True
         )
         if not ok:
             return action_error_callback(
@@ -608,7 +621,7 @@ class MoveToPregraspNode(Node):
                     motion_executor = self.controller.move_to_ee_pose_inverse_jacobian(
                         goal=goal_pose,
                         articulated_joints=joints_for_velocity_control,
-                        termination=TerminationCriteria.ZERO_ERR,
+                        termination=TerminationCriteria.ZERO_VEL,
                         joint_position_overrides=joint_position_overrides,
                         timeout_secs=remaining_time(
                             self.get_clock().now(),
@@ -649,6 +662,7 @@ class MoveToPregraspNode(Node):
                     if len(motion_executors) == 0:
                         state_i += 1
                 except Exception as e:
+                    self.get_logger().error(traceback.format_exc())
                     return action_error_callback(
                         f"Error executing the motion generator: {e}",
                         MoveToPregrasp.Result.STATUS_FAILURE,
@@ -704,7 +718,11 @@ class MoveToPregraspNode(Node):
             return True
 
     def inverse_transform_pixel(
-        self, scaled_u: int, scaled_v: int, params: Optional[Dict]
+        self,
+        scaled_u: int,
+        scaled_v: int,
+        params: Optional[Dict],
+        camera_info_msg: CameraInfo,
     ) -> Tuple[int, int]:
         """
         First, unscale the u and v coordinates. Then, undo the transformations
@@ -721,6 +739,7 @@ class MoveToPregraspNode(Node):
         scaled_u: The horizontal coordinate of the clicked pixel in the web app, in [0.0, 1.0].
         scaled_v: The vertical coordinate of the clicked pixel in the web app, in [0.0, 1.0].
         params: The transformation parameters.
+        camera_info_msg: The camera info message.
 
         Returns
         -------
@@ -728,10 +747,7 @@ class MoveToPregraspNode(Node):
         """
         # Get the image dimensions. Note that (w, h) are dimensions of the raw image,
         # while (u, v) are coordinates on the transformed image.
-        with self.latest_realsense_msgs_lock:
-            # An image is guaranteed to exist by the precondition of accepting the goal
-            img_msg = self.latest_realsense_msgs[0]
-        w, h = img_msg.width, img_msg.height
+        w, h = camera_info_msg.width, camera_info_msg.height
 
         # First, unscale the u and v coordinates
         if (
@@ -824,9 +840,6 @@ class MoveToPregraspNode(Node):
         ok: Whether the goal pose was successfully calculated.
         PoseStamped: The goal end effector pose.
         """
-        if publish_tf:
-            static_transform_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
-
         # Get the goal position in camera frame
         goal_pose = PoseStamped()
         goal_pose.header = header
@@ -901,7 +914,7 @@ class MoveToPregraspNode(Node):
             return False, PoseStamped()
 
         if publish_tf:
-            static_transform_broadcaster.sendTransform(
+            self.static_transform_broadcaster.sendTransform(
                 TransformStamped(
                     header=goal_pose_odom.header,
                     child_frame_id="goal",

@@ -2,18 +2,20 @@
 
 import math
 import sys
+from typing import Union
 
 import cv2
 import message_filters
 import numpy as np
 import pcl
-import PyKDL
+import PyKDL  # TODO: This can be removed, as it is only used to perform a transformation that can be done with numpy
 import rclpy
 import ros2_numpy
 import tf2_py as tf2
 import tf2_ros
 import yaml
 from cv_bridge import CvBridge
+from helpers import cv2_image_to_ros_msg, depth_img_to_pointcloud, ros_msg_to_cv2_image
 from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
@@ -29,7 +31,18 @@ from std_srvs.srv import SetBool
 class ConfigureVideoStreams(Node):
     BACKGROUND_COLOR = (200, 200, 200)
 
-    def __init__(self, params_file, has_beta_teleop_kit):
+    def __init__(self, params_file, has_beta_teleop_kit, use_pointcloud=True):
+        """
+        Initialize the ConfigureVideoStreams class.
+
+        Parameters
+        ----------
+        node: The ROS node that this class is a part of.
+        params_file: The path to the YAML file containing the image parameters.
+        has_beta_teleop_kit: Whether the robot has the beta teleop kit.
+        use_pointcloud: If True, subscribe to the raw pointcloud message. If False,
+            subscribe to the compressed depth image message.
+        """
         super().__init__("configure_video_streams")
 
         with open(params_file, "r") as params:
@@ -86,7 +99,7 @@ class ConfigureVideoStreams(Node):
 
         # Subscribers
         self.camera_rgb_subscriber = message_filters.Subscriber(
-            self, Image, "/camera/color/image_raw"
+            self, CompressedImage, "/camera/color/image_raw/compressed"
         )
         self.overhead_camera_rgb_subscriber = self.create_subscription(
             Image,
@@ -94,15 +107,28 @@ class ConfigureVideoStreams(Node):
             self.navigation_camera_cb,
             QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE),
         )
+        if has_beta_teleop_kit:
+            gripper_camera_type = Image
+            gripper_camera_topic = "/gripper_camera/image_raw"
+        else:
+            gripper_camera_type = CompressedImage
+            gripper_camera_topic = "/gripper_camera/image_raw/compressed"
         self.gripper_camera_rgb_subscriber = self.create_subscription(
-            Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1
+            gripper_camera_type, gripper_camera_topic, self.gripper_camera_cb, 1
         )
         self.joint_state_subscription = self.create_subscription(
             JointState, "/stretch/joint_states", self.joint_state_cb, 1
         )
-        self.point_cloud_subscriber = message_filters.Subscriber(
-            self, PointCloud2, "/camera/depth/color/points"
-        )
+        if use_pointcloud:
+            self.depth_subscriber = message_filters.Subscriber(
+                self, PointCloud2, "/camera/depth/color/points"
+            )
+        else:
+            self.depth_subscriber = message_filters.Subscriber(
+                self,
+                CompressedImage,
+                "/camera/aligned_depth_to_color/image_raw/compressedDepth",
+            )
         self.camera_info_subscriber = self.create_subscription(
             CameraInfo,
             "/camera/aligned_depth_to_color/camera_info",
@@ -112,10 +138,10 @@ class ConfigureVideoStreams(Node):
         self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer(
             [
                 self.camera_rgb_subscriber,
-                self.point_cloud_subscriber,
+                self.depth_subscriber,
             ],
-            1,
-            1,
+            queue_size=1,
+            slop=0.5,  # seconds
             allow_headerless=True,
         )
         self.camera_synchronizer.registerCallback(self.realsense_cb)
@@ -168,7 +194,9 @@ class ConfigureVideoStreams(Node):
         self.P = np.array(msg.p).reshape(3, 4)
         # self.camera_info_subscriber.destroy()
 
-    def pc_callback(self, msg, img):
+    def depth_callback(
+        self, depth_msg: Union[CompressedImage, PointCloud2], img: CompressedImage
+    ):
         # Only keep points that are within 0.01m to 1.5m from the camera
         if self.P is None:
             self.get_logger().warn(
@@ -176,7 +204,17 @@ class ConfigureVideoStreams(Node):
             )
             return img
 
-        pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
+        if isinstance(depth_msg, CompressedImage):
+            depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
+            pc_in_camera = depth_img_to_pointcloud(
+                depth_image,
+                f_x=self.P[0, 0],
+                f_y=self.P[1, 1],
+                c_x=self.P[0, 2],
+                c_y=self.P[1, 2],
+            )
+        else:
+            pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
         passthrough = pcl_cloud.make_passthrough_filter()
         passthrough.set_filter_field_name("z")
@@ -231,15 +269,22 @@ class ConfigureVideoStreams(Node):
             coords = np.matmul(self.P, np.transpose(pts_in_range))  # 3 x N
             u_idx = (coords[0, :] / coords[2, :]).astype(int)
             v_idx = (coords[1, :] / coords[2, :]).astype(int)
+            uv = np.vstack((u_idx, v_idx)).T  # N x 2
+            uv_dedup = np.unique(uv, axis=0)
             in_bounds_idx = np.where(
-                (u_idx >= 0)
-                & (u_idx < img.shape[1])
-                & (v_idx >= 0)
-                & (v_idx < img.shape[0])
+                (uv_dedup[:, 0] >= 0)
+                & (uv_dedup[:, 0] < img.shape[1])
+                & (uv_dedup[:, 1] >= 0)
+                & (uv_dedup[:, 1] < img.shape[0])
             )
-            # Color the pixels in the robot's reach
-            img[v_idx[in_bounds_idx], u_idx[in_bounds_idx], :] = [0, 191, 255, 50]
-
+            u_mask = uv_dedup[in_bounds_idx][:, 0]
+            v_mask = uv_dedup[in_bounds_idx][:, 1]
+            # Overlay the pixels in the robot's reach
+            img = img.astype(np.float32)
+            alpha = 0.5
+            img[v_mask, u_mask, :] *= 1.0 - alpha
+            img[v_mask, u_mask, :] += alpha * np.array([0.0, 191.0, 255.0])
+            img = img.astype(np.uint8)
         return img
 
     def depth_ar_callback(self, req, res):
@@ -351,14 +396,18 @@ class ConfigureVideoStreams(Node):
                 rgb_image = self.rotate_image(rgb_image, params["rotate"])
         return rgb_image
 
-    def realsense_cb(self, ros_image, pc):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image)
+    def realsense_cb(
+        self,
+        rgb_ros_image: CompressedImage,
+        depth_msg: Union[CompressedImage, PointCloud2],
+    ):
+        image = ros_msg_to_cv2_image(rgb_ros_image, self.cv_bridge)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         for image_config_name in self.realsense_params:
             # Overlay the pointcloud *before* cropping/masking/rotating the image,
             # for consistent (de)projection and transformations
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
             if self.depth_ar:
-                image = self.pc_callback(pc, image)
+                image = self.depth_callback(depth_msg, image)
             img = self.configure_images(image, self.realsense_params[image_config_name])
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
@@ -371,7 +420,8 @@ class ConfigureVideoStreams(Node):
         )
 
     def gripper_camera_cb(self, ros_image):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image, "rgb8")
+        image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # Compute and publish the standard gripper image
         gripper_camera_rgb_image = self.configure_images(
             image, self.gripper_params[self.gripper_camera_perspective]
@@ -394,7 +444,8 @@ class ConfigureVideoStreams(Node):
         )
 
     def navigation_camera_cb(self, ros_image):
-        image = self.cv_bridge.imgmsg_to_cv2(ros_image, "rgb8")
+        image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         self.overhead_camera_rgb_image = self.configure_images(
             image, self.overhead_params[self.overhead_camera_perspective]
         )
@@ -420,10 +471,7 @@ class ConfigureVideoStreams(Node):
             self.roll_value = joint_state.position[roll_index]
 
     def publish_compressed_msg(self, image, publisher):
-        msg = CompressedImage()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.format = "jpeg"
-        msg.data = np.array(cv2.imencode(".jpg", image)[1]).tobytes()
+        msg = cv2_image_to_ros_msg(image, compress=True, bridge=self.cv_bridge)
         publisher.publish(msg)
 
 

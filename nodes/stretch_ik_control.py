@@ -22,7 +22,7 @@ from builtin_interfaces.msg import Time
 # Local Imports
 from constants import ControlMode, Frame, Joint, SpeedProfile
 from control_msgs.action import FollowJointTrajectory
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Transform, Twist, Vector3
 from pinocchio_ik_solver import PinocchioIKSolver
 from rclpy.action import ActionClient
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
@@ -32,7 +32,7 @@ from rclpy.task import Future
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Trigger
 from stretch_body.robot_params import RobotParams
-from tf2_geometry_msgs import PoseStamped
+from tf2_geometry_msgs import PoseStamped, TransformStamped
 from tf_transformations import (
     euler_from_quaternion,
     quaternion_inverse,
@@ -74,6 +74,7 @@ class StretchIKControl:
         node: Node,
         tf_buffer: tf2_ros.Buffer,
         urdf_path: str,
+        static_transform_broadcaster: tf2_ros.StaticTransformBroadcaster,
         speed_profile: SpeedProfile = SpeedProfile.MAX,  # TODO: consider allowing users to set this in the message!
     ):
         """
@@ -90,6 +91,7 @@ class StretchIKControl:
         self.node = node
         self.tf_buffer = tf_buffer
         self.urdf_path = urdf_path
+        self.static_transform_broadcaster = static_transform_broadcaster
         self.speed_profile = speed_profile
         self.initialized = False
 
@@ -121,8 +123,7 @@ class StretchIKControl:
         # telescoping arm joints and 1.0 otherwise, but for this implementation
         # 1.0 everywhere seems to work fine.
         self.K = np.eye(len(self.all_joints), dtype=np.float64)
-        base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
-        self.K[base_rotation_i, base_rotation_i] = 3.0
+        # base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
@@ -575,6 +576,7 @@ class StretchIKControl:
                 goal_odom,
                 remaining_time(self.node.get_clock().now(), start_time, timeout),
                 q_all=q,
+                publish_fk=True,
             )
             if not ok:
                 yield MotionGeneratorRetval.FAILURE
@@ -759,6 +761,7 @@ class StretchIKControl:
         goal: PoseStamped,
         timeout: Duration,
         q_all: Optional[npt.NDArray[np.float64]] = None,
+        publish_fk: bool = False,
     ) -> Tuple[bool, npt.NDArray[np.float64]]:
         """
         Get the error between the goal pose and the current end effector pose.
@@ -770,6 +773,10 @@ class StretchIKControl:
         timeout: The timeout.
         q_all: The joint positions to use to compute the end effector pose.
             If None, use the current joint positions.
+        publish_fk: Whether to publish the end-effector pose after forward
+            kinematics to the TF tree (e.g., if we were to stop the currently-
+            articulated joint right now and move the remaining joints to their
+            positions in q_all, the end effector would be at this published pose).
 
         Returns
         -------
@@ -786,6 +793,36 @@ class StretchIKControl:
         ee_pos, ee_quat = self.ik_solver.compute_fk(
             config=dict(zip(self.all_joints_str, q_all))
         )
+        if publish_fk:
+            # Transform the end effector pose to the odom frame
+            ee_pose = PoseStamped()
+            ee_pose.header.stamp = Time()  # Get the most recent transform
+            ee_pose.header.frame_id = Frame.BASE_LINK.value
+            ee_pose.pose.position.x = ee_pos[0]
+            ee_pose.pose.position.y = ee_pos[1]
+            ee_pose.pose.position.z = ee_pos[2]
+            ee_pose.pose.orientation.x = ee_quat[0]
+            ee_pose.pose.orientation.y = ee_quat[1]
+            ee_pose.pose.orientation.z = ee_quat[2]
+            ee_pose.pose.orientation.w = ee_quat[3]
+            ok, ee_pose_odom = self.__transform_pose(
+                ee_pose, Frame.ODOM, start_time, timeout
+            )
+            if ok:
+                self.static_transform_broadcaster.sendTransform(
+                    TransformStamped(
+                        header=ee_pose_odom.header,
+                        child_frame_id="fk_end_effector",
+                        transform=Transform(
+                            translation=Vector3(
+                                x=ee_pose_odom.pose.position.x,
+                                y=ee_pose_odom.pose.position.y,
+                                z=ee_pose_odom.pose.position.z,
+                            ),
+                            rotation=ee_pose_odom.pose.orientation,
+                        ),
+                    )
+                )
 
         # Get the goal end effector pose in base frame
         goal.header.stamp = Time()  # Get the most recent transform
