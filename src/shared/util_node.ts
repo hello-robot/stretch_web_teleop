@@ -1,10 +1,10 @@
-import ROSLIB, { Message } from "roslib";
-import { cmd } from "./commands";
+// import ROSLIB, { Message } from 'roslib'
+import { cmd } from "./commands_node";
 
 export type ValidJoints =
   | "joint_head_tilt"
   | "joint_head_pan"
-  | "joint_gripper"
+  | "joint_gripper_finger_left"
   | "joint_arm"
   | "wrist_extension"
   | "joint_lift"
@@ -17,7 +17,10 @@ export type ValidJoints =
   | "joint_arm_l0"
   | "joint_arm_l1"
   | "joint_arm_l2"
-  | "joint_arm_l3";
+  | "joint_arm_l3"
+  | "joint_gripper"
+  | "mobile_base"
+  | "other";
 
 export type VelocityGoalArray = [
   { [key in ValidJoints]?: number },
@@ -29,38 +32,20 @@ export type RemoteStream = {
   track: MediaStreamTrack;
 };
 
-export const AllJoints: ValidJoints[] = [
-  "joint_head_tilt",
-  "joint_head_pan",
-  "joint_gripper",
-  "joint_arm",
-  "wrist_extension",
-  "joint_lift",
-  "joint_wrist_roll",
-  "joint_wrist_pitch",
-  "joint_wrist_yaw",
-  "translate_mobile_base",
-  "rotate_mobile_base",
-];
-
 export type ValidJointStateDict = { [key in ValidJoints]?: [boolean, boolean] };
 
-export interface ROSJointState extends Message {
-  name: [ValidJoints?];
-  position: [number];
-  effort: [number];
-  velocity: [number];
-}
+// export interface ROSJointState extends Message {
+//     name: [ValidJoints?],
+//     position: [number],
+//     effort: [number],
+//     velocity: [number],
+// }
 
-export interface ROSBatteryState extends Message {
-  voltage: number;
-}
-
-export interface ROSCompressedImage extends Message {
-  header: string;
-  format: "jpeg" | "png";
-  data: string;
-}
+// export interface ROSCompressedImage extends Message {
+//     header: string,
+//     format: "jpeg" | "png",
+//     data: string
+// }
 
 export interface CameraInfo {
   [key: string]: string;
@@ -72,14 +57,15 @@ export interface SignallingMessage {
   cameraInfo?: CameraInfo;
 }
 
-export interface Transform {
-  transform: ROSLIB.Transform;
-}
+// export interface Transform {
+//     transform: ROSLIB.Transform
+// }
 
+// Removed OccupancyGridMessage
+
+// export type WebRTCMessage = ValidJointStateMessage | MapPoseMessage | StopTrajectoryMessage | StopMoveBaseMessage | FollowJointTrajectoryActionResultMessage | MoveBaseActionResultMessage | BatteryVoltageMessage | MoveBaseStateMessage | IsRunStoppedMessage | HasBetaTeleopKitMessage | cmd;
 export type WebRTCMessage =
   | ValidJointStateMessage
-  | OccupancyGridMessage
-  | MapPoseMessage
   | StopTrajectoryMessage
   | StopMoveBaseMessage
   | FollowJointTrajectoryActionResultMessage
@@ -163,28 +149,28 @@ export interface MoveBaseActionResult {
   result: string;
 }
 
-export interface OccupancyGridMessage {
-  type: "occupancyGrid";
-  message: ROSOccupancyGrid;
-}
+// export interface OccupancyGridMessage {
+//     type: "occupancyGrid",
+//     message: ROSOccupancyGrid
+// }
 
-export interface MapPoseMessage {
-  type: "amclPose";
-  message: ROSLIB.Transform;
-}
+// export interface MapPoseMessage {
+//     type: 'amclPose',
+//     message: ROSLIB.Transform
+// }
 
 export interface BatteryVoltageMessage {
   type: "batteryVoltage";
   message: number;
 }
 
-export interface AMCLPose extends Message {
-  header: string;
-  pose: {
-    pose: ROSPose;
-    covariance: number[];
-  };
-}
+// export interface AMCLPose extends Message {
+//     header: string,
+//     pose: {
+//         pose: ROSPose,
+//         covariance: number[]
+//     }
+// }
 
 export interface MarkerArray {
   markers: Marker[];
@@ -195,37 +181,37 @@ export interface Marker {
   id: number;
 }
 
-export interface ROSPoint extends Message {
-  x: number;
-  y: number;
-  z: number;
-}
+// export interface ROSPoint extends Message {
+//     x: number,
+//     y: number,
+//     z: number
+// }
 
-export interface ROSQuaternion extends Message {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-}
+// export interface ROSQuaternion extends Message {
+//     x: number,
+//     y: number,
+//     z: number,
+//     w: number
+// }
 
-export interface ROSPose extends Message {
-  position: ROSPoint;
-  orientation: ROSQuaternion;
-}
+// export interface ROSPose extends Message{
+//     position: ROSPoint
+//     orientation: ROSQuaternion
+// }
 
-export interface ROSMapMetaData extends Message {
-  map_load_time: number;
-  resolution: number;
-  width: number;
-  height: number;
-  origin: ROSPose;
-}
+// export interface ROSMapMetaData extends Message {
+//     map_load_time: number,
+//     resolution: number,
+//     width: number,
+//     height: number,
+//     origin: ROSPose
+// }
 
-export interface ROSOccupancyGrid {
-  header: string;
-  info: ROSMapMetaData;
-  data: number[];
-}
+// export interface ROSOccupancyGrid {
+//     header: string,
+//     info: ROSMapMetaData,
+//     data: number[]
+// }
 
 export const STOW_WRIST: RobotPose = {
   joint_wrist_roll: 0.0,
@@ -262,10 +248,16 @@ export const JOINT_LIMITS: { [key in ValidJoints]?: [number, number] } = {
   joint_lift: [0.001, 1.1],
   translate_mobile_base: [-30.0, 30.0],
   rotate_mobile_base: [-3.14, 3.14],
-  joint_gripper: [-0.37, 0.17],
+  joint_gripper_finger_left: [-0.37, 0.17],
   joint_head_tilt: [-1.6, 0.3],
   joint_head_pan: [-3.95, 1.7],
 };
+
+export const JOINT_EFFORT_LIMITS: { [key in ValidJoints]?: [number, number] } =
+  {
+    joint_arm: [-40, 40],
+    joint_lift: [0, 70],
+  };
 
 export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
   joint_head_tilt: 0.3,
@@ -282,7 +274,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
   joint_head_tilt: 0.1,
   joint_head_pan: 0.1,
-  joint_gripper: 0.075,
+  joint_gripper_finger_left: 0.075,
   wrist_extension: 0.075,
   joint_lift: 0.075,
   joint_wrist_roll: 0.2,
@@ -292,50 +284,79 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
   rotate_mobile_base: 0.2,
 };
 
-export const navigationProps = {
-  width: 768, // 800,
-  height: 768, // 1280,
-  scale: 1,
-  fps: 6.0,
-};
-
-export const realsenseProps = {
-  width: 360,
-  height: 640,
-  scale: 1,
-  fps: 6.0,
-};
-
-export const gripperProps = {
-  width: 768, // 1024
-  height: 768,
-  scale: 1,
-  fps: 6.0,
-};
-
-export const expandedGripperProps = {
-  width: 768, // 480
-  height: 768, // 480
-  scale: 1,
-  fps: 6.0,
-};
-
-export interface VideoProps {
-  topicName: string;
-  callback: (message: ROSCompressedImage) => void;
-}
-
-export function rosJointStatetoRobotPose(jointState: ROSJointState): RobotPose {
+export function statustoRobotPose(status): RobotPose {
   let robotPose: RobotPose = {};
-  const names = jointState.name;
-  const positions = jointState.position;
-  names.map((name, index) => {
-    if (name) {
-      robotPose[name] = positions[index];
+  Object.keys(status).forEach((joint?: ValidJoints) => {
+    if (joint === "mobile_base" || joint === "other") {
+      return;
     }
+    robotPose[joint] = status[joint]["position"];
   });
   return robotPose;
 }
+
+export function statustoInJointLimits(status): ValidJointStateDict {
+  let inLimits: ValidJointStateDict = {};
+  let eps = 0.01;
+  Object.keys(status).forEach((joint?: ValidJoints) => {
+    if (joint === "mobile_base" || joint === "other") {
+      return;
+    }
+    let jointInLimit: [boolean, boolean] = [true, true];
+    jointInLimit[0] =
+      status[joint]["position"] - eps >= status[joint]["lower_limit"]; // Lower joint limit
+    jointInLimit[1] =
+      status[joint]["position"] + eps <= status[joint]["upper_limit"]; // Upper joint limit
+    inLimits[joint] = jointInLimit;
+  });
+  return inLimits;
+}
+
+export function statustoInCollision(status): ValidJointStateDict {
+  let inCollision: ValidJointStateDict = {};
+  Object.keys(status).forEach((joint?: ValidJoints) => {
+    let jointInCollision: [boolean, boolean] = [false, false];
+    if (
+      joint === "mobile_base" ||
+      joint === "other" ||
+      joint === "joint_head_tilt" ||
+      joint === "joint_head_pan" ||
+      joint === "joint_wrist_roll" ||
+      joint === "joint_wrist_pitch" ||
+      joint === "joint_wrist_yaw" ||
+      joint === "joint_gripper"
+    ) {
+      inCollision[joint] = jointInCollision;
+    } else {
+      jointInCollision[0] =
+        status[joint]["effort"] < JOINT_EFFORT_LIMITS[joint][0]; // Lower effort limit
+      jointInCollision[1] =
+        status[joint]["effort"] > JOINT_EFFORT_LIMITS[joint][1]; // Upper effort limit
+      inCollision[joint] = jointInCollision;
+    }
+  });
+  return inCollision;
+}
+
+export function statustoBatteryVoltageMessage(status): BatteryVoltageMessage {
+  let batteryState: BatteryVoltageMessage = {
+    type: "batteryVoltage",
+    message: status["other"]["voltage"],
+  };
+  return batteryState;
+}
+
+export const disallowConcurrency = (fn) => {
+  // https://stackoverflow.com/a/65238465/4753010
+  let inprogressPromise = Promise.resolve();
+
+  return (...args) => {
+    inprogressPromise = inprogressPromise.then(() => fn(...args));
+
+    return inprogressPromise;
+  };
+};
+
 ////////////////////////////////////////////////////////////
 // safelyParseJSON code copied from
 // https://stackoverflow.com/questions/29797946/handling-bad-json-parse-in-node-safely
