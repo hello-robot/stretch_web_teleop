@@ -484,6 +484,7 @@ export class Robot extends React.Component {
       },
     });
     if (!this.cmdVelTopic) throw "trajectoryClient is undefined";
+    console.log("Publishing base velocity twist message");
     this.cmdVelTopic.publish(twist);
   };
 

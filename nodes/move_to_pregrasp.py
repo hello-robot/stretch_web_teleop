@@ -6,7 +6,7 @@ from __future__ import annotations  # Required for type hinting a class within i
 import sys
 import threading
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Generator, List, Optional, Tuple
 
 # Third-Party Imports
 import message_filters
@@ -45,6 +45,8 @@ from tf_transformations import quaternion_about_axis, quaternion_multiply
 # Local Imports
 from stretch_web_teleop.action import MoveToPregrasp
 
+# TODO: Replace many of the info logs with debugs.
+
 
 class MoveToPregraspState(Enum):
     """
@@ -61,15 +63,19 @@ class MoveToPregraspState(Enum):
     STOW_WRIST = 1
     STOW_ARM_LIFT = 2
     ROTATE_BASE = 3
-    LIFT_ARM = 4
-    MOVE_WRIST = 5
-    LENGTHEN_ARM = 6
-    TERMINAL = 7
+    HEAD_PAN = 4
+    LIFT_ARM = 5
+    MOVE_WRIST = 6
+    LENGTHEN_ARM = 7
+    TERMINAL = 8
 
     @staticmethod
     def get_state_machine(
-        horizontal_grasp: bool, init_lift_near_base: bool, goal_lift_near_base: bool
-    ) -> List[MoveToPregraspState]:
+        horizontal_grasp: bool,
+        init_lift_near_base: bool,
+        goal_lift_near_base: bool,
+        init_length_near_mast: bool,
+    ) -> List[List[MoveToPregraspState]]:
         """
         Get the default state machine.
 
@@ -79,34 +85,39 @@ class MoveToPregraspState(Enum):
             (True) or vertically (False).
         init_lift_near_base: Whether the robot's arm is near the base at the start.
         goal_lift_near_base: Whether the robot's arm should be near the base at the end.
+        init_length_near_mast: Whether the robot's arm length is near the mast at the start.
 
         Returns
         -------
-        List[MoveToPregraspState]: The default state machine.
+        List[List[MoveToPregraspState]]: The default state machine. Each list of states
+            (axis 0) will be executed sequentially. Within a list of states (axis 1), the
+            states will be executed in parallel.
         """
         states = []
-        # If the current arm lift is near the base, move up so there is space to stow the wrist.
-        if init_lift_near_base:
-            states.append(MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL)
-            states.append(MoveToPregraspState.STOW_ARM_LIFT)
-            states.append(MoveToPregraspState.STOW_ARM_LENGTH_FULL)
+        # If the current arm lift is near the base, and the length is not already near the mast,
+        # move the arm to the stow height before fully stowing the arm length. This is to account
+        # for the case where the wrist is vertically down and may collide with the base.
+        if init_lift_near_base and not init_length_near_mast:
+            states.append([MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL])
+            states.append([MoveToPregraspState.STOW_ARM_LIFT])
+            states.append([MoveToPregraspState.STOW_ARM_LENGTH_FULL])
         else:
-            states.append(MoveToPregraspState.STOW_ARM_LENGTH_FULL)
-        states.append(MoveToPregraspState.STOW_WRIST)
+            states.append([MoveToPregraspState.STOW_ARM_LENGTH_FULL])
+        states.append([MoveToPregraspState.STOW_WRIST])
         # If the goal arm lift is near the base and we haven't already stowed the arm lift, stow the arm lift.
         if goal_lift_near_base and MoveToPregraspState.STOW_ARM_LIFT not in states:
-            states.append(MoveToPregraspState.STOW_ARM_LIFT)
-        states.append(MoveToPregraspState.ROTATE_BASE)
+            states.append([MoveToPregraspState.STOW_ARM_LIFT])
+        states.append([MoveToPregraspState.ROTATE_BASE, MoveToPregraspState.HEAD_PAN])
         # If the goal is near the base and we're doing a vertical grasp, lengthen the arm before deploying the wrist.
         if goal_lift_near_base and not horizontal_grasp:
-            states.append(MoveToPregraspState.LENGTHEN_ARM)
-            states.append(MoveToPregraspState.MOVE_WRIST)
-            states.append(MoveToPregraspState.LIFT_ARM)
+            states.append([MoveToPregraspState.LENGTHEN_ARM])
+            states.append([MoveToPregraspState.MOVE_WRIST])
+            states.append([MoveToPregraspState.LIFT_ARM])
         else:
-            states.append(MoveToPregraspState.LIFT_ARM)
-            states.append(MoveToPregraspState.MOVE_WRIST)
-            states.append(MoveToPregraspState.LENGTHEN_ARM)
-        states.append(MoveToPregraspState.TERMINAL)
+            states.append([MoveToPregraspState.LIFT_ARM])
+            states.append([MoveToPregraspState.MOVE_WRIST])
+            states.append([MoveToPregraspState.LENGTHEN_ARM])
+        states.append([MoveToPregraspState.TERMINAL])
 
         return states
 
@@ -164,7 +175,7 @@ class MoveToPregraspNode(Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
         # Create the inverse jacobian controller to execute motions
-        # TODO: Figure out where the URDF should go!
+        # TODO: Figure out where the specialized URDF should go!
         urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
         self.controller = StretchIKControl(
             self, tf_buffer=self.tf_buffer, urdf_path=urdf_abs_path
@@ -346,12 +357,45 @@ class MoveToPregraspNode(Node):
         feedback.initial_distance_m = -1.0
 
         def distance_callback(err: npt.NDArray[np.float32]) -> None:
-            self.get_logger().info(f" Distance error: {err}")
+            self.get_logger().debug(f" Distance error: {err}")
             distance = np.linalg.norm(err[:3])
             if feedback.initial_distance_m < 0.0:
                 feedback.initial_distance_m = distance
             else:
                 feedback.remaining_distance_m = distance
+
+        # Functions to cleanup the action
+        terminate_motion_executors = False
+
+        def cleanup() -> None:
+            nonlocal terminate_motion_executors
+            self.active_goal_request = None
+            terminate_motion_executors = True
+
+        def action_error_callback(
+            error_msg: str = "Goal failed",
+            status: int = MoveToPregrasp.Result.STATUS_FAILURE,
+        ) -> MoveToPregrasp.Result:
+            self.get_logger().error(error_msg)
+            goal_handle.abort()
+            cleanup()
+            return MoveToPregrasp.Result(status=status)
+
+        def action_success_callback(
+            success_msg: str = "Goal succeeded",
+        ) -> MoveToPregrasp.Result:
+            self.get_logger().info(success_msg)
+            goal_handle.succeed()
+            cleanup()
+            return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_SUCCESS)
+
+        def action_cancel_callback(
+            cancel_msg: str = "Goal canceled",
+        ) -> MoveToPregrasp.Result:
+            self.get_logger().info(cancel_msg)
+            goal_handle.canceled()
+            cleanup()
+            return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_CANCELLED)
 
         # Undo any transformation that were applied to the raw camera image before sending it
         # to the web app
@@ -392,10 +436,10 @@ class MoveToPregraspNode(Node):
             x, y, z, pointcloud_msg.header, horizontal_grasp, publish_tf=True
         )
         if not ok:
-            self.get_logger().error("Failed to get goal pose")
-            goal_handle.abort()
-            self.active_goal_request = None
-            return MoveToPregrasp.Result()
+            return action_error_callback(
+                "Failed to get goal pose",
+                MoveToPregrasp.Goal.STATUS_DEPROJECTION_FAILURE,
+            )
         self.get_logger().info(f"Goal Pose: {goal_pose}")
 
         # Verify the goal is reachable
@@ -404,28 +448,37 @@ class MoveToPregraspNode(Node):
             goal_pose, joint_position_overrides=wrist_rotation
         )
         if not reachable:
-            self.get_logger().error(f"Goal pose is not reachable {ik_solution}")
-            goal_handle.abort()
-            self.active_goal_request = None
-            return MoveToPregrasp.Result(
-                status=MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE
+            return action_error_callback(
+                f"Goal pose is not reachable {ik_solution}",
+                MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
             )
 
         # Get the current joints
         init_joints = self.controller.get_current_joints()
+        # init_base_rotation = self.controller.get_base_rotation()
 
         # Get the states.
         # If the robot is in a vertical grasp position and the arm needs to descend,
         # lengthn the arm before deploying the wrist.
         arm_lift_when_stowed = get_stow_configuration([Joint.ARM_LIFT])[Joint.ARM_LIFT]
+        arm_length_when_partially_stowed = get_stow_configuration(
+            [Joint.ARM_L0], partial=True
+        )[Joint.ARM_L0]
         states = MoveToPregraspState.get_state_machine(
             horizontal_grasp=horizontal_grasp,
             init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
             goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
+            init_length_near_mast=init_joints[Joint.ARM_L0]
+            < arm_length_when_partially_stowed,
         )
-        self.get_logger().info(f" States: {states}")
+        if not (len(states[-1]) == 1 and MoveToPregraspState.TERMINAL in states[-1]):
+            self.get_logger().error(
+                "Terminal state is not the last state. Adding it in."
+            )
+            states.append([MoveToPregraspState.TERMINAL])
+        self.get_logger().info(f" All States: {states}")
 
-        # Chenge the mode to navigation mode
+        # Change the mode to navigation mode
         ok = self.controller.set_navigation_mode(
             timeout=remaining_time(
                 self.get_clock().now(),
@@ -434,69 +487,73 @@ class MoveToPregraspNode(Node):
             )
         )
         if not ok:
-            self.get_logger().error("Failed to set navigation mode")
-            goal_handle.abort()
-            self.active_goal_request = None
-            return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_FAILURE)
+            return action_error_callback(
+                "Failed to set navigation mode",
+                MoveToPregrasp.Result.STATUS_STRETCH_DRIVER_FAILURE,
+            )
 
         state_i = 0
-        motion_executor = None
-        terminate_future = False
-        result = MoveToPregrasp.Result()
+        motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
         rate = self.create_rate(5.0)
         while rclpy.ok():
-            state = states[state_i]
-            self.get_logger().info(f"State: {state}", throttle_duration_sec=1.0)
+            concurrent_states = states[state_i]
+            self.get_logger().info(
+                f"Executing States: {concurrent_states}", throttle_duration_sec=1.0
+            )
             # Check if a cancel has been requested
             if goal_handle.is_cancel_requested:
-                self.get_logger().info("Goal canceled")
-                result.status = MoveToPregrasp.Result.STATUS_CANCELLED
-                goal_handle.canceled()
-                break
+                return action_cancel_callback("Goal canceled")
             # Check if the action has timed out
             if (self.get_clock().now() - start_time) > self.action_timeout:
-                self.get_logger().error("Goal timed out")
-                result.status = MoveToPregrasp.Result.STATUS_TIMEOUT
-                goal_handle.abort()
-                break
+                return action_error_callback(
+                    "Goal timed out", MoveToPregrasp.Result.STATUS_TIMEOUT
+                )
 
             # Get the IK solution if necessary
-            if state.use_ik():
-                reachable, ik_solution = self.controller.solve_ik(
-                    goal_pose,
-                    joint_position_overrides=wrist_rotation,
-                )
-                if not reachable:
-                    self.get_logger().error(f"Failed to solve IK {ik_solution}")
-                    result.status = MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE
-                    goal_handle.abort()
+            reachable = True
+            for state in concurrent_states:
+                if state.use_ik():
+                    reachable, ik_solution = self.controller.solve_ik(
+                        goal_pose,
+                        joint_position_overrides=wrist_rotation,
+                    )
+                    if not reachable:
+                        return action_error_callback(
+                            f"Failed to solve IK {ik_solution}",
+                            MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
+                        )
                     break
+            if not reachable:
+                break
 
             # Move the robot
-            if motion_executor is None:
+            if len(motion_executors) == 0:
                 joints_for_velocity_control = []
                 joint_position_overrides = {}
                 joints_for_position_control = {}
+                velocity_overrides = {}
                 cartesian_mask = None
-                if state == MoveToPregraspState.STOW_ARM_LENGTH_FULL:
+                if MoveToPregraspState.TERMINAL in concurrent_states:  # TERMINAL
+                    return action_success_callback("Goal succeeded")
+                if MoveToPregraspState.STOW_ARM_LENGTH_FULL in concurrent_states:
                     joints_for_position_control.update(
                         get_stow_configuration([Joint.ARM_L0])
                     )
-                elif state == MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL:
+                if MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL in concurrent_states:
                     joints_for_position_control.update(
                         get_stow_configuration([Joint.ARM_L0], partial=True)
                     )
-                elif state == MoveToPregraspState.STOW_ARM_LIFT:
+                if MoveToPregraspState.STOW_ARM_LIFT in concurrent_states:
                     joints_for_position_control.update(
                         get_stow_configuration([Joint.ARM_LIFT])
                     )
-                elif state == MoveToPregraspState.STOW_WRIST:
+                if MoveToPregraspState.STOW_WRIST in concurrent_states:
                     joints_for_position_control.update(
                         get_stow_configuration(
                             Joint.get_wrist_joints() + [Joint.GRIPPER_LEFT]
                         )
                     )
-                elif state == MoveToPregraspState.ROTATE_BASE:
+                if MoveToPregraspState.ROTATE_BASE in concurrent_states:
                     # TODO: This sometimes ends up a few degrees off. The object is
                     # still in the gripper camera view, so users can resolve this,
                     # but we should look into why (odom -> base_link TF delay?
@@ -515,26 +572,37 @@ class MoveToPregraspNode(Node):
                     # Only care about x and yaw in base frame. y and z are adjusted by
                     # arm length/lift
                     cartesian_mask = np.array([True, False, False, False, False, True])
-                elif state == MoveToPregraspState.LIFT_ARM:
+                if MoveToPregraspState.HEAD_PAN in concurrent_states:
+                    desired_base_rotation = ik_solution[Joint.BASE_ROTATION]
+                    curr_head_pan = self.controller.get_current_joints()[Joint.HEAD_PAN]
+                    # The head should rotate in the opposite direction of the base, to
+                    # keep the field of view roughly the same
+                    target_head_pan = curr_head_pan - desired_base_rotation
+                    self.get_logger().debug(
+                        f"Desired base rotation: {desired_base_rotation}, "
+                        f"Current head pan: {curr_head_pan}, Target head pan: {target_head_pan}"
+                    )
+                    joints_for_position_control[Joint.HEAD_PAN] = target_head_pan
+                    # Cap the head pan at the base's max rotation speed, so the base and head pan
+                    # camera roughly track each other.
+                    velocity_overrides[
+                        Joint.HEAD_PAN
+                    ] = self.controller.joint_vel_abs_lim[Joint.BASE_ROTATION][1]
+                if MoveToPregraspState.LIFT_ARM in concurrent_states:
                     joints_for_position_control[Joint.ARM_LIFT] = ik_solution[
                         Joint.ARM_LIFT
                     ]
-                elif state == MoveToPregraspState.MOVE_WRIST:
+                if MoveToPregraspState.MOVE_WRIST in concurrent_states:
                     joints_for_position_control.update(
                         get_gripper_configuration(closed=False)
                     )
                     joints_for_position_control.update(
                         get_pregrasp_wrist_configuration(horizontal_grasp)
                     )
-                elif state == MoveToPregraspState.LENGTHEN_ARM:
+                if MoveToPregraspState.LENGTHEN_ARM in concurrent_states:
                     joints_for_position_control[Joint.ARM_L0] = ik_solution[
                         Joint.ARM_L0
                     ]
-                else:  # TERMINAL
-                    self.get_logger().info("Goal succeeded")
-                    result.status = MoveToPregrasp.Result.STATUS_SUCCESS
-                    goal_handle.succeed()
-                    break
                 if len(joints_for_velocity_control) > 0:
                     motion_executor = self.controller.move_to_ee_pose_inverse_jacobian(
                         goal=goal_pose,
@@ -547,40 +615,43 @@ class MoveToPregraspNode(Node):
                             self.action_timeout,
                             return_secs=True,
                         ),
-                        check_cancel=lambda: terminate_future,
+                        check_cancel=lambda: terminate_motion_executors,
                         err_callback=distance_callback,
                         cartesian_mask=cartesian_mask,
                     )
-                else:
+                    motion_executors.append(motion_executor)
+                if len(joints_for_position_control) > 0:
                     motion_executor = self.controller.move_to_joint_positions(
                         joint_positions=joints_for_position_control,
+                        velocity_overrides=velocity_overrides,
                         timeout_secs=remaining_time(
                             self.get_clock().now(),
                             start_time,
                             self.action_timeout,
                             return_secs=True,
                         ),
-                        check_cancel=lambda: terminate_future,
+                        check_cancel=lambda: terminate_motion_executors,
                     )
+                    motion_executors.append(motion_executor)
             # Check if the robot is done moving
             else:
                 try:
-                    retval = next(motion_executor)
-                    self.get_logger().info(f"Motion executor returned {retval}")
-                    if retval == MotionGeneratorRetval.SUCCESS:
+                    for i, motion_executor in enumerate(motion_executors):
+                        retval = next(motion_executor)
+                        if retval == MotionGeneratorRetval.SUCCESS:
+                            motion_executors.pop(i)
+                            break
+                        elif retval == MotionGeneratorRetval.FAILURE:
+                            raise Exception("Failed to move to goal pose")
+                        else:  # CONTINUE
+                            pass
+                    if len(motion_executors) == 0:
                         state_i += 1
-                        motion_executor = None
-                    elif retval == MotionGeneratorRetval.FAILURE:
-                        raise Exception("Failed to move to goal pose")
-                    else:  # CONTINUE
-                        pass
                 except Exception as e:
-                    self.get_logger().error(
-                        f"Error executing the motion generator: {e}"
+                    return action_error_callback(
+                        f"Error executing the motion generator: {e}",
+                        MoveToPregrasp.Result.STATUS_FAILURE,
                     )
-                    result.status = MoveToPregrasp.Result.STATUS_FAILURE
-                    goal_handle.abort()
-                    break
 
             # Send feedback. If we are not controlling any joints with the inverse
             # Jacobian, then we need to calculate the error here.
@@ -601,8 +672,7 @@ class MoveToPregraspNode(Node):
             rate.sleep()
 
         # Perform cleanup
-        self.active_goal_request = None
-        return result
+        return action_error_callback("Failed to execute MoveToPregrasp")
 
     def get_grasp_orientation(self, request: MoveToPregrasp.Goal) -> bool:
         """
