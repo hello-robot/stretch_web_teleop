@@ -427,15 +427,9 @@ function getJointNameFromButtonFunction(
     case ButtonPadButton.GripperOpen:
       return "joint_gripper";
 
-<<<<<<< HEAD
     case ButtonPadButton.WristRollLeft:
     case ButtonPadButton.WristRollRight:
       return "joint_wrist_roll";
-=======
-        case (ButtonPadButton.GripperClose):
-        case (ButtonPadButton.GripperOpen):
-            return "joint_gripper";
->>>>>>> 1cfb3b0 (updated name for gripper joint)
 
     case ButtonPadButton.WristPitchUp:
     case ButtonPadButton.WristPitchDown:

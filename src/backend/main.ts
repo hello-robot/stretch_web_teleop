@@ -1,24 +1,29 @@
-import { Robot } from './robot';
-import { VideoStream } from './videostream';
-import { WebRTCConnection } from '../shared/webrtcconnections_node'
+import { Robot } from "./robot";
+import { VideoStream } from "./videostream";
+import { WebRTCConnection } from "../shared/webrtcconnections_node";
 import {
-    WebRTCMessage, ValidJointStateDict, ValidJointStateMessage,
-    IsRunStoppedMessage, RobotPose, MoveBaseState, MoveBaseStateMessage,
-    BatteryVoltageMessage, HasBetaTeleopKitMessage
-} from '../shared/util_node'
-
+  WebRTCMessage,
+  ValidJointStateDict,
+  ValidJointStateMessage,
+  IsRunStoppedMessage,
+  RobotPose,
+  MoveBaseState,
+  MoveBaseStateMessage,
+  BatteryVoltageMessage,
+  HasBetaTeleopKitMessage,
+} from "../shared/util_node";
 
 export let headNavCamStream = new VideoStream();
 export const robot = new Robot(
-    forwardJointStates,
-    forwardBatteryState,
-    // occupancyGridCallback: forwardOccupancyGrid,
-    // moveBaseResultCallback: forwardMoveBaseState,
-    // amclPoseCallback: forwardAMCLPose,
-    forwardIsRunStopped,
-    // hasBetaTeleopKitCallback: forwardHasBetaTeleopKit
-    forwardImg
-)
+  forwardJointStates,
+  forwardBatteryState,
+  // occupancyGridCallback: forwardOccupancyGrid,
+  // moveBaseResultCallback: forwardMoveBaseState,
+  // amclPoseCallback: forwardAMCLPose,
+  forwardIsRunStopped,
+  // hasBetaTeleopKitCallback: forwardHasBetaTeleopKit
+  forwardImg,
+);
 
 export let connection: WebRTCConnection;
 // export let realsenseStream = new VideoStream(realsenseProps)
@@ -26,68 +31,72 @@ export let connection: WebRTCConnection;
 // let occupancyGrid: ROSOccupancyGrid | undefined;
 
 connection = new WebRTCConnection({
-    peerRole: 'robot',
-    polite: false,
-    onRobotConnectionStart: handleSessionStart,
-    onMessage: handleMessage,
-    onConnectionEnd: disconnectFromRobot
-})
+  peerRole: "robot",
+  polite: false,
+  onRobotConnectionStart: handleSessionStart,
+  onMessage: handleMessage,
+  onConnectionEnd: disconnectFromRobot,
+});
 
 function sendPing(msg: string) {
-    if (!connection) throw 'WebRTC connection undefined!'
+  if (!connection) throw "WebRTC connection undefined!";
 
-    connection.sendData({type: "ping", message: msg});
+  connection.sendData({ type: "ping", message: msg });
 }
 
 robot.connect().then(() => {
-    // robot.subscribeToVideo({
-    //     topicName: "/navigation_camera/image_raw/rotated/compressed",
-    //     callback: navigationStream.updateImage
-    // })
-    // navigationStream.start()
+  // robot.subscribeToVideo({
+  //     topicName: "/navigation_camera/image_raw/rotated/compressed",
+  //     callback: navigationStream.updateImage
+  // })
+  // navigationStream.start()
 
-    // robot.subscribeToVideo({
-    //     topicName: "/camera/color/image_raw/rotated/compressed",
-    //     callback: realsenseStream.updateImage
-    // })
-    // realsenseStream.start()
+  // robot.subscribeToVideo({
+  //     topicName: "/camera/color/image_raw/rotated/compressed",
+  //     callback: realsenseStream.updateImage
+  // })
+  // realsenseStream.start()
 
-    // robot.subscribeToVideo({
-    //     topicName: "/gripper_camera/image_raw/cropped/compressed",
-    //     callback: gripperStream.updateImage
-    // })
-    // gripperStream.start()
+  // robot.subscribeToVideo({
+  //     topicName: "/gripper_camera/image_raw/cropped/compressed",
+  //     callback: gripperStream.updateImage
+  // })
+  // gripperStream.start()
 
-    // robot.getOccupancyGrid()
-    // robot.getJointLimits()
-    
-    connection.joinRobotRoom()
-    setInterval(sendPing, 1000, "hello, operator");
-})
+  // robot.getOccupancyGrid()
+  // robot.getJointLimits()
+
+  connection.joinRobotRoom();
+  setInterval(sendPing, 1000, "hello, operator");
+});
 
 function handleSessionStart() {
-    connection.removeTracks()
+  connection.removeTracks();
 
-    // connection.addTrackWithoutStream(headNavCamStream.track, "overhead");
-    connection.addTrack(headNavCamStream.track, headNavCamStream.stream, "overhead")
+  // connection.addTrackWithoutStream(headNavCamStream.track, "overhead");
+  connection.addTrack(
+    headNavCamStream.track,
+    headNavCamStream.stream,
+    "overhead",
+  );
 
-    // stream = realsenseStream.outputVideoStream!;
-    // stream.getTracks().forEach(track => connection.addTrack(track, stream, "realsense"))
+  // stream = realsenseStream.outputVideoStream!;
+  // stream.getTracks().forEach(track => connection.addTrack(track, stream, "realsense"))
 
-    // stream = gripperStream.outputVideoStream!;
-    // stream.getTracks().forEach(track => connection.addTrack(track, stream, "gripper"))
-    console.log("Opening data channels")
-    connection.openDataChannels()
+  // stream = gripperStream.outputVideoStream!;
+  // stream.getTracks().forEach(track => connection.addTrack(track, stream, "gripper"))
+  console.log("Opening data channels");
+  connection.openDataChannels();
 }
 
 function forwardImg(img) {
-    if (headNavCamStream) {
-        headNavCamStream.uncompressAndSendImage(img)
-    }
+  if (headNavCamStream) {
+    headNavCamStream.uncompressAndSendImage(img);
+  }
 }
 // function forwardMoveBaseState(state: MoveBaseState) {
 //     if (!connection) throw 'WebRTC connection undefined!'
-    
+
 //     if (state.alert_type != "info") {
 //         connection.sendData({
 //             type: "goalStatus",
@@ -102,12 +111,12 @@ function forwardImg(img) {
 // }
 
 function forwardIsRunStopped(isRunStopped: boolean) {
-    if (!connection) throw 'WebRTC connection undefined!'
+  if (!connection) throw "WebRTC connection undefined!";
 
-    connection.sendData({
-        type: "isRunStopped",
-        enabled: isRunStopped,
-    } as IsRunStoppedMessage);
+  connection.sendData({
+    type: "isRunStopped",
+    enabled: isRunStopped,
+  } as IsRunStoppedMessage);
 }
 
 // function forwardHasBetaTeleopKit(value: boolean) {
@@ -119,21 +128,25 @@ function forwardIsRunStopped(isRunStopped: boolean) {
 //     } as HasBetaTeleopKitMessage);
 // }
 
-function forwardJointStates(robotPose: RobotPose, jointValues: ValidJointStateDict, effortValues: ValidJointStateDict) {
-    if (!connection) throw 'WebRTC connection undefined!'
+function forwardJointStates(
+  robotPose: RobotPose,
+  jointValues: ValidJointStateDict,
+  effortValues: ValidJointStateDict,
+) {
+  if (!connection) throw "WebRTC connection undefined!";
 
-    connection.sendData({
-        type: "validJointState",
-        robotPose: robotPose,
-        jointsInLimits: jointValues,
-        jointsInCollision: effortValues
-    } as ValidJointStateMessage);
+  connection.sendData({
+    type: "validJointState",
+    robotPose: robotPose,
+    jointsInLimits: jointValues,
+    jointsInCollision: effortValues,
+  } as ValidJointStateMessage);
 }
 
 function forwardBatteryState(batteryState: BatteryVoltageMessage) {
-    if (!connection) throw 'WebRTC connection undefined'
+  if (!connection) throw "WebRTC connection undefined";
 
-    connection.sendData(batteryState);
+  connection.sendData(batteryState);
 }
 
 // function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
@@ -173,76 +186,79 @@ function forwardBatteryState(batteryState: BatteryVoltageMessage) {
 // }
 
 function handleMessage(message: WebRTCMessage) {
-    if (!("type" in message)) {
-        console.error("Malformed message:", message)
-        return
-    }
+  if (!("type" in message)) {
+    console.error("Malformed message:", message);
+    return;
+  }
 
-    switch (message.type) {
-        case "driveBase":
-            console.log("Got command: driveBase")
-            robot.executeBaseVelocity(message.modifier.linVel, message.modifier.angVel);
-            break;
-        case "incrementalMove":
-            console.log("Got command: incrementalMove")
-            robot.executeIncrementalMove(message.jointName, message.increment)
-            break
-        case "stopTrajectory":
-            console.log("Got command: stopTrajectory")
-            // robot.syncStopTrajectory.call(robot); # TODO
-            break
-        case "stopMoveBase":
-            console.log("Got command: stopMoveBase")
-            // robot.stopMoveBaseClient()
-            break
-        case "setRobotMode":
-            console.log("Got command: setRobotMode")
-            // message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
-            break
-        case "setCameraPerspective":
-            console.log("Got command: setCameraPerspective")
-            // robot.setCameraPerspective({ camera: message.camera, perspective: message.perspective })
-            break
-        case "setRobotPose":
-            console.log("Got command: setRobotPose")
-            // robot.executePoseGoal(message.pose)
-            break
-        case "playbackPoses":
-            console.log("Got command: playbackPoses")
-            // robot.executePoseGoals(message.poses, 0)
-            break
-        case "moveBase":
-            console.log("Got command: moveBase")
-            // robot.executeMoveBaseGoal(message.pose)
-            break
-        case "setFollowGripper":
-            console.log("Got command: setFollowGripper")
-            // robot.setPanTiltFollowGripper(message.toggle)
-            break
-        case "setDepthSensing":
-            console.log("Got command: setDepthSensing")
-            // robot.setDepthSensing(message.toggle)
-            break
-        case "setRunStop":
-            console.log("Got command: setRunStop")
-            // robot.setRunStop(message.toggle)
-            break
-        case "lookAtGripper":
-            console.log("Got command: lookAtGripper")
-            // robot.lookAtGripper(0, 0)
-            break
-        case "getOccupancyGrid":
-            console.log("Got command: getOccupancyGrid")
-            // robot.getOccupancyGrid()
-            break 
-        case "getHasBetaTeleopKit":
-            console.log("Got command: getHasBetaTeleopKit")
-            // robot.getHasBetaTeleopKit()
-            break;
-    }
-};
+  switch (message.type) {
+    case "driveBase":
+      console.log("Got command: driveBase");
+      robot.executeBaseVelocity(
+        message.modifier.linVel,
+        message.modifier.angVel,
+      );
+      break;
+    case "incrementalMove":
+      console.log("Got command: incrementalMove");
+      robot.executeIncrementalMove(message.jointName, message.increment);
+      break;
+    case "stopTrajectory":
+      console.log("Got command: stopTrajectory");
+      // robot.syncStopTrajectory.call(robot); # TODO
+      break;
+    case "stopMoveBase":
+      console.log("Got command: stopMoveBase");
+      // robot.stopMoveBaseClient()
+      break;
+    case "setRobotMode":
+      console.log("Got command: setRobotMode");
+      // message.modifier == "navigation" ? robot.switchToNavigationMode() : robot.switchToPositionMode()
+      break;
+    case "setCameraPerspective":
+      console.log("Got command: setCameraPerspective");
+      // robot.setCameraPerspective({ camera: message.camera, perspective: message.perspective })
+      break;
+    case "setRobotPose":
+      console.log("Got command: setRobotPose");
+      // robot.executePoseGoal(message.pose)
+      break;
+    case "playbackPoses":
+      console.log("Got command: playbackPoses");
+      // robot.executePoseGoals(message.poses, 0)
+      break;
+    case "moveBase":
+      console.log("Got command: moveBase");
+      // robot.executeMoveBaseGoal(message.pose)
+      break;
+    case "setFollowGripper":
+      console.log("Got command: setFollowGripper");
+      // robot.setPanTiltFollowGripper(message.toggle)
+      break;
+    case "setDepthSensing":
+      console.log("Got command: setDepthSensing");
+      // robot.setDepthSensing(message.toggle)
+      break;
+    case "setRunStop":
+      console.log("Got command: setRunStop");
+      // robot.setRunStop(message.toggle)
+      break;
+    case "lookAtGripper":
+      console.log("Got command: lookAtGripper");
+      // robot.lookAtGripper(0, 0)
+      break;
+    case "getOccupancyGrid":
+      console.log("Got command: getOccupancyGrid");
+      // robot.getOccupancyGrid()
+      break;
+    case "getHasBetaTeleopKit":
+      console.log("Got command: getHasBetaTeleopKit");
+      // robot.getHasBetaTeleopKit()
+      break;
+  }
+}
 
 function disconnectFromRobot() {
-    // robot.closeROSConnection()
-    connection.hangup()
+  // robot.closeROSConnection()
+  connection.hangup();
 }

@@ -139,8 +139,8 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
   }
 
   switch (message.type) {
-    case 'ping':
-      console.log('received ping');
+    case "ping":
+      console.log("received ping");
       break;
     case "validJointState":
       remoteRobot.sensors.checkValidJointState(
