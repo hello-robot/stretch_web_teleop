@@ -144,7 +144,8 @@ class MoveToPregraspNode(Node):
     the object the pixel is a part of.
     """
 
-    DISTANCE_TO_OBJECT = 0.1  # meters
+    # How far (m) from the object the end-effecor should move to.
+    DISTANCE_TO_OBJECT = 0.1
 
     def __init__(
         self,
@@ -438,7 +439,7 @@ class MoveToPregraspNode(Node):
         if not ok:
             return action_error_callback(
                 "Failed to get goal pose",
-                MoveToPregrasp.Goal.STATUS_DEPROJECTION_FAILURE,
+                MoveToPregrasp.Result.STATUS_DEPROJECTION_FAILURE,
             )
         self.get_logger().info(f"Goal Pose: {goal_pose}")
 
