@@ -9,6 +9,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rosbridge_server REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
@@ -26,6 +27,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 #############
 ## Install ##
 #############
+
+ament_python_install_package(${PROJECT_NAME}_helpers)
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html

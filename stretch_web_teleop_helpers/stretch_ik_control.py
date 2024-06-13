@@ -18,12 +18,8 @@ import rclpy
 import tf2_py as tf2
 import tf2_ros
 from builtin_interfaces.msg import Time
-
-# Local Imports
-from constants import ControlMode, Frame, Joint, SpeedProfile
 from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import Transform, Twist, Vector3
-from pinocchio_ik_solver import PinocchioIKSolver
 from rclpy.action import ActionClient
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
@@ -39,6 +35,10 @@ from tf_transformations import (
     quaternion_multiply,
 )
 from trajectory_msgs.msg import JointTrajectoryPoint
+
+# Local Imports
+from .constants import ControlMode, Frame, Joint, SpeedProfile
+from .pinocchio_ik_solver import PinocchioIKSolver
 
 
 class TerminationCriteria(Enum):
@@ -274,7 +274,9 @@ class StretchIKControl:
                     speed_profile_slow_str
                 ]["vel"]
             else:
-                self.node.get_logger().warn(f"Unknown joint name: {joint_name}")
+                self.node.get_logger().debug(
+                    f"Will not get limits for joint name: {joint_name}"
+                )
                 max_abs_vel = 0.0
                 min_abs_vel = 0.0
             self.joint_vel_abs_lim[joint_name] = (
