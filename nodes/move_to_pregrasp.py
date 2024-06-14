@@ -25,7 +25,6 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
 from tf2_geometry_msgs import PoseStamped
@@ -40,7 +39,7 @@ from stretch_web_teleop_helpers.constants import (
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
 )
-from stretch_web_teleop_helpers.helpers import (
+from stretch_web_teleop_helpers.conversions import (
     depth_img_to_pointcloud,
     ros_msg_to_cv2_image,
 )
@@ -103,8 +102,9 @@ class MoveToPregraspState(Enum):
         # If the current arm lift is near the base, and the length is not already near the mast,
         # move the arm to the stow height before fully stowing the arm length. This is to account
         # for the case where the wrist is vertically down and may collide with the base.
-        if init_lift_near_base and not init_length_near_mast:
-            states.append([MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL])
+        if init_lift_near_base:
+            if not init_length_near_mast:
+                states.append([MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL])
             states.append([MoveToPregraspState.STOW_ARM_LIFT])
             states.append([MoveToPregraspState.STOW_ARM_LENGTH_FULL])
         else:
@@ -456,7 +456,7 @@ class MoveToPregraspNode(Node):
         # when rotating the base, we only account for error in the x-direction, so it is
         # fine if the yaw is slightly off. After rotating the base, we update goal yaw,
         # so future IK is correct.
-        ok, goal_pose = self.get_goal_pose(
+        ok, goal_pose, base_rotation = self.get_goal_pose(
             x, y, z, depth_msg.header, horizontal_grasp, publish_tf=True
         )
         if not ok:
@@ -466,10 +466,15 @@ class MoveToPregraspNode(Node):
             )
         self.get_logger().info(f"Goal Pose: {goal_pose}")
 
-        # Verify the goal is reachable
+        # Verify the goal is reachable, seeded with the estimate base rotation.
         wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
+        joint_overrides = {}
+        joint_overrides.update(wrist_rotation)
+        if base_rotation is not None:
+            # Seed IK with the estimated base rotation
+            joint_overrides[Joint.BASE_ROTATION] = base_rotation
         reachable, ik_solution = self.controller.solve_ik(
-            goal_pose, joint_position_overrides=wrist_rotation
+            goal_pose, joint_position_overrides=joint_overrides
         )
         if not reachable:
             return action_error_callback(
@@ -479,7 +484,6 @@ class MoveToPregraspNode(Node):
 
         # Get the current joints
         init_joints = self.controller.get_current_joints()
-        # init_base_rotation = self.controller.get_base_rotation()
 
         # Get the states.
         # If the robot is in a vertical grasp position and the arm needs to descend,
@@ -533,22 +537,22 @@ class MoveToPregraspNode(Node):
                     "Goal timed out", MoveToPregrasp.Result.STATUS_TIMEOUT
                 )
 
-            # Get the IK solution if necessary
-            reachable = True
-            for state in concurrent_states:
-                if state.use_ik():
-                    reachable, ik_solution = self.controller.solve_ik(
-                        goal_pose,
-                        joint_position_overrides=wrist_rotation,
-                    )
-                    if not reachable:
-                        return action_error_callback(
-                            f"Failed to solve IK {ik_solution}",
-                            MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
-                        )
-                    break
-            if not reachable:
-                break
+            # # Get the IK solution if necessary
+            # reachable = True
+            # for state in concurrent_states:
+            #     if state.use_ik():
+            #         reachable, ik_solution = self.controller.solve_ik(
+            #             goal_pose,
+            #             joint_position_overrides=wrist_rotation,
+            #         )
+            #         if not reachable:
+            #             return action_error_callback(
+            #                 f"Failed to solve IK {ik_solution}",
+            #                 MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
+            #             )
+            #         break
+            # if not reachable:
+            #     break
 
             # Move the robot
             if len(motion_executors) == 0:
@@ -556,7 +560,7 @@ class MoveToPregraspNode(Node):
                 joint_position_overrides = {}
                 joints_for_position_control = {}
                 velocity_overrides = {}
-                cartesian_mask = None
+                get_cartesian_mask = None
                 if MoveToPregraspState.TERMINAL in concurrent_states:  # TERMINAL
                     return action_success_callback("Goal succeeded")
                 if MoveToPregraspState.STOW_ARM_LENGTH_FULL in concurrent_states:
@@ -589,15 +593,36 @@ class MoveToPregraspNode(Node):
                     joint_position_overrides.update(
                         get_pregrasp_wrist_configuration(horizontal_grasp)
                     )
-                    # Only care about x and yaw in base frame. y and z are adjusted by
-                    # arm length/lift
-                    cartesian_mask = np.array([True, False, False, False, False, False])
+
+                    # Care about yaw error when error is large, but for final positioning,
+                    # care about x error. This is because our yaw is slightly off, so if
+                    # we care about both yaw and x for final positioning, it will stop
+                    # at a slightly off position.
+                    def get_cartesian_mask(err: npt.NDArray[float]):
+                        cartesian_mask = np.array(
+                            [True, False, False, False, False, False]
+                        )
+                        err_yaw = err[5]
+                        if np.abs(err_yaw) > np.pi / 4.0:
+                            cartesian_mask[5] = True
+                        return cartesian_mask
+
                 if MoveToPregraspState.HEAD_PAN in concurrent_states:
                     desired_base_rotation = ik_solution[Joint.BASE_ROTATION]
                     curr_head_pan = self.controller.get_current_joints()[Joint.HEAD_PAN]
                     # The head should rotate in the opposite direction of the base, to
                     # keep the field of view roughly the same
                     target_head_pan = curr_head_pan - desired_base_rotation
+                    while (
+                        target_head_pan
+                        < self.controller.joint_pos_lim[Joint.HEAD_PAN][0]
+                    ):
+                        target_head_pan += 2.0 * np.pi
+                    while (
+                        target_head_pan
+                        > self.controller.joint_pos_lim[Joint.HEAD_PAN][1]
+                    ):
+                        target_head_pan -= 2.0 * np.pi
                     self.get_logger().debug(
                         f"Desired base rotation: {desired_base_rotation}, "
                         f"Current head pan: {curr_head_pan}, Target head pan: {target_head_pan}"
@@ -637,7 +662,7 @@ class MoveToPregraspNode(Node):
                         ),
                         check_cancel=lambda: terminate_motion_executors,
                         err_callback=distance_callback,
-                        cartesian_mask=cartesian_mask,
+                        get_cartesian_mask=get_cartesian_mask,
                     )
                     motion_executors.append(motion_executor)
                 if len(joints_for_position_control) > 0:
@@ -836,7 +861,7 @@ class MoveToPregraspNode(Node):
         header: Header,
         horizontal_grasp: bool,
         publish_tf: bool = False,
-    ) -> Tuple[bool, PoseStamped]:
+    ) -> Tuple[bool, PoseStamped, Optional[float]]:
         """
         Get the goal end effector pose.
 
@@ -853,6 +878,7 @@ class MoveToPregraspNode(Node):
         -------
         ok: Whether the goal pose was successfully calculated.
         PoseStamped: The goal end effector pose.
+        Optional[float]: The estimated base rotation to get to the goal pose.
         """
         # Get the goal position in camera frame
         goal_pose = PoseStamped()
@@ -876,17 +902,18 @@ class MoveToPregraspNode(Node):
             self.get_logger().error(
                 f"Failed to transform goal pose to the odom frame: {error}"
             )
-            return False, PoseStamped()
+            return False, PoseStamped(), None
 
         # Get the goal orientation
-        ok, theta = self.__get_goal_yaw(
+        ok, theta, base_theta = self.__get_goal_yaw(
             goal_pose_base.pose.position.x,
             goal_pose_base.pose.position.y,
+            horizontal_grasp,
             account_for_offsets=True,
         )
         if not ok:
             self.get_logger().error("Failed to get goal yaw")
-            return False, PoseStamped()
+            return False, PoseStamped(), None
         rot = quaternion_about_axis(theta, [0, 0, 1])
         if not horizontal_grasp:
             # For vertical grasp, the goal orientation is also rotated +90deg around y
@@ -905,7 +932,7 @@ class MoveToPregraspNode(Node):
                 self.get_logger().error(
                     f"Clicked point is too close to the robot: {xy_dist} < {self.DISTANCE_TO_OBJECT}"
                 )
-                return False, PoseStamped()
+                return False, PoseStamped(), None
             xy = xy / xy_dist * (xy_dist - self.DISTANCE_TO_OBJECT)
             goal_pose_base.pose.position.x, goal_pose_base.pose.position.y = xy
         else:
@@ -929,16 +956,16 @@ class MoveToPregraspNode(Node):
             self.get_logger().error(
                 f"Failed to transform goal pose to the odom frame: {error}"
             )
-            return False, PoseStamped()
+            return False, PoseStamped(), None
 
         if publish_tf:
             self.broadcast_static_transform(goal_pose_odom, "goal")
 
-        return True, goal_pose_odom
+        return True, goal_pose_odom, base_theta
 
     def __get_goal_yaw(
-        self, x_g: float, y_g: float, account_for_offsets: bool
-    ) -> Tuple[bool, float]:
+        self, x_g: float, y_g: float, horizontal_grasp: bool, account_for_offsets: bool
+    ) -> Tuple[bool, float, Optional[float]]:
         """
         Gets the yaw angle of the goal pose. The below equations were derived
         by manual IK calculations on a projection of the robot onto the XY plane.
@@ -977,6 +1004,7 @@ class MoveToPregraspNode(Node):
         ----------
         x_g: The x-coordinate of the goal pose, in base frame.
         y_g: The y-coordinate of the goal pose, in base frame.
+        horizontal_grasp: Whether the goal pose should be horizontal.
         account_for_offsets: if True, do the above calculation. If false, just
             return the angle of the vector from the base to (x_g, y_g), which
             is quite close to the correct answer.
@@ -985,32 +1013,17 @@ class MoveToPregraspNode(Node):
         -------
         bool: Whether the goal yaw was successfully calculated.
         float: The goal yaw.
+        Optional[float]: The estimated base rotation to get to the goal pose, if computed.
         """
         if not account_for_offsets:
-            return True, np.arctan2(y_g, x_g)
+            return True, np.arctan2(y_g, x_g), None
 
         # First, get the lift offset
         if self.lift_offset is None:
-            try:
-                lift_offset = self.tf_buffer.lookup_transform(
-                    Frame.BASE_LINK.value,
-                    Frame.LIFT_LINK.value,
-                    Time(),
-                )
-                self.lift_offset = (
-                    lift_offset.transform.translation.x,
-                    lift_offset.transform.translation.y,
-                )
-            except (
-                tf2.ConnectivityException,
-                tf2.ExtrapolationException,
-                tf2.InvalidArgumentException,
-                tf2.LookupException,
-                tf2.TimeoutException,
-                tf2.TransformException,
-            ) as error:
-                self.get_logger().error(f"Failed to get mast offset: {error}")
-                return False, 0.0
+            T = self.controller.get_transform(
+                parent_link=Frame.BASE_LINK, child_link=Frame.LIFT_LINK
+            )
+            self.lift_offset = (T[0, 3], T[1, 3])
         x_o, y_o = self.lift_offset
 
         # Next, get the wrist offset
@@ -1018,28 +1031,16 @@ class MoveToPregraspNode(Node):
         # will impact the offset. Really, what we want is the offset at goal
         # wrist yaw, which requires FK. But this is a good enough approximation.
         if self.wrist_offset is None:
-            try:
-                wrist_offset = self.tf_buffer.lookup_transform(
-                    Frame.L0_LINK.value,
-                    Frame.WRIST_PITCH_LINK.value,
-                    Time(),
-                )
-                # In the manual IK calculations, what I call +x and +y and what
-                # the actual TF tree has as +z and +x, respectively.
-                self.wrist_offset = (
-                    wrist_offset.transform.translation.z,
-                    wrist_offset.transform.translation.x,
-                )
-            except (
-                tf2.ConnectivityException,
-                tf2.ExtrapolationException,
-                tf2.InvalidArgumentException,
-                tf2.LookupException,
-                tf2.TimeoutException,
-                tf2.TransformException,
-            ) as error:
-                self.get_logger().error(f"Failed to get mast offset: {error}")
-                return False, 0.0
+            # First, get the transform from the base link to the end of the arm
+            T = self.controller.get_transform(
+                parent_link=Frame.L0_LINK,
+                child_link=Frame.END_EFFECTOR_LINK,
+                joint_overrides=get_pregrasp_wrist_configuration(horizontal_grasp),
+            )
+            self.get_logger().info(f"Transform from L0 to wrist pitch: {T}")
+            # In the manual IK calculations, what I call +x and +y is what
+            # the actual TF tree has as +z and +x, respectively.
+            self.wrist_offset = (T[2, 3], T[0, 3])
         x_w, y_w = self.wrist_offset
 
         self.get_logger().info(f"Lift offset: {(x_o, y_o)}")
@@ -1061,8 +1062,8 @@ class MoveToPregraspNode(Node):
 
         for i in range(2):
             if Ls[i] > 0:
-                return True, thetas[i] - np.pi / 2
-        return False, 0.0
+                return True, thetas[i] - np.pi / 2, thetas[i]
+        return False, 0.0, None
 
     def update_goal_orientation(
         self,
@@ -1085,7 +1086,7 @@ class MoveToPregraspNode(Node):
         bool: Whether it succeeded.
         """
         # Run FK
-        ee_pos, ee_quat = self.controller.solve_fk(wrist_configuration)
+        ee_pos, ee_quat = self.controller.solve_fk(joint_overrides=wrist_configuration)
         ee_pose = PoseStamped()
         ee_pose.header.frame_id = Frame.BASE_LINK.value
         ee_pose.pose.position = Point(x=ee_pos[0], y=ee_pos[1], z=ee_pos[2])

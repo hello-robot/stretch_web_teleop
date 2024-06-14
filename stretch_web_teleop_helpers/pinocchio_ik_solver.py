@@ -1,7 +1,11 @@
-# Copied from stretchpy/src/stretch/motion/pinocchio_ik_solver.py
-# TODO: Remove this file once the above package is finalized.
+# Adapted from https://github.com/hello-robot/stretchpy/blob/main/src/stretch/motion/pinocchio_ik_solver.py
+
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
 import sys
-from typing import List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pinocchio
@@ -104,6 +108,12 @@ class PinocchioIKSolver:
                 if joint_name in self.controlled_joints_by_name:
                     q_out[self.controlled_joints_by_name[joint_name]] = value
                 else:
+                    jid = self.model.getJointId(joint_name)
+                    if jid >= len(self.model.idx_qs):
+                        logger.error(f"{joint_name=} {jid=} not in model.idx_qs")
+                        raise RuntimeError(
+                            f"Tried to set joint not in model.idx_qs: {joint_name=}"
+                        )
                     q_out[self.model.idx_qs[self.model.getJointId(joint_name)]] = value
         else:
             assert len(self.controlled_joints) == len(
@@ -122,13 +132,17 @@ class PinocchioIKSolver:
 
         return q_out
 
-    def compute_fk(self, config) -> Tuple[np.ndarray, np.ndarray]:
+    def compute_fk(self, config, link_name=None) -> Tuple[np.ndarray, np.ndarray]:
         """given joint values return end-effector position and quaternion associated with it"""
+        if link_name is None:
+            frame_idx = self.ee_frame_idx
+        else:
+            frame_idx = [f.name for f in self.model.frames].index(link_name)
         q_model = self._qmap_control2model(config)
         pinocchio.forwardKinematics(self.model, self.data, q_model)
-        pinocchio.updateFramePlacement(self.model, self.data, self.ee_frame_idx)
-        pos = self.data.oMf[self.ee_frame_idx].translation
-        quat = R.from_matrix(self.data.oMf[self.ee_frame_idx].rotation).as_quat()
+        pinocchio.updateFramePlacement(self.model, self.data, frame_idx)
+        pos = self.data.oMf[frame_idx].translation
+        quat = R.from_matrix(self.data.oMf[frame_idx].rotation).as_quat()
 
         return pos.copy(), quat.copy()
 
@@ -201,3 +215,181 @@ class PinocchioIKSolver:
         for i, name in enumerate(self.controlled_joint_names):
             state[name] = arr[i]
         return state
+
+
+class PositionIKOptimizer:
+    """
+    Solver that jointly optimizes IK and best orientation to achieve desired position.
+    Can optimize any solver that implements IKSolverBase.
+    Additionally, it implements IKSolverBase so this optimizer-based version can be readily dropped-in.
+    """
+
+    max_iterations: int = 30  # Max num of iterations for CEM
+    num_samples: int = 100  # Total candidate samples for each CEM iteration
+    num_top: int = 10  # Top N candidates for each CEM iteration
+
+    def __init__(
+        self,
+        ik_solver: Union[PinocchioIKSolver],
+        pos_error_tol: float,
+        ori_error_range: Union[float, np.ndarray],
+        pos_weight: float = 1.0,
+        ori_weight: float = 0.0,
+        cem_params: Optional[Dict] = None,
+    ):
+        self.pos_wt = pos_weight
+        self.ori_wt = ori_weight
+
+        # Initialize IK solver
+        self.ik_solver = ik_solver
+
+        # Initialize optimizer
+        self.pos_error_tol = pos_error_tol
+        if type(ori_error_range) is float:
+            self.ori_error_range = ori_error_range * np.ones(3)
+        else:
+            self.ori_error_range = ori_error_range
+
+        cem_params = {} if cem_params is None else cem_params
+        max_iterations = (
+            cem_params["max_iterations"]
+            if "max_iterations" in cem_params
+            else self.max_iterations
+        )
+        num_samples = (
+            cem_params["num_samples"]
+            if "num_samples" in cem_params
+            else self.num_samples
+        )
+        num_top = cem_params["num_top"] if "num_top" in cem_params else self.num_top
+
+        self.opt = CEM(
+            max_iterations=max_iterations,
+            num_samples=num_samples,
+            num_top=num_top,
+            tol=self.pos_error_tol,
+            sigma0=self.ori_error_range / 2,
+        )
+
+    def get_dof(self) -> int:
+        return self.ik_solver.get_dof()
+
+    def get_num_controllable_joints(self) -> int:
+        return self.ik_solver.get_num_controllable_joints()
+
+    def compute_ik(
+        self,
+        pos_desired: np.ndarray,
+        quat_desired: np.ndarray,
+        *args,
+        **kwargs,
+    ) -> Tuple[np.ndarray, bool, dict]:
+        """optimization-based IK solver using CEM"""
+
+        # Function to optimize: IK error given delta from original desired orientation
+        def solve_ik(dr):
+            pos = pos_desired
+            quat = (R.from_rotvec(dr) * R.from_quat(quat_desired)).as_quat()
+
+            q, _, subsolver_debug_info = self.ik_solver.compute_ik(pos, quat)
+            pos_out, rot_out = self.ik_solver.compute_fk(q)
+
+            cost_pos = np.linalg.norm(pos - pos_out)
+            cost_rot = (
+                1 - (rot_out * quat_desired).sum() ** 2
+            )  # TODO: just minimize dr?
+
+            cost = self.pos_wt * cost_pos + self.ori_wt * cost_rot
+
+            return cost, q
+
+        # Optimize for IK and best orientation (x=0 -> use original desired orientation)
+        cost_opt, q_result, max_iter, opt_sigma, success = self.opt.optimize(
+            solve_ik, x0=np.zeros(3)
+        )
+        pos_out, quat_out = self.ik_solver.compute_fk(q_result)
+        print(
+            f"After ik optimization, cost: {cost_opt}, result: {pos_out, quat_out} "
+            f"vs desired: {pos_desired, quat_desired}"
+        )
+
+        debug_info = {
+            "best_cost": cost_opt,
+            "last_iter": max_iter,
+            "opt_sigma": opt_sigma,
+            "pos_desired": pos_desired,
+            "quat_desired": quat_desired,
+            "pos_out": pos_out,
+            "quat_out": quat_out,
+        }
+
+        return q_result, success, debug_info
+
+    def compute_fk(self, q):
+        return self.ik_solver.compute_fk(q)
+
+
+class CEM:
+    """class implementing generic CEM solver for optimization"""
+
+    def __init__(
+        self,
+        max_iterations: int,
+        num_samples: int,
+        num_top: int,
+        tol: float,
+        sigma0: np.ndarray,
+    ):
+        """
+        max_iterations: max number of iterations
+        num_samples: number of samples per iteration
+        num_top: number of top samples to use for next iteration
+        tol: tolerance for stopping criterion
+        """
+        self.max_iterations = max_iterations
+        self.num_samples = num_samples
+        self.num_top = num_top
+        self.cost_tol = tol
+        self.sigma0 = sigma0
+
+    def optimize(self, func: Callable, x0: np.ndarray):
+        """optimize function func with initial guess mu=x0 and initial std=sigma0"""
+        assert (
+            x0.shape == self.sigma0.shape
+        ), f"x0 and sigma0 must have same shape, got {x0.shape} and {self.sigma0.shape}"
+
+        i = 0
+        mu = x0
+        sigma = self.sigma0
+
+        while True:
+            # Sample x
+            x_arr = mu + sigma * np.random.randn(self.num_samples, x0.shape[0])
+
+            # Compute costs
+            cost_arr = np.zeros(self.num_samples)
+            aux_outputs = [None for _ in range(self.num_samples)]
+            for j, x in enumerate(x_arr):
+                cost_arr[j], aux_outputs[j] = func(x)
+
+            # Sort costs
+            idx_sorted_arr = np.argsort(cost_arr)
+            i_best = idx_sorted_arr[0]
+
+            # Check termination
+            i += 1
+            if i >= self.max_iterations or np.all(sigma <= self.cost_tol / 10):
+                # If we have run out of iterations or if our sigma has converged before getting close enough, per our
+                # error tolerances, then the optimization failed
+                success = False
+                break
+
+            if cost_arr[i_best] <= self.cost_tol:
+                success = True
+                break
+
+            # Update distribution
+            mu = np.mean(x_arr[idx_sorted_arr[: self.num_top], :], axis=0)
+            sigma = np.std(x_arr[idx_sorted_arr[: self.num_top], :], axis=0)
+
+        return cost_arr[i_best], aux_outputs[i_best], i, sigma, success

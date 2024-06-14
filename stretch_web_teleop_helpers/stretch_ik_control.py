@@ -32,13 +32,15 @@ from tf2_geometry_msgs import PoseStamped, TransformStamped
 from tf_transformations import (
     euler_from_quaternion,
     quaternion_inverse,
+    quaternion_matrix,
     quaternion_multiply,
 )
 from trajectory_msgs.msg import JointTrajectoryPoint
 
 # Local Imports
 from .constants import ControlMode, Frame, Joint, SpeedProfile
-from .pinocchio_ik_solver import PinocchioIKSolver
+from .conversions import create_ros_pose, get_pos_quat_from_ros
+from .pinocchio_ik_solver import PinocchioIKSolver, PositionIKOptimizer
 
 
 class TerminationCriteria(Enum):
@@ -76,6 +78,7 @@ class StretchIKControl:
         urdf_path: str,
         static_transform_broadcaster: tf2_ros.StaticTransformBroadcaster,
         speed_profile: SpeedProfile = SpeedProfile.MAX,  # TODO: consider allowing users to set this in the message!
+        use_ik_optimizer: bool = False,
     ):
         """
         Create the StretchIKControl object.
@@ -85,7 +88,9 @@ class StretchIKControl:
         node: The ROS2 node that will run the controller.
         tf_buffer: The tf2 buffer to use to transform poses.
         urdf_path: The path to the URDF file for the robot.
+        static_transform_broadcaster: The static transform broadcaster to use to publish the end effector pose.
         speed_profile: The speed profile to use to get max velocities and accelerations.
+        use_ik_optimizer: Whether to use the PositionIKOptimizer to compute the IK solution.
         """
         # Store the parameters
         self.node = node
@@ -93,6 +98,7 @@ class StretchIKControl:
         self.urdf_path = urdf_path
         self.static_transform_broadcaster = static_transform_broadcaster
         self.speed_profile = speed_profile
+        self.use_ik_optimizer = use_ik_optimizer
         self.initialized = False
 
     def initialize(self):
@@ -111,12 +117,22 @@ class StretchIKControl:
             Joint.ARM_LIFT,
             Joint.ARM_L0,  # The URDF uses the most distal of the telescoping joints
         ]
-        self.ik_solver = PinocchioIKSolver(
+        self.base_ik_solver = PinocchioIKSolver(
             self.urdf_path,
             Frame.END_EFFECTOR_LINK.value,
             [joint.value for joint in self.controllable_joints],
         )
-        self.all_joints_str = self.ik_solver.get_all_joint_names()
+        if self.use_ik_optimizer:
+            # In practice, I've found that this doesn't work at times when
+            # the base IK solver does. Perhaps it requires tuning.
+            self.ik_solver = PositionIKOptimizer(
+                ik_solver=self.base_ik_solver,
+                pos_error_tol=0.005,
+                ori_error_range=np.array([0.0, 0.0, 0.2]),
+            )
+        else:
+            self.ik_solver = self.base_ik_solver
+        self.all_joints_str = self.base_ik_solver.get_all_joint_names()
         self.all_joints = [Joint(name) for name in self.all_joints_str]
         # Store the control gains
         # NOTE: The CMU implementation had controller gains of 0.2 on the
@@ -124,7 +140,7 @@ class StretchIKControl:
         # 1.0 everywhere seems to work fine.
         self.K = np.eye(len(self.all_joints), dtype=np.float64)
         base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
-        self.K[base_rotation_i, base_rotation_i] = 2.0
+        self.K[base_rotation_i, base_rotation_i] = 1.0
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
@@ -383,6 +399,8 @@ class StretchIKControl:
         start_time = self.node.get_clock().now()
         timeout = Duration(seconds=timeout_secs)
 
+        # Limit the joint positions
+        _, joint_positions = self.check_joint_limits(joint_positions)
         self.node.get_logger().debug(f" Target Joint Positions: {joint_positions}")
 
         # The duration of each trajectory command
@@ -474,7 +492,9 @@ class StretchIKControl:
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         err_callback: Optional[Callable[[npt.NDArray[np.float64]], None]] = None,
-        cartesian_mask: Optional[npt.NDArray[np.bool]] = None,
+        get_cartesian_mask: Optional[
+            Callable[[npt.NDArray[np.float64]], npt.NDArray[np.bool]]
+        ] = None,
     ) -> Generator[MotionGeneratorRetval, None, None]:
         """
         Move the end-effector to the goal pose. This function uses closed-loop inverse
@@ -491,8 +511,8 @@ class StretchIKControl:
         check_cancel: A function that returns True if the action should be cancelled.
         err_callback: A callback that is called with the error between the end-effector pose
             and the goal pose.
-        cartesian_mask: A mask to apply to the Jacobian matrix. If None, the Jacobian matrix
-            is not masked.
+        get_cartesian_mask: A function that takes in the error vector and returns a mask
+            specifying the elements of the error to keep.
 
         Returns
         -------
@@ -557,6 +577,7 @@ class StretchIKControl:
         # Command motion until the termination criteria is reached
         err = None
         vel = None
+        cartesian_mask = None
         while not check_cancel() and not self.__reached_termination(
             termination, err, vel, cartesian_mask
         ):
@@ -586,17 +607,19 @@ class StretchIKControl:
                 return
             if err_callback is not None:
                 err_callback(err)
-            self.node.get_logger().debug(f" Error: {err}")
+            if get_cartesian_mask is not None:
+                cartesian_mask = get_cartesian_mask(err)
+            self.node.get_logger().info(f" Error: {err}")
 
             # Get the Jacobian matrix for the chain
             J = pinocchio.computeFrameJacobian(
-                self.ik_solver.model,
-                self.ik_solver.data,
+                self.base_ik_solver.model,
+                self.base_ik_solver.data,
                 q,
-                self.ik_solver.ee_frame_idx,
+                self.base_ik_solver.ee_frame_idx,
                 pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
             )
-            self.node.get_logger().debug(f" Jacobian: {J}")
+            self.node.get_logger().info(f" Jacobian: {J}")
 
             # Mask the Jacobian matrix to only include the articulated joints
             J[:, non_articulated_joints_mask] = 0.0
@@ -614,7 +637,7 @@ class StretchIKControl:
 
             # Calculate the joint velocities
             vel = self.K @ J_pinv @ err
-            self.node.get_logger().debug(
+            self.node.get_logger().info(
                 f" Joint Velocities: {list(zip(self.controllable_joints, vel))}"
             )
 
@@ -798,16 +821,7 @@ class StretchIKControl:
         )
         if publish_fk:
             # Transform the end effector pose to the odom frame
-            ee_pose = PoseStamped()
-            ee_pose.header.stamp = Time()  # Get the most recent transform
-            ee_pose.header.frame_id = Frame.BASE_LINK.value
-            ee_pose.pose.position.x = ee_pos[0]
-            ee_pose.pose.position.y = ee_pos[1]
-            ee_pose.pose.position.z = ee_pos[2]
-            ee_pose.pose.orientation.x = ee_quat[0]
-            ee_pose.pose.orientation.y = ee_quat[1]
-            ee_pose.pose.orientation.z = ee_quat[2]
-            ee_pose.pose.orientation.w = ee_quat[3]
+            ee_pose = create_ros_pose(ee_pos, ee_quat, Frame.BASE_LINK.value)
             ok, ee_pose_odom = self.__transform_pose(
                 ee_pose, Frame.ODOM, start_time, timeout
             )
@@ -902,6 +916,7 @@ class StretchIKControl:
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
+        self.node.get_logger().info(f" Pre-Clip Velocities: {joint_velocities}")
         _, clipped_velocities = self.check_velocity_limits(joint_velocities)
         self.node.get_logger().info(f" Commanding Velocities: {clipped_velocities}")
 
@@ -1067,6 +1082,8 @@ class StretchIKControl:
         """
         Solve the inverse kinematics problem.
 
+        TODO: Consider allowing this to run multiple times with random seeds.
+
         Parameters
         ----------
         goal: The goal pose.
@@ -1091,21 +1108,7 @@ class StretchIKControl:
             goal_base = goal
 
         # Get the inputs
-        pos = np.array(
-            [
-                goal_base.pose.position.x,
-                goal_base.pose.position.y,
-                goal_base.pose.position.z,
-            ]
-        )
-        quat = np.array(
-            [
-                goal_base.pose.orientation.x,
-                goal_base.pose.orientation.y,
-                goal_base.pose.orientation.z,
-                goal_base.pose.orientation.w,
-            ]
-        )
+        pos, quat = get_pos_quat_from_ros(goal_base)
 
         # To encourage the IK solver to compute positive arm lengths,
         # we seed it with arm length at the maximum distance.
@@ -1118,36 +1121,90 @@ class StretchIKControl:
         self.node.get_logger().debug(
             f" q_init: {dict(zip(self.all_joints_str, q_init))}"
         )
-        q, success, _ = self.ik_solver.compute_ik(
+        q, success, debug_info = self.ik_solver.compute_ik(
             pos, quat, q_init=dict(zip(self.all_joints_str, q_init))
         )
+        joint_positions = dict(zip(self.controllable_joints, q))
         if success:
             # Check whether the controllable joints are within their limits
-            joint_positions = dict(zip(self.controllable_joints, q))
             within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
             if within_limits:
                 return True, joint_positions
             else:
                 return False, joint_positions
 
-        return False, {}
+        self.node.get_logger().error(
+            f"IK Debug info: {debug_info}, q {joint_positions}"
+        )
 
-    def solve_fk(self, joints: Dict[Joint, float]) -> Tuple[np.ndarray, np.ndarray]:
+        return False, joint_positions
+
+    def solve_fk(
+        self, joint_overrides: Dict[Joint, float] = {}, link: Optional[Frame] = None
+    ) -> Tuple[npt.NDArray, npt.NDArray]:
         """
         Solve the forward kinematics problem.
 
         Parameters
         ----------
-        joints: The joint positions. For any joints not in this, we will use the latest
+        joint_overrides: The joint positions. For any joints not in this, we will use the latest
             joint state.
+        link: The link to compute the forward kinematics for. If None, compute
+            the forward kinematics for the end effector.
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]: The position and quaternion of the end effector.
+        Tuple[npt.NDArray, npt.NDArray]: The position and quaternion of the end effector.
         """
-        q = self.__get_q(joints, all_joints=True)
-        pos, quat = self.ik_solver.compute_fk(config=dict(zip(self.all_joints_str, q)))
+        link_name: Optional[str] = None
+        if link is not None:
+            link_name = link.value
+        q = self.__get_q(joint_overrides, all_joints=True)
+        pos, quat = self.ik_solver.compute_fk(
+            config=dict(zip(self.all_joints_str, q)), link_name=link_name
+        )
         return (pos, quat)
+
+    def get_transform(
+        self,
+        parent_link: Frame,
+        child_link: Frame,
+        joint_overrides: Dict[Joint, float] = {},
+    ) -> npt.NDArray:
+        """
+        Get the transform between two links.
+
+        Parameters
+        ----------
+        joint_overrides: The joint positions. For any joints not in this, we will use the latest
+            joint state.
+        parent_link: The parent link.
+        child_link: The child link.
+
+        Returns
+        -------
+        npt.NDArray: The homogeneous (4x4) transform matrix. Multiplying this by
+            a position in child frame will yield a position in parent frame.
+        """
+        # Get the transform from the base to the parent
+        if parent_link == Frame.BASE_LINK:
+            b_T_p = np.eye(4)
+        else:
+            pos, quat = self.solve_fk(joint_overrides, parent_link)
+            b_T_p = quaternion_matrix(quat)
+            b_T_p[:3, 3] = pos
+
+        # Get the transform from the base to the child
+        if child_link == Frame.BASE_LINK:
+            b_T_c = np.eye(4)
+        else:
+            pos, quat = self.solve_fk(joint_overrides, child_link)
+            b_T_c = quaternion_matrix(quat)
+            b_T_c[:3, 3] = pos
+
+        # Get the transform from the parent to the child
+        p_T_c = np.linalg.inv(b_T_p) @ b_T_c
+        return p_T_c
 
     def get_current_joints(self, combine_arm: bool = True) -> Dict[Joint, float]:
         """

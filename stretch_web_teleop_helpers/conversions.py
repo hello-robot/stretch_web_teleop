@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 from cv_bridge import CvBridge
+from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import CompressedImage, Image
 
 # The fixed header that ROS2 Humble's compressed depth image transport plugin prepends to
@@ -182,3 +183,62 @@ def depth_img_to_pointcloud(
         pointcloud = np.dot(transform, pointcloud.T).T[:, :3]
 
     return pointcloud
+
+
+def create_ros_pose(
+    pos: npt.NDArray, quat: npt.NDArray, frame: Optional[str] = None
+) -> Union[Pose, PoseStamped]:
+    """
+    Create a ROS Pose or PoseStamped message from a position and quaternion.
+
+    Parameters
+    ----------
+    pos: The position of the pose
+    quat: The quaternion of the pose, in XYZW.
+    frame: The frame of the pose. If None, a Pose will eb returned, else a PoseStamped
+
+    Returns
+    -------
+    pose: The ROS Pose or PoseStamped message
+    """
+    pose = Pose()
+    pose.position.x = pos[0]
+    pose.position.y = pos[1]
+    pose.position.z = pos[2]
+    pose.orientation.x = quat[0]
+    pose.orientation.y = quat[1]
+    pose.orientation.z = quat[2]
+    pose.orientation.w = quat[3]
+
+    if frame is None:
+        return pose
+
+    pose_stamped = PoseStamped()
+    pose_stamped.header.frame_id = frame
+    pose_stamped.pose = pose
+    return pose_stamped
+
+
+def get_pos_quat_from_ros(
+    pose: Union[Pose, PoseStamped]
+) -> tuple[npt.NDArray, npt.NDArray]:
+    """
+    Get the position and quaternion from a ROS Pose or PoseStamped message.
+
+    Parameters
+    ----------
+    pose: The ROS Pose or PoseStamped message
+
+    Returns
+    -------
+    pos: The position of the pose
+    quat: The quaternion of the pose, in XYZW.
+    """
+    if isinstance(pose, PoseStamped):
+        pose = pose.pose
+
+    pos = np.array([pose.position.x, pose.position.y, pose.position.z])
+    quat = np.array(
+        [pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
+    )
+    return pos, quat
