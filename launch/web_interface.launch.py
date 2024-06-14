@@ -184,6 +184,10 @@ def generate_launch_description():
     stretch_tool = robot_params["robot"]["tool"]
     stretch_has_beta_teleop_kit = symlinks_to_has_beta_teleop_kit()
     stretch_has_nav_head_cam = symlinks_to_has_nav_head_cam()
+    stretch_has_dex_gripper = stretch_tool in [
+        "tool_stretch_dex_wrist",
+        "eoa_wrist_dw3_tool_sg3",
+    ]
     (
         drivers_realsense,
         driver_gripper_cam,
@@ -422,7 +426,12 @@ def generate_launch_description():
         executable="configure_video_streams.py",
         output="screen",
         arguments=[LaunchConfiguration("params"), str(stretch_has_beta_teleop_kit)],
-        parameters=[{"has_beta_teleop_kit": stretch_has_beta_teleop_kit}],
+        parameters=[
+            {
+                "has_beta_teleop_kit": stretch_has_beta_teleop_kit,
+                "has_dex_gripper": stretch_has_dex_gripper,
+            }
+        ],
     )
     ld.add_action(configure_video_streams_node)
 

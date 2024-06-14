@@ -60,9 +60,11 @@ export class Robot extends React.Component {
   private amclPoseCallback: (pose: ROSLIB.Transform) => void;
   private isRunStoppedCallback: (isRunStopped: boolean) => void;
   private hasBetaTeleopKitCallback: (value: boolean) => void;
+  private hasDexGripperCallback: (value: boolean) => void;
   private lookAtGripperInterval?: number; // ReturnType<typeof setInterval>
   private subscriptions: ROSLIB.Topic[] = [];
   private hasBetaTeleopKitParam: ROSLIB.Param;
+  private hasDexGripperParam: ROSLIB.Param;
 
   constructor(props: {
     jointStateCallback: (
@@ -77,6 +79,7 @@ export class Robot extends React.Component {
     amclPoseCallback: (pose: ROSLIB.Transform) => void;
     isRunStoppedCallback: (isRunStopped: boolean) => void;
     hasBetaTeleopKitCallback: (value: boolean) => void;
+    hasDexGripperCallback: (value: boolean) => void;
   }) {
     super(props);
     this.jointStateCallback = props.jointStateCallback;
@@ -87,6 +90,7 @@ export class Robot extends React.Component {
     this.amclPoseCallback = props.amclPoseCallback;
     this.isRunStoppedCallback = props.isRunStoppedCallback;
     this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
+    this.hasDexGripperCallback = props.hasDexGripperCallback;
   }
 
   async connect(): Promise<void> {
@@ -233,6 +237,18 @@ export class Robot extends React.Component {
     this.hasBetaTeleopKitParam.get((value: boolean) => {
       console.log("has beta teleop kit: ", value);
       if (this.hasBetaTeleopKitCallback) this.hasBetaTeleopKitCallback(value);
+    });
+  }
+
+  getHasDexGripper() {
+    this.hasDexGripperParam = new ROSLIB.Param({
+      ros: this.ros,
+      name: "/configure_video_streams:has_dex_gripper",
+    });
+
+    this.hasDexGripperParam.get((value: boolean) => {
+      console.log("has dex gripper: ", value);
+      if (this.hasDexGripperCallback) this.hasDexGripperCallback(value);
     });
   }
 

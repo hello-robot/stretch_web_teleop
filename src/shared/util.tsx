@@ -86,6 +86,7 @@ export type WebRTCMessage =
   | BatteryVoltageMessage
   | IsRunStoppedMessage
   | HasBetaTeleopKitMessage
+  | HasDexGripperMessage
   | cmd;
 
 interface StopTrajectoryMessage {
@@ -112,6 +113,11 @@ export interface IsRunStoppedMessage {
 
 export interface HasBetaTeleopKitMessage {
   type: "hasBetaTeleopKit";
+  value: boolean;
+}
+
+export interface HasDexGripperMessage {
+  type: "hasDexGripper";
   value: boolean;
 }
 

@@ -28,6 +28,7 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
+  hasDexGripper,
   underVideoFunctionProvider,
 } from "..";
 import {
@@ -840,6 +841,83 @@ const UnderRealsenseButtons = (props: {
 
   console.log("UnderRealsenseButtons", props.isMovingToPregrasp);
 
+  // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
+  let moveToPregraspButtons = <></>;
+  if (hasDexGripper) {
+    moveToPregraspButtons = (
+      <React.Fragment>
+        <CheckToggleButton
+          checked={props.definition.selectObjectForMoveToPregrasp || false}
+          onClick={() => {
+            props.definition.selectObjectForMoveToPregrasp =
+              !props.definition.selectObjectForMoveToPregrasp;
+            props.setSelectObjectScaledXY(null);
+            setRerender(!rerender);
+          }}
+          label="Select Object"
+        />
+        {props.isMovingToPregrasp ? (
+          <button
+            className="map-cancel-btn"
+            onPointerDown={() => {
+              underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.CancelMoveToPregrasp,
+              ).onClick!();
+              props.setIsMovingToPregrasp(false);
+            }}
+          >
+            <span>Cancel</span>
+            <span className="material-icons">cancel</span>
+          </button>
+        ) : (
+          <AccordionSelect
+            title="Align Gripper to Object"
+            possibleOptions={Object.values(realsenseMoveToPregraspButtons)}
+            backgroundColor="var(--selected-color)"
+            onChange={(idx: number) => {
+              if (props.selectObjectScaledXY == null) {
+                underVideoFunctionProvider.setMoveToPregraspState({
+                  state: "Please select an object first.",
+                  alert_type: "error",
+                });
+                return;
+              }
+              underVideoFunctionProvider.provideFunctions(
+                realsenseMoveToPregraspButtons[idx],
+              ).onClick!(props.selectObjectScaledXY);
+              props.setSelectObjectScaledXY(null);
+              props.setIsMovingToPregrasp(true);
+              props.definition.selectObjectForMoveToPregrasp = false;
+              underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.MoveToPregraspGoalReached,
+              ).getFuture!().then(() => {
+                props.setIsMovingToPregrasp(false);
+              });
+            }}
+            toggleAccordianCallback={() => {
+              if (props.underVideoAreaRef.current) {
+                // Over the next 600ms, which is the CSS-specified transition time for
+                // an accordion, keep scrolling the underVideoArea to the bottom, in case
+                // the expanded accordion is off-screen.
+                let startTime = Date.now();
+                let scrollInterval = setInterval(() => {
+                  let currentTime = Date.now();
+                  let timeElapsed = currentTime - startTime;
+                  if (timeElapsed >= 600) {
+                    clearInterval(scrollInterval);
+                  } else {
+                    props.underVideoAreaRef.current!.scrollTop =
+                      props.underVideoAreaRef.current!.scrollHeight;
+                  }
+                }, 10);
+              }
+            }}
+          />
+        )}
+      </React.Fragment>
+    );
+  }
+
   return (
     <React.Fragment>
       <AccordionSelect
@@ -872,74 +950,7 @@ const UnderRealsenseButtons = (props: {
         }}
         label="Depth Sensing"
       />
-      <CheckToggleButton
-        checked={props.definition.selectObjectForMoveToPregrasp || false}
-        onClick={() => {
-          props.definition.selectObjectForMoveToPregrasp =
-            !props.definition.selectObjectForMoveToPregrasp;
-          props.setSelectObjectScaledXY(null);
-          setRerender(!rerender);
-        }}
-        label="Select Object"
-      />
-      {props.isMovingToPregrasp ? (
-        <button
-          className="map-cancel-btn"
-          onPointerDown={() => {
-            underVideoFunctionProvider.provideFunctions(
-              UnderVideoButton.CancelMoveToPregrasp,
-            ).onClick!();
-            props.setIsMovingToPregrasp(false);
-          }}
-        >
-          <span>Cancel</span>
-          <span className="material-icons">cancel</span>
-        </button>
-      ) : (
-        <AccordionSelect
-          title="Align Gripper to Object"
-          possibleOptions={Object.values(realsenseMoveToPregraspButtons)}
-          backgroundColor="var(--selected-color)"
-          onChange={(idx: number) => {
-            if (props.selectObjectScaledXY == null) {
-              underVideoFunctionProvider.setMoveToPregraspState({
-                state: "Please select an object first.",
-                alert_type: "error",
-              });
-              return;
-            }
-            underVideoFunctionProvider.provideFunctions(
-              realsenseMoveToPregraspButtons[idx],
-            ).onClick!(props.selectObjectScaledXY);
-            props.setSelectObjectScaledXY(null);
-            props.setIsMovingToPregrasp(true);
-            props.definition.selectObjectForMoveToPregrasp = false;
-            underVideoFunctionProvider.provideFunctions(
-              UnderVideoButton.MoveToPregraspGoalReached,
-            ).getFuture!().then(() => {
-              props.setIsMovingToPregrasp(false);
-            });
-          }}
-          toggleAccordianCallback={() => {
-            if (props.underVideoAreaRef.current) {
-              // Over the next 600ms, which is the CSS-specified transition time for
-              // an accordion, keep scrolling the underVideoArea to the bottom, in case
-              // the expanded accordion is off-screen.
-              let startTime = Date.now();
-              let scrollInterval = setInterval(() => {
-                let currentTime = Date.now();
-                let timeElapsed = currentTime - startTime;
-                if (timeElapsed >= 600) {
-                  clearInterval(scrollInterval);
-                } else {
-                  props.underVideoAreaRef.current!.scrollTop =
-                    props.underVideoAreaRef.current!.scrollHeight;
-                }
-              }, 10);
-            }
-          }}
-        />
-      )}
+      {moveToPregraspButtons}
       {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {

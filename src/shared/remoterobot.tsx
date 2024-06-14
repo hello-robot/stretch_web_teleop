@@ -21,7 +21,7 @@ import {
   ROSPose,
   waitUntil,
 } from "shared/util";
-import { GetHasBetaTeleopKit } from "./commands";
+import { GetHasBetaTeleopKit, GetHasDexGripper } from "./commands";
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -185,6 +185,13 @@ export class RemoteRobot extends React.Component<{}, any> {
 
   getHasBetaTeleopKit(type: "getHasBetaTeleopKit") {
     let cmd: GetHasBetaTeleopKit = {
+      type: type,
+    };
+    this.robotChannel(cmd);
+  }
+
+  getHasDexGripper(type: "getHasDexGripper") {
+    let cmd: GetHasDexGripper = {
       type: type,
     };
     this.robotChannel(cmd);
