@@ -123,7 +123,8 @@ class StretchIKControl:
         # telescoping arm joints and 1.0 otherwise, but for this implementation
         # 1.0 everywhere seems to work fine.
         self.K = np.eye(len(self.all_joints), dtype=np.float64)
-        # base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
+        base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
+        self.K[base_rotation_i, base_rotation_i] = 2.0
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
@@ -1131,6 +1132,23 @@ class StretchIKControl:
 
         return False, {}
 
+    def solve_fk(self, joints: Dict[Joint, float]) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Solve the forward kinematics problem.
+
+        Parameters
+        ----------
+        joints: The joint positions. For any joints not in this, we will use the latest
+            joint state.
+
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray]: The position and quaternion of the end effector.
+        """
+        q = self.__get_q(joints, all_joints=True)
+        pos, quat = self.ik_solver.compute_fk(config=dict(zip(self.all_joints_str, q)))
+        return (pos, quat)
+
     def get_current_joints(self, combine_arm: bool = True) -> Dict[Joint, float]:
         """
         Get the current states of the controllable joints.
@@ -1157,41 +1175,6 @@ class StretchIKControl:
                 joint_positions[joint_name] = pos
 
         return joint_positions
-
-    # def get_base_rotation(self, timeout: Optional[Duration] = None) -> Optional[float]:
-    #     """
-    #     Gets the current base rotation, e.g., the rotation from odom -> base link.
-
-    #     Returns
-    #     -------
-    #     Optional[float]: The base rotation in radians, in [-pi, pi], or None if the
-    #         base rotation could not be retrieved.
-    #     """
-    #     # Get a pose that corresponds exactly to the base link
-    #     base_link_pose = PoseStamped()
-    #     base_link_pose.header.frame_id = Frame.BASE_LINK
-    #     base_link_pose.pose.orientation.w = 1.0
-
-    #     # Transform the pose to the odom frame
-    #     ok, odom_pose = self.__transform_pose(
-    #         base_link_pose, Frame.ODOM, self.node.get_clock().now(), timeout
-    #     )
-    #     if not ok:
-    #         return None
-
-    #     # Get the yaw from the quaternion
-    #     yaw, _, _ = euler_from_quaternion(
-    #         err_quaternion,
-    #         axes="rzyx",  # https://wiki.ros.org/geometry2/RotationMethods#Fixed_Axis_vs_Euler_Angles
-    #     )
-
-    #     # Convert it into the range [-pi, pi]
-    #     if yaw > np.pi:
-    #         yaw -= 2 * np.pi
-    #     elif yaw < -np.pi:
-    #         yaw += 2 * np.pi
-
-    #     return yaw
 
     def __get_q(
         self,

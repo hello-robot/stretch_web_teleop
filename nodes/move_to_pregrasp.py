@@ -25,6 +25,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
 from tf2_geometry_msgs import PoseStamped
@@ -180,6 +181,8 @@ class MoveToPregraspNode(Node):
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         self.static_transform_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
+        self.lift_offset: Optional[Tuple[float, float]] = None
+        self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
         # TODO: Figure out where the specialized URDF should go!
@@ -448,7 +451,11 @@ class MoveToPregraspNode(Node):
         # Determine how the robot should orient its gripper to align with the clicked pixel
         horizontal_grasp = self.get_grasp_orientation(goal_handle.request)
 
-        # Get the goal end effector pose
+        # Get the goal end effector pose. NOTE that at this point, the yaw is slightly off
+        # (see notes in the docstring of __get_goal_yaw). However, this is fine because
+        # when rotating the base, we only account for error in the x-direction, so it is
+        # fine if the yaw is slightly off. After rotating the base, we update goal yaw,
+        # so future IK is correct.
         ok, goal_pose = self.get_goal_pose(
             x, y, z, depth_msg.header, horizontal_grasp, publish_tf=True
         )
@@ -571,10 +578,6 @@ class MoveToPregraspNode(Node):
                         )
                     )
                 if MoveToPregraspState.ROTATE_BASE in concurrent_states:
-                    # TODO: This sometimes ends up a few degrees off. The object is
-                    # still in the gripper camera view, so users can resolve this,
-                    # but we should look into why (odom -> base_link TF delay?
-                    # issue with termination thresholds? robot's center of rotation? etc.)
                     joints_for_velocity_control += [Joint.BASE_ROTATION]
                     joint_position_overrides.update(
                         {
@@ -588,7 +591,7 @@ class MoveToPregraspNode(Node):
                     )
                     # Only care about x and yaw in base frame. y and z are adjusted by
                     # arm length/lift
-                    cartesian_mask = np.array([True, False, False, False, False, True])
+                    cartesian_mask = np.array([True, False, False, False, False, False])
                 if MoveToPregraspState.HEAD_PAN in concurrent_states:
                     desired_base_rotation = ik_solution[Joint.BASE_ROTATION]
                     curr_head_pan = self.controller.get_current_joints()[Joint.HEAD_PAN]
@@ -663,6 +666,14 @@ class MoveToPregraspNode(Node):
                         else:  # CONTINUE
                             pass
                     if len(motion_executors) == 0:
+                        if MoveToPregraspState.ROTATE_BASE in concurrent_states:
+                            # If we just completed the rotate base motion, update the goal yaw
+                            # so future IK is correct.
+                            self.update_goal_orientation(
+                                goal_pose,
+                                get_pregrasp_wrist_configuration(horizontal_grasp),
+                                publish_tf=True,
+                            )
                         state_i += 1
                 except Exception as e:
                     self.get_logger().error(traceback.format_exc())
@@ -867,11 +878,15 @@ class MoveToPregraspNode(Node):
             )
             return False, PoseStamped()
 
-        # The goal orientation is (0,0,0,1) in base link frame, rotated
-        # so +x points towards the clicked point
-        theta = np.arctan2(
-            goal_pose_base.pose.position.y, goal_pose_base.pose.position.x
+        # Get the goal orientation
+        ok, theta = self.__get_goal_yaw(
+            goal_pose_base.pose.position.x,
+            goal_pose_base.pose.position.y,
+            account_for_offsets=True,
         )
+        if not ok:
+            self.get_logger().error("Failed to get goal yaw")
+            return False, PoseStamped()
         rot = quaternion_about_axis(theta, [0, 0, 1])
         if not horizontal_grasp:
             # For vertical grasp, the goal orientation is also rotated +90deg around y
@@ -917,22 +932,218 @@ class MoveToPregraspNode(Node):
             return False, PoseStamped()
 
         if publish_tf:
-            self.static_transform_broadcaster.sendTransform(
-                TransformStamped(
-                    header=goal_pose_odom.header,
-                    child_frame_id="goal",
-                    transform=Transform(
-                        translation=Vector3(
-                            x=goal_pose_odom.pose.position.x,
-                            y=goal_pose_odom.pose.position.y,
-                            z=goal_pose_odom.pose.position.z,
-                        ),
-                        rotation=goal_pose_odom.pose.orientation,
-                    ),
-                )
-            )
+            self.broadcast_static_transform(goal_pose_odom, "goal")
 
         return True, goal_pose_odom
+
+    def __get_goal_yaw(
+        self, x_g: float, y_g: float, account_for_offsets: bool
+    ) -> Tuple[bool, float]:
+        """
+        Gets the yaw angle of the goal pose. The below equations were derived
+        by manual IK calculations on a projection of the robot onto the XY plane.
+        Let theta be the angle the base has rotated, let L be the arm length,
+        let (x_o, y_o) be the lift offset in base frame, and let (x_w, y_w) be
+        the wrist offset in the lift frame. Then, we have the following transforms
+        (base-to-world, lift-to-base, armEnd-to-lift):
+
+        w_T_b = [[cos(theta)    -sin(theta)    0]
+                 [sin(theta)     cos(theta)    0]
+                 [0              0             1]]
+        b_T_l = [[0   1  x_o]
+                 [-1  0  y_o]
+                 [0   0  1  ]]
+        l_T_a = [[1  0  L]
+                 [0  1  0]
+                 [0  0  1]
+
+        Our goal is to find (theta, L) such that:
+        w_T_b * b_T_l * l_T_a [[x_w]   = [[x_g]
+                               [y_w]      [y_g]
+                               [1  ]]     [1  ]]
+
+        The solutions to that are:
+
+        theta = acos((x_o + y_w) / sqrt(x_g^2 + y_g^2)) + atan2(y_g, x_g) - (0 or pi)
+        L = - (y_g)cos(theta) + (x_g)sin(theta) + y_o
+
+        We use whichever theta results in a positive L. And we then convert it
+        to lift rotation by subtracting pi/2.
+
+        Note that in these calculations, we assume wrist yaw and roll will be 0
+        in the final pre-grasp pose.
+
+        Parameters
+        ----------
+        x_g: The x-coordinate of the goal pose, in base frame.
+        y_g: The y-coordinate of the goal pose, in base frame.
+        account_for_offsets: if True, do the above calculation. If false, just
+            return the angle of the vector from the base to (x_g, y_g), which
+            is quite close to the correct answer.
+
+        Returns
+        -------
+        bool: Whether the goal yaw was successfully calculated.
+        float: The goal yaw.
+        """
+        if not account_for_offsets:
+            return True, np.arctan2(y_g, x_g)
+
+        # First, get the lift offset
+        if self.lift_offset is None:
+            try:
+                lift_offset = self.tf_buffer.lookup_transform(
+                    Frame.BASE_LINK.value,
+                    Frame.LIFT_LINK.value,
+                    Time(),
+                )
+                self.lift_offset = (
+                    lift_offset.transform.translation.x,
+                    lift_offset.transform.translation.y,
+                )
+            except (
+                tf2.ConnectivityException,
+                tf2.ExtrapolationException,
+                tf2.InvalidArgumentException,
+                tf2.LookupException,
+                tf2.TimeoutException,
+                tf2.TransformException,
+            ) as error:
+                self.get_logger().error(f"Failed to get mast offset: {error}")
+                return False, 0.0
+        x_o, y_o = self.lift_offset
+
+        # Next, get the wrist offset
+        # NOTE: This is technically wrong, because if the yaw is non-zero, that
+        # will impact the offset. Really, what we want is the offset at goal
+        # wrist yaw, which requires FK. But this is a good enough approximation.
+        if self.wrist_offset is None:
+            try:
+                wrist_offset = self.tf_buffer.lookup_transform(
+                    Frame.L0_LINK.value,
+                    Frame.WRIST_PITCH_LINK.value,
+                    Time(),
+                )
+                # In the manual IK calculations, what I call +x and +y and what
+                # the actual TF tree has as +z and +x, respectively.
+                self.wrist_offset = (
+                    wrist_offset.transform.translation.z,
+                    wrist_offset.transform.translation.x,
+                )
+            except (
+                tf2.ConnectivityException,
+                tf2.ExtrapolationException,
+                tf2.InvalidArgumentException,
+                tf2.LookupException,
+                tf2.TimeoutException,
+                tf2.TransformException,
+            ) as error:
+                self.get_logger().error(f"Failed to get mast offset: {error}")
+                return False, 0.0
+        x_w, y_w = self.wrist_offset
+
+        self.get_logger().info(f"Lift offset: {(x_o, y_o)}")
+        self.get_logger().info(f"Wrist offset: {(x_w, y_w)}")
+        self.get_logger().info(f"Goal pose in base frame: {(x_g, y_g)}")
+
+        # Get the possible thetas
+        theta = np.arccos((x_o + y_w) / np.sqrt(x_g**2 + y_g**2)) + np.arctan2(
+            y_g, x_g
+        )
+        thetas = [theta, theta - np.pi]
+
+        # Get the corresponding Ls
+        Ls = [
+            -y_g * np.cos(theta) + x_g * np.sin(theta) + y_o - x_w for theta in thetas
+        ]
+        self.get_logger().info(f"Possible thetas: {thetas}, Ls: {Ls}")
+        self.get_logger().info(f"Earlier theta: {np.arctan2(y_g, x_g)}")
+
+        for i in range(2):
+            if Ls[i] > 0:
+                return True, thetas[i] - np.pi / 2
+        return False, 0.0
+
+    def update_goal_orientation(
+        self,
+        goal_pose: PoseStamped,
+        wrist_configuration: Dict[Joint, float],
+        publish_tf: bool = False,
+    ) -> bool:
+        """
+        Run FK with the specified wrist configuration to get the goal orientation in base
+        frame, then convert it to odom frame and update the orientation of the goal pose.
+
+        Parameters
+        ----------
+        goal_pose: The old goal pose.
+        wrist_configuration: The wrist configuration.
+        publish_tf: Whether to publish the goal pose as a TF frame.
+
+        Returns
+        -------
+        bool: Whether it succeeded.
+        """
+        # Run FK
+        ee_pos, ee_quat = self.controller.solve_fk(wrist_configuration)
+        ee_pose = PoseStamped()
+        ee_pose.header.frame_id = Frame.BASE_LINK.value
+        ee_pose.pose.position = Point(x=ee_pos[0], y=ee_pos[1], z=ee_pos[2])
+        ee_pose.pose.orientation = Quaternion(
+            x=ee_quat[0], y=ee_quat[1], z=ee_quat[2], w=ee_quat[3]
+        )
+
+        # Convert it to odom frame
+        try:
+            ee_pose_odom = self.tf_buffer.transform(
+                ee_pose, Frame.ODOM.value, timeout=self.tf_timeout
+            )
+        except (
+            tf2.ConnectivityException,
+            tf2.ExtrapolationException,
+            tf2.InvalidArgumentException,
+            tf2.LookupException,
+            tf2.TimeoutException,
+            tf2.TransformException,
+        ) as error:
+            self.get_logger().error(
+                f"Failed to transform end effector pose to the odom frame: {error}"
+            )
+            return False
+
+        # Update the orientation of the goal pose
+        goal_pose.pose.orientation = ee_pose_odom.pose.orientation
+
+        if publish_tf:
+            self.broadcast_static_transform(goal_pose, "goal")
+
+        return True
+
+    def broadcast_static_transform(
+        self, pose: PoseStamped, child_frame_id: str
+    ) -> None:
+        """
+        Broadcast a static transform from the base frame to the goal pose.
+
+        Parameters
+        ----------
+        pose: The goal pose.
+        child_frame_id: The child frame id.
+        """
+        self.static_transform_broadcaster.sendTransform(
+            TransformStamped(
+                header=pose.header,
+                child_frame_id=child_frame_id,
+                transform=Transform(
+                    translation=Vector3(
+                        x=pose.pose.position.x,
+                        y=pose.pose.position.y,
+                        z=pose.pose.position.z,
+                    ),
+                    rotation=pose.pose.orientation,
+                ),
+            )
+        )
 
 
 def main(args: Optional[List[str]] = None):

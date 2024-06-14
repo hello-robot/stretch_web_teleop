@@ -56,6 +56,9 @@ class Frame(Enum):
 
     BASE_LINK = "base_link"
     END_EFFECTOR_LINK = "link_grasp_center"
+    LIFT_LINK = "link_lift"
+    L0_LINK = "link_arm_l0"
+    WRIST_PITCH_LINK = "link_wrist_pitch"
     ODOM = "odom"
 
 
