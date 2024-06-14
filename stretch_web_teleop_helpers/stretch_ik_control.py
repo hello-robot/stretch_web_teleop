@@ -312,6 +312,7 @@ class StretchIKControl:
             if joint_name == Joint.COMBINED_ARM:
                 joint_name = Joint.ARM_L0
             self.joint_pos_lim[joint_name] = (min_pos, max_pos)
+        self.joint_pos_lim[Joint.BASE_ROTATION] = (-np.pi, np.pi)
 
         return True
 
@@ -1078,6 +1079,7 @@ class StretchIKControl:
         self,
         goal: PoseStamped,
         joint_position_overrides: Dict[Joint, float] = {},
+        max_tries: int = 5,
     ) -> Tuple[bool, Dict[Joint, float]]:
         """
         Solve the inverse kinematics problem.
@@ -1116,26 +1118,25 @@ class StretchIKControl:
         q_init[self.controllable_joints.index(Joint.ARM_L0)] = self.joint_pos_lim[
             Joint.ARM_L0
         ][1]
+        initializations = [q_init]
+        for _ in range(max_tries - 1):
+            initializations.append(self.__get_random_q(all_joints=True))
 
-        # Solve the IK problem
-        self.node.get_logger().debug(
-            f" q_init: {dict(zip(self.all_joints_str, q_init))}"
-        )
-        q, success, debug_info = self.ik_solver.compute_ik(
-            pos, quat, q_init=dict(zip(self.all_joints_str, q_init))
-        )
-        joint_positions = dict(zip(self.controllable_joints, q))
-        if success:
-            # Check whether the controllable joints are within their limits
-            within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
-            if within_limits:
-                return True, joint_positions
-            else:
-                return False, joint_positions
-
-        self.node.get_logger().error(
-            f"IK Debug info: {debug_info}, q {joint_positions}"
-        )
+        for q_init in initializations:
+            # Solve the IK problem
+            q, success, debug_info = self.ik_solver.compute_ik(
+                pos, quat, q_init=dict(zip(self.all_joints_str, q_init))
+            )
+            self.node.get_logger().info(
+                f"For initiatilization {dict(zip(self.all_joints_str, q_init))}, "
+                f"success: {success}, q: {q} debug_info: {debug_info}"
+            )
+            joint_positions = dict(zip(self.controllable_joints, q))
+            if success:
+                # Check whether the controllable joints are within their limits
+                within_limits, _ = self.check_joint_limits(joint_positions, clip=False)
+                if within_limits:
+                    return True, joint_positions
 
         return False, joint_positions
 
@@ -1270,6 +1271,31 @@ class StretchIKControl:
                 # Set dummy joints to 0.0
                 joint_positions.append(0.0)
         return np.array(joint_positions, dtype=np.float64)
+
+    def __get_random_q(self, all_joints: bool = False):
+        """
+        Get a random joint configuration.
+
+        Parameters
+        ----------
+        all_joints: whether to use all joints or only the controllable ones.
+
+        Returns
+        -------
+        npt.NDArray: The joint positions
+        """
+        if all_joints:
+            joints = self.all_joints
+        else:
+            joints = self.controllable_joints
+        q = []
+        for joint_name in joints:
+            q.append(
+                np.random.uniform(
+                    self.joint_pos_lim[joint_name][0], self.joint_pos_lim[joint_name][1]
+                )
+            )
+        return np.array(q, dtype=np.float64)
 
 
 def remaining_time(

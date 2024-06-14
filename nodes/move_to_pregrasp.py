@@ -151,7 +151,10 @@ class MoveToPregraspNode(Node):
     """
 
     # How far (m) from the object the end-effecor should move to.
-    DISTANCE_TO_OBJECT = 0.1
+    # We will use the first one that succeeds. The reason for multiple is in case
+    # the object is close to the robot, and the robot can't actually get 0.1m away
+    # from it.
+    DISTANCES_TO_OBJECT = [0.1, 0.05, 0.025, 0.001]
 
     def __init__(
         self,
@@ -451,31 +454,42 @@ class MoveToPregraspNode(Node):
         # Determine how the robot should orient its gripper to align with the clicked pixel
         horizontal_grasp = self.get_grasp_orientation(goal_handle.request)
 
-        # Get the goal end effector pose. NOTE that at this point, the yaw is slightly off
-        # (see notes in the docstring of __get_goal_yaw). However, this is fine because
-        # when rotating the base, we only account for error in the x-direction, so it is
-        # fine if the yaw is slightly off. After rotating the base, we update goal yaw,
-        # so future IK is correct.
-        ok, goal_pose, base_rotation = self.get_goal_pose(
-            x, y, z, depth_msg.header, horizontal_grasp, publish_tf=True
-        )
-        if not ok:
+        # Get the goal end effector pose and verify it is reachable.
+        goal_pose = None
+        reachable = False
+        for distance_to_object in self.DISTANCES_TO_OBJECT:
+            ok, goal_pose, base_rotation = self.get_goal_pose(
+                x,
+                y,
+                z,
+                depth_msg.header,
+                horizontal_grasp,
+                publish_tf=True,
+                distance_to_object=distance_to_object,
+            )
+            if not ok:
+                continue
+            self.get_logger().info(f"Goal Pose: {goal_pose}")
+
+            # Verify the goal is reachable, seeded with the estimate base rotation.
+            wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
+            joint_overrides = {}
+            joint_overrides.update(wrist_rotation)
+            if base_rotation is not None:
+                # Seed IK with the estimated base rotation
+                joint_overrides[Joint.BASE_ROTATION] = base_rotation
+            reachable, ik_solution = self.controller.solve_ik(
+                goal_pose, joint_position_overrides=joint_overrides
+            )
+            if not reachable:
+                continue
+            else:
+                break
+        if not goal_pose:
             return action_error_callback(
                 "Failed to get goal pose",
                 MoveToPregrasp.Result.STATUS_DEPROJECTION_FAILURE,
             )
-        self.get_logger().info(f"Goal Pose: {goal_pose}")
-
-        # Verify the goal is reachable, seeded with the estimate base rotation.
-        wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
-        joint_overrides = {}
-        joint_overrides.update(wrist_rotation)
-        if base_rotation is not None:
-            # Seed IK with the estimated base rotation
-            joint_overrides[Joint.BASE_ROTATION] = base_rotation
-        reachable, ik_solution = self.controller.solve_ik(
-            goal_pose, joint_position_overrides=joint_overrides
-        )
         if not reachable:
             return action_error_callback(
                 f"Goal pose is not reachable {ik_solution}",
@@ -861,6 +875,7 @@ class MoveToPregraspNode(Node):
         header: Header,
         horizontal_grasp: bool,
         publish_tf: bool = False,
+        distance_to_object: float = 0.1,  # m
     ) -> Tuple[bool, PoseStamped, Optional[float]]:
         """
         Get the goal end effector pose.
@@ -873,6 +888,7 @@ class MoveToPregraspNode(Node):
         header: The header of the pointcloud message.
         horizontal_grasp: Whether the goal pose should be horizontal.
         publish_tf: Whether to publish the goal pose as a TF frame.
+        distance_to_object: The distance to move the end effector away from the object.
 
         Returns
         -------
@@ -928,15 +944,15 @@ class MoveToPregraspNode(Node):
                 [goal_pose_base.pose.position.x, goal_pose_base.pose.position.y]
             )
             xy_dist = np.linalg.norm(xy)
-            if xy_dist < self.DISTANCE_TO_OBJECT:
+            if xy_dist < distance_to_object:
                 self.get_logger().error(
-                    f"Clicked point is too close to the robot: {xy_dist} < {self.DISTANCE_TO_OBJECT}"
+                    f"Clicked point is too close to the robot: {xy_dist} < {distance_to_object}"
                 )
                 return False, PoseStamped(), None
-            xy = xy / xy_dist * (xy_dist - self.DISTANCE_TO_OBJECT)
+            xy = xy / xy_dist * (xy_dist - distance_to_object)
             goal_pose_base.pose.position.x, goal_pose_base.pose.position.y = xy
         else:
-            goal_pose_base.pose.position.z += self.DISTANCE_TO_OBJECT
+            goal_pose_base.pose.position.z += distance_to_object
 
         self.get_logger().info(f"Goal pose in base link frame: {goal_pose_base}")
 
