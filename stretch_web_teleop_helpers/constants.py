@@ -27,8 +27,6 @@ class Joint(Enum):
     WRIST_YAW = "joint_wrist_yaw"
     WRIST_PITCH = "joint_wrist_pitch"
     WRIST_ROLL = "joint_wrist_roll"
-    WHEEL_LEFT = "joint_right_wheel"
-    WHEEL_RIGHT = "joint_left_wheel"
     GRIPPER_RIGHT = "joint_gripper_finger_right"
     GRIPPER_LEFT = "joint_gripper_finger_left"
     RIGHT_WHEEL = "joint_right_wheel"
