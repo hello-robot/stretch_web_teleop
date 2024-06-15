@@ -45,19 +45,25 @@ class PinocchioIKSolver:
 
     def __init__(
         self,
-        urdf_path: str,
+        urdf_path: Optional[str],
         ee_link_name: str,
         controlled_joints: List[str],
         verbose: bool = False,
+        model: Optional[pinocchio.Model] = None,
     ):
         """
-        urdf_path: path to urdf file
+        urdf_path: path to urdf file. Either this or model must be set.
         ee_link_name: name of the end-effector link
         controlled_joints: list of joint names to control
         """
+        if not (urdf_path or model):
+            raise ValueError("Either urdf_path or model must be set.")
         if verbose:
             print(f"{urdf_path=}")
-        self.model = pinocchio.buildModelFromUrdf(urdf_path)
+        if urdf_path:
+            self.model = pinocchio.buildModelFromUrdf(urdf_path)
+        else:
+            self.model = model
         self.data = self.model.createData()
         self.q_neutral = pinocchio.neutral(self.model)
 

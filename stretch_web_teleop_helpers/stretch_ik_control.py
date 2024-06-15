@@ -6,6 +6,7 @@ Parts of this approach are inspired from:
 https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/stretch_ik_solver.py
 """
 # Standard Imports
+import os
 import threading
 from enum import Enum
 from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
@@ -17,6 +18,7 @@ import pinocchio
 import rclpy
 import tf2_py as tf2
 import tf2_ros
+from ament_index_python import get_package_share_directory
 from builtin_interfaces.msg import Time
 from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import Transform, Twist, Vector3
@@ -40,7 +42,7 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 # Local Imports
 from .constants import ControlMode, Frame, Joint, SpeedProfile
 from .conversions import create_ros_pose, get_pos_quat_from_ros
-from .pinocchio_ik_solver import PinocchioIKSolver, PositionIKOptimizer
+from .pinocchio_ik_solver import PinocchioIKSolver
 
 
 class TerminationCriteria(Enum):
@@ -75,10 +77,8 @@ class StretchIKControl:
         self,
         node: Node,
         tf_buffer: tf2_ros.Buffer,
-        urdf_path: str,
         static_transform_broadcaster: tf2_ros.StaticTransformBroadcaster,
         speed_profile: SpeedProfile = SpeedProfile.MAX,  # TODO: consider allowing users to set this in the message!
-        use_ik_optimizer: bool = False,
     ):
         """
         Create the StretchIKControl object.
@@ -87,23 +87,23 @@ class StretchIKControl:
         ----------
         node: The ROS2 node that will run the controller.
         tf_buffer: The tf2 buffer to use to transform poses.
-        urdf_path: The path to the URDF file for the robot.
         static_transform_broadcaster: The static transform broadcaster to use to publish the end effector pose.
         speed_profile: The speed profile to use to get max velocities and accelerations.
-        use_ik_optimizer: Whether to use the PositionIKOptimizer to compute the IK solution.
         """
         # Store the parameters
         self.node = node
         self.tf_buffer = tf_buffer
-        self.urdf_path = urdf_path
         self.static_transform_broadcaster = static_transform_broadcaster
         self.speed_profile = speed_profile
-        self.use_ik_optimizer = use_ik_optimizer
         self.initialized = False
 
-    def initialize(self):
+    def initialize(self) -> bool:
         """
         Initialize the StretchIKControl object.
+
+        Returns
+        -------
+        bool: True if the controller was successfully initialized.
         """
         # Load the IK solver.
         # We restrict IK to the base rotation, arm lift, and arm joints,
@@ -117,22 +117,10 @@ class StretchIKControl:
             Joint.ARM_LIFT,
             Joint.ARM_L0,  # The URDF uses the most distal of the telescoping joints
         ]
-        self.base_ik_solver = PinocchioIKSolver(
-            self.urdf_path,
-            Frame.END_EFFECTOR_LINK.value,
-            [joint.value for joint in self.controllable_joints],
-        )
-        if self.use_ik_optimizer:
-            # In practice, I've found that this doesn't work at times when
-            # the base IK solver does. Perhaps it requires tuning.
-            self.ik_solver = PositionIKOptimizer(
-                ik_solver=self.base_ik_solver,
-                pos_error_tol=0.005,
-                ori_error_range=np.array([0.0, 0.0, 0.2]),
-            )
-        else:
-            self.ik_solver = self.base_ik_solver
-        self.all_joints_str = self.base_ik_solver.get_all_joint_names()
+        ok = self.__load_ik_solver()
+        if not ok:
+            return False
+        self.all_joints_str = self.ik_solver.get_all_joint_names()
         self.all_joints = [Joint(name) for name in self.all_joints_str]
         # Store the control gains
         # NOTE: The CMU implementation had controller gains of 0.2 on the
@@ -144,7 +132,7 @@ class StretchIKControl:
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
-        self.latest_joint_limits = None
+        self.latest_joint_limits: Optional[Dict[Joint, Tuple[float, float]]] = None
         self.joint_limits_sub = self.node.create_subscription(
             JointState,
             "/joint_limits",
@@ -153,7 +141,7 @@ class StretchIKControl:
             # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.latest_joint_state_lock = threading.Lock()
-        self.latest_joint_state = None
+        self.latest_joint_state: Optional[Dict[Joint, float]] = None
         self.joint_state_sub = self.node.create_subscription(
             JointState,
             "/joint_states",
@@ -190,6 +178,57 @@ class StretchIKControl:
         )
 
         self.initialized = True
+        return True
+
+    def __load_ik_solver(self) -> bool:
+        """ """
+        # Get the URDF path
+        urdf_path = get_package_share_directory("stretch_description")
+        urdf_path = os.path.join(urdf_path, "urdf", "stretch.urdf")
+
+        # Load the model
+        model = pinocchio.buildModelFromUrdf(urdf_path)
+
+        # Fix the telescoping arm joints
+        joints_to_fix = [
+            Joint.WHEEL_LEFT.value,
+            Joint.WHEEL_RIGHT.value,
+            Joint.HEAD_PAN.value,
+            Joint.HEAD_TILT.value,
+            Joint.GRIPPER_RIGHT.value,
+            Joint.GRIPPER_LEFT.value,
+            Joint.ARM_L1.value,
+            Joint.ARM_L2.value,
+            Joint.ARM_L3.value,
+        ]
+        jid_to_fix = [model.getJointId(joint_name) for joint_name in joints_to_fix]
+        q = pinocchio.neutral(model)
+        model_reduced = pinocchio.buildReducedModel(model, jid_to_fix, q)
+
+        # Add the base rotation joint
+        model_reduced.addJoint(
+            parent_id=0,  # universe
+            joint_model=pinocchio.JointModel(pinocchio.JointModelRZ()),
+            joint_placement=pinocchio.SE3.Identity(),
+            joint_name=Joint.BASE_ROTATION.value,
+            max_effort=np.array([10.0]),
+            max_velocity=np.array([1.0]),
+            min_config=np.array([-np.pi]),
+            max_config=np.array([np.pi]),
+        )
+        lift_jid = model_reduced.getJointId(Joint.ARM_LIFT.value)
+        model_reduced.parents[lift_jid] = model_reduced.getJointId(
+            Joint.BASE_ROTATION.value
+        )
+
+        # Create the IK solver
+        self.ik_solver = PinocchioIKSolver(
+            urdf_path=None,
+            ee_link_name=Frame.END_EFFECTOR_LINK.value,
+            controlled_joints=[joint.value for joint in self.controllable_joints],
+            model=model_reduced,
+        )
+
         return True
 
     def __load_joint_limits(self, speed_profile: SpeedProfile) -> bool:
@@ -614,10 +653,10 @@ class StretchIKControl:
 
             # Get the Jacobian matrix for the chain
             J = pinocchio.computeFrameJacobian(
-                self.base_ik_solver.model,
-                self.base_ik_solver.data,
+                self.ik_solver.model,
+                self.ik_solver.data,
                 q,
-                self.base_ik_solver.ee_frame_idx,
+                self.ik_solver.ee_frame_idx,
                 pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
             )
             self.node.get_logger().info(f" Jacobian: {J}")

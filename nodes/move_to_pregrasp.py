@@ -188,12 +188,9 @@ class MoveToPregraspNode(Node):
         self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
-        # TODO: Figure out where the specialized URDF should go!
-        urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
         self.controller = StretchIKControl(
             self,
             tf_buffer=self.tf_buffer,
-            urdf_path=urdf_abs_path,
             static_transform_broadcaster=self.static_transform_broadcaster,
         )
 
