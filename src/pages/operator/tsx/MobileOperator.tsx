@@ -11,6 +11,7 @@ import { className, MoveBaseState, RemoteStream } from "shared/util";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
+  stretchTool,
   movementRecorderFunctionProvider,
   underMapFunctionProvider,
   underVideoFunctionProvider,
@@ -115,6 +116,7 @@ export const MobileOperator = (props: {
     buttonStateMap: buttonStateMap.current,
     hideLabels: false,
     hasBetaTeleopKit: hasBetaTeleopKit,
+    stretchTool: stretchTool,
   };
 
   function updateScreens() {

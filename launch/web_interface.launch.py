@@ -422,7 +422,12 @@ def generate_launch_description():
         executable="configure_video_streams.py",
         output="screen",
         arguments=[LaunchConfiguration("params"), str(stretch_has_beta_teleop_kit)],
-        parameters=[{"has_beta_teleop_kit": stretch_has_beta_teleop_kit}],
+        parameters=[
+            {
+                "has_beta_teleop_kit": stretch_has_beta_teleop_kit,
+                "stretch_tool": stretch_tool,
+            }
+        ],
     )
     ld.add_action(configure_video_streams_node)
 

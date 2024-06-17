@@ -53,9 +53,11 @@ export class Robot extends React.Component {
   private amclPoseCallback: (pose: ROSLIB.Transform) => void;
   private isRunStoppedCallback: (isRunStopped: boolean) => void;
   private hasBetaTeleopKitCallback: (value: boolean) => void;
+  private stretchToolCallback: (value: string) => void;
   private lookAtGripperInterval?: number; // ReturnType<typeof setInterval>
   private subscriptions: ROSLIB.Topic[] = [];
   private hasBetaTeleopKitParam: ROSLIB.Param;
+  private stretchToolParam: ROSLIB.Param;
 
   constructor(props: {
     jointStateCallback: (
@@ -69,6 +71,7 @@ export class Robot extends React.Component {
     amclPoseCallback: (pose: ROSLIB.Transform) => void;
     isRunStoppedCallback: (isRunStopped: boolean) => void;
     hasBetaTeleopKitCallback: (value: boolean) => void;
+    stretchToolCallback: (value: string) => void;
   }) {
     super(props);
     this.jointStateCallback = props.jointStateCallback;
@@ -78,6 +81,7 @@ export class Robot extends React.Component {
     this.amclPoseCallback = props.amclPoseCallback;
     this.isRunStoppedCallback = props.isRunStoppedCallback;
     this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
+    this.stretchToolCallback = props.stretchToolCallback;
   }
 
   async connect(): Promise<void> {
@@ -210,6 +214,18 @@ export class Robot extends React.Component {
     this.hasBetaTeleopKitParam.get((value: boolean) => {
       console.log("has beta teleop kit: ", value);
       if (this.hasBetaTeleopKitCallback) this.hasBetaTeleopKitCallback(value);
+    });
+  }
+
+  getStretchTool() {
+    this.stretchToolParam = new ROSLIB.Param({
+      ros: this.ros,
+      name: "/configure_video_streams:stretch_tool",
+    });
+
+    this.stretchToolParam.get((value: string) => {
+      console.log("stretch tool: ", value);
+      if (this.stretchToolCallback) this.stretchToolCallback(value);
     });
   }
 

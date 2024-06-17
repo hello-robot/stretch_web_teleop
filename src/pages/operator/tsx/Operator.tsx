@@ -14,6 +14,7 @@ import {
   buttonFunctionProvider,
   underMapFunctionProvider,
   hasBetaTeleopKit,
+  stretchTool,
 } from ".";
 import {
   ButtonPadButton,
@@ -219,6 +220,7 @@ export const Operator = (props: {
     buttonStateMap: buttonStateMap.current,
     hideLabels: !layout.current.displayLabels,
     hasBetaTeleopKit: hasBetaTeleopKit,
+    stretchTool: stretchTool,
   };
 
   /** Properties for the global options area of the sidebar */

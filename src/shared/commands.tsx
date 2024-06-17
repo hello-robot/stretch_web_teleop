@@ -16,7 +16,8 @@ export type cmd =
   | StopMoveBaseCommand
   | PlaybackPosesCommand
   | GetBatteryVoltageCommand
-  | GetHasBetaTeleopKit;
+  | GetHasBetaTeleopKit
+  | GetStretchTool;
 
 export interface VelocityCommand {
   stop: () => void;
@@ -73,6 +74,10 @@ export interface GetOccupancyGrid {
 
 export interface GetHasBetaTeleopKit {
   type: "getHasBetaTeleopKit";
+}
+
+export interface GetStretchTool {
+  type: "getStretchTool";
 }
 
 export interface MoveBaseCommand {

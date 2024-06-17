@@ -33,7 +33,10 @@ class ConfigureVideoStreams(Node):
         with open(params_file, "r") as params:
             self.image_params = yaml.safe_load(params)
 
+        # These parameters are not used by this node. Rather, they are used by
+        # the web app to determine the robot's configuration.
         self.declare_parameter("has_beta_teleop_kit", rclpy.Parameter.Type.BOOL)
+        self.declare_parameter("stretch_tool", rclpy.Parameter.Type.STRING)
 
         self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
         self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
