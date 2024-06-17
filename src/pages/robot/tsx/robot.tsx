@@ -41,6 +41,8 @@ export class Robot extends React.Component {
   private robotFrameTfClient?: ROSLIB.TFClient;
   private mapFrameTfClient?: ROSLIB.TFClient;
   private linkGripperFingerLeftTF?: ROSLIB.Transform;
+  private linkTabletTF?: ROSLIB.Transform;
+  private linkWristYawTF?: ROSLIB.Transform;
   private linkHeadTiltTF?: ROSLIB.Transform;
   private jointStateCallback: (
     robotPose: RobotPose,
@@ -124,6 +126,8 @@ export class Robot extends React.Component {
     this.createRobotFrameTFClient();
     this.createMapFrameTFClient();
     this.subscribeToGripperFingerTF();
+    this.subscribeToTabletTF();
+    this.subscribeToWristYawTF();
     this.subscribeToHeadTiltTF();
     this.subscribeToMapTF();
 
@@ -218,6 +222,7 @@ export class Robot extends React.Component {
   }
 
   getStretchTool() {
+    // NOTE: This information can also come from the /tool topic.
     this.stretchToolParam = new ROSLIB.Param({
       ros: this.ros,
       name: "/configure_video_streams:stretch_tool",
@@ -384,6 +389,18 @@ export class Robot extends React.Component {
         this.linkGripperFingerLeftTF = transform;
       },
     );
+  }
+
+  subscribeToTabletTF() {
+    this.robotFrameTfClient?.subscribe("link_DW3_tablet_12in", (transform) => {
+      this.linkTabletTF = transform;
+    });
+  }
+
+  subscribeToWristYawTF() {
+    this.robotFrameTfClient?.subscribe("link_wrist_yaw", (transform) => {
+      this.linkWristYawTF = transform;
+    });
   }
 
   subscribeToHeadTiltTF() {
@@ -642,7 +659,12 @@ export class Robot extends React.Component {
       let panOffset = 0;
       let tiltOffset = 0;
       let lookIfReadyAndRepeat = () => {
-        if (this.linkGripperFingerLeftTF && this.linkHeadTiltTF) {
+        if (
+          (this.linkGripperFingerLeftTF ||
+            this.linkTabletTF ||
+            this.linkWristYawTF) &&
+          this.linkHeadTiltTF
+        ) {
           this.lookAtGripper(panOffset, tiltOffset);
         }
         this.lookAtGripperInterval = window.setTimeout(
@@ -659,19 +681,17 @@ export class Robot extends React.Component {
   }
 
   lookAtGripper(panOffset: number, tiltOffset: number) {
-    if (!this.linkGripperFingerLeftTF)
-      throw "linkGripperFingerLeftTF is undefined";
+    // If there is a gripper, follow its TF frame. Else, if there is a tablet, follow its TF frame.
+    // Else, follow the quick connect TF frame.
+    let transform: ROSLIB.Transform | undefined =
+      this.linkGripperFingerLeftTF || this.linkTabletTF || this.linkWristYawTF;
+    if (!transform)
+      throw "linkGripperFingerLeftTF, linkTabletTF, and linkWristYawTF are all undefined";
     if (!this.linkHeadTiltTF) throw "linkHeadTiltTF is undefined";
     let posDifference = {
-      x:
-        this.linkGripperFingerLeftTF.translation.x -
-        this.linkHeadTiltTF.translation.x,
-      y:
-        this.linkGripperFingerLeftTF.translation.y -
-        this.linkHeadTiltTF.translation.y,
-      z:
-        this.linkGripperFingerLeftTF.translation.z -
-        this.linkHeadTiltTF.translation.z,
+      x: transform.translation.x - this.linkHeadTiltTF.translation.x,
+      y: transform.translation.y - this.linkHeadTiltTF.translation.y,
+      z: transform.translation.z - this.linkHeadTiltTF.translation.z,
     };
 
     // Normalize posDifference
