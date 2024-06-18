@@ -21,7 +21,7 @@ import {
   ROSPose,
   waitUntil,
 } from "shared/util";
-import { GetHasBetaTeleopKit } from "./commands";
+import { GetHasBetaTeleopKit, GetStretchTool } from "./commands";
 
 export type robotMessageChannel = (message: cmd) => void;
 
@@ -175,6 +175,13 @@ export class RemoteRobot extends React.Component<{}, any> {
 
   getHasBetaTeleopKit(type: "getHasBetaTeleopKit") {
     let cmd: GetHasBetaTeleopKit = {
+      type: type,
+    };
+    this.robotChannel(cmd);
+  }
+
+  getStretchTool(type: "getStretchTool") {
+    let cmd: GetStretchTool = {
       type: type,
     };
     this.robotChannel(cmd);

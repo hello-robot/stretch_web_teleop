@@ -88,6 +88,7 @@ export type WebRTCMessage =
   | MoveBaseStateMessage
   | IsRunStoppedMessage
   | HasBetaTeleopKitMessage
+  | StretchToolMessage
   | cmd;
 
 interface StopTrajectoryMessage {
@@ -115,6 +116,11 @@ export interface IsRunStoppedMessage {
 export interface HasBetaTeleopKitMessage {
   type: "hasBetaTeleopKit";
   value: boolean;
+}
+
+export interface StretchToolMessage {
+  type: "stretchTool";
+  value: string;
 }
 
 export interface FollowJointTrajectoryActionResultMessage {

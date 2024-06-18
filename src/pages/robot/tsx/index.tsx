@@ -24,7 +24,10 @@ import {
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import ROSLIB from "roslib";
-import { HasBetaTeleopKitMessage } from "../../../shared/util";
+import {
+  HasBetaTeleopKitMessage,
+  StretchToolMessage,
+} from "../../../shared/util";
 
 export const robot = new Robot({
   jointStateCallback: forwardJointStates,
@@ -34,6 +37,7 @@ export const robot = new Robot({
   amclPoseCallback: forwardAMCLPose,
   isRunStoppedCallback: forwardIsRunStopped,
   hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
+  stretchToolCallback: forwardStretchTool,
 });
 
 export let connection: WebRTCConnection;
@@ -142,6 +146,15 @@ function forwardHasBetaTeleopKit(value: boolean) {
     type: "hasBetaTeleopKit",
     value: value,
   } as HasBetaTeleopKitMessage);
+}
+
+function forwardStretchTool(value: string) {
+  if (!connection) throw "WebRTC connection undefined!";
+
+  connection.sendData({
+    type: "stretchTool",
+    value: value,
+  } as StretchToolMessage);
 }
 
 function forwardJointStates(
@@ -260,6 +273,8 @@ function handleMessage(message: WebRTCMessage) {
       break;
     case "getHasBetaTeleopKit":
       robot.getHasBetaTeleopKit();
+    case "getStretchTool":
+      robot.getStretchTool();
   }
 }
 

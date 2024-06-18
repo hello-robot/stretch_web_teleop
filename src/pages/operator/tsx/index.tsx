@@ -39,6 +39,7 @@ let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
 export let hasBetaTeleopKit: boolean;
+export let stretchTool: string;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -153,6 +154,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
     case "hasBetaTeleopKit":
       hasBetaTeleopKit = message.value;
       break;
+    case "stretchTool":
+      stretchTool = message.value;
+      break;
     case "occupancyGrid":
       if (!occupancyGrid) {
         occupancyGrid = message.message;
@@ -207,6 +211,7 @@ function configureRemoteRobot() {
   });
   occupancyGrid = undefined;
   remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit");
+  remoteRobot.getStretchTool("getStretchTool");
   FunctionProvider.addRemoteRobot(remoteRobot);
   mapFunctionProvider = new MapFunctionProvider();
   remoteRobot.sensors.setFunctionProviderCallback(

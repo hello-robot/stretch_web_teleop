@@ -28,6 +28,7 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
+  stretchTool,
   underVideoFunctionProvider,
 } from "..";
 import {
@@ -720,7 +721,7 @@ const UnderAdjustableOverheadButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label="Follow Gripper"
+        label={getFollowGripperLabel()}
       />
       <CheckToggleButton
         checked={props.definition.predictiveDisplay || false}
@@ -772,7 +773,7 @@ const UnderRealsenseButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label="Follow Gripper"
+        label={getFollowGripperLabel()}
       />
       <CheckToggleButton
         checked={props.definition.depthSensing || false}
@@ -875,3 +876,19 @@ const CameraPerspectiveButton = (props: {
   ).onClick;
   return <button onClick={onClick}>{props.perspective}</button>;
 };
+
+function getFollowGripperLabel() {
+  if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
+    return "Follow Tablet";
+  } else if (
+    [
+      "eoa_wrist_dw3_tool_sg3",
+      "tool_stretch_dex_wrist",
+      "tool_stretch_gripper",
+    ].includes(stretchTool)
+  ) {
+    return "Follow Gripper";
+  } else {
+    return "Follow Wrist";
+  }
+}
