@@ -125,9 +125,6 @@ export class Robot extends React.Component {
     this.createRunStopService();
     this.createRobotFrameTFClient();
     this.createMapFrameTFClient();
-    this.subscribeToGripperFingerTF();
-    this.subscribeToTabletTF();
-    this.subscribeToWristYawTF();
     this.subscribeToHeadTiltTF();
     this.subscribeToMapTF();
 
@@ -230,6 +227,19 @@ export class Robot extends React.Component {
 
     this.stretchToolParam.get((value: string) => {
       console.log("stretch tool: ", value);
+      if (value === "eoa_wrist_dw3_tool_tablet_12in") {
+        this.subscribeToTabletTF();
+      } else if (
+        [
+          "eoa_wrist_dw3_tool_sg3",
+          "tool_stretch_dex_wrist",
+          "tool_stretch_gripper",
+        ].includes(value)
+      ) {
+        this.subscribeToGripperFingerTF();
+      } else {
+        this.subscribeToWristYawTF();
+      }
       if (this.stretchToolCallback) this.stretchToolCallback(value);
     });
   }
