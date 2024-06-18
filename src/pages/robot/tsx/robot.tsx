@@ -220,6 +220,7 @@ export class Robot extends React.Component {
 
   getStretchTool() {
     // NOTE: This information can also come from the /tool topic.
+    // However, we only need it once, so opt for a parameter.
     this.stretchToolParam = new ROSLIB.Param({
       ros: this.ros,
       name: "/configure_video_streams:stretch_tool",
