@@ -245,6 +245,14 @@ export const CENTER_WRIST: RobotPose = {
   joint_wrist_yaw: 0.0,
 };
 
+export const WRIST_ROLL_ZERO: RobotPose = {
+  joint_wrist_roll: 0.0,
+};
+
+export const WRIST_ROLL_NINETY: RobotPose = {
+  joint_wrist_roll: 1.57079632679,
+};
+
 export const REALSENSE_FORWARD_POSE: RobotPose = {
   joint_head_pan: 0.075,
   joint_head_tilt: 0.0,

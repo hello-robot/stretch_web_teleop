@@ -6,6 +6,8 @@ import {
   REALSENSE_FORWARD_POSE,
   REALSENSE_GRIPPER_POSE,
   STOW_WRIST,
+  WRIST_ROLL_ZERO,
+  WRIST_ROLL_NINETY,
 } from "../../../../shared/util";
 
 export enum UnderVideoButton {
@@ -19,6 +21,8 @@ export enum UnderVideoButton {
   ToggleArucoMarkers = "Toggle Aruco Markers",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
+  WristRollZeroDeg = "Roll Wrist 0&deg;",
+  WristRollNinetyDeg = "Roll Wrist 90&deg;",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -39,6 +43,8 @@ export const realsenseButtons: UnderVideoButton[] = [
 export const wristButtons: UnderVideoButton[] = [
   UnderVideoButton.CenterWrist,
   UnderVideoButton.StowWrist,
+  UnderVideoButton.WristRollZeroDeg,
+  UnderVideoButton.WristRollNinetyDeg,
 ];
 /** Type to specify the different realsense camera perspectives */
 export type RealsenseButtons = (typeof realsenseButtons)[number];
@@ -112,6 +118,16 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
       case UnderVideoButton.StowWrist:
         return {
           onClick: () => FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST),
+        };
+      case UnderVideoButton.WristRollZeroDeg:
+        return {
+          onClick: () =>
+            FunctionProvider.remoteRobot?.setRobotPose(WRIST_ROLL_ZERO),
+        };
+      case UnderVideoButton.WristRollNinetyDeg:
+        return {
+          onClick: () =>
+            FunctionProvider.remoteRobot?.setRobotPose(WRIST_ROLL_NINETY),
         };
       default:
         throw Error(
