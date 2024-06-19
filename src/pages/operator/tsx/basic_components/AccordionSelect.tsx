@@ -27,10 +27,9 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
           props.onChange(idx);
           toggleAccordion();
         }}
-        // We use dangerouslySetInnerHTML in case the option has an HTML
-        // character code e.g., &deg;
-        dangerouslySetInnerHTML={{ __html: option as string }}
-      ></div>
+      >
+        {option}
+      </div>
     );
   }
 
