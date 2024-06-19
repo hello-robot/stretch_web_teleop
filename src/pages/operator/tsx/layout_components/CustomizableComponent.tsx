@@ -5,7 +5,7 @@ import {
 } from "../utils/component_definitions";
 import { DropZoneState } from "./DropZone";
 import { Panel } from "./Panel";
-import { RemoteStream } from "shared/util";
+import { RemoteStream, StretchTool } from "shared/util";
 import { ButtonPad } from "./ButtonPad";
 import { CameraView } from "./CameraView";
 import { PredictiveDisplay } from "./PredictiveDisplay";
@@ -33,6 +33,8 @@ export type SharedState = {
   hideLabels?: boolean;
   /** Whether or not the beta teleop cameras are being used */
   hasBetaTeleopKit: boolean;
+  /** What tool is attached to the stretch gripper. */
+  stretchTool: StretchTool;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

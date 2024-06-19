@@ -6,6 +6,8 @@ import {
   navigationProps,
   realsenseProps,
   RemoteStream,
+  StretchTool,
+  TabletOrientation,
 } from "../../../../shared/util";
 import {
   CameraViewDefinition,
@@ -28,7 +30,6 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
-  hasDexGripper,
   underVideoFunctionProvider,
 } from "..";
 import {
@@ -342,6 +343,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             isMovingToPregrasp={isMovingToPregrasp}
             setIsMovingToPregrasp={setIsMovingToPregrasp}
             underVideoAreaRef={underVideoAreaRef}
+            stretchTool={props.sharedState.stretchTool}
           />
         </div>
       ) : (
@@ -701,6 +703,7 @@ const UnderVideoButtons = (props: {
   setIsMovingToPregrasp: (isMoving: boolean) => void;
   underVideoAreaRef: React.RefObject<HTMLDivElement>;
   betaTeleopKit: boolean;
+  stretchTool: StretchTool;
 }) => {
   let buttons: JSX.Element | null;
   switch (props.definition.id) {
@@ -710,6 +713,7 @@ const UnderVideoButtons = (props: {
           definition={props.definition}
           betaTeleopKit={props.betaTeleopKit}
           setExpandedGripperView={props.setExpandedGripperView}
+          stretchTool={props.stretchTool}
         />
       );
       break;
@@ -735,6 +739,7 @@ const UnderVideoButtons = (props: {
           isMovingToPregrasp={props.isMovingToPregrasp}
           setIsMovingToPregrasp={props.setIsMovingToPregrasp}
           underVideoAreaRef={props.underVideoAreaRef}
+          stretchTool={props.stretchTool}
         />
       );
       break;
@@ -801,7 +806,7 @@ const UnderAdjustableOverheadButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label="Follow Gripper"
+        label={getFollowGripperLabel()}
       />
       <CheckToggleButton
         checked={props.definition.predictiveDisplay || false}
@@ -834,6 +839,7 @@ const UnderRealsenseButtons = (props: {
   isMovingToPregrasp: boolean;
   setIsMovingToPregrasp: (isMoving: boolean) => void;
   underVideoAreaRef: React.RefObject<HTMLDivElement>;
+  stretchTool: StretchTool;
 }) => {
   const [rerender, setRerender] = React.useState<boolean>(false);
   const [selectedIdx, setSelectedIdx] = React.useState<number>();
@@ -843,7 +849,7 @@ const UnderRealsenseButtons = (props: {
 
   // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
   let moveToPregraspButtons = <></>;
-  if (hasDexGripper) {
+  if (props.stretchTool === StretchTool.DEX_GRIPPER) {
     moveToPregraspButtons = (
       <React.Fragment>
         <CheckToggleButton
@@ -937,7 +943,7 @@ const UnderRealsenseButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label="Follow Gripper"
+        label={getFollowGripperLabel(props.stretchTool)}
       />
       <CheckToggleButton
         checked={props.definition.depthSensing || false}
@@ -991,7 +997,11 @@ const UnderGripperButtons = (props: {
   definition: GripperVideoStreamDef;
   betaTeleopKit: boolean;
   setExpandedGripperView: (expanded: boolean) => void;
+  stretchTool: StretchTool;
 }) => {
+  let tabletOrientation = underVideoFunctionProvider.provideFunctions(
+    UnderVideoButton.GetTabletOrientation,
+  ).get!();
   const [rerender, setRerender] = React.useState<boolean>(false);
 
   return (
@@ -1022,6 +1032,23 @@ const UnderGripperButtons = (props: {
           label="Expanded Gripper View"
         />
       )}
+      {props.stretchTool === StretchTool.TABLET && (
+        <button
+          onClick={() => {
+            let isPortait = tabletOrientation === TabletOrientation.PORTRAIT;
+            underVideoFunctionProvider.provideFunctions(
+              UnderVideoButton.ToggleTabletOrientation,
+            ).onCheck!(isPortait);
+            setRerender(!rerender);
+          }}
+        >
+          Switch to{" "}
+          {tabletOrientation === TabletOrientation.PORTRAIT
+            ? "Landscape"
+            : "Portrait"}{" "}
+          View
+        </button>
+      )}
     </React.Fragment>
   );
 };
@@ -1041,3 +1068,15 @@ const CameraPerspectiveButton = (props: {
   ).onClick;
   return <button onClick={onClick}>{props.perspective}</button>;
 };
+
+function getFollowGripperLabel(stretchTool: StretchTool) {
+  switch (stretchTool) {
+    case StretchTool.TABLET:
+      return "Follow Tablet";
+    case StretchTool.GRIPPER:
+    case StretchTool.DEX_GRIPPER:
+      return "Follow Gripper";
+    default:
+      return "Follow Wrist";
+  }
+}

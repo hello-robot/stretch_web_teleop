@@ -15,6 +15,7 @@ import {
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
+  stretchTool,
   movementRecorderFunctionProvider,
   underMapFunctionProvider,
   underVideoFunctionProvider,
@@ -90,6 +91,14 @@ export const MobileOperator = (props: {
   }
   buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
+  // Just used as a flag to force the operator to rerender when the tablet orientation
+  // changes.
+  const [tabletOrientationRerender, setTabletOrientationRerender] =
+    React.useState<boolean>(false);
+  underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
+    setTabletOrientationRerender(!tabletOrientationRerender);
+  });
+
   function moveBaseStateCallback(state: MoveBaseState) {
     setMoveBaseState(state);
   }
@@ -119,6 +128,7 @@ export const MobileOperator = (props: {
     buttonStateMap: buttonStateMap.current,
     hideLabels: false,
     hasBetaTeleopKit: hasBetaTeleopKit,
+    stretchTool: stretchTool,
   };
 
   function updateScreens() {

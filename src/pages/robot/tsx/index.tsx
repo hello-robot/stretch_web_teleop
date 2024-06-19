@@ -26,7 +26,7 @@ import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import ROSLIB from "roslib";
 import {
   HasBetaTeleopKitMessage,
-  HasDexGripperMessage,
+  StretchToolMessage,
 } from "../../../shared/util";
 
 export const robot = new Robot({
@@ -40,7 +40,7 @@ export const robot = new Robot({
   amclPoseCallback: forwardAMCLPose,
   isRunStoppedCallback: forwardIsRunStopped,
   hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
-  hasDexGripperCallback: forwardHasDexGripper,
+  stretchToolCallback: forwardStretchTool,
 });
 
 export let connection: WebRTCConnection;
@@ -151,13 +151,13 @@ function forwardHasBetaTeleopKit(value: boolean) {
   } as HasBetaTeleopKitMessage);
 }
 
-function forwardHasDexGripper(value: boolean) {
+function forwardStretchTool(value: string) {
   if (!connection) throw "WebRTC connection undefined!";
 
   connection.sendData({
-    type: "hasDexGripper",
+    type: "stretchTool",
     value: value,
-  } as HasDexGripperMessage);
+  } as StretchToolMessage);
 }
 
 function forwardJointStates(
@@ -276,8 +276,6 @@ function handleMessage(message: WebRTCMessage) {
       break;
     case "getHasBetaTeleopKit":
       robot.getHasBetaTeleopKit();
-    case "getHasDexGripper":
-      robot.getHasDexGripper();
     case "moveToPregrasp":
       console.log(
         "moveToPregrasp",
@@ -294,6 +292,8 @@ function handleMessage(message: WebRTCMessage) {
     case "stopMoveToPregrasp":
       robot.stopMoveToPregraspClient();
       break;
+    case "getStretchTool":
+      robot.getStretchTool();
   }
 }
 

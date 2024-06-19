@@ -15,6 +15,7 @@ import {
   underMapFunctionProvider,
   underVideoFunctionProvider,
   hasBetaTeleopKit,
+  stretchTool,
 } from ".";
 import {
   ButtonPadButton,
@@ -78,6 +79,14 @@ export const Operator = (props: {
   }
   buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
+  // Just used as a flag to force the operator to rerender when the tablet orientation
+  // changes.
+  const [tabletOrientationRerender, setTabletOrientationRerender] =
+    React.useState<boolean>(false);
+  underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
+    setTabletOrientationRerender(!tabletOrientationRerender);
+  });
+
   // Callback for when the move base state is updated (e.g., the ROS2 action returns)
   // Used to render alerts to the operator.
   function moveBaseStateCallback(state: ActionState) {
@@ -99,7 +108,9 @@ export const Operator = (props: {
   function moveToPregraspStateCallback(state: ActionState) {
     setMoveToPregraspState(state);
   }
-  underVideoFunctionProvider.setOperatorCallback(moveToPregraspStateCallback);
+  underVideoFunctionProvider.setMoveToPregraspOperatorCallback(
+    moveToPregraspStateCallback,
+  );
   let moveToPregraspAlertTimeout: NodeJS.Timeout;
   React.useEffect(() => {
     if (moveToPregraspState && moveToPregraspState.alert_type != "info") {
@@ -116,6 +127,7 @@ export const Operator = (props: {
   function updateLayout() {
     console.log("update layout");
     setButtonStateMapRerender(!buttonStateMapRerender);
+    setTabletOrientationRerender(!tabletOrientationRerender);
   }
 
   /**
@@ -240,6 +252,7 @@ export const Operator = (props: {
     buttonStateMap: buttonStateMap.current,
     hideLabels: !layout.current.displayLabels,
     hasBetaTeleopKit: hasBetaTeleopKit,
+    stretchTool: stretchTool,
   };
 
   /** Properties for the global options area of the sidebar */

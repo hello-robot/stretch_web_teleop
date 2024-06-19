@@ -19,7 +19,7 @@ export type cmd =
   | PlaybackPosesCommand
   | GetBatteryVoltageCommand
   | GetHasBetaTeleopKit
-  | GetHasDexGripper;
+  | GetStretchTool;
 
 export interface VelocityCommand {
   stop: () => void;
@@ -78,8 +78,8 @@ export interface GetHasBetaTeleopKit {
   type: "getHasBetaTeleopKit";
 }
 
-export interface GetHasDexGripper {
-  type: "getHasDexGripper";
+export interface GetStretchTool {
+  type: "getStretchTool";
 }
 
 export interface MoveBaseCommand {

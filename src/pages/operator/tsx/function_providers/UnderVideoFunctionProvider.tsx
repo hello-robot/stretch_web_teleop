@@ -6,8 +6,14 @@ import {
   REALSENSE_BASE_POSE,
   REALSENSE_FORWARD_POSE,
   REALSENSE_GRIPPER_POSE,
-  STOW_WRIST,
+  RobotPose,
+  STOW_WRIST_GRIPPER,
+  STOW_WRIST_TABLET,
+  TabletOrientation,
+  TABLET_ORIENTATION_LANDSCAPE,
+  TABLET_ORIENTATION_PORTRAIT,
 } from "../../../../shared/util";
+import { stretchTool } from "..";
 
 export enum UnderVideoButton {
   DriveView = "Drive View",
@@ -24,6 +30,8 @@ export enum UnderVideoButton {
   StartMoveToPregraspVertical = "Gripper Vertical",
   CancelMoveToPregrasp = "Cancel Goal",
   MoveToPregraspGoalReached = "Goal Reached",
+  ToggleTabletOrientation = "Toggle Tablet Orientation",
+  GetTabletOrientation = "Get Tablet Orientation",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -57,22 +65,33 @@ export type RealsenseButtons = (typeof realsenseButtons)[number];
 export type UnderVideoButtonFunctions = {
   onClick?: (...args: any[]) => void;
   onCheck?: (toggle: boolean) => void;
-  getMarkers?: () => string[];
+  get?: () => any;
   send?: (name: string) => void;
   getFuture?: () => Promise<any>;
 };
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
+  private tabletOrientation: TabletOrientation;
+
   constructor() {
     super();
+    this.tabletOrientation = TabletOrientation.LANDSCAPE;
     this.provideFunctions = this.provideFunctions.bind(this);
+    this.jointStateCallback = this.jointStateCallback.bind(this);
   }
 
+  /**
+   * Callback function for when the tablet orientation changes
+   */
+  private tabletOrientationOperatorCallback?: (
+    tabletOrientation: TabletOrientation,
+  ) => void = undefined;
   /**
    * Callback function to update the move base state in the operator
    * interface (e.g., show alerts).
    */
-  private operatorCallback?: (state: ActionState) => void = undefined;
+  private moveToPregraspOperatorCallback?: (state: ActionState) => void =
+    undefined;
   /**
    * Store the timestam at which the last moveToPregrasp state was received
    */
@@ -84,7 +103,8 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
    */
   public setMoveToPregraspState(state: ActionState) {
     this.lastMoveToPregraspStateTimestamp = Date.now();
-    if (this.operatorCallback) this.operatorCallback(state);
+    if (this.moveToPregraspOperatorCallback)
+      this.moveToPregraspOperatorCallback(state);
   }
 
   public provideFunctions(button: UnderVideoButton): UnderVideoButtonFunctions {
@@ -181,8 +201,31 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             FunctionProvider.remoteRobot?.setRobotPose(CENTER_WRIST),
         };
       case UnderVideoButton.StowWrist:
+        if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
+          return {
+            onClick: () =>
+              FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST_TABLET),
+          };
+        } else {
+          return {
+            onClick: () =>
+              FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST_GRIPPER),
+          };
+        }
+      case UnderVideoButton.ToggleTabletOrientation:
         return {
-          onClick: () => FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST),
+          onCheck: (isPortrait: boolean) =>
+            FunctionProvider.remoteRobot?.setRobotPose(
+              isPortrait
+                ? TABLET_ORIENTATION_LANDSCAPE
+                : TABLET_ORIENTATION_PORTRAIT,
+            ),
+        };
+      case UnderVideoButton.GetTabletOrientation:
+        return {
+          get: () => {
+            return this.tabletOrientation;
+          },
         };
       default:
         throw Error(
@@ -192,12 +235,54 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
   }
 
   /**
+   * Callback for when a new joint state is received.
+   */
+  public jointStateCallback(robotPose: RobotPose) {
+    let prevTabletOrientation = this.tabletOrientation;
+    // Update the tablet orientation
+    let wristRoll = 0.0;
+    if (robotPose.joint_wrist_roll) {
+      wristRoll = robotPose.joint_wrist_roll;
+    }
+    let diff = Math.abs(wristRoll % Math.PI);
+    let isLandscape = false;
+    if (diff <= Math.PI / 4.0 || diff >= (3.0 * Math.PI) / 4.0) {
+      isLandscape = true;
+    }
+    if (isLandscape) {
+      this.tabletOrientation = TabletOrientation.LANDSCAPE;
+    } else {
+      this.tabletOrientation = TabletOrientation.PORTRAIT;
+    }
+    if (
+      this.tabletOrientationOperatorCallback &&
+      prevTabletOrientation !== this.tabletOrientation
+    ) {
+      this.tabletOrientationOperatorCallback(this.tabletOrientation);
+    }
+  }
+
+  /**
    * Sets the local pointer to the operator's callback function, to be called
    * whenever the move to pregrasp state changes.
    *
    * @param callback operator's callback function to update aruco navigation state
    */
-  public setOperatorCallback(callback: (state: ActionState) => void) {
-    this.operatorCallback = callback;
+  public setMoveToPregraspOperatorCallback(
+    callback: (state: ActionState) => void,
+  ) {
+    this.moveToPregraspOperatorCallback = callback;
+  }
+
+  /**
+   * Sets the local pointer to the operator's callback function, to be called
+   * whenever the tablet orientation changes.
+   *
+   * @param callback operator's callback function to update aruco navigation state
+   */
+  public setTabletOrientationOperatorCallback(
+    callback: (tabletOrientation: TabletOrientation) => void,
+  ) {
+    this.tabletOrientationOperatorCallback = callback;
   }
 }

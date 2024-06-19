@@ -6,7 +6,9 @@ import {
   RemoteStream,
   RobotPose,
   ROSOccupancyGrid,
+  StretchTool,
   delay,
+  getStretchTool,
   waitUntil,
 } from "shared/util";
 import { RemoteRobot } from "shared/remoterobot";
@@ -39,7 +41,7 @@ let remoteRobot: RemoteRobot;
 let connection: WebRTCConnection;
 let root: Root;
 export let hasBetaTeleopKit: boolean;
-export let hasDexGripper: boolean;
+export let stretchTool: StretchTool;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
 
@@ -154,8 +156,8 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
     case "hasBetaTeleopKit":
       hasBetaTeleopKit = message.value;
       break;
-    case "hasDexGripper":
-      hasDexGripper = message.value;
+    case "stretchTool":
+      stretchTool = getStretchTool(message.value);
       break;
     case "occupancyGrid":
       if (!occupancyGrid) {
@@ -216,11 +218,14 @@ function configureRemoteRobot() {
   });
   occupancyGrid = undefined;
   remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit");
-  remoteRobot.getHasDexGripper("getHasDexGripper");
+  remoteRobot.getStretchTool("getStretchTool");
   FunctionProvider.addRemoteRobot(remoteRobot);
   mapFunctionProvider = new MapFunctionProvider();
   remoteRobot.sensors.setFunctionProviderCallback(
     buttonFunctionProvider.updateJointStates,
+  );
+  remoteRobot.sensors.setJointStateFunctionProviderCallback(
+    underVideoFunctionProvider.jointStateCallback,
   );
   remoteRobot.sensors.setBatteryFunctionProviderCallback(
     batteryVoltageFunctionProvider.updateVoltage,

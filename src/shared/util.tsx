@@ -52,6 +52,32 @@ export interface ROSJointState extends Message {
   velocity: [number];
 }
 
+export enum StretchTool {
+  DEX_GRIPPER = "dex gripper",
+  GRIPPER = "gripper",
+  TABLET = "tablet",
+  UNKNOWN = "unknown",
+}
+
+export function getStretchTool(stretchTool: string) {
+  if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
+    return StretchTool.TABLET;
+  } else if (
+    ["eoa_wrist_dw3_tool_sg3", "tool_stretch_dex_wrist"].includes(stretchTool)
+  ) {
+    return StretchTool.DEX_GRIPPER;
+  } else if (stretchTool === "tool_stretch_gripper") {
+    return StretchTool.GRIPPER;
+  } else {
+    return StretchTool.UNKNOWN;
+  }
+}
+
+export enum TabletOrientation {
+  PORTRAIT = "portrait",
+  LANDSCAPE = "landscape",
+}
+
 export interface ROSBatteryState extends Message {
   voltage: number;
 }
@@ -86,7 +112,7 @@ export type WebRTCMessage =
   | BatteryVoltageMessage
   | IsRunStoppedMessage
   | HasBetaTeleopKitMessage
-  | HasDexGripperMessage
+  | StretchToolMessage
   | cmd;
 
 interface StopTrajectoryMessage {
@@ -116,9 +142,9 @@ export interface HasBetaTeleopKitMessage {
   value: boolean;
 }
 
-export interface HasDexGripperMessage {
-  type: "hasDexGripper";
-  value: boolean;
+export interface StretchToolMessage {
+  type: "stretchTool";
+  value: string;
 }
 
 export interface FollowJointTrajectoryActionResultMessage {
@@ -220,16 +246,30 @@ export interface ROSOccupancyGrid {
   data: number[];
 }
 
-export const STOW_WRIST: RobotPose = {
+export const STOW_WRIST_GRIPPER: RobotPose = {
   joint_wrist_roll: 0.0,
   joint_wrist_pitch: -0.497,
   joint_wrist_yaw: 3.19579,
+};
+
+export const STOW_WRIST_TABLET: RobotPose = {
+  joint_wrist_roll: Math.PI / 2.0,
+  joint_wrist_pitch: 0.0,
+  joint_wrist_yaw: Math.PI / 2.0,
 };
 
 export const CENTER_WRIST: RobotPose = {
   joint_wrist_roll: 0.0,
   joint_wrist_pitch: 0.0,
   joint_wrist_yaw: 0.0,
+};
+
+export const TABLET_ORIENTATION_LANDSCAPE: RobotPose = {
+  joint_wrist_roll: 0.0,
+};
+
+export const TABLET_ORIENTATION_PORTRAIT: RobotPose = {
+  joint_wrist_roll: Math.PI / 2.0,
 };
 
 export const REALSENSE_FORWARD_POSE: RobotPose = {

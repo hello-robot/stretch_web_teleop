@@ -21,8 +21,7 @@ import {
   ROSPose,
   waitUntil,
 } from "shared/util";
-import { GetHasBetaTeleopKit, GetHasDexGripper } from "./commands";
-
+import { GetHasBetaTeleopKit, GetStretchTool } from "./commands";
 export type robotMessageChannel = (message: cmd) => void;
 
 export class RemoteRobot extends React.Component<{}, any> {
@@ -190,8 +189,8 @@ export class RemoteRobot extends React.Component<{}, any> {
     this.robotChannel(cmd);
   }
 
-  getHasDexGripper(type: "getHasDexGripper") {
-    let cmd: GetHasDexGripper = {
+  getStretchTool(type: "getStretchTool") {
+    let cmd: GetStretchTool = {
       type: type,
     };
     this.robotChannel(cmd);
@@ -230,6 +229,7 @@ class RobotSensors extends React.Component {
   ) => void;
   private batteryFunctionProviderCallback?: (voltage: number) => void;
   private runStopFunctionProviderCallback?: (enabled: boolean) => void;
+  private jointStateFunctionProviderCallback?: (robotPose: RobotPose) => void;
 
   constructor(props: {}) {
     super(props);
@@ -242,6 +242,8 @@ class RobotSensors extends React.Component {
       this.setBatteryFunctionProviderCallback.bind(this);
     this.setRunStopFunctionProviderCallback =
       this.setRunStopFunctionProviderCallback.bind(this);
+    this.setJointStateFunctionProviderCallback =
+      this.setJointStateFunctionProviderCallback.bind(this);
   }
 
   /**
@@ -295,9 +297,14 @@ class RobotSensors extends React.Component {
       }
     });
 
-    // Only callback when value has changed
+    // Call the callback when joint limits or in collition joints have changed.
     if (change && this.functionProviderCallback) {
       this.functionProviderCallback(jointValues, effortValues);
+    }
+
+    // Call the callback when a new joint state is received.
+    if (this.jointStateFunctionProviderCallback) {
+      this.jointStateFunctionProviderCallback(this.robotPose);
     }
   }
 
@@ -314,6 +321,18 @@ class RobotSensors extends React.Component {
     ) => void,
   ) {
     this.functionProviderCallback = callback;
+  }
+
+  /**
+   * Records a callback from the function provider. The callback is called
+   * whenever a new joint state is received.
+   *
+   * @param callback callback to function provider
+   */
+  setJointStateFunctionProviderCallback(
+    callback: (robotPose: RobotPose) => void,
+  ) {
+    this.jointStateFunctionProviderCallback = callback;
   }
 
   setBatteryVoltage(voltage: number) {

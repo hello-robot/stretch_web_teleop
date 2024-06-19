@@ -54,7 +54,7 @@ class ConfigureVideoStreams(Node):
         # These are parameters the web app uses to determine which features to
         # enabled. They are not used in this node itself.
         self.declare_parameter("has_beta_teleop_kit", rclpy.Parameter.Type.BOOL)
-        self.declare_parameter("has_dex_gripper", rclpy.Parameter.Type.BOOL)
+        self.declare_parameter("stretch_tool", rclpy.Parameter.Type.STRING)
 
         self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
         self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
