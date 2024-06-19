@@ -216,6 +216,7 @@ class RobotSensors extends React.Component {
   ) => void;
   private batteryFunctionProviderCallback?: (voltage: number) => void;
   private runStopFunctionProviderCallback?: (enabled: boolean) => void;
+  private jointStateFunctionProviderCallback?: (robotPose: RobotPose) => void;
 
   constructor(props: {}) {
     super(props);
@@ -228,6 +229,8 @@ class RobotSensors extends React.Component {
       this.setBatteryFunctionProviderCallback.bind(this);
     this.setRunStopFunctionProviderCallback =
       this.setRunStopFunctionProviderCallback.bind(this);
+    this.setJointStateFunctionProviderCallback =
+      this.setJointStateFunctionProviderCallback.bind(this);
   }
 
   /**
@@ -281,9 +284,14 @@ class RobotSensors extends React.Component {
       }
     });
 
-    // Only callback when value has changed
+    // Call the callback when joint limits or in collition joints have changed.
     if (change && this.functionProviderCallback) {
       this.functionProviderCallback(jointValues, effortValues);
+    }
+
+    // Call the callback when a new joint state is received.
+    if (this.jointStateFunctionProviderCallback) {
+      this.jointStateFunctionProviderCallback(this.robotPose);
     }
   }
 
@@ -300,6 +308,18 @@ class RobotSensors extends React.Component {
     ) => void,
   ) {
     this.functionProviderCallback = callback;
+  }
+
+  /**
+   * Records a callback from the function provider. The callback is called
+   * whenever a new joint state is received.
+   *
+   * @param callback callback to function provider
+   */
+  setJointStateFunctionProviderCallback(
+    callback: (robotPose: RobotPose) => void,
+  ) {
+    this.jointStateFunctionProviderCallback = callback;
   }
 
   setBatteryVoltage(voltage: number) {

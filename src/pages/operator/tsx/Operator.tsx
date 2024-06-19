@@ -15,6 +15,7 @@ import {
   underMapFunctionProvider,
   hasBetaTeleopKit,
   stretchTool,
+  underVideoFunctionProvider,
 } from ".";
 import {
   ButtonPadButton,
@@ -76,6 +77,14 @@ export const Operator = (props: {
   }
   buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
+  // Just used as a flag to force the operator to rerender when the tablet orientation
+  // changes.
+  const [tabletOrientationRerender, setTabletOrientationRerender] =
+    React.useState<boolean>(false);
+  underVideoFunctionProvider.setOperatorCallback((_) => {
+    setTabletOrientationRerender(!tabletOrientationRerender);
+  });
+
   function moveBaseStateCallback(state: MoveBaseState) {
     setMoveBaseState(state);
   }
@@ -96,6 +105,7 @@ export const Operator = (props: {
   function updateLayout() {
     console.log("update layout");
     setButtonStateMapRerender(!buttonStateMapRerender);
+    setTabletOrientationRerender(!tabletOrientationRerender);
   }
 
   /**

@@ -109,6 +109,9 @@ export class ButtonFunctionProvider extends FunctionProvider {
     inJointLimit: ValidJointStateDict,
     inCollision: ValidJointStateDict,
   ) {
+    // For all the joints that are in collision, set their corresponding buttons
+    // either to collision (for the button corresponding to the direction the
+    // collision is in) or inactive (for the button corresponding to the other direction).
     Object.keys(inCollision).forEach((k: string) => {
       const key = k as ValidJoints;
       const [inCollisionNeg, inCollisionPos] = inCollision[key]!;
@@ -136,6 +139,9 @@ export class ButtonFunctionProvider extends FunctionProvider {
         );
     });
 
+    // For all the joints that are at their limit, set their corresponding buttons
+    // either to limit (for the button corresponding to the direction the joint
+    // limit is in) or inactive (for the button corresponding to the other direction).
     Object.keys(inJointLimit).forEach((k: string) => {
       const key = k as ValidJoints;
       const [inLimitNeg, inLimitPos] = inJointLimit[key]!;
