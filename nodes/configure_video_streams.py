@@ -2,7 +2,7 @@
 
 import math
 import sys
-from typing import Union
+from typing import Optional, Union
 
 import cv2
 import message_filters
@@ -114,14 +114,30 @@ class ConfigureVideoStreams(Node):
             QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE),
         )
         if has_beta_teleop_kit:
-            gripper_camera_type = Image
-            gripper_camera_topic = "/gripper_camera/image_raw"
+            self.gripper_camera_rgb_subscriber = self.create_subscription(
+                Image, "/gripper_camera/image_raw", self.gripper_camera_cb, 1
+            )
         else:
-            gripper_camera_type = CompressedImage
-            gripper_camera_topic = "/gripper_camera/image_raw/compressed"
-        self.gripper_camera_rgb_subscriber = self.create_subscription(
-            gripper_camera_type, gripper_camera_topic, self.gripper_camera_cb, 1
-        )
+            self.gripper_camera_rgb_subscriber = message_filters.Subscriber(
+                self, CompressedImage, "/gripper_camera/image_raw/compressed"
+            )
+            self.gripper_depth_subscriber = message_filters.Subscriber(
+                self,
+                CompressedImage,
+                "/gripper_camera/aligned_depth_to_color/image_raw/compressedDepth",
+            )
+            self.gripper_camera_synchronizer = (
+                message_filters.ApproximateTimeSynchronizer(
+                    [
+                        self.gripper_camera_rgb_subscriber,
+                        self.gripper_depth_subscriber,
+                    ],
+                    queue_size=1,
+                    slop=0.5,  # seconds
+                    allow_headerless=True,
+                )
+            )
+            self.gripper_camera_synchronizer.registerCallback(self.gripper_realsense_cb)
         self.joint_state_subscription = self.create_subscription(
             JointState, "/stretch/joint_states", self.joint_state_cb, 1
         )
@@ -426,6 +442,20 @@ class ConfigureVideoStreams(Node):
         )
 
     def gripper_camera_cb(self, ros_image):
+        self.process_gripper_image(ros_image)
+
+    def gripper_realsense_cb(
+        self,
+        ros_image: Union[CompressedImage, Image],
+        depth_msg: CompressedImage,
+    ):
+        self.process_gripper_image(ros_image, depth_msg)
+
+    def process_gripper_image(
+        self,
+        ros_image: Union[CompressedImage, Image],
+        depth_msg: Optional[CompressedImage] = None,
+    ):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # Compute and publish the standard gripper image
