@@ -6,6 +6,8 @@ import {
   navigationProps,
   realsenseProps,
   RemoteStream,
+  StretchTool,
+  TabletOrientation,
 } from "../../../../shared/util";
 import {
   CameraViewDefinition,
@@ -28,7 +30,6 @@ import { PredictiveDisplay } from "./PredictiveDisplay";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
-  stretchTool,
   underVideoFunctionProvider,
 } from "..";
 import {
@@ -276,6 +277,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             setPredictiveDisplay={setPredictiveDisplay}
             setExpandedGripperView={setExpandedGripperView}
             betaTeleopKit={props.sharedState.hasBetaTeleopKit}
+            stretchTool={props.sharedState.stretchTool}
           />
         </div>
       ) : (
@@ -630,6 +632,7 @@ const UnderVideoButtons = (props: {
   setPredictiveDisplay: (enabled: boolean) => void;
   setExpandedGripperView: (expanded: boolean) => void;
   betaTeleopKit: boolean;
+  stretchTool: StretchTool;
 }) => {
   let buttons: JSX.Element | null;
   switch (props.definition.id) {
@@ -639,6 +642,7 @@ const UnderVideoButtons = (props: {
           definition={props.definition}
           betaTeleopKit={props.betaTeleopKit}
           setExpandedGripperView={props.setExpandedGripperView}
+          stretchTool={props.stretchTool}
         />
       );
       break;
@@ -656,7 +660,12 @@ const UnderVideoButtons = (props: {
       );
       break;
     case CameraViewId.realsense:
-      buttons = <UnderRealsenseButtons definition={props.definition} />;
+      buttons = (
+        <UnderRealsenseButtons
+          definition={props.definition}
+          stretchTool={props.stretchTool}
+        />
+      );
       break;
     default:
       throw Error(`unknow video stream id: ${props.definition.id}`);
@@ -749,6 +758,7 @@ const UnderAdjustableOverheadButtons = (props: {
  */
 const UnderRealsenseButtons = (props: {
   definition: RealsenseVideoStreamDef;
+  stretchTool: StretchTool;
 }) => {
   const [rerender, setRerender] = React.useState<boolean>(false);
   const [selectedIdx, setSelectedIdx] = React.useState<number>();
@@ -773,7 +783,7 @@ const UnderRealsenseButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label={getFollowGripperLabel()}
+        label={getFollowGripperLabel(props.stretchTool)}
       />
       <CheckToggleButton
         checked={props.definition.depthSensing || false}
@@ -826,7 +836,11 @@ const UnderGripperButtons = (props: {
   definition: GripperVideoStreamDef;
   betaTeleopKit: boolean;
   setExpandedGripperView: (expanded: boolean) => void;
+  stretchTool: StretchTool;
 }) => {
+  let tabletOrientation = underVideoFunctionProvider.provideFunctions(
+    UnderVideoButton.GetTabletOrientation,
+  ).get!();
   const [rerender, setRerender] = React.useState<boolean>(false);
 
   return (
@@ -857,6 +871,23 @@ const UnderGripperButtons = (props: {
           label="Expanded Gripper View"
         />
       )}
+      {props.stretchTool === StretchTool.TABLET && (
+        <button
+          onClick={() => {
+            let isPortait = tabletOrientation === TabletOrientation.PORTRAIT;
+            underVideoFunctionProvider.provideFunctions(
+              UnderVideoButton.ToggleTabletOrientation,
+            ).onCheck!(isPortait);
+            setRerender(!rerender);
+          }}
+        >
+          Switch to{" "}
+          {tabletOrientation === TabletOrientation.PORTRAIT
+            ? "Landscape"
+            : "Portrait"}{" "}
+          View
+        </button>
+      )}
     </React.Fragment>
   );
 };
@@ -877,18 +908,13 @@ const CameraPerspectiveButton = (props: {
   return <button onClick={onClick}>{props.perspective}</button>;
 };
 
-function getFollowGripperLabel() {
-  if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
-    return "Follow Tablet";
-  } else if (
-    [
-      "eoa_wrist_dw3_tool_sg3",
-      "tool_stretch_dex_wrist",
-      "tool_stretch_gripper",
-    ].includes(stretchTool)
-  ) {
-    return "Follow Gripper";
-  } else {
-    return "Follow Wrist";
+function getFollowGripperLabel(stretchTool: StretchTool) {
+  switch (stretchTool) {
+    case StretchTool.TABLET:
+      return "Follow Tablet";
+    case StretchTool.GRIPPER:
+      return "Follow Gripper";
+    default:
+      return "Follow Wrist";
   }
 }
