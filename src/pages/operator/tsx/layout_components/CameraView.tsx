@@ -1055,17 +1055,20 @@ const UnderGripperButtons = (props: {
             }}
             label="Expanded Gripper View"
           />
-          <CheckToggleButton
-            checked={props.definition.depthSensing || false}
-            onClick={() => {
-              props.definition.depthSensing = !props.definition.depthSensing;
-              setRerender(!rerender);
-              underVideoFunctionProvider.provideFunctions(
-                UnderVideoButton.GripperDepthSensing,
-              ).onCheck!(props.definition.depthSensing);
-            }}
-            label="Depth Sensing"
-          />
+          {(props.stretchTool === StretchTool.GRIPPER ||
+            props.stretchTool === StretchTool.DEX_GRIPPER) && (
+            <CheckToggleButton
+              checked={props.definition.depthSensing || false}
+              onClick={() => {
+                props.definition.depthSensing = !props.definition.depthSensing;
+                setRerender(!rerender);
+                underVideoFunctionProvider.provideFunctions(
+                  UnderVideoButton.GripperDepthSensing,
+                ).onCheck!(props.definition.depthSensing);
+              }}
+              label="Depth Sensing"
+            />
+          )}
         </React.Fragment>
       )}
       {props.stretchTool === StretchTool.TABLET && (
