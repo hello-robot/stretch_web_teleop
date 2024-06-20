@@ -561,8 +561,9 @@ class ConfigureVideoStreams(Node):
         # Detect the gripper markers
         corners, ids, _ = self.aruco_detector.detectMarkers(image)
         if ids is None:
-            self.get_logger().warn(
-                "Did not detect any aruco markers. Skipping point cloud processing."
+            self.get_logger().debug(
+                "Did not detect any aruco markers on the gripper. Skipping point cloud processing.",
+                throttle_duration_sec=1.0,
             )
             return image
         aruco_center_pos = {}
@@ -579,8 +580,9 @@ class ConfigureVideoStreams(Node):
             "finger_left" not in aruco_center_pos
             or "finger_right" not in aruco_center_pos
         ):
-            self.get_logger().warn(
-                "Did not detect both aruco markers. Skipping point cloud processing."
+            self.get_logger().debug(
+                "Did not detect both aruco markers on the gripper. Skipping point cloud processing.",
+                throttle_duration_sec=1.0,
             )
             return image
 
