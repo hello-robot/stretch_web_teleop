@@ -326,7 +326,6 @@ export const CameraView = (props: CustomizableComponentProps) => {
       ) : undefined}
     </div>
   );
-
   return (
     <div className="video-container" draggable={false}>
       {videoComponent}
@@ -633,6 +632,7 @@ function getStream(
 function executeVideoSettings(definition: CameraViewDefinition) {
   switch (definition.id) {
     case CameraViewId.gripper:
+      executeGripperSettings(definition as GripperVideoStreamDef);
       break;
     case CameraViewId.overhead:
       // executeFixedOverheadSettings(definition as FixedOverheadVideoStreamDef);
@@ -680,8 +680,20 @@ function executeAdjustableOverheadettings(
 function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
   underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper)
     .onCheck!(definition.followGripper || false);
-  underVideoFunctionProvider.provideFunctions(UnderVideoButton.DepthSensing)
-    .onCheck!(definition.depthSensing || false);
+  underVideoFunctionProvider.provideFunctions(
+    UnderVideoButton.RealsenseDepthSensing,
+  ).onCheck!(definition.depthSensing || false);
+}
+
+/**
+ * Executes functions to prepare for rendering the Gripper video stream.
+ *
+ * @param definition {@link GripperVideoStreamDef}
+ */
+function executeGripperSettings(definition: GripperVideoStreamDef) {
+  underVideoFunctionProvider.provideFunctions(
+    UnderVideoButton.GripperDepthSensing,
+  ).onCheck!(definition.depthSensing || false);
 }
 
 /*******************************************************************************
@@ -962,7 +974,7 @@ const UnderRealsenseButtons = (props: {
           props.definition.depthSensing = !props.definition.depthSensing;
           setRerender(!rerender);
           underVideoFunctionProvider.provideFunctions(
-            UnderVideoButton.DepthSensing,
+            UnderVideoButton.RealsenseDepthSensing,
           ).onCheck!(props.definition.depthSensing);
         }}
         label="Depth Sensing"
@@ -1028,20 +1040,33 @@ const UnderGripperButtons = (props: {
       {props.betaTeleopKit ? (
         <></>
       ) : (
-        <CheckToggleButton
-          checked={props.definition.expandedGripperView || false}
-          onClick={() => {
-            if (!props.definition.expandedGripperView) {
-              props.setExpandedGripperView(true);
-              props.definition.expandedGripperView = true;
-            } else {
-              props.setExpandedGripperView(false);
-              props.definition.expandedGripperView = false;
-            }
-            setRerender(!rerender);
-          }}
-          label="Expanded Gripper View"
-        />
+        <React.Fragment>
+          <CheckToggleButton
+            checked={props.definition.expandedGripperView || false}
+            onClick={() => {
+              if (!props.definition.expandedGripperView) {
+                props.setExpandedGripperView(true);
+                props.definition.expandedGripperView = true;
+              } else {
+                props.setExpandedGripperView(false);
+                props.definition.expandedGripperView = false;
+              }
+              setRerender(!rerender);
+            }}
+            label="Expanded Gripper View"
+          />
+          <CheckToggleButton
+            checked={props.definition.depthSensing || false}
+            onClick={() => {
+              props.definition.depthSensing = !props.definition.depthSensing;
+              setRerender(!rerender);
+              underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.GripperDepthSensing,
+              ).onCheck!(props.definition.depthSensing);
+            }}
+            label="Depth Sensing"
+          />
+        </React.Fragment>
       )}
       {props.stretchTool === StretchTool.TABLET && (
         <button
