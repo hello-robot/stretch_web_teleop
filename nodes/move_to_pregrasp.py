@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from __future__ import annotations  # Required for type hinting a class within itself
-
 # Standard Imports
 import os
 import sys
 import threading
 import traceback
-from enum import Enum
 from typing import Dict, Generator, List, Optional, Tuple
 
 # Third-Party Imports
@@ -37,110 +34,21 @@ from stretch_web_teleop.action import MoveToPregrasp
 from stretch_web_teleop_helpers.constants import (
     Frame,
     Joint,
-    get_gripper_configuration,
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
 )
 from stretch_web_teleop_helpers.conversions import (
     depth_img_to_pointcloud,
+    remaining_time,
     ros_msg_to_cv2_image,
 )
+from stretch_web_teleop_helpers.move_to_pregrasp_state import MoveToPregraspState
 from stretch_web_teleop_helpers.stretch_ik_control import (
     MotionGeneratorRetval,
     StretchIKControl,
-    TerminationCriteria,
-    remaining_time,
 )
 
 # TODO: Replace many of the info logs with debugs.
-
-
-class MoveToPregraspState(Enum):
-    """
-    The below states can be strung together to form a state machine that moves the robot
-    to a pregrasp position. The general principle we follow is that the robot should only
-    rotate its base and move the lift when its arm is within the base footprint of the robot
-    (i.e., the arm length is fully in and the wrist is stowed).
-    """
-
-    STOW_ARM_LENGTH_PARTIAL = (
-        -1
-    )  # Stow the arm until the gripper would collide with the base if the gripper were vertically down.
-    STOW_ARM_LENGTH_FULL = 0  # Stow the arm fully.
-    STOW_WRIST = 1
-    STOW_ARM_LIFT = 2
-    ROTATE_BASE = 3
-    HEAD_PAN = 4
-    LIFT_ARM = 5
-    MOVE_WRIST = 6
-    LENGTHEN_ARM = 7
-    TERMINAL = 8
-
-    @staticmethod
-    def get_state_machine(
-        horizontal_grasp: bool,
-        init_lift_near_base: bool,
-        goal_lift_near_base: bool,
-        init_length_near_mast: bool,
-    ) -> List[List[MoveToPregraspState]]:
-        """
-        Get the default state machine.
-
-        Parameters
-        ----------
-        horizontal_grasp: Whether the robot will be grasping the object horizontally
-            (True) or vertically (False).
-        init_lift_near_base: Whether the robot's arm is near the base at the start.
-        goal_lift_near_base: Whether the robot's arm should be near the base at the end.
-        init_length_near_mast: Whether the robot's arm length is near the mast at the start.
-
-        Returns
-        -------
-        List[List[MoveToPregraspState]]: The default state machine. Each list of states
-            (axis 0) will be executed sequentially. Within a list of states (axis 1), the
-            states will be executed in parallel.
-        """
-        states = []
-        # If the current arm lift is near the base, and the length is not already near the mast,
-        # move the arm to the stow height before fully stowing the arm length. This is to account
-        # for the case where the wrist is vertically down and may collide with the base.
-        if init_lift_near_base:
-            if not init_length_near_mast:
-                states.append([MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL])
-            states.append([MoveToPregraspState.STOW_ARM_LIFT])
-            states.append([MoveToPregraspState.STOW_ARM_LENGTH_FULL])
-        else:
-            states.append([MoveToPregraspState.STOW_ARM_LENGTH_FULL])
-        states.append([MoveToPregraspState.STOW_WRIST])
-        # If the goal arm lift is near the base and we haven't already stowed the arm lift, stow the arm lift.
-        if goal_lift_near_base and MoveToPregraspState.STOW_ARM_LIFT not in states:
-            states.append([MoveToPregraspState.STOW_ARM_LIFT])
-        states.append([MoveToPregraspState.ROTATE_BASE, MoveToPregraspState.HEAD_PAN])
-        # If the goal is near the base and we're doing a vertical grasp, lengthen the arm before deploying the wrist.
-        if goal_lift_near_base and not horizontal_grasp:
-            states.append([MoveToPregraspState.LENGTHEN_ARM])
-            states.append([MoveToPregraspState.MOVE_WRIST])
-            states.append([MoveToPregraspState.LIFT_ARM])
-        else:
-            states.append([MoveToPregraspState.LIFT_ARM])
-            states.append([MoveToPregraspState.MOVE_WRIST])
-            states.append([MoveToPregraspState.LENGTHEN_ARM])
-        states.append([MoveToPregraspState.TERMINAL])
-
-        return states
-
-    def use_ik(self) -> bool:
-        """
-        Whether the state requires us to compute the arm's IK.
-
-        Returns
-        -------
-        bool: Whether the state requires the inverse jacobian controller.
-        """
-        return self in [
-            MoveToPregraspState.LIFT_ARM,
-            MoveToPregraspState.LENGTHEN_ARM,
-        ]
 
 
 class MoveToPregraspNode(Node):
@@ -555,123 +463,14 @@ class MoveToPregraspNode(Node):
                     "Goal timed out", MoveToPregrasp.Result.STATUS_TIMEOUT
                 )
 
-            # # Get the IK solution if necessary
-            # reachable = True
-            # for state in concurrent_states:
-            #     if state.use_ik():
-            #         reachable, ik_solution = self.controller.solve_ik(
-            #             goal_pose,
-            #             joint_position_overrides=wrist_rotation,
-            #         )
-            #         if not reachable:
-            #             return action_error_callback(
-            #                 f"Failed to solve IK {ik_solution}",
-            #                 MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
-            #             )
-            #         break
-            # if not reachable:
-            #     break
-
             # Move the robot
             if len(motion_executors) == 0:
-                joints_for_velocity_control = []
-                joint_position_overrides = {}
-                joints_for_position_control = {}
-                velocity_overrides = {}
-                get_cartesian_mask = None
-                if MoveToPregraspState.TERMINAL in concurrent_states:  # TERMINAL
-                    return action_success_callback("Goal succeeded")
-                if MoveToPregraspState.STOW_ARM_LENGTH_FULL in concurrent_states:
-                    joints_for_position_control.update(
-                        get_stow_configuration([Joint.ARM_L0])
-                    )
-                if MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL in concurrent_states:
-                    joints_for_position_control.update(
-                        get_stow_configuration([Joint.ARM_L0], partial=True)
-                    )
-                if MoveToPregraspState.STOW_ARM_LIFT in concurrent_states:
-                    joints_for_position_control.update(
-                        get_stow_configuration([Joint.ARM_LIFT])
-                    )
-                if MoveToPregraspState.STOW_WRIST in concurrent_states:
-                    joints_for_position_control.update(
-                        get_stow_configuration(
-                            Joint.get_wrist_joints() + [Joint.GRIPPER_LEFT]
-                        )
-                    )
-                if MoveToPregraspState.ROTATE_BASE in concurrent_states:
-                    joints_for_velocity_control += [Joint.BASE_ROTATION]
-                    joint_position_overrides.update(
-                        {
-                            joint: position
-                            for joint, position in ik_solution.items()
-                            if joint != Joint.BASE_ROTATION
-                        }
-                    )
-                    joint_position_overrides.update(
-                        get_pregrasp_wrist_configuration(horizontal_grasp)
-                    )
-
-                    # Care about yaw error when error is large, but for final positioning,
-                    # care about x error. This is because our yaw is slightly off, so if
-                    # we care about both yaw and x for final positioning, it will stop
-                    # at a slightly off position.
-                    def get_cartesian_mask(err: npt.NDArray[float]):
-                        cartesian_mask = np.array(
-                            [True, False, False, False, False, False]
-                        )
-                        err_yaw = err[5]
-                        if np.abs(err_yaw) > np.pi / 4.0:
-                            cartesian_mask[5] = True
-                        return cartesian_mask
-
-                if MoveToPregraspState.HEAD_PAN in concurrent_states:
-                    desired_base_rotation = ik_solution[Joint.BASE_ROTATION]
-                    curr_head_pan = self.controller.get_current_joints()[Joint.HEAD_PAN]
-                    # The head should rotate in the opposite direction of the base, to
-                    # keep the field of view roughly the same
-                    target_head_pan = curr_head_pan - desired_base_rotation
-                    while (
-                        target_head_pan
-                        < self.controller.joint_pos_lim[Joint.HEAD_PAN][0]
-                    ):
-                        target_head_pan += 2.0 * np.pi
-                    while (
-                        target_head_pan
-                        > self.controller.joint_pos_lim[Joint.HEAD_PAN][1]
-                    ):
-                        target_head_pan -= 2.0 * np.pi
-                    self.get_logger().debug(
-                        f"Desired base rotation: {desired_base_rotation}, "
-                        f"Current head pan: {curr_head_pan}, Target head pan: {target_head_pan}"
-                    )
-                    joints_for_position_control[Joint.HEAD_PAN] = target_head_pan
-                    # Cap the head pan at the base's max rotation speed, so the base and head pan
-                    # camera roughly track each other.
-                    velocity_overrides[
-                        Joint.HEAD_PAN
-                    ] = self.controller.joint_vel_abs_lim[Joint.BASE_ROTATION][1]
-                if MoveToPregraspState.LIFT_ARM in concurrent_states:
-                    joints_for_position_control[Joint.ARM_LIFT] = ik_solution[
-                        Joint.ARM_LIFT
-                    ]
-                if MoveToPregraspState.MOVE_WRIST in concurrent_states:
-                    joints_for_position_control.update(
-                        get_gripper_configuration(closed=False)
-                    )
-                    joints_for_position_control.update(
-                        get_pregrasp_wrist_configuration(horizontal_grasp)
-                    )
-                if MoveToPregraspState.LENGTHEN_ARM in concurrent_states:
-                    joints_for_position_control[Joint.ARM_L0] = ik_solution[
-                        Joint.ARM_L0
-                    ]
-                if len(joints_for_velocity_control) > 0:
-                    motion_executor = self.controller.move_to_ee_pose_inverse_jacobian(
-                        goal=goal_pose,
-                        articulated_joints=joints_for_velocity_control,
-                        termination=TerminationCriteria.ZERO_VEL,
-                        joint_position_overrides=joint_position_overrides,
+                for state in concurrent_states:
+                    motion_executor = state.get_motion_executor(
+                        controller=self.controller,
+                        goal_pose=goal_pose,
+                        ik_solution=ik_solution,
+                        horizontal_grasp=horizontal_grasp,
                         timeout_secs=remaining_time(
                             self.get_clock().now(),
                             start_time,
@@ -680,21 +479,9 @@ class MoveToPregraspNode(Node):
                         ),
                         check_cancel=lambda: terminate_motion_executors,
                         err_callback=distance_callback,
-                        get_cartesian_mask=get_cartesian_mask,
                     )
-                    motion_executors.append(motion_executor)
-                if len(joints_for_position_control) > 0:
-                    motion_executor = self.controller.move_to_joint_positions(
-                        joint_positions=joints_for_position_control,
-                        velocity_overrides=velocity_overrides,
-                        timeout_secs=remaining_time(
-                            self.get_clock().now(),
-                            start_time,
-                            self.action_timeout,
-                            return_secs=True,
-                        ),
-                        check_cancel=lambda: terminate_motion_executors,
-                    )
+                    if motion_executor is None:
+                        return action_success_callback("Goal succeeded")
                     motion_executors.append(motion_executor)
             # Check if the robot is done moving
             else:

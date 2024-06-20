@@ -39,7 +39,7 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 
 # Local Imports
 from .constants import ControlMode, Frame, Joint, SpeedProfile
-from .conversions import create_ros_pose, get_pos_quat_from_ros
+from .conversions import create_ros_pose, get_pos_quat_from_ros, remaining_time
 from .pinocchio_ik_solver import PinocchioIKSolver, PositionIKOptimizer
 
 
@@ -1296,27 +1296,3 @@ class StretchIKControl:
                 )
             )
         return np.array(q, dtype=np.float64)
-
-
-def remaining_time(
-    now: Time, start_time: Time, timeout: Duration, return_secs: bool = False
-) -> Duration:
-    """
-    Get the remaining time until the timeout.
-
-    Parameters
-    ----------
-    now: The current time.
-    start_time: The start time.
-    timeout: The timeout.
-    return_secs: Whether to return the remaining time in seconds.
-
-    Returns
-    -------
-    Duration: The remaining time.
-    """
-    elapsed_time = now - start_time
-    diff = Duration(nanoseconds=timeout.nanoseconds - elapsed_time.nanoseconds)
-    if return_secs:
-        return diff.nanoseconds / 1.0e9
-    return diff

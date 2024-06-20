@@ -8,6 +8,8 @@ import numpy as np
 import numpy.typing as npt
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose, PoseStamped
+from rclpy.duration import Duration
+from rclpy.time import Time
 from sensor_msgs.msg import CompressedImage, Image
 
 # The fixed header that ROS2 Humble's compressed depth image transport plugin prepends to
@@ -242,3 +244,27 @@ def get_pos_quat_from_ros(
         [pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
     )
     return pos, quat
+
+
+def remaining_time(
+    now: Time, start_time: Time, timeout: Duration, return_secs: bool = False
+) -> Duration:
+    """
+    Get the remaining time until the timeout.
+
+    Parameters
+    ----------
+    now: The current time.
+    start_time: The start time.
+    timeout: The timeout.
+    return_secs: Whether to return the remaining time in seconds.
+
+    Returns
+    -------
+    Duration: The remaining time.
+    """
+    elapsed_time = now - start_time
+    diff = Duration(nanoseconds=timeout.nanoseconds - elapsed_time.nanoseconds)
+    if return_secs:
+        return diff.nanoseconds / 1.0e9
+    return diff
