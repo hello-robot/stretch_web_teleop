@@ -3,6 +3,7 @@
 from __future__ import annotations  # Required for type hinting a class within itself
 
 # Standard Imports
+import os
 import sys
 import threading
 import traceback
@@ -17,6 +18,7 @@ import rclpy
 import tf2_py as tf2
 import tf2_ros
 import yaml
+from ament_index_python import get_package_share_directory
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -188,8 +190,10 @@ class MoveToPregraspNode(Node):
         self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
-        # TODO: Figure out where the specialized URDF should go!
-        urdf_abs_path = "/home/hello-robot/stretchpy/src/stretch/motion/stretch_base_rotation_ik.urdf"
+        urdf_abs_path = os.path.join(
+            get_package_share_directory("stretch_web_teleop"),
+            "urdf/stretch_base_rotation_ik.urdf",
+        )
         self.controller = StretchIKControl(
             self,
             tf_buffer=self.tf_buffer,

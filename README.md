@@ -6,6 +6,22 @@ This interface enables a user to remotely teleoperate a Stretch robot through a 
 
 The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions](<>)) and create a the Stretch ROS2 Humble workspace ([instructions](<>)). This will install all package dependencies and install the web teleop interface.
 
+## Installing Python Dependencies
+
+```
+colcon_cd stretch_web_teleop
+python3 -m pip install -r requirements.txt
+```
+
+## Creating Specialized URDFs
+
+```
+colcon_cd stretch_web_teleop
+python3 prepare_specialized_urdf.py
+cd ../..
+colcon build
+```
+
 ## Installing Beta Teleop Cameras
 
 To install the Beta teleop cameras, plug one camera in and run the following command:
