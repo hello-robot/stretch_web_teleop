@@ -158,7 +158,11 @@ export class RemoteRobot extends React.Component<{}, any> {
   }
 
   setToggle(
-    type: "setFollowGripper" | "setDepthSensing" | "setRunStop",
+    type:
+      | "setFollowGripper"
+      | "setRealsenseDepthSensing"
+      | "setGripperDepthSensing"
+      | "setRunStop",
     toggle: boolean,
   ) {
     let cmd: ToggleCommand = {

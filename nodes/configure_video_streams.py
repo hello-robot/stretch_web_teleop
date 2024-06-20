@@ -7,6 +7,7 @@ from typing import Optional, Union
 import cv2
 import message_filters
 import numpy as np
+import numpy.typing as npt
 import pcl
 import PyKDL  # TODO: This can be removed, as it is only used to perform a transformation that can be done with numpy
 import rclpy
@@ -33,6 +34,10 @@ from stretch_web_teleop_helpers.conversions import (
 
 class ConfigureVideoStreams(Node):
     BACKGROUND_COLOR = (200, 200, 200)
+    REALSENSE_DEPTH_AR_COLOR = (0, 191, 255)
+    REALSENSE_DEPTH_AR_ALPHA = 0.6
+    GRIPPER_DEPTH_AR_COLOR = (255, 0, 191)
+    GRIPPER_DEPTH_AR_ALPHA = 0.6
 
     def __init__(self, params_file, has_beta_teleop_kit, use_pointcloud=True):
         """
@@ -85,6 +90,12 @@ class ConfigureVideoStreams(Node):
         self.gripper_camera_rgb_image = None
         self.expanded_gripper_camera_rgb_image = None
         self.cv_bridge = CvBridge()
+        self.aruco_detector = None
+        # https://github.com/hello-robot/stretchpy/blob/feature/aruco_marker_detection/docs/arucos.md#known-markers
+        self.gripper_aruco_ids = {
+            "finger_left": 200,
+            "finger_right": 201,
+        }
 
         # Stores the camera projection matrix
         self.P = None
@@ -177,11 +188,15 @@ class ConfigureVideoStreams(Node):
         self.gripper_camera_perspective = "default" if has_beta_teleop_kit else "d405"
         self.get_logger().info(self.gripper_camera_perspective)
 
-        # Service for enabling the depth AR overlay on the realsense stream
-        self.depth_ar_service = self.create_service(
-            SetBool, "depth_ar", self.depth_ar_callback
+        # Services for enabling the depth AR overlay on the realsense stream
+        self.realsense_depth_ar_service = self.create_service(
+            SetBool, "realsense_depth_ar", self.realsense_depth_ar_callback
         )
-        self.depth_ar = False
+        self.realsense_depth_ar = False
+        self.gripper_depth_ar_service = self.create_service(
+            SetBool, "gripper_depth_ar", self.gripper_depth_ar_callback
+        )
+        self.gripper_depth_ar = False
         self.pcl_cloud_filtered = None
 
         self.roll_value = 0.0
@@ -216,7 +231,7 @@ class ConfigureVideoStreams(Node):
         self.P = np.array(msg.p).reshape(3, 4)
         # self.camera_info_subscriber.destroy()
 
-    def depth_callback(
+    def overlay_realsense_depth_ar(
         self, depth_msg: Union[CompressedImage, PointCloud2], img: CompressedImage
     ):
         # Only keep points that are within 0.01m to 1.5m from the camera
@@ -303,14 +318,20 @@ class ConfigureVideoStreams(Node):
             v_mask = uv_dedup[in_bounds_idx][:, 1]
             # Overlay the pixels in the robot's reach
             img = img.astype(np.float32)
-            alpha = 0.5
-            img[v_mask, u_mask, :] *= 1.0 - alpha
-            img[v_mask, u_mask, :] += alpha * np.array([0.0, 191.0, 255.0])
+            img[v_mask, u_mask, :] *= 1.0 - self.REALSENSE_DEPTH_AR_ALPHA
+            img[v_mask, u_mask, :] += self.REALSENSE_DEPTH_AR_ALPHA * np.array(
+                self.REALSENSE_DEPTH_AR_COLOR
+            )
             img = img.astype(np.uint8)
         return img
 
-    def depth_ar_callback(self, req, res):
-        self.depth_ar = req.data
+    def realsense_depth_ar_callback(self, req, res):
+        self.realsense_depth_ar = req.data
+        res.success = True
+        return res
+
+    def gripper_depth_ar_callback(self, req, res):
+        self.gripper_depth_ar = req.data
         res.success = True
         return res
 
@@ -428,8 +449,8 @@ class ConfigureVideoStreams(Node):
         for image_config_name in self.realsense_params:
             # Overlay the pointcloud *before* cropping/masking/rotating the image,
             # for consistent (de)projection and transformations
-            if self.depth_ar:
-                image = self.depth_callback(depth_msg, image)
+            if self.realsense_depth_ar:
+                image = self.overlay_realsense_depth_ar(depth_msg, image)
             img = self.configure_images(image, self.realsense_params[image_config_name])
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
@@ -457,7 +478,12 @@ class ConfigureVideoStreams(Node):
         depth_msg: Optional[CompressedImage] = None,
     ):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        if depth_msg and self.gripper_depth_ar:
+            # TODO: Consider switching to pointcloud for less latency!
+            image = self.overlay_gripper_depth_ar(image, depth_msg)
+
         # Compute and publish the standard gripper image
         gripper_camera_rgb_image = self.configure_images(
             image, self.gripper_params[self.gripper_camera_perspective]
@@ -478,6 +504,88 @@ class ConfigureVideoStreams(Node):
         self.publish_compressed_msg(
             self.expanded_gripper_camera_rgb_image, self.publisher_expanded_gripper_cmp
         )
+
+    def overlay_gripper_depth_ar(self, image: npt.NDArray, depth_msg: CompressedImage):
+        """
+        Overlays points within the graspable region of the gripper in the depth image.
+
+        Note that this method does not require extrinsics calibration between the camera and the gripper,
+        because it utilizes the aruco markers on the gripper.
+        """
+        # Load the depth image
+        depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
+
+        # Create the Aruco Detector
+        if self.aruco_detector is None:
+            aruco_parameters = cv2.aruco.DetectorParameters()
+            aruco_parameters.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+            aruco_dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+            self.aruco_detector = cv2.aruco.ArucoDetector(
+                aruco_dictionary, aruco_parameters
+            )
+
+        # Detect the gripper markers
+        corners, ids, _ = self.aruco_detector.detectMarkers(image)
+        img_crop_top_left, img_crop_bottom_right = np.array(
+            depth_image.shape, dtype=np.uint16
+        ) - 1, np.zeros(2, dtype=np.uint16)
+        avg_depth_mm = 0
+        for label, aruco_id in self.gripper_aruco_ids.items():
+            if aruco_id in ids:
+                # Update the crop corners
+                idx = np.argmax(ids == aruco_id)
+                aruco_corners = corners[idx][0]
+                img_crop_top_left = np.min(
+                    np.vstack([img_crop_top_left, aruco_corners]), axis=0
+                )
+                img_crop_bottom_right = np.max(
+                    np.vstack([img_crop_bottom_right, aruco_corners]), axis=0
+                )
+
+                # Get the depth coordinate
+                depths_mm = depth_image[
+                    max(int(aruco_corners[0][1]), 0) : min(
+                        int(aruco_corners[2][1]), depth_image.shape[0]
+                    ),
+                    max(int(aruco_corners[0][0]), 0) : min(
+                        int(aruco_corners[2][0]), depth_image.shape[1]
+                    ),
+                ]
+                avg_depth_mm = max(avg_depth_mm, np.mean(depths_mm))
+        img_crop_top_left = np.min(
+            np.vstack([img_crop_top_left, depth_image.shape]), axis=0
+        ).astype(np.uint16)
+        img_crop_bottom_right = np.max(
+            np.vstack([img_crop_bottom_right, (0, 0)]), axis=0
+        ).astype(np.uint16)
+
+        # Get the mask of points within the graspable region.
+        # Add 5cm to the detected depth of the Aruco markers, to account for the offset between the aruco
+        # markers and the gripper tip.
+        depth_offset_mm = 50  # 5cm
+        cropped_depth_img = depth_image[
+            img_crop_top_left[1] : img_crop_bottom_right[1],
+            img_crop_top_left[0] : img_crop_bottom_right[0],
+        ]
+        mask = np.zeros(depth_image.shape, dtype=bool)
+        mask[
+            img_crop_top_left[1] : img_crop_bottom_right[1],
+            img_crop_top_left[0] : img_crop_bottom_right[0],
+        ] = np.logical_and(
+            cropped_depth_img > 0,
+            cropped_depth_img <= avg_depth_mm + depth_offset_mm,
+        )
+
+        # Overlay the pixels in the robot's reach
+        idx = np.where(mask)
+        image = image.astype(np.float32)
+        image[idx] *= 1.0 - self.GRIPPER_DEPTH_AR_ALPHA
+        image[idx] += self.GRIPPER_DEPTH_AR_ALPHA * np.array(
+            self.GRIPPER_DEPTH_AR_COLOR
+        )
+        image = image.astype(np.uint8)
+
+        return image
 
     def navigation_camera_cb(self, ros_image):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)

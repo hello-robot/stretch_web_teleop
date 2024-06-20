@@ -136,6 +136,10 @@ export type GripperVideoStreamDef = CameraViewDefinition & {
    * Whether to display the expanded gripper view or the default one
    */
   expandedGripperView?: boolean;
+  /**
+   * If pixels within the graspable region should be highlighted.
+   */
+  depthSensing?: boolean;
 };
 
 /**
