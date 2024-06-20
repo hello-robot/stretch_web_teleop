@@ -11,6 +11,7 @@ import {
   TabletOrientation,
   TABLET_ORIENTATION_LANDSCAPE,
   TABLET_ORIENTATION_PORTRAIT,
+  StretchTool,
 } from "../../../../shared/util";
 import { stretchTool } from "..";
 
@@ -127,7 +128,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             FunctionProvider.remoteRobot?.setRobotPose(CENTER_WRIST),
         };
       case UnderVideoButton.StowWrist:
-        if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
+        if (stretchTool === StretchTool.TABLET) {
           return {
             onClick: () =>
               FunctionProvider.remoteRobot?.setRobotPose(STOW_WRIST_TABLET),
