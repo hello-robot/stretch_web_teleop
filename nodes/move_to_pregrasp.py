@@ -37,6 +37,7 @@ from stretch_web_teleop_helpers.constants import (
     get_stow_configuration,
 )
 from stretch_web_teleop_helpers.conversions import (
+    deproject_pixel_to_point,
     depth_img_to_pointcloud,
     remaining_time,
     ros_msg_to_cv2_image,
@@ -537,7 +538,7 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = self.deproject_pixel_to_point(u, v, pointcloud)
+        x, y, z = deproject_pixel_to_point(u, v, pointcloud, self.p)
         self.get_logger().debug(
             f"Closest point to clicked pixel (camera frame): {(x, y, z)}"
         )
@@ -610,36 +611,6 @@ class MoveToPregraspNode(Node):
                 )
 
         return u, v
-
-    def deproject_pixel_to_point(
-        self, u: int, v: int, pointcloud: npt.NDArray[np.float32]
-    ) -> Tuple[float, float, float]:
-        """
-        Deproject the clicked pixel to get the 3D coordinates of the clicked point.
-
-        Parameters
-        ----------
-        u: The horizontal coordinate of the clicked pixel.
-        v: The vertical coordinate of the clicked pixel.
-        pointcloud: The pointcloud array of size (N, 3).
-
-        Returns
-        -------
-        Tuple[float, float, float]: The 3D coordinates of the clicked point.
-        """
-        # Get the ray from the camera origin to the clicked point
-        ray_dir = np.linalg.pinv(self.p)[:3, :] @ np.array([u, v, 1])
-        ray_dir /= np.linalg.norm(ray_dir)
-
-        # Find the point that is closest to the ray
-        p, r = pointcloud, ray_dir
-        closest_point_idx = np.argmin(
-            np.linalg.norm(
-                p - np.multiply((p @ r).reshape((-1, 1)), r.reshape((1, 3))), axis=1
-            )
-        )
-
-        return p[closest_point_idx]
 
     def get_goal_pose_and_ik(
         self,
