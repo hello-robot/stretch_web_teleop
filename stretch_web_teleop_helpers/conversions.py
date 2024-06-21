@@ -1,11 +1,13 @@
 # Standard imports
 import array
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 # Third-party imports
 import cv2
 import numpy as np
 import numpy.typing as npt
+import tf2_py as tf2
+import tf2_ros
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose, PoseStamped
 from rclpy.duration import Duration
@@ -268,3 +270,38 @@ def remaining_time(
     if return_secs:
         return diff.nanoseconds / 1.0e9
     return diff
+
+
+def tf2_transform(
+    tf_buffer: tf2_ros.Buffer,
+    pose: PoseStamped,
+    target_frame: str,
+    timeout: Duration,
+    verbose: bool = False,
+) -> Tuple[bool, PoseStamped]:
+    """
+    Transform a pose to a target frame.
+
+    Parameters
+    ----------
+    tf_buffer: The tf2_ros.Buffer object.
+    pose: The pose to transform.
+    target_frame: The target frame.
+    timeout: The timeout.
+
+    Returns
+    -------
+    Tuple[bool, PostStamped]: Whether the transform was successful and the transformed pose.
+    """
+    try:
+        pose_transformed = tf_buffer.transform(pose, target_frame, timeout=timeout)
+    except (
+        tf2.ConnectivityException,
+        tf2.ExtrapolationException,
+        tf2.InvalidArgumentException,
+        tf2.LookupException,
+        tf2.TimeoutException,
+        tf2.TransformException,
+    ):
+        return False, PoseStamped()
+    return True, pose_transformed

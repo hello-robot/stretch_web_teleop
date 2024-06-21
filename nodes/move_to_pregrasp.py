@@ -12,7 +12,6 @@ import message_filters
 import numpy as np
 import numpy.typing as npt
 import rclpy
-import tf2_py as tf2
 import tf2_ros
 import yaml
 from ament_index_python import get_package_share_directory
@@ -41,6 +40,7 @@ from stretch_web_teleop_helpers.conversions import (
     depth_img_to_pointcloud,
     remaining_time,
     ros_msg_to_cv2_image,
+    tf2_transform,
 )
 from stretch_web_teleop_helpers.move_to_pregrasp_state import MoveToPregraspState
 from stretch_web_teleop_helpers.stretch_ik_control import (
@@ -285,7 +285,11 @@ class MoveToPregraspNode(Node):
         feedback.initial_distance_m = -1.0
 
         def distance_callback(err: npt.NDArray[np.float32]) -> None:
-            self.get_logger().debug(f" Distance error: {err}")
+            """
+            Callback for when the error between the current end-effector pose and the goal
+            end-effector pose is calculated. Send it as feedback.
+            """
+            self.get_logger().debug(f"Distance error: {err}")
             distance = np.linalg.norm(err[:3])
             if feedback.initial_distance_m < 0.0:
                 feedback.initial_distance_m = distance
@@ -296,6 +300,9 @@ class MoveToPregraspNode(Node):
         terminate_motion_executors = False
 
         def cleanup() -> None:
+            """
+            Clean up before returning from the action.
+            """
             nonlocal terminate_motion_executors
             self.active_goal_request = None
             terminate_motion_executors = True
@@ -304,6 +311,9 @@ class MoveToPregraspNode(Node):
             error_msg: str = "Goal failed",
             status: int = MoveToPregrasp.Result.STATUS_FAILURE,
         ) -> MoveToPregrasp.Result:
+            """
+            Callback for when the action encounters an error.
+            """
             self.get_logger().error(error_msg)
             goal_handle.abort()
             cleanup()
@@ -312,6 +322,9 @@ class MoveToPregraspNode(Node):
         def action_success_callback(
             success_msg: str = "Goal succeeded",
         ) -> MoveToPregrasp.Result:
+            """
+            Callback for when the action succeeds.
+            """
             self.get_logger().info(success_msg)
             goal_handle.succeed()
             cleanup()
@@ -320,117 +333,32 @@ class MoveToPregraspNode(Node):
         def action_cancel_callback(
             cancel_msg: str = "Goal canceled",
         ) -> MoveToPregrasp.Result:
+            """
+            Callback for when the action is canceled.
+            """
             self.get_logger().info(cancel_msg)
             goal_handle.canceled()
             cleanup()
             return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_CANCELLED)
 
-        # Get the latest Realsense messages
-        with self.latest_realsense_msgs_lock:
-            depth_msg, camera_info_msg = self.latest_realsense_msgs
-        depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
-        pointcloud = depth_img_to_pointcloud(
-            depth_image,
-            f_x=camera_info_msg.k[0],
-            f_y=camera_info_msg.k[4],
-            c_x=camera_info_msg.k[2],
-            c_y=camera_info_msg.k[5],
-        )  # N x 3 array
-
-        # Undo any transformation that were applied to the raw camera image before sending it
-        # to the web app
-        raw_scaled_u, raw_scaled_v = (
-            goal_handle.request.scaled_u,
-            goal_handle.request.scaled_v,
-        )
-        if (
-            "realsense" in self.image_params
-            and "default" in self.image_params["realsense"]
-        ):
-            params = self.image_params["realsense"]["default"]
-        else:
-            params = None
-        u, v = self.inverse_transform_pixel(
-            raw_scaled_u, raw_scaled_v, params, camera_info_msg
-        )
-        self.get_logger().info(
-            f"Clicked pixel after inverse transform (camera frame): {(u, v)}"
-        )
-
-        # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = self.deproject_pixel_to_point(u, v, pointcloud)
-        self.get_logger().info(
-            f"Closest point to clicked pixel (camera frame): {(x, y, z)}"
-        )
+        # Get the clicked pixel
+        x, y, z, header = self.get_clicked_pixel(goal_handle.request)
 
         # Determine how the robot should orient its gripper to align with the clicked pixel
         horizontal_grasp = self.get_grasp_orientation(goal_handle.request)
 
         # Get the goal end effector pose and verify it is reachable.
-        goal_pose = None
-        reachable = False
-        for distance_to_object in self.DISTANCES_TO_OBJECT:
-            ok, goal_pose, base_rotation = self.get_goal_pose(
-                x,
-                y,
-                z,
-                depth_msg.header,
-                horizontal_grasp,
-                publish_tf=True,
-                distance_to_object=distance_to_object,
-            )
-            if not ok:
-                continue
-            self.get_logger().info(f"Goal Pose: {goal_pose}")
-
-            # Verify the goal is reachable, seeded with the estimate base rotation.
-            wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
-            joint_overrides = {}
-            joint_overrides.update(wrist_rotation)
-            if base_rotation is not None:
-                # Seed IK with the estimated base rotation
-                joint_overrides[Joint.BASE_ROTATION] = base_rotation
-            reachable, ik_solution = self.controller.solve_ik(
-                goal_pose, joint_position_overrides=joint_overrides
-            )
-            if not reachable:
-                continue
-            else:
-                break
-        if not goal_pose:
-            return action_error_callback(
-                "Failed to get goal pose",
-                MoveToPregrasp.Result.STATUS_DEPROJECTION_FAILURE,
-            )
+        reachable, goal_pose, base_rotation, ik_solution = self.get_goal_pose_and_ik(
+            x, y, z, header, horizontal_grasp, publish_tf=True
+        )
         if not reachable:
             return action_error_callback(
                 f"Goal pose is not reachable {ik_solution}",
                 MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
             )
 
-        # Get the current joints
-        init_joints = self.controller.get_current_joints()
-
         # Get the states.
-        # If the robot is in a vertical grasp position and the arm needs to descend,
-        # lengthn the arm before deploying the wrist.
-        arm_lift_when_stowed = get_stow_configuration([Joint.ARM_LIFT])[Joint.ARM_LIFT]
-        arm_length_when_partially_stowed = get_stow_configuration(
-            [Joint.ARM_L0], partial=True
-        )[Joint.ARM_L0]
-        states = MoveToPregraspState.get_state_machine(
-            horizontal_grasp=horizontal_grasp,
-            init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
-            goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
-            init_length_near_mast=init_joints[Joint.ARM_L0]
-            < arm_length_when_partially_stowed,
-        )
-        if not (len(states[-1]) == 1 and MoveToPregraspState.TERMINAL in states[-1]):
-            self.get_logger().error(
-                "Terminal state is not the last state. Adding it in."
-            )
-            states.append([MoveToPregraspState.TERMINAL])
-        self.get_logger().info(f" All States: {states}")
+        states = self.get_states(horizontal_grasp, ik_solution)
 
         # Change the mode to navigation mode
         ok = self.controller.set_navigation_mode(
@@ -446,6 +374,7 @@ class MoveToPregraspNode(Node):
                 MoveToPregrasp.Result.STATUS_STRETCH_DRIVER_FAILURE,
             )
 
+        # Execute the states
         state_i = 0
         motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
         rate = self.create_rate(5.0)
@@ -561,6 +490,60 @@ class MoveToPregraspNode(Node):
             )
             return True
 
+    def get_clicked_pixel(
+        self, request: MoveToPregrasp.Goal
+    ) -> Tuple[float, float, float, Header]:
+        """
+        Get the 3D coordinates of the clicked pixel in camera frame.
+
+        Parameters
+        ----------
+        goal_handle: The goal handle.
+
+        Returns
+        -------
+        Tuple[float, float, float, Header]: The clicked pixel, and the header of the depth message.
+        """
+        # Get the latest Realsense messages
+        with self.latest_realsense_msgs_lock:
+            depth_msg, camera_info_msg = self.latest_realsense_msgs
+        depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
+        pointcloud = depth_img_to_pointcloud(
+            depth_image,
+            f_x=camera_info_msg.k[0],
+            f_y=camera_info_msg.k[4],
+            c_x=camera_info_msg.k[2],
+            c_y=camera_info_msg.k[5],
+        )  # N x 3 array
+
+        # Undo any transformation that were applied to the raw camera image before sending it
+        # to the web app
+        raw_scaled_u, raw_scaled_v = (
+            request.scaled_u,
+            request.scaled_v,
+        )
+        if (
+            "realsense" in self.image_params
+            and "default" in self.image_params["realsense"]
+        ):
+            params = self.image_params["realsense"]["default"]
+        else:
+            params = None
+        u, v = self.inverse_transform_pixel(
+            raw_scaled_u, raw_scaled_v, params, camera_info_msg
+        )
+        self.get_logger().debug(
+            f"Clicked pixel after inverse transform (camera frame): {(u, v)}"
+        )
+
+        # Deproject the clicked pixel to get the 3D coordinates of the clicked point
+        x, y, z = self.deproject_pixel_to_point(u, v, pointcloud)
+        self.get_logger().debug(
+            f"Closest point to clicked pixel (camera frame): {(x, y, z)}"
+        )
+
+        return x, y, z, depth_msg.header
+
     def inverse_transform_pixel(
         self,
         scaled_u: int,
@@ -658,6 +641,68 @@ class MoveToPregraspNode(Node):
 
         return p[closest_point_idx]
 
+    def get_goal_pose_and_ik(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        header: Header,
+        horizontal_grasp: bool,
+        publish_tf: bool = False,
+    ) -> Tuple[bool, PoseStamped, float, Dict[Joint, float]]:
+        """
+        Get the goal end effector pose and verify it is reachable.
+
+        Parameters
+        ----------
+        x: The x-coordinate of the clicked point.
+        y: The y-coordinate of the clicked point.
+        z: The z-coordinate of the clicked point.
+        header: The header of the pointcloud message.
+        horizontal_grasp: Whether the goal pose should be horizontal.
+        publish_tf: Whether to publish the goal pose as a TF frame.
+
+        Returns
+        -------
+        bool: Whether the goal pose was successfully calculated.
+        PoseStamped: The goal end effector pose.
+        float: The estimated base rotation to get to the goal pose.
+        Dict[Joint, float]: The IK solution.
+        """
+        reachable = False
+        goal_pose = PoseStamped()
+        base_rotation = 0.0
+        ik_solution: Dict[Joint, float] = {}
+        for distance_to_object in self.DISTANCES_TO_OBJECT:
+            ok, goal_pose, base_rotation = self.get_goal_pose(
+                x,
+                y,
+                z,
+                header,
+                horizontal_grasp,
+                publish_tf=True,
+                distance_to_object=distance_to_object,
+            )
+            if not ok:
+                continue
+            self.get_logger().info(f"Goal Pose: {goal_pose}")
+
+            # Verify the goal is reachable, seeded with the estimate base rotation.
+            wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
+            joint_overrides = {}
+            joint_overrides.update(wrist_rotation)
+            if base_rotation is not None:
+                # Seed IK with the estimated base rotation
+                joint_overrides[Joint.BASE_ROTATION] = base_rotation
+            reachable, ik_solution = self.controller.solve_ik(
+                goal_pose, joint_position_overrides=joint_overrides
+            )
+            if not reachable:
+                continue
+            else:
+                break
+        return reachable, goal_pose, base_rotation, ik_solution
+
     def get_goal_pose(
         self,
         x: float,
@@ -694,21 +739,11 @@ class MoveToPregraspNode(Node):
         goal_pose.pose.orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
 
         # Convert to base frame
-        try:
-            goal_pose_base = self.tf_buffer.transform(
-                goal_pose, Frame.BASE_LINK.value, timeout=self.tf_timeout
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
-            self.get_logger().error(
-                f"Failed to transform goal pose to the odom frame: {error}"
-            )
+        ok, goal_pose_base = tf2_transform(
+            self.tf_buffer, goal_pose, Frame.BASE_LINK.value, self.tf_timeout
+        )
+        if not ok:
+            self.get_logger().error("Failed to transform goal pose to base link frame")
             return False, PoseStamped(), None
 
         # Get the goal orientation
@@ -721,13 +756,11 @@ class MoveToPregraspNode(Node):
         if not ok:
             self.get_logger().error("Failed to get goal yaw")
             return False, PoseStamped(), None
-        rot = quaternion_about_axis(theta, [0, 0, 1])
+        r = quaternion_about_axis(theta, [0, 0, 1])
         if not horizontal_grasp:
             # For vertical grasp, the goal orientation is also rotated +90deg around y
-            rot = quaternion_multiply(rot, quaternion_about_axis(np.pi / 2, [0, 1, 0]))
-        goal_pose_base.pose.orientation = Quaternion(
-            x=rot[0], y=rot[1], z=rot[2], w=rot[3]
-        )
+            r = quaternion_multiply(r, quaternion_about_axis(np.pi / 2, [0, 1, 0]))
+        goal_pose_base.pose.orientation = Quaternion(x=r[0], y=r[1], z=r[2], w=r[3])
 
         # Adjust the goal position by the distance to the object
         if horizontal_grasp:
@@ -745,24 +778,14 @@ class MoveToPregraspNode(Node):
         else:
             goal_pose_base.pose.position.z += distance_to_object
 
-        self.get_logger().info(f"Goal pose in base link frame: {goal_pose_base}")
+        self.get_logger().debug(f"Goal pose in base link frame: {goal_pose_base}")
 
         # Convert the goal pose to the odom frame so it stays fixed even as the robot moves
-        try:
-            goal_pose_odom = self.tf_buffer.transform(
-                goal_pose_base, Frame.ODOM.value, timeout=self.tf_timeout
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
-            self.get_logger().error(
-                f"Failed to transform goal pose to the odom frame: {error}"
-            )
+        ok, goal_pose_odom = tf2_transform(
+            self.tf_buffer, goal_pose_base, Frame.ODOM.value, self.tf_timeout
+        )
+        if not ok:
+            self.get_logger().error("Failed to transform goal pose to odom frame")
             return False, PoseStamped(), None
 
         if publish_tf:
@@ -844,15 +867,15 @@ class MoveToPregraspNode(Node):
                 child_link=Frame.END_EFFECTOR_LINK,
                 joint_overrides=get_pregrasp_wrist_configuration(horizontal_grasp),
             )
-            self.get_logger().info(f"Transform from L0 to wrist pitch: {T}")
+            self.get_logger().debug(f"Transform from L0 to wrist pitch: {T}")
             # In the manual IK calculations, what I call +x and +y is what
             # the actual TF tree has as +z and +x, respectively.
             self.wrist_offset = (T[2, 3], T[0, 3])
         x_w, y_w = self.wrist_offset
 
-        self.get_logger().info(f"Lift offset: {(x_o, y_o)}")
-        self.get_logger().info(f"Wrist offset: {(x_w, y_w)}")
-        self.get_logger().info(f"Goal pose in base frame: {(x_g, y_g)}")
+        self.get_logger().debug(f"Lift offset: {(x_o, y_o)}")
+        self.get_logger().debug(f"Wrist offset: {(x_w, y_w)}")
+        self.get_logger().debug(f"Goal pose in base frame: {(x_g, y_g)}")
 
         # Get the possible thetas
         theta = np.arccos((x_o + y_w) / np.sqrt(x_g**2 + y_g**2)) + np.arctan2(
@@ -864,8 +887,8 @@ class MoveToPregraspNode(Node):
         Ls = [
             -y_g * np.cos(theta) + x_g * np.sin(theta) + y_o - x_w for theta in thetas
         ]
-        self.get_logger().info(f"Possible thetas: {thetas}, Ls: {Ls}")
-        self.get_logger().info(f"Earlier theta: {np.arctan2(y_g, x_g)}")
+        self.get_logger().debug(f"Possible thetas: {thetas}, Ls: {Ls}")
+        self.get_logger().debug(f"Earlier theta: {np.arctan2(y_g, x_g)}")
 
         for i in range(2):
             if Ls[i] > 0:
@@ -902,20 +925,12 @@ class MoveToPregraspNode(Node):
         )
 
         # Convert it to odom frame
-        try:
-            ee_pose_odom = self.tf_buffer.transform(
-                ee_pose, Frame.ODOM.value, timeout=self.tf_timeout
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
+        ok, ee_pose_odom = tf2_transform(
+            self.tf_buffer, ee_pose, Frame.ODOM.value, self.tf_timeout
+        )
+        if not ok:
             self.get_logger().error(
-                f"Failed to transform end effector pose to the odom frame: {error}"
+                "Failed to transform end effector pose to the odom frame"
             )
             return False
 
@@ -926,6 +941,49 @@ class MoveToPregraspNode(Node):
             self.broadcast_static_transform(goal_pose, "goal")
 
         return True
+
+    def get_states(
+        self, horizontal_grasp: bool, ik_solution: Dict[Joint, float]
+    ) -> List[List[MoveToPregraspState]]:
+        """
+        Get the states to execute to move the robot to the goal pose.
+
+        Parameters
+        ----------
+        horizontal_grasp: Whether the goal pose should be horizontal.
+        ik_solution: The IK solution.
+
+        Returns
+        -------
+        List[MoveToPregraspState]: The states to execute.
+        """
+        # Get the current joints
+        init_joints = self.controller.get_current_joints()
+        # Get the arm lift/length when (partially) stowed
+        arm_lift_when_stowed = get_stow_configuration([Joint.ARM_LIFT])[Joint.ARM_LIFT]
+        arm_length_when_partially_stowed = get_stow_configuration(
+            [Joint.ARM_L0], partial=True
+        )[Joint.ARM_L0]
+
+        # Get the states. If the robot is in a vertical grasp position and the arm
+        # needs to descend, lengthn the arm before deploying the wrist.
+        states = MoveToPregraspState.get_state_machine(
+            horizontal_grasp=horizontal_grasp,
+            init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
+            goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
+            init_length_near_mast=init_joints[Joint.ARM_L0]
+            < arm_length_when_partially_stowed,
+        )
+
+        # Ensure the terminal state is the last state
+        if not (len(states[-1]) == 1 and MoveToPregraspState.TERMINAL in states[-1]):
+            self.get_logger().error(
+                "Terminal state is not the last state. Adding it in."
+            )
+            states.append([MoveToPregraspState.TERMINAL])
+        self.get_logger().debug(f"All States: {states}")
+
+        return states
 
     def broadcast_static_transform(
         self, pose: PoseStamped, child_frame_id: str

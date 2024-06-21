@@ -15,7 +15,6 @@ import numpy as np
 import numpy.typing as npt
 import pinocchio
 import rclpy
-import tf2_py as tf2
 import tf2_ros
 from builtin_interfaces.msg import Time
 from control_msgs.action import FollowJointTrajectory
@@ -39,7 +38,12 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 
 # Local Imports
 from .constants import ControlMode, Frame, Joint, SpeedProfile
-from .conversions import create_ros_pose, get_pos_quat_from_ros, remaining_time
+from .conversions import (
+    create_ros_pose,
+    get_pos_quat_from_ros,
+    remaining_time,
+    tf2_transform,
+)
 from .pinocchio_ik_solver import PinocchioIKSolver, PositionIKOptimizer
 
 
@@ -232,64 +236,29 @@ class StretchIKControl:
         self.joint_vel_abs_lim: Dict[Joint, Tuple[float, float]] = {}
 
         # Get the velocity limits for the controllable joints
+        joint_map = {
+            Joint.ARM_LIFT: ("lift", "vel_m"),
+            Joint.ARM_L0: ("arm", "vel_m"),
+            Joint.COMBINED_ARM: ("arm", "vel_m"),
+            Joint.WRIST_YAW: ("wrist_yaw", "vel"),
+            Joint.WRIST_PITCH: ("wrist_pitch", "vel"),
+            Joint.WRIST_ROLL: ("wrist_roll", "vel"),
+            Joint.HEAD_PAN: ("head_pan", "vel"),
+            Joint.HEAD_TILT: ("head_tilt", "vel"),
+            Joint.GRIPPER_RIGHT: ("stretch_gripper", "vel"),
+            Joint.GRIPPER_LEFT: ("stretch_gripper", "vel"),
+        }
         for joint_name in Joint:
-            # Get the max velocity
-            if joint_name == Joint.BASE_ROTATION:
+            if joint_name in joint_map:
+                module, vel_key = joint_map[joint_name]
+                max_abs_vel = robot_params[module]["motion"][speed_profile_str][vel_key]
+                min_abs_vel = robot_params[module]["motion"][speed_profile_slow_str][
+                    vel_key
+                ]
+            elif joint_name == Joint.BASE_ROTATION:
                 # https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
                 max_abs_vel = 0.5  # rad/s
                 min_abs_vel = 0.05  # rad/s
-            elif joint_name == Joint.ARM_LIFT:
-                max_abs_vel = robot_params["lift"]["motion"][speed_profile_str]["vel_m"]
-                min_abs_vel = robot_params["lift"]["motion"][speed_profile_slow_str][
-                    "vel_m"
-                ]
-            elif joint_name == Joint.ARM_L0 or joint_name == Joint.COMBINED_ARM:
-                max_abs_vel = robot_params["arm"]["motion"][speed_profile_str]["vel_m"]
-                min_abs_vel = robot_params["arm"]["motion"][speed_profile_slow_str][
-                    "vel_m"
-                ]
-            elif joint_name == Joint.WRIST_YAW:
-                max_abs_vel = robot_params["wrist_yaw"]["motion"][speed_profile_str][
-                    "vel"
-                ]
-                min_abs_vel = robot_params["wrist_yaw"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
-            elif joint_name == Joint.WRIST_PITCH:
-                max_abs_vel = robot_params["wrist_pitch"]["motion"][speed_profile_str][
-                    "vel"
-                ]
-                min_abs_vel = robot_params["wrist_pitch"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
-            elif joint_name == Joint.WRIST_ROLL:
-                max_abs_vel = robot_params["wrist_roll"]["motion"][speed_profile_str][
-                    "vel"
-                ]
-                min_abs_vel = robot_params["wrist_roll"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
-            elif joint_name == Joint.HEAD_PAN:
-                max_abs_vel = robot_params["head_pan"]["motion"][speed_profile_str][
-                    "vel"
-                ]
-                min_abs_vel = robot_params["head_pan"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
-            elif joint_name == Joint.HEAD_TILT:
-                max_abs_vel = robot_params["head_tilt"]["motion"][speed_profile_str][
-                    "vel"
-                ]
-                min_abs_vel = robot_params["head_tilt"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
-            elif joint_name == Joint.GRIPPER_RIGHT or joint_name == Joint.GRIPPER_LEFT:
-                max_abs_vel = robot_params["stretch_gripper"]["motion"][
-                    speed_profile_str
-                ]["vel"]
-                min_abs_vel = robot_params["stretch_gripper"]["motion"][
-                    speed_profile_slow_str
-                ]["vel"]
             else:
                 self.node.get_logger().debug(
                     f"Will not get limits for joint name: {joint_name}"
@@ -402,7 +371,7 @@ class StretchIKControl:
 
         # Limit the joint positions
         _, joint_positions = self.check_joint_limits(joint_positions)
-        self.node.get_logger().debug(f" Target Joint Positions: {joint_positions}")
+        self.node.get_logger().debug(f"Target Joint Positions: {joint_positions}")
 
         # The duration of each trajectory command
         duration = 1.0  # seconds
@@ -442,7 +411,7 @@ class StretchIKControl:
                         min_pos, max_pos = self.joint_pos_lim[joint_name]
                         tolerance = (max_pos - min_pos) / threshold_factor
                     self.node.get_logger().debug(
-                        f" Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
+                        f"Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
                     )
                     if abs(joint_err) > tolerance:
                         joint_positions_cmd[joint_name] = joint_position
@@ -454,7 +423,7 @@ class StretchIKControl:
                     return
 
                 # Command the robot to move to the joint positions
-                self.node.get_logger().info(
+                self.node.get_logger().debug(
                     f"Commanding robot to move to joint positions: {joint_positions_cmd}"
                 )
                 future = self.__command_move_to_joint_position(
@@ -531,7 +500,7 @@ class StretchIKControl:
 
         # Check the articulated joints.
         self.node.get_logger().debug(
-            f" Joint position overrides: {joint_position_overrides}"
+            f"Joint position overrides: {joint_position_overrides}"
         )
         articulated_joints = [
             joint_name
@@ -593,7 +562,7 @@ class StretchIKControl:
             # Get the current joint state
             q = self.__get_q(joint_position_overrides, all_joints=True)
             self.node.get_logger().debug(
-                f" Joint Positions: {list(zip(self.all_joints, q))}"
+                f"Joint Positions: {list(zip(self.all_joints, q))}"
             )
 
             # Get the error between the end-effector pose and the goal pose
@@ -610,7 +579,7 @@ class StretchIKControl:
                 err_callback(err)
             if get_cartesian_mask is not None:
                 cartesian_mask = get_cartesian_mask(err)
-            self.node.get_logger().info(f" Error: {err}")
+            self.node.get_logger().debug(f"Error: {err}")
 
             # Get the Jacobian matrix for the chain
             J = pinocchio.computeFrameJacobian(
@@ -620,7 +589,7 @@ class StretchIKControl:
                 self.base_ik_solver.ee_frame_idx,
                 pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
             )
-            self.node.get_logger().info(f" Jacobian: {J}")
+            self.node.get_logger().debug(f"Jacobian: {J}")
 
             # Mask the Jacobian matrix to only include the articulated joints
             J[:, non_articulated_joints_mask] = 0.0
@@ -629,7 +598,7 @@ class StretchIKControl:
 
             # Calculate the pseudo-inverse of the Jacobian
             J_pinv = np.linalg.pinv(J, rcond=1e-6)
-            self.node.get_logger().debug(f" Jacobian Pseudo-Inverse: {J_pinv}")
+            self.node.get_logger().debug(f"Jacobian Pseudo-Inverse: {J_pinv}")
 
             # Re-mask the pseudo-inverse to address any numerical issues
             J_pinv[non_articulated_joints_mask, :] = 0.0
@@ -638,8 +607,8 @@ class StretchIKControl:
 
             # Calculate the joint velocities
             vel = self.K @ J_pinv @ err
-            self.node.get_logger().info(
-                f" Joint Velocities: {list(zip(self.controllable_joints, vel))}"
+            self.node.get_logger().debug(
+                f"Joint Velocities: {list(zip(self.controllable_joints, vel))}"
             )
 
             # Execute the velocities
@@ -666,7 +635,7 @@ class StretchIKControl:
         """
         start_time = self.node.get_clock().now()
         # Invoke the service
-        self.node.get_logger().info(" Switching to navigation mode...")
+        self.node.get_logger().info("Switching to navigation mode...")
         ready = self.switch_to_navigation_client.wait_for_service(
             timeout_sec=timeout.nanoseconds / 1.0e9
         )
@@ -720,22 +689,15 @@ class StretchIKControl:
         """
         if isinstance(target_frame, Frame):
             target_frame = target_frame.value
-        try:
-            pose_transformed = self.tf_buffer.transform(
-                pose,
-                target_frame,
-                remaining_time(self.node.get_clock().now(), start_time, timeout),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as e:
+        ok, pose_transformed = tf2_transform(
+            self.tf_buffer,
+            pose,
+            target_frame,
+            remaining_time(self.node.get_clock().now(), start_time, timeout),
+        )
+        if not ok:
             self.node.get_logger().error(
-                f"Failed to transform pose {pose} to frame {target_frame}: {e}"
+                f"Failed to transform pose {pose} to frame {target_frame}."
             )
             return False, PoseStamped()
 
@@ -917,9 +879,9 @@ class StretchIKControl:
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
-        self.node.get_logger().info(f" Pre-Clip Velocities: {joint_velocities}")
+        self.node.get_logger().debug(f"Pre-Clip Velocities: {joint_velocities}")
         _, clipped_velocities = self.check_velocity_limits(joint_velocities)
-        self.node.get_logger().info(f" Commanding Velocities: {clipped_velocities}")
+        self.node.get_logger().debug(f"Commanding Velocities: {clipped_velocities}")
 
         # Send base commands
         if move_base:
@@ -969,7 +931,7 @@ class StretchIKControl:
         """
         # Limit the joint positions
         _, joint_positions = self.check_joint_limits(joint_positions)
-        self.node.get_logger().debug(f" Commanding arm to {joint_positions}")
+        self.node.get_logger().debug(f"Commanding arm to {joint_positions}")
 
         # Replace the distal arm joint with the combined joint
         if Joint.ARM_L0 in joint_positions:
@@ -995,7 +957,7 @@ class StretchIKControl:
         arm_goal.trajectory.points[0].time_from_start = Duration(
             seconds=duration_sec,
         ).to_msg()
-        self.node.get_logger().debug(f" Commanding arm to {arm_goal}")
+        self.node.get_logger().debug(f"Commanding arm to {arm_goal}")
         return self.arm_client.send_goal_async(arm_goal)
 
     def check_joint_limits(
@@ -1127,7 +1089,7 @@ class StretchIKControl:
             q, success, debug_info = self.ik_solver.compute_ik(
                 pos, quat, q_init=dict(zip(self.all_joints_str, q_init))
             )
-            self.node.get_logger().info(
+            self.node.get_logger().debug(
                 f"For initiatilization {dict(zip(self.all_joints_str, q_init))}, "
                 f"success: {success}, q: {q} debug_info: {debug_info}"
             )
