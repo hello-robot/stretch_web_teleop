@@ -2,25 +2,9 @@
 
 This interface enables a user to remotely teleoperate a Stretch robot through a web browser. This website can be set up to teleoperate the robot remotely from anywhere in the world with an internet connection, or simply eyes-off teleop from the next room on a local network. The codebase is built on ROS2, WebRTC, Nav2, and TypeScript.
 
-# Setup
+# Setup & Installation
 
-The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions](<>)) and create a the Stretch ROS2 Humble workspace ([instructions](<>)). This will install all package dependencies and install the web teleop interface.
-
-## Installing Python Dependencies
-
-```
-colcon_cd stretch_web_teleop
-python3 -m pip install -r requirements.txt
-```
-
-## Creating Specialized URDFs
-
-```
-colcon_cd stretch_web_teleop
-python3 prepare_specialized_urdf.py
-cd ../..
-colcon build
-```
+The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions](https://docs.hello-robot.com/0.3/installation/robot_install/)) and create/update the Stretch ROS2 Humble workspace ([instructions](https://docs.hello-robot.com/0.3/installation/ros_workspace/)). This will install all package dependencies and install the web teleop interface.
 
 ## Installing Beta Teleop Cameras
 
