@@ -857,9 +857,6 @@ class MoveToPregraspNode(Node):
         x_o, y_o = self.lift_offset
 
         # Next, get the wrist offset
-        # NOTE: This is technically wrong, because if the yaw is non-zero, that
-        # will impact the offset. Really, what we want is the offset at goal
-        # wrist yaw, which requires FK. But this is a good enough approximation.
         if self.wrist_offset is None:
             # First, get the transform from the base link to the end of the arm
             T = self.controller.get_transform(

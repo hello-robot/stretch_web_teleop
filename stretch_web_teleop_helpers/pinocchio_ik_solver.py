@@ -132,12 +132,29 @@ class PinocchioIKSolver:
 
         return q_out
 
-    def compute_fk(self, config, link_name=None) -> Tuple[np.ndarray, np.ndarray]:
-        """given joint values return end-effector position and quaternion associated with it"""
+    def compute_fk(
+        self, config: np.ndarray, link_name: str = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Given joint values, return end-effector position and quaternion associated with it.
+
+        Args:
+            config: joint values
+            link_name: name of the link to compute FK for; if None, uses the end-effector link
+
+        Returns:
+            pos: end-effector position (x, y, z)
+            quat: end-effector quaternion (w, x, y, z)
+        """
         if link_name is None:
             frame_idx = self.ee_frame_idx
         else:
-            frame_idx = [f.name for f in self.model.frames].index(link_name)
+            try:
+                frame_idx = [f.name for f in self.model.frames].index(link_name)
+            except ValueError:
+                logger.error(
+                    f"Unknown link_name {link_name}. Defaulting to end-effector"
+                )
+                frame_idx = self.ee_frame_idx
         q_model = self._qmap_control2model(config)
         pinocchio.forwardKinematics(self.model, self.data, q_model)
         pinocchio.updateFramePlacement(self.model, self.data, frame_idx)
@@ -220,8 +237,6 @@ class PinocchioIKSolver:
 class PositionIKOptimizer:
     """
     Solver that jointly optimizes IK and best orientation to achieve desired position.
-    Can optimize any solver that implements IKSolverBase.
-    Additionally, it implements IKSolverBase so this optimizer-based version can be readily dropped-in.
     """
 
     max_iterations: int = 30  # Max num of iterations for CEM
@@ -230,7 +245,7 @@ class PositionIKOptimizer:
 
     def __init__(
         self,
-        ik_solver: Union[PinocchioIKSolver],
+        ik_solver: PinocchioIKSolver,
         pos_error_tol: float,
         ori_error_range: Union[float, np.ndarray],
         pos_weight: float = 1.0,

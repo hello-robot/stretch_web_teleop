@@ -1126,6 +1126,7 @@ class StretchIKControl:
         pos, quat = self.ik_solver.compute_fk(
             config=dict(zip(self.all_joints_str, q)), link_name=link_name
         )
+        self.node.get_logger().debug(f"FK for {q} {link}: {pos}, {quat}")
         return (pos, quat)
 
     def get_transform(
