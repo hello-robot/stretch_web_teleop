@@ -656,6 +656,7 @@ const UnderVideoButtons = (props: {
         <UnderAdjustableOverheadButtons
           definition={props.definition}
           setPredictiveDisplay={props.setPredictiveDisplay}
+          stretchTool={props.stretchTool}
         />
       );
       break;
@@ -708,6 +709,7 @@ const UnderOverheadButtons = (props: {
 const UnderAdjustableOverheadButtons = (props: {
   definition: AdjustableOverheadVideoStreamDef;
   setPredictiveDisplay: (enabled: boolean) => void;
+  stretchTool: StretchTool;
 }) => {
   const [rerender, setRerender] = React.useState<boolean>(false);
 
@@ -715,7 +717,12 @@ const UnderAdjustableOverheadButtons = (props: {
     <React.Fragment>
       <AccordionSelect
         title="Look..."
-        possibleOptions={Object.values(realsenseButtons)}
+        possibleOptions={realsenseButtons.map((button) => {
+          if (button === UnderVideoButton.LookAtGripper) {
+            return "Look at " + getGripperLabel(props.stretchTool);
+          }
+          return button;
+        })}
         onChange={(idx: number) => {
           underVideoFunctionProvider.provideFunctions(realsenseButtons[idx])
             .onClick!();
@@ -730,7 +737,7 @@ const UnderAdjustableOverheadButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label={getFollowGripperLabel()}
+        label={"Follow " + getGripperLabel(props.stretchTool)}
       />
       <CheckToggleButton
         checked={props.definition.predictiveDisplay || false}
@@ -768,7 +775,12 @@ const UnderRealsenseButtons = (props: {
     <React.Fragment>
       <AccordionSelect
         title="Look..."
-        possibleOptions={Object.values(realsenseButtons)}
+        possibleOptions={realsenseButtons.map((button) => {
+          if (button === UnderVideoButton.LookAtGripper) {
+            return "Look at " + getGripperLabel(props.stretchTool);
+          }
+          return button;
+        })}
         onChange={(idx: number) => {
           underVideoFunctionProvider.provideFunctions(realsenseButtons[idx])
             .onClick!();
@@ -783,7 +795,7 @@ const UnderRealsenseButtons = (props: {
             UnderVideoButton.FollowGripper,
           ).onCheck!(props.definition.followGripper);
         }}
-        label={getFollowGripperLabel(props.stretchTool)}
+        label={"Follow " + getGripperLabel(props.stretchTool)}
       />
       <CheckToggleButton
         checked={props.definition.depthSensing || false}
@@ -908,13 +920,14 @@ const CameraPerspectiveButton = (props: {
   return <button onClick={onClick}>{props.perspective}</button>;
 };
 
-function getFollowGripperLabel(stretchTool: StretchTool) {
+function getGripperLabel(stretchTool: StretchTool) {
+  console.log("getGripperLabel stretchTool", stretchTool);
   switch (stretchTool) {
     case StretchTool.TABLET:
-      return "Follow Tablet";
+      return "Tablet";
     case StretchTool.GRIPPER:
-      return "Follow Gripper";
+      return "Gripper";
     default:
-      return "Follow Wrist";
+      return "Wrist";
   }
 }
