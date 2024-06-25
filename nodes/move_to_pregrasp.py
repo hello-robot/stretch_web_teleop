@@ -8,7 +8,6 @@ import traceback
 from typing import Dict, Generator, List, Optional, Tuple
 
 # Third-Party Imports
-import message_filters
 import numpy as np
 import numpy.typing as npt
 import rclpy
@@ -19,10 +18,13 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import (
+    ReentrantCallbackGroup,  # MutuallyExclusiveCallbackGroup
+)
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
 from tf2_geometry_msgs import PoseStamped
@@ -112,36 +114,22 @@ class MoveToPregraspNode(Node):
 
         # Subscribe to the Realsense's RGB, pointcloud, and camera info feeds
         self.cv_bridge = CvBridge()
-        self.latest_realsense_msgs_lock = threading.Lock()
-        self.latest_realsense_msgs: Optional[Tuple[CompressedImage, CameraInfo]] = None
-        depth_image_subscriber = message_filters.Subscriber(
-            self,
+        self.latest_realsense_depth_lock = threading.Lock()
+        self.latest_realsense_depth: Optional[CompressedImage] = None
+        self.depth_image_subscriber = self.create_subscription(
             CompressedImage,
             "/camera/aligned_depth_to_color/image_raw/compressedDepth",
+            self.realsense_depth_cb,
+            qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
+            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        camera_info_subscriber = message_filters.Subscriber(
-            self,
-            CameraInfo,
-            "/camera/aligned_depth_to_color/camera_info",
-        )
-        self.camera_synchronizer = message_filters.ApproximateTimeSynchronizer(
-            [
-                depth_image_subscriber,
-                camera_info_subscriber,
-            ],
-            queue_size=1,
-            # TODO: Tune the max allowable delay between RGB and pointcloud messages
-            slop=1.0,  # seconds
-            allow_headerless=False,
-        )
-        self.camera_synchronizer.registerCallback(self.realsense_cb)
-        self.p_lock = threading.Lock()
-        self.p = None  # The camera's projection matrix
+        self.latest_realsense_info_lock = threading.Lock()
+        self.latest_realsense_info: Optional[CameraInfo] = None
         self.camera_info_subscriber = self.create_subscription(
             CameraInfo,
-            "/camera/color/camera_info",
-            self.camera_info_cb,
-            qos_profile=1,
+            "/camera/aligned_depth_to_color/camera_info",
+            self.realsense_info_cb,
+            qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
             # callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
@@ -185,31 +173,33 @@ class MoveToPregraspNode(Node):
 
         return True
 
-    def camera_info_cb(self, msg: CameraInfo) -> None:
-        """
-        Callback for the camera info subscriber. Save the camera's projection matrix.
-
-        Parameters
-        ----------
-        msg: The camera info message.
-        """
-        with self.p_lock:
-            self.p = np.array(msg.p).reshape(3, 4)
-
-    def realsense_cb(
-        self, depth_msg: CompressedImage, camera_info_msg: CameraInfo
+    def realsense_depth_cb(
+        self,
+        depth_msg: CompressedImage,
     ) -> None:
         """
-        Callback for the Realsense camera feed subscriber. Save the latest depth image
-        and camera info messages.
+        Callback for the Realsense camera feed subscriber. Save the latest depth image.
 
         Parameters
         ----------
-        depth_msg: The depth image message.
-        camera_info_msg: The camera info message.
+        depth_msg: The depth image message
         """
-        with self.latest_realsense_msgs_lock:
-            self.latest_realsense_msgs = (depth_msg, camera_info_msg)
+        with self.latest_realsense_depth_lock:
+            self.latest_realsense_depth = depth_msg
+
+    def realsense_info_cb(
+        self,
+        info_msg: CameraInfo,
+    ) -> None:
+        """
+        Callback for the Realsense camera info subscriber. Save the latest camera info.
+
+        Parameters
+        ----------
+        info_msg: The camera info message
+        """
+        with self.latest_realsense_info_lock:
+            self.latest_realsense_info = info_msg
 
     def goal_callback(self, goal_request: MoveToPregrasp.Goal) -> GoalResponse:
         """
@@ -221,19 +211,19 @@ class MoveToPregraspNode(Node):
         """
         self.get_logger().info(f"Received request {goal_request}")
 
-        # Reject the goal if no camera info has been received yet
-        with self.p_lock:
-            if self.p is None:
+        # Reject the goal if no Realsense camera info has been received
+        with self.latest_realsense_info_lock:
+            if self.latest_realsense_info is None:
                 self.get_logger().info(
-                    "Rejecting goal request since no camera info has been received yet"
+                    "Rejecting goal request since no Realsense camera info message has been received yet"
                 )
                 return GoalResponse.REJECT
 
         # Reject the goal if no Realsense messages have been received yet
-        with self.latest_realsense_msgs_lock:
-            if self.latest_realsense_msgs is None:
+        with self.latest_realsense_depth_lock:
+            if self.latest_realsense_depth is None:
                 self.get_logger().info(
-                    "Rejecting goal request since no Realsense messages have been received yet"
+                    "Rejecting goal request since no Realsense depth message has been received yet"
                 )
                 return GoalResponse.REJECT
 
@@ -506,8 +496,10 @@ class MoveToPregraspNode(Node):
         Tuple[float, float, float, Header]: The clicked pixel, and the header of the depth message.
         """
         # Get the latest Realsense messages
-        with self.latest_realsense_msgs_lock:
-            depth_msg, camera_info_msg = self.latest_realsense_msgs
+        with self.latest_realsense_depth_lock:
+            depth_msg = self.latest_realsense_depth
+        with self.latest_realsense_info_lock:
+            camera_info_msg = self.latest_realsense_info
         depth_image = ros_msg_to_cv2_image(depth_msg, self.cv_bridge)
         pointcloud = depth_img_to_pointcloud(
             depth_image,
@@ -538,7 +530,9 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = deproject_pixel_to_point(u, v, pointcloud, self.p)
+        x, y, z = deproject_pixel_to_point(
+            u, v, pointcloud, np.array(camera_info_msg.p).reshape(3, 4)
+        )
         self.get_logger().debug(
             f"Closest point to clicked pixel (camera frame): {(x, y, z)}"
         )
