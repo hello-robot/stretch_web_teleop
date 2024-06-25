@@ -234,7 +234,7 @@ export class Robot extends React.Component {
   getHasBetaTeleopKit() {
     this.hasBetaTeleopKitParam = new ROSLIB.Param({
       ros: this.ros,
-      name: "/configure_video_streams:has_beta_teleop_kit",
+      name: "/configure_video_streams_gripper:has_beta_teleop_kit",
     });
 
     this.hasBetaTeleopKitParam.get((value: boolean) => {
@@ -248,7 +248,7 @@ export class Robot extends React.Component {
     // However, we only need it once, so opt for a parameter.
     this.stretchToolParam = new ROSLIB.Param({
       ros: this.ros,
-      name: "/configure_video_streams:stretch_tool",
+      name: "/configure_video_streams_gripper:stretch_tool",
     });
 
     this.stretchToolParam.get((value: string) => {
