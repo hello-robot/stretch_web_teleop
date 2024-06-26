@@ -25,6 +25,7 @@ export enum UnderVideoButton {
   FollowGripper = "Follow Gripper",
   RealsenseDepthSensing = "Realsense Depth Sensing",
   GripperDepthSensing = "Gripper Depth Sensing",
+  ExpandedGripperView = "Expanded Gripper View",
   ToggleArucoMarkers = "Toggle Aruco Markers",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
@@ -161,6 +162,14 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
           onCheck: (toggle: boolean) =>
             FunctionProvider.remoteRobot?.setToggle(
               "setGripperDepthSensing",
+              toggle,
+            ),
+        };
+      case UnderVideoButton.ExpandedGripperView:
+        return {
+          onCheck: (toggle: boolean) =>
+            FunctionProvider.remoteRobot?.setToggle(
+              "setExpandedGripper",
               toggle,
             ),
         };

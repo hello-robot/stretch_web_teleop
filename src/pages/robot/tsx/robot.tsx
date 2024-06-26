@@ -44,6 +44,7 @@ export class Robot extends React.Component {
   private setCameraPerspectiveService?: ROSLIB.Service;
   private setRealsenseDepthSensingService?: ROSLIB.Service;
   private setGripperDepthSensingService?: ROSLIB.Service;
+  private setExpandedGripperService?: ROSLIB.Service;
   private setRunStopService?: ROSLIB.Service;
   private robotFrameTfClient?: ROSLIB.TFClient;
   private mapFrameTfClient?: ROSLIB.TFClient;
@@ -147,6 +148,7 @@ export class Robot extends React.Component {
     this.createSwitchToPositionService();
     this.createRealsenseDepthSensingService();
     this.createGripperDepthSensingService();
+    this.createExpandedGripperService();
     this.createRunStopService();
     this.createRobotFrameTFClient();
     this.createMapFrameTFClient();
@@ -427,6 +429,14 @@ export class Robot extends React.Component {
     });
   }
 
+  createExpandedGripperService() {
+    this.setExpandedGripperService = new ROSLIB.Service({
+      ros: this.ros,
+      name: "/expanded_gripper",
+      serviceType: "std_srvs/srv/SetBool",
+    });
+  }
+
   createRunStopService() {
     this.setRunStopService = new ROSLIB.Service({
       ros: this.ros,
@@ -494,7 +504,7 @@ export class Robot extends React.Component {
       request,
       (response: boolean) => {
         response
-          ? console.log("Enable realsense depth sensing")
+          ? console.log("Enabled realsense depth sensing")
           : console.log("Disabled realsense depth sensing");
       },
     );
@@ -506,8 +516,20 @@ export class Robot extends React.Component {
       request,
       (response: boolean) => {
         response
-          ? console.log("Enable gripper depth sensing")
+          ? console.log("Enabled gripper depth sensing")
           : console.log("Disabled gripper depth sensing");
+      },
+    );
+  }
+
+  setExpandedGripper(toggle: boolean) {
+    var request = new ROSLIB.ServiceRequest({ data: toggle });
+    this.setExpandedGripperService?.callService(
+      request,
+      (response: boolean) => {
+        response
+          ? console.log("Enabled expanded gripper")
+          : console.log("Disabled expanded gripper");
       },
     );
   }

@@ -109,6 +109,8 @@ d435_parameter_overrides = {
     'enable_gyro': 'true',
     'enable_accel': 'true',
     'pointcloud.enable': 'true',
+    'pointcloud.stream_filter': '',
+    'pointcloud.stream_index_filter': '',
     'enable_sync': 'true',
     'align_depth.enable': 'true',
     'initial_reset': 'true',
@@ -128,6 +130,8 @@ d405_parameter_overrides = {
     'enable_gyro': 'true',
     'enable_accel': 'true',
     'pointcloud.enable': 'true',
+    'pointcloud.stream_filter': '',
+    'pointcloud.stream_index_filter': '',
     'enable_sync': 'true',
     'align_depth.enable': 'true',
     # 'initial_reset': 'true', # TODO: Look into whether this should be True!
@@ -234,6 +238,22 @@ def generate_launch_description():
             "name": f"{d405_parameter_overrides['camera_name']}.aligned_depth_to_color.image_raw.png_level",
             "default": "1",  # PNG level 1 is the fastest
             "description": "Compression level for aligned depth",
+        }
+    )
+
+    # Add RGB compression parameters
+    d435_params.append(
+        {
+            "name": f"{d435_parameter_overrides['camera_name']}.color.image_rect_raw.png_level",
+            "default": "1",
+            "description": "Compression level for the color stream",
+        }
+    )
+    d405_params.append(
+        {
+            "name": f"{d405_parameter_overrides['camera_name']}.color.image_rect_raw.png_level",
+            "default": "1",
+            "description": "Compression level for the color stream",
         }
     )
 
