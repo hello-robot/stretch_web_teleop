@@ -7,6 +7,7 @@ type VideoStreamProps = {
   height: number;
   scale: number;
   fps: number;
+  streamName: string;
 };
 
 export class VideoStream extends React.Component<VideoStreamProps> {
@@ -17,6 +18,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
   height: number;
   scale: number;
   fps: number;
+  streamName: string;
   className?: string;
   outputVideoStream?: MediaStream;
   aspectRatio: any;
@@ -27,6 +29,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     this.height = props.height;
     this.scale = props.scale;
     this.fps = props.fps;
+    this.streamName = props.streamName;
     this.img = document.createElement("img");
     this.video = document.createElement("video");
     this.video.style.display = "block";
@@ -50,7 +53,15 @@ export class VideoStream extends React.Component<VideoStreamProps> {
       ?.drawImage(this.img, 0, 0, this.width, this.height);
   }
 
-  updateImage(message: ROSCompressedImage) {
+  updateImage(message: ROSCompressedImage, verbose: boolean = false) {
+    if (verbose) {
+      console.log(
+        this.streamName,
+        "stream got image with latency",
+        Date.now() / 1.0e3 -
+          (message.header.stamp.sec + message.header.stamp.nanosec / 1.0e9),
+      );
+    }
     if (!this.imageReceived) {
       let { width, height, data } = jpeg.decode(
         Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0)),
