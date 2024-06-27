@@ -12,7 +12,6 @@ import pcl
 import PyKDL  # TODO: This can be removed, as it is only used to perform a transformation that can be done with numpy
 import rclpy
 import ros2_numpy
-import tf2_py as tf2
 import tf2_ros
 import yaml
 from cv_bridge import CvBridge
@@ -30,6 +29,7 @@ from stretch_web_teleop_helpers.conversions import (
     deproject_pixel_to_point,
     depth_img_to_pointcloud,
     ros_msg_to_cv2_image,
+    tf2_get_transform,
 )
 
 # TODO: Add docstrings to this file.
@@ -348,32 +348,23 @@ class ConfigureVideoStreams(Node):
         passthrough.set_filter_field_name("z")
         passthrough.set_filter_limits(0.01, 1.5)
         self.pcl_cloud_filtered = passthrough.filter()
-
-        # Get transform
-        try:
-            transform = self.tf_buffer.lookup_transform(
-                "base_link",
-                "camera_color_optical_frame",
-                Time(),
-                timeout=Duration(seconds=0.1),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
-            self.get_logger().warn(
-                "Could not find the transform between frames base_link and "
-                f"camera_color_optical_frame. Error: {error}"
-            )
-            return img
-
         if not self.pcl_cloud_filtered:
             return img
         if self.pcl_cloud_filtered.to_array().size == 0:
+            return img
+
+        # Get transform
+        ok, transform = tf2_get_transform(
+            self.tf_buffer,
+            "base_link",
+            "camera_color_optical_frame",
+            timeout=Duration(seconds=0.1),
+        )
+        if not ok:
+            self.get_logger().warn(
+                "Could not find the transform between frames base_link and "
+                "camera_color_optical_frame."
+            )
             return img
 
         # Transform point cloud to base link
@@ -704,6 +695,17 @@ class ConfigureVideoStreams(Node):
         else:
             pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
 
+        # Filter the pointcloud to only nearby points, to lower its size
+        pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
+        passthrough = pcl_cloud.make_passthrough_filter()
+        passthrough.set_filter_field_name("z")
+        passthrough.set_filter_limits(0.01, 0.3)
+        pcl_cloud_filtered = passthrough.filter()
+        pc_in_camera_filtered = pcl_cloud_filtered.to_array()
+        self.get_logger().info(
+            f"pc_in_camera_filtered shape {pc_in_camera_filtered.shape}"
+        )
+
         # Create the Aruco Detector
         if self.aruco_detector is None:
             aruco_parameters = cv2.aruco.DetectorParameters()
@@ -729,7 +731,7 @@ class ConfigureVideoStreams(Node):
                 aruco_corners = corners[idx][0]
                 center = np.mean(aruco_corners, axis=0)
                 aruco_center_pos[label] = deproject_pixel_to_point(
-                    center[0], center[1], pc_in_camera, self.gripper_P
+                    center[0], center[1], pc_in_camera_filtered, self.gripper_P
                 )
         if (
             "finger_left" not in aruco_center_pos
@@ -745,11 +747,10 @@ class ConfigureVideoStreams(Node):
         # camera frame (e.g., +z out of camera, +x to the left of camera, +y up)
         left_x, left_y, left_z = aruco_center_pos["finger_left"]
         right_x, right_y, right_z = aruco_center_pos["finger_right"]
-        pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
         # Filter points within the distance range. Add a depth offset of 5cm to
         # account for the offset between the aruco marker and the gripper tip.
         z_offset_m = 0.04
-        passthrough_z = pcl_cloud.make_passthrough_filter()
+        passthrough_z = pcl_cloud_filtered.make_passthrough_filter()
         passthrough_z.set_filter_field_name("z")
         passthrough_z.set_filter_limits(0.01, max(left_z, right_z) + z_offset_m)
         pcl_cloud_filtered = passthrough_z.filter()
