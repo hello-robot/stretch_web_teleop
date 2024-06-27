@@ -9,7 +9,7 @@ import numpy.typing as npt
 import tf2_py as tf2
 import tf2_ros
 from cv_bridge import CvBridge
-from geometry_msgs.msg import Pose, PoseStamped
+from geometry_msgs.msg import Pose, PoseStamped, TransformStamped
 from rclpy.duration import Duration
 from rclpy.time import Time
 from sensor_msgs.msg import CompressedImage, Image
@@ -323,7 +323,7 @@ def tf2_transform(
 
     Returns
     -------
-    Tuple[bool, PostStamped]: Whether the transform was successful and the transformed pose.
+    Tuple[bool, PoseStamped]: Whether the transform was successful and the transformed pose.
     """
     try:
         pose_transformed = tf_buffer.transform(pose, target_frame, timeout=timeout)
@@ -337,3 +337,39 @@ def tf2_transform(
     ):
         return False, PoseStamped()
     return True, pose_transformed
+
+
+def tf2_get_transform(
+    tf_buffer: tf2_ros.Buffer,
+    target_frame: str,
+    source_frame: str,
+    timeout: Duration,
+) -> Tuple[bool, TransformStamped]:
+    """
+    Get the transform from a source frame to a target frame.
+
+    Parameters
+    ----------
+    tf_buffer: The tf2_ros.Buffer object.
+    target_frame: The target frame.
+    source_frame: The source frame.
+    timeout: The timeout.
+
+    Returns
+    -------
+    Tuple[bool, TransformStamped]: Whether the transform was successful and the transform message.
+    """
+    try:
+        transform = tf_buffer.lookup_transform(
+            target_frame, source_frame, Time(), timeout=timeout
+        )
+    except (
+        tf2.ConnectivityException,
+        tf2.ExtrapolationException,
+        tf2.InvalidArgumentException,
+        tf2.LookupException,
+        tf2.TimeoutException,
+        tf2.TransformException,
+    ):
+        return False, TransformStamped()
+    return True, transform
