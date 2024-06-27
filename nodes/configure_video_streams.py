@@ -796,6 +796,16 @@ class ConfigureVideoStreams(Node):
         return image
 
     def navigation_camera_cb(self, ros_image):
+        if self.verbose:
+            start_time = self.get_clock().now()
+            lag = (
+                start_time - Time.from_msg(ros_image.header.stamp)
+            ).nanoseconds / 1.0e9
+            self.get_logger().info(
+                f"Navigation RGB recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
+
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         self.overhead_camera_rgb_image = self.configure_images(
@@ -804,6 +814,13 @@ class ConfigureVideoStreams(Node):
         self.publish_compressed_msg(
             self.overhead_camera_rgb_image, self.publisher_overhead_cmp
         )
+
+        if self.verbose:
+            lag = (self.get_clock().now() - start_time).nanoseconds / 1.0e9
+            self.get_logger().info(
+                f"Navigation RGB processing time: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
 
     def rotate_image_around_center(self, image, angle):
         image_center = tuple(np.array(image.shape[1::-1]) / 2)
@@ -841,5 +858,5 @@ if __name__ == "__main__":
     print("Publishing reconfigured video stream")
     # Use a MultiThreadedExecutor so that subscriptions, actions, etc. can be
     # processed in parallel.
-    executor = MultiThreadedExecutor(num_threads=8)
+    executor = MultiThreadedExecutor()
     rclpy.spin(node, executor=executor)
