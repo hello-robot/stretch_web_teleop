@@ -12,6 +12,9 @@ json_path = os.path.join(
     get_package_share_directory("stretch_core"), "config", "HighAccuracyPreset.json"
 )
 
+D435_RESOLUTION = "424x240x15"
+D405_RESOLUTION = "480x270x15"
+
 configurable_parameters = [
     {"name": "camera_namespace1", "default": "", "description": "namespace for camera"},
     {"name": "camera_name1", "default": "camera", "description": "camera unique name"},
@@ -23,18 +26,18 @@ configurable_parameters = [
     },
     {
         "name": "depth_module.depth_profile1",
-        "default": "424x240x15",
+        "default": D435_RESOLUTION,
         "description": "depth module profile",
     },
     {
         "name": "depth_module.infra_profile1",
-        "default": "424x240x15",
+        "default": D435_RESOLUTION,
         "description": "depth module infrared profile",
     },
     {"name": "enable_depth1", "default": "true", "description": "enable depth stream"},
     {
         "name": "rgb_camera.color_profile1",
-        "default": "424x240x15",
+        "default": D435_RESOLUTION,
         "description": "color image width",
     },
     {"name": "enable_color1", "default": "true", "description": "enable color stream"},
@@ -87,7 +90,7 @@ configurable_parameters = [
     },
     {
         "name": "depth_module.depth_profile2",
-        "default": "480x270x15",
+        "default": D405_RESOLUTION,
         "description": "depth module profile",
     },
     {
@@ -98,7 +101,7 @@ configurable_parameters = [
     {"name": "enable_depth2", "default": "true", "description": "enable depth stream"},
     {
         "name": "depth_module.color_profile2",
-        "default": "480x270x15",
+        "default": D405_RESOLUTION,
         "description": "color image width",
     },
     {"name": "enable_color2", "default": "true", "description": "enable color stream"},
@@ -163,6 +166,10 @@ def generate_launch_description():
             SetRemap(
                 src="/gripper_camera/color/image_rect_raw",
                 dst="/gripper_camera/image_raw",
+            ),
+            SetRemap(
+                src="/gripper_camera/color/image_rect_raw/compressed",
+                dst="/gripper_camera/image_raw/compressed",
             ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(

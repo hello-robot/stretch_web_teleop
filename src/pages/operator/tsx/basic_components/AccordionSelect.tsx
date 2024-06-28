@@ -5,7 +5,9 @@ import { className } from "shared/util";
 export const AccordionSelect = <T extends string | JSX.Element>(props: {
   title: string;
   possibleOptions: T[];
+  backgroundColor?: string;
   onChange: (selectedIndex: number) => void;
+  toggleAccordianCallback?: () => void;
 }) => {
   const [active, setActiveState] = useState<boolean>(false);
   const [height, setHeightState] = useState("0px");
@@ -13,6 +15,9 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
   const content = useRef(null);
 
   function toggleAccordion() {
+    if (props.toggleAccordianCallback) {
+      props.toggleAccordianCallback();
+    }
     setActiveState(active ? false : true);
     setHeightState(active ? "0px" : `${content.current.scrollHeight}px`);
     setRotateState(active ? "accordion_icon" : "accordion_icon rotate");
@@ -38,13 +43,17 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
       <button
         className={className("accordion", { active })}
         onClick={toggleAccordion}
+        style={{ backgroundColor: props.backgroundColor }}
       >
         {props.title}
         <span className="material-icons">expand_more</span>
       </button>
       <div
         ref={content}
-        style={{ maxHeight: `${height}` }}
+        style={{
+          maxHeight: `${height}`,
+          backgroundColor: props.backgroundColor,
+        }}
         className="accordion_content"
       >
         <div>{props.possibleOptions.map(mapFunc)}</div>

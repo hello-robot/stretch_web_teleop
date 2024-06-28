@@ -290,7 +290,7 @@ input[type="checkbox"] {
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .accordion:hover,
 .active {
-  background-color: #ccc;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.05) 0 0);
 }
 
 /* Style the accordion content title */
@@ -322,5 +322,5 @@ input[type="checkbox"] {
 }
 
 .accordion-item:hover {
-  background-color: #ccc;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.15) 0 0);
 }

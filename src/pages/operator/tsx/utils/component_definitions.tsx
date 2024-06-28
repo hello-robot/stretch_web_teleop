@@ -192,6 +192,11 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
    * reachable area.
    */
   depthSensing?: boolean;
+  /**
+   * If the user should be allowed to click on the image and have the robot
+   * move to the pre-grasp position relative to the clicked object.
+   */
+  selectObjectForMoveToPregrasp?: boolean;
 };
 
 /**

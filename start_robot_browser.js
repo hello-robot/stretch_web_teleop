@@ -37,6 +37,7 @@ if (process.argv.length > 2) {
   const context = await browser.newContext({ ignoreHTTPSErrors: true }); // avoid ERR_CERT_COMMON_NAME_INVALID
 
   const page = await context.newPage();
+  page.on("console", (msg) => console.log(msg));
 
   while (try_again) {
     try {

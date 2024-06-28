@@ -1,0 +1,31 @@
+# MoveToPregrasp takes in the scaled (u,v) coordinates of a click on the Realsense camera,
+# as well as some configuration such as the direction of the pregrasp. It then moves
+# the robot to the pregrasp configuration, giving feedback on the way.
+
+# These should be in the range [0.0, 1.0]
+float64 scaled_u
+float64 scaled_v
+
+uint8 PREGRASP_DIRECTION_AUTO=0
+uint8 PREGRASP_DIRECTION_HORIZONTAL=1
+uint8 PREGRASP_DIRECTION_VERTICAL=2
+
+uint8 pregrasp_direction
+
+---
+# Result
+
+uint8 STATUS_SUCCESS=0
+uint8 STATUS_FAILURE=1
+uint8 STATUS_CANCELLED = 2
+uint8 STATUS_TIMEOUT = 3
+uint8 STATUS_GOAL_NOT_REACHABLE = 4
+uint8 STATUS_DEPROJECTION_FAILURE = 5
+uint8 STATUS_STRETCH_DRIVER_FAILURE = 6
+
+uint8 status
+---
+# Feedback
+float32 initial_distance_m
+float32 remaining_distance_m
+builtin_interfaces/Duration elapsed_time
