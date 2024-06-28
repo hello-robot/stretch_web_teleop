@@ -107,7 +107,7 @@ d435_parameter_overrides = {
     'pointcloud.stream_filter': '',
     'pointcloud.stream_index_filter': '',
     'enable_sync': 'true',
-    'align_depth.enable': 'false',
+    'align_depth.enable': 'true',
     'initial_reset': 'true',
     'allow_no_texture_points': 'true',
 }
@@ -124,7 +124,7 @@ d405_parameter_overrides = {
     'pointcloud.stream_filter': '',
     'pointcloud.stream_index_filter': '',
     'enable_sync': 'true',
-    'align_depth.enable': 'true',
+    'align_depth.enable': 'false',
     'initial_reset': 'true',
     'allow_no_texture_points': 'true',
 }
