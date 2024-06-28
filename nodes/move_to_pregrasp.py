@@ -39,7 +39,7 @@ from stretch_web_teleop_helpers.constants import (
     get_stow_configuration,
 )
 from stretch_web_teleop_helpers.conversions import (
-    deproject_pixel_to_point,
+    deproject_pixel_to_pointcloud_point,
     depth_img_to_pointcloud,
     remaining_time,
     ros_msg_to_cv2_image,
@@ -530,7 +530,7 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = deproject_pixel_to_point(
+        x, y, z = deproject_pixel_to_pointcloud_point(
             u, v, pointcloud, np.array(camera_info_msg.p).reshape(3, 4)
         )
         self.get_logger().debug(
