@@ -421,49 +421,29 @@ def generate_launch_description():
     ld.add_action(rosbridge_launch)
 
     # Configure Video Streams
-    # labels = ["overhead", "realsense", "gripper"]
-    # for i in range(len(labels)):
-    #     bools = ["False", "False", "False"]
-    #     bools[i] = "True"
-    #     label = labels[i]
-    #     configure_video_streams_node = Node(
-    #         package="stretch_web_teleop",
-    #         executable="configure_video_streams.py",
-    #         name=f"configure_video_streams_{label}",
-    #         output="screen",
-    #         arguments=[
-    #             LaunchConfiguration("params"),
-    #             str(stretch_has_beta_teleop_kit),
-    #             *bools,
-    #         ],
-    #         parameters=[
-    #             {
-    #                 "has_beta_teleop_kit": stretch_has_beta_teleop_kit,
-    #                 "stretch_tool": stretch_tool,
-    #             }
-    #         ],
-    #     )
-    #     ld.add_action(configure_video_streams_node)
-    configure_video_streams_node = Node(
-        package="stretch_web_teleop",
-        executable="configure_video_streams.py",
-        name="configure_video_streams_gripper",
-        output="screen",
-        arguments=[
-            LaunchConfiguration("params"),
-            str(stretch_has_beta_teleop_kit),
-            "True",
-            "True",
-            "True",
-        ],
-        parameters=[
-            {
-                "has_beta_teleop_kit": stretch_has_beta_teleop_kit,
-                "stretch_tool": stretch_tool,
-            }
-        ],
-    )
-    ld.add_action(configure_video_streams_node)
+    labels = ["overhead", "realsense", "gripper"]
+    for i in range(len(labels)):
+        bools = ["False", "False", "False"]
+        bools[i] = "True"
+        label = labels[i]
+        configure_video_streams_node = Node(
+            package="stretch_web_teleop",
+            executable="configure_video_streams.py",
+            name=f"configure_video_streams_{label}",
+            output="screen",
+            arguments=[
+                LaunchConfiguration("params"),
+                str(stretch_has_beta_teleop_kit),
+                *bools,
+            ],
+            parameters=[
+                {
+                    "has_beta_teleop_kit": stretch_has_beta_teleop_kit,
+                    "stretch_tool": stretch_tool,
+                }
+            ],
+        )
+        ld.add_action(configure_video_streams_node)
 
     rplidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
