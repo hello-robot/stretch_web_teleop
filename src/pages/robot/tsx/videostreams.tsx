@@ -10,6 +10,28 @@ type VideoStreamProps = {
   streamName: string;
 };
 
+// Adapted from https://github.com/personalrobotics/feeding_web_interface/blob/2dc2dfe3a67b840b619fa9b00ef2f2ee66c46962/feedingwebapp/src/robot/VideoStream.jsx#L10C1-L31C2
+function dataURItoBlob(dataURI: string) {
+  // convert base64 to raw binary data held in a string
+  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+  var splitString = dataURI.split(",");
+  var byteString = atob(splitString[1]);
+
+  // separate out the mime component
+  var mimeString = splitString[0].split(":")[1].split(";")[0];
+
+  // write the bytes of the string to an ArrayBuffer
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  // write the ArrayBuffer to a blob, and you're done
+  var blob = new Blob([ab], { type: mimeString });
+  return blob;
+}
+
 export class VideoStream extends React.Component<VideoStreamProps> {
   canvas = React.createRef<HTMLCanvasElement>();
   img: HTMLImageElement;
@@ -73,7 +95,12 @@ export class VideoStream extends React.Component<VideoStreamProps> {
       this.canvas.current!.width = this.width;
       this.canvas.current!.height = this.height;
     }
-    this.img.src = "data:image/jpg;base64," + message.data;
+    if (this.img.src) {
+      URL.revokeObjectURL(this.img.src);
+    }
+    this.img.src = URL.createObjectURL(
+      dataURItoBlob("data:image/jpg;base64," + message.data),
+    );
   }
 
   drawVideo() {
