@@ -180,7 +180,6 @@ export const CameraView = (props: CustomizableComponentProps) => {
     }
     // If it is the Realsense, there is no overlay (e.g., button pad),
     // and click-to-pregrasp is toggled on, select the goal.
-    // TODO: add a way to stop it!
     else if (
       props.definition.id === CameraViewId.realsense &&
       !overlay &&

@@ -221,7 +221,9 @@ class StretchIKControl:
             # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.node.get_logger().info("Waiting for the get joint states service...")
-        get_joint_limits_client.wait_for_service()  # TODO: This can block!
+        # NOTE: Waiting for the service can block, although we haven't noticed an issue
+        # stemming from it.
+        get_joint_limits_client.wait_for_service()
         response = get_joint_limits_client.call(Trigger.Request())
         if not response.success:
             self.node.get_logger().error("Failed to get joint limits.")
@@ -1046,8 +1048,6 @@ class StretchIKControl:
         """
         Solve the inverse kinematics problem.
 
-        TODO: Consider allowing this to run multiple times with random seeds.
-
         Parameters
         ----------
         goal: The goal pose.
@@ -1076,6 +1076,8 @@ class StretchIKControl:
 
         # To encourage the IK solver to compute positive arm lengths,
         # we seed it with arm length at the maximum distance.
+        # We also add other fully random configurations in case the
+        # first one fails.
         q_init = self.__get_q(joint_position_overrides, all_joints=True)
         q_init[self.controllable_joints.index(Joint.ARM_L0)] = self.joint_pos_lim[
             Joint.ARM_L0

@@ -48,8 +48,6 @@ from stretch_web_teleop_helpers.stretch_ik_control import (
     StretchIKControl,
 )
 
-# TODO: Replace many of the info logs with debugs.
-
 
 class MoveToPregraspNode(Node):
     """
@@ -70,7 +68,9 @@ class MoveToPregraspNode(Node):
         self,
         image_params_file: str,
         tf_timeout_secs: float = 0.5,
-        action_timeout_secs: float = 60.0,  # TODO: lower!
+        # This is high because the robot can take a while to align, and if the user
+        # notices a lack of movement they can cancel the goal.
+        action_timeout_secs: float = 60.0,
     ):
         """
         Initialize the MoveToPregraspNode
