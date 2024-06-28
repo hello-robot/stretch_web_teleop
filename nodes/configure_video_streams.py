@@ -961,7 +961,7 @@ if __name__ == "__main__":
     print("Publishing reconfigured video stream")
     # Use a MultiThreadedExecutor so that subscriptions, actions, etc. can be
     # processed in parallel.
-    executor = MultiThreadedExecutor()
+    executor = MultiThreadedExecutor(num_threads=8)
 
     # Spin in the background
     spin_thread = threading.Thread(
