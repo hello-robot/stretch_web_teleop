@@ -12,6 +12,7 @@ import rclpy
 from cv_bridge import CvBridge
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 
 # Local imports
@@ -37,7 +38,7 @@ class CompressedImageVisualizer(Node):
             CompressedImage,
             "/camera/color/image_raw/compressed",
             self.compressed_img_callback,
-            1,
+            QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
         )
 
         self.get_logger().info("Compressed Image Visualizer node initialized.")

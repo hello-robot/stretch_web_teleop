@@ -253,10 +253,19 @@ class StretchIKControl:
         for joint_name in Joint:
             if joint_name in joint_map:
                 module, vel_key = joint_map[joint_name]
-                max_abs_vel = robot_params[module]["motion"][speed_profile_str][vel_key]
-                min_abs_vel = robot_params[module]["motion"][speed_profile_slow_str][
-                    vel_key
-                ]
+                try:
+                    max_abs_vel = robot_params[module]["motion"][speed_profile_str][
+                        vel_key
+                    ]
+                    min_abs_vel = robot_params[module]["motion"][
+                        speed_profile_slow_str
+                    ][vel_key]
+                except KeyError:
+                    self.node.get_logger().error(
+                        f"Failed to get velocity limits for joint name: {joint_name}"
+                    )
+                    max_abs_vel = 0.0
+                    min_abs_vel = 0.0
             elif joint_name == Joint.BASE_ROTATION:
                 # https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
                 max_abs_vel = 0.5  # rad/s

@@ -23,7 +23,8 @@ export enum UnderVideoButton {
   LookAtBase = "Look At Base",
   LookAhead = "Look Ahead",
   FollowGripper = "Follow Gripper",
-  DepthSensing = "Depth Sensing",
+  RealsenseDepthSensing = "Realsense Depth Sensing",
+  GripperDepthSensing = "Gripper Depth Sensing",
   ToggleArucoMarkers = "Toggle Aruco Markers",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
@@ -147,10 +148,21 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
           onCheck: (toggle: boolean) =>
             FunctionProvider.remoteRobot?.setToggle("setFollowGripper", toggle),
         };
-      case UnderVideoButton.DepthSensing:
+      case UnderVideoButton.RealsenseDepthSensing:
         return {
           onCheck: (toggle: boolean) =>
-            FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle),
+            FunctionProvider.remoteRobot?.setToggle(
+              "setRealsenseDepthSensing",
+              toggle,
+            ),
+        };
+      case UnderVideoButton.GripperDepthSensing:
+        return {
+          onCheck: (toggle: boolean) =>
+            FunctionProvider.remoteRobot?.setToggle(
+              "setGripperDepthSensing",
+              toggle,
+            ),
         };
       case UnderVideoButton.StartMoveToPregraspHorizontal:
         horizontal = true;

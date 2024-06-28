@@ -262,8 +262,11 @@ function handleMessage(message: WebRTCMessage) {
     case "setFollowGripper":
       robot.setPanTiltFollowGripper(message.toggle);
       break;
-    case "setDepthSensing":
-      robot.setDepthSensing(message.toggle);
+    case "setRealsenseDepthSensing":
+      robot.setRealsenseDepthSensing(message.toggle);
+      break;
+    case "setGripperDepthSensing":
+      robot.setGripperDepthSensing(message.toggle);
       break;
     case "setRunStop":
       robot.setRunStop(message.toggle);
