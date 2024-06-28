@@ -190,10 +190,33 @@ def depth_img_to_pointcloud(
 
 
 def deproject_pixel_to_point(
+    u: int, v: int, depth: float, proj: npt.NDArray[np.float32]
+) -> Tuple[float, float, float]:
+    """
+    Deproject the clicked pixel to the 3D coordinates of the clicked point.
+
+    Parameters
+    ----------
+    u: The horizontal coordinate of the clicked pixel.
+    v: The vertical coordinate of the clicked pixel.
+    depth: The depth value of the clicked pixel.
+    proj: The camera's projection matrix of size (3, 4).
+
+    Returns
+    -------
+    Tuple[float, float, float]: The 3D coordinates of the clicked point.
+    """
+    x, y, z = (
+        np.linalg.pinv(proj)[:3, :] @ np.array([depth * u, depth * v, depth]).flatten()
+    )
+    return x, y, z
+
+
+def deproject_pixel_to_pointcloud_point(
     u: int, v: int, pointcloud: npt.NDArray[np.float32], proj: npt.NDArray[np.float32]
 ) -> Tuple[float, float, float]:
     """
-    Deproject the clicked pixel to get the 3D coordinates of the clicked point.
+    Deproject the clicked pixel to the 3D coordinates of the closest point within the pointcloud.
 
     Parameters
     ----------
