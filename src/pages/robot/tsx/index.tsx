@@ -7,7 +7,6 @@ import {
   navigationProps,
   realsenseProps,
   gripperProps,
-  expandedGripperProps,
   WebRTCMessage,
   ValidJointStateDict,
   ValidJointStateMessage,
@@ -47,7 +46,6 @@ export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps);
 export let gripperStream = new VideoStream(gripperProps);
-export let expandedGripperStream = new VideoStream(expandedGripperProps);
 // let occupancyGrid: ROSOccupancyGrid | undefined;
 
 connection = new WebRTCConnection({
@@ -77,12 +75,6 @@ robot.connect().then(() => {
   });
   gripperStream.start();
 
-  robot.subscribeToVideo({
-    topicName: "/gripper_camera/image_raw/expanded/compressed",
-    callback: expandedGripperStream.updateImage,
-  });
-  expandedGripperStream.start();
-
   robot.getOccupancyGrid();
   robot.getJointLimits();
 
@@ -108,11 +100,6 @@ function handleSessionStart() {
   stream
     .getTracks()
     .forEach((track) => connection.addTrack(track, stream, "gripper"));
-
-  stream = expandedGripperStream.outputVideoStream!;
-  stream
-    .getTracks()
-    .forEach((track) => connection.addTrack(track, stream, "expandedGripper"));
 
   connection.openDataChannels();
 }
@@ -268,6 +255,9 @@ function handleMessage(message: WebRTCMessage) {
     case "setGripperDepthSensing":
       robot.setGripperDepthSensing(message.toggle);
       break;
+    case "setExpandedGripper":
+      robot.setExpandedGripper(message.toggle);
+      break;
     case "setRunStop":
       robot.setRunStop(message.toggle);
       break;
@@ -315,11 +305,6 @@ const container = document.getElementById("root");
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript
 root.render(
   <AllVideoStreamComponent
-    streams={[
-      navigationStream,
-      realsenseStream,
-      gripperStream,
-      expandedGripperStream,
-    ]}
+    streams={[navigationStream, realsenseStream, gripperStream]}
   />,
 );

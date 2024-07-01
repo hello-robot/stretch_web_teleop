@@ -330,6 +330,7 @@ export const navigationProps = {
   height: 768, // 1280,
   scale: 1,
   fps: 6.0,
+  streamName: "navigation",
 };
 
 export const realsenseProps = {
@@ -337,6 +338,7 @@ export const realsenseProps = {
   height: 640,
   scale: 1,
   fps: 6.0,
+  streamName: "realsense",
 };
 
 export const gripperProps = {
@@ -344,13 +346,7 @@ export const gripperProps = {
   height: 768,
   scale: 1,
   fps: 6.0,
-};
-
-export const expandedGripperProps = {
-  width: 768, // 480
-  height: 768, // 480
-  scale: 1,
-  fps: 6.0,
+  streamName: "gripper",
 };
 
 export interface VideoProps {

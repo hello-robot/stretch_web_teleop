@@ -18,9 +18,7 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
-from rclpy.callback_groups import (
-    ReentrantCallbackGroup,  # MutuallyExclusiveCallbackGroup
-)
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
@@ -39,7 +37,7 @@ from stretch_web_teleop_helpers.constants import (
     get_stow_configuration,
 )
 from stretch_web_teleop_helpers.conversions import (
-    deproject_pixel_to_point,
+    deproject_pixel_to_pointcloud_point,
     depth_img_to_pointcloud,
     remaining_time,
     ros_msg_to_cv2_image,
@@ -121,7 +119,6 @@ class MoveToPregraspNode(Node):
             "/camera/aligned_depth_to_color/image_raw/compressedDepth",
             self.realsense_depth_cb,
             qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.latest_realsense_info_lock = threading.Lock()
         self.latest_realsense_info: Optional[CameraInfo] = None
@@ -130,7 +127,6 @@ class MoveToPregraspNode(Node):
             "/camera/aligned_depth_to_color/camera_info",
             self.realsense_info_cb,
             qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
         # Create the action timeout
@@ -530,7 +526,7 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = deproject_pixel_to_point(
+        x, y, z = deproject_pixel_to_pointcloud_point(
             u, v, pointcloud, np.array(camera_info_msg.p).reshape(3, 4)
         )
         self.get_logger().debug(
