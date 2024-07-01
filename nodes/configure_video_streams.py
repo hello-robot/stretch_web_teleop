@@ -133,6 +133,7 @@ class ConfigureVideoStreams(Node):
             )
             self.gripper_images: Dict[str, npt.NDArray] = {}
             self.gripper_camera_rgb_image = None
+            self.latest_gripper_camera_rgb_image_lock = None
 
         self.cv_bridge = CvBridge()
         self.aruco_detector = None
@@ -178,6 +179,9 @@ class ConfigureVideoStreams(Node):
                 callback_group=MutuallyExclusiveCallbackGroup(),
             )
         if self.use_gripper:
+            self.latest_gripper_camera_rgb_image = None
+            self.latest_gripper_camera_rgb_image_lock = threading.Lock()
+            self.expanded_gripper = False
             if has_beta_teleop_kit:
                 self.gripper_camera_rgb_subscriber = self.create_subscription(
                     Image,
@@ -188,8 +192,6 @@ class ConfigureVideoStreams(Node):
                 )
             else:
                 # Subscribe to the RGB ompressed image topic
-                self.latest_gripper_realsense_rgb_image = None
-                self.latest_gripper_realsense_rgb_image_lock = threading.Lock()
                 self.gripper_camera_rgb_subscriber = self.create_subscription(
                     CompressedImage if use_compressed_image else Image,
                     "/gripper_camera/image_raw"
@@ -203,7 +205,6 @@ class ConfigureVideoStreams(Node):
                 self.expanded_gripper_service = self.create_service(
                     SetBool, "expanded_gripper", self.expanded_gripper_callback
                 )
-                self.expanded_gripper = False
 
                 # Subscribe to the depth image topic
                 self.latest_gripper_realsense_depth_image = None
@@ -636,8 +637,8 @@ class ConfigureVideoStreams(Node):
         )
 
     def gripper_camera_cb(self, ros_image):
-        with self.latest_gripper_realsense_rgb_image_lock:
-            self.latest_gripper_realsense_rgb_image = ros_image
+        with self.latest_gripper_camera_rgb_image_lock:
+            self.latest_gripper_camera_rgb_image = ros_image
 
     def gripper_realsense_depth_cb(
         self,
@@ -670,8 +671,8 @@ class ConfigureVideoStreams(Node):
                 throttle_duration_sec=1.0,
             )
 
-        with self.latest_gripper_realsense_rgb_image_lock:
-            self.latest_gripper_realsense_rgb_image = ros_image
+        with self.latest_gripper_camera_rgb_image_lock:
+            self.latest_gripper_camera_rgb_image = ros_image
 
     def process_gripper_image(
         self,
@@ -939,9 +940,9 @@ class ConfigureVideoStreams(Node):
 
             # Process the gripper image
             if self.use_gripper:
-                with self.latest_gripper_realsense_rgb_image_lock:
-                    gripper_rgb_image = self.latest_gripper_realsense_rgb_image
-                    self.latest_gripper_realsense_rgb_image = None
+                with self.latest_gripper_camera_rgb_image_lock:
+                    gripper_rgb_image = self.latest_gripper_camera_rgb_image
+                    self.latest_gripper_camera_rgb_image = None
                 if gripper_rgb_image is not None:
                     self.process_gripper_image(gripper_rgb_image)
 
