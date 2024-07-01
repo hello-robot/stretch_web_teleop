@@ -115,17 +115,19 @@ root = createRoot(container!);
 
 /** Handle when the WebRTC connection adds a new track on a camera video stream. */
 function handleRemoteTrackAdded(event: RTCTrackEvent) {
-  console.log("Remote track added.");
   const track = event.track;
   const stream = event.streams[0];
-  console.log(stream.getVideoTracks()[0].getConstraints());
+  let streamName = connection.cameraInfo[stream.id];
+  console.log("Adding remote track", streamName);
+  if (streamName != "audio") {
+    console.log(stream.getVideoTracks()[0].getConstraints());
+  }
   console.log("got track id=" + track.id, track);
   if (stream) {
     console.log("stream id=" + stream.id, stream);
   }
   console.log("OPERATOR: adding remote tracks");
 
-  let streamName = connection.cameraInfo[stream.id];
   allRemoteStreams.set(streamName, { track: track, stream: stream });
 }
 
