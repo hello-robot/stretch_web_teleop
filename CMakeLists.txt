@@ -20,6 +20,7 @@ find_package(rosidl_default_generators REQUIRED)
 ##############################
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/MoveToPregrasp.action"
+  "msg/TextToSpeech.msg"
   DEPENDENCIES geometry_msgs
 )
 
