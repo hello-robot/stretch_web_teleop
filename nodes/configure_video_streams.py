@@ -681,6 +681,8 @@ class ConfigureVideoStreams(Node):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
         if isinstance(ros_image, CompressedImage):
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        else:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         if self.gripper_depth_ar:
             with self.latest_gripper_realsense_depth_image_lock:

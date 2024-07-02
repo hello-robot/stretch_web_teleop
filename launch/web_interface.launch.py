@@ -13,7 +13,7 @@ from launch.actions import (
     GroupAction,
     IncludeLaunchDescription,
 )
-from launch.conditions import LaunchConfigurationNotEquals, LaunchConfigurationEquals
+from launch.conditions import LaunchConfigurationNotEquals
 from launch.launch_description_sources import (
     FrontendLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
