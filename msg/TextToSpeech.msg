@@ -1,15 +1,16 @@
 # The text to say
 string text
 
-# Which engine to use
-uint8 ENGINE_PYTTSX = 0
-uint8 ENGINE_GTTS = 1
-uint8 engine
-
 # The voice to use. Valid options for this depend on the engine.
 string voice
 
-# If false, allow future messages to override this one. If false,
-# add this message to queue of waiting message, guaranteeing that
-# it gets executed.
-bool queue
+# The speed to speak at, in words per minute. Defaults to 110.
+uint8 speed_wpm
+
+# If a message is already being spoken, this flag controls what to do with this message:
+# add it to a queue to be executed sequentially (Default), or interrupt the
+# current message and queue to speak this message (in this case, the old queue gets
+# discarded).
+uint8 OVERRIDE_BEHAVIOR_QUEUE = 0
+uint8 OVERRIDE_BEHAVIOR_INTERRUPT = 1
+uint8 override_behavior
