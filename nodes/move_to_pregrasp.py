@@ -286,14 +286,23 @@ class MoveToPregraspNode(Node):
 
         # Functions to cleanup the action
         terminate_motion_executors = False
+        motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
 
         def cleanup() -> None:
             """
             Clean up before returning from the action.
             """
-            nonlocal terminate_motion_executors
+            nonlocal terminate_motion_executors, motion_executors
             self.active_goal_request = None
+            self.get_logger().debug("Setting termination flag to True")
             terminate_motion_executors = True
+            # Execute the motion executors once more to process cancellation.
+            if len(motion_executors) > 0:
+                try:
+                    for i, motion_executor in enumerate(motion_executors):
+                        _ = next(motion_executor)
+                except Exception:
+                    self.get_logger().debug(traceback.format_exc())
 
         def action_error_callback(
             error_msg: str = "Goal failed",
@@ -367,7 +376,6 @@ class MoveToPregraspNode(Node):
 
         # Execute the states
         state_i = 0
-        motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
         rate = self.create_rate(5.0)
         while rclpy.ok():
             concurrent_states = states[state_i]
@@ -381,6 +389,13 @@ class MoveToPregraspNode(Node):
             if (self.get_clock().now() - start_time) > self.action_timeout:
                 return action_error_callback(
                     "Goal timed out", MoveToPregrasp.Result.STATUS_TIMEOUT
+                )
+            # Check if any joint is in collision
+            joints_in_collision = self.controller.get_joints_in_collision()
+            if len(joints_in_collision) > 0:
+                return action_error_callback(
+                    f"Joints in collision: {joints_in_collision}",
+                    MoveToPregrasp.Result.STATUS_JOINTS_IN_COLLISION,
                 )
 
             # Move the robot

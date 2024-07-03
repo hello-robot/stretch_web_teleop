@@ -7,6 +7,7 @@ https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/str
 """
 # Standard Imports
 import threading
+import traceback
 from enum import Enum
 from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
@@ -16,6 +17,7 @@ import numpy.typing as npt
 import pinocchio
 import rclpy
 import tf2_ros
+from action_msgs.msg import GoalStatus
 from builtin_interfaces.msg import Time
 from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import Transform, Twist, Vector3
@@ -158,6 +160,8 @@ class StretchIKControl:
         )
         self.latest_joint_state_lock = threading.Lock()
         self.latest_joint_state = None
+        self.max_joint_effort_lock = threading.Lock()
+        self.max_joint_effort = {}
         self.joint_state_sub = self.node.create_subscription(
             JointState,
             "/joint_states",
@@ -185,7 +189,8 @@ class StretchIKControl:
             "/stretch/cmd_vel",
             qos_profile=1,
         )
-        self.arm_client_future = None
+        self.arm_client_send_goal_future = None
+        self.arm_client_get_result_future = None
         self.arm_client = ActionClient(
             self.node,
             FollowJointTrajectory,
@@ -236,6 +241,7 @@ class StretchIKControl:
         speed_profile_slow_str = SpeedProfile.SLOW.value
         self.joint_pos_lim: Dict[Joint, Tuple[float, float]] = {}
         self.joint_vel_abs_lim: Dict[Joint, Tuple[float, float]] = {}
+        self.joint_effort_lim: Dict[Joint, Tuple[float, float]] = {}
 
         # Get the velocity limits for the controllable joints
         joint_map = {
@@ -294,6 +300,32 @@ class StretchIKControl:
             self.joint_pos_lim[joint_name] = (min_pos, max_pos)
         self.joint_pos_lim[Joint.BASE_ROTATION] = (-np.pi, np.pi)
 
+        # Get the effort limits for all joints. If this threshold is exceeded, we will assume that joint is
+        # in collision. Some values taken from:
+        # https://github.com/hello-robot/stretch_web_teleop/blob/2189494b88d0d3994ada0b3d7815154fcd296bb6/src/pages/robot/tsx/robot.tsx#L770
+        self.joint_effort_lim = {
+            Joint.ARM_LIFT: (
+                0,
+                70,
+            ),  # tuple(robot_params["lift"]["contact_models"]["effort_pct"]["contact_thresh_default"]),
+            Joint.ARM_L0: (
+                -34,
+                34,
+            ),  # tuple(robot_params["arm"]["contact_models"]["effort_pct"]["contact_thresh_default"]),
+            Joint.HEAD_PAN: (-50, 25),
+            Joint.HEAD_TILT: (-50, 50),
+            Joint.WRIST_YAW: (-12, 12),
+            # The pitch joint's effort is quite noisy as it moves, so we don't check it.
+            # Joint.WRIST_PITCH: (-12, 12),
+            Joint.WRIST_ROLL: (-12, 12),
+            # The gripper's effort is quite noisy as it moves, so we don't check it.
+            # Joint.GRIPPER_RIGHT: (-5, 5),
+        }
+        self.joint_effort_lim[Joint.COMBINED_ARM] = self.joint_effort_lim[Joint.ARM_L0]
+        # self.joint_effort_lim[Joint.GRIPPER_LEFT] = self.joint_effort_lim[
+        #     Joint.GRIPPER_RIGHT
+        # ]
+
         return True
 
     def __joint_state_cb(self, msg: JointState) -> None:
@@ -316,6 +348,18 @@ class StretchIKControl:
                 Joint(joint_name): msg.position[i]
                 for i, joint_name in enumerate(msg.name)
             }
+        if len(msg.effort) > 0:
+            # This stores the max joint effort since the last time get_joints_in_collision was called.
+            with self.max_joint_effort_lock:
+                for i, joint_name in enumerate(msg.name):
+                    effort = msg.effort[i]
+                    joint = Joint(joint_name)
+                    if joint in self.max_joint_effort:
+                        self.max_joint_effort[joint] = max(
+                            self.max_joint_effort[joint], effort
+                        )
+                    else:
+                        self.max_joint_effort[joint] = effort
 
     def __joint_limits_cb(self, msg: JointState) -> None:
         """
@@ -348,6 +392,7 @@ class StretchIKControl:
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         threshold_factor: float = 50.0,
+        num_allowable_failures: int = 3,
     ) -> Generator[MotionGeneratorRetval, None, None]:
         """
         Move the arm joints to a specific position. This function is closed-loop, and
@@ -365,6 +410,8 @@ class StretchIKControl:
         threshold_factor: The factor by which to divide the joint range to get the tolerance.
             A larger number results in a smaller tolerance and more precise motion. But
             too large may result in the robot never reaching the target position.
+        num_allowable_failures: The number of allowable failures in the FollowJointTrajectory
+            action before we give up.
 
         Returns
         -------
@@ -388,12 +435,19 @@ class StretchIKControl:
         duration = 1.0  # seconds
 
         # Command motion until the termination criteria is reached
-        future = None
+        send_goal_future = None
+        get_result_future = None
+        goal_handle = None
 
         def cleanup():
-            if future is not None and not future.done():
-                future.cancel()
+            nonlocal goal_handle
+            self.node.get_logger().debug("Cleaning up...")
+            if goal_handle is not None:
+                self.node.get_logger().debug("Cancelling the current trajectory...")
+                _ = goal_handle.cancel_goal_async()
+                self.node.get_logger().debug("Cancelled the current trajectory.")
 
+        num_failures = 0
         while not check_cancel():
             self.node.get_logger().debug("Loop Started...")
             # Leave early if ROS shuts down or timeout is reached
@@ -405,7 +459,7 @@ class StretchIKControl:
                 return
 
             # Command the robot to move to the joint positions
-            if future is None:
+            if send_goal_future is None and get_result_future is None:
                 # Get the current joint state
                 latest_joint_state_combined_arm = self.get_current_joints(
                     combine_arm=True
@@ -437,21 +491,45 @@ class StretchIKControl:
                 self.node.get_logger().debug(
                     f"Commanding robot to move to joint positions: {joint_positions_cmd}"
                 )
-                future = self.__command_move_to_joint_position(
+                send_goal_future = self.__command_move_to_joint_position(
                     joint_positions_cmd, duration, velocity_overrides=velocity_overrides
                 )
-            # Wait for the previous command to finish
-            elif future.done():
+            # Check if the goal has been accepted/rejected yet
+            elif send_goal_future is not None and send_goal_future.done():
                 try:
-                    ok = future.result()
-                    if not ok:
-                        raise Exception("Failed to move to joint positions")
-                except Exception as e:
-                    self.get_logger().error(f"{e}")
+                    goal_handle = send_goal_future.result()
+                    get_result_future = goal_handle.get_result_async()
+                    if not goal_handle.accepted:
+                        raise Exception("Move to joint position goal rejected")
+                except Exception:
+                    self.node.get_logger().error(traceback.format_exc())
                     cleanup()
                     yield MotionGeneratorRetval.FAILURE
                     return
-                future = None
+                send_goal_future = None
+            # Check if the goal has finished yet
+            elif get_result_future is not None and get_result_future.done():
+                try:
+                    result = get_result_future.result()
+                    # Even if the result is success, we don't terminate the loop,
+                    # in case the robot hasn't actually reached its target joint position
+                    # and we need to re-invoke the action.
+                    if (
+                        result.status != GoalStatus.STATUS_SUCCEEDED
+                        and result.result.error_code
+                        != FollowJointTrajectory.Result.SUCCESSFUL
+                    ):
+                        num_failures += 1
+                        if num_failures > num_allowable_failures:
+                            raise Exception(
+                                "FollowJointTrajectory action failed {num_failures} times. Aborting."
+                            )
+                except Exception:
+                    self.node.get_logger().error(traceback.format_exc())
+                    cleanup()
+                    yield MotionGeneratorRetval.FAILURE
+                    return
+                get_result_future = None
             else:
                 self.node.get_logger().debug(
                     "Waiting for previous command to finish..."
@@ -881,12 +959,35 @@ class StretchIKControl:
             return False
 
         # If moving the arm, wait until the previous arm command is done
-        if (
-            move_arm
-            and self.arm_client_future is not None
-            and not self.arm_client_future.done()
-        ):
-            return True
+        if move_arm:
+            if self.arm_client_send_goal_future is not None:
+                if self.arm_client_send_goal_future.done():
+                    goal_handle = self.arm_client_send_goal_future.result()
+                    self.arm_client_get_result_future = goal_handle.get_result_async()
+                    self.arm_client_send_goal_future = None
+                    return True
+                else:
+                    self.node.get_logger().debug(
+                        "Waiting for previous arm goal to be accepted..."
+                    )
+                    return True
+            elif self.arm_client_get_result_future is not None:
+                if self.arm_client_get_result_future.done():
+                    result = self.arm_client_get_result_future.result()
+                    if (
+                        result.status != GoalStatus.STATUS_SUCCEEDED
+                        or result.result.error_code
+                        != FollowJointTrajectory.Result.SUCCESSFUL
+                    ):
+                        self.node.get_logger().debug(
+                            "Previous arm goal failed. Will try again."
+                        )
+                    self.arm_client_get_result_future = None
+                else:
+                    self.node.get_logger().debug(
+                        "Waiting for previous arm goal to finish..."
+                    )
+                    return True
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
@@ -914,7 +1015,7 @@ class StretchIKControl:
                 joint_positions[joint_name] = (
                     pos + vel * forward_project_velocities_secs
                 )
-        self.arm_client_future = self.__command_move_to_joint_position(
+        self.arm_client_send_goal_future = self.__command_move_to_joint_position(
             joint_positions, forward_project_velocities_secs
         )
 
@@ -1047,6 +1148,27 @@ class StretchIKControl:
                 clipped_joint_velocities[joint_name] = vel
 
         return in_limits, clipped_joint_velocities if clip else joint_velocities
+
+    def get_joints_in_collision(self) -> List[Joint]:
+        """
+        Check if any of the joints are in collision.
+
+        Returns
+        -------
+        List[Joint]: The joints in collision.
+        """
+        with self.max_joint_effort_lock:
+            joint_efforts = self.max_joint_effort
+            self.max_joint_effort = {}
+        if len(joint_efforts) == 0:
+            return []
+        joints_in_collision = []
+        for joint_name, effort in joint_efforts.items():
+            if joint_name in self.joint_effort_lim:
+                min_effort, max_effort = self.joint_effort_lim[joint_name]
+                if effort < min_effort or effort > max_effort:
+                    joints_in_collision.append(joint_name)
+        return joints_in_collision
 
     def solve_ik(
         self,
