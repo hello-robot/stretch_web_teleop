@@ -390,13 +390,6 @@ class MoveToPregraspNode(Node):
                 return action_error_callback(
                     "Goal timed out", MoveToPregrasp.Result.STATUS_TIMEOUT
                 )
-            # Check if any joint is in collision
-            joints_in_collision = self.controller.get_joints_in_collision()
-            if len(joints_in_collision) > 0:
-                return action_error_callback(
-                    f"Joints in collision: {joints_in_collision}",
-                    MoveToPregrasp.Result.STATUS_JOINTS_IN_COLLISION,
-                )
 
             # Move the robot
             if len(motion_executors) == 0:

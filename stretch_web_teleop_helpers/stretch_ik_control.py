@@ -160,8 +160,6 @@ class StretchIKControl:
         )
         self.latest_joint_state_lock = threading.Lock()
         self.latest_joint_state = None
-        self.max_joint_effort_lock = threading.Lock()
-        self.max_joint_effort = {}
         self.joint_state_sub = self.node.create_subscription(
             JointState,
             "/joint_states",
@@ -241,7 +239,6 @@ class StretchIKControl:
         speed_profile_slow_str = SpeedProfile.SLOW.value
         self.joint_pos_lim: Dict[Joint, Tuple[float, float]] = {}
         self.joint_vel_abs_lim: Dict[Joint, Tuple[float, float]] = {}
-        self.joint_effort_lim: Dict[Joint, Tuple[float, float]] = {}
 
         # Get the velocity limits for the controllable joints
         joint_map = {
@@ -300,32 +297,6 @@ class StretchIKControl:
             self.joint_pos_lim[joint_name] = (min_pos, max_pos)
         self.joint_pos_lim[Joint.BASE_ROTATION] = (-np.pi, np.pi)
 
-        # Get the effort limits for all joints. If this threshold is exceeded, we will assume that joint is
-        # in collision. Some values taken from:
-        # https://github.com/hello-robot/stretch_web_teleop/blob/2189494b88d0d3994ada0b3d7815154fcd296bb6/src/pages/robot/tsx/robot.tsx#L770
-        self.joint_effort_lim = {
-            Joint.ARM_LIFT: (
-                0,
-                70,
-            ),  # tuple(robot_params["lift"]["contact_models"]["effort_pct"]["contact_thresh_default"]),
-            Joint.ARM_L0: (
-                -34,
-                34,
-            ),  # tuple(robot_params["arm"]["contact_models"]["effort_pct"]["contact_thresh_default"]),
-            Joint.HEAD_PAN: (-50, 25),
-            Joint.HEAD_TILT: (-50, 50),
-            Joint.WRIST_YAW: (-12, 12),
-            # The pitch joint's effort is quite noisy as it moves, so we don't check it.
-            # Joint.WRIST_PITCH: (-12, 12),
-            Joint.WRIST_ROLL: (-12, 12),
-            # The gripper's effort is quite noisy as it moves, so we don't check it.
-            # Joint.GRIPPER_RIGHT: (-5, 5),
-        }
-        self.joint_effort_lim[Joint.COMBINED_ARM] = self.joint_effort_lim[Joint.ARM_L0]
-        # self.joint_effort_lim[Joint.GRIPPER_LEFT] = self.joint_effort_lim[
-        #     Joint.GRIPPER_RIGHT
-        # ]
-
         return True
 
     def __joint_state_cb(self, msg: JointState) -> None:
@@ -348,18 +319,6 @@ class StretchIKControl:
                 Joint(joint_name): msg.position[i]
                 for i, joint_name in enumerate(msg.name)
             }
-        if len(msg.effort) > 0:
-            # This stores the max joint effort since the last time get_joints_in_collision was called.
-            with self.max_joint_effort_lock:
-                for i, joint_name in enumerate(msg.name):
-                    effort = msg.effort[i]
-                    joint = Joint(joint_name)
-                    if joint in self.max_joint_effort:
-                        self.max_joint_effort[joint] = max(
-                            self.max_joint_effort[joint], effort
-                        )
-                    else:
-                        self.max_joint_effort[joint] = effort
 
     def __joint_limits_cb(self, msg: JointState) -> None:
         """
@@ -392,7 +351,7 @@ class StretchIKControl:
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         threshold_factor: float = 50.0,
-        num_allowable_failures: int = 3,
+        num_allowable_failures: int = 2,
     ) -> Generator[MotionGeneratorRetval, None, None]:
         """
         Move the arm joints to a specific position. This function is closed-loop, and
@@ -1148,27 +1107,6 @@ class StretchIKControl:
                 clipped_joint_velocities[joint_name] = vel
 
         return in_limits, clipped_joint_velocities if clip else joint_velocities
-
-    def get_joints_in_collision(self) -> List[Joint]:
-        """
-        Check if any of the joints are in collision.
-
-        Returns
-        -------
-        List[Joint]: The joints in collision.
-        """
-        with self.max_joint_effort_lock:
-            joint_efforts = self.max_joint_effort
-            self.max_joint_effort = {}
-        if len(joint_efforts) == 0:
-            return []
-        joints_in_collision = []
-        for joint_name, effort in joint_efforts.items():
-            if joint_name in self.joint_effort_lim:
-                min_effort, max_effort = self.joint_effort_lim[joint_name]
-                if effort < min_effort or effort > max_effort:
-                    joints_in_collision.append(joint_name)
-        return joints_in_collision
 
     def solve_ik(
         self,
