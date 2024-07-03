@@ -13,6 +13,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 # Local Imports
 from stretch_web_teleop.msg import TextToSpeech
 from stretch_web_teleop_helpers.text_to_speech_helpers import (
+    GTTS,
     PyTTSx3,
     TextToSpeechEngine,
     TextToSpeechEngineType,
@@ -67,6 +68,9 @@ class TextToSpeechNode(Node):
         """
         if self.engine_type == TextToSpeechEngineType.PYTTSX3:
             self.engine = PyTTSx3(self.get_logger())
+            self.initialized = True
+        elif self.engine_type == TextToSpeechEngineType.GTTS:
+            self.engine = GTTS(self.get_logger())
             self.initialized = True
         else:
             self.get_logger().error(f"Unsupported text-to-speech {self.engine_type}")
@@ -124,7 +128,9 @@ class TextToSpeechNode(Node):
 def main():
     rclpy.init()
 
-    node = TextToSpeechNode()
+    node = TextToSpeechNode(
+        engine_type=TextToSpeechEngineType.GTTS,
+    )
     node.get_logger().info("Created!")
 
     # Spin in the background, as the node initializes

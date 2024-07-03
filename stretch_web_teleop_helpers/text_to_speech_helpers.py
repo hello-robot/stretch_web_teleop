@@ -1,10 +1,14 @@
 # Standard imports
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List
+from io import BytesIO
+from typing import List, Optional
 
 # Third-party imports
 import pyttsx3
+import simpleaudio
+from gtts import gTTS
+from pydub import AudioSegment
 from rclpy.impl.rcutils_logger import RcutilsLogger
 
 
@@ -15,6 +19,7 @@ class TextToSpeechEngineType(Enum):
     """
 
     PYTTSX3 = 1
+    GTTS = 2
 
 
 class TextToSpeechEngine(ABC):
@@ -62,7 +67,10 @@ class TextToSpeechEngine(ABC):
         """
         Set the current voice ID for the text-to-speech engine.
         """
-        self._voice_id = voice_id
+        if voice_id in self._voice_ids:
+            self._voice_id = voice_id
+        else:
+            self._logger.error(f"Invalid voice ID: {voice_id}")
 
     @property
     def is_slow(self) -> bool:
@@ -191,3 +199,82 @@ class PyTTSx3(TextToSpeechEngine):
         self._logger.warn(
             "Asynchronous stopping is not supported for PyTTSx3 on Linux."
         )
+
+
+class GTTS(TextToSpeechEngine):
+    """
+    Text-to-speech engine using gTTS.
+    """
+
+    def __init__(self, logger: RcutilsLogger):
+        """
+        Initialize the text-to-speech engine.
+
+        Parameters
+        ----------
+        logger : Logger
+            The logger to use for logging messages.
+        """
+        super().__init__(logger)
+        self._can_say_async = True
+
+        # Initialize the voices.
+        # https://gtts.readthedocs.io/en/latest/module.html#gtts.lang.tts_langs
+        self._voice_ids = [
+            "com",  # Default
+            "us",  # United States
+            "com.au",  # Australia
+            "co.uk",  # United Kingdom
+            "ca",  # Canada
+            "co.in",  # India
+            "ie",  # Ireland
+            "co.za",  # South Africa
+            "com.ng",  # Nigeria
+        ]
+        self.voice_id = "com"
+        self._playback: Optional[simpleaudio.PlayObject] = None
+
+    def __synthesize_and_play_text(self, text: str) -> simpleaudio.PlayObject:
+        """
+        Get the playback object for the given text.
+
+        Parameters
+        ----------
+        text : str
+            The text to speak.
+
+        Returns
+        -------
+        simpleaudio.PlayObject
+            The playback object.
+        """
+        tts = gTTS(text=text, lang="en", tld=self.voice_id, slow=self.is_slow)
+        fp = BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        audio = AudioSegment.from_file(fp, format="mp3")
+        self._playback = simpleaudio.play_buffer(
+            audio.raw_data, audio.channels, audio.sample_width, audio.frame_rate
+        )
+
+    def say_async(self, text: str):
+        """
+        Speak the given text asynchronously.
+        """
+        self.__synthesize_and_play_text(text)
+
+    def say(self, text: str):
+        """
+        Speak the given text synchronously.
+        """
+        self.__synthesize_and_play_text(text)
+        self._playback.wait_done()
+        self._playback = None
+
+    def stop(self):
+        """
+        Stop speaking the current text.
+        """
+        if self._playback is not None:
+            self._playback.stop()
+            self._playback = None
