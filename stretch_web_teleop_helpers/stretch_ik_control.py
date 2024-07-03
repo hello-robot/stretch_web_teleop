@@ -162,7 +162,7 @@ class StretchIKControl:
         self.latest_joint_state = None
         self.joint_state_sub = self.node.create_subscription(
             JointState,
-            "/joint_states",
+            "/stretch/joint_states",
             self.__joint_state_cb,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
@@ -245,6 +245,7 @@ class StretchIKControl:
             Joint.ARM_LIFT: ("lift", "vel_m"),
             Joint.ARM_L0: ("arm", "vel_m"),
             Joint.COMBINED_ARM: ("arm", "vel_m"),
+            Joint.WRIST_EXTENSION: ("arm", "vel"),
             Joint.WRIST_YAW: ("wrist_yaw", "vel"),
             Joint.WRIST_PITCH: ("wrist_pitch", "vel"),
             Joint.WRIST_ROLL: ("wrist_roll", "vel"),
@@ -417,35 +418,32 @@ class StretchIKControl:
                 yield MotionGeneratorRetval.FAILURE
                 return
 
+            # Get the current joint state
+            latest_joint_state_combined_arm = self.get_current_joints(combine_arm=True)
+
+            # Remove joints that have reached their set point
+            joint_positions_cmd = {}
+            for joint_name, joint_position in joint_positions.items():
+                joint_err = joint_position - latest_joint_state_combined_arm[joint_name]
+                tolerance = 0.05
+                if joint_name in self.joint_pos_lim:
+                    min_pos, max_pos = self.joint_pos_lim[joint_name]
+                    tolerance = (max_pos - min_pos) / threshold_factor
+                self.node.get_logger().debug(
+                    f"Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
+                )
+                if abs(joint_err) > tolerance:
+                    joint_positions_cmd[joint_name] = joint_position
+
+            # If no joints to move, break. This is necessary because sometimes the wrist
+            # reaches the goal but stretch_driver doesn't realize it has reached the goal
+            # so keeps waiting until timeout.
+            if len(joint_positions_cmd) == 0:
+                cleanup()
+                yield MotionGeneratorRetval.SUCCESS
+                return
             # Command the robot to move to the joint positions
             if send_goal_future is None and get_result_future is None:
-                # Get the current joint state
-                latest_joint_state_combined_arm = self.get_current_joints(
-                    combine_arm=True
-                )
-
-                # Remove joints that have reached their set point
-                joint_positions_cmd = {}
-                for joint_name, joint_position in joint_positions.items():
-                    joint_err = (
-                        joint_position - latest_joint_state_combined_arm[joint_name]
-                    )
-                    tolerance = 0.05
-                    if joint_name in self.joint_pos_lim:
-                        min_pos, max_pos = self.joint_pos_lim[joint_name]
-                        tolerance = (max_pos - min_pos) / threshold_factor
-                    self.node.get_logger().debug(
-                        f"Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
-                    )
-                    if abs(joint_err) > tolerance:
-                        joint_positions_cmd[joint_name] = joint_position
-
-                # If no joints to move, break
-                if len(joint_positions_cmd) == 0:
-                    cleanup()
-                    yield MotionGeneratorRetval.SUCCESS
-                    return
-
                 # Command the robot to move to the joint positions
                 self.node.get_logger().debug(
                     f"Commanding robot to move to joint positions: {joint_positions_cmd}"

@@ -24,6 +24,7 @@ class Joint(Enum):
     ARM_L2 = "joint_arm_l2"
     ARM_L3 = "joint_arm_l3"
     COMBINED_ARM = "joint_arm"
+    WRIST_EXTENSION = "wrist_extension"
     WRIST_YAW = "joint_wrist_yaw"
     WRIST_PITCH = "joint_wrist_pitch"
     WRIST_ROLL = "joint_wrist_roll"
