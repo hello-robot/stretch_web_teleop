@@ -33,6 +33,7 @@ from stretch_web_teleop.action import MoveToPregrasp
 from stretch_web_teleop_helpers.constants import (
     Frame,
     Joint,
+    adjust_arm_lift_for_base_collision,
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
 )
@@ -343,6 +344,9 @@ class MoveToPregraspNode(Node):
                 f"Goal pose is not reachable {ik_solution}",
                 MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
             )
+
+        # Raise the arm lift if it is too low and the wrist would collide with the base
+        adjust_arm_lift_for_base_collision(ik_solution, horizontal_grasp)
 
         # Get the states.
         states = self.get_states(horizontal_grasp, ik_solution)

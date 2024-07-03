@@ -131,6 +131,32 @@ def get_stow_configuration(
     return retval
 
 
+def adjust_arm_lift_for_base_collision(
+    ik_solution: Dict[Joint, float],
+    horizontal_grasp: bool,
+) -> None:
+    """
+    Modifies the arm lift to avoid collision with the base.
+
+    Parameters
+    ----------
+    ik_solution: The current IK solution.
+    horizontal_grasp: Whether the robot will be grasping the object horizontally
+    """
+    if horizontal_grasp:
+        # If the arm length is less than 10cm and the arm lift is less than 11cm,
+        # a horizontal wrist will collide with the base. Raise the arm lift.
+        if ik_solution[Joint.ARM_L0] < 0.10:
+            if ik_solution[Joint.ARM_LIFT] < 0.11:
+                ik_solution[Joint.ARM_LIFT] = 0.11
+    else:
+        # If the arm length is less than 10cm and the arm lift is less than 33cm,
+        # a vertical wrist will collide with the base. Raise the arm lift.
+        if ik_solution[Joint.ARM_L0] < 0.10:
+            if ik_solution[Joint.ARM_LIFT] < 0.33:
+                ik_solution[Joint.ARM_LIFT] = 0.33
+
+
 def get_pregrasp_wrist_configuration(horizontal: bool) -> Dict[Joint, float]:
     """
     Get the wrist rotation for the pregrasp position.
