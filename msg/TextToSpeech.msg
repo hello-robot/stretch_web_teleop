@@ -4,8 +4,8 @@ string text
 # The voice to use. Valid options for this depend on the engine.
 string voice
 
-# The speed to speak at, in words per minute. Defaults to 110.
-uint8 speed_wpm
+# Whether to speak slow or not.
+bool is_slow
 
 # If a message is already being spoken, this flag controls what to do with this message:
 # add it to a queue to be executed sequentially (Default), or interrupt the
