@@ -10,8 +10,8 @@
 
 From the top-level of this repository, run:
 
-- \[ \] `pre-commit run --all-files`
+- [ ] `pre-commit run --all-files`
 
 # To merge
 
-- \[ \] `Squash & Merge`
+- [ ] `Squash & Merge`
