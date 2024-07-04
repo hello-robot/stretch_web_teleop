@@ -157,6 +157,7 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
       hasBetaTeleopKit = message.value;
       break;
     case "stretchTool":
+      console.log("index stretchTool", message.value);
       stretchTool = getStretchTool(message.value);
       break;
     case "occupancyGrid":

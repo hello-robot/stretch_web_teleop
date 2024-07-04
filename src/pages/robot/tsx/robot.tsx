@@ -42,7 +42,8 @@ export class Robot extends React.Component {
   private switchToNavigationService?: ROSLIB.Service;
   private switchToPositionService?: ROSLIB.Service;
   private setCameraPerspectiveService?: ROSLIB.Service;
-  private setDepthSensingService?: ROSLIB.Service;
+  private setRealsenseDepthSensingService?: ROSLIB.Service;
+  private setGripperDepthSensingService?: ROSLIB.Service;
   private setRunStopService?: ROSLIB.Service;
   private robotFrameTfClient?: ROSLIB.TFClient;
   private mapFrameTfClient?: ROSLIB.TFClient;
@@ -144,7 +145,8 @@ export class Robot extends React.Component {
     this.createCmdVelTopic();
     this.createSwitchToNavigationService();
     this.createSwitchToPositionService();
-    this.createDepthSensingService();
+    this.createRealsenseDepthSensingService();
+    this.createGripperDepthSensingService();
     this.createRunStopService();
     this.createRobotFrameTFClient();
     this.createMapFrameTFClient();
@@ -232,7 +234,7 @@ export class Robot extends React.Component {
   getHasBetaTeleopKit() {
     this.hasBetaTeleopKitParam = new ROSLIB.Param({
       ros: this.ros,
-      name: "/configure_video_streams:has_beta_teleop_kit",
+      name: "/configure_video_streams_gripper:has_beta_teleop_kit",
     });
 
     this.hasBetaTeleopKitParam.get((value: boolean) => {
@@ -246,7 +248,7 @@ export class Robot extends React.Component {
     // However, we only need it once, so opt for a parameter.
     this.stretchToolParam = new ROSLIB.Param({
       ros: this.ros,
-      name: "/configure_video_streams:stretch_tool",
+      name: "/configure_video_streams_gripper:stretch_tool",
     });
 
     this.stretchToolParam.get((value: string) => {
@@ -409,10 +411,18 @@ export class Robot extends React.Component {
     });
   }
 
-  createDepthSensingService() {
-    this.setDepthSensingService = new ROSLIB.Service({
+  createRealsenseDepthSensingService() {
+    this.setRealsenseDepthSensingService = new ROSLIB.Service({
       ros: this.ros,
-      name: "/depth_ar",
+      name: "/realsense_depth_ar",
+      serviceType: "std_srvs/srv/SetBool",
+    });
+  }
+
+  createGripperDepthSensingService() {
+    this.setGripperDepthSensingService = new ROSLIB.Service({
+      ros: this.ros,
+      name: "/gripper_depth_ar",
       serviceType: "std_srvs/srv/SetBool",
     });
   }
@@ -478,13 +488,28 @@ export class Robot extends React.Component {
     });
   }
 
-  setDepthSensing(toggle: boolean) {
+  setRealsenseDepthSensing(toggle: boolean) {
     var request = new ROSLIB.ServiceRequest({ data: toggle });
-    this.setDepthSensingService?.callService(request, (response: boolean) => {
-      response
-        ? console.log("Enable depth sensing")
-        : console.log("Disabled depth sensing");
-    });
+    this.setRealsenseDepthSensingService?.callService(
+      request,
+      (response: boolean) => {
+        response
+          ? console.log("Enable realsense depth sensing")
+          : console.log("Disabled realsense depth sensing");
+      },
+    );
+  }
+
+  setGripperDepthSensing(toggle: boolean) {
+    var request = new ROSLIB.ServiceRequest({ data: toggle });
+    this.setGripperDepthSensingService?.callService(
+      request,
+      (response: boolean) => {
+        response
+          ? console.log("Enable gripper depth sensing")
+          : console.log("Disabled gripper depth sensing");
+      },
+    );
   }
 
   setRunStop(toggle: boolean) {

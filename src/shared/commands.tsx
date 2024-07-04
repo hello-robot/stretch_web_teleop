@@ -62,7 +62,11 @@ export interface CameraPerspectiveCommand {
 }
 
 export interface ToggleCommand {
-  type: "setFollowGripper" | "setDepthSensing" | "setRunStop";
+  type:
+    | "setFollowGripper"
+    | "setRealsenseDepthSensing"
+    | "setGripperDepthSensing"
+    | "setRunStop";
   toggle: boolean;
 }
 
