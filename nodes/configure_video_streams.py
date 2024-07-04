@@ -363,21 +363,21 @@ class ConfigureVideoStreams(Node):
             pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
 
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
-        # Downsample points using a VoxelGrid
-        downsampler = pcl_cloud.make_voxel_grid_filter()
-        downsampler.set_leaf_size(
-            self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
-            self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
-            self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
-        )
-        pcl_cloud_filtered = downsampler.filter()
-
         # Filter by points that are within z_dist m of the camera.
         z_dist = 1.5  # m
-        passthrough_z = pcl_cloud_filtered.make_passthrough_filter()
+        passthrough_z = pcl_cloud.make_passthrough_filter()
         passthrough_z.set_filter_field_name("z")
         passthrough_z.set_filter_limits(0.01, z_dist)
         pcl_cloud_filtered = passthrough_z.filter()
+        # Downsample points using a VoxelGrid
+        if self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE > 0:
+            downsampler = pcl_cloud_filtered.make_voxel_grid_filter()
+            downsampler.set_leaf_size(
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+            )
+            pcl_cloud_filtered = downsampler.filter()
         if not pcl_cloud_filtered:
             return img
         if pcl_cloud_filtered.to_array().size == 0:
@@ -745,24 +745,22 @@ class ConfigureVideoStreams(Node):
         else:
             pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
 
-        # Downsample points using a VoxelGrid
+        # Filter the pointcloud to only nearby points, to lower its size
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
+        passthrough = pcl_cloud.make_passthrough_filter()
+        passthrough.set_filter_field_name("z")
+        passthrough.set_filter_limits(0.01, 0.3)
+        pcl_cloud_filtered = passthrough.filter()
+
+        # Downsample points using a VoxelGrid
         if self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE > 0:
-            downsampler = pcl_cloud.make_voxel_grid_filter()
+            downsampler = pcl_cloud_filtered.make_voxel_grid_filter()
             downsampler.set_leaf_size(
                 self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
                 self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
                 self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
             )
             pcl_cloud_filtered = downsampler.filter()
-        else:
-            pcl_cloud_filtered = pcl_cloud
-
-        # Filter the pointcloud to only nearby points, to lower its size
-        passthrough = pcl_cloud_filtered.make_passthrough_filter()
-        passthrough.set_filter_field_name("z")
-        passthrough.set_filter_limits(0.01, 0.3)
-        pcl_cloud_filtered = passthrough.filter()
         pc_in_camera_filtered = pcl_cloud_filtered.to_array()
 
         # Create the Aruco Detector
