@@ -920,6 +920,10 @@ export class Robot extends React.Component {
 
   inCollision(jointName: ValidJoints) {
     let inCollision: [boolean, boolean] = [false, false];
+    // TODO: This formulation needs to be changed, because effort values are
+    // robot-specific and change based on whether the robot is plugged in or not,
+    // mechanical factors (e.g., an old cable), etc. Thus, a single threshold
+    // will not work across all robots.
     const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
       joint_head_tilt: [-50, 50],
       joint_head_pan: [-50, 50],
