@@ -349,6 +349,10 @@ export const gripperProps = {
   streamName: "gripper",
 };
 
+// audioProps are empty for now, but are included in case we want to customize
+// the audio stream in the future.
+export const audioProps = {};
+
 export interface VideoProps {
   topicName: string;
   callback: (message: ROSCompressedImage) => void;

@@ -1,4 +1,5 @@
 import React from "react";
+import { AudioControl } from "./static_components/AudioControl";
 import { SpeedControl } from "./static_components/SpeedControl";
 import { LayoutArea } from "./static_components/LayoutArea";
 import { CustomizeButton } from "./static_components/CustomizeButton";
@@ -289,6 +290,7 @@ export const Operator = (props: {
           showActive
           placement="bottom"
         />
+        <AudioControl remoteStreams={remoteStreams} />
         <SpeedControl
           scale={velocityScale}
           onChange={(newScale: number) => {

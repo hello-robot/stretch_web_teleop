@@ -7,6 +7,7 @@ import {
   navigationProps,
   realsenseProps,
   gripperProps,
+  audioProps,
   WebRTCMessage,
   ValidJointStateDict,
   ValidJointStateMessage,
@@ -22,6 +23,7 @@ import {
   BatteryVoltageMessage,
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
+import { AudioStream } from "./audiostreams";
 import ROSLIB from "roslib";
 import {
   HasBetaTeleopKitMessage,
@@ -46,6 +48,7 @@ export let connection: WebRTCConnection;
 export let navigationStream = new VideoStream(navigationProps);
 export let realsenseStream = new VideoStream(realsenseProps);
 export let gripperStream = new VideoStream(gripperProps);
+export let audioStream = new AudioStream(audioProps);
 // let occupancyGrid: ROSOccupancyGrid | undefined;
 
 connection = new WebRTCConnection({
@@ -75,6 +78,8 @@ robot.connect().then(() => {
   });
   gripperStream.start();
 
+  audioStream.start();
+
   robot.getOccupancyGrid();
   robot.getJointLimits();
 
@@ -100,6 +105,11 @@ function handleSessionStart() {
   stream
     .getTracks()
     .forEach((track) => connection.addTrack(track, stream, "gripper"));
+
+  stream = audioStream.outputAudioStream!;
+  stream
+    .getTracks()
+    .forEach((track) => connection.addTrack(track, stream, "audio"));
 
   connection.openDataChannels();
 }
