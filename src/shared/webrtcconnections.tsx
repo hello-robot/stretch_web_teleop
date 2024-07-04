@@ -323,22 +323,46 @@ export class WebRTCConnection extends React.Component {
     if (this.onMessage) this.onMessage(obj);
   }
 
-  async isConnected() {
-    await this.peerConnection?.getStats(null).then((stats) => {
-      stats.forEach((report) => {
-        if (report.type == "data-channel") {
-          // Ignore repeated reports
-          if (report.timestamp <= this.dataChannelReceivedTimestamp)
-            return this.dataChannelConnectionState;
+  /**
+   * Returns whether the data channel is connected. This function implements two
+   * ways of doing so:
+   * 1. It requests a data report from the peer connection and checks the number
+   *   of bytes received.
+   * 2. It checks the connection state of the peer connection.
+   * @param report if True, use option 1 above. Otherwise, use option 2.
+   * @returns whether the data channel is connected
+   */
+  async isConnected(report: boolean = false) {
+    if (report) {
+      await this.peerConnection?.getStats(null).then((stats) => {
+        stats.forEach((report) => {
+          if (report.type == "data-channel") {
+            // Ignore repeated reports
+            if (report.timestamp <= this.dataChannelReceivedTimestamp)
+              return this.dataChannelConnectionState;
 
-          this.dataChannelConnectionState =
-            report.bytesReceived > this.dataChannelReceivedByteCount;
-          this.dataChannelReceivedByteCount = report.bytesReceived;
-          this.dataChannelReceivedTimestamp = report.timestamp;
-        }
+            // console.log(
+            //   "Data channel report: bytes sent", report.bytesSent,
+            //   ", bytes received", report.bytesReceived,
+            //   ", messages sent", report.messagesSent,
+            //   ", messages received", report.messagesReceived,
+            //   ", state", report.state,
+            // )
+
+            // bytesReceived contains the total number of bytes received over the
+            // lifetime of the data channel. If it has increased since the last report,
+            // then the data channel is still connected.
+            this.dataChannelConnectionState =
+              report.bytesReceived > this.dataChannelReceivedByteCount;
+            this.dataChannelReceivedByteCount = report.bytesReceived;
+            this.dataChannelReceivedTimestamp = report.timestamp;
+          }
+        });
       });
-    });
-
+    } else {
+      this.dataChannelConnectionState =
+        this.peerConnection?.connectionState == "connected";
+    }
     return this.dataChannelConnectionState;
   }
 }

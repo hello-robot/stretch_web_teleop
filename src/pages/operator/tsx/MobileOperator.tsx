@@ -7,7 +7,11 @@ import {
   ComponentType,
   MapDefinition,
 } from "./utils/component_definitions";
-import { className, MoveBaseState, RemoteStream } from "shared/util";
+import {
+  className,
+  ActionState as MoveBaseState,
+  RemoteStream,
+} from "shared/util";
 import {
   buttonFunctionProvider,
   hasBetaTeleopKit,
@@ -86,6 +90,14 @@ export const MobileOperator = (props: {
     }
   }
   buttonFunctionProvider.setOperatorCallback(operatorCallback);
+
+  // Just used as a flag to force the operator to rerender when the tablet orientation
+  // changes.
+  const [tabletOrientationRerender, setTabletOrientationRerender] =
+    React.useState<boolean>(false);
+  underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
+    setTabletOrientationRerender(!tabletOrientationRerender);
+  });
 
   function moveBaseStateCallback(state: MoveBaseState) {
     setMoveBaseState(state);

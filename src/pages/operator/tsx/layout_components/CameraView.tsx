@@ -39,6 +39,7 @@ import {
 import {
   OverheadButtons,
   realsenseButtons,
+  realsenseMoveToPregraspButtons,
   RealsenseButtons,
   UnderVideoButton,
   wristButtons,
@@ -55,8 +56,20 @@ import "operator/css/CameraView.css";
 export const CameraView = (props: CustomizableComponentProps) => {
   // Reference to the video element
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  // X and Y position of the cursor when user clicks on the video
-  const [clickXY, setClickXY] = React.useState<[number, number] | null>(null);
+  // X and Y position of the cursor when user clicks on the video while customizing
+  const [contextMenuXY, setContextMenuXY] = React.useState<
+    [number, number] | null
+  >(null);
+  // Scaled x and y positions (in [0.0, 1.0]) when the user clicks the realsense stream to select an object
+  const [selectObjectScaledXY, setSelectObjectScaledXY] = React.useState<
+    [number, number] | null
+  >(null);
+  // The font size to use for the icon indicating the selected object
+  const [selectObjectFontSize, setSelectObjectFontSize] =
+    React.useState<string>("1.5em");
+  // Whether the robot is currently in the process of moving to a pregrasp position
+  const [isMovingToPregrasp, setIsMovingToPregrasp] =
+    React.useState<boolean>(false);
   const definition = React.useMemo(
     () => props.definition as CameraViewDefinition,
     [props.definition],
@@ -67,6 +80,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     );
   // Reference to the div immediately around the video element
   const videoAreaRef = React.useRef<HTMLDivElement>(null);
+  // Reference to the div below the video element
+  const underVideoAreaRef = React.useRef<HTMLDivElement>(null);
   // Boolean representing if the video stream needs to be constrained by height
   // (constrained by width otherwise)
   const [constrainedHeight, setConstrainedHeight] =
@@ -123,35 +138,62 @@ export const CameraView = (props: CustomizableComponentProps) => {
   /** Mark this video stream as selected */
   function selectSelf() {
     props.sharedState.onSelect(props.definition, props.path);
-    setClickXY(null);
+    setContextMenuXY(null);
   }
 
   /** Mark the button pad child as selected */
   function selectChild() {
     props.sharedState.onSelect(overlayDefinition!, props.path + "-0");
-    setClickXY(null);
+    setContextMenuXY(null);
   }
 
   /** Opens a popup  */
   function handleClick(event: React.MouseEvent<HTMLDivElement>) {
     event.stopPropagation();
 
-    // If no button pad overlay then select self and return
-    if (
-      !overlayDefinition ||
-      overlayDefinition.type !== ComponentType.ButtonPad
-    ) {
-      selectSelf();
-      return;
-    }
-
-    // Create context menu popup where user can choose between selecting
-    // the button pad or the video stream
+    // Get the coordinates of the click within the camera view
     const { clientX, clientY } = event;
-    const { left, top } = videoRef.current!.getBoundingClientRect();
+    const { left, top, right, bottom } =
+      videoRef.current!.getBoundingClientRect();
     const x = clientX - left;
     const y = clientY - top;
-    setClickXY([x, y]);
+
+    console.log("CameraView clicked at x", x, "y ", y);
+
+    // If you are customizing and there is a button pad on top of the
+    // video feed, display a dropdown letting users to specify which to
+    // select. Note that even clicks on overlaid components will trigger
+    // this (in addition to the overlaid component's click event).
+    if (customizing) {
+      // If no button pad overlay then select self and return
+      if (
+        !overlayDefinition ||
+        overlayDefinition.type !== ComponentType.ButtonPad
+      ) {
+        selectSelf();
+        return;
+      }
+
+      // Create context menu popup where user can choose between selecting
+      // the button pad or the video stream
+      setContextMenuXY([x, y]);
+    }
+    // If it is the Realsense, there is no overlay (e.g., button pad),
+    // and click-to-pregrasp is toggled on, select the goal.
+    else if (
+      props.definition.id === CameraViewId.realsense &&
+      !overlay &&
+      (props.definition as RealsenseVideoStreamDef)
+        .selectObjectForMoveToPregrasp
+    ) {
+      let scaled_x = x / (right - left);
+      let scaled_y = y / (bottom - top);
+      setSelectObjectScaledXY([scaled_x, scaled_y]);
+      console.log("scaled x", scaled_x, "scaled y", scaled_y);
+      // underVideoFunctionProvider.provideFunctions(
+      //   UnderVideoButton.MoveToPregrasp,
+      // ).onClick!(scaled_x, scaled_y);
+    }
   }
 
   // Constrain the width or height when the stream gets too large
@@ -159,16 +201,22 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const resizeObserver = new ResizeObserver((entries) => {
       // height and width of area around the video stream
       const { height, width } = entries[0].contentRect;
+      const areaAspectRatio = +(width / height).toFixed(2);
 
       // height and width of video stream
       if (!videoRef?.current) return;
       const videoRect = videoRef.current.getBoundingClientRect();
+      const videoAspectRatio = +(videoRect.width / videoRect.height).toFixed(2);
 
-      if (Math.abs(videoRect.height - height) > 1.0) {
+      // Set whether the height or width is the constraining factor
+      if (areaAspectRatio > videoAspectRatio) {
         setConstrainedHeight(true);
-      } else if (Math.abs(videoRect.width - width) > 1.0) {
+      } else if (areaAspectRatio < videoAspectRatio) {
         setConstrainedHeight(false);
       }
+
+      // Set the font size for the selected object icon
+      setSelectObjectFontSize((videoRect.width / 8).toString() + "px");
     });
     if (!videoAreaRef?.current) return;
     resizeObserver.observe(videoAreaRef.current);
@@ -185,7 +233,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         predictiveDisplay,
       })}
       // style={overlayDimensions}
-      onClick={customizing ? handleClick : undefined}
+      onClick={handleClick}
     >
       {
         // Display overlay on top of video stream
@@ -200,13 +248,13 @@ export const CameraView = (props: CustomizableComponentProps) => {
         )
       }
       {
-        // When clickXY is set, display context menu
-        clickXY ? (
+        // When contextMenuXY is set, display thr context menu
+        contextMenuXY ? (
           <SelectContexMenu
-            clickXY={clickXY}
+            clickXY={contextMenuXY}
             selectSelf={selectSelf}
             selectChild={selectChild}
-            clickOut={() => setClickXY(null)}
+            clickOut={() => setContextMenuXY(null)}
           />
         ) : undefined
       }
@@ -264,6 +312,18 @@ export const CameraView = (props: CustomizableComponentProps) => {
         className={className(videoClass, { constrainedHeight })}
       />
       {overlayContainer}
+      {selectObjectScaledXY ? (
+        <span
+          className="realsense material-icons"
+          style={{
+            left: (selectObjectScaledXY[0] * 100).toString() + "%",
+            top: (selectObjectScaledXY[1] * 100).toString() + "%",
+            fontSize: selectObjectFontSize,
+          }}
+        >
+          add
+        </span>
+      ) : undefined}
     </div>
   );
 
@@ -271,12 +331,17 @@ export const CameraView = (props: CustomizableComponentProps) => {
     <div className="video-container" draggable={false}>
       {videoComponent}
       {definition.displayButtons ? (
-        <div className="under-video-area">
+        <div className="under-video-area" ref={underVideoAreaRef}>
           <UnderVideoButtons
             definition={definition}
             setPredictiveDisplay={setPredictiveDisplay}
             setExpandedGripperView={setExpandedGripperView}
             betaTeleopKit={props.sharedState.hasBetaTeleopKit}
+            selectObjectScaledXY={selectObjectScaledXY}
+            setSelectObjectScaledXY={setSelectObjectScaledXY}
+            isMovingToPregrasp={isMovingToPregrasp}
+            setIsMovingToPregrasp={setIsMovingToPregrasp}
+            underVideoAreaRef={underVideoAreaRef}
             stretchTool={props.sharedState.stretchTool}
           />
         </div>
@@ -631,6 +696,11 @@ const UnderVideoButtons = (props: {
   definition: CameraViewDefinition;
   setPredictiveDisplay: (enabled: boolean) => void;
   setExpandedGripperView: (expanded: boolean) => void;
+  selectObjectScaledXY: [number, number] | null;
+  setSelectObjectScaledXY: (scaledXY: [number, number] | null) => void;
+  isMovingToPregrasp: boolean;
+  setIsMovingToPregrasp: (isMoving: boolean) => void;
+  underVideoAreaRef: React.RefObject<HTMLDivElement>;
   betaTeleopKit: boolean;
   stretchTool: StretchTool;
 }) => {
@@ -664,6 +734,11 @@ const UnderVideoButtons = (props: {
       buttons = (
         <UnderRealsenseButtons
           definition={props.definition}
+          selectObjectScaledXY={props.selectObjectScaledXY}
+          setSelectObjectScaledXY={props.setSelectObjectScaledXY}
+          isMovingToPregrasp={props.isMovingToPregrasp}
+          setIsMovingToPregrasp={props.setIsMovingToPregrasp}
+          underVideoAreaRef={props.underVideoAreaRef}
           stretchTool={props.stretchTool}
         />
       );
@@ -765,11 +840,95 @@ const UnderAdjustableOverheadButtons = (props: {
  */
 const UnderRealsenseButtons = (props: {
   definition: RealsenseVideoStreamDef;
+  selectObjectScaledXY: [number, number] | null;
+  setSelectObjectScaledXY: (scaledXY: [number, number] | null) => void;
+  isMovingToPregrasp: boolean;
+  setIsMovingToPregrasp: (isMoving: boolean) => void;
+  underVideoAreaRef: React.RefObject<HTMLDivElement>;
   stretchTool: StretchTool;
 }) => {
   const [rerender, setRerender] = React.useState<boolean>(false);
   const [selectedIdx, setSelectedIdx] = React.useState<number>();
   // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
+
+  console.log("UnderRealsenseButtons", props.isMovingToPregrasp);
+
+  // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
+  let moveToPregraspButtons = <></>;
+  if (props.stretchTool === StretchTool.DEX_GRIPPER) {
+    moveToPregraspButtons = (
+      <React.Fragment>
+        <CheckToggleButton
+          checked={props.definition.selectObjectForMoveToPregrasp || false}
+          onClick={() => {
+            props.definition.selectObjectForMoveToPregrasp =
+              !props.definition.selectObjectForMoveToPregrasp;
+            props.setSelectObjectScaledXY(null);
+            setRerender(!rerender);
+          }}
+          label="Select Object"
+        />
+        {props.isMovingToPregrasp ? (
+          <button
+            className="map-cancel-btn"
+            onPointerDown={() => {
+              underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.CancelMoveToPregrasp,
+              ).onClick!();
+              props.setIsMovingToPregrasp(false);
+            }}
+          >
+            <span>Cancel</span>
+            <span className="material-icons">cancel</span>
+          </button>
+        ) : (
+          <AccordionSelect
+            title="Align Gripper to Object"
+            possibleOptions={Object.values(realsenseMoveToPregraspButtons)}
+            backgroundColor="var(--selected-color)"
+            onChange={(idx: number) => {
+              if (props.selectObjectScaledXY == null) {
+                underVideoFunctionProvider.setMoveToPregraspState({
+                  state: "Please select an object first.",
+                  alert_type: "error",
+                });
+                return;
+              }
+              underVideoFunctionProvider.provideFunctions(
+                realsenseMoveToPregraspButtons[idx],
+              ).onClick!(props.selectObjectScaledXY);
+              props.setSelectObjectScaledXY(null);
+              props.setIsMovingToPregrasp(true);
+              props.definition.selectObjectForMoveToPregrasp = false;
+              underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.MoveToPregraspGoalReached,
+              ).getFuture!().then(() => {
+                props.setIsMovingToPregrasp(false);
+              });
+            }}
+            toggleAccordianCallback={() => {
+              if (props.underVideoAreaRef.current) {
+                // Over the next 600ms, which is the CSS-specified transition time for
+                // an accordion, keep scrolling the underVideoArea to the bottom, in case
+                // the expanded accordion is off-screen.
+                let startTime = Date.now();
+                let scrollInterval = setInterval(() => {
+                  let currentTime = Date.now();
+                  let timeElapsed = currentTime - startTime;
+                  if (timeElapsed >= 600) {
+                    clearInterval(scrollInterval);
+                  } else {
+                    props.underVideoAreaRef.current!.scrollTop =
+                      props.underVideoAreaRef.current!.scrollHeight;
+                  }
+                }, 10);
+              }
+            }}
+          />
+        )}
+      </React.Fragment>
+    );
+  }
 
   return (
     <React.Fragment>
@@ -808,6 +967,7 @@ const UnderRealsenseButtons = (props: {
         }}
         label="Depth Sensing"
       />
+      {moveToPregraspButtons}
       {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {
@@ -926,6 +1086,7 @@ function getGripperLabel(stretchTool: StretchTool) {
     case StretchTool.TABLET:
       return "Tablet";
     case StretchTool.GRIPPER:
+    case StretchTool.DEX_GRIPPER:
       return "Gripper";
     default:
       return "Wrist";

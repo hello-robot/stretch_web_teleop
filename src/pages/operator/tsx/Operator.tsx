@@ -9,13 +9,13 @@ import {
   ComponentDefinition,
   LayoutDefinition,
 } from "./utils/component_definitions";
-import { className, MoveBaseState, RemoteStream, RobotPose } from "shared/util";
+import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
 import {
   buttonFunctionProvider,
   underMapFunctionProvider,
+  underVideoFunctionProvider,
   hasBetaTeleopKit,
   stretchTool,
-  underVideoFunctionProvider,
 } from ".";
 import {
   ButtonPadButton,
@@ -57,7 +57,9 @@ export const Operator = (props: {
   const [buttonCollision, setButtonCollision] = React.useState<
     ButtonPadButton[]
   >([]);
-  const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>();
+  const [moveBaseState, setMoveBaseState] = React.useState<ActionState>();
+  const [moveToPregraspState, setMoveToPregraspState] =
+    React.useState<ActionState>();
 
   const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -81,11 +83,13 @@ export const Operator = (props: {
   // changes.
   const [tabletOrientationRerender, setTabletOrientationRerender] =
     React.useState<boolean>(false);
-  underVideoFunctionProvider.setOperatorCallback((_) => {
+  underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
     setTabletOrientationRerender(!tabletOrientationRerender);
   });
 
-  function moveBaseStateCallback(state: MoveBaseState) {
+  // Callback for when the move base state is updated (e.g., the ROS2 action returns)
+  // Used to render alerts to the operator.
+  function moveBaseStateCallback(state: ActionState) {
     setMoveBaseState(state);
   }
   underMapFunctionProvider.setOperatorCallback(moveBaseStateCallback);
@@ -98,6 +102,24 @@ export const Operator = (props: {
       }, 5000);
     }
   }, [moveBaseState]);
+
+  // Callback for when the move to pregrasp state is updated (e.g., the ROS2 action returns)
+  // Used to render alerts to the operator.
+  function moveToPregraspStateCallback(state: ActionState) {
+    setMoveToPregraspState(state);
+  }
+  underVideoFunctionProvider.setMoveToPregraspOperatorCallback(
+    moveToPregraspStateCallback,
+  );
+  let moveToPregraspAlertTimeout: NodeJS.Timeout;
+  React.useEffect(() => {
+    if (moveToPregraspState && moveToPregraspState.alert_type != "info") {
+      if (moveToPregraspAlertTimeout) clearTimeout(moveToPregraspAlertTimeout);
+      moveToPregraspAlertTimeout = setTimeout(() => {
+        setMoveToPregraspState(undefined);
+      }, 5000);
+    }
+  }, [moveToPregraspState]);
 
   let remoteStreams = props.remoteStreams;
 
@@ -308,6 +330,21 @@ export const Operator = (props: {
             <Alert
               type={moveBaseState.alert_type}
               message={moveBaseState.state}
+            />
+          </div>
+        </div>
+      )}
+      {moveToPregraspState && (
+        <div className="operator-collision-alerts">
+          <div
+            className={className("operator-alert", {
+              fadeIn: moveToPregraspState !== undefined,
+              fadeOut: moveToPregraspState == undefined,
+            })}
+          >
+            <Alert
+              type={moveToPregraspState.alert_type}
+              message={moveToPregraspState.state}
             />
           </div>
         </div>

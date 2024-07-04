@@ -1,5 +1,6 @@
 import { FunctionProvider } from "./FunctionProvider";
 import {
+  ActionState,
   CENTER_WRIST,
   Marker,
   REALSENSE_BASE_POSE,
@@ -26,6 +27,10 @@ export enum UnderVideoButton {
   ToggleArucoMarkers = "Toggle Aruco Markers",
   CenterWrist = "Center Wrist",
   StowWrist = "Stow Wrist",
+  StartMoveToPregraspHorizontal = "Gripper Horizontal",
+  StartMoveToPregraspVertical = "Gripper Vertical",
+  CancelMoveToPregrasp = "Cancel Goal",
+  MoveToPregraspGoalReached = "Goal Reached",
   ToggleTabletOrientation = "Toggle Tablet Orientation",
   GetTabletOrientation = "Get Tablet Orientation",
 }
@@ -44,6 +49,12 @@ export const realsenseButtons: UnderVideoButton[] = [
   UnderVideoButton.LookAtGripper,
 ];
 
+/** Array of different options for the MoveToPregrasp feature on the realsense camera */
+export const realsenseMoveToPregraspButtons: UnderVideoButton[] = [
+  UnderVideoButton.StartMoveToPregraspHorizontal,
+  UnderVideoButton.StartMoveToPregraspVertical,
+];
+
 /** Array of different actions for the wrist */
 export const wristButtons: UnderVideoButton[] = [
   UnderVideoButton.CenterWrist,
@@ -53,19 +64,15 @@ export const wristButtons: UnderVideoButton[] = [
 export type RealsenseButtons = (typeof realsenseButtons)[number];
 
 export type UnderVideoButtonFunctions = {
-  onClick?: () => void;
+  onClick?: (...args: any[]) => void;
   onCheck?: (toggle: boolean) => void;
   get?: () => any;
   send?: (name: string) => void;
+  getFuture?: () => Promise<any>;
 };
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
   private tabletOrientation: TabletOrientation;
-  /**
-   * Callback function for when the tablet orientation changes
-   */
-  private operatorCallback?: (tabletOrientation: TabletOrientation) => void =
-    undefined;
 
   constructor() {
     super();
@@ -74,7 +81,35 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
     this.jointStateCallback = this.jointStateCallback.bind(this);
   }
 
+  /**
+   * Callback function for when the tablet orientation changes
+   */
+  private tabletOrientationOperatorCallback?: (
+    tabletOrientation: TabletOrientation,
+  ) => void = undefined;
+  /**
+   * Callback function to update the move base state in the operator
+   * interface (e.g., show alerts).
+   */
+  private moveToPregraspOperatorCallback?: (state: ActionState) => void =
+    undefined;
+  /**
+   * Store the timestam at which the last moveToPregrasp state was received
+   */
+  private lastMoveToPregraspStateTimestamp: number = 0;
+
+  /**
+   * Called when a response is received from the robot for the move to pregrasp.
+   * @param state the move to pregrasp state to set
+   */
+  public setMoveToPregraspState(state: ActionState) {
+    this.lastMoveToPregraspStateTimestamp = Date.now();
+    if (this.moveToPregraspOperatorCallback)
+      this.moveToPregraspOperatorCallback(state);
+  }
+
   public provideFunctions(button: UnderVideoButton): UnderVideoButtonFunctions {
+    let horizontal = false;
     switch (button) {
       case UnderVideoButton.DriveView:
         return {
@@ -116,6 +151,45 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         return {
           onCheck: (toggle: boolean) =>
             FunctionProvider.remoteRobot?.setToggle("setDepthSensing", toggle),
+        };
+      case UnderVideoButton.StartMoveToPregraspHorizontal:
+        horizontal = true;
+      case UnderVideoButton.StartMoveToPregraspVertical:
+        return {
+          onClick: (scaledXY: [number, number] | null) => {
+            if (!scaledXY) {
+              console.log("No scaledXY");
+              return;
+            }
+            FunctionProvider.remoteRobot?.moveToPregrasp(
+              scaledXY[0],
+              scaledXY[1],
+              horizontal,
+            );
+          },
+        };
+      case UnderVideoButton.MoveToPregraspGoalReached:
+        // TODO: Add timeouts to this and the other GoalReached promises!
+        return {
+          getFuture: () => {
+            let currentTimestamp = Date.now();
+            let that = this;
+            const promise = new Promise((resolve, reject) => {
+              let interval = setInterval(() => {
+                let goalReached =
+                  that.lastMoveToPregraspStateTimestamp > currentTimestamp;
+                if (goalReached) {
+                  clearInterval(interval);
+                  resolve(true);
+                }
+              });
+            });
+            return promise;
+          },
+        };
+      case UnderVideoButton.CancelMoveToPregrasp:
+        return {
+          onClick: () => FunctionProvider.remoteRobot?.stopMoveToPregrasp(),
         };
       case UnderVideoButton.ToggleArucoMarkers:
         return {
@@ -182,11 +256,23 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
       this.tabletOrientation = TabletOrientation.PORTRAIT;
     }
     if (
-      this.operatorCallback &&
+      this.tabletOrientationOperatorCallback &&
       prevTabletOrientation !== this.tabletOrientation
     ) {
-      this.operatorCallback(this.tabletOrientation);
+      this.tabletOrientationOperatorCallback(this.tabletOrientation);
     }
+  }
+
+  /**
+   * Sets the local pointer to the operator's callback function, to be called
+   * whenever the move to pregrasp state changes.
+   *
+   * @param callback operator's callback function to update aruco navigation state
+   */
+  public setMoveToPregraspOperatorCallback(
+    callback: (state: ActionState) => void,
+  ) {
+    this.moveToPregraspOperatorCallback = callback;
   }
 
   /**
@@ -195,9 +281,9 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
    *
    * @param callback operator's callback function to update aruco navigation state
    */
-  public setOperatorCallback(
-    callback: (tabeltOrientation: TabletOrientation) => void,
+  public setTabletOrientationOperatorCallback(
+    callback: (tabletOrientation: TabletOrientation) => void,
   ) {
-    this.operatorCallback = callback;
+    this.tabletOrientationOperatorCallback = callback;
   }
 }

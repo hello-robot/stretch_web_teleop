@@ -22,7 +22,6 @@ import {
   waitUntil,
 } from "shared/util";
 import { GetHasBetaTeleopKit, GetStretchTool } from "./commands";
-
 export type robotMessageChannel = (message: cmd) => void;
 
 export class RemoteRobot extends React.Component<{}, any> {
@@ -148,6 +147,16 @@ export class RemoteRobot extends React.Component<{}, any> {
     this.robotChannel(cmd);
   }
 
+  moveToPregrasp(scaled_x: number, scaled_y: number, horizontal: boolean) {
+    let cmd: MoveBaseCommand = {
+      type: "moveToPregrasp",
+      scaled_x: scaled_x,
+      scaled_y: scaled_y,
+      horizontal: horizontal,
+    };
+    this.robotChannel(cmd);
+  }
+
   setToggle(
     type: "setFollowGripper" | "setDepthSensing" | "setRunStop",
     toggle: boolean,
@@ -201,6 +210,10 @@ export class RemoteRobot extends React.Component<{}, any> {
 
   stopMoveBase() {
     this.robotChannel({ type: "stopMoveBase" });
+  }
+
+  stopMoveToPregrasp() {
+    this.robotChannel({ type: "stopMoveToPregrasp" });
   }
 }
 

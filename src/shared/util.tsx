@@ -53,6 +53,7 @@ export interface ROSJointState extends Message {
 }
 
 export enum StretchTool {
+  DEX_GRIPPER = "dex gripper",
   GRIPPER = "gripper",
   TABLET = "tablet",
   UNKNOWN = "unknown",
@@ -62,12 +63,10 @@ export function getStretchTool(stretchTool: string) {
   if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
     return StretchTool.TABLET;
   } else if (
-    [
-      "eoa_wrist_dw3_tool_sg3",
-      "tool_stretch_dex_wrist",
-      "tool_stretch_gripper",
-    ].includes(stretchTool)
+    ["eoa_wrist_dw3_tool_sg3", "tool_stretch_dex_wrist"].includes(stretchTool)
   ) {
+    return StretchTool.DEX_GRIPPER;
+  } else if (stretchTool === "tool_stretch_gripper") {
     return StretchTool.GRIPPER;
   } else {
     return StretchTool.UNKNOWN;
@@ -110,9 +109,7 @@ export type WebRTCMessage =
   | StopTrajectoryMessage
   | StopMoveBaseMessage
   | FollowJointTrajectoryActionResultMessage
-  | MoveBaseActionResultMessage
   | BatteryVoltageMessage
-  | MoveBaseStateMessage
   | IsRunStoppedMessage
   | HasBetaTeleopKitMessage
   | StretchToolMessage
@@ -161,11 +158,11 @@ export interface FollowJointTrajectoryActionResult {
   result: string;
 }
 
-export interface NavigateToPoseActionStatusList {
-  status_list: NavigateToPoseActionStatus[];
+export interface ActionStatusList {
+  status_list: ActionStatus[];
 }
 
-export interface NavigateToPoseActionStatus {
+export interface ActionStatus {
   status: number;
 }
 
@@ -175,25 +172,14 @@ export interface GoalStatus {
   text: string;
 }
 
-export interface MoveBaseState {
+export interface ActionState {
   state: string;
   alert_type: string;
 }
 
-export interface MoveBaseStateMessage {
-  type: "moveBaseState";
-  message: MoveBaseState;
-}
-
-export interface MoveBaseActionResultMessage {
-  type: "moveBaseActionResult";
-  message: MoveBaseActionResult;
-}
-
-export interface MoveBaseActionResult {
-  header: string;
-  status: GoalStatus;
-  result: string;
+export interface ActionStateMessage {
+  type: string;
+  message: ActionState;
 }
 
 export interface OccupancyGridMessage {

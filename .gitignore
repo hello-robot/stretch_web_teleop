@@ -33,3 +33,9 @@ mkcert*
 dist/*
 
 outcomes/*
+
+# Compiled Python
+*/__pycache__
+
+# Specialized URDFs
+urdf/*.urdf

@@ -7,9 +7,9 @@ import {
   VideoProps,
   ROSOccupancyGrid,
   ROSPose,
-  MoveBaseState,
-  NavigateToPoseActionResult,
-  NavigateToPoseActionStatusList,
+  ActionState,
+  MoveToPregraspState,
+  ActionStatusList,
   ROSBatteryState,
 } from "shared/util";
 import {
@@ -22,6 +22,10 @@ import {
 export var robotMode: "navigation" | "position" = "position";
 export var rosConnected = false;
 
+// Names of ROS actions
+const moveBaseActionName = "/navigate_to_pose";
+const moveToPregraspActionName = "/move_to_pregrasp";
+
 export class Robot extends React.Component {
   private ros: ROSLIB.Ros;
   private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
@@ -32,6 +36,8 @@ export class Robot extends React.Component {
   private moveBaseGoal?: ROSLIB.ActionGoal;
   private trajectoryClient?: ROSLIB.ActionClient;
   private moveBaseClient?: ROSLIB.ActionClient;
+  private moveToPregraspGoal?: ROSLIB.ActionGoal;
+  private moveToPregraspClient?: ROSLIB.ActionClient;
   private cmdVelTopic?: ROSLIB.Topic;
   private switchToNavigationService?: ROSLIB.Service;
   private switchToPositionService?: ROSLIB.Service;
@@ -51,7 +57,8 @@ export class Robot extends React.Component {
   ) => void;
   private batteryStateCallback: (batteryState: ROSBatteryState) => void;
   private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
-  private moveBaseResultCallback: (goalState: MoveBaseState) => void;
+  private moveBaseResultCallback: (goalState: ActionState) => void;
+  private moveToPregraspResultCallback: (goalState: ActionState) => void;
   private amclPoseCallback: (pose: ROSLIB.Transform) => void;
   private isRunStoppedCallback: (isRunStopped: boolean) => void;
   private hasBetaTeleopKitCallback: (value: boolean) => void;
@@ -69,7 +76,8 @@ export class Robot extends React.Component {
     ) => void;
     batteryStateCallback: (batteryState: ROSBatteryState) => void;
     occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
-    moveBaseResultCallback: (goalState: MoveBaseState) => void;
+    moveBaseResultCallback: (goalState: ActionState) => void;
+    moveToPregraspResultCallback: (goalState: ActionState) => void;
     amclPoseCallback: (pose: ROSLIB.Transform) => void;
     isRunStoppedCallback: (isRunStopped: boolean) => void;
     hasBetaTeleopKitCallback: (value: boolean) => void;
@@ -80,6 +88,7 @@ export class Robot extends React.Component {
     this.batteryStateCallback = props.batteryStateCallback;
     this.occupancyGridCallback = props.occupancyGridCallback;
     this.moveBaseResultCallback = props.moveBaseResultCallback;
+    this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
     this.amclPoseCallback = props.amclPoseCallback;
     this.isRunStoppedCallback = props.isRunStoppedCallback;
     this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
@@ -114,10 +123,24 @@ export class Robot extends React.Component {
     this.subscribeToJointState();
     this.subscribeToJointLimits();
     this.subscribeToBatteryState();
-    this.subscribeToMoveBaseResult();
+    this.subscribeToActionResult(
+      moveBaseActionName,
+      this.moveBaseResultCallback,
+      "Navigation canceled!",
+      "Navigation succeeded!",
+      "Navigation failed!",
+    );
+    this.subscribeToActionResult(
+      moveToPregraspActionName,
+      this.moveToPregraspResultCallback,
+      "Move To Pre-grasp canceled!",
+      "Move To Pre-grasp succeeded!",
+      "Move To Pre-grasp failed!",
+    );
     this.subscribeToIsRunStopped();
     this.createTrajectoryClient();
     this.createMoveBaseClient();
+    this.createMoveToPregraspClient();
     this.createCmdVelTopic();
     this.createSwitchToNavigationService();
     this.createSwitchToPositionService();
@@ -273,30 +296,51 @@ export class Robot extends React.Component {
     getJointLimitsService.callService(request, () => {});
   }
 
-  subscribeToMoveBaseResult() {
-    let topic: ROSLIB.Topic<NavigateToPoseActionResult> = new ROSLIB.Topic({
+  subscribeToActionResult(
+    actionName: string,
+    callback?: (goalState: ActionState) => void,
+    cancelMsg?: string,
+    successMsg?: string,
+    failureMsg?: string,
+  ) {
+    // Get the messages
+    if (!cancelMsg) {
+      cancelMsg = "Action " + actionName + "canceled!";
+    }
+    if (!successMsg) {
+      successMsg = "Action " + actionName + "succeeded!";
+    }
+    if (!failureMsg) {
+      failureMsg = "Action " + actionName + "failed!";
+    }
+
+    // Create the topic
+    let topic: ROSLIB.Topic<ActionStatusList> = new ROSLIB.Topic({
       ros: this.ros,
-      name: "/navigate_to_pose/_action/status",
+      name: actionName + "/_action/status",
       messageType: "action_msgs/msg/GoalStatusArray",
     });
     this.subscriptions.push(topic);
 
-    topic.subscribe((msg: NavigateToPoseActionStatusList) => {
+    // Subscribe to the topic
+    topic.subscribe((msg: ActionStatusList) => {
+      console.log("Got action status msg", msg);
       let status = msg.status_list.pop()?.status;
-      if (this.moveBaseResultCallback) {
+      console.log("For action ", actionName, "got status ", status);
+      if (callback) {
         if (status == 5)
-          this.moveBaseResultCallback({
-            state: "Navigation cancelled!",
+          callback({
+            state: cancelMsg,
             alert_type: "error",
           });
         else if (status == 4)
-          this.moveBaseResultCallback({
-            state: "Navigation succeeded!",
+          callback({
+            state: successMsg,
             alert_type: "success",
           });
         else if (status == 6)
-          this.moveBaseResultCallback({
-            state: "Navigation failed!",
+          callback({
+            state: failureMsg,
             alert_type: "error",
           });
       }
@@ -327,9 +371,17 @@ export class Robot extends React.Component {
   createMoveBaseClient() {
     this.moveBaseClient = new ROSLIB.ActionHandle({
       ros: this.ros,
-      name: "/navigate_to_pose",
+      name: moveBaseActionName,
       actionType: "nav2_msgs/action/NavigateToPose",
       // timeout: 100
+    });
+  }
+
+  createMoveToPregraspClient() {
+    this.moveToPregraspClient = new ROSLIB.ActionHandle({
+      ros: this.ros,
+      name: moveToPregraspActionName,
+      actionType: "stretch_web_teleop/action/MoveToPregrasp",
     });
   }
 
@@ -476,6 +528,7 @@ export class Robot extends React.Component {
       },
     });
     if (!this.cmdVelTopic) throw "trajectoryClient is undefined";
+    console.log("Publishing base velocity twist message");
     this.cmdVelTopic.publish(twist);
   };
 
@@ -533,6 +586,22 @@ export class Robot extends React.Component {
         },
         pose: pose,
       },
+    });
+
+    return newGoal;
+  }
+
+  makeMoveToPregraspGoal(
+    scaled_x: number,
+    scaled_y: number,
+    horizontal: boolean,
+  ) {
+    if (!this.moveToPregraspClient) throw "moveToPregraspClient is undefined";
+
+    let newGoal = new ROSLIB.ActionGoal({
+      scaled_u: scaled_x,
+      scaled_v: scaled_y,
+      pregrasp_direction: horizontal ? 1 : 2,
     });
 
     return newGoal;
@@ -643,6 +712,7 @@ export class Robot extends React.Component {
   stopExecution() {
     this.stopTrajectoryClient();
     this.stopMoveBaseClient();
+    this.stopMoveToPregraspClient();
   }
 
   stopTrajectoryClient() {
@@ -660,6 +730,40 @@ export class Robot extends React.Component {
       this.moveBaseClient.cancelGoal();
       // this.moveBaseGoal.cancel()
       this.moveBaseGoal = undefined;
+    }
+  }
+
+  /**
+   * @param x The x coordinate of the click on the Realsense camera
+   * @param y The y coordinate of the click on the Realsense camera
+   * @param horizontal Whether the gripper should orient horizontally or vertically.
+   */
+  executeMoveToPregraspGoal(
+    scaled_x?: number,
+    scaled_y?: number,
+    horizontal?: boolean,
+  ) {
+    if (
+      scaled_x === undefined ||
+      scaled_y === undefined ||
+      horizontal === undefined
+    ) {
+      return;
+    }
+    console.log("Got move to pregrasp goal", scaled_x, scaled_y, horizontal);
+    this.moveToPregraspGoal = this.makeMoveToPregraspGoal(
+      scaled_x,
+      scaled_y,
+      horizontal,
+    );
+    this.moveToPregraspClient.createClient(this.moveToPregraspGoal);
+  }
+
+  stopMoveToPregraspClient() {
+    if (!this.moveToPregraspClient) throw "moveToPregraspClient is undefined";
+    if (this.moveToPregraspGoal) {
+      this.moveToPregraspClient.cancelGoal();
+      this.moveToPregraspGoal = undefined;
     }
   }
 
