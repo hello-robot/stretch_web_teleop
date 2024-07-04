@@ -85,7 +85,7 @@ class MoveToPregraspState(Enum):
             states.append([MoveToPregraspState.STOW_ARM_LIFT])
         states.append([MoveToPregraspState.ROTATE_BASE, MoveToPregraspState.HEAD_PAN])
         # If the goal is near the base and we're doing a vertical grasp, lengthen the arm before deploying the wrist.
-        if goal_lift_near_base and not horizontal_grasp:
+        if goal_lift_near_base:
             states.append([MoveToPregraspState.LENGTHEN_ARM])
             states.append([MoveToPregraspState.MOVE_WRIST])
             states.append([MoveToPregraspState.LIFT_ARM])

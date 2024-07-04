@@ -18,9 +18,7 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
-from rclpy.callback_groups import (
-    ReentrantCallbackGroup,  # MutuallyExclusiveCallbackGroup
-)
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
@@ -35,11 +33,12 @@ from stretch_web_teleop.action import MoveToPregrasp
 from stretch_web_teleop_helpers.constants import (
     Frame,
     Joint,
+    adjust_arm_lift_for_base_collision,
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
 )
 from stretch_web_teleop_helpers.conversions import (
-    deproject_pixel_to_point,
+    deproject_pixel_to_pointcloud_point,
     depth_img_to_pointcloud,
     remaining_time,
     ros_msg_to_cv2_image,
@@ -121,7 +120,6 @@ class MoveToPregraspNode(Node):
             "/camera/aligned_depth_to_color/image_raw/compressedDepth",
             self.realsense_depth_cb,
             qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.latest_realsense_info_lock = threading.Lock()
         self.latest_realsense_info: Optional[CameraInfo] = None
@@ -130,7 +128,6 @@ class MoveToPregraspNode(Node):
             "/camera/aligned_depth_to_color/camera_info",
             self.realsense_info_cb,
             qos_profile=QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-            # callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
         # Create the action timeout
@@ -289,14 +286,23 @@ class MoveToPregraspNode(Node):
 
         # Functions to cleanup the action
         terminate_motion_executors = False
+        motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
 
         def cleanup() -> None:
             """
             Clean up before returning from the action.
             """
-            nonlocal terminate_motion_executors
+            nonlocal terminate_motion_executors, motion_executors
             self.active_goal_request = None
+            self.get_logger().debug("Setting termination flag to True")
             terminate_motion_executors = True
+            # Execute the motion executors once more to process cancellation.
+            if len(motion_executors) > 0:
+                try:
+                    for i, motion_executor in enumerate(motion_executors):
+                        _ = next(motion_executor)
+                except Exception:
+                    self.get_logger().debug(traceback.format_exc())
 
         def action_error_callback(
             error_msg: str = "Goal failed",
@@ -348,6 +354,9 @@ class MoveToPregraspNode(Node):
                 MoveToPregrasp.Result.STATUS_GOAL_NOT_REACHABLE,
             )
 
+        # Raise the arm lift if it is too low and the wrist would collide with the base
+        adjust_arm_lift_for_base_collision(ik_solution, horizontal_grasp)
+
         # Get the states.
         states = self.get_states(horizontal_grasp, ik_solution)
 
@@ -367,7 +376,6 @@ class MoveToPregraspNode(Node):
 
         # Execute the states
         state_i = 0
-        motion_executors: List[Generator[MotionGeneratorRetval, None, None]] = []
         rate = self.create_rate(5.0)
         while rclpy.ok():
             concurrent_states = states[state_i]
@@ -530,7 +538,7 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = deproject_pixel_to_point(
+        x, y, z = deproject_pixel_to_pointcloud_point(
             u, v, pointcloud, np.array(camera_info_msg.p).reshape(3, 4)
         )
         self.get_logger().debug(

@@ -3,7 +3,7 @@
 import math
 import sys
 import threading
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 import cv2
 import numpy as np
@@ -12,10 +12,10 @@ import pcl
 import PyKDL  # TODO: This can be removed, as it is only used to perform a transformation that can be done with numpy
 import rclpy
 import ros2_numpy
-import tf2_py as tf2
 import tf2_ros
 import yaml
 from cv_bridge import CvBridge
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
@@ -26,20 +26,30 @@ from std_srvs.srv import SetBool
 
 from stretch_web_teleop_helpers.conversions import (
     cv2_image_to_ros_msg,
-    deproject_pixel_to_point,
+    deproject_pixel_to_pointcloud_point,
     depth_img_to_pointcloud,
     ros_msg_to_cv2_image,
+    tf2_get_transform,
 )
 
 # TODO: Add docstrings to this file.
 
 
 class ConfigureVideoStreams(Node):
+    # Define constant colors and alpha values for the depth AR overlay
     BACKGROUND_COLOR = (200, 200, 200)
-    REALSENSE_DEPTH_AR_COLOR = (0, 191, 255)
+    REALSENSE_DEPTH_AR_COLOR = np.array((0, 191, 255), dtype=np.uint8)
     REALSENSE_DEPTH_AR_ALPHA = 0.6
-    GRIPPER_DEPTH_AR_COLOR = (255, 0, 191)
+    GRIPPER_DEPTH_AR_COLOR = np.array((255, 0, 191), dtype=np.uint8)
     GRIPPER_DEPTH_AR_ALPHA = 0.6
+
+    # Define constants related to downsampling the pointcloud. Combine pixels
+    # within the downsampling distance, and expand overlaid pixels by the kernel size
+    # (to fill downsampling gaps)
+    REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE = 0.012  # m
+    REALSENSE_DEPTH_AR_EXPANSION_KERNEL_SIZE = 3
+    GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE = 0.0019  # m
+    GRIPPER_DEPTH_AR_EXPANSION_KERNEL_SIZE = 3
 
     def __init__(
         self,
@@ -48,8 +58,13 @@ class ConfigureVideoStreams(Node):
         use_overhead: bool = True,
         use_realsense: bool = True,
         use_gripper: bool = True,
+        # Even with the aligned depth compression parameter set to 1 (fastest),
+        # we are seeing that the aligned depth data is received 2-4x later than
+        # pointclouds (pointclouds are sub-1s between the realsense header stamp
+        # and when we receive it, whereas aligned depth images are up to 0.4s)
         use_pointcloud: bool = True,
         use_compressed_image: bool = True,
+        target_fps: float = 15.0,
         verbose: bool = False,
     ):
         """
@@ -67,6 +82,7 @@ class ConfigureVideoStreams(Node):
             subscribe to the aligned depth image message.
         use_compressed_image: If True, subscribe to the compressed image messages.
             If False, subscribe to the raw image messages.
+        target_fps: The target frames per second for the video streams.
         verbose: If True, print additional log messages.
         """
         super().__init__("configure_video_streams")
@@ -74,17 +90,23 @@ class ConfigureVideoStreams(Node):
         with open(params_file, "r") as params:
             self.image_params = yaml.safe_load(params)
         self.verbose = verbose
+        self.use_overhead = use_overhead
+        self.use_realsense = use_realsense
+        self.use_gripper = use_gripper
+        self.target_fps = target_fps
 
         # These are parameters the web app uses to determine which features to
         # enabled. They are not used in this node itself.
         self.declare_parameter("has_beta_teleop_kit", rclpy.Parameter.Type.BOOL)
         self.declare_parameter("stretch_tool", rclpy.Parameter.Type.STRING)
 
-        self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
-        self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        # Subscribe to the TF camera feeds to project camera points into base frame.
+        if self.use_realsense:
+            self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=12))
+            self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
         # Loaded params for each video stream
-        if use_overhead:
+        if self.use_overhead:
             self.overhead_params = (
                 self.image_params["overhead"]
                 if "overhead" in self.image_params
@@ -92,7 +114,7 @@ class ConfigureVideoStreams(Node):
             )
             self.overhead_images: Dict[str, npt.NDArray] = {}
             self.overhead_camera_rgb_image = None
-        if use_realsense:
+        if self.use_realsense:
             self.realsense_params = (
                 self.image_params["realsense"]
                 if "realsense" in self.image_params
@@ -100,7 +122,7 @@ class ConfigureVideoStreams(Node):
             )
             self.realsense_images: Dict[str, npt.NDArray] = {}
             self.realsense_rgb_image = None
-        if use_gripper:
+        if self.use_gripper:
             self.gripper_params = (
                 self.image_params["gripper"] if "gripper" in self.image_params else None
             )
@@ -111,7 +133,7 @@ class ConfigureVideoStreams(Node):
             )
             self.gripper_images: Dict[str, npt.NDArray] = {}
             self.gripper_camera_rgb_image = None
-            self.expanded_gripper_camera_rgb_image = None
+            self.latest_gripper_camera_rgb_image_lock = None
 
         self.cv_bridge = CvBridge()
         self.aruco_detector = None
@@ -122,61 +144,69 @@ class ConfigureVideoStreams(Node):
         }
 
         # Stores the camera projection matrix
-        if use_realsense:
+        if self.use_realsense:
             self.realsense_P = None
-        if use_gripper:
+        if self.use_gripper:
             self.gripper_P = None
 
         # Compressed Image publishers
-        if use_overhead:
+        if self.use_overhead:
             self.publisher_overhead_cmp = self.create_publisher(
                 CompressedImage, "/navigation_camera/image_raw/rotated/compressed", 15
             )
-        if use_realsense:
+        if self.use_realsense:
             self.publisher_realsense_cmp = self.create_publisher(
                 CompressedImage,
                 "/camera/color/image_raw/rotated/compressed",
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
             )
-        if use_gripper:
+        if self.use_gripper:
             self.publisher_gripper_cmp = self.create_publisher(
                 CompressedImage,
                 "/gripper_camera/image_raw/cropped/compressed",
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
             )
-            self.publisher_expanded_gripper_cmp = self.create_publisher(
-                CompressedImage,
-                "/gripper_camera/image_raw/expanded/compressed",
-                QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-            )
 
         # Subscribers
-        if use_overhead:
+        if self.use_overhead:
+            self.latest_overhead_camera_rgb_image = None
+            self.latest_overhead_camera_rgb_image_lock = threading.Lock()
             self.overhead_camera_rgb_subscriber = self.create_subscription(
                 Image,  # usb_cam doesn't output compressed images
                 "/navigation_camera/image_raw",
                 self.navigation_camera_cb,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                # callback_group=MutuallyExclusiveCallbackGroup(),
+                callback_group=MutuallyExclusiveCallbackGroup(),
             )
-        if use_gripper:
+        if self.use_gripper:
+            self.latest_gripper_camera_rgb_image = None
+            self.latest_gripper_camera_rgb_image_lock = threading.Lock()
+            self.expanded_gripper = False
             if has_beta_teleop_kit:
                 self.gripper_camera_rgb_subscriber = self.create_subscription(
                     Image,
                     "/gripper_camera/image_raw",
                     self.gripper_camera_cb,
                     QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                    # callback_group=MutuallyExclusiveCallbackGroup(),
+                    callback_group=MutuallyExclusiveCallbackGroup(),
                 )
             else:
+                # Subscribe to the RGB ompressed image topic
                 self.gripper_camera_rgb_subscriber = self.create_subscription(
                     CompressedImage if use_compressed_image else Image,
                     "/gripper_camera/image_raw"
                     + ("/compressed" if use_compressed_image else ""),
                     self.gripper_realsense_rgb_cb,
                     QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                    # callback_group=MutuallyExclusiveCallbackGroup(),
+                    callback_group=MutuallyExclusiveCallbackGroup(),
                 )
+
+                # Services for expanding the gripper image
+                self.expanded_gripper_service = self.create_service(
+                    SetBool, "expanded_gripper", self.expanded_gripper_callback
+                )
+
+                # Subscribe to the depth image topic
                 self.latest_gripper_realsense_depth_image = None
                 self.latest_gripper_realsense_depth_image_lock = threading.Lock()
                 if use_pointcloud:
@@ -185,7 +215,7 @@ class ConfigureVideoStreams(Node):
                         "/gripper_camera/depth/color/points",
                         self.gripper_realsense_depth_cb,
                         QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                        # callback_group=MutuallyExclusiveCallbackGroup(),
+                        callback_group=MutuallyExclusiveCallbackGroup(),
                     )
                 else:
                     self.gripper_depth_subscriber = self.create_subscription(
@@ -194,30 +224,32 @@ class ConfigureVideoStreams(Node):
                         + ("/compressedDepth" if use_compressed_image else ""),
                         self.gripper_realsense_depth_cb,
                         QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                        # callback_group=MutuallyExclusiveCallbackGroup(),
+                        callback_group=MutuallyExclusiveCallbackGroup(),
                     )
                 self.gripper_camera_info_subscriber = self.create_subscription(
                     CameraInfo,
-                    "/gripper_camera/aligned_depth_to_color/camera_info",
+                    "/gripper_camera/color/camera_info",
                     self.gripper_camera_info_cb,
                     QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                    # callback_group=MutuallyExclusiveCallbackGroup(),
+                    callback_group=MutuallyExclusiveCallbackGroup(),
                 )
-        self.joint_state_subscription = self.create_subscription(
-            JointState,
-            "/stretch/joint_states",
-            self.joint_state_cb,
-            1,
-            # callback_group=MutuallyExclusiveCallbackGroup(),
-        )
-        if use_realsense:
+            self.joint_state_subscription = self.create_subscription(
+                JointState,
+                "/stretch/joint_states",
+                self.joint_state_cb,
+                1,
+                callback_group=MutuallyExclusiveCallbackGroup(),
+            )
+        if self.use_realsense:
+            self.latest_realsense_rgb_image = None
+            self.latest_realsense_rgb_image_lock = threading.Lock()
             self.camera_rgb_subscriber = self.create_subscription(
                 CompressedImage if use_compressed_image else Image,
                 "/camera/color/image_raw"
                 + ("/compressed" if use_compressed_image else ""),
                 self.realsense_rgb_cb,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                # callback_group=MutuallyExclusiveCallbackGroup(),
+                callback_group=MutuallyExclusiveCallbackGroup(),
             )
             self.latest_realsense_depth_image = None
             self.latest_realsense_depth_image_lock = threading.Lock()
@@ -227,7 +259,7 @@ class ConfigureVideoStreams(Node):
                     "/camera/depth/color/points",
                     self.realsense_depth_cb,
                     QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                    # callback_group=MutuallyExclusiveCallbackGroup(),
+                    callback_group=MutuallyExclusiveCallbackGroup(),
                 )
             else:
                 self.depth_subscriber = self.create_subscription(
@@ -236,41 +268,40 @@ class ConfigureVideoStreams(Node):
                     + ("/compressedDepth" if use_compressed_image else ""),
                     self.realsense_depth_cb,
                     QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                    # callback_group=MutuallyExclusiveCallbackGroup(),
+                    callback_group=MutuallyExclusiveCallbackGroup(),
                 )
             self.camera_info_subscriber = self.create_subscription(
                 CameraInfo,
-                "/camera/aligned_depth_to_color/camera_info",
+                "/camera/color/camera_info",
                 self.realsense_camera_info_cb,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
-                # callback_group=MutuallyExclusiveCallbackGroup(),
+                callback_group=MutuallyExclusiveCallbackGroup(),
             )
 
         # Default image perspectives
-        if use_overhead:
+        if self.use_overhead:
             self.overhead_camera_perspective = (
                 "fixed" if has_beta_teleop_kit else "wide_angle_cam"
             )
-        if use_realsense:
+        if self.use_realsense:
             self.realsense_camera_perspective = "default"
-        if use_gripper:
+        if self.use_gripper:
             self.gripper_camera_perspective = (
                 "default" if has_beta_teleop_kit else "d405"
             )
 
         # Services for enabling the depth AR overlay on the realsense stream
-        if use_realsense:
+        if self.use_realsense:
             self.realsense_depth_ar_service = self.create_service(
                 SetBool, "realsense_depth_ar", self.realsense_depth_ar_callback
             )
             self.realsense_depth_ar = False
-        if use_gripper:
+        if self.use_gripper:
             self.gripper_depth_ar_service = self.create_service(
                 SetBool, "gripper_depth_ar", self.gripper_depth_ar_callback
             )
             self.gripper_depth_ar = False
 
-        self.pcl_cloud_filtered = None
         self.roll_value = 0.0
 
     # https://github.com/ros/geometry2/blob/noetic-devel/tf2_sensor_msgs/src/tf2_sensor_msgs/tf2_sensor_msgs.py#L44
@@ -330,41 +361,44 @@ class ConfigureVideoStreams(Node):
             )
         else:
             pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
+
         pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
-        passthrough = pcl_cloud.make_passthrough_filter()
-        passthrough.set_filter_field_name("z")
-        passthrough.set_filter_limits(0.01, 1.5)
-        self.pcl_cloud_filtered = passthrough.filter()
+        # Filter by points that are within z_dist m of the camera.
+        z_dist = 1.5  # m
+        passthrough_z = pcl_cloud.make_passthrough_filter()
+        passthrough_z.set_filter_field_name("z")
+        passthrough_z.set_filter_limits(0.01, z_dist)
+        pcl_cloud_filtered = passthrough_z.filter()
+        # Downsample points using a VoxelGrid
+        if self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE > 0:
+            downsampler = pcl_cloud_filtered.make_voxel_grid_filter()
+            downsampler.set_leaf_size(
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.REALSENSE_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+            )
+            pcl_cloud_filtered = downsampler.filter()
+        if not pcl_cloud_filtered:
+            return img
+        if pcl_cloud_filtered.to_array().size == 0:
+            return img
 
         # Get transform
-        try:
-            transform = self.tf_buffer.lookup_transform(
-                "base_link",
-                "camera_color_optical_frame",
-                Time(),
-                timeout=Duration(seconds=0.1),
-            )
-        except (
-            tf2.ConnectivityException,
-            tf2.ExtrapolationException,
-            tf2.InvalidArgumentException,
-            tf2.LookupException,
-            tf2.TimeoutException,
-            tf2.TransformException,
-        ) as error:
+        ok, transform = tf2_get_transform(
+            self.tf_buffer,
+            "base_link",
+            "camera_color_optical_frame",
+            timeout=Duration(seconds=0.1),
+        )
+        if not ok:
             self.get_logger().warn(
                 "Could not find the transform between frames base_link and "
-                f"camera_color_optical_frame. Error: {error}"
+                "camera_color_optical_frame."
             )
-            return img
-
-        if not self.pcl_cloud_filtered:
-            return img
-        if self.pcl_cloud_filtered.to_array().size == 0:
             return img
 
         # Transform point cloud to base link
-        pc_in_base_link = self.do_transform_cloud(self.pcl_cloud_filtered, transform)
+        pc_in_base_link = self.do_transform_cloud(pcl_cloud_filtered, transform)
 
         # Only keep points that are between 0.25m and 1m from the base in the XY plane
         dist = np.sqrt(
@@ -373,7 +407,7 @@ class ConfigureVideoStreams(Node):
         filtered_indices = np.where((dist > 0.25) & (dist < 1))[0]
 
         # Get filtered points in camera frame
-        pts_in_range = self.pcl_cloud_filtered.to_array()[filtered_indices, :]
+        pts_in_range = pcl_cloud_filtered.to_array()[filtered_indices, :]
 
         # Convert to homogeneous coordinates
         pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
@@ -394,22 +428,49 @@ class ConfigureVideoStreams(Node):
             )
             u_mask = uv_dedup[in_bounds_idx][:, 0]
             v_mask = uv_dedup[in_bounds_idx][:, 1]
+
             # Overlay the pixels in the robot's reach
-            img = img.astype(np.float32)
-            img[v_mask, u_mask, :] *= 1.0 - self.REALSENSE_DEPTH_AR_ALPHA
-            img[v_mask, u_mask, :] += self.REALSENSE_DEPTH_AR_ALPHA * np.array(
-                self.REALSENSE_DEPTH_AR_COLOR
+            overlay_mask = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+            overlay_mask[v_mask, u_mask] = 255
+            overlay_mask = cv2.dilate(
+                overlay_mask,
+                np.ones(
+                    (
+                        self.REALSENSE_DEPTH_AR_EXPANSION_KERNEL_SIZE,
+                        self.REALSENSE_DEPTH_AR_EXPANSION_KERNEL_SIZE,
+                    ),
+                    np.uint8,
+                ),
+                iterations=1,
             )
-            img = img.astype(np.uint8)
+            overlay_img = np.tile(
+                self.REALSENSE_DEPTH_AR_COLOR, (img.shape[0], img.shape[1], 1)
+            )
+            overlaid_img = cv2.addWeighted(
+                img,
+                1 - self.REALSENSE_DEPTH_AR_ALPHA,
+                overlay_img,
+                self.REALSENSE_DEPTH_AR_ALPHA,
+                0,
+            )
+            img = np.where(overlay_mask[:, :, None], overlaid_img, img)
         return img
 
     def realsense_depth_ar_callback(self, req, res):
+        self.get_logger().info(f"Realsense depth AR service: {req.data}")
         self.realsense_depth_ar = req.data
         res.success = True
         return res
 
     def gripper_depth_ar_callback(self, req, res):
+        self.get_logger().info(f"Gripper depth AR service: {req.data}")
         self.gripper_depth_ar = req.data
+        res.success = True
+        return res
+
+    def expanded_gripper_callback(self, req, res):
+        self.get_logger().info(f"Expanded gripper service: {req.data}")
+        self.expanded_gripper = req.data
         res.success = True
         return res
 
@@ -522,10 +583,14 @@ class ConfigureVideoStreams(Node):
         depth_msg: Union[CompressedImage, Image, PointCloud2],
     ):
         if self.verbose:
+            start_time = self.get_clock().now()
             lag = (
-                self.get_clock().now() - Time.from_msg(depth_msg.header.stamp)
+                start_time - Time.from_msg(depth_msg.header.stamp)
             ).nanoseconds / 1.0e9
-            self.get_logger().info(f"Realsense depth lag: {lag:.3f} seconds")
+            self.get_logger().info(
+                f"Realsense depth recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
         with self.latest_realsense_depth_image_lock:
             self.latest_realsense_depth_image = depth_msg
 
@@ -534,11 +599,22 @@ class ConfigureVideoStreams(Node):
         rgb_ros_image: Union[CompressedImage, Image],
     ):
         if self.verbose:
+            start_time = self.get_clock().now()
             lag = (
-                self.get_clock().now() - Time.from_msg(rgb_ros_image.header.stamp)
+                start_time - Time.from_msg(rgb_ros_image.header.stamp)
             ).nanoseconds / 1.0e9
-            self.get_logger().info(f"Realsense RGB lag: {lag:.3f} seconds")
+            self.get_logger().info(
+                f"Realsense RGB recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
 
+        with self.latest_realsense_rgb_image_lock:
+            self.latest_realsense_rgb_image = rgb_ros_image
+
+    def process_realsense_image(
+        self,
+        rgb_ros_image: Union[CompressedImage, Image],
+    ):
         image = ros_msg_to_cv2_image(rgb_ros_image, self.cv_bridge)
         if isinstance(rgb_ros_image, CompressedImage):
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -557,21 +633,26 @@ class ConfigureVideoStreams(Node):
             self.realsense_camera_perspective
         ]
         self.publish_compressed_msg(
-            self.realsense_rgb_image, self.publisher_realsense_cmp
+            self.realsense_rgb_image, self.publisher_realsense_cmp, rgb_ros_image.header
         )
 
     def gripper_camera_cb(self, ros_image):
-        self.process_gripper_image(ros_image)
+        with self.latest_gripper_camera_rgb_image_lock:
+            self.latest_gripper_camera_rgb_image = ros_image
 
     def gripper_realsense_depth_cb(
         self,
         depth_msg: Union[CompressedImage, Image, PointCloud2],
     ):
         if self.verbose:
+            start_time = self.get_clock().now()
             lag = (
-                self.get_clock().now() - Time.from_msg(depth_msg.header.stamp)
+                start_time - Time.from_msg(depth_msg.header.stamp)
             ).nanoseconds / 1.0e9
-            self.get_logger().info(f"Gripper Depth lag: {lag:.3f} seconds")
+            self.get_logger().info(
+                f"Gripper Depth recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
 
         with self.latest_gripper_realsense_depth_image_lock:
             self.latest_gripper_realsense_depth_image = depth_msg
@@ -581,47 +662,60 @@ class ConfigureVideoStreams(Node):
         ros_image: Union[CompressedImage, Image],
     ):
         if self.verbose:
+            start_time = self.get_clock().now()
             lag = (
-                self.get_clock().now() - Time.from_msg(ros_image.header.stamp)
+                start_time - Time.from_msg(ros_image.header.stamp)
             ).nanoseconds / 1.0e9
-            self.get_logger().info(f"Gripper RGB lag: {lag:.3f} seconds")
+            self.get_logger().info(
+                f"Gripper RGB recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
 
-        with self.latest_gripper_realsense_depth_image_lock:
-            depth_msg = self.latest_gripper_realsense_depth_image
-        self.process_gripper_image(ros_image, depth_msg)
+        with self.latest_gripper_camera_rgb_image_lock:
+            self.latest_gripper_camera_rgb_image = ros_image
 
     def process_gripper_image(
         self,
         ros_image: Union[CompressedImage, Image],
-        depth_msg: Optional[Union[CompressedImage, Image, PointCloud2]] = None,
     ):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
         if isinstance(ros_image, CompressedImage):
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        else:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        if depth_msg is not None and self.gripper_depth_ar:
-            image = self.overlay_gripper_depth_ar(image, depth_msg)
+        if self.gripper_depth_ar:
+            with self.latest_gripper_realsense_depth_image_lock:
+                depth_msg = self.latest_gripper_realsense_depth_image
+            if depth_msg is not None:
+                image = self.overlay_gripper_depth_ar(image, depth_msg)
 
-        # Compute and publish the standard gripper image
-        gripper_camera_rgb_image = self.configure_images(
-            image, self.gripper_params[self.gripper_camera_perspective]
-        )
-        self.gripper_camera_rgb_image = self.rotate_image_around_center(
-            gripper_camera_rgb_image, -1 * self.roll_value
-        )
-        self.publish_compressed_msg(
-            self.gripper_camera_rgb_image, self.publisher_gripper_cmp
-        )
-        # Compute and publish the expanded gripper image
-        expanded_gripper_camera_rgb_image = self.configure_images(
-            image, self.expanded_gripper_params[self.gripper_camera_perspective]
-        )
-        self.expanded_gripper_camera_rgb_image = self.rotate_image_around_center(
-            expanded_gripper_camera_rgb_image, -1 * self.roll_value
-        )
-        self.publish_compressed_msg(
-            self.expanded_gripper_camera_rgb_image, self.publisher_expanded_gripper_cmp
-        )
+        if self.expanded_gripper:
+            # Compute and publish the expanded gripper image
+            gripper_camera_rgb_image = self.configure_images(
+                image, self.expanded_gripper_params[self.gripper_camera_perspective]
+            )
+            self.gripper_camera_rgb_image = self.rotate_image_around_center(
+                gripper_camera_rgb_image, -1 * self.roll_value
+            )
+            self.publish_compressed_msg(
+                self.gripper_camera_rgb_image,
+                self.publisher_gripper_cmp,
+                ros_image.header,
+            )
+        else:
+            # Compute and publish the standard gripper image
+            gripper_camera_rgb_image = self.configure_images(
+                image, self.gripper_params[self.gripper_camera_perspective]
+            )
+            self.gripper_camera_rgb_image = self.rotate_image_around_center(
+                gripper_camera_rgb_image, -1 * self.roll_value
+            )
+            self.publish_compressed_msg(
+                self.gripper_camera_rgb_image,
+                self.publisher_gripper_cmp,
+                ros_image.header,
+            )
 
     def overlay_gripper_depth_ar(
         self, image: npt.NDArray, depth_msg: Union[CompressedImage, Image, PointCloud2]
@@ -651,6 +745,24 @@ class ConfigureVideoStreams(Node):
         else:
             pc_in_camera = ros2_numpy.point_cloud2.pointcloud2_to_xyz_array(depth_msg)
 
+        # Filter the pointcloud to only nearby points, to lower its size
+        pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
+        passthrough = pcl_cloud.make_passthrough_filter()
+        passthrough.set_filter_field_name("z")
+        passthrough.set_filter_limits(0.01, 0.3)
+        pcl_cloud_filtered = passthrough.filter()
+
+        # Downsample points using a VoxelGrid
+        if self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE > 0:
+            downsampler = pcl_cloud_filtered.make_voxel_grid_filter()
+            downsampler.set_leaf_size(
+                self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+                self.GRIPPER_DEPTH_AR_DOWNSAMPLE_DISTANCE,
+            )
+            pcl_cloud_filtered = downsampler.filter()
+        pc_in_camera_filtered = pcl_cloud_filtered.to_array()
+
         # Create the Aruco Detector
         if self.aruco_detector is None:
             aruco_parameters = cv2.aruco.DetectorParameters()
@@ -675,8 +787,8 @@ class ConfigureVideoStreams(Node):
                 idx = np.argmax(ids == aruco_id)
                 aruco_corners = corners[idx][0]
                 center = np.mean(aruco_corners, axis=0)
-                aruco_center_pos[label] = deproject_pixel_to_point(
-                    center[0], center[1], pc_in_camera, self.gripper_P
+                aruco_center_pos[label] = deproject_pixel_to_pointcloud_point(
+                    center[0], center[1], pc_in_camera_filtered, self.gripper_P
                 )
         if (
             "finger_left" not in aruco_center_pos
@@ -692,11 +804,10 @@ class ConfigureVideoStreams(Node):
         # camera frame (e.g., +z out of camera, +x to the left of camera, +y up)
         left_x, left_y, left_z = aruco_center_pos["finger_left"]
         right_x, right_y, right_z = aruco_center_pos["finger_right"]
-        pcl_cloud = pcl.PointCloud(np.array(pc_in_camera, dtype=np.float32))
         # Filter points within the distance range. Add a depth offset of 5cm to
         # account for the offset between the aruco marker and the gripper tip.
         z_offset_m = 0.04
-        passthrough_z = pcl_cloud.make_passthrough_filter()
+        passthrough_z = pcl_cloud_filtered.make_passthrough_filter()
         passthrough_z.set_filter_field_name("z")
         passthrough_z.set_filter_limits(0.01, max(left_z, right_z) + z_offset_m)
         pcl_cloud_filtered = passthrough_z.filter()
@@ -732,23 +843,58 @@ class ConfigureVideoStreams(Node):
         v_mask = uv_dedup[in_bounds_idx][:, 1]
 
         # Overlay the pixels in the robot's reach
-        image = image.astype(np.float32)
-        image[v_mask, u_mask, :] *= 1.0 - self.GRIPPER_DEPTH_AR_ALPHA
-        image[v_mask, u_mask, :] += self.GRIPPER_DEPTH_AR_ALPHA * np.array(
-            self.GRIPPER_DEPTH_AR_COLOR
+        overlay_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+        overlay_mask[v_mask, u_mask] = 255
+        if self.GRIPPER_DEPTH_AR_EXPANSION_KERNEL_SIZE > 1:
+            overlay_mask = cv2.dilate(
+                overlay_mask,
+                np.ones(
+                    (
+                        self.GRIPPER_DEPTH_AR_EXPANSION_KERNEL_SIZE,
+                        self.GRIPPER_DEPTH_AR_EXPANSION_KERNEL_SIZE,
+                    ),
+                    np.uint8,
+                ),
+                iterations=1,
+            )
+        overlay_image = np.tile(
+            self.GRIPPER_DEPTH_AR_COLOR, (image.shape[0], image.shape[1], 1)
         )
-        image = image.astype(np.uint8)
+        overlaid_image = cv2.addWeighted(
+            image,
+            1 - self.GRIPPER_DEPTH_AR_ALPHA,
+            overlay_image,
+            self.GRIPPER_DEPTH_AR_ALPHA,
+            0,
+        )
+        image = np.where(overlay_mask[:, :, None], overlaid_image, image)
 
         return image
 
     def navigation_camera_cb(self, ros_image):
+        if self.verbose:
+            start_time = self.get_clock().now()
+            lag = (
+                start_time - Time.from_msg(ros_image.header.stamp)
+            ).nanoseconds / 1.0e9
+            self.get_logger().info(
+                f"Navigation RGB recv lag: {lag:.3f} seconds",
+                throttle_duration_sec=1.0,
+            )
+
+        with self.latest_overhead_camera_rgb_image_lock:
+            self.latest_overhead_camera_rgb_image = ros_image
+
+    def process_navigation_image(self, ros_image):
         image = ros_msg_to_cv2_image(ros_image, self.cv_bridge)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         self.overhead_camera_rgb_image = self.configure_images(
             image, self.overhead_params[self.overhead_camera_perspective]
         )
         self.publish_compressed_msg(
-            self.overhead_camera_rgb_image, self.publisher_overhead_cmp
+            self.overhead_camera_rgb_image,
+            self.publisher_overhead_cmp,
+            ros_image.header,
         )
 
     def rotate_image_around_center(self, image, angle):
@@ -768,10 +914,39 @@ class ConfigureVideoStreams(Node):
             roll_index = joint_state.name.index("joint_wrist_roll")
             self.roll_value = joint_state.position[roll_index]
 
-    def publish_compressed_msg(self, image, publisher):
+    def publish_compressed_msg(self, image, publisher, header):
         msg = cv2_image_to_ros_msg(image, compress=True, bridge=self.cv_bridge)
-        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.stamp = header.stamp
         publisher.publish(msg)
+
+    def run(self):
+        rate = self.create_rate(self.target_fps)
+        while rclpy.ok():
+            # Process the navigation image
+            if self.use_overhead:
+                with self.latest_overhead_camera_rgb_image_lock:
+                    overhead_camera_rgb_image = self.latest_overhead_camera_rgb_image
+                    self.latest_overhead_camera_rgb_image = None
+                if overhead_camera_rgb_image is not None:
+                    self.process_navigation_image(overhead_camera_rgb_image)
+
+            # Process the realsense image
+            if self.use_realsense:
+                with self.latest_realsense_rgb_image_lock:
+                    realsense_rgb_image = self.latest_realsense_rgb_image
+                    self.latest_realsense_rgb_image = None
+                if realsense_rgb_image is not None:
+                    self.process_realsense_image(realsense_rgb_image)
+
+            # Process the gripper image
+            if self.use_gripper:
+                with self.latest_gripper_camera_rgb_image_lock:
+                    gripper_rgb_image = self.latest_gripper_camera_rgb_image
+                    self.latest_gripper_camera_rgb_image = None
+                if gripper_rgb_image is not None:
+                    self.process_gripper_image(gripper_rgb_image)
+
+            rate.sleep()
 
 
 if __name__ == "__main__":
@@ -787,5 +962,27 @@ if __name__ == "__main__":
     print("Publishing reconfigured video stream")
     # Use a MultiThreadedExecutor so that subscriptions, actions, etc. can be
     # processed in parallel.
-    executor = MultiThreadedExecutor()
+    executor = MultiThreadedExecutor(num_threads=8)
+
+    # Spin in the background
+    spin_thread = threading.Thread(
+        target=rclpy.spin,
+        args=(node,),
+        kwargs={"executor": executor},
+        daemon=True,
+    )
+    spin_thread.start()
+
+    # Run video stream configuration
+    try:
+        node.run()
+    except KeyboardInterrupt:
+        pass
+
+    # Terminate this node
+    node.destroy_node()
+    rclpy.shutdown()
+    # Join the spin thread (so it is spinning in the main thread)
+    spin_thread.join()
+
     rclpy.spin(node, executor=executor)

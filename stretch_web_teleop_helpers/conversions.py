@@ -9,7 +9,7 @@ import numpy.typing as npt
 import tf2_py as tf2
 import tf2_ros
 from cv_bridge import CvBridge
-from geometry_msgs.msg import Pose, PoseStamped
+from geometry_msgs.msg import Pose, PoseStamped, TransformStamped
 from rclpy.duration import Duration
 from rclpy.time import Time
 from sensor_msgs.msg import CompressedImage, Image
@@ -190,10 +190,33 @@ def depth_img_to_pointcloud(
 
 
 def deproject_pixel_to_point(
+    u: int, v: int, depth: float, proj: npt.NDArray[np.float32]
+) -> Tuple[float, float, float]:
+    """
+    Deproject the clicked pixel to the 3D coordinates of the clicked point.
+
+    Parameters
+    ----------
+    u: The horizontal coordinate of the clicked pixel.
+    v: The vertical coordinate of the clicked pixel.
+    depth: The depth value of the clicked pixel.
+    proj: The camera's projection matrix of size (3, 4).
+
+    Returns
+    -------
+    Tuple[float, float, float]: The 3D coordinates of the clicked point.
+    """
+    x, y, z = (
+        np.linalg.pinv(proj)[:3, :] @ np.array([depth * u, depth * v, depth]).flatten()
+    )
+    return x, y, z
+
+
+def deproject_pixel_to_pointcloud_point(
     u: int, v: int, pointcloud: npt.NDArray[np.float32], proj: npt.NDArray[np.float32]
 ) -> Tuple[float, float, float]:
     """
-    Deproject the clicked pixel to get the 3D coordinates of the clicked point.
+    Deproject the clicked pixel to the 3D coordinates of the closest point within the pointcloud.
 
     Parameters
     ----------
@@ -323,7 +346,7 @@ def tf2_transform(
 
     Returns
     -------
-    Tuple[bool, PostStamped]: Whether the transform was successful and the transformed pose.
+    Tuple[bool, PoseStamped]: Whether the transform was successful and the transformed pose.
     """
     try:
         pose_transformed = tf_buffer.transform(pose, target_frame, timeout=timeout)
@@ -337,3 +360,39 @@ def tf2_transform(
     ):
         return False, PoseStamped()
     return True, pose_transformed
+
+
+def tf2_get_transform(
+    tf_buffer: tf2_ros.Buffer,
+    target_frame: str,
+    source_frame: str,
+    timeout: Duration,
+) -> Tuple[bool, TransformStamped]:
+    """
+    Get the transform from a source frame to a target frame.
+
+    Parameters
+    ----------
+    tf_buffer: The tf2_ros.Buffer object.
+    target_frame: The target frame.
+    source_frame: The source frame.
+    timeout: The timeout.
+
+    Returns
+    -------
+    Tuple[bool, TransformStamped]: Whether the transform was successful and the transform message.
+    """
+    try:
+        transform = tf_buffer.lookup_transform(
+            target_frame, source_frame, Time(), timeout=timeout
+        )
+    except (
+        tf2.ConnectivityException,
+        tf2.ExtrapolationException,
+        tf2.InvalidArgumentException,
+        tf2.LookupException,
+        tf2.TimeoutException,
+        tf2.TransformException,
+    ):
+        return False, TransformStamped()
+    return True, transform

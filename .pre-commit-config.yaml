@@ -59,6 +59,7 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
+        exclude: \.github/.*  # Exclude files in the .github directory
 
   # Codespell checks the code for common misspellings
   - repo: https://github.com/codespell-project/codespell

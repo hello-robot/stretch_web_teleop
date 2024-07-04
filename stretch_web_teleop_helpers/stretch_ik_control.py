@@ -7,6 +7,7 @@ https://github.com/RCHI-Lab/HAT2/blob/main/driver_assistance/da_core/scripts/str
 """
 # Standard Imports
 import threading
+import traceback
 from enum import Enum
 from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
@@ -16,6 +17,7 @@ import numpy.typing as npt
 import pinocchio
 import rclpy
 import tf2_ros
+from action_msgs.msg import GoalStatus
 from builtin_interfaces.msg import Time
 from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import Transform, Twist, Vector3
@@ -160,7 +162,7 @@ class StretchIKControl:
         self.latest_joint_state = None
         self.joint_state_sub = self.node.create_subscription(
             JointState,
-            "/joint_states",
+            "/stretch/joint_states",
             self.__joint_state_cb,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
@@ -185,7 +187,8 @@ class StretchIKControl:
             "/stretch/cmd_vel",
             qos_profile=1,
         )
-        self.arm_client_future = None
+        self.arm_client_send_goal_future = None
+        self.arm_client_get_result_future = None
         self.arm_client = ActionClient(
             self.node,
             FollowJointTrajectory,
@@ -242,6 +245,7 @@ class StretchIKControl:
             Joint.ARM_LIFT: ("lift", "vel_m"),
             Joint.ARM_L0: ("arm", "vel_m"),
             Joint.COMBINED_ARM: ("arm", "vel_m"),
+            Joint.WRIST_EXTENSION: ("arm", "vel"),
             Joint.WRIST_YAW: ("wrist_yaw", "vel"),
             Joint.WRIST_PITCH: ("wrist_pitch", "vel"),
             Joint.WRIST_ROLL: ("wrist_roll", "vel"),
@@ -348,6 +352,7 @@ class StretchIKControl:
         timeout_secs: float = 10.0,
         check_cancel: Callable[[], bool] = lambda: False,
         threshold_factor: float = 50.0,
+        num_allowable_failures: int = 2,
     ) -> Generator[MotionGeneratorRetval, None, None]:
         """
         Move the arm joints to a specific position. This function is closed-loop, and
@@ -365,6 +370,8 @@ class StretchIKControl:
         threshold_factor: The factor by which to divide the joint range to get the tolerance.
             A larger number results in a smaller tolerance and more precise motion. But
             too large may result in the robot never reaching the target position.
+        num_allowable_failures: The number of allowable failures in the FollowJointTrajectory
+            action before we give up.
 
         Returns
         -------
@@ -388,12 +395,19 @@ class StretchIKControl:
         duration = 1.0  # seconds
 
         # Command motion until the termination criteria is reached
-        future = None
+        send_goal_future = None
+        get_result_future = None
+        goal_handle = None
 
         def cleanup():
-            if future is not None and not future.done():
-                future.cancel()
+            nonlocal goal_handle
+            self.node.get_logger().debug("Cleaning up...")
+            if goal_handle is not None:
+                self.node.get_logger().debug("Cancelling the current trajectory...")
+                _ = goal_handle.cancel_goal_async()
+                self.node.get_logger().debug("Cancelled the current trajectory.")
 
+        num_failures = 0
         while not check_cancel():
             self.node.get_logger().debug("Loop Started...")
             # Leave early if ROS shuts down or timeout is reached
@@ -404,54 +418,75 @@ class StretchIKControl:
                 yield MotionGeneratorRetval.FAILURE
                 return
 
-            # Command the robot to move to the joint positions
-            if future is None:
-                # Get the current joint state
-                latest_joint_state_combined_arm = self.get_current_joints(
-                    combine_arm=True
+            # Get the current joint state
+            latest_joint_state_combined_arm = self.get_current_joints(combine_arm=True)
+
+            # Remove joints that have reached their set point
+            joint_positions_cmd = {}
+            for joint_name, joint_position in joint_positions.items():
+                joint_err = joint_position - latest_joint_state_combined_arm[joint_name]
+                tolerance = 0.05
+                if joint_name in self.joint_pos_lim:
+                    min_pos, max_pos = self.joint_pos_lim[joint_name]
+                    tolerance = (max_pos - min_pos) / threshold_factor
+                self.node.get_logger().debug(
+                    f"Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
                 )
+                if abs(joint_err) > tolerance:
+                    joint_positions_cmd[joint_name] = joint_position
 
-                # Remove joints that have reached their set point
-                joint_positions_cmd = {}
-                for joint_name, joint_position in joint_positions.items():
-                    joint_err = (
-                        joint_position - latest_joint_state_combined_arm[joint_name]
-                    )
-                    tolerance = 0.05
-                    if joint_name in self.joint_pos_lim:
-                        min_pos, max_pos = self.joint_pos_lim[joint_name]
-                        tolerance = (max_pos - min_pos) / threshold_factor
-                    self.node.get_logger().debug(
-                        f"Joint {joint_name} error: {joint_err}, tolerance: {tolerance}"
-                    )
-                    if abs(joint_err) > tolerance:
-                        joint_positions_cmd[joint_name] = joint_position
-
-                # If no joints to move, break
-                if len(joint_positions_cmd) == 0:
-                    cleanup()
-                    yield MotionGeneratorRetval.SUCCESS
-                    return
-
+            # If no joints to move, break. This is necessary because sometimes the wrist
+            # reaches the goal but stretch_driver doesn't realize it has reached the goal
+            # so keeps waiting until timeout.
+            if len(joint_positions_cmd) == 0:
+                cleanup()
+                yield MotionGeneratorRetval.SUCCESS
+                return
+            # Command the robot to move to the joint positions
+            if send_goal_future is None and get_result_future is None:
                 # Command the robot to move to the joint positions
                 self.node.get_logger().debug(
                     f"Commanding robot to move to joint positions: {joint_positions_cmd}"
                 )
-                future = self.__command_move_to_joint_position(
+                send_goal_future = self.__command_move_to_joint_position(
                     joint_positions_cmd, duration, velocity_overrides=velocity_overrides
                 )
-            # Wait for the previous command to finish
-            elif future.done():
+            # Check if the goal has been accepted/rejected yet
+            elif send_goal_future is not None and send_goal_future.done():
                 try:
-                    ok = future.result()
-                    if not ok:
-                        raise Exception("Failed to move to joint positions")
-                except Exception as e:
-                    self.get_logger().error(f"{e}")
+                    goal_handle = send_goal_future.result()
+                    get_result_future = goal_handle.get_result_async()
+                    if not goal_handle.accepted:
+                        raise Exception("Move to joint position goal rejected")
+                except Exception:
+                    self.node.get_logger().error(traceback.format_exc())
                     cleanup()
                     yield MotionGeneratorRetval.FAILURE
                     return
-                future = None
+                send_goal_future = None
+            # Check if the goal has finished yet
+            elif get_result_future is not None and get_result_future.done():
+                try:
+                    result = get_result_future.result()
+                    # Even if the result is success, we don't terminate the loop,
+                    # in case the robot hasn't actually reached its target joint position
+                    # and we need to re-invoke the action.
+                    if (
+                        result.status != GoalStatus.STATUS_SUCCEEDED
+                        and result.result.error_code
+                        != FollowJointTrajectory.Result.SUCCESSFUL
+                    ):
+                        num_failures += 1
+                        if num_failures > num_allowable_failures:
+                            raise Exception(
+                                "FollowJointTrajectory action failed {num_failures} times. Aborting."
+                            )
+                except Exception:
+                    self.node.get_logger().error(traceback.format_exc())
+                    cleanup()
+                    yield MotionGeneratorRetval.FAILURE
+                    return
+                get_result_future = None
             else:
                 self.node.get_logger().debug(
                     "Waiting for previous command to finish..."
@@ -881,12 +916,35 @@ class StretchIKControl:
             return False
 
         # If moving the arm, wait until the previous arm command is done
-        if (
-            move_arm
-            and self.arm_client_future is not None
-            and not self.arm_client_future.done()
-        ):
-            return True
+        if move_arm:
+            if self.arm_client_send_goal_future is not None:
+                if self.arm_client_send_goal_future.done():
+                    goal_handle = self.arm_client_send_goal_future.result()
+                    self.arm_client_get_result_future = goal_handle.get_result_async()
+                    self.arm_client_send_goal_future = None
+                    return True
+                else:
+                    self.node.get_logger().debug(
+                        "Waiting for previous arm goal to be accepted..."
+                    )
+                    return True
+            elif self.arm_client_get_result_future is not None:
+                if self.arm_client_get_result_future.done():
+                    result = self.arm_client_get_result_future.result()
+                    if (
+                        result.status != GoalStatus.STATUS_SUCCEEDED
+                        or result.result.error_code
+                        != FollowJointTrajectory.Result.SUCCESSFUL
+                    ):
+                        self.node.get_logger().debug(
+                            "Previous arm goal failed. Will try again."
+                        )
+                    self.arm_client_get_result_future = None
+                else:
+                    self.node.get_logger().debug(
+                        "Waiting for previous arm goal to finish..."
+                    )
+                    return True
 
         # Clip the velocities
         joint_velocities = dict(zip(self.controllable_joints, velocities))
@@ -914,7 +972,7 @@ class StretchIKControl:
                 joint_positions[joint_name] = (
                     pos + vel * forward_project_velocities_secs
                 )
-        self.arm_client_future = self.__command_move_to_joint_position(
+        self.arm_client_send_goal_future = self.__command_move_to_joint_position(
             joint_positions, forward_project_velocities_secs
         )
 

@@ -304,7 +304,11 @@ def generate_launch_description():
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(
                             PathJoinSubstitution(
-                                [core_package, "launch", "navigation_camera.launch.py"]
+                                [
+                                    teleop_interface_package,
+                                    "launch",
+                                    "navigation_camera.launch.py",
+                                ]
                             )
                         )
                     )
@@ -517,13 +521,14 @@ def generate_launch_description():
     # )
 
     # Move To Pre-grasp Action Server
-    move_to_pregrasp_node = Node(
-        package="stretch_web_teleop",
-        executable="move_to_pregrasp.py",
-        output="screen",
-        arguments=[LaunchConfiguration("params")],
-        parameters=[],
-    )
-    ld.add_action(move_to_pregrasp_node)
+    if stretch_tool == "eoa_wrist_dw3_tool_sg3":
+        move_to_pregrasp_node = Node(
+            package="stretch_web_teleop",
+            executable="move_to_pregrasp.py",
+            output="screen",
+            arguments=[LaunchConfiguration("params")],
+            parameters=[],
+        )
+        ld.add_action(move_to_pregrasp_node)
 
     return ld
