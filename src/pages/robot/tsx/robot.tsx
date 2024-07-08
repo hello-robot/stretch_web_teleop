@@ -731,12 +731,14 @@ export class Robot extends React.Component {
 
   executePoseGoal(pose: RobotPose) {
     this.switchToPositionMode();
+    this.stopExecution();
     this.poseGoal = this.makePoseGoal(pose);
     this.trajectoryClient.createClient(this.poseGoal);
   }
 
   async executePoseGoals(poses: RobotPose[], index: number) {
     this.switchToPositionMode();
+    this.stopExecution();
     this.poseGoal = this.makePoseGoals(poses);
     this.trajectoryClient.createClient(this.poseGoal);
   }
@@ -752,6 +754,7 @@ export class Robot extends React.Component {
 
   executeIncrementalMove(jointName: ValidJoints, increment: number) {
     this.switchToPositionMode();
+    this.stopExecution();
     this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment);
     this.trajectoryClient.createClient(this.poseGoal);
   }
