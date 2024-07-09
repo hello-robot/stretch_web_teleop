@@ -768,7 +768,7 @@ export class Robot extends React.Component {
   stopAutonomousClients() {
     this.stopMoveBaseClient();
     this.stopMoveToPregraspClient();
-  }  
+  }
 
   stopTrajectoryClient() {
     if (!this.trajectoryClient) throw "trajectoryClient is undefined";
