@@ -754,7 +754,7 @@ export class Robot extends React.Component {
 
   executeIncrementalMove(jointName: ValidJoints, increment: number) {
     this.switchToPositionMode();
-    this.stopExecution();
+    this.stopAutonomousClients();
     this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment);
     this.trajectoryClient.createClient(this.poseGoal);
   }
@@ -764,6 +764,11 @@ export class Robot extends React.Component {
     this.stopMoveBaseClient();
     this.stopMoveToPregraspClient();
   }
+
+  stopAutonomousClients() {
+    this.stopMoveBaseClient();
+    this.stopMoveToPregraspClient();
+  }  
 
   stopTrajectoryClient() {
     if (!this.trajectoryClient) throw "trajectoryClient is undefined";
