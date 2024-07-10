@@ -79,11 +79,12 @@
 .operator-voice,
 .operator-pose-library,
 .operator-pose-recorder,
+.operator-text-to-speech,
 .operator-aruco-markers {
   background-color: whitesmoke;
   box-shadow: var(--shadow);
   height: 6rem;
-  width: 40rem;
+  width: 50rem;
   display: inline-grid;
   align-items: center;
   justify-content: center;
@@ -113,6 +114,7 @@
 .operator-voice[hidden],
 .operator-pose-library[hidden],
 .operator-pose-recorder[hidden],
+.operator-text-to-speech[hidden],
 .operator-aruco-markers[hidden] {
   display: none;
 }

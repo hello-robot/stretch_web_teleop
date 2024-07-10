@@ -108,6 +108,10 @@ export type GlobalOptionsProps = {
   displayMovementRecorder: boolean;
   setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
 
+  /** IF the text-to-speech component should be displayed */
+  displayTextToSpeech: boolean;
+  setDisplayTextToSpeech: (displayTextToSpeech: boolean) => void;
+
   /** If the button text labels should be displayed */
   displayLabels: boolean;
   setDisplayLabels: (displayLabels: boolean) => void;
@@ -151,6 +155,13 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
             props.setDisplayMovementRecorder(!props.displayMovementRecorder)
           }
           label="Display movement recorder"
+        />
+        <OnOffToggleButton
+          on={!props.displayTextToSpeech}
+          onClick={() =>
+            props.setDisplayTextToSpeech(!props.displayTextToSpeech)
+          }
+          label="Display text-to-speech"
         />
         <button onClick={() => setShowLoadLayoutModal(true)}>
           Load layout
