@@ -13,6 +13,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
   const [showDropdown, setShowDropdown] = React.useState(false);
   const [placement, setPlacement] = React.useState(props.placement);
   const inputRef = React.useRef<HTMLDivElement>(null);
+  const dropdownPopupRef = React.useRef<HTMLDivElement>(null);
   if (props.selectedIndex === undefined && !props.placeholderText)
     throw Error("both selectedOption and placeholderText undefined");
 
@@ -31,6 +32,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
     }
   });
 
+  // Function to convert each possible option into a button
   function mapFunc(option: T, idx: number) {
     const active = idx === props.selectedIndex;
     if (active && !props.showActive) return null;
@@ -47,6 +49,21 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
       </button>
     );
   }
+
+  // Set the max-height of the popup to the screen height minus the top of the popup
+  function resizeDropdownPopup() {
+    if (dropdownPopupRef.current) {
+      const top = dropdownPopupRef.current.getBoundingClientRect().top;
+      dropdownPopupRef.current.style.maxHeight = `calc(100vh - ${top}px)`;
+    }
+  }
+  React.useEffect(resizeDropdownPopup, [showDropdown]);
+  React.useEffect(() => {
+    window.addEventListener("resize", resizeDropdownPopup);
+    return () => {
+      window.removeEventListener("resize", resizeDropdownPopup);
+    };
+  });
 
   return (
     <div ref={inputRef} className="dropdown">
@@ -69,6 +86,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
           top: props.placement == "top",
           bottom: props.placement == "bottom",
         })}
+        ref={dropdownPopupRef}
       >
         {props.possibleOptions.map(mapFunc)}
       </div>

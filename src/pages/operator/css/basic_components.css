@@ -154,6 +154,7 @@
   border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
   top: 100%;
   bottom: auto;
+  overflow-y: auto; /* Make it scrollable */
 }
 
 .dropdown-popup.top,

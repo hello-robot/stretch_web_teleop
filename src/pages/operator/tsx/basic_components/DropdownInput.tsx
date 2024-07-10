@@ -3,7 +3,7 @@ import { className } from "shared/util";
 import "operator/css/basic_components.css";
 import e from "express";
 
-export const DropdownInput = <T extends string | JSX.Element>(props: {
+export const DropdownInput = <T extends string>(props: {
   text: string;
   setText: (text: string) => void;
   selectedIndex?: number;
@@ -15,6 +15,7 @@ export const DropdownInput = <T extends string | JSX.Element>(props: {
 }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
   const componentRef = React.useRef<HTMLDivElement>(null);
+  const dropdownPopupRef = React.useRef<HTMLDivElement>(null);
 
   // Handler to close dropdown when click outside
   React.useEffect(() => {
@@ -31,6 +32,16 @@ export const DropdownInput = <T extends string | JSX.Element>(props: {
     }
   });
 
+  // Handler to update the selected index if the possible options or text changes
+  React.useEffect(() => {
+    if (props.possibleOptions.includes(props.text as T)) {
+      props.setSelectedIndex(props.possibleOptions.indexOf(props.text as T));
+    } else {
+      props.setSelectedIndex(undefined);
+    }
+  }, [props.possibleOptions, props.text]);
+
+  // Function to convert each possible option into a button
   function mapFunc(option: T, idx: number) {
     const active = idx === props.selectedIndex;
     return (
@@ -49,17 +60,34 @@ export const DropdownInput = <T extends string | JSX.Element>(props: {
     );
   }
 
+  // Set the max-height of the popup to the screen height minus the top of the popup
+  function resizeDropdownPopup() {
+    if (dropdownPopupRef.current) {
+      const top = dropdownPopupRef.current.getBoundingClientRect().top;
+      dropdownPopupRef.current.style.maxHeight = `calc(100vh - ${top}px)`;
+    }
+  }
+  React.useEffect(resizeDropdownPopup, [showDropdown]);
+  React.useEffect(() => {
+    window.addEventListener("resize", resizeDropdownPopup);
+    return () => {
+      window.removeEventListener("resize", resizeDropdownPopup);
+    };
+  });
+
   return (
     <div ref={componentRef} className="dropdown-input">
       <textarea
         className="dropdown-input-textarea"
         rows={props.rows}
         value={props.text}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowDropdown(false);
+        }}
         onChange={(e) => {
           e.stopPropagation();
           props.setText(e.target.value);
-          props.setSelectedIndex(undefined);
         }}
         placeholder={props.placeholderText}
       />
@@ -70,7 +98,6 @@ export const DropdownInput = <T extends string | JSX.Element>(props: {
           bottom: props.placement == "bottom",
         })}
         onClick={(e) => {
-          console.log("clicked", e);
           e.stopPropagation();
           setShowDropdown(!showDropdown);
         }}
@@ -83,6 +110,7 @@ export const DropdownInput = <T extends string | JSX.Element>(props: {
           top: props.placement == "top",
           bottom: props.placement == "bottom",
         })}
+        ref={dropdownPopupRef}
       >
         {props.possibleOptions.map(mapFunc)}
       </div>
