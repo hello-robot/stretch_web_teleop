@@ -29,16 +29,15 @@ export class TextToSpeechFunctionProvider extends FunctionProvider {
         };
       case TextToSpeechFunction.SaveText:
         return (text: string) => {
-          console.log("Saving text: ", text);
+          this.storageHandler.saveText(text);
         };
       case TextToSpeechFunction.DeleteText:
-        return (textID: number) => {
-          console.log("Deleting text with ID: ", textID);
+        return (text: string) => {
+          this.storageHandler.deleteText(text);
         };
       case TextToSpeechFunction.SavedTexts:
         return () => {
-          console.log("Getting saved texts");
-          return ["Hello", "Goodbye"];
+          return this.storageHandler.getSavedTexts();
         };
     }
   }

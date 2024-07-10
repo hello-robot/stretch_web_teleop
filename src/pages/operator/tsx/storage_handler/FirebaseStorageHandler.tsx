@@ -43,6 +43,7 @@ export class FirebaseStorageHandler extends StorageHandler {
   private mapPoses: { [name: string]: ROSLIB.Transform };
   private mapPoseTypes: { [name: string]: string };
   private recordings: { [name: string]: RobotPose[] };
+  private textToSpeech: string[];
   private markerNames: string[];
   private markerIDs: string[];
   private markerInfo: ArucoMarkersInfo;
@@ -66,6 +67,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     this.mapPoses = {};
     this.mapPoseTypes = {};
     this.recordings = {};
+    this.textToSpeech = [];
     this.markerNames = [];
     this.markerIDs = [];
     this.markerInfo = {} as ArucoMarkersInfo;
@@ -86,6 +88,7 @@ export class FirebaseStorageHandler extends StorageHandler {
           this.mapPoses = userData.map_poses;
           this.mapPoseTypes = userData.map_pose_types;
           this.recordings = userData.recordings;
+          this.textToSpeech = userData.text_to_speech;
 
           this.onReadyCallback();
         })
@@ -253,5 +256,35 @@ export class FirebaseStorageHandler extends StorageHandler {
     if (!recording) throw Error(`Could not delete recording ${recordingName}`);
     delete this.recordings[recordingName];
     this.writeRecordings(this.recordings);
+  }
+
+  /**
+   * NOTE: The below four text-to-speech functions have NOT been tested.
+   */
+
+  public getSavedTexts(): string[] {
+    if (!this.textToSpeech) return [];
+    return this.textToSpeech;
+  }
+
+  public saveText(text: string): void {
+    if (this.textToSpeech.includes(text)) return;
+    this.textToSpeech.push(text);
+    this.writeTextToSpeech(this.textToSpeech);
+  }
+
+  private async writeTextToSpeech(textToSpeech: string[]) {
+    this.textToSpeech = textToSpeech;
+
+    let updates: any = {};
+    updates["/users/" + this.uid + "/text_to_speech"] = textToSpeech;
+    return update(ref(this.database), updates);
+  }
+
+  public deleteText(text: string): void {
+    if (!this.textToSpeech.includes(text)) return;
+    const index = this.textToSpeech.indexOf(text);
+    this.textToSpeech.splice(index, 1);
+    this.writeTextToSpeech(this.textToSpeech);
   }
 }

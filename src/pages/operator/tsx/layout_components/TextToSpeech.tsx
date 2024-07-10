@@ -19,7 +19,7 @@ export interface TextToSpeechFunctions {
   Play: (text: string) => void;
   Stop: () => void;
   SaveText: (text: string) => void;
-  DeleteText: (textID: number) => void;
+  DeleteText: (text: string) => void;
   SavedTexts: () => string[];
 }
 
@@ -30,7 +30,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
     ) as (name: string) => void,
     DeleteText: textToSpeechFunctionProvider.provideFunctions(
       TextToSpeechFunction.DeleteText,
-    ) as (textID: number) => void,
+    ) as (text: string) => void,
     SavedTexts: textToSpeechFunctionProvider.provideFunctions(
       TextToSpeechFunction.SavedTexts,
     ) as () => string[],
@@ -96,7 +96,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
               className="delete-btn btn-label"
               onClick={() => {
                 if (selectedIdx != undefined) {
-                  functions.DeleteText(selectedIdx);
+                  functions.DeleteText(text);
                 }
                 setSavedTexts(functions.SavedTexts());
                 setSelectedIdx(undefined);
@@ -112,6 +112,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
               className="save-btn btn-label"
               onClick={() => {
                 functions.SaveText(text);
+                setSavedTexts(functions.SavedTexts());
               }}
             >
               <i hidden={props.hideLabels}>Save</i>
