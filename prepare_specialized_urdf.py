@@ -98,7 +98,9 @@ print("The specialized URDFs will be derived from this URDF.")
 try:
     robot = ud.Robot.from_xml_file(urdf_filename)
 except FileNotFoundError:
-    print(f"The URDF file was not found in path {urdf_filename}. Unable to create specialized URDFs.")
+    print(
+        f"The URDF file was not found in path {urdf_filename}. Unable to create specialized URDFs."
+    )
     sys.exit(0)
 
 # Change any joint that should be immobile for end effector IK into a fixed joint
