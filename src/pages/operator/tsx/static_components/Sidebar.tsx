@@ -108,7 +108,7 @@ export type GlobalOptionsProps = {
   displayMovementRecorder: boolean;
   setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
 
-  /** IF the text-to-speech component should be displayed */
+  /** If the text-to-speech component should be displayed */
   displayTextToSpeech: boolean;
   setDisplayTextToSpeech: (displayTextToSpeech: boolean) => void;
 

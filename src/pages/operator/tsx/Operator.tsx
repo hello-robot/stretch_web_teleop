@@ -293,11 +293,6 @@ export const Operator = (props: {
 
   const actionModes = Object.values(ActionMode);
 
-  console.log(
-    "layout.current.displayTextToSpeech",
-    layout.current.displayTextToSpeech,
-  );
-
   return (
     <div id="operator">
       <div id="operator-header" onClick={handleClickHeader}>

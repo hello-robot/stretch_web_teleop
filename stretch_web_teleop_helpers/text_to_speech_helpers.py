@@ -7,6 +7,7 @@ from typing import List, Optional
 # Third-party imports
 import pyttsx3
 import simpleaudio
+import sounddevice  # suppress ALSA warnings # noqa: F401
 from gtts import gTTS
 from pydub import AudioSegment
 from rclpy.impl.rcutils_logger import RcutilsLogger
@@ -110,7 +111,9 @@ class TextToSpeechEngine(ABC):
 
 class PyTTSx3(TextToSpeechEngine):
     """
-    Text-to-speech engine using pyttsx3.
+    Text-to-speech engine using pyttsx3. A big benefit of pyttsx3 compared
+    to other enginers is that it runs offline. However, its Linux voices tend
+    to be less natural than other engines.
     """
 
     def __init__(self, logger: RcutilsLogger):

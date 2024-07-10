@@ -89,7 +89,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
             <span className="material-icons">stop_circle</span>
           </button>
         </Tooltip>
-        {/* If we have loaded saved text, then we should show a delete button. If it is new text, then we should show a save button. */}
+        {/* If we are on saved text, then we show a delete button, else a save button. */}
         {selectedIdx != undefined ? (
           <Tooltip text="Delete text" position="top">
             <button
