@@ -1084,7 +1084,6 @@ const CameraPerspectiveButton = (props: {
 };
 
 function getGripperLabel(stretchTool: StretchTool) {
-  console.log("getGripperLabel stretchTool", stretchTool);
   switch (stretchTool) {
     case StretchTool.TABLET:
       return "Tablet";
