@@ -95,6 +95,13 @@ class TextToSpeechEngine(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def is_speaking(self) -> bool:
+        """
+        Return whether the text-to-speech engine is currently speaking.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def say(self, text: str):
         """
         Speak the given text synchronously.
@@ -183,6 +190,16 @@ class PyTTSx3(TextToSpeechEngine):
             "Asynchronous speaking is not supported for PyTTSx3 on Linux."
         )
 
+    def is_speaking(self) -> bool:
+        """
+        Return whether the text-to-speech engine is currently speaking.
+        """
+        # Because asynchronous speaking is not supported in pyttsxy on Linux,
+        # if this function is called, it is assumed that the engine is not speaking.
+        # This works as long as `is_speaking` and `say` will be called from
+        # the same thread.
+        return False
+
     def say(self, text: str):
         """
         Speak the given text synchronously.
@@ -265,6 +282,17 @@ class GTTS(TextToSpeechEngine):
         Speak the given text asynchronously.
         """
         self.__synthesize_and_play_text(text)
+
+    def is_speaking(self) -> bool:
+        """
+        Return whether the text-to-speech engine is currently speaking.
+        """
+        if self._playback is None:
+            return False
+        if not self._playback.is_playing():
+            self._playback = None
+            return False
+        return True
 
     def say(self, text: str):
         """

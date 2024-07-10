@@ -51,7 +51,7 @@ class TextToSpeechNode(Node):
 
         # Declare the attributes for the run thread
         self.rate_hz = rate_hz
-        self.queue: List[str] = []
+        self.queue: List[TextToSpeech] = []
         self.queue_lock = threading.Lock()
 
         # Create the subscription
@@ -59,7 +59,8 @@ class TextToSpeechNode(Node):
             TextToSpeech,
             "text_to_speech",
             self.text_to_speech_callback,
-            QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
+            QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE),
+            callback_group=rclpy.callback_groups.MutuallyExclusiveCallbackGroup(),
         )
 
     def initialize(self):
@@ -93,19 +94,11 @@ class TextToSpeechNode(Node):
             else:
                 self.get_logger().warn("Engine does not support interrupting speech")
 
-        # Process the voice
-        if len(msg.voice) > 0:
-            if msg.voice != self.engine.voice_id:
-                self.engine.voice_id = msg.voice
-
-        # Process the speed
-        if msg.is_slow != self.engine.is_slow:
-            self.engine.is_slow = msg.is_slow
-
         # Queue the text
         if len(msg.text) > 0:
             with self.queue_lock:
-                self.queue.append(msg.text)
+                self.queue.append(msg)
+                self.get_logger().info(f"Queue in cb: {self.queue}")
 
     def run(self):
         """
@@ -113,19 +106,34 @@ class TextToSpeechNode(Node):
         """
         rate = self.create_rate(self.rate_hz)
         while rclpy.ok():
-            # Send a single queued utterance to the text-to-speech engine
-            text = None
-            with self.queue_lock:
-                if len(self.queue) > 0:
-                    text = self.queue.pop(0)
-            if text is not None:
-                if self.engine._can_say_async:
-                    self.engine.say_async(text)
-                else:
-                    self.engine.say(text)
-
+            self.get_logger().info("In loop")
             # Sleep
             rate.sleep()
+
+            # Send a single queued utterance to the text-to-speech engine
+            if not self.engine.is_speaking():
+                self.get_logger().info("Not speaking")
+                msg = None
+                with self.queue_lock:
+                    self.get_logger().info(f"Queue in loop: {self.queue}")
+                    if len(self.queue) > 0:
+                        msg = self.queue.pop(0)
+                        self.get_logger().info(f"Msg in loop: {msg}")
+                if msg is not None:
+                    # Process the voice
+                    if len(msg.voice) > 0:
+                        if msg.voice != self.engine.voice_id:
+                            self.engine.voice_id = msg.voice
+
+                    # Process the speed
+                    if msg.is_slow != self.engine.is_slow:
+                        self.engine.is_slow = msg.is_slow
+
+                    # Speak the text
+                    if self.engine._can_say_async:
+                        self.engine.say_async(msg.text)
+                    else:
+                        self.engine.say(msg.text)
 
 
 def main():
@@ -137,9 +145,11 @@ def main():
     node.get_logger().info("Created!")
 
     # Spin in the background, as the node initializes
+    executor = rclpy.executors.MultiThreadedExecutor(num_threads=4)
     spin_thread = threading.Thread(
         target=rclpy.spin,
         args=(node,),
+        kwargs={"executor": executor},
         daemon=True,
     )
     spin_thread.start()

@@ -5,6 +5,11 @@
   justify-content: center;
 }
 
+/* The below buttons' CSS likely gets overridden by the TextToSpeech CSS
+ * for the same class names. It is not an issue now because they use the
+ * same styles, but may be an issue in the future if we change styles for
+ * one of the components.
+ */
 .play-btn {
   background-color: var(--selected-color);
   display: flex;
@@ -16,7 +21,8 @@
 }
 
 .delete-btn {
-  background-color: var(--btn-red);
+  background-color: #cd0b0b;
+  color: white;
   display: flex;
 }
 
