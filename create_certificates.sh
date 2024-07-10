@@ -9,7 +9,7 @@ rm -rf ~/.local/share/mkcert/root*
 cp root* ~/.local/share/mkcert
 mkcert ${HELLO_FLEET_ID} ${HELLO_FLEET_ID}.local ${HELLO_FLEET_ID}.dev localhost 127.0.0.1 0.0.0.0 ::1 
 rm mkcert-v*-linux-amd64
-cd $AMENT_WSDIR/src/stretch_web_teleop
+cd ..
 touch .env
 echo certfile=${HELLO_FLEET_ID}+6.pem >> .env
 echo keyfile=${HELLO_FLEET_ID}+6-key.pem >> .env
