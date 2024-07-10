@@ -13,6 +13,8 @@ import {
   GetOccupancyGrid,
   MoveBaseCommand,
   PlaybackPosesCommand,
+  PlayTextToSpeech,
+  StopTextToSpeech,
 } from "shared/commands";
 import {
   ValidJointStateDict,
@@ -218,6 +220,37 @@ export class RemoteRobot extends React.Component<{}, any> {
 
   stopMoveToPregrasp() {
     this.robotChannel({ type: "stopMoveToPregrasp" });
+  }
+
+  /**
+   * Speak the specified text.
+   *
+   * @param text text to speak
+   * @param override_behavior 0 to queue, 1 to interrupt
+   * @param is_slow False for normal speed, True for slow speed
+   */
+  playTextToSpeech(
+    text: string,
+    override_behavior: number = 0,
+    is_slow: boolean = false,
+  ) {
+    let cmd: PlayTextToSpeech = {
+      type: "playTextToSpeech",
+      text: text,
+      override_behavior: override_behavior,
+      is_slow: is_slow,
+    };
+    this.robotChannel(cmd);
+  }
+
+  /**
+   * Stop the text that is currently being spoken.
+   */
+  stopTextToSpeech() {
+    let cmd: StopTextToSpeech = {
+      type: "stopTextToSpeech",
+    };
+    this.robotChannel(cmd);
   }
 }
 

@@ -16,10 +16,16 @@ export class TextToSpeechFunctionProvider extends FunctionProvider {
       case TextToSpeechFunction.Play:
         return (text: string) => {
           console.log("Playing text: ", text);
+          FunctionProvider.remoteRobot?.playTextToSpeech(
+            text,
+            0, // 0 to queue, 1 to interrupt
+            false, // false to speak normally, true to speak slowly
+          );
         };
       case TextToSpeechFunction.Stop:
         return () => {
           console.log("Stopping text");
+          FunctionProvider.remoteRobot?.stopTextToSpeech();
         };
       case TextToSpeechFunction.SaveText:
         return (text: string) => {

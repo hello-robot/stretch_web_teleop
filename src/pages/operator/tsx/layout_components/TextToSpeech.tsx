@@ -69,6 +69,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
           <button
             className="play-btn btn-label"
             onClick={() => {
+              // TODO: Should we reset the text here?
               functions.Play(text);
             }}
           >

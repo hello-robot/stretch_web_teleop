@@ -88,6 +88,8 @@ class TextToSpeechNode(Node):
         if msg.override_behavior == TextToSpeech.OVERRIDE_BEHAVIOR_INTERRUPT:
             if self.engine._can_say_async:
                 self.engine.stop()
+                with self.queue_lock:
+                    self.queue.clear()
             else:
                 self.get_logger().warn("Engine does not support interrupting speech")
 
@@ -101,8 +103,9 @@ class TextToSpeechNode(Node):
             self.engine.is_slow = msg.is_slow
 
         # Queue the text
-        with self.queue_lock:
-            self.queue.append(msg.text)
+        if len(msg.text) > 0:
+            with self.queue_lock:
+                self.queue.append(msg.text)
 
     def run(self):
         """

@@ -19,7 +19,9 @@ export type cmd =
   | PlaybackPosesCommand
   | GetBatteryVoltageCommand
   | GetHasBetaTeleopKit
-  | GetStretchTool;
+  | GetStretchTool
+  | PlayTextToSpeech
+  | StopTextToSpeech;
 
 export interface VelocityCommand {
   stop: () => void;
@@ -111,4 +113,15 @@ export interface StopMoveToPregraspCommand {
 
 export interface GetBatteryVoltageCommand {
   type: "getBatteryVoltage";
+}
+
+export interface PlayTextToSpeech {
+  type: "playTextToSpeech";
+  text: string;
+  override_behavior: number;
+  is_slow: boolean;
+}
+
+export interface StopTextToSpeech {
+  type: "stopTextToSpeech";
 }

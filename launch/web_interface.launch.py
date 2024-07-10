@@ -531,4 +531,14 @@ def generate_launch_description():
         )
         ld.add_action(move_to_pregrasp_node)
 
+    # Text to speech
+    text_to_speech_node = Node(
+        package="stretch_web_teleop",
+        executable="text_to_speech.py",
+        output="screen",
+        arguments=[],
+        parameters=[],
+    )
+    ld.add_action(text_to_speech_node)
+
     return ld
