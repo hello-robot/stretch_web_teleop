@@ -2,6 +2,7 @@ import React from "react";
 import { className } from "shared/util";
 import "operator/css/basic_components.css";
 import e from "express";
+import { text } from "stream/consumers";
 
 export const DropdownInput = <T extends string>(props: {
   text: string;
@@ -84,6 +85,13 @@ export const DropdownInput = <T extends string>(props: {
         onClick={(e) => {
           e.stopPropagation();
           setShowDropdown(false);
+        }}
+        onFocus={(e) => {
+          e.stopPropagation();
+          e.target.select();
+        }}
+        onBlur={(e) => {
+          document.getSelection()?.empty();
         }}
         onChange={(e) => {
           e.stopPropagation();
