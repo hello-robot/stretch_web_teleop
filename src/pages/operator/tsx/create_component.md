@@ -5,7 +5,7 @@ To create a new component you'll want to follow these steps:
 1. **Create a new type** for your component in `ComponentType` in `utils/component_definitions.tsx`.
 
    - If there are going to be subtypes of your component then define an id for each of the subtypes like `CameraViewId` in `utils/component_definitions.tsx`
-   - If you component needs any other field in order for it to render (such as a `TabDefinition` having a `label`), then create a separate definition for your component with those fields.
+   - If your component needs any other field in order for it to render (such as a `TabDefinition` having a `label`), then create a separate definition for your component with those fields.
 
 1. **Create a new file** in `layout_components` with the React code for your new component. The React functional component should take `CustomizableComponentProps` as its props. A field in `CustomizableComponentProps` is the `ComponentDefinition`, so you should be able to access all of the fields in the components definition there. Here are some more details about the React component you create:
 

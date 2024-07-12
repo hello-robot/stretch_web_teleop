@@ -9,6 +9,7 @@ import {
   LayoutDefinition,
   ActionMode,
   LayoutGridDefinition,
+  KeyboardControlDefinition,
 } from "../utils/component_definitions";
 
 /**
@@ -43,6 +44,10 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                   displayButtons: true,
                   children: [],
                 } as CameraViewDefinition,
+                {
+                  //KEYBOARD CONTROL
+                  type: ComponentType.KeyboardControl,
+                } as KeyboardControlDefinition,
               ],
             },
           ],

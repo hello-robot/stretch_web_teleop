@@ -237,7 +237,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         )
       }
       {
-        // When contextMenuXY is set, display thr context menu
+        // When contextMenuXY is set, display the context menu
         contextMenuXY ? (
           <SelectContexMenu
             clickXY={contextMenuXY}
@@ -621,7 +621,7 @@ function executeVideoSettings(definition: CameraViewDefinition) {
       executeRealsenseSettings(definition as RealsenseVideoStreamDef);
       break;
     default:
-      throw Error(`unknow video stream id: ${definition.id}`);
+      throw Error(`unknown video stream id: ${definition.id}`);
   }
 }
 
@@ -734,7 +734,7 @@ const UnderVideoButtons = (props: {
       );
       break;
     default:
-      throw Error(`unknow video stream id: ${props.definition.id}`);
+      throw Error(`unknown video stream id: ${props.definition.id}`);
   }
   return buttons;
 };

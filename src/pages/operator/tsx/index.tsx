@@ -26,6 +26,7 @@ import { UnderVideoFunctionProvider } from "./function_providers/UnderVideoFunct
 import { MapFunctionProvider } from "./function_providers/MapFunctionProvider";
 import { UnderMapFunctionProvider } from "./function_providers/UnderMapFunctionProvider";
 import { MovementRecorderFunctionProvider } from "./function_providers/MovementRecorderFunctionProvider";
+import { KeyboardFunctionProvider } from "./function_providers/KeyboardFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
 import { isMobile } from "react-device-detect";
 import "operator/css/index.css";
@@ -57,6 +58,7 @@ export var batteryVoltageFunctionProvider =
 export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
+export var keyboardFunctionProvider = new KeyboardFunctionProvider();
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
