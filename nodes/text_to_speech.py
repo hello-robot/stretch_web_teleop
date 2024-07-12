@@ -85,6 +85,7 @@ class TextToSpeechNode(Node):
         msg : TextToSpeech
             The message containing the text to speak.
         """
+        self.get_logger().info(f"Received: {msg}")
         # Interrupt if requested
         if msg.override_behavior == TextToSpeech.OVERRIDE_BEHAVIOR_INTERRUPT:
             if self.engine._can_say_async:
@@ -98,7 +99,6 @@ class TextToSpeechNode(Node):
         if len(msg.text) > 0:
             with self.queue_lock:
                 self.queue.append(msg)
-                self.get_logger().info(f"Queue in cb: {self.queue}")
 
     def run(self):
         """
@@ -106,19 +106,15 @@ class TextToSpeechNode(Node):
         """
         rate = self.create_rate(self.rate_hz)
         while rclpy.ok():
-            self.get_logger().info("In loop")
             # Sleep
             rate.sleep()
 
             # Send a single queued utterance to the text-to-speech engine
             if not self.engine.is_speaking():
-                self.get_logger().info("Not speaking")
                 msg = None
                 with self.queue_lock:
-                    self.get_logger().info(f"Queue in loop: {self.queue}")
                     if len(self.queue) > 0:
                         msg = self.queue.pop(0)
-                        self.get_logger().info(f"Msg in loop: {msg}")
                 if msg is not None:
                     # Process the voice
                     if len(msg.voice) > 0:
@@ -134,6 +130,7 @@ class TextToSpeechNode(Node):
                         self.engine.say_async(msg.text)
                     else:
                         self.engine.say(msg.text)
+                    self.get_logger().info(f"Saying: {msg.text}")
 
 
 def main():
