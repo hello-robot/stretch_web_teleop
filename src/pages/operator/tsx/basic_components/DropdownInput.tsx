@@ -35,8 +35,9 @@ export const DropdownInput = <T extends string>(props: {
 
   // Handler to update the selected index if the possible options or text changes
   React.useEffect(() => {
-    if (props.possibleOptions.includes(props.text as T)) {
-      props.setSelectedIndex(props.possibleOptions.indexOf(props.text as T));
+    let text = props.text.trim();
+    if (props.possibleOptions.includes(text as T)) {
+      props.setSelectedIndex(props.possibleOptions.indexOf(text as T));
     } else {
       props.setSelectedIndex(undefined);
     }

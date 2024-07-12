@@ -69,7 +69,6 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
           <button
             className="play-btn btn-label"
             onClick={() => {
-              // TODO: Should we reset the text here?
               functions.Play(text);
             }}
           >
@@ -96,7 +95,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
               className="delete-btn btn-label"
               onClick={() => {
                 if (selectedIdx != undefined) {
-                  functions.DeleteText(text);
+                  functions.DeleteText(text.trim());
                 }
                 setSavedTexts(functions.SavedTexts());
                 setSelectedIdx(undefined);
@@ -111,7 +110,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
             <button
               className="save-btn btn-label"
               onClick={() => {
-                functions.SaveText(text);
+                functions.SaveText(text.trim());
                 setSavedTexts(functions.SavedTexts());
               }}
             >
