@@ -21,8 +21,7 @@
 }
 
 .delete-btn {
-  background-color: #cd0b0b;
-  color: white;
+  background-color: var(--btn-red);
   display: flex;
 }
 
