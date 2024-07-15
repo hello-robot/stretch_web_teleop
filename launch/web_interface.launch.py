@@ -212,6 +212,11 @@ def generate_launch_description():
     map_yaml = DeclareLaunchArgument(
         "map_yaml", description="filepath to previously captured map", default_value=""
     )
+    tts_engine = DeclareLaunchArgument(
+        "tts_engine",
+        description="name of the TTS engine. Either pyttsx3 or gtts.",
+        default_value="gtts",
+    )
     certfile_arg = DeclareLaunchArgument(
         "certfile", default_value=stretch_serial_no + "+6.pem"
     )
@@ -230,6 +235,7 @@ def generate_launch_description():
     ld = LaunchDescription(
         [
             map_yaml,
+            tts_engine,
             nav2_params_file_param,
             params_file,
             certfile_arg,
@@ -536,7 +542,7 @@ def generate_launch_description():
         package="stretch_web_teleop",
         executable="text_to_speech.py",
         output="screen",
-        arguments=[],
+        arguments=[LaunchConfiguration("tts_engine")],
         parameters=[],
     )
     ld.add_action(text_to_speech_node)

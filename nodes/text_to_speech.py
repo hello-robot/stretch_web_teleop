@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Standard imports
+import sys
 import threading
 from typing import List, Optional
 
@@ -29,7 +30,7 @@ class TextToSpeechNode(Node):
     def __init__(
         self,
         engine_type: TextToSpeechEngineType = TextToSpeechEngineType.PYTTSX3,
-        rate_hz: float = 10.0,
+        rate_hz: float = 5.0,
     ):
         """
         Initialize the TextToSpeechNode.
@@ -134,10 +135,20 @@ class TextToSpeechNode(Node):
 
 
 def main():
+    # Check the arguments
+    tts_engine = sys.argv[1]
+    tts_engine = tts_engine.lower()
+    tts_engine_map = {e.name.lower(): e for e in TextToSpeechEngineType}
+    if tts_engine not in tts_engine_map:
+        print(f"Invalid text-to-speech engine: {tts_engine}")
+        print(f"Options: {list(tts_engine_map.keys())}")
+        print("Defaulting to gtts")
+        tts_engine = "gtts"
+
     rclpy.init()
 
     node = TextToSpeechNode(
-        engine_type=TextToSpeechEngineType.GTTS,
+        engine_type=tts_engine_map[tts_engine],
     )
     node.get_logger().info("Created!")
 
