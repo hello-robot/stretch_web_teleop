@@ -1,15 +1,10 @@
-#movement-recorder-container {
+#text-to-speech-container {
   display: flex;
   gap: 15px;
   align-items: center;
   justify-content: center;
 }
 
-/* The below buttons' CSS likely gets overridden by the TextToSpeech CSS
- * for the same class names. It is not an issue now because they use the
- * same styles, but may be an issue in the future if we change styles for
- * one of the components.
- */
 .play-btn {
   background-color: var(--selected-color);
   display: flex;
@@ -20,18 +15,24 @@
   display: flex;
 }
 
+.stop-btn {
+  background-color: #cd0b0b;
+  color: white;
+  display: flex;
+}
+
 .delete-btn {
   background-color: var(--btn-red);
   display: flex;
 }
 
 @media (max-width: 1300px) {
-  #movement-recorder-container {
+  #text-to-speech-container {
     font-size: smaller;
   }
 }
 
-.mobile-movement-save-btn {
+.mobile-text-save-btn {
   border-radius: 13px;
   border: 5px solid whitesmoke;
   font-size: 25px;
@@ -44,7 +45,7 @@
   justify-content: center;
 }
 
-.mobile-movement-play-btn {
+.mobile-text-play-btn {
   /* width: 97%; */
   border-radius: 13px;
   border: 5px solid whitesmoke;

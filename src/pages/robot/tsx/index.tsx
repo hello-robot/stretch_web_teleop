@@ -297,6 +297,17 @@ function handleMessage(message: WebRTCMessage) {
       break;
     case "getStretchTool":
       robot.getStretchTool();
+      break;
+    case "playTextToSpeech":
+      robot.playTextToSpeech(
+        message.text,
+        message.override_behavior,
+        message.is_slow,
+      );
+      break;
+    case "stopTextToSpeech":
+      robot.stopTextToSpeech();
+      break;
   }
 }
 
