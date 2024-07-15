@@ -7,8 +7,14 @@ enum Mode {
 }
 
 export default function KeyboardFunctionProvider() {
-  const [mode, setMode] = React.useState();
+  const [mode, setMode] = React.useState<Mode>();
 
+  // constructor(){
+  //   super();
+  //   this.provideFunctions = this.provideFunctions.bind(this);
+  // }
+
+  // public provideFunctions()
   const handleKeyPress = React.useCallback(
     (event) => {
       switch (event.key) {

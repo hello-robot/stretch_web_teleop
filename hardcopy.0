@@ -1,0 +1,600 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[INFO] [launch]: All log files can be found below /home/hello-robot/.ros/log/2024-06-26-18-01-51-184146-stretch-se3-3001-28509
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [realsense2_camera_node-1]: process started with pid [28527]
+[INFO] [realsense2_camera_node-2]: process started with pid [28529]
+[INFO] [usb_cam-4]: process started with pid [28533]
+[INFO] [stretch_driver-8]: process started with pid [28541]
+[INFO] [d435i_accel_correction-3]: process started with pid [28531]
+[INFO] [tf2_web_republisher-5]: process started with pid [28535]
+[INFO] [joint_state_publisher-6]: process started with pid [28537]
+[INFO] [robot_state_publisher-7]: process started with pid [28539]
+[INFO] [rosbridge_websocket-9]: process started with pid [28543]
+[INFO] [rosapi_node-10]: process started with pid [28546]
+[INFO] [configure_video_streams.py-11]: process started with pid [28549]
+[INFO] [configure_video_streams.py-12]: process started with pid [28551]
+[INFO] [configure_video_streams.py-13]: process started with pid [28553]
+[INFO] [sllidar_node-14]: process started with pid [28555]
+[INFO] [scan_to_scan_filter_chain-15]: process started with pid [28652]
+[INFO] [Empty "{}"-16]: process started with pid [28669]
+[INFO] [Bool true-17]: process started with pid [28682]
+[INFO] [move_to_pregrasp.py-18]: process started with pid [28693]
+[sllidar_node-14] [INFO] [1719450112.007842499] [sllidar_node]: SLLidar running on ROS2 package SLLidar.ROS2 SDK Version:1.0.1, SLLIDAR
+SDK Version:2.1.0
+[sllidar_node-14] [INFO] [1719450112.014620825] [sllidar_node]: SLLidar S/N: BB9FED93C0EA98C9A5E698F22E414669
+[sllidar_node-14] [INFO] [1719450112.014682825] [sllidar_node]: Firmware Ver: 1.29
+[sllidar_node-14] [INFO] [1719450112.014691971] [sllidar_node]: Hardware Rev: 7
+[sllidar_node-14] [INFO] [1719450112.016155877] [sllidar_node]: SLLidar health status : 0
+[sllidar_node-14] [INFO] [1719450112.016183710] [sllidar_node]: SLLidar health status : OK.
+[sllidar_node-14] [INFO] [1719450112.204099452] [sllidar_node]: current scan mode: Boost, sample rate: 8 Khz, max_distance: 12.0 m, scan
+ frequency:10.0 Hz,
+[scan_to_scan_filter_chain-15] [INFO] [1719450112.195245870] [laser_filter]: In shadow configure done
+[scan_to_scan_filter_chain-15] [WARN] [1719450112.195378331] [rcl.logging_rosout]: Publisher already registered for provided node name.
+If this is due to multiple nodes with the same name then all logs for that logger name will go out over the existing publisher. As soon
+as any node with that name is destructed it will unregister the publisher, preventing any further logs for that name from being publishe
+d on the rosout topic.
+[scan_to_scan_filter_chain-15] [WARN] [1719450112.198158537] [rcl.logging_rosout]: Publisher already registered for provided node name.
+If this is due to multiple nodes with the same name then all logs for that logger name will go out over the existing publisher. As soon
+as any node with that name is destructed it will unregister the publisher, preventing any further logs for that name from being publishe
+d on the rosout topic.
+[realsense2_camera_node-2] [INFO] [1719450112.595619838] [gripper_camera]: RealSense ROS v4.55.1
+[realsense2_camera_node-2] [INFO] [1719450112.595730290] [gripper_camera]: Built with LibRealSense v2.55.1
+[realsense2_camera_node-2] [INFO] [1719450112.595746652] [gripper_camera]: Running with LibRealSense v2.55.1
+[realsense2_camera_node-1] [INFO] [1719450112.597398366] [camera]: RealSense ROS v4.55.1
+[realsense2_camera_node-1] [INFO] [1719450112.598083871] [camera]: Built with LibRealSense v2.55.1
+[realsense2_camera_node-1] [INFO] [1719450112.598602812] [camera]: Running with LibRealSense v2.55.1
+[realsense2_camera_node-2] [INFO] [1719450112.679232480] [gripper_camera]: Device with serial number 242222071329 was found.
+[realsense2_camera_node-2]
+[realsense2_camera_node-2] [INFO] [1719450112.679901502] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/
+usb2/2-1/2-1:1.0/video4linux/video0 was found.
+[realsense2_camera_node-2] [INFO] [1719450112.679921589] [gripper_camera]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-2] [INFO] [1719450112.680125279] [gripper_camera]: Device with port number 2-1 was found.
+[realsense2_camera_node-1] [INFO] [1719450112.695818881] [camera]: Device with serial number 242222071329 was found.
+[realsense2_camera_node-1]
+[realsense2_camera_node-1] [INFO] [1719450112.695913118] [camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1
+/2-1:1.0/video4linux/video0 was found.
+[realsense2_camera_node-1] [INFO] [1719450112.695937736] [camera]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-1] [INFO] [1719450112.696135234] [camera]: Device with port number 2-1 was found.
+[realsense2_camera_node-1] [INFO] [1719450112.696169792] [camera]: Device USB type: 3.2
+[realsense2_camera_node-1] [INFO] [1719450112.696188657] [camera]: Resetting device...
+[realsense2_camera_node-2] [INFO] [1719450112.710782261] [gripper_camera]: Device with serial number 130322272285 was found.
+[realsense2_camera_node-2]
+[realsense2_camera_node-2] [INFO] [1719450112.712646248] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:14.0/
+usb3/3-2/3-2.3/3-2.3.3/3-2.3.3.1/3-2.3.3.1:1.0/video4linux/video6 was found.
+[realsense2_camera_node-2] [INFO] [1719450112.713271256] [gripper_camera]: Device with name Intel RealSense D405 was found.
+[realsense2_camera_node-2] [INFO] [1719450112.714043652] [gripper_camera]: Device with port number 3-2.3.3.1 was found.
+[realsense2_camera_node-2] [INFO] [1719450112.714602915] [gripper_camera]: Device USB type: 2.1
+[realsense2_camera_node-2] [WARN] [1719450112.715160014] [gripper_camera]: Device 130322272285 is connected using a 2.1 port. Reduced pe
+rformance is expected.
+[realsense2_camera_node-2] [INFO] [1719450112.715833534] [gripper_camera]: getParameters...
+[d435i_accel_correction-3] [INFO] [1719450112.798242296] [d435i_accel_correction_node]: d435i_accel_correction_node started
+[rosbridge_websocket-9] [INFO] [1719450112.936766758] [rosbridge_websocket]: Rosbridge WebSocket server started on port 9090
+[realsense2_camera_node-2] [INFO] [1719450113.007018470] [gripper_camera]: JSON file is loaded! (/home/hello-robot/ament_ws/install/stre
+tch_core/share/stretch_core/config/HighAccuracyPreset.json)
+[realsense2_camera_node-2] [INFO] [1719450113.007097848] [gripper_camera]: Device Name: Intel RealSense D405
+[realsense2_camera_node-2] [INFO] [1719450113.007119149] [gripper_camera]: Device Serial No: 130322272285
+[realsense2_camera_node-2] [INFO] [1719450113.007133390] [gripper_camera]: Device physical port: /sys/devices/pci0000:00/0000:00:14.0/us
+b3/3-2/3-2.3/3-2.3.3/3-2.3.3.1/3-2.3.3.1:1.0/video4linux/video6
+[realsense2_camera_node-2] [INFO] [1719450113.007147449] [gripper_camera]: Device FW version: 5.12.14.100
+[realsense2_camera_node-2] [INFO] [1719450113.007160565] [gripper_camera]: Device Product ID: 0x0B5B
+[realsense2_camera_node-2] [INFO] [1719450113.007173605] [gripper_camera]: Sync Mode: On
+[usb_cam-4] [INFO] [1719450113.068112847] [navigation_camera]: Starting USB Camera Node...
+[realsense2_camera_node-2] [WARN] [1719450113.103861196] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.103952531] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.103996340] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.104970398] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.105671746] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.106318116] [gripper_camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1719450113.115091267] [gripper_camera]: Could not set param: pointcloud.stream_filter with 0 Range: [
+0, 11]: parameter 'pointcloud.stream_filter' has invalid type: expected [integer] got [string]
+[realsense2_camera_node-2] [WARN] [1719450113.116319163] [gripper_camera]: Could not set param: pointcloud.stream_index_filter with -1 R
+ange: [-1, 16]: parameter 'pointcloud.stream_index_filter' has invalid type: expected [integer] got [string]
+[realsense2_camera_node-2] [INFO] [1719450113.118864779] [gripper_camera]: Stopping Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1719450113.156681086] [gripper_camera]: Starting Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1719450113.161979397] [gripper_camera]: Open profile: stream_type: Color(0), Format: RGB8, Width: 480
+, Height: 270, FPS: 15
+[realsense2_camera_node-2] [INFO] [1719450113.163202970] [gripper_camera]: Open profile: stream_type: Depth(0), Format: Z16, Width: 480,
+ Height: 270, FPS: 15
+[usb_cam-4] [INFO] [1719450113.167431647] [navigation_camera]: Camera Port: /dev/hello-nav-head-camera
+[usb_cam-4] [INFO] [1719450113.167826691] [navigation_camera]: Published to topic: /navigation_camera/image_raw
+[usb_cam-4] [INFO] [1719450113.168706718] [navigation_camera]: Camera Properties Applied: {'format': 'MJPG', 'size': [800, 600], 'fps':
+15, 'brightness': 10, 'contrast': 30, 'saturation': 80, 'hue': 0, 'gamma': 80, 'gain': 10, 'white_balence_temp': 4600, 'sharpness': 3, '
+backlight': 1}
+[realsense2_camera_node-2] [INFO] [1719450113.170866340] [gripper_camera]: RealSense Node Is Up!
+[configure_video_streams.py-13] [INFO] [1719450113.437070077] [configure_video_streams_gripper]: Gripper Depth recv lag: 0.074 seconds
+[move_to_pregrasp.py-18] [INFO] [1719450113.913298536] [move_to_pregrasp]: Created!
+[move_to_pregrasp.py-18] [INFO] [1719450113.923445349] [move_to_pregrasp]: Waiting for the get joint states service...
+[configure_video_streams.py-11] [INFO] [1719450114.019302752] [configure_video_streams_overhead]: Navigation RGB recv lag: 0.006 seconds
+[configure_video_streams.py-11] [INFO] [1719450114.025206548] [configure_video_streams_overhead]: Navigation RGB processing time: 0.020
+seconds
+[configure_video_streams.py-13] [INFO] [1719450114.068717382] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.056 seconds
+[configure_video_streams.py-13] [INFO] [1719450114.075197460] [configure_video_streams_gripper]: Gripper RGB processing time: 0.007 seco
+nds
+[stretch_driver-8] [INFO] [1719450114.075349535] [stretch_driver]: For use with S T R E T C H (TM) RESEARCH EDITION from Hello Robot Inc
+.
+[stretch_driver-8] [INFO] [1719450114.075598164] [stretch_driver]: stretch_driver started
+[Bool true-17] Setting parameter failed: ('Invalid access to undeclared parameter(s)', [])
+[INFO] [Bool true-17]: process has finished cleanly [pid 28682]
+[stretch_driver-8] Key mapped to End-Of-Arm Tool: eoa_wrist_dw3_tool_sg3
+[configure_video_streams.py-13] [INFO] [1719450115.132617830] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.052 seconds
+[configure_video_streams.py-13] [INFO] [1719450115.137509948] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[stretch_driver-8] [INFO] [1719450115.862624749] [stretch_driver]: Changed to mode = position
+[stretch_driver-8] [INFO] [1719450115.864186981] [stretch_driver]: broadcast_odom_tf = True
+[stretch_driver-8] [INFO] [1719450115.887358206] [stretch_driver]: rate = 30.0 Hz
+[stretch_driver-8] [INFO] [1719450115.893107832] [stretch_driver]: twist timeout = 0.5 s
+[stretch_driver-8] [INFO] [1719450115.895762188] [stretch_driver]: base_frame_id = base_link
+[stretch_driver-8] [INFO] [1719450115.898409830] [stretch_driver]: odom_frame_id = odom
+[move_to_pregrasp.py-18] [INFO] [1719450116.041849296] [move_to_pregrasp]: Received the joint limits.
+[configure_video_streams.py-13] [INFO] [1719450116.132952324] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.058 seconds
+[configure_video_streams.py-13] [INFO] [1719450116.138687337] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[rosbridge_websocket-9] [INFO] [1719450116.461005102] [rosbridge_websocket]: Calling services in existing thread
+[rosbridge_websocket-9] [INFO] [1719450116.462597131] [rosbridge_websocket]: Client connected. 1 clients total.
+[rosbridge_websocket-9] [INFO] [1719450116.564603208] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /stretch/joint_states
+[rosbridge_websocket-9] [INFO] [1719450116.566603623] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /joint_limits
+[rosbridge_websocket-9] [INFO] [1719450116.568353238] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /battery
+[rosbridge_websocket-9] [INFO] [1719450116.571226522] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /navigate_to_pose/_action/status
+[rosbridge_websocket-9] [INFO] [1719450116.572918197] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /move_to_pregrasp/_action/status
+[rosbridge_websocket-9] [INFO] [1719450116.574589201] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ is_runstopped
+[rosbridge_websocket-9] [INFO] [1719450116.576625996] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /navigation_camera/image_raw/rotated/compressed
+[rosbridge_websocket-9] [INFO] [1719450116.578679905] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /camera/color/image_raw/rotated/compressed
+[rosbridge_websocket-9] [INFO] [1719450116.580559344] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ /gripper_camera/image_raw/cropped/compressed
+[rosbridge_websocket-9] [ERROR] [1719450116.582835611] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] [id: call_se
+rvice:/map_server/map:10] call_service InvalidServiceException: Service /map_server/map does not exist
+[tf2_web_republisher-5] [INFO] [1719450116.649563515] [tf2_web_republisher]: RepublishTF service request received
+[tf2_web_republisher-5] [INFO] [1719450116.655525532] [tf2_web_republisher]: Publishing requested TFs on topic tf_repub_eee72efc_4a1a_4c
+d1_8a80_f57637d36645
+[tf2_web_republisher-5] [INFO] [1719450116.664411164] [tf2_web_republisher]: RepublishTF service request received
+[tf2_web_republisher-5] [INFO] [1719450116.665697758] [tf2_web_republisher]: Publishing requested TFs on topic tf_repub_d4cf6b78_97a2_47
+87_9924_519f9c4d1c3c
+[rosbridge_websocket-9] [INFO] [1719450116.746036241] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ tf_repub_eee72efc_4a1a_4cd1_8a80_f57637d36645
+[rosbridge_websocket-9] [INFO] [1719450116.748713751] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ tf_repub_d4cf6b78_97a2_4787_9924_519f9c4d1c3c
+[tf2_web_republisher-5] [WARN] [1719450116.766518974] [tf2_web_republisher]: "map" passed to lookupTransform argument target_frame does
+not exist.
+[rosbridge_websocket-9] [ERROR] [1719450117.099023697] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] [id: call_se
+rvice:/map_server/map:18] call_service InvalidServiceException: Service /map_server/map does not exist
+[tf2_web_republisher-5] [INFO] [1719450117.157185569] [tf2_web_republisher]: RepublishTF service request received
+[tf2_web_republisher-5] [INFO] [1719450117.159040037] [tf2_web_republisher]: Publishing requested TFs on topic tf_repub_8d379694_73a5_4f
+1b_8570_07a9d7958f24
+[rosbridge_websocket-9] [INFO] [1719450117.176605494] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Unsubscribed
+from tf_repub_eee72efc_4a1a_4cd1_8a80_f57637d36645
+[rosbridge_websocket-9] [INFO] [1719450117.178718805] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] Subscribed to
+ tf_repub_8d379694_73a5_4f1b_8570_07a9d7958f24
+[configure_video_streams.py-13] [INFO] [1719450117.196627549] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.059 seconds
+[configure_video_streams.py-13] [INFO] [1719450117.199889416] [configure_video_streams_gripper]: Gripper RGB processing time: 0.003 seco
+nds
+[tf2_web_republisher-5] [INFO] [1719450117.252681149] [tf2_web_republisher]: Tearing down publisher
+[configure_video_streams.py-13] [INFO] [1719450118.262134984] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450118.266452466] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[realsense2_camera_node-1] [INFO] [1719450118.741213513] [camera]: Device with serial number 242222071329 was found.
+[realsense2_camera_node-1]
+[realsense2_camera_node-1] [INFO] [1719450118.741277988] [camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1
+/2-1:1.0/video4linux/video0 was found.
+[realsense2_camera_node-1] [INFO] [1719450118.741286510] [camera]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-1] [INFO] [1719450118.741414753] [camera]: Device with port number 2-1 was found.
+[realsense2_camera_node-1] [INFO] [1719450118.741425689] [camera]: Device USB type: 3.2
+[realsense2_camera_node-1] [INFO] [1719450118.741462859] [camera]: getParameters...
+[realsense2_camera_node-1] [INFO] [1719450119.148668371] [camera]: JSON file is loaded! (/home/hello-robot/ament_ws/install/stretch_core
+/share/stretch_core/config/HighAccuracyPreset.json)
+[realsense2_camera_node-1] [INFO] [1719450119.148756911] [camera]: Device Name: Intel RealSense D435I
+[realsense2_camera_node-1] [INFO] [1719450119.148777368] [camera]: Device Serial No: 242222071329
+[realsense2_camera_node-1] [INFO] [1719450119.148793906] [camera]: Device physical port: /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2
+-1:1.0/video4linux/video0
+[realsense2_camera_node-1] [INFO] [1719450119.148809716] [camera]: Device FW version: 5.15.0.2
+[realsense2_camera_node-1] [INFO] [1719450119.148824932] [camera]: Device Product ID: 0x0B3A
+[realsense2_camera_node-1] [INFO] [1719450119.148839636] [camera]: Sync Mode: On
+[realsense2_camera_node-1] [WARN] [1719450119.314992099] [camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1719450119.316175829] [camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1719450119.316861160] [camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1719450119.325427591] [camera]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1719450119.326451330] [camera]: re-enable the stream for the change to take effect.
+[configure_video_streams.py-13] [INFO] [1719450119.328565113] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[realsense2_camera_node-1] [WARN] [1719450119.332031986] [camera]: Could not set param: pointcloud.stream_filter with 0 Range: [0, 11]:
+parameter 'pointcloud.stream_filter' has invalid type: expected [integer] got [string]
+[realsense2_camera_node-1] [WARN] [1719450119.332260856] [camera]: Could not set param: pointcloud.stream_index_filter with -1 Range: [-
+1, 16]: parameter 'pointcloud.stream_index_filter' has invalid type: expected [integer] got [string]
+[configure_video_streams.py-13] [INFO] [1719450119.332211318] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
+[realsense2_camera_node-1] [INFO] [1719450119.334191543] [camera]: Stopping Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1719450119.334482305] [camera]: Stopping Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1719450119.334519914] [camera]: Stopping Sensor: Motion Module
+[realsense2_camera_node-1] [INFO] [1719450119.352497741] [camera]: Starting Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1719450119.354796882] [camera]: Open profile: stream_type: Infra(1), Format: Y8, Width: 424, Height:
+240, FPS: 15
+[realsense2_camera_node-1] [INFO] [1719450119.354882739] [camera]: Open profile: stream_type: Depth(0), Format: Z16, Width: 424, Height:
+ 240, FPS: 15
+[realsense2_camera_node-1] [INFO] [1719450119.361351607] [camera]: Starting Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1719450119.362428481] [camera]: Open profile: stream_type: Color(0), Format: RGB8, Width: 424, Height
+: 240, FPS: 15
+[realsense2_camera_node-1] [INFO] [1719450119.378262699] [camera]: Starting Sensor: Motion Module
+[realsense2_camera_node-1] [INFO] [1719450119.379755880] [camera]: Open profile: stream_type: Accel(0)Format: MOTION_XYZ32F, FPS: 100
+[realsense2_camera_node-1] [INFO] [1719450119.379795282] [camera]: Open profile: stream_type: Gyro(0)Format: MOTION_XYZ32F, FPS: 200
+[realsense2_camera_node-1] [INFO] [1719450119.381966398] [camera]: RealSense Node Is Up!
+[configure_video_streams.py-12] [INFO] [1719450119.570393928] [configure_video_streams_realsense]: Realsense depth recv lag: 0.024 secon
+ds
+[configure_video_streams.py-12] [INFO] [1719450120.205301732] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.340 seconds
+[configure_video_streams.py-12] [INFO] [1719450120.209817863] [configure_video_streams_realsense]: Realsense RGB processing time: 0.005
+seconds
+[configure_video_streams.py-13] [INFO] [1719450120.329549732] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450120.335018253] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[realsense2_camera_node-1] [WARN] [1719450120.352946329] [camera]: XXX Hardware Notification:Motion Module failure,1.71945e+12,Error,Har
+dware Error
+[realsense2_camera_node-1] [WARN] [1719450120.353023594] [camera]: Hardware Notification:Motion Module failure,1.71945e+12,Error,Hardwar
+e Error
+[configure_video_streams.py-12] [INFO] [1719450120.721439751] [configure_video_streams_realsense]: Realsense depth recv lag: 0.104 secon
+ds
+[configure_video_streams.py-12] [INFO] [1719450121.261797630] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.112 seconds
+[configure_video_streams.py-12] [INFO] [1719450121.264872790] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450121.394585723] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450121.400149656] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450121.726652386] [configure_video_streams_realsense]: Realsense depth recv lag: 0.115 secon
+ds
+[configure_video_streams.py-12] [INFO] [1719450122.327937605] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.127 seconds
+[configure_video_streams.py-12] [INFO] [1719450122.331237389] [configure_video_streams_realsense]: Realsense RGB processing time: 0.005
+seconds
+[configure_video_streams.py-13] [INFO] [1719450122.458611663] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450122.463244592] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450122.791807788] [configure_video_streams_realsense]: Realsense depth recv lag: 0.123 secon
+ds
+[configure_video_streams.py-12] [INFO] [1719450123.399181104] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.134 seconds
+[configure_video_streams.py-12] [INFO] [1719450123.402877672] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450123.459158971] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450123.464543514] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450123.862572212] [configure_video_streams_realsense]: Realsense depth recv lag: 0.132 secon
+ds
+[configure_video_streams.py-12] [INFO] [1719450124.456168863] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.129 seconds
+[configure_video_streams.py-12] [INFO] [1719450124.458959731] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450124.522069750] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450124.526677469] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450125.462252500] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.134 seconds
+[configure_video_streams.py-12] [INFO] [1719450125.465318163] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450125.522937414] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450125.528773965] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450126.475114733] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.146 seconds
+[configure_video_streams.py-12] [INFO] [1719450126.478243932] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450126.587359327] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450126.591039652] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
+[rosbridge_websocket-9] [ERROR] [1719450127.478661540] [rosbridge_websocket]: [Client 6d830aca-764c-4389-9270-59570cf688cd] [id: call_se
+rvice:/map_server/map:23] call_service InvalidServiceException: Service /map_server/map does not exist
+[configure_video_streams.py-12] [INFO] [1719450127.530262187] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.133 seconds
+[configure_video_streams.py-12] [INFO] [1719450127.533360258] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450127.591793483] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-13] [INFO] [1719450127.653271147] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-12] [INFO] [1719450128.533983350] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.136 seconds
+[configure_video_streams.py-12] [INFO] [1719450128.536795428] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-12] [INFO] [1719450128.633713668] [configure_video_streams_realsense]: Realsense depth AR service: False
+[configure_video_streams.py-13] [INFO] [1719450128.637269689] [configure_video_streams_gripper]: Gripper depth AR service: False
+[configure_video_streams.py-13] [INFO] [1719450128.644014406] [configure_video_streams_gripper]: Expanded gripper service: False
+[configure_video_streams.py-13] [INFO] [1719450128.653308127] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450128.658686207] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450129.593323448] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.128 seconds
+[configure_video_streams.py-12] [INFO] [1719450129.595273045] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450129.718218752] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450129.722092590] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450130.598517093] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.132 seconds
+[configure_video_streams.py-12] [INFO] [1719450130.601426400] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450130.785820242] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450130.792434446] [configure_video_streams_gripper]: Gripper RGB processing time: 0.008 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450131.599691423] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.133 seconds
+[configure_video_streams.py-12] [INFO] [1719450131.601987781] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450131.850391498] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450131.853971106] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450132.660528385] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.126 seconds
+[configure_video_streams.py-12] [INFO] [1719450132.662723339] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450132.915043539] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450132.920612138] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450133.661313443] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.126 seconds
+[configure_video_streams.py-12] [INFO] [1719450133.664326872] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450133.980367566] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450133.987122327] [configure_video_streams_gripper]: Gripper RGB processing time: 0.007 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450134.665417984] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.129 seconds
+[configure_video_streams.py-12] [INFO] [1719450134.667597590] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450135.045741115] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450135.051573305] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450135.668277270] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.131 seconds
+[configure_video_streams.py-12] [INFO] [1719450135.670222492] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450136.111161592] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450136.116487024] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450136.673399826] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.135 seconds
+[configure_video_streams.py-12] [INFO] [1719450136.676565892] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450137.111220214] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450137.117569431] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450137.733415500] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.129 seconds
+[configure_video_streams.py-12] [INFO] [1719450137.735357139] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450138.174461781] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.061 seconds
+[configure_video_streams.py-13] [INFO] [1719450138.179368169] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450138.744341652] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.138 seconds
+[configure_video_streams.py-12] [INFO] [1719450138.746529006] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450139.240004164] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450139.243897386] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450139.803068851] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.130 seconds
+[configure_video_streams.py-12] [INFO] [1719450139.806038458] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450140.305610181] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.061 seconds
+[configure_video_streams.py-13] [INFO] [1719450140.311210956] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450140.864111429] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.121 seconds
+[configure_video_streams.py-12] [INFO] [1719450140.865960694] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450141.370946807] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.061 seconds
+[configure_video_streams.py-13] [INFO] [1719450141.376611476] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450141.865617315] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.122 seconds
+[configure_video_streams.py-12] [INFO] [1719450141.868792840] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450142.371009964] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450142.442625448] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450142.933737150] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.123 seconds
+[configure_video_streams.py-12] [INFO] [1719450142.936379857] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450143.436164440] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450143.505068503] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450143.938568489] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.127 seconds
+[configure_video_streams.py-12] [INFO] [1719450143.941740249] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450144.502384629] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450144.508121327] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450145.003254752] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.125 seconds
+[configure_video_streams.py-12] [INFO] [1719450145.005559147] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450145.566612272] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.061 seconds
+[configure_video_streams.py-13] [INFO] [1719450145.572113570] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450146.003392851] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.125 seconds
+[configure_video_streams.py-12] [INFO] [1719450146.005629160] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450146.567104965] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450146.573218981] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450147.007096807] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.125 seconds
+[configure_video_streams.py-12] [INFO] [1719450147.009740130] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450147.631277171] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450147.635973871] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450148.071243517] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.122 seconds
+[configure_video_streams.py-12] [INFO] [1719450148.074668663] [configure_video_streams_realsense]: Realsense RGB processing time: 0.004
+seconds
+[configure_video_streams.py-13] [INFO] [1719450148.697330992] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450148.702473844] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450149.138597057] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.123 seconds
+[configure_video_streams.py-12] [INFO] [1719450149.141846946] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450149.762500155] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450149.768349021] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450150.145752223] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.129 seconds
+[configure_video_streams.py-12] [INFO] [1719450150.151824388] [configure_video_streams_realsense]: Realsense RGB processing time: 0.005
+seconds
+[configure_video_streams.py-13] [INFO] [1719450150.763120699] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.063 seconds
+[configure_video_streams.py-13] [INFO] [1719450150.834938284] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450151.209511742] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.126 seconds
+[configure_video_streams.py-12] [INFO] [1719450151.211257972] [configure_video_streams_realsense]: Realsense RGB processing time: 0.002
+seconds
+[configure_video_streams.py-13] [INFO] [1719450151.828843928] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450151.900257032] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450152.274276491] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.123 seconds
+[configure_video_streams.py-12] [INFO] [1719450152.276556882] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450152.895218935] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450152.900691683] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450153.277663239] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.127 seconds
+[configure_video_streams.py-12] [INFO] [1719450153.280497801] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450153.959918311] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450153.965302821] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450154.341056474] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.124 seconds
+[configure_video_streams.py-12] [INFO] [1719450154.343953485] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450155.023807639] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450155.027883407] [configure_video_streams_gripper]: Gripper RGB processing time: 0.005 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450155.357570224] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.140 seconds
+[configure_video_streams.py-12] [INFO] [1719450155.359978860] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+q[configure_video_streams.py-13] [INFO] [1719450156.089986818] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.062 seconds
+[configure_video_streams.py-13] [INFO] [1719450156.095640958] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450156.411456951] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.127 seconds
+[configure_video_streams.py-12] [INFO] [1719450156.416140152] [configure_video_streams_realsense]: Realsense RGB processing time: 0.003
+seconds
+[configure_video_streams.py-13] [INFO] [1719450157.090833030] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450157.095837401] [configure_video_streams_gripper]: Gripper RGB processing time: 0.006 seco
+nds
+[configure_video_streams.py-12] [INFO] [1719450157.420150086] [configure_video_streams_realsense]: Realsense RGB recv lag: 0.131 seconds
+[configure_video_streams.py-12] [INFO] [1719450157.422667924] [configure_video_streams_realsense]: Realsense RGB processing time: 0.005
+seconds
+[configure_video_streams.py-13] [INFO] [1719450158.155831630] [configure_video_streams_gripper]: Gripper RGB recv lag: 0.064 seconds
+[configure_video_streams.py-13] [INFO] [1719450158.160111766] [configure_video_streams_gripper]: Gripper RGB processing time: 0.004 seco
+nds
