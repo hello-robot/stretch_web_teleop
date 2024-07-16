@@ -28,6 +28,9 @@ const moveToPregraspActionName = "/move_to_pregrasp";
 
 export class Robot extends React.Component {
   private ros: ROSLIB.Ros;
+  private readonly rosURL = "wss://localhost:9090";
+  private rosReconnectTimerID?: ReturnType<typeof setTimeout>;
+  private onRosConnectCallback?: () => void;
   private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
   private jointState?: ROSJointState;
   private poseGoal?: ROSLIB.ActionGoal;
@@ -98,31 +101,101 @@ export class Robot extends React.Component {
     this.stretchToolCallback = props.stretchToolCallback;
   }
 
+  setOnRosConnectCallback(callback: () => void) {
+    this.onRosConnectCallback = callback;
+  }
+
   async connect(): Promise<void> {
+    console.log("Connecting to ROS...");
     this.ros = new ROSLIB.Ros({
       // set this to false to use the new service interface to
       // tf2_web_republisher. true is the default and means roslibjs
       // will use the action interface
       groovyCompatibility: false,
-      url: "wss://localhost:9090",
+      url: this.rosURL,
     });
 
-    return new Promise<void>((resolve, reject) => {
-      this.ros.on("connection", async () => {
+    this.ros.on("connection", async () => {
+      console.log("Connected to ROS.");
+      // Sometimes, ROSLib thinks it is connected but data doesn't
+      // actually go to rosbridge. Thus, we first verify bidirectional
+      // communication works before proceeding.
+      let isConnected = await this.checkROSConnection();
+      if (isConnected) {
         await this.onConnect();
-        resolve();
-      });
-      this.ros.on("error", (error) => {
-        reject(error);
-      });
+        if (this.onRosConnectCallback) this.onRosConnectCallback();
+      } else {
+        console.log("No data received on ROS connection. Reconnecting.");
+        this.reconnect();
+      }
+    });
+    this.ros.on("error", (error) => {
+      console.log("Error connecting to ROS:", error);
+      this.reconnect();
+    });
 
-      this.ros.on("close", () => {
-        reject("Connection to websocket has been closed.");
-      });
+    this.ros.on("close", () => {
+      console.log("Connection to ROS has been closed.");
+      this.reconnect();
+    });
+  }
+
+  async reconnect(interval_ms: number = 1000) {
+    if (!this.rosReconnectTimerID) {
+      this.rosReconnectTimerID = setTimeout(() => {
+        console.log("Reconnecting to ROS...");
+        this.ros.close();
+        this.ros.connect(this.rosURL);
+        this.rosReconnectTimerID = undefined;
+      }, interval_ms);
+    }
+  }
+
+  async checkROSConnection(timeout_ms: number = 5000): Promise<boolean> {
+    console.log("Checking ROS connection...");
+    return new Promise(async (resolve) => {
+      let gotResponseFromService = false;
+      if (this.ros.isConnected) {
+        // To verify it is connected, list all the services and ensure we get
+        // a correct response within the timeout
+        this.ros.getServices(
+          // Success callback
+          (response) => {
+            gotResponseFromService = true;
+            if (response.includes("/get_joint_states")) {
+              console.log("Verified that ROS is connected (A).");
+              resolve(true);
+            } else {
+              console.log("Verified that ROS is not connected (B).");
+              resolve(false);
+            }
+          },
+          // Failure callback. Even if the service fails, we know ROS is connected.
+          () => {
+            console.log("Verified that ROS is connected (C).");
+            gotResponseFromService = true;
+            resolve(true);
+          },
+        );
+        resolve(
+          await new Promise<boolean>((resolve) =>
+            setTimeout(() => {
+              if (!gotResponseFromService) {
+                console.log("Verified that ROS is not connected (D).");
+                resolve(false);
+              }
+            }, timeout_ms),
+          ),
+        );
+      } else {
+        console.log("Verified that ROS is not connected (E).");
+        resolve(false);
+      }
     });
   }
 
   async onConnect() {
+    console.log("onConnect");
     this.subscribeToJointState();
     this.subscribeToJointLimits();
     this.subscribeToBatteryState();
@@ -205,7 +278,13 @@ export class Robot extends React.Component {
     this.subscriptions.push(jointLimitsTopic);
 
     jointLimitsTopic.subscribe((msg: ROSJointState) => {
-      msg.name.forEach((name, idx) => {
+      msg.name.forEach((name: string, idx: number) => {
+        console.log(
+          "Got joint limit for",
+          name,
+          msg.position[idx],
+          msg.velocity[idx],
+        );
         if (name == "joint_arm") name = "wrist_extension";
         this.jointLimits[name] = [msg.position[idx], msg.velocity[idx]];
       });
@@ -248,6 +327,7 @@ export class Robot extends React.Component {
   }
 
   getStretchTool() {
+    console.log("Getting stretch tool", this.ros.isConnected);
     // NOTE: This information can also come from the /tool topic.
     // However, we only need it once, so opt for a parameter.
     this.stretchToolParam = new ROSLIB.Param({
@@ -292,6 +372,7 @@ export class Robot extends React.Component {
   }
 
   getJointLimits() {
+    console.log("Getting joint limits");
     let getJointLimitsService = new ROSLIB.Service({
       ros: this.ros,
       name: "/get_joint_states",
@@ -299,7 +380,15 @@ export class Robot extends React.Component {
     });
 
     var request = new ROSLIB.ServiceRequest({});
-    getJointLimitsService.callService(request, () => {});
+    getJointLimitsService.callService(
+      request,
+      () => {
+        console.log("Got joint limits service succeeded");
+      },
+      (error) => {
+        console.log("Got joint limits service failed", error);
+      },
+    );
   }
 
   subscribeToActionResult(
@@ -514,8 +603,8 @@ export class Robot extends React.Component {
       request,
       (response: boolean) => {
         response
-          ? console.log("Enabled realsense depth sensing")
-          : console.log("Disabled realsense depth sensing");
+          ? console.log("Successfully set realsense depth sensing to", toggle)
+          : console.log("Failed to set realsense depth sensing to", toggle);
       },
     );
   }
@@ -526,8 +615,8 @@ export class Robot extends React.Component {
       request,
       (response: boolean) => {
         response
-          ? console.log("Enabled gripper depth sensing")
-          : console.log("Disabled gripper depth sensing");
+          ? console.log("Successfully set gripper depth sensing to", toggle)
+          : console.log("Failed to set gripper depth sensing to", toggle);
       },
     );
   }
@@ -538,8 +627,8 @@ export class Robot extends React.Component {
       request,
       (response: boolean) => {
         response
-          ? console.log("Enabled expanded gripper")
-          : console.log("Disabled expanded gripper");
+          ? console.log("Successfully set expanded gripper to", toggle)
+          : console.log("Failed to set expanded gripper to", toggle);
       },
     );
   }

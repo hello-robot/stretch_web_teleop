@@ -422,6 +422,7 @@ def generate_launch_description():
                 ]
             ),
             "authenticate": "false",
+            "call_services_in_new_thread": "true",
         }.items(),
     )
     ld.add_action(rosbridge_launch)
