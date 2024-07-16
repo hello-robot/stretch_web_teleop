@@ -58,7 +58,7 @@ connection = new WebRTCConnection({
   onMessage: handleMessage,
   onConnectionEnd: disconnectFromRobot,
 });
-robot.setOnRosConnectCallback(() => {
+robot.setOnRosConnectCallback(async () => {
   robot.subscribeToVideo({
     topicName: "/navigation_camera/image_raw/rotated/compressed",
     callback: navigationStream.updateImage,
@@ -83,6 +83,8 @@ robot.setOnRosConnectCallback(() => {
   robot.getJointLimits();
 
   connection.joinRobotRoom();
+
+  return Promise.resolve();
 });
 robot.connect();
 

@@ -30,7 +30,7 @@ export class Robot extends React.Component {
   private ros: ROSLIB.Ros;
   private readonly rosURL = "wss://localhost:9090";
   private rosReconnectTimerID?: ReturnType<typeof setTimeout>;
-  private onRosConnectCallback?: () => void;
+  private onRosConnectCallback?: () => Promise<void>;
   private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
   private jointState?: ROSJointState;
   private poseGoal?: ROSLIB.ActionGoal;
@@ -101,7 +101,7 @@ export class Robot extends React.Component {
     this.stretchToolCallback = props.stretchToolCallback;
   }
 
-  setOnRosConnectCallback(callback: () => void) {
+  setOnRosConnectCallback(callback: () => Promise<void>) {
     this.onRosConnectCallback = callback;
   }
 
@@ -117,8 +117,19 @@ export class Robot extends React.Component {
 
     this.ros.on("connection", async () => {
       console.log("Connected to ROS.");
-      await this.onConnect();
-      if (this.onRosConnectCallback) this.onRosConnectCallback();
+      // We check that bidirectional communications with ROS are working, and
+      // that some key topics have publishers (which are indicative of all
+      // required nodes being loaded). This is because ROSbridge matches the
+      // QoS of publishers, so without publishers there is likely to be a
+      // QoS mismatch.
+      let isConnected = await this.checkROSConnection();
+      if (isConnected) {
+        await this.onConnect();
+        if (this.onRosConnectCallback) await this.onRosConnectCallback();
+      } else {
+        console.log("Required ROS nodes are not yet loaded. Reconnecting.");
+        this.reconnect();
+      }
     });
     this.ros.on("error", (error) => {
       console.log("Error connecting to ROS:", error);
@@ -140,6 +151,74 @@ export class Robot extends React.Component {
         this.rosReconnectTimerID = undefined;
       }, interval_ms);
     }
+  }
+
+  async checkROSConnection(
+    required_topics: string[] = [
+      "/camera/color/image_raw/rotated/compressed",
+      "/gripper_camera/image_raw/cropped/compressed",
+      "/navigation_camera/image_raw/rotated/compressed",
+      "/stretch/joint_states",
+    ],
+    timeout_ms: number = 5000,
+  ): Promise<boolean> {
+    let numRequiredTopicsWithPublisher = 0;
+    let isResolved = false;
+    console.log("Checking ROS connection...");
+    return new Promise(async (resolve) => {
+      if (this.ros.isConnected) {
+        for (let topic of required_topics) {
+          // Verify that the topic has a publisher
+          this.ros.getPublishers(
+            topic,
+            // Success callback
+            (publishers: string[]) => {
+              if (publishers.length > 0) {
+                console.log("Got a publisher on topic", topic);
+                numRequiredTopicsWithPublisher += 1;
+                if (numRequiredTopicsWithPublisher === required_topics.length) {
+                  console.log("Got publishers on all required topics.");
+                  isResolved = true;
+                  resolve(true);
+                }
+              } else {
+                console.log("No publisher on topic", topic);
+                isResolved = true;
+                resolve(false);
+              }
+            },
+            // Failure callback
+            (error) => {
+              console.log(
+                "Error in getting publishers for topic",
+                topic,
+                error,
+              );
+              isResolved = true;
+              resolve(false);
+            },
+          );
+        }
+        resolve(
+          await new Promise<boolean>((resolve) =>
+            setTimeout(() => {
+              if (!isResolved) {
+                if (numRequiredTopicsWithPublisher < required_topics.length) {
+                  console.log(
+                    "Timed out with at least one required topic not having publishers.",
+                  );
+                  resolve(false);
+                }
+              }
+            }, timeout_ms),
+          ),
+        );
+      } else {
+        console.log("ROS is not connected.");
+        isResolved = true;
+        resolve(false);
+      }
+    });
   }
 
   async onConnect() {
