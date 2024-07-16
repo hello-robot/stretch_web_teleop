@@ -117,17 +117,8 @@ export class Robot extends React.Component {
 
     this.ros.on("connection", async () => {
       console.log("Connected to ROS.");
-      // Sometimes, ROSLib thinks it is connected but data doesn't
-      // actually go to rosbridge. Thus, we first verify bidirectional
-      // communication works before proceeding.
-      let isConnected = await this.checkROSConnection();
-      if (isConnected) {
-        await this.onConnect();
-        if (this.onRosConnectCallback) this.onRosConnectCallback();
-      } else {
-        console.log("No data received on ROS connection. Reconnecting.");
-        this.reconnect();
-      }
+      await this.onConnect();
+      if (this.onRosConnectCallback) this.onRosConnectCallback();
     });
     this.ros.on("error", (error) => {
       console.log("Error connecting to ROS:", error);
@@ -149,49 +140,6 @@ export class Robot extends React.Component {
         this.rosReconnectTimerID = undefined;
       }, interval_ms);
     }
-  }
-
-  async checkROSConnection(timeout_ms: number = 5000): Promise<boolean> {
-    console.log("Checking ROS connection...");
-    return new Promise(async (resolve) => {
-      let gotResponseFromService = false;
-      if (this.ros.isConnected) {
-        // To verify it is connected, list all the services and ensure we get
-        // a correct response within the timeout
-        this.ros.getServices(
-          // Success callback
-          (response) => {
-            gotResponseFromService = true;
-            if (response.includes("/get_joint_states")) {
-              console.log("Verified that ROS is connected (A).");
-              resolve(true);
-            } else {
-              console.log("Verified that ROS is not connected (B).");
-              resolve(false);
-            }
-          },
-          // Failure callback. Even if the service fails, we know ROS is connected.
-          () => {
-            console.log("Verified that ROS is connected (C).");
-            gotResponseFromService = true;
-            resolve(true);
-          },
-        );
-        resolve(
-          await new Promise<boolean>((resolve) =>
-            setTimeout(() => {
-              if (!gotResponseFromService) {
-                console.log("Verified that ROS is not connected (D).");
-                resolve(false);
-              }
-            }, timeout_ms),
-          ),
-        );
-      } else {
-        console.log("Verified that ROS is not connected (E).");
-        resolve(false);
-      }
-    });
   }
 
   async onConnect() {
