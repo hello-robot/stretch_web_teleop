@@ -162,6 +162,13 @@ export class Robot extends React.Component {
     ],
     timeout_ms: number = 5000,
   ): Promise<boolean> {
+    // For backwards compatibility with older versions of roslibjs, use the
+    // local copy of getPublishers if the ROS object does not have it.
+    let getPublishers = this.getPublishers.bind(this);
+    if (this.ros.getPublishers !== undefined) {
+      getPublishers = this.ros.getPublishers.bind(this.ros);
+    }
+
     let numRequiredTopicsWithPublisher = 0;
     let isResolved = false;
     console.log("Checking ROS connection...");
@@ -169,7 +176,7 @@ export class Robot extends React.Component {
       if (this.ros.isConnected) {
         for (let topic of required_topics) {
           // Verify that the topic has a publisher
-          this.ros.getPublishers(
+          getPublishers(
             topic,
             // Success callback
             (publishers: string[]) => {
@@ -1096,5 +1103,39 @@ export class Robot extends React.Component {
   stopTextToSpeech() {
     // Send an empty string and override behavior 1 to interrupt the current speech
     this.playTextToSpeech("", 1);
+  }
+
+  /**
+   * Copied from https://github.com/hello-vinitha/roslibjs/pull/1 and
+   * https://github.com/RobotWebTools/roslibjs/pull/760 , included here for
+   * backwards compatibility.
+   */
+  getPublishers(
+    topic: string,
+    callback: (publishers: string[]) => void,
+    failedCallback: (message: any) => void,
+  ) {
+    var publishersClient = new ROSLIB.Service({
+      ros: this.ros,
+      name: "/rosapi/publishers",
+      serviceType: "rosapi_msgs/srv/Publishers",
+    });
+
+    var request = new ROSLIB.ServiceRequest({
+      topic: topic,
+    });
+    if (typeof failedCallback === "function") {
+      publishersClient.callService(
+        request,
+        function (result: any) {
+          callback(result.publishers);
+        },
+        failedCallback,
+      );
+    } else {
+      publishersClient.callService(request, function (result) {
+        callback(result.publishers);
+      });
+    }
   }
 }
