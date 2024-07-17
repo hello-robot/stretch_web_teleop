@@ -69,6 +69,7 @@ export class Robot extends React.Component {
   private subscriptions: ROSLIB.Topic[] = [];
   private hasBetaTeleopKitParam: ROSLIB.Param;
   private stretchToolParam: ROSLIB.Param;
+  private textToSpeechTopic?: ROSLIB.Topic;
 
   constructor(props: {
     jointStateCallback: (
@@ -154,6 +155,7 @@ export class Robot extends React.Component {
     this.createMapFrameTFClient();
     this.subscribeToHeadTiltTF();
     this.subscribeToMapTF();
+    this.createTextToSpeechTopic();
 
     return Promise.resolve();
   }
@@ -397,6 +399,14 @@ export class Robot extends React.Component {
     });
   }
 
+  createTextToSpeechTopic() {
+    this.textToSpeechTopic = new ROSLIB.Topic({
+      ros: this.ros,
+      name: "/text_to_speech",
+      messageType: "stretch_web_teleop/msg/TextToSpeech",
+    });
+  }
+
   createSwitchToNavigationService() {
     this.switchToNavigationService = new ROSLIB.Service({
       ros: this.ros,
@@ -574,7 +584,7 @@ export class Robot extends React.Component {
         z: props.angVel,
       },
     });
-    if (!this.cmdVelTopic) throw "trajectoryClient is undefined";
+    if (!this.cmdVelTopic) throw "cmdVelTopic is undefined";
     console.log("Publishing base velocity twist message");
     this.cmdVelTopic.publish(twist);
   };
@@ -945,5 +955,30 @@ export class Robot extends React.Component {
       this.jointState.effort[jointIndex] > MAX_EFFORTS[jointName]![1];
 
     return inCollision;
+  }
+
+  playTextToSpeech(
+    text: string,
+    override_behavior: number = 0,
+    is_slow: boolean = false,
+  ) {
+    if (!this.textToSpeechTopic) throw "textToSpeechTopic is undefined";
+    if (override_behavior != 0 && override_behavior != 1) {
+      console.log(
+        "override behavior must be 0 (queue) or 1 (interrupt). Setting to 0.",
+      );
+      override_behavior = 0;
+    }
+    let message = new ROSLIB.Message({
+      text: text,
+      is_slow: is_slow,
+      override_behavior: override_behavior,
+    });
+    this.textToSpeechTopic.publish(message);
+  }
+
+  stopTextToSpeech() {
+    // Send an empty string and override behavior 1 to interrupt the current speech
+    this.playTextToSpeech("", 1);
   }
 }

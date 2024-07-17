@@ -1,26 +1,27 @@
 import React from "react";
 import { className } from "shared/util";
 import "operator/css/basic_components.css";
+import e from "express";
+import { text } from "stream/consumers";
 
-export const Dropdown = <T extends string | JSX.Element>(props: {
-  onChange: (selectedIndex: number) => void;
-  possibleOptions: T[];
+export const DropdownInput = <T extends string>(props: {
+  text: string;
+  setText: (text: string) => void;
   selectedIndex?: number;
-  placeholderText?: string;
-  showActive?: boolean;
+  setSelectedIndex: (index?: number) => void;
+  possibleOptions: T[];
+  placeholderText: string;
   placement: string;
+  rows: number;
 }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
-  const [placement, setPlacement] = React.useState(props.placement);
-  const inputRef = React.useRef<HTMLDivElement>(null);
+  const componentRef = React.useRef<HTMLDivElement>(null);
   const dropdownPopupRef = React.useRef<HTMLDivElement>(null);
-  if (props.selectedIndex === undefined && !props.placeholderText)
-    throw Error("both selectedOption and placeholderText undefined");
 
   // Handler to close dropdown when click outside
   React.useEffect(() => {
     const handler = (e: any) => {
-      if (inputRef.current && !inputRef.current.contains(e.target)) {
+      if (componentRef.current && !componentRef.current.contains(e.target)) {
         setShowDropdown(false);
       }
     };
@@ -32,18 +33,29 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
     }
   });
 
+  // Handler to update the selected index if the possible options or text changes
+  React.useEffect(() => {
+    let text = props.text.trim();
+    if (props.possibleOptions.includes(text as T)) {
+      props.setSelectedIndex(props.possibleOptions.indexOf(text as T));
+    } else {
+      props.setSelectedIndex(undefined);
+    }
+  }, [props.possibleOptions, props.text]);
+
   // Function to convert each possible option into a button
   function mapFunc(option: T, idx: number) {
     const active = idx === props.selectedIndex;
-    if (active && !props.showActive) return null;
     return (
       <button
         key={idx}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           setShowDropdown(false);
-          if (!active) props.onChange(idx);
+          props.setText(option as string);
+          if (!active) props.setSelectedIndex(idx);
         }}
-        className={className("dropdown-option", { active })}
+        className={className("dropdown-input-option", { active })}
       >
         {option}
       </button>
@@ -66,23 +78,44 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
   });
 
   return (
-    <div ref={inputRef} className="dropdown">
+    <div ref={componentRef} className="dropdown-input">
+      <textarea
+        className="dropdown-input-textarea"
+        rows={props.rows}
+        value={props.text}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowDropdown(false);
+        }}
+        onFocus={(e) => {
+          e.stopPropagation();
+          e.target.select();
+        }}
+        onBlur={(e) => {
+          document.getSelection()?.empty();
+        }}
+        onChange={(e) => {
+          e.stopPropagation();
+          props.setText(e.target.value);
+        }}
+        placeholder={props.placeholderText}
+      />
       <button
-        className={className("dropdown-button", {
+        className={className("dropdown-input-button", {
           expanded: showDropdown,
           top: props.placement == "top",
           bottom: props.placement == "bottom",
         })}
-        onClick={() => setShowDropdown(!showDropdown)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowDropdown(!showDropdown);
+        }}
       >
-        {props.selectedIndex === undefined
-          ? props.placeholderText
-          : props.possibleOptions[props.selectedIndex]}
         <span className="material-icons">expand_more</span>
       </button>
       <div
         hidden={!showDropdown}
-        className={className("dropdown-popup", {
+        className={className("dropdown-input-popup", {
           top: props.placement == "top",
           bottom: props.placement == "bottom",
         })}

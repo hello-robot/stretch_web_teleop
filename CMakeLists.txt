@@ -20,6 +20,7 @@ find_package(rosidl_default_generators REQUIRED)
 ##############################
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/MoveToPregrasp.action"
+  "msg/TextToSpeech.msg"
   DEPENDENCIES geometry_msgs
 )
 
@@ -40,6 +41,7 @@ install(PROGRAMS
   nodes/configure_video_streams.py
   nodes/move_to_pregrasp.py
   nodes/navigation_camera.py
+  nodes/text_to_speech.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

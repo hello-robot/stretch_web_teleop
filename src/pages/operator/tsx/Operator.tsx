@@ -38,6 +38,7 @@ import {
 import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
+import { TextToSpeech } from "./layout_components/TextToSpeech";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -154,6 +155,17 @@ export const Operator = (props: {
   }
 
   /**
+   * Sets the text-to-speech component to display or hidden.
+   *
+   * @param displayTextToSpeech whether the text-to-speech component should
+   *    be displayed.
+   */
+  function setDisplayTextToSpeech(displayTextToSpeech: boolean) {
+    layout.current.displayTextToSpeech = displayTextToSpeech;
+    updateLayout();
+  }
+
+  /**
    * Sets the display labels property to display or hidden.
    *
    * @param displayLabels if the button text labels should be displayed
@@ -259,8 +271,10 @@ export const Operator = (props: {
   /** Properties for the global options area of the sidebar */
   const globalOptionsProps: GlobalOptionsProps = {
     displayMovementRecorder: layout.current.displayMovementRecorder,
+    displayTextToSpeech: layout.current.displayTextToSpeech,
     displayLabels: layout.current.displayLabels,
     setDisplayMovementRecorder: setDisplayMovementRecorder,
+    setDisplayTextToSpeech: setDisplayTextToSpeech,
     setDisplayLabels: setDisplayLabels,
     defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
     customLayouts: props.storageHandler.getCustomLayoutNames(),
@@ -359,6 +373,14 @@ export const Operator = (props: {
           hidden={!layout.current.displayMovementRecorder}
         >
           <MovementRecorder hideLabels={!layout.current.displayLabels} />
+        </div>
+        <div
+          className={className("operator-text-to-speech", {
+            hideLabels: !layout.current.displayLabels,
+          })}
+          hidden={!layout.current.displayTextToSpeech}
+        >
+          <TextToSpeech hideLabels={!layout.current.displayLabels} />
         </div>
       </div>
       <div id="operator-body">

@@ -11,6 +11,7 @@ export class LocalStorageHandler extends StorageHandler {
   public static MAP_POSE_NAMES_KEY = "user_map_pose_names";
   public static MAP_POSE_TYPES_KEY = "user_map_pose_types";
   public static POSE_RECORDING_NAMES_KEY = "user_pose_recording_names";
+  public static TEXT_TO_SPEECH_KEY = "text_to_speech";
 
   constructor(onStorageHandlerReadyCallback: () => void) {
     super(onStorageHandlerReadyCallback);
@@ -171,6 +172,35 @@ export class LocalStorageHandler extends StorageHandler {
     localStorage.setItem(
       LocalStorageHandler.POSE_RECORDING_NAMES_KEY,
       JSON.stringify(recordingNames),
+    );
+  }
+
+  public getSavedTexts(): string[] {
+    const storedJson = localStorage.getItem(
+      LocalStorageHandler.TEXT_TO_SPEECH_KEY,
+    );
+    if (!storedJson) return [];
+    return JSON.parse(storedJson);
+  }
+
+  public saveText(text: string): void {
+    const texts = this.getSavedTexts();
+    if (texts.includes(text)) return;
+    texts.push(text);
+    localStorage.setItem(
+      LocalStorageHandler.TEXT_TO_SPEECH_KEY,
+      JSON.stringify(texts),
+    );
+  }
+
+  public deleteText(text: string): void {
+    const texts = this.getSavedTexts();
+    if (!texts.includes(text)) return;
+    const index = texts.indexOf(text);
+    texts.splice(index, 1);
+    localStorage.setItem(
+      LocalStorageHandler.TEXT_TO_SPEECH_KEY,
+      JSON.stringify(texts),
     );
   }
 }

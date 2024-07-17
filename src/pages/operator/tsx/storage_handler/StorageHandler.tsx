@@ -134,6 +134,24 @@ export abstract class StorageHandler {
   public abstract deleteRecording(recordingName: string): void;
 
   /**
+   * Gets all the text to speech messages saved by the user.
+   * @returns list of all saved text to speech messages
+   */
+  public abstract getSavedTexts(): string[];
+
+  /**
+   * Saves a text to speech message to the storage device.
+   * @param text the text to save
+   */
+  public abstract saveText(text: string): void;
+
+  /**
+   * Deletes a text to speech message from the storage device.
+   * @param text the text to delete
+   */
+  public abstract deleteText(text: string): void;
+
+  /**
    * Gets the last saved state from the user's layout, or gets the default
    * layout if the user has no saved state.
    * @returns layout definition for the layout that should be loaded into the
