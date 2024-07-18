@@ -8,6 +8,8 @@ The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only
 
 ## Audio configuration
 
+We provide a convenience script `./configure_audio.sh` to configure your audio devices. Depending on desired audio configuration, you may need to pass in speaker and mic names (see the comment in the script itself for usage details). Below, we detail additional commands that could help configure your audio.
+
 ### Audio Devices
 
 For robot-to-operator audio streaming, the web interfaces uses the robot's system default microphone if one or more external microphones are plugged in, or the built-in robot microphone if no external microphones are plugged in.
