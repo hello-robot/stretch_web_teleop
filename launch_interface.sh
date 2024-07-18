@@ -23,6 +23,7 @@ fi
 
 stretch_free_robot_process.py;
 ./stop_interface.sh
+./configure_audio.sh
 sudo udevadm control --reload-rules && sudo udevadm trigger
 source /opt/ros/humble/setup.bash
 source ~/ament_ws/install/setup.bash
