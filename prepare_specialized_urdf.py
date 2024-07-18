@@ -2,6 +2,7 @@
 import pathlib
 import pprint
 import subprocess
+import sys
 from typing import Dict, Optional, Tuple
 
 # Third-party imports
@@ -94,7 +95,13 @@ print()
 print("Loading URDF from:")
 print(urdf_filename)
 print("The specialized URDFs will be derived from this URDF.")
-robot = ud.Robot.from_xml_file(urdf_filename)
+try:
+    robot = ud.Robot.from_xml_file(urdf_filename)
+except FileNotFoundError:
+    print(
+        f"The URDF file was not found in path {urdf_filename}. Unable to create specialized URDFs."
+    )
+    sys.exit(0)
 
 # Change any joint that should be immobile for end effector IK into a fixed joint
 for j in robot.joint_map.keys():

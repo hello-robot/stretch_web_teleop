@@ -44,6 +44,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
   className?: string;
   outputVideoStream?: MediaStream;
   aspectRatio: any;
+  started: boolean;
 
   constructor(props: VideoStreamProps) {
     super(props);
@@ -58,6 +59,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     this.video.setAttribute("width", this.width.toString());
     this.video.setAttribute("height", this.height.toString());
     this.outputVideoStream = new MediaStream();
+    this.started = false;
 
     this.updateImage = this.updateImage.bind(this);
   }
@@ -85,7 +87,7 @@ export class VideoStream extends React.Component<VideoStreamProps> {
       );
     }
     if (!this.imageReceived) {
-      let { width, height, data } = jpeg.decode(
+      let { width, height } = jpeg.decode(
         Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0)),
         true,
       );
@@ -109,10 +111,16 @@ export class VideoStream extends React.Component<VideoStreamProps> {
   }
 
   start() {
-    if (!this.canvas.current) throw "Video stream canvas null";
-    this.outputVideoStream = this.canvas.current.captureStream(this.fps);
-    this.video.srcObject = this.outputVideoStream;
-    this.drawVideo();
+    if (!this.started) {
+      console.log("Starting video stream", this.streamName);
+      if (!this.canvas.current) throw "Video stream canvas null";
+      this.outputVideoStream = this.canvas.current.captureStream(this.fps);
+      this.video.srcObject = this.outputVideoStream;
+      this.drawVideo();
+      this.started = true;
+    } else {
+      console.log("Video stream already started", this.streamName);
+    }
   }
 
   render() {
