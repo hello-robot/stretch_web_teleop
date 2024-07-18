@@ -6,6 +6,34 @@ This interface enables a user to remotely teleoperate a Stretch robot through a 
 
 The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. Upgrade your operating system if necessary ([instructions](https://docs.hello-robot.com/0.3/installation/robot_install/)) and create/update the Stretch ROS2 Humble workspace ([instructions](https://docs.hello-robot.com/0.3/installation/ros_workspace/)). This will install all package dependencies and install the web teleop interface.
 
+## Audio configuration
+
+We provide a convenience script `./configure_audio.sh` to configure your audio devices. Depending on desired audio configuration, you may need to pass in speaker and mic names (see the comment in the script itself for usage details). Below, we detail additional commands that could help configure your audio.
+
+You may need to re-run audio configuration every time you re-start your Stretch.
+
+### Audio Devices
+
+For robot-to-operator audio streaming, the web interfaces uses the robot's system default microphone if one or more external microphones are plugged in, or the built-in robot microphone if no external microphones are plugged in.
+
+For operator-to-robot text-to-speech, the web interface uses the system default speaker.
+
+However, note the system defaults can change when you (un)plug audio devices (e.g., sometimes (un)plugging a mic can cause the system default speaker to change). Thus, it is best practice to always check.
+
+In the below instructions,  replace `<sink/source>` with `sink` for a speaker and `source` for a microphone. Note that this won't work if you're using X-11 forwarding:
+
+1. List all speakers/microphones: `pactl list short <sink/source>s`
+1. Get the default: `pactl get-default-<sink/source>`
+1. Set the default: `pactl set-default-<sink/source> <device-name>` where `<device-name>` is one of the names listed from the above command.
+   1. The built-in default speaker will be called something like `alsa_output.pci-0000_00_1f.3.analog-stereo`, and the built-in default mic will be called something like `alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.multichannel-input`.
+
+### Audio volume/gain
+
+1. To unmute the speaker: `amixer set 'Master unmute`
+1. To set the speaker volume to 100%: `amixer sset 'Master' 100%` (Note that there is also a physical volume knob on the head of the Stretch3 that must be turned up.)
+1. To unmute the mic: `amixer set 'Capture' cap`
+1. To set the mic gain to 100%: `amixer sset 'Capture' 100%`
+
 ## Installing Beta Teleop Cameras
 
 To install the Beta teleop cameras, plug one camera in and run the following command:
