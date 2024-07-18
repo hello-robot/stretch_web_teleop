@@ -12,7 +12,7 @@ export class AudioStream extends React.Component<AudioStreamProps> {
 
   async start() {
     this.outputAudioStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: true, // Will use the default system mic
       video: false,
     });
   }
