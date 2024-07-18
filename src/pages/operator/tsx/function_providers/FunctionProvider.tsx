@@ -80,11 +80,13 @@ export abstract class FunctionProvider {
     }, 150);
   }
 
-  public stopCurrentAction() {
-    FunctionProvider.remoteRobot?.stopTrajectory();
+  public stopCurrentAction(send_stop_command: boolean = false) {
+    if (send_stop_command) FunctionProvider.remoteRobot?.stopTrajectory();
     if (this.activeVelocityAction) {
-      // No matter what region this is, stop the currently running action
-      this.activeVelocityAction.stop();
+      // TODO: this.activeVelocityAction.stop sometimes (always?) executes the
+      // exact same cancellation command(s) as FunctionProvider.remoteRobot?.stopTrajectory,
+      // which means we are unnecessarily calling it twice.
+      if (send_stop_command) this.activeVelocityAction.stop();
       this.activeVelocityAction = undefined;
     }
     if (this.velocityExecutionHeartbeat) {
