@@ -58,8 +58,7 @@ connection = new WebRTCConnection({
   onMessage: handleMessage,
   onConnectionEnd: disconnectFromRobot,
 });
-
-robot.connect().then(() => {
+robot.setOnRosConnectCallback(async () => {
   robot.subscribeToVideo({
     topicName: "/navigation_camera/image_raw/rotated/compressed",
     callback: navigationStream.updateImage,
@@ -84,7 +83,10 @@ robot.connect().then(() => {
   robot.getJointLimits();
 
   connection.joinRobotRoom();
+
+  return Promise.resolve();
 });
+robot.connect();
 
 function handleSessionStart() {
   connection.removeTracks();
@@ -280,12 +282,6 @@ function handleMessage(message: WebRTCMessage) {
     case "getHasBetaTeleopKit":
       robot.getHasBetaTeleopKit();
     case "moveToPregrasp":
-      console.log(
-        "moveToPregrasp",
-        message.scaled_x,
-        message.scaled_y,
-        message.horizontal,
-      );
       robot.executeMoveToPregraspGoal(
         message.scaled_x,
         message.scaled_y,

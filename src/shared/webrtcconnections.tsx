@@ -61,7 +61,7 @@ export class WebRTCConnection extends React.Component {
     this.socket = io();
 
     this.socket.on("connect", () => {
-      console.log("socket connected");
+      console.log("WebRTCConnection socket connected");
     });
 
     this.socket.on("join", (room: string) => {
