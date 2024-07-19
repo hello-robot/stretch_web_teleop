@@ -1,69 +1,69 @@
 .radio-btn-mobile {
-  font-size: 20px;
-  border-radius: 13px;
-  background-color: whitesmoke;
-  margin: 0.5rem;
-  border: 3px solid whitesmoke;
-  filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4));
+    font-size: 20px;
+    border-radius: 13px;
+    background-color: whitesmoke;
+    margin: 0.5rem;
+    border: 3px solid whitesmoke;
+    filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4));
 }
 
 .radio-btn {
-  font-size: 20px;
-  border-radius: 4px;
-  background-color: whitesmoke;
-  padding: 5px;
-  margin: 0.5rem;
-  filter: drop-shadow(4px 2px 2px rgb(0 0 0 / 0.4));
+    font-size: 20px;
+    border-radius: 4px;
+    background-color: whitesmoke;
+    padding: 5px;
+    margin: 0.5rem;
+    filter: drop-shadow(4px 2px 2px rgb(0 0 0 / 0.4));
 }
 
 .radio {
-  height: 1rem;
-  width: 1rem;
-  margin-right: 2rem;
+    height: 1rem;
+    width: 1rem;
+    margin-right: 2rem;
 }
 
 .radio-mobile {
-  height: 1.25rem;
-  width: 1.25rem;
-  margin-right: 1.5rem;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-right: 1.5rem;
 }
 
 .radio-group {
-  overflow-y: auto;
-  width: 100%;
-  max-height: 18vh;
+    overflow-y: auto;
+    width: 100%;
+    max-height: 18vh;
 }
 
 .radio-group-mobile {
-  overflow-y: scroll;
+    overflow-y: scroll;
 }
 
 .modify {
-  float: right;
-  font-size: 25px;
+    float: right;
+    font-size: 25px;
 }
 
 .radio-icon {
-  padding-right: 2rem;
+    padding-right: 2rem;
 }
 
 .add-btn {
-  width: 97%;
-  border-radius: 13px;
-  border: 5px solid whitesmoke;
-  font-size: 45px;
-  padding: 20px;
-  margin: 1rem;
-  text-align: center;
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 45px;
+    padding: 20px;
+    margin: 1rem;
+    text-align: center;
 }
 
 .start-btn {
-  width: 97%;
-  border-radius: 13px;
-  border: 5px solid whitesmoke;
-  font-size: 45px;
-  padding: 20px;
-  margin: 1rem;
-  text-align: center;
-  background: #06c7e1;
+    width: 97%;
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 45px;
+    padding: 20px;
+    margin: 1rem;
+    text-align: center;
+    background: #06c7e1;
 }

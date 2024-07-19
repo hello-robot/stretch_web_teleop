@@ -1,19 +1,19 @@
 #velocity-control-container button:first-of-type {
-  border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
+    border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }
 
 #velocity-control-container button:last-of-type {
-  border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
+    border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
 }
 
 #velocity-control-container button {
-  border-radius: 0;
-  /* Make buttons wider than default */
-  width: 8rem;
+    border-radius: 0;
+    /* Make buttons wider than default */
+    width: 8rem;
 }
 
 @media (max-width: 1000px) {
-  #velocity-control-container button {
-    width: auto;
-  }
+    #velocity-control-container button {
+        width: auto;
+    }
 }

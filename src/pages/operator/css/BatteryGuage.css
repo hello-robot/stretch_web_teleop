@@ -1,59 +1,59 @@
 .bar {
-  width: 100%;
-  height: 15px;
-  background-color: #436fb7;
-  display: flex;
-  margin-top: 3px;
+    width: 100%;
+    height: 15px;
+    background-color: #436fb7;
+    display: flex;
+    margin-top: 3px;
 }
 
 .barsContainer {
-  width: 50px;
-  height: 100px;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
+    width: 50px;
+    height: 100px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
 }
 
 .batteryGauge {
-  height: 100px;
-  /* position: absolute; */
-  width: 100%;
-  padding: 0px 10px 10px 10px;
+    height: 100px;
+    /* position: absolute; */
+    width: 100%;
+    padding: 0px 10px 10px 10px;
 }
 
 .green {
-  filter: invert(17%) sepia(15%) saturate(6070%) hue-rotate(89deg)
-    brightness(75%) contrast(108%);
+    filter: invert(17%) sepia(15%) saturate(6070%) hue-rotate(89deg)
+        brightness(75%) contrast(108%);
 }
 
 .yellow-green {
-  filter: brightness(70%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
-    hue-rotate(56deg) contrast(119%);
+    filter: brightness(70%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
+        hue-rotate(56deg) contrast(119%);
 }
 
 .yellow {
-  filter: brightness(90%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
-    hue-rotate(6deg) contrast(119%);
+    filter: brightness(90%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
+        hue-rotate(6deg) contrast(119%);
 }
 
 .orange {
-  filter: brightness(70%) saturate(100%) invert(10%) sepia(28%) saturate(4155%)
-    hue-rotate(6deg) contrast(119%);
+    filter: brightness(70%) saturate(100%) invert(10%) sepia(28%)
+        saturate(4155%) hue-rotate(6deg) contrast(119%);
 }
 
 .orange-red {
-  filter: brightness(50%) saturate(100%) invert(10%) sepia(28%) saturate(4155%)
-    hue-rotate(6deg) contrast(119%);
+    filter: brightness(50%) saturate(100%) invert(10%) sepia(28%)
+        saturate(4155%) hue-rotate(6deg) contrast(119%);
 }
 
 .red {
-  filter: brightness(30%) saturate(100%) invert(10%) sepia(28%) saturate(4155%)
-    hue-rotate(346deg) contrast(119%);
+    filter: brightness(30%) saturate(100%) invert(10%) sepia(28%)
+        saturate(4155%) hue-rotate(346deg) contrast(119%);
 }
 
 .batteryGaugeContainer {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  max-height: 90%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    max-height: 90%;
 }

@@ -1,79 +1,79 @@
 #operator {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  grid-template-columns: 1fr auto;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr auto;
 
-  --screen-padding: 1rem;
+    --screen-padding: 1rem;
 }
 
 #operator-header {
-  background-color: var(--gray-bg);
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--screen-padding);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  grid-row: 1;
-  grid-column: 1/3;
-  --header-btn-width: 11rem;
-  --header-btn-width-med: 7rem;
+    background-color: var(--gray-bg);
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--screen-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-row: 1;
+    grid-column: 1/3;
+    --header-btn-width: 11rem;
+    --header-btn-width-med: 7rem;
 }
 
 .operator-collision-alerts {
-  width: 100%;
-  /* padding: 0.5rem 1rem 0 1rem; */
-  position: absolute;
+    width: 100%;
+    /* padding: 0.5rem 1rem 0 1rem; */
+    position: absolute;
 }
 
 .operator-alert {
-  font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 
 .operator-collision-alerts .operator-alert {
-  animation: fade-out 1s;
+    animation: fade-out 1s;
 }
 
 .operator-collision-alerts .operator-alert.fadeOut {
-  display: none;
-  animation: fade-out 2s;
-  opacity: 0;
+    display: none;
+    animation: fade-out 2s;
+    opacity: 0;
 }
 
 .operator-collision-alerts .operator-alert.fadeIn {
-  display: block;
-  animation: fade-in 0.5s;
+    display: block;
+    animation: fade-in 0.5s;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
+    from {
+        opacity: 0;
+    }
 
-  to {
-    opacity: 1;
-  }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fade-out {
-  from {
-    opacity: 1;
-  }
+    from {
+        opacity: 1;
+    }
 
-  to {
-    opacity: 0;
-  }
+    to {
+        opacity: 0;
+    }
 }
 
 /* Make all the components in the header fill the available height */
 #operator-header > *,
 #operator-header button {
-  height: 100%;
+    height: 100%;
 }
 
 #operator-header .dropdown {
-  width: var(--header-btn-width);
+    width: var(--header-btn-width);
 }
 
 .operator-voice,
@@ -81,34 +81,34 @@
 .operator-pose-recorder,
 .operator-text-to-speech,
 .operator-aruco-markers {
-  background-color: whitesmoke;
-  box-shadow: var(--shadow);
-  height: 6rem;
-  width: 50rem;
-  display: inline-grid;
-  align-items: center;
-  justify-content: center;
-  /* justify-self: center; */
-  align-self: center;
-  border-radius: 200px;
-  /* margin-top: 10px; */
-  /* grid-row: 2/2;
+    background-color: whitesmoke;
+    box-shadow: var(--shadow);
+    height: 6rem;
+    width: 50rem;
+    display: inline-grid;
+    align-items: center;
+    justify-content: center;
+    /* justify-self: center; */
+    align-self: center;
+    border-radius: 200px;
+    /* margin-top: 10px; */
+    /* grid-row: 2/2;
     grid-column: 1/1; */
-  transition: all 0.2s ease-out;
-  font-size: large;
+    transition: all 0.2s ease-out;
+    font-size: large;
 }
 
 .operator-pose-library.hideLabels,
 .operator-pose-recorder.hideLabels {
-  width: 32rem;
+    width: 32rem;
 }
 
 .operator-aruco-markers.hideLabels {
-  width: 43rem;
+    width: 43rem;
 }
 
 .operator-aruco-markers {
-  width: 66rem;
+    width: 66rem;
 }
 
 .operator-voice[hidden],
@@ -116,82 +116,82 @@
 .operator-pose-recorder[hidden],
 .operator-text-to-speech[hidden],
 .operator-aruco-markers[hidden] {
-  display: none;
+    display: none;
 }
 
 #operator-global-controls {
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: 10px;
-  column-gap: 10px;
-  justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    column-gap: 10px;
+    justify-content: center;
 }
 
 #operator-body {
-  display: flex;
-  justify-content: center;
-  flex-flow: row;
-  flex: 1 1 0;
-  grid-column: 1/1;
-  grid-row: 3;
+    display: flex;
+    justify-content: center;
+    flex-flow: row;
+    flex: 1 1 0;
+    grid-column: 1/1;
+    grid-row: 3;
 }
 
 /** https://stackoverflow.com/a/40989121 **/
 .loader {
-  position: absolute;
-  top: calc(50% - 5em);
-  left: calc(50% - 5em);
-  width: 11em;
-  height: 11em;
-  border: 1.1em solid rgba(0, 0, 0, 0.2);
-  border-left: 1.1em solid #000000;
-  border-radius: 50%;
-  animation: load 1s infinite linear;
-  background-color: white;
-  z-index: 4;
+    position: absolute;
+    top: calc(50% - 5em);
+    left: calc(50% - 5em);
+    width: 11em;
+    height: 11em;
+    border: 1.1em solid rgba(0, 0, 0, 0.2);
+    border-left: 1.1em solid #000000;
+    border-radius: 50%;
+    animation: load 1s infinite linear;
+    background-color: white;
+    z-index: 4;
 }
 
 .loading-text {
-  position: absolute;
-  top: calc(50% - 1em);
-  left: calc(50% - 2em);
-  font-size: large;
-  z-index: 4;
+    position: absolute;
+    top: calc(50% - 1em);
+    left: calc(50% - 2em);
+    font-size: large;
+    z-index: 4;
 }
 
 .reconnecting-text {
-  position: absolute;
-  top: calc(50% - 1em);
-  left: calc(50% - 3em);
-  font-size: large;
-  z-index: 5;
+    position: absolute;
+    top: calc(50% - 1em);
+    left: calc(50% - 3em);
+    font-size: large;
+    z-index: 5;
 }
 
 @keyframes load {
-  0% {
-    transform: rotate(0deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
 
-  100% {
-    transform: rotate(360deg);
-  }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 900px) {
-  #operator-header .dropdown {
-    width: var(--header-btn-width-med);
-  }
+    #operator-header .dropdown {
+        width: var(--header-btn-width-med);
+    }
 
-  #operator-header > *,
-  #operator-header button {
-    height: 3rem;
-  }
+    #operator-header > *,
+    #operator-header button {
+        height: 3rem;
+    }
 
-  .operator-voice,
-  .operator-pose-library,
-  .operator-pose-recorder,
-  .operator-aruco-markers {
-    width: 30rem;
-    height: 5rem;
-  }
+    .operator-voice,
+    .operator-pose-library,
+    .operator-pose-recorder,
+    .operator-aruco-markers {
+        width: 30rem;
+        height: 5rem;
+    }
 }

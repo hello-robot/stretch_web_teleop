@@ -8,21 +8,21 @@ import React from "react";
 import { BatteryVoltageFunctions } from "../function_providers/BatteryVoltageFunctionProvider";
 
 export const BatteryGuage = (props: CustomizableComponentProps) => {
-  const [color, setColor] = useState("green");
+    const [color, setColor] = useState("green");
 
-  batteryVoltageFunctionProvider.setVoltageChangeCallback(setColor);
+    batteryVoltageFunctionProvider.setVoltageChangeCallback(setColor);
 
-  return (
-    <div className="batteryGaugeContainer">
-      <img src={batteryGauge} className={"batteryGauge " + color} />
-      {/* <div className="barsContainer">
+    return (
+        <div className="batteryGaugeContainer">
+            <img src={batteryGauge} className={"batteryGauge " + color} />
+            {/* <div className="barsContainer">
                 <div className="bar"></div>
                 <div className="bar"></div>
                 <div className="bar"></div>
                 <div className="bar"></div>
                 <div className="bar"></div>
             </div> */}
-      <span>Battery Gauge</span>
-    </div>
-  );
+            <span>Battery Gauge</span>
+        </div>
+    );
 };
