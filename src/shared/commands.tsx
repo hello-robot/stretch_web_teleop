@@ -22,7 +22,8 @@ export type cmd =
     | GetStretchTool
     | PlayTextToSpeech
     | StopTextToSpeech
-    | GetHumanPoseEstimate;
+    | ShowTabletCommand
+    | StopShowTabletCommand;
 
 export interface VelocityCommand {
     stop: () => void;
@@ -90,10 +91,6 @@ export interface GetStretchTool {
     type: "getStretchTool";
 }
 
-export interface GetHumanPoseEstimate {
-    type: "getHumanPoseEstimate";
-}
-
 export interface MoveBaseCommand {
     type: "moveBase";
     pose: ROSPose;
@@ -115,6 +112,15 @@ export interface MoveToPregraspCommand {
 
 export interface StopMoveToPregraspCommand {
     type: "stopMoveToPregrasp";
+}
+
+export interface ShowTabletCommand {
+    type: "showTablet";
+    url: string;
+}
+
+export interface StopShowTabletCommand {
+    type: "stopShowTablet";
 }
 
 export interface GetBatteryVoltageCommand {

@@ -8,7 +8,6 @@ import {
     ROSOccupancyGrid,
     ROSPose,
     ActionState,
-    MoveToPregraspState,
     ActionStatusList,
     ROSBatteryState,
 } from "shared/util";
@@ -25,7 +24,7 @@ export var rosConnected = false;
 // Names of ROS actions
 const moveBaseActionName = "/navigate_to_pose";
 const moveToPregraspActionName = "/move_to_pregrasp";
-const estimateHumanPoseActionName = "/estimate_human_pose";
+const showTabletActionName = "/show_tablet";
 
 export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
@@ -41,9 +40,9 @@ export class Robot extends React.Component {
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
     private moveToPregraspGoal?: ROSLIB.ActionGoal;
-    private estimateHumanPoseGoal?: ROSLIB.ActionGoal;
+    private showTabletGoal?: ROSLIB.ActionGoal;
     private moveToPregraspClient?: ROSLIB.ActionClient;
-    private estimateHumanPoseClient?: ROSLIB.ActionClient;
+    private showTabletClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
@@ -69,6 +68,7 @@ export class Robot extends React.Component {
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
     private moveBaseResultCallback: (goalState: ActionState) => void;
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
+    private showTabletResultCallback: (goalState: ActionState) => void;
     private amclPoseCallback: (pose: ROSLIB.Transform) => void;
     private isRunStoppedCallback: (isRunStopped: boolean) => void;
     private hasBetaTeleopKitCallback: (value: boolean) => void;
@@ -89,6 +89,7 @@ export class Robot extends React.Component {
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
         moveBaseResultCallback: (goalState: ActionState) => void;
         moveToPregraspResultCallback: (goalState: ActionState) => void;
+        showTabletResultCallback: (goalState: ActionState) => void;
         amclPoseCallback: (pose: ROSLIB.Transform) => void;
         isRunStoppedCallback: (isRunStopped: boolean) => void;
         hasBetaTeleopKitCallback: (value: boolean) => void;
@@ -100,6 +101,7 @@ export class Robot extends React.Component {
         this.occupancyGridCallback = props.occupancyGridCallback;
         this.moveBaseResultCallback = props.moveBaseResultCallback;
         this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
+        this.showTabletResultCallback = props.showTabletResultCallback;
         this.amclPoseCallback = props.amclPoseCallback;
         this.isRunStoppedCallback = props.isRunStoppedCallback;
         this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
@@ -263,11 +265,18 @@ export class Robot extends React.Component {
             "Move To Pre-grasp succeeded!",
             "Move To Pre-grasp failed!",
         );
+        this.subscribeToActionResult(
+            showTabletActionName,
+            this.showTabletResultCallback,
+            "Show Tablet canceled!",
+            "Show Tablet succeeded!",
+            "Show Tablet failed!",
+        );
         this.subscribeToIsRunStopped();
         this.createTrajectoryClient();
         this.createMoveBaseClient();
         this.createMoveToPregraspClient();
-        this.createEstimateHumanPoseClient();
+        this.createShowTabletClient();
         this.createCmdVelTopic();
         this.createSwitchToNavigationService();
         this.createSwitchToPositionService();
@@ -537,11 +546,11 @@ export class Robot extends React.Component {
         });
     }
 
-    createEstimateHumanPoseClient() {
-        this.estimateHumanPoseClient = new ROSLIB.ActionHandle({
+    createShowTabletClient() {
+        this.showTabletClient = new ROSLIB.ActionHandle({
             ros: this.ros,
-            name: estimateHumanPoseActionName,
-            actionType: "stretch_tablet_interfaces/action/EstimateHumanPose",
+            name: showTabletActionName,
+            actionType: "stretch_tablet_interfaces/action/ShowTablet",
         });
     }
 
@@ -897,12 +906,12 @@ export class Robot extends React.Component {
         return newGoal;
     }
 
-    makeEstimateHumanPoseGoal() {
-        if (!this.estimateHumanPoseClient)
-            throw "estimateHumanPoseClient is undefined";
+    makeShowTabletGoal() {
+        if (!this.showTabletClient) throw "showTabletClient is undefined";
 
         let newGoal = new ROSLIB.ActionGoal({
-            number_of_samples: 10,
+            // TODO: Update once we have a finalized interface!
+            number_of_pose_estimates: 10,
         });
 
         return newGoal;
@@ -1017,11 +1026,13 @@ export class Robot extends React.Component {
         this.stopTrajectoryClient();
         this.stopMoveBaseClient();
         this.stopMoveToPregraspClient();
+        this.stopShowTabletClient();
     }
 
     stopAutonomousClients() {
         this.stopMoveBaseClient();
         this.stopMoveToPregraspClient();
+        this.stopShowTabletClient();
     }
 
     stopTrajectoryClient() {
@@ -1082,19 +1093,16 @@ export class Robot extends React.Component {
         }
     }
 
-    executeEstimateHumanPoseGoal() {
-        this.estimateHumanPoseGoal = this.makeEstimateHumanPoseGoal();
-        if (!this.estimateHumanPoseClient)
-            throw "estimateHumanPoseGoal is undefined";
-        this.estimateHumanPoseClient.createClient(this.estimateHumanPoseGoal);
+    executeShowTabletGoal() {
+        this.showTabletGoal = this.makeShowTabletGoal();
+        this.showTabletClient.createClient(this.showTabletGoal);
     }
 
-    stopEstimateHumanPoseGoal() {
-        if (!this.estimateHumanPoseClient)
-            throw "estimateHumanPoseGoal is undefined";
-        if (this.estimateHumanPoseGoal) {
-            this.estimateHumanPoseClient.cancelGoal();
-            this.estimateHumanPoseGoal = undefined;
+    stopShowTabletClient() {
+        if (!this.showTabletClient) throw "showTabletClient is undefined";
+        if (this.showTabletGoal) {
+            this.showTabletClient.cancelGoal();
+            this.showTabletGoal = undefined;
         }
     }
 

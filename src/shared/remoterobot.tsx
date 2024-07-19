@@ -162,6 +162,10 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel(cmd);
     }
 
+    showTablet() {
+        this.robotChannel({ type: "showTablet" });
+    }
+
     setToggle(
         type:
             | "setFollowGripper"
@@ -226,6 +230,10 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel({ type: "stopMoveToPregrasp" });
     }
 
+    stopShowTablet() {
+        this.robotChannel({ type: "stopShowTablet" });
+    }
+
     /**
      * Speak the specified text.
      *
@@ -255,13 +263,6 @@ export class RemoteRobot extends React.Component<{}, any> {
             type: "stopTextToSpeech",
         };
         this.robotChannel(cmd);
-    }
-
-    /**
-     * Get the human's pose estimate in the Realsense camera frame.
-     */
-    getHumanPoseEstimate() {
-        this.robotChannel({ type: "getHumanPoseEstimate" });
     }
 }
 

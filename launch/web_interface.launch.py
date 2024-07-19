@@ -556,8 +556,8 @@ def generate_launch_description():
     )
     ld.add_action(text_to_speech_node)
 
-    # Change to tablet tool
-    if stretch_tool == "eoa_wrist_dw3_tool_sg3":
+    # TODO: Uncomment tablet tool
+    if True:  # stretch_tool == "eoa_wrist_dw3_tool_tablet_12in":
         detect_body_landmarks_node = Node(
             package="stretch_tablet",
             executable="detect_body_landmarks",
@@ -565,9 +565,12 @@ def generate_launch_description():
         )
         ld.add_action(detect_body_landmarks_node)
 
-        estimate_pose_server_node = Node(
-            package="stretch_tablet", executable="estimate_pose_server", output="screen"
+        # TODO: Replace with the actual action server
+        show_tablet_node = Node(
+            package="stretch_web_teleop",
+            executable="dummy_show_tablet.py",
+            output="screen",
         )
-        ld.add_action(estimate_pose_server_node)
+        ld.add_action(show_tablet_node)
 
     return ld

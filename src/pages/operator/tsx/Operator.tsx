@@ -62,6 +62,8 @@ export const Operator = (props: {
     const [moveBaseState, setMoveBaseState] = React.useState<ActionState>();
     const [moveToPregraspState, setMoveToPregraspState] =
         React.useState<ActionState>();
+    const [showTabletState, setShowTabletState] =
+        React.useState<ActionState>(false);
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -123,6 +125,24 @@ export const Operator = (props: {
             }, 5000);
         }
     }, [moveToPregraspState]);
+
+    // Callback for when the show tablet state is updated (e.g., the ROS2 action returns)
+    // Used to render alerts to the operator.
+    function showTabletStateCallback(state: ActionState) {
+        setShowTabletState(state);
+    }
+    underVideoFunctionProvider.setShowTabletOperatorCallback(
+        showTabletStateCallback,
+    );
+    let showTabletAlertTimeout: NodeJS.Timeout;
+    React.useEffect(() => {
+        if (showTabletState && showTabletState.alert_type != "info") {
+            if (showTabletAlertTimeout) clearTimeout(showTabletAlertTimeout);
+            showTabletAlertTimeout = setTimeout(() => {
+                setShowTabletState(undefined);
+            }, 5000);
+        }
+    }, [showTabletState]);
 
     let remoteStreams = props.remoteStreams;
 
@@ -365,6 +385,21 @@ export const Operator = (props: {
                         <Alert
                             type={moveToPregraspState.alert_type}
                             message={moveToPregraspState.state}
+                        />
+                    </div>
+                </div>
+            )}
+            {showTabletState && (
+                <div className="operator-collision-alerts">
+                    <div
+                        className={className("operator-alert", {
+                            fadeIn: showTabletState !== undefined,
+                            fadeOut: showTabletState == undefined,
+                        })}
+                    >
+                        <Alert
+                            type={showTabletState.alert_type}
+                            message={showTabletState.state}
                         />
                     </div>
                 </div>
