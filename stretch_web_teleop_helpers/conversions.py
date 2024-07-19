@@ -265,11 +265,19 @@ def project_points_to_pixels(
     -------
     npt.NDArray[np.float32]: The array of (u, v) pixel coordinates. Size: (N, 2).
     """
-    points_homogenous = np.hstack((points, np.ones((points.shape[0], 1))))
-    coords = np.matmul(proj, np.transpose(points_homogenous))  # 3 x N
+    # Project the points to the image plane
+    points_homogeneous = np.hstack((points, np.ones((points.shape[0], 1))))
+    coords = np.matmul(proj, np.transpose(points_homogeneous))  # 3 x N
+
+    # Filter our all points whose third homogeneous coordinate is 0 or nan
+    coords = coords[:, ~np.isnan(coords[2, :]) & (coords[2, :] != 0)]
+
+    # Convert the coordinates to pixel indices
     u_idx = (coords[0, :] / coords[2, :]).astype(int)
     v_idx = (coords[1, :] / coords[2, :]).astype(int)
     uv = np.vstack((u_idx, v_idx)).T  # N x 2
+
+    # Remove duplicate and out-of-bounds pixel coordinates
     uv_dedup = np.unique(uv, axis=0)
     in_bounds_idx = np.where(
         (uv_dedup[:, 0] >= 0)
@@ -277,6 +285,7 @@ def project_points_to_pixels(
         & (uv_dedup[:, 1] >= 0)
         & (uv_dedup[:, 1] < height)
     )
+
     return uv_dedup[in_bounds_idx]
 
 

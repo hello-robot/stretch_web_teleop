@@ -167,6 +167,7 @@ export class RemoteRobot extends React.Component<{}, any> {
             | "setFollowGripper"
             | "setRealsenseDepthSensing"
             | "setGripperDepthSensing"
+            | "setRealsenseBodyPoseEstimate"
             | "setRunStop",
         toggle: boolean,
     ) {

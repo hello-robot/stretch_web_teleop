@@ -51,6 +51,8 @@ export class Robot extends React.Component {
     private setRealsenseDepthSensingService?: ROSLIB.Service;
     private setGripperDepthSensingService?: ROSLIB.Service;
     private setExpandedGripperService?: ROSLIB.Service;
+    private setRealsenseShowBodyPoseService?: ROSLIB.Service;
+    private setComputeBodyPoseService?: ROSLIB.Service;
     private setRunStopService?: ROSLIB.Service;
     private robotFrameTfClient?: ROSLIB.TFClient;
     private mapFrameTfClient?: ROSLIB.TFClient;
@@ -272,6 +274,8 @@ export class Robot extends React.Component {
         this.createRealsenseDepthSensingService();
         this.createGripperDepthSensingService();
         this.createExpandedGripperService();
+        this.createRealsenseShowBodyPoseService();
+        this.createComputeBodyPoseService();
         this.createRunStopService();
         this.createRobotFrameTFClient();
         this.createMapFrameTFClient();
@@ -597,6 +601,23 @@ export class Robot extends React.Component {
         });
     }
 
+    createRealsenseShowBodyPoseService() {
+        this.setRealsenseShowBodyPoseService = new ROSLIB.Service({
+            ros: this.ros,
+            name: "/realsense_body_pose_ar",
+            serviceType: "std_srvs/srv/SetBool",
+        });
+    }
+
+    createComputeBodyPoseService() {
+        this.setComputeBodyPoseService = new ROSLIB.Service({
+            ros: this.ros,
+            // TODO: Change this to the correct service name!
+            name: "/detection/toggle",
+            serviceType: "std_srvs/srv/SetBool",
+        });
+    }
+
     createRunStopService() {
         this.setRunStopService = new ROSLIB.Service({
             ros: this.ros,
@@ -708,6 +729,39 @@ export class Robot extends React.Component {
                           toggle,
                       )
                     : console.log("Failed to set expanded gripper to", toggle);
+            },
+        );
+    }
+
+    setRealsenseShowBodyPose(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        this.setRealsenseShowBodyPoseService?.callService(
+            request,
+            (response: boolean) => {
+                response
+                    ? console.log(
+                          "Successfully set realsense depth sensing to",
+                          toggle,
+                      )
+                    : console.log(
+                          "Failed to set realsense depth sensing to",
+                          toggle,
+                      );
+            },
+        );
+    }
+
+    setComputeBodyPose(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        this.setComputeBodyPoseService?.callService(
+            request,
+            (response: boolean) => {
+                response
+                    ? console.log(
+                          "Successfully set compute body pose to",
+                          toggle,
+                      )
+                    : console.log("Failed to set compute body pose to", toggle);
             },
         );
     }

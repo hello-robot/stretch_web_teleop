@@ -670,6 +670,9 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
     underVideoFunctionProvider.provideFunctions(
         UnderVideoButton.RealsenseDepthSensing,
     ).onCheck!(definition.depthSensing || false);
+    underVideoFunctionProvider.provideFunctions(
+        UnderVideoButton.RealsenseBodyPoseEstimate,
+    ).onCheck!(definition.bodyPoseAR || false);
 }
 
 /**
@@ -980,15 +983,17 @@ const UnderRealsenseButtons = (props: {
                 label="Depth Sensing"
             />
             {moveToPregraspButtons}
-            {
-                <button
-                    // className="map-cancel-btn"
-                    onPointerDown={() => {}}
-                >
-                    <span>Show Tablet</span>
-                    {/* <span className="material-icons">cancel</span> */}
-                </button>
-            }
+            <CheckToggleButton
+                checked={props.definition.bodyPoseAR || false}
+                onClick={() => {
+                    props.definition.bodyPoseAR = !props.definition.bodyPoseAR;
+                    setRerender(!rerender);
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.RealsenseBodyPoseEstimate,
+                    ).onCheck!(props.definition.bodyPoseAR);
+                }}
+                label="Show Body Pose"
+            />
             {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {

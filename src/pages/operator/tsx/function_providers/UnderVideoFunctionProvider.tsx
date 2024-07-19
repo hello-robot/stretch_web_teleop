@@ -35,7 +35,7 @@ export enum UnderVideoButton {
     MoveToPregraspGoalReached = "Goal Reached",
     ToggleTabletOrientation = "Toggle Tablet Orientation",
     GetTabletOrientation = "Get Tablet Orientation",
-    ShowTablet = "Show Tablet",
+    RealsenseBodyPoseEstimate = "Show Body Pose",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -60,7 +60,7 @@ export const realsenseMoveToPregraspButtons: UnderVideoButton[] = [
 
 /** Array of different options for the ShowTablet feature on the realsense camera */
 export const realsenseShowTabletButtons: UnderVideoButton[] = [
-    UnderVideoButton.ShowTablet,
+    UnderVideoButton.RealsenseBodyPoseEstimate,
 ];
 
 /** Array of different actions for the wrist */
@@ -277,10 +277,13 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                         return this.tabletOrientation;
                     },
                 };
-            case UnderVideoButton.ShowTablet:
+            case UnderVideoButton.RealsenseBodyPoseEstimate:
                 return {
-                    onClick: () =>
-                        FunctionProvider.remoteRobot?.getHumanPoseEstimate(),
+                    onCheck: (toggle: boolean) =>
+                        FunctionProvider.remoteRobot?.setToggle(
+                            "setRealsenseBodyPoseEstimate",
+                            toggle,
+                        ),
                 };
             default:
                 throw Error(

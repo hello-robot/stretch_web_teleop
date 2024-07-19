@@ -270,6 +270,10 @@ function handleMessage(message: WebRTCMessage) {
         case "setExpandedGripper":
             robot.setExpandedGripper(message.toggle);
             break;
+        case "setRealsenseBodyPoseEstimate":
+            robot.setComputeBodyPose(message.toggle);
+            robot.setRealsenseShowBodyPose(message.toggle);
+            break;
         case "setRunStop":
             robot.setRunStop(message.toggle);
             break;
@@ -303,9 +307,6 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "stopTextToSpeech":
             robot.stopTextToSpeech();
-            break;
-        case "getHumanPoseEstimate":
-            robot.executeEstimateHumanPoseGoal();
             break;
     }
 }
