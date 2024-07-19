@@ -7,23 +7,23 @@ import runStopButton from "operator/icons/button.svg";
 import React, { useState } from "react";
 
 export const RunStopButton = (props: CustomizableComponentProps) => {
-  const functs: RunStopFunctions = runStopFunctionProvider.provideFunctions();
-  const [enabled, setEnabled] = useState<boolean>(false);
+    const functs: RunStopFunctions = runStopFunctionProvider.provideFunctions();
+    const [enabled, setEnabled] = useState<boolean>(false);
 
-  runStopFunctionProvider.setRunStopStateChangeCallback(setEnabled);
+    runStopFunctionProvider.setRunStopStateChangeCallback(setEnabled);
 
-  return (
-    <div className="runStopContainer">
-      <img
-        src={runStopButton}
-        onClick={functs.onClick}
-        className={className("run-stop-button", { enabled })}
-      />
-      {enabled ? (
-        <span>Run Stop: Enabled</span>
-      ) : (
-        <span>Run Stop: Disabled</span>
-      )}
-    </div>
-  );
+    return (
+        <div className="runStopContainer">
+            <img
+                src={runStopButton}
+                onClick={functs.onClick}
+                className={className("run-stop-button", { enabled })}
+            />
+            {enabled ? (
+                <span>Run Stop: Enabled</span>
+            ) : (
+                <span>Run Stop: Disabled</span>
+            )}
+        </div>
+    );
 };

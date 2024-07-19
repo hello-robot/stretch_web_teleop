@@ -1,65 +1,65 @@
 /* The alert message box */
 .alert {
-  position: relative;
-  padding: 2rem 1rem;
-  /* margin-bottom: 1rem; */
-  border: 1px solid transparent;
-  border-radius: 0.25rem;
-  height: 5.5rem;
-  text-align: center;
+    position: relative;
+    padding: 2rem 1rem;
+    /* margin-bottom: 1rem; */
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    height: 5.5rem;
+    text-align: center;
 }
 
 .error {
-  color: #842029;
-  background-color: #f8d7da;
-  border-color: #f5c2c7;
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
 }
 
 .success {
-  color: #0f4f51;
-  background-color: #d1e4e7;
-  border-color: #badbcc;
+    color: #0f4f51;
+    background-color: #d1e4e7;
+    border-color: #badbcc;
 }
 
 .warning {
-  color: #664d03;
-  background-color: #fff3cd;
-  border-color: #ffecb5;
+    color: #664d03;
+    background-color: #fff3cd;
+    border-color: #ffecb5;
 }
 
 .primary {
-  color: #084298;
-  background-color: #cfe2ff;
-  border-color: #b6d4fe;
+    color: #084298;
+    background-color: #cfe2ff;
+    border-color: #b6d4fe;
 }
 
 .info {
-  color: #41464b;
-  background-color: #e2e3e5;
-  border-color: #d3d6d8;
+    color: #41464b;
+    background-color: #e2e3e5;
+    border-color: #d3d6d8;
 }
 
 .secondary {
-  color: #055160;
-  background-color: #cff4fc;
-  border-color: #b6effb;
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #b6effb;
 }
 /* The close button */
 .closebtn {
-  margin-left: 15px;
-  /* color: white; */
-  font-weight: bold;
-  float: right;
-  font-size: 3rem;
-  line-height: 0.75rem;
-  cursor: pointer;
-  transition: 0.3s;
+    margin-left: 15px;
+    /* color: white; */
+    font-weight: bold;
+    float: right;
+    font-size: 3rem;
+    line-height: 0.75rem;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 /* When moving the mouse over the close button */
 .closebtn:hover {
-  color: black;
+    color: black;
 }
 .hide {
-  display: none;
+    display: none;
 }

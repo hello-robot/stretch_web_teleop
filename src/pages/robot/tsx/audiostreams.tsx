@@ -3,17 +3,17 @@ import React from "react";
 type AudioStreamProps = {};
 
 export class AudioStream extends React.Component<AudioStreamProps> {
-  outputAudioStream?: MediaStream;
+    outputAudioStream?: MediaStream;
 
-  constructor(props: AudioStreamProps) {
-    super(props);
-    this.outputAudioStream = new MediaStream();
-  }
+    constructor(props: AudioStreamProps) {
+        super(props);
+        this.outputAudioStream = new MediaStream();
+    }
 
-  async start() {
-    this.outputAudioStream = await navigator.mediaDevices.getUserMedia({
-      audio: true, // Will use the default system mic
-      video: false,
-    });
-  }
+    async start() {
+        this.outputAudioStream = await navigator.mediaDevices.getUserMedia({
+            audio: true, // Will use the default system mic
+            video: false,
+        });
+    }
 }
