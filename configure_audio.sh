@@ -19,6 +19,8 @@ if getopts ":m:" opt && [[ $opt == "m" ]]; then
     MIC_NAME="$OPTARG"
 fi
 
+echo "Configuring audio...Note that this script may not work if X-11 forwarding is enabled."
+
 echo "Setting speaker to $SPEAKER_NAME"
 pactl set-default-sink $SPEAKER_NAME
 
