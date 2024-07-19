@@ -304,6 +304,9 @@ function handleMessage(message: WebRTCMessage) {
         case "stopTextToSpeech":
             robot.stopTextToSpeech();
             break;
+        case "getHumanPoseEstimate":
+            robot.executeEstimateHumanPoseGoal();
+            break;
     }
 }
 

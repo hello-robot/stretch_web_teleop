@@ -35,6 +35,7 @@ export enum UnderVideoButton {
     MoveToPregraspGoalReached = "Goal Reached",
     ToggleTabletOrientation = "Toggle Tablet Orientation",
     GetTabletOrientation = "Get Tablet Orientation",
+    ShowTablet = "Show Tablet",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -55,6 +56,11 @@ export const realsenseButtons: UnderVideoButton[] = [
 export const realsenseMoveToPregraspButtons: UnderVideoButton[] = [
     UnderVideoButton.StartMoveToPregraspHorizontal,
     UnderVideoButton.StartMoveToPregraspVertical,
+];
+
+/** Array of different options for the ShowTablet feature on the realsense camera */
+export const realsenseShowTabletButtons: UnderVideoButton[] = [
+    UnderVideoButton.ShowTablet,
 ];
 
 /** Array of different actions for the wrist */
@@ -270,6 +276,11 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                     get: () => {
                         return this.tabletOrientation;
                     },
+                };
+            case UnderVideoButton.ShowTablet:
+                return {
+                    onClick: () =>
+                        FunctionProvider.remoteRobot?.getHumanPoseEstimate(),
                 };
             default:
                 throw Error(

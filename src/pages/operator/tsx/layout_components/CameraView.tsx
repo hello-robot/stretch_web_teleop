@@ -980,6 +980,15 @@ const UnderRealsenseButtons = (props: {
                 label="Depth Sensing"
             />
             {moveToPregraspButtons}
+            {
+                <button
+                    // className="map-cancel-btn"
+                    onPointerDown={() => {}}
+                >
+                    <span>Show Tablet</span>
+                    {/* <span className="material-icons">cancel</span> */}
+                </button>
+            }
             {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {

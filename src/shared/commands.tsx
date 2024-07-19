@@ -21,7 +21,8 @@ export type cmd =
     | GetHasBetaTeleopKit
     | GetStretchTool
     | PlayTextToSpeech
-    | StopTextToSpeech;
+    | StopTextToSpeech
+    | GetHumanPoseEstimate;
 
 export interface VelocityCommand {
     stop: () => void;
@@ -86,6 +87,10 @@ export interface GetHasBetaTeleopKit {
 
 export interface GetStretchTool {
     type: "getStretchTool";
+}
+
+export interface GetHumanPoseEstimate {
+    type: "getHumanPoseEstimate";
 }
 
 export interface MoveBaseCommand {

@@ -25,6 +25,7 @@ export var rosConnected = false;
 // Names of ROS actions
 const moveBaseActionName = "/navigate_to_pose";
 const moveToPregraspActionName = "/move_to_pregrasp";
+const estimateHumanPoseActionName = "/estimate_human_pose";
 
 export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
@@ -40,7 +41,9 @@ export class Robot extends React.Component {
     private trajectoryClient?: ROSLIB.ActionClient;
     private moveBaseClient?: ROSLIB.ActionClient;
     private moveToPregraspGoal?: ROSLIB.ActionGoal;
+    private estimateHumanPoseGoal?: ROSLIB.ActionGoal;
     private moveToPregraspClient?: ROSLIB.ActionClient;
+    private estimateHumanPoseClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
@@ -262,6 +265,7 @@ export class Robot extends React.Component {
         this.createTrajectoryClient();
         this.createMoveBaseClient();
         this.createMoveToPregraspClient();
+        this.createEstimateHumanPoseClient();
         this.createCmdVelTopic();
         this.createSwitchToNavigationService();
         this.createSwitchToPositionService();
@@ -529,6 +533,14 @@ export class Robot extends React.Component {
         });
     }
 
+    createEstimateHumanPoseClient() {
+        this.estimateHumanPoseClient = new ROSLIB.ActionHandle({
+            ros: this.ros,
+            name: estimateHumanPoseActionName,
+            actionType: "stretch_tablet_interfaces/action/EstimateHumanPose",
+        });
+    }
+
     createCmdVelTopic() {
         this.cmdVelTopic = new ROSLIB.Topic({
             ros: this.ros,
@@ -705,6 +717,10 @@ export class Robot extends React.Component {
         this.setRunStopService?.callService(request, (response: boolean) => {});
     }
 
+    /**
+     * In navigation mode, you can send position commands to the arm and
+     * velocity commands to the base.
+     */
     switchToNavigationMode() {
         var request = new ROSLIB.ServiceRequest({});
         if (robotMode !== "navigation") {
@@ -715,6 +731,11 @@ export class Robot extends React.Component {
         }
     }
 
+    /**
+     * In position mode, you can send position commands to the arm and
+     * position commands to the base. This mode is no longer used in the
+     * web interface.
+     */
     switchToPositionMode = () => {
         var request = new ROSLIB.ServiceRequest({});
         if (robotMode !== "position") {
@@ -822,6 +843,17 @@ export class Robot extends React.Component {
         return newGoal;
     }
 
+    makeEstimateHumanPoseGoal() {
+        if (!this.estimateHumanPoseClient)
+            throw "estimateHumanPoseClient is undefined";
+
+        let newGoal = new ROSLIB.ActionGoal({
+            number_of_samples: 10,
+        });
+
+        return newGoal;
+    }
+
     makePoseGoal(pose: RobotPose) {
         let jointNames: ValidJoints[] = [];
         let jointPositions: number[] = [];
@@ -898,14 +930,14 @@ export class Robot extends React.Component {
     }
 
     executePoseGoal(pose: RobotPose) {
-        this.switchToPositionMode();
+        this.switchToNavigationMode();
         this.stopExecution();
         this.poseGoal = this.makePoseGoal(pose);
         this.trajectoryClient.createClient(this.poseGoal);
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
-        this.switchToPositionMode();
+        this.switchToNavigationMode();
         this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses);
         this.trajectoryClient.createClient(this.poseGoal);
@@ -921,7 +953,7 @@ export class Robot extends React.Component {
     }
 
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
-        this.switchToPositionMode();
+        this.switchToNavigationMode();
         this.stopAutonomousClients();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment);
         this.trajectoryClient.createClient(this.poseGoal);
@@ -993,6 +1025,22 @@ export class Robot extends React.Component {
         if (this.moveToPregraspGoal) {
             this.moveToPregraspClient.cancelGoal();
             this.moveToPregraspGoal = undefined;
+        }
+    }
+
+    executeEstimateHumanPoseGoal() {
+        this.estimateHumanPoseGoal = this.makeEstimateHumanPoseGoal();
+        if (!this.estimateHumanPoseClient)
+            throw "estimateHumanPoseGoal is undefined";
+        this.estimateHumanPoseClient.createClient(this.estimateHumanPoseGoal);
+    }
+
+    stopEstimateHumanPoseGoal() {
+        if (!this.estimateHumanPoseClient)
+            throw "estimateHumanPoseGoal is undefined";
+        if (this.estimateHumanPoseGoal) {
+            this.estimateHumanPoseClient.cancelGoal();
+            this.estimateHumanPoseGoal = undefined;
         }
     }
 

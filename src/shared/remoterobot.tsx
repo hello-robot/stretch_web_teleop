@@ -255,6 +255,13 @@ export class RemoteRobot extends React.Component<{}, any> {
         };
         this.robotChannel(cmd);
     }
+
+    /**
+     * Get the human's pose estimate in the Realsense camera frame.
+     */
+    getHumanPoseEstimate() {
+        this.robotChannel({ type: "getHumanPoseEstimate" });
+    }
 }
 
 class RobotSensors extends React.Component {
