@@ -960,7 +960,7 @@ const UnderRealsenseButtons = (props: {
     // Only show ShowTablet buttons if the robot has a tablet attached.
     // TODO: Un-comment the tool conditional!
     let showTabletButtons = <></>;
-    if (true /*props.stretchTool === StretchTool.TABLET*/) {
+    if (props.stretchTool === StretchTool.TABLET) {
         showTabletButtons = (
             <React.Fragment>
                 <CheckToggleButton

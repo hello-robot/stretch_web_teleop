@@ -288,7 +288,7 @@ class ConfigureVideoStreams(Node):
             self.latest_body_landmarks_str_lock = threading.Lock()
             self.body_landmarks_subscriber = self.create_subscription(
                 String,
-                "/body_landmarks/landmarks_3d",
+                "/human_estimates/latest_body_pose",
                 self.realsense_body_landmarks_cb,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
                 callback_group=MutuallyExclusiveCallbackGroup(),
@@ -477,12 +477,6 @@ class ConfigureVideoStreams(Node):
             )
             return img
 
-        # Parse the body landmarks. Due to issues with the JSON formatting,
-        # we have to replace certain characters before parsing it.
-        body_landmarks_str = body_landmarks_str.replace('"', "")
-        body_landmarks_str = body_landmarks_str.replace("'", '"')
-        body_landmarks_str = body_landmarks_str.replace("(", "[")
-        body_landmarks_str = body_landmarks_str.replace(")", "]")
         try:
             body_landmarks_xyz = json.loads(body_landmarks_str)
         except json.JSONDecodeError as err:

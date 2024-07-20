@@ -621,8 +621,7 @@ export class Robot extends React.Component {
     createComputeBodyPoseService() {
         this.setComputeBodyPoseService = new ROSLIB.Service({
             ros: this.ros,
-            // TODO: Change this to the correct service name!
-            name: "/detection/toggle",
+            name: "/toggle_body_pose_estimator",
             serviceType: "std_srvs/srv/SetBool",
         });
     }
