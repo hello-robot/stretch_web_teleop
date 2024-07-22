@@ -927,10 +927,22 @@ export class Robot extends React.Component {
         this.trajectoryClient.createClient(this.poseGoal);
     }
 
-    stopExecution() {
-        this.stopTrajectoryClient();
-        this.stopMoveBaseClient();
-        this.stopMoveToPregraspClient();
+    // NOTE: When we undo this temp fix (of not stopping the
+    // trajectory client) we also need to undo it in FunctionProvider.jsx
+    // `stopCurrentAction()`.
+    // However, we should consider not stopping the trajectory client here,
+    // regardless, because:
+    //   (1) there is a race condition where ROS can receive the cancellation
+    //       request *after* the new goal, and thus cancel the new goal (e.g.,
+    //       this occurs often when toggling the tablet between portrait and
+    //       landscape mode);
+    //   (2) the trajectory client smoothly interpolates between goals anyway,
+    //       so there is no need to stop it.
+    // If we premanently don't stop the trajectory client here, then
+    // `stopExecution` should just be replaced with `stopAutonomousClients`.
+    stopExecution(stop_trajectory_client: boolean = false) {
+        if (stop_trajectory_client) this.stopTrajectoryClient();
+        this.stopAutonomousClients();
     }
 
     stopAutonomousClients() {
