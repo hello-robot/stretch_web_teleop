@@ -35,6 +35,9 @@ const baseRight = BASE.centerX + BASE.width / 2;
 /**Radius around the base of the rotation arrows */
 const rotateArcRadius = percent2Pixel(10);
 
+/**If the cursor is at this fraction of maxDistance, set the speed to max. */
+const distanceRatioForMaxSpeed = 0.9;
+
 /** Functions required for predictive display */
 export type PredictiveDisplayFunctions = {
     /** Callback function when mouse is clicked in predicitive display area */
@@ -168,12 +171,14 @@ function drawTrajectory(x: number, y: number): [number, number, JSX.Element] {
  * @returns the linear distance, the angle, and the trajectory element
  */
 function drawForwardTraj(x: number, y: number): [number, number, JSX.Element] {
-    const dx = BASE.centerX - x;
-    const dy = baseFront - y;
+    const baseX = BASE.centerX;
+    const baseY = baseFront;
+    const dx = baseX - x;
+    const dy = baseY - y;
     const heading = Math.atan2(-dx, dy);
     const sweepFlag = dx < 0;
 
-    const distance = Math.sqrt(dx * dx + dy * dy); // length from base to cursor
+    const distance = Math.sqrt(dx ** 2.0 + dy ** 2.0); // length from base to cursor
     const radius = distance / (2 * Math.sin(heading)); // radius of the center curve
     const centerPath = makeArc(
         BASE.centerX,
@@ -216,11 +221,42 @@ function drawForwardTraj(x: number, y: number): [number, number, JSX.Element] {
         </>
     );
 
+    // Compute the max distance in the direction of the cursor.
+    // Note that this is not quite accurate. The most accurate way
+    // to do this would be to compute the length along the center arc,
+    // and then compute the length along the center arc if we were to
+    // extend it all the way to the edge of the image, and then normalize.
+    // Instead, we compute the length along the straight-line path from
+    // the base to the cursor, and then compute the length along the straight-line
+    // path from the base to the cursor if we were to extend it all the way to the edge
+    // of the image, and then normalize. However, for our purposes straight-line length
+    // can serve as a heuristic for arc length.
+    const headingTopLeft = Math.atan2(-baseX, baseY);
+    const headingTopRight = Math.atan2(SVG_RESOLUTION - baseX, baseY);
+    let maxPointX: number;
+    let maxPointY: number;
+    if (heading < headingTopLeft) {
+        // The max point is where the line from base to cursor intersects the left edge of the image
+        maxPointX = 0;
+        maxPointY = baseY - (baseX * dy) / dx;
+    } else if (heading > headingTopRight) {
+        // The max point is where the line from base to cursor intersects the right edge of the image
+        maxPointX = SVG_RESOLUTION;
+        maxPointY = baseY + ((SVG_RESOLUTION - baseX) * dy) / dx;
+    } else {
+        // The max point is where the line from base to cursor intersects the top edge of the image
+        maxPointY = 0;
+        maxPointX = baseX - (baseY * dx) / dy;
+    }
+    const maxDistance = Math.sqrt(
+        (baseX - maxPointX) ** 2.0 + (baseY - maxPointY) ** 2.0,
+    );
+
     // Normalize the distance
-    const maxX = SVG_RESOLUTION / 2;
-    const maxY = baseFront;
-    const maxDistance = Math.sqrt(maxX * maxX + maxY * maxY);
-    const normalizedDistance = distance / maxDistance;
+    const normalizedDistance = Math.min(
+        distance / (maxDistance * distanceRatioForMaxSpeed),
+        1.0,
+    );
     return [normalizedDistance, -1 * heading, trajectory];
 }
 
@@ -298,7 +334,11 @@ function drawBackward(y: number): [number, number, JSX.Element] {
 
     const distance = baseBack - y;
     const maxDistance = resolution_height - baseBack;
-    return [distance / maxDistance, 0, trajectory];
+    const normalizedDistance = Math.max(
+        distance / (maxDistance * distanceRatioForMaxSpeed),
+        -1.0,
+    );
+    return [normalizedDistance, 0, trajectory];
 }
 
 /**Formats the SVG path arc string. */
