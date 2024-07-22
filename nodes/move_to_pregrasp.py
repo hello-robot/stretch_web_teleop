@@ -339,7 +339,13 @@ class MoveToPregraspNode(Node):
             return MoveToPregrasp.Result(status=MoveToPregrasp.Result.STATUS_CANCELLED)
 
         # Get the clicked pixel
-        x, y, z, header = self.get_clicked_pixel(goal_handle.request)
+        clicked_pixel_retval = self.get_clicked_pixel(goal_handle.request)
+        if clicked_pixel_retval is None:
+            return action_error_callback(
+                "Failed to get the clicked pixel",
+                MoveToPregrasp.Result.STATUS_DEPROJECTION_FAILURE,
+            )
+        x, y, z, header = clicked_pixel_retval
 
         # Determine how the robot should orient its gripper to align with the clicked pixel
         horizontal_grasp = self.get_grasp_orientation(goal_handle.request)
@@ -491,7 +497,7 @@ class MoveToPregraspNode(Node):
 
     def get_clicked_pixel(
         self, request: MoveToPregrasp.Goal
-    ) -> Tuple[float, float, float, Header]:
+    ) -> Optional[Tuple[float, float, float, Header]]:
         """
         Get the 3D coordinates of the clicked pixel in camera frame.
 
@@ -501,7 +507,8 @@ class MoveToPregraspNode(Node):
 
         Returns
         -------
-        Tuple[float, float, float, Header]: The clicked pixel, and the header of the depth message.
+        Optional[Tuple[float, float, float, Header]]: The clicked pixel, and the header of
+            the depth message, or None if the clicked pixel could not be deprojected.
         """
         # Get the latest Realsense messages
         with self.latest_realsense_depth_lock:
@@ -538,9 +545,13 @@ class MoveToPregraspNode(Node):
         )
 
         # Deproject the clicked pixel to get the 3D coordinates of the clicked point
-        x, y, z = deproject_pixel_to_pointcloud_point(
+        retval = deproject_pixel_to_pointcloud_point(
             u, v, pointcloud, np.array(camera_info_msg.p).reshape(3, 4)
         )
+        if retval is None:
+            self.get_logger().error("Failed to deproject clicked pixel")
+            return None
+        x, y, z = retval
         self.get_logger().debug(
             f"Closest point to clicked pixel (camera frame): {(x, y, z)}"
         )
