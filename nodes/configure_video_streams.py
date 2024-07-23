@@ -285,6 +285,7 @@ class ConfigureVideoStreams(Node):
 
             # Also subscribe to body landmarks to overlay the user's pose
             self.latest_body_landmarks_str = None
+            self.latest_body_landmarks_str_recv_time = None
             self.latest_body_landmarks_str_lock = threading.Lock()
             self.body_landmarks_subscriber = self.create_subscription(
                 String,
@@ -469,11 +470,42 @@ class ConfigureVideoStreams(Node):
         return img
 
     def overlay_realsense_body_pose_ar(
-        self, body_landmarks_str: str, img: npt.NDArray[np.uint8]
-    ):
+        self,
+        body_landmarks_str: str,
+        body_landmarks_str_recv_time: Time,
+        img: npt.NDArray[np.uint8],
+        timeout_sec: float = 2.0,
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Overlay the detected body landmarks on the image.
+
+        Parameters
+        ----------
+        body_landmarks_str : str
+            The body landmarks as a JSON string.
+        body_landmarks_str_recv_time : Time
+            The time at which the body landmarks string was received.
+        img : np.ndarray
+            The image to overlay the body landmarks on.
+        timeout_sec : float, optional
+            The maximum time for which the body landmark string is not considered stale.
+
+        Returns
+        -------
+        np.ndarray
+            The image with the body landmarks overlaid.
+        """
         if self.realsense_P is None:
             self.get_logger().warn(
                 "Camera projection matrix is not available. Skipping point cloud processing."
+            )
+            return img
+
+        if self.get_clock().now() - body_landmarks_str_recv_time > Duration(
+            seconds=timeout_sec
+        ):
+            self.get_logger().warn(
+                "Body landmarks are stale. Skipping body pose AR overlay."
             )
             return img
 
@@ -686,6 +718,7 @@ class ConfigureVideoStreams(Node):
 
     def realsense_body_landmarks_cb(self, msg):
         with self.latest_body_landmarks_str_lock:
+            self.latest_body_landmarks_str_recv_time = self.get_clock().now()
             self.latest_body_landmarks_str = msg.data
 
     def process_realsense_image(
@@ -705,9 +738,12 @@ class ConfigureVideoStreams(Node):
             if self.realsense_body_pose_ar:
                 with self.latest_body_landmarks_str_lock:
                     body_landmarks_str = self.latest_body_landmarks_str
+                    body_landmarks_str_recv_time = (
+                        self.latest_body_landmarks_str_recv_time
+                    )
                 if body_landmarks_str is not None and len(body_landmarks_str) > 0:
                     image = self.overlay_realsense_body_pose_ar(
-                        body_landmarks_str, image
+                        body_landmarks_str, body_landmarks_str_recv_time, image
                     )
             img = self.configure_images(image, self.realsense_params[image_config_name])
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
