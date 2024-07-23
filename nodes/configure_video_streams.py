@@ -846,6 +846,12 @@ class ConfigureVideoStreams(Node):
             )
             pcl_cloud_filtered = downsampler.filter()
         pc_in_camera_filtered = pcl_cloud_filtered.to_array()
+        if pc_in_camera_filtered.shape[0] == 0:
+            self.get_logger().debug(
+                "No points in the gripper's depth image. Skipping point cloud processing.",
+                throttle_duration_sec=1.0,
+            )
+            return image
 
         # Create the Aruco Detector
         if self.aruco_detector is None:
@@ -874,6 +880,11 @@ class ConfigureVideoStreams(Node):
                 aruco_center_pos[label] = deproject_pixel_to_pointcloud_point(
                     center[0], center[1], pc_in_camera_filtered, self.gripper_P
                 )
+                if aruco_center_pos[label] is None:
+                    self.get_logger().warn(
+                        f"Could not deproject the center of aruco marker {label}. Skipping point cloud processing."
+                    )
+                    return image
         if (
             "finger_left" not in aruco_center_pos
             or "finger_right" not in aruco_center_pos

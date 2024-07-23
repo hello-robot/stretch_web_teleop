@@ -77,6 +77,9 @@ export abstract class FunctionProvider {
         }, 150);
     }
 
+    // NOTE: When we undo this temp fix (of not stopping the
+    // trajectory client) we also need to undo it in robot.jsx
+    // `stopExecution()`.
     public stopCurrentAction(send_stop_command: boolean = false) {
         if (send_stop_command) FunctionProvider.remoteRobot?.stopTrajectory();
         if (this.activeVelocityAction) {

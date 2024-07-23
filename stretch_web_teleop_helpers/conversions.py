@@ -214,7 +214,7 @@ def deproject_pixel_to_point(
 
 def deproject_pixel_to_pointcloud_point(
     u: int, v: int, pointcloud: npt.NDArray[np.float32], proj: npt.NDArray[np.float32]
-) -> Tuple[float, float, float]:
+) -> Optional[Tuple[float, float, float]]:
     """
     Deproject the clicked pixel to the 3D coordinates of the closest point within the pointcloud.
 
@@ -227,8 +227,13 @@ def deproject_pixel_to_pointcloud_point(
 
     Returns
     -------
-    Tuple[float, float, float]: The 3D coordinates of the clicked point.
+    Optional[Tuple[float, float, float]]: The 3D coordinates of the clicked point, or None
+        if the pointcloud is empty.
     """
+    # Check if the pointcloud is empty
+    if pointcloud.shape[0] == 0:
+        return None
+
     # Get the ray from the camera origin to the clicked point
     ray_dir = np.linalg.pinv(proj)[:3, :] @ np.array([u, v, 1])
     ray_dir /= np.linalg.norm(ray_dir)
