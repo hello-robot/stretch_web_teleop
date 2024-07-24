@@ -44,10 +44,6 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                   displayButtons: true,
                   children: [],
                 } as CameraViewDefinition,
-                {
-                  //KEYBOARD CONTROL
-                  type: ComponentType.KeyboardControl,
-                } as KeyboardControlDefinition,
               ],
             },
           ],

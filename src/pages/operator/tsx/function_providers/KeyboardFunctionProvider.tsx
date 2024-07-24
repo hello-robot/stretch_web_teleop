@@ -3,24 +3,38 @@ import { buttonFunctionProvider } from "operator/tsx/index";
 import { FunctionProvider } from "./FunctionProvider";
 import { ButtonPadButton, ButtonFunctions } from "./ButtonFunctionProvider";
 import { ActionMode } from "../utils/component_definitions";
+// import { keyState } from "../layout_components/KeyboardControl"
 
 export enum Mode {
-  Base = "base",
-  Arm = "arm",
-  Wrist = "wrist",
+  Base = "Base",
+  Arm = "Arm",
+  Wrist = "Wrist",
 }
+
+// const [keyState, setKeyState] = React.useState({
+//   W: false,
+//   A: false,
+//   S: false,
+//   D: false,
+//   J: false,
+//   K: false,
+//   UpArrow: false,
+//   LeftArrow: false,
+//   DownArrow: false,
+//   RightArrow: false,
+// });
 
 export class KeyboardFunctionProvider extends FunctionProvider {
   constructor() {
     super();
     this.provideFunctions = this.provideFunctions.bind(this);
+    /// buttonFunctionProvider.updateJointStates = buttonFunctionProvider.updateJointStates.bind(this);
   }
 
   private getButtonPadButton(
     KeyboardFunction: Mode,
     key: string,
   ): ButtonPadButton {
-    // TODO
     let keyInput: ButtonPadButton;
     switch (key) {
       case "w":

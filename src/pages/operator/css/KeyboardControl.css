@@ -1,0 +1,121 @@
+.keyboard-control {
+  /* display: grid;
+    flex: 2;
+    justify-content: center;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    border-radius: var(--radius);    */
+
+  background-color: #f4f7f8;
+  margin: 1em;
+  display: grid;
+  resize: horizontal;
+}
+
+.keyboard-row {
+  display: flex;
+}
+
+.keyboard-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: auto;
+}
+
+.item {
+  /* margin: 0.5em;
+    padding: 0.5em;
+    min-width: 0; */
+  /* background-color: #1b5385;
+    color: white;
+    font-family: monospace;
+    font-size: 13px; */
+  flex: auto;
+}
+
+/* WASD AND ARROW KEYS LAYOUT */
+.controls-container {
+  position: relative;
+  display: grid;
+  margin: 0.5em;
+  grid-template-rows: repeat(3, 1fr);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: auto;
+}
+
+.controls-column {
+  position: relative;
+  justify-self: center;
+  align-items: center;
+}
+
+.gripper-container {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  align-items: center;
+  justify-content: center;
+  flex: auto;
+  margin: 0.5em;
+}
+.gripper-column {
+  position: relative;
+  justify-self: center;
+  align-items: center;
+}
+
+.keyboard-button.active {
+  fill-opacity: 60%;
+  background-color: hsl(200, 50%, 60%);
+  color: hsl(200, 0%, 60%);
+}
+
+/* BUTTON MODES */
+.mode-button {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  position: relative;
+  grid-template-rows: repeat(2, 1fr);
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-button.active {
+  background-color: #1b5385;
+}
+
+.current-mode {
+  /* margin-bottom: 0.5em; */
+}
+
+/* TOGGLE BUTTON */
+.toggle-key {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 1em;
+}
+
+.toggle-key.active {
+  background-color: green;
+  color: white;
+}
+
+.toggle-key.off {
+  background-color: red;
+}
+
+/* TODO: MAKE LAYOUT REACTIVE TO SCREEN SIZE */
+@media screen and (orientation: portrait) {
+  .keyboard-control {
+    width: 100%;
+  }
+}
+
+button {
+  background-color: hsl(0, 0%, 31%);
+}
