@@ -504,8 +504,9 @@ class ConfigureVideoStreams(Node):
         if self.get_clock().now() - body_landmarks_str_recv_time > Duration(
             seconds=timeout_sec
         ):
-            self.get_logger().warn(
-                "Body landmarks are stale. Skipping body pose AR overlay."
+            self.get_logger().debug(
+                "Body landmarks are stale. Skipping body pose AR overlay.",
+                throttle_duration_sec=1.0,
             )
             return img
 

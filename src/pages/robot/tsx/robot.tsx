@@ -18,7 +18,7 @@ import {
     IsRunStoppedMessage,
 } from "../../../shared/util";
 
-export var robotMode: "navigation" | "position" = "position";
+export var robotMode: "navigation" | "position" | "unknown" = "position";
 export var rosConnected = false;
 
 // Names of ROS actions
@@ -1010,8 +1010,9 @@ export class Robot extends React.Component {
         // this.stopExecution()
         this.moveBaseGoal = this.makeMoveBaseGoal(pose);
         this.moveBaseClient.createClient(this.moveBaseGoal);
-        // this.moveBaseResultCallback({state: "Navigating to selected goal...", alert_type: "info"})
-        // this.moveBaseGoal.send()
+
+        // An autonomous client may change the robot's mode.
+        robotMode = "unknown";
     }
 
     executeIncrementalMove(jointName: ValidJoints, increment: number) {
@@ -1092,6 +1093,9 @@ export class Robot extends React.Component {
             horizontal,
         );
         this.moveToPregraspClient.createClient(this.moveToPregraspGoal);
+
+        // An autonomous client may change the robot's mode.
+        robotMode = "unknown";
     }
 
     stopMoveToPregraspClient() {
@@ -1106,6 +1110,9 @@ export class Robot extends React.Component {
     executeShowTabletGoal() {
         this.showTabletGoal = this.makeShowTabletGoal();
         this.showTabletClient.createClient(this.showTabletGoal);
+
+        // An autonomous client may change the robot's mode.
+        robotMode = "unknown";
     }
 
     stopShowTabletClient() {
