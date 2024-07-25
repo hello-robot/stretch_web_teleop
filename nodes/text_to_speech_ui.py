@@ -147,7 +147,7 @@ class TextToSpeechUserInterfaceNode(Node):
         # Get the user input
         while rclpy.ok():
             # Get the user input
-            message = input("Message (S to stop, Q to exit): ").strip()
+            message = input("\nMessage (S to stop, Q to exit): ").strip()
 
             # Process the special 1-character commands
             if len(message) == 0:
