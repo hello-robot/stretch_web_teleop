@@ -12,6 +12,20 @@
   resize: horizontal;
 }
 
+.keyboard-control.selected {
+  opacity: 100%;
+  stroke: var(--selected-color);
+  opacity: 100%;
+  border: 1px solid var(--selected-color);
+  stroke-width: 5px;
+  box-shadow: 0 0 1rem 0.5rem var(--selected-color);
+  pointer-events: none;
+}
+
+.keyboard-control.customizing path {
+  pointer-events: none;
+}
+
 .keyboard-row {
   display: flex;
 }
@@ -21,7 +35,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex: auto;
+  margin: 0.5em;
+  flex: 1;
 }
 
 .item {
@@ -41,7 +56,7 @@
   display: grid;
   margin: 0.5em;
   grid-template-rows: repeat(3, 1fr);
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   text-align: center;
   flex: auto;
@@ -57,7 +72,7 @@
   position: relative;
   display: grid;
   grid-template-rows: repeat(2, 1fr);
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex: auto;
   margin: 0.5em;
@@ -71,7 +86,7 @@
 .keyboard-button.active {
   fill-opacity: 60%;
   background-color: hsl(200, 50%, 60%);
-  color: hsl(200, 0%, 60%);
+  color: hsl(0, 0%, 79%);
 }
 
 /* BUTTON MODES */
@@ -79,13 +94,13 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   position: relative;
-  grid-template-rows: repeat(2, 1fr);
-  align-items: center;
-  justify-content: center;
+  margin-top: 0.1em;
+  margin-inline: 0.1em;
 }
 
 .mode-button.active {
-  background-color: #1b5385;
+  background-color: hsl(200, 50%, 60%);
+  color: hsl(0, 0%, 79%);
 }
 
 .current-mode {
@@ -95,18 +110,17 @@
 /* TOGGLE BUTTON */
 .toggle-key {
   display: block;
-  margin-right: auto;
-  margin-left: auto;
   font-size: 1em;
 }
 
 .toggle-key.active {
-  background-color: green;
+  background-color: var(--btn-turquoise);
   color: white;
 }
 
 .toggle-key.off {
-  background-color: red;
+  background-color: var(--btn-red);
+  color: black;
 }
 
 /* TODO: MAKE LAYOUT REACTIVE TO SCREEN SIZE */
