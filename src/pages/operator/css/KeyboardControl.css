@@ -1,15 +1,8 @@
 .keyboard-control {
-  /* display: grid;
-    flex: 2;
-    justify-content: center;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    border-radius: var(--radius);    */
-
   background-color: #f4f7f8;
   margin: 1em;
   display: grid;
-  resize: horizontal;
+  resize: vertical;
 }
 
 .keyboard-control.selected {
@@ -37,17 +30,6 @@
   align-items: center;
   margin: 0.5em;
   flex: 1;
-}
-
-.item {
-  /* margin: 0.5em;
-    padding: 0.5em;
-    min-width: 0; */
-  /* background-color: #1b5385;
-    color: white;
-    font-family: monospace;
-    font-size: 13px; */
-  flex: auto;
 }
 
 /* WASD AND ARROW KEYS LAYOUT */
@@ -101,10 +83,6 @@
 .mode-button.active {
   background-color: hsl(200, 50%, 60%);
   color: hsl(0, 0%, 79%);
-}
-
-.current-mode {
-  /* margin-bottom: 0.5em; */
 }
 
 /* TOGGLE BUTTON */

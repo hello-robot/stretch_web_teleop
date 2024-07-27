@@ -100,27 +100,24 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
   );
 
   React.useEffect(() => {
-    if (toggleState) {
+    if (toggleState && !customizing) {
       window.addEventListener("keydown", handleKeyPress);
       window.addEventListener("keyup", handleKeyRelease);
     } else {
+      setKeyPressed(false);
       window.removeEventListener("keydown", handleKeyPress);
       window.removeEventListener("keyup", handleKeyRelease);
-      {
-        handleKeyRelease;
-      }
     }
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
       window.removeEventListener("keyup", handleKeyRelease);
     };
-  }, [toggleState, handleKeyPress, handleKeyRelease]);
+  }, [toggleState, handleKeyPress, handleKeyRelease, customizing]);
 
   return (
     <div
       className={className("keyboard-control", { customizing, selected })}
       onClick={handleSelect}
-      {...selectProp}
     >
       <div className="keyboard-row">
         <div className="keyboard-column">
@@ -169,7 +166,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           <div className="controls-column">
             {activeMode === 2 && (
               <button
-                className={keyState.q ? "keyboard-button active" : ""}
+                className={
+                  keyState.q ? "keyboard-button active" : "keyboard-button"
+                }
                 disabled
               >
                 {" "}
@@ -177,7 +176,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
               </button>
             )}
             <button
-              className={keyState.w ? "keyboard-button active" : ""}
+              className={
+                keyState.w ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
@@ -185,7 +186,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
             </button>
             {activeMode === 2 && (
               <button
-                className={keyState.e ? "keyboard-button active" : ""}
+                className={
+                  keyState.e ? "keyboard-button active" : "keyboard-button"
+                }
                 disabled
               >
                 {" "}
@@ -195,21 +198,27 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
           <div className="controls-column">
             <button
-              className={keyState.a ? "keyboard-button active" : ""}
+              className={
+                keyState.a ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
               A{" "}
             </button>
             <button
-              className={keyState.s ? "keyboard-button active" : ""}
+              className={
+                keyState.s ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
               S{" "}
             </button>
             <button
-              className={keyState.d ? "keyboard-button active" : ""}
+              className={
+                keyState.d ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
@@ -223,7 +232,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           Camera Controls <br />
           <div className="controls-column">
             <button
-              className={keyState.ArrowUp ? "keyboard-button active" : ""}
+              className={
+                keyState.ArrowUp ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
@@ -232,21 +243,33 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
           <div className="controls-column">
             <button
-              className={keyState.ArrowLeft ? "keyboard-button active" : ""}
+              className={
+                keyState.ArrowLeft
+                  ? "keyboard-button active"
+                  : "keyboard-button"
+              }
               disabled
             >
               {" "}
               &lt;{" "}
             </button>
             <button
-              className={keyState.ArrowDown ? "keyboard-button active" : ""}
+              className={
+                keyState.ArrowDown
+                  ? "keyboard-button active"
+                  : "keyboard-button"
+              }
               disabled
             >
               {" "}
               v{" "}
             </button>
             <button
-              className={keyState.ArrowRight ? "keyboard-button active" : ""}
+              className={
+                keyState.ArrowRight
+                  ? "keyboard-button active"
+                  : "keyboard-button"
+              }
               disabled
             >
               {" "}
@@ -258,13 +281,17 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           Gripper Controls <br />
           <div className="gripper-column">
             <button
-              className={keyState.j ? "keyboard-button active" : ""}
+              className={
+                keyState.j ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               J
             </button>
             <button
-              className={keyState.k ? "keyboard-button active" : ""}
+              className={
+                keyState.k ? "keyboard-button active" : "keyboard-button"
+              }
               disabled
             >
               {" "}
