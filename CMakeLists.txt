@@ -42,7 +42,6 @@ install(PROGRAMS
   nodes/move_to_pregrasp.py
   nodes/navigation_camera.py
   nodes/text_to_speech.py
-  nodes/dummy_show_tablet.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
