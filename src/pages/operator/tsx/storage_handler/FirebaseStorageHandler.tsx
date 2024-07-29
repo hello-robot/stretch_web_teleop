@@ -85,12 +85,20 @@ export class FirebaseStorageHandler extends StorageHandler {
 
             this.getUserDataFirebase()
                 .then(async (userData) => {
-                    this.layouts = userData.layouts;
+                    this.layouts = userData.layouts ? userData.layouts : {};
                     this.currentLayout = userData.currentLayout;
-                    this.mapPoses = userData.map_poses;
-                    this.mapPoseTypes = userData.map_pose_types;
-                    this.recordings = userData.recordings;
-                    this.textToSpeech = userData.text_to_speech;
+                    this.mapPoses = userData.map_poses
+                        ? userData.map_poses
+                        : {};
+                    this.mapPoseTypes = userData.map_pose_types
+                        ? userData.map_pose_types
+                        : {};
+                    this.recordings = userData.recordings
+                        ? userData.recordings
+                        : {};
+                    this.textToSpeech = userData.text_to_speech
+                        ? userData.text_to_speech
+                        : [];
 
                     this.onReadyCallback();
                 })
