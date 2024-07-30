@@ -1,4 +1,4 @@
-import { StorageHandler } from "./StorageHandler";
+import { DEFAULT_LAYOUTS, StorageHandler } from "./StorageHandler";
 import { LayoutDefinition } from "../utils/component_definitions";
 
 import {
@@ -58,7 +58,9 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.database = getDatabase(this.app);
         this.auth = getAuth(this.app);
         this.GAuthProvider = new GoogleAuthProvider();
-
+        this.GAuthProvider.setCustomParameters({
+            prompt: "select_account",
+        });
         this.userEmail = "";
         this.uid = "";
         this.layouts = {};
@@ -71,9 +73,9 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.markerNames = [];
         this.markerIDs = [];
         this.markerInfo = {} as ArucoMarkersInfo;
-        onAuthStateChanged(this.auth, (user) =>
-            this.handleAuthStateChange(user),
-        );
+        // onAuthStateChanged(this.auth, (user) =>
+        //     this.handleAuthStateChange(user),
+        // );
 
         this.signInWithGoogle();
     }
@@ -85,6 +87,7 @@ export class FirebaseStorageHandler extends StorageHandler {
 
             this.getUserDataFirebase()
                 .then(async (userData) => {
+                    console.log(userData);
                     this.layouts = userData.layouts ? userData.layouts : {};
                     this.currentLayout = userData.currentLayout;
                     this.mapPoses = userData.map_poses
@@ -106,7 +109,9 @@ export class FirebaseStorageHandler extends StorageHandler {
                     console.log(
                         "Detected that FirebaseModel isn't initialized for user ",
                         this.uid,
+                        " Initializing to default layout.",
                     );
+                    this.saveCurrentLayout(DEFAULT_LAYOUTS["Basic Layout"]);
                     this.onReadyCallback();
                 });
         }
@@ -132,6 +137,7 @@ export class FirebaseStorageHandler extends StorageHandler {
                         GoogleAuthProvider.credentialFromResult(result);
                     const token = credential!.accessToken;
                     const user = result.user;
+                    this.handleAuthStateChange(user);
                     return Promise.resolve();
                 })
                 .catch(this.handleError);
