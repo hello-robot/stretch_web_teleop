@@ -112,7 +112,7 @@ export type SingleButtonProps = {
   iconPosition: { x: number; y: number };
 };
 
-const SingleButton = (props: SingleButtonProps) => {
+export const SingleButton = (props: SingleButtonProps) => {
   const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
     props.funct,
   );

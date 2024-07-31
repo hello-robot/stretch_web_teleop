@@ -454,6 +454,6 @@ function getJointNameFromButtonFunction(
       return "joint_head_pan";
 
     default:
-      throw Error("unknown button pad function" + buttonType);
+      console.log("unknown button pad function" + buttonType);
   }
 }

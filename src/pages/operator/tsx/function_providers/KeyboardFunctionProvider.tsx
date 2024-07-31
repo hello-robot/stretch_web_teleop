@@ -3,7 +3,8 @@ import { buttonFunctionProvider } from "operator/tsx/index";
 import { FunctionProvider } from "./FunctionProvider";
 import { ButtonPadButton, ButtonFunctions } from "./ButtonFunctionProvider";
 import { ActionMode } from "../utils/component_definitions";
-// import { keyState } from "../layout_components/KeyboardControl"
+//import { keyState } from "../layout_components/KeyboardControl"
+import { ConsoleView } from "react-device-detect";
 
 export enum Mode {
   Base = "Base",
@@ -11,24 +12,16 @@ export enum Mode {
   Wrist = "Wrist",
 }
 
-// const [keyState, setKeyState] = React.useState({
-//   W: false,
-//   A: false,
-//   S: false,
-//   D: false,
-//   J: false,
-//   K: false,
-//   UpArrow: false,
-//   LeftArrow: false,
-//   DownArrow: false,
-//   RightArrow: false,
-// });
-
 export class KeyboardFunctionProvider extends FunctionProvider {
   constructor() {
     super();
     this.provideFunctions = this.provideFunctions.bind(this);
-    /// buttonFunctionProvider.updateJointStates = buttonFunctionProvider.updateJointStates.bind(this);
+  }
+
+  public setOperatorCallback(
+    callback: (buttonStateMap: ButtonStateMap) => void,
+  ) {
+    this.operatorCallback = callback;
   }
 
   private getButtonPadButton(
@@ -129,12 +122,12 @@ export class KeyboardFunctionProvider extends FunctionProvider {
             break;
         }
         break;
-      case "j":
-        console.log("j pressed; gripper closed");
+      case "z":
+        console.log("z pressed; gripper closed");
         keyInput = ButtonPadButton.GripperClose;
         break;
-      case "k":
-        console.log("k pressed; gripper opened");
+      case "x":
+        console.log("x pressed; gripper opened");
         keyInput = ButtonPadButton.GripperOpen;
         break;
       case "ArrowUp":
@@ -163,11 +156,15 @@ export class KeyboardFunctionProvider extends FunctionProvider {
   }
 
   public provideFunctions(
-    keyboardFunction: Mode,
+    modeFunction: Mode,
     key: string,
-  ): ButtonFunctions {
-    // switch()
-    let button = this.getButtonPadButton(keyboardFunction, key);
+  ): ButtonFunctions | null {
+    const button = this.getButtonPadButton(modeFunction, key);
+    console.log(
+      "**********************",
+      `${button}`,
+      "************************",
+    );
     return buttonFunctionProvider.provideFunctions(button);
   }
 }

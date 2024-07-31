@@ -9,7 +9,10 @@ import { RemoteStream, StretchTool } from "shared/util";
 import { ButtonPad } from "./ButtonPad";
 import { CameraView } from "./CameraView";
 import { PredictiveDisplay } from "./PredictiveDisplay";
-import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
+import {
+  ButtonStateMap,
+  ButtonPadButton,
+} from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
@@ -54,6 +57,7 @@ export type CustomizableComponentProps = {
   definition: ComponentDefinition;
   /** see {@link SharedState} */
   sharedState: SharedState;
+  funct: ButtonPadButton;
 };
 
 /**
@@ -103,3 +107,4 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
 export function isSelected(props: CustomizableComponentProps): boolean {
   return props.path === props.sharedState.selectedPath;
 }
+export { ButtonPadButton };

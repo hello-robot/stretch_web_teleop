@@ -17,6 +17,7 @@ import {
   underVideoFunctionProvider,
   hasBetaTeleopKit,
   stretchTool,
+  keyboardFunctionProvider,
 } from ".";
 import {
   ButtonPadButton,
@@ -79,6 +80,7 @@ export const Operator = (props: {
     setButtonStateMapRerender(!buttonStateMapRerender);
   }
   buttonFunctionProvider.setOperatorCallback(operatorCallback);
+  keyboardFunctionProvider.setOperatorCallback(operatorCallback);
 
   // Just used as a flag to force the operator to rerender when the tablet orientation
   // changes.

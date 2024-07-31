@@ -65,10 +65,34 @@
   align-items: center;
 }
 
+.keyboard-button.images {
+  background-color: hsl(0, 0%, 31%);
+  color: hsl(0, 0%, 79%);
+  fill-opacity: 40%;
+  height: 100%;
+}
+
 .keyboard-button.active {
   fill-opacity: 60%;
   background-color: hsl(200, 50%, 60%);
   color: hsl(0, 0%, 79%);
+}
+
+.keyboard-button.active img {
+  fill-opacity: 60%;
+  background-color: hsl(200, 50%, 60%);
+  color: hsl(0, 0%, 79%);
+  /* filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg); */
+}
+
+.keyboard-button.collision {
+  background-color: orange;
+  fill-opacity: 40%;
+}
+
+.keyboard-button path.limit {
+  background-color: red;
+  fill-opacity: 40%;
 }
 
 /* BUTTON MODES */
@@ -85,10 +109,16 @@
   color: hsl(0, 0%, 79%);
 }
 
-/* TOGGLE BUTTON */
+/* TOGGLE BUTTONS */
+.toggle-row {
+  display: flex;
+}
+
 .toggle-key {
   display: block;
   font-size: 1em;
+  margin-left: 0.3em;
+  margin-right: 0.3em;
 }
 
 .toggle-key.active {
@@ -101,13 +131,19 @@
   color: black;
 }
 
+.toggle-icons {
+  background-color: var(--selected-color);
+  color: black;
+  margin-top: 0.1em;
+}
+
 /* TODO: MAKE LAYOUT REACTIVE TO SCREEN SIZE */
-@media screen and (orientation: portrait) {
+/* @media screen and (orientation: portrait) {
   .keyboard-control {
     width: 100%;
   }
-}
+} */
 
-button {
+/* button {
   background-color: hsl(0, 0%, 31%);
-}
+} */
