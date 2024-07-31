@@ -26,7 +26,13 @@ export enum MovementRecorderFunction {
 }
 
 export interface MovementRecorderFunctions {
-    Record: () => void;
+    Record: (
+        head: boolean,
+        arm: boolean,
+        lift: boolean,
+        wrist: boolean,
+        gripper: boolean,
+    ) => void;
     SaveRecording: (name: string) => void;
     StopRecording: () => void;
     SavedRecordingNames: () => string[];
@@ -42,7 +48,13 @@ export const MovementRecorder = (props: {
     let functions: MovementRecorderFunctions = {
         Record: movementRecorderFunctionProvider.provideFunctions(
             MovementRecorderFunction.Record,
-        ) as () => void,
+        ) as (
+            head: boolean,
+            arm: boolean,
+            lift: boolean,
+            wrist: boolean,
+            gripper: boolean,
+        ) => void,
         SaveRecording: movementRecorderFunctionProvider.provideFunctions(
             MovementRecorderFunction.SaveRecording,
         ) as (name: string) => void,
@@ -73,11 +85,109 @@ export const MovementRecorder = (props: {
         functions.SavedRecordingNames(),
     );
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    const [showJointSelectionModal, setShowJointSelectionModal] =
+        useState<boolean>(false);
     const [showSaveRecordingModal, setShowSaveRecordingModal] =
         useState<boolean>(false);
     const [isRecording, setIsRecording] = React.useState<boolean>(
         props.isRecording ? props.isRecording : false,
     );
+
+    const JointSelectionModal = (props: {
+        setShow: (show: boolean) => void;
+        show: boolean;
+    }) => {
+        const [head, setHead] = React.useState<boolean>(true);
+        const [arm, setArm] = React.useState<boolean>(true);
+        const [lift, setLift] = React.useState<boolean>(true);
+        const [wrist, setWrist] = React.useState<boolean>(true);
+        const [gripper, setGripper] = React.useState<boolean>(true);
+
+        function handleAccept() {
+            functions.Record(head, arm, lift, wrist, gripper);
+            setHead(true);
+            setArm(true);
+            setLift(true);
+            setWrist(true);
+            setGripper(true);
+        }
+
+        return (
+            <PopupModal
+                setShow={props.setShow}
+                show={props.show}
+                onAccept={handleAccept}
+                onCancel={() => functions.StopRecording()}
+                id="save-recording-modal"
+                acceptButtonText="Save"
+                size={isMobile ? "small" : "large"}
+                mobile={isMobile}
+            >
+                {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
+                <hr/> */}
+                <div className="joint-checkbox">
+                    <label>Select the joints to record:</label>
+                </div>
+                <ul className="checkbox">
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="head"
+                            name="save-head-pose"
+                            value="Head"
+                            defaultChecked={head}
+                            onChange={(e) => setHead(e.target.checked)}
+                        />
+                        <label>Head</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="arm"
+                            name="save-arm-pose"
+                            value="Arm"
+                            defaultChecked={arm}
+                            onChange={(e) => setArm(e.target.checked)}
+                        />
+                        <label>Arm</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="lift"
+                            name="save-lift-pose"
+                            value="Lift"
+                            defaultChecked={lift}
+                            onChange={(e) => setLift(e.target.checked)}
+                        />
+                        <label>Lift</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="wrist"
+                            name="save-wrist-pose"
+                            value="Wrist"
+                            defaultChecked={wrist}
+                            onChange={(e) => setWrist(e.target.checked)}
+                        />
+                        <label>Wrist</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="gripper"
+                            name="save-gripper-pose"
+                            value="Gripper"
+                            defaultChecked={gripper}
+                            onChange={(e) => setGripper(e.target.checked)}
+                        />
+                        <label>Gripper</label>
+                    </li>
+                </ul>
+            </PopupModal>
+        );
+    };
 
     const SaveRecordingModal = (props: {
         setShow: (show: boolean) => void;
@@ -124,15 +234,15 @@ export const MovementRecorder = (props: {
         );
     };
 
-    useEffect(() => {
-        if (props.isRecording == undefined) {
-            return;
-        } else if (props.isRecording) {
-            functions.Record();
-        } else {
-            setShowSaveRecordingModal(true);
-        }
-    }, [props.isRecording]);
+    // useEffect(() => {
+    //     if (props.isRecording == undefined) {
+    //         return;
+    //     } else if (props.isRecording) {
+    //         functions.Record();
+    //     } else {
+    //         setShowSaveRecordingModal(true);
+    //     }
+    // }, [props.isRecording]);
 
     if (props.globalRecord !== undefined && !props.globalRecord)
         return (
@@ -175,7 +285,7 @@ export const MovementRecorder = (props: {
                         onClick={() => {
                             if (!isRecording) {
                                 setIsRecording(true);
-                                functions.Record();
+                                setShowJointSelectionModal(true);
                             } else {
                                 setIsRecording(false);
                                 setShowSaveRecordingModal(true);
@@ -210,6 +320,10 @@ export const MovementRecorder = (props: {
                     </button>
                 </Tooltip>
             </div>
+            <JointSelectionModal
+                setShow={setShowJointSelectionModal}
+                show={showJointSelectionModal}
+            />
             <SaveRecordingModal
                 setShow={setShowSaveRecordingModal}
                 show={showSaveRecordingModal}
@@ -249,6 +363,10 @@ export const MovementRecorder = (props: {
                     <i>Play</i>
                 </div>
             </div>
+            <JointSelectionModal
+                setShow={setShowJointSelectionModal}
+                show={showJointSelectionModal}
+            />
             <SaveRecordingModal
                 setShow={setShowSaveRecordingModal}
                 show={showSaveRecordingModal}

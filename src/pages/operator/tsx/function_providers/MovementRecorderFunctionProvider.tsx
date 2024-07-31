@@ -21,42 +21,78 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
     public provideFunctions(poseRecordFunction: MovementRecorderFunction) {
         switch (poseRecordFunction) {
             case MovementRecorderFunction.Record:
-                return () => {
-                    let lastJoint: ValidJoints | undefined;
+                return (
+                    head: boolean,
+                    arm: boolean,
+                    lift: boolean,
+                    wrist: boolean,
+                    gripper: boolean,
+                ) => {
+                    let prevJoint: ValidJoints | undefined;
+                    let prevJointDirection: number | undefined;
+                    let currJointDirection: number | undefined;
                     this.recordPosesHeartbeat = window.setInterval(() => {
                         const currentPose: RobotPose =
                             FunctionProvider.remoteRobot!.sensors.getRobotPose(
-                                true,
-                                true,
-                                true,
+                                head,
+                                arm,
+                                lift,
+                                wrist,
+                                gripper,
                             );
-                        const lastPose =
+                        const prevPose =
                             this.poses.length == 0
                                 ? undefined
                                 : this.poses[this.poses.length - 1];
-                        if (lastPose) {
+                        if (prevPose) {
                             Object.keys(currentPose).map((key, index) => {
                                 if (
                                     Math.abs(
                                         currentPose[key as ValidJoints]! -
-                                            lastPose[key as ValidJoints]!,
+                                            prevPose[key as ValidJoints]!,
                                     ) > 0.025
                                 ) {
-                                    if (!lastJoint || lastJoint != key) {
-                                        lastJoint = key as ValidJoints;
+                                    // If there is no prevJoint or the current joint moving has changed
+                                    if (!prevJoint || prevJoint != key) {
+                                        prevJoint = key as ValidJoints;
+                                        prevJointDirection = Math.sign(
+                                            currentPose[key as ValidJoints] -
+                                                prevPose[
+                                                    prevJoint as ValidJoints
+                                                ],
+                                        );
                                         this.poses.push(currentPose);
                                         return;
-                                    } else {
+                                    }
+
+                                    currJointDirection = Math.sign(
+                                        currentPose[key as ValidJoints] -
+                                            prevPose[prevJoint as ValidJoints],
+                                    );
+
+                                    // If the direction of joint movement has not been changed
+                                    if (
+                                        currJointDirection ===
+                                        prevJointDirection
+                                    ) {
                                         this.poses[this.poses.length - 1][
-                                            lastJoint
+                                            prevJoint
                                         ] = currentPose[key as ValidJoints];
+                                        return;
+                                    }
+
+                                    // If the direction of joint movement has changed
+                                    else {
+                                        prevJointDirection = currJointDirection;
+                                        this.poses.push(currentPose);
+                                        return;
                                     }
                                 }
                             });
                         } else {
                             this.poses.push(currentPose);
                         }
-                    }, 50);
+                    }, 150);
                 };
             case MovementRecorderFunction.SaveRecording:
                 return (name: string) => {

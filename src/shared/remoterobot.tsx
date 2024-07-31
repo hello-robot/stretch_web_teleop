@@ -421,24 +421,34 @@ class RobotSensors extends React.Component {
     /**
      * @returns current robot pose
      */
-    getRobotPose(head: boolean, gripper: boolean, arm: boolean): RobotPose {
+    getRobotPose(
+        head: boolean,
+        arm: boolean,
+        lift: boolean,
+        wrist: boolean,
+        gripper: boolean,
+    ): RobotPose {
         let filteredPose: RobotPose = {};
         if (head) {
             filteredPose["joint_head_tilt"] = this.robotPose["joint_head_tilt"];
             filteredPose["joint_head_pan"] = this.robotPose["joint_head_pan"];
         }
-        if (gripper) {
+        if (arm) {
+            filteredPose["wrist_extension"] = this.robotPose["wrist_extension"];
+        }
+        if (lift) {
+            filteredPose["joint_lift"] = this.robotPose["joint_lift"];
+        }
+        if (wrist) {
             filteredPose["joint_wrist_roll"] =
                 this.robotPose["joint_wrist_roll"];
             filteredPose["joint_wrist_pitch"] =
                 this.robotPose["joint_wrist_pitch"];
             filteredPose["joint_wrist_yaw"] = this.robotPose["joint_wrist_yaw"];
+        }
+        if (gripper) {
             filteredPose["joint_gripper_finger_left"] =
                 this.robotPose["joint_gripper_finger_left"];
-        }
-        if (arm) {
-            filteredPose["joint_lift"] = this.robotPose["joint_lift"];
-            filteredPose["wrist_extension"] = this.robotPose["wrist_extension"];
         }
         return filteredPose;
     }
