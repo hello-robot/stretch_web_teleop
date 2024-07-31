@@ -105,11 +105,11 @@ export const MovementRecorder = (props: {
 
         function handleAccept() {
             functions.Record(head, arm, lift, wrist, gripper);
-            setHead(true);
-            setArm(true);
-            setLift(true);
-            setWrist(true);
-            setGripper(true);
+            setHead(false);
+            setArm(false);
+            setLift(false);
+            setWrist(false);
+            setGripper(false);
         }
 
         return (
