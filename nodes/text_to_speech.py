@@ -127,11 +127,11 @@ class TextToSpeechNode(Node):
                         self.engine.is_slow = msg.is_slow
 
                     # Speak the text
+                    self.get_logger().info(f"Saying: {msg.text}")
                     if self.engine._can_say_async:
                         self.engine.say_async(msg.text)
                     else:
                         self.engine.say(msg.text)
-                    self.get_logger().info(f"Saying: {msg.text}")
 
 
 def main():
