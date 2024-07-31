@@ -35,6 +35,10 @@ export enum UnderVideoButton {
     MoveToPregraspGoalReached = "Goal Reached",
     ToggleTabletOrientation = "Toggle Tablet Orientation",
     GetTabletOrientation = "Get Tablet Orientation",
+    RealsenseBodyPoseEstimate = "Show Body Pose",
+    RealsenseShowTablet = "Show Tablet",
+    RealsenseStopShowTablet = "Stop Show Tablet",
+    RealsenseShowTabletGoalReached = "Show Tablet Goal Reached",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -96,9 +100,19 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
     private moveToPregraspOperatorCallback?: (state: ActionState) => void =
         undefined;
     /**
-     * Store the timestam at which the last moveToPregrasp state was received
+     * CAllback function to update the show tablet state in the operator
+     * interface (e.g., show alerts).
+     */
+    private showTabletOperatorCallback?: (state: ActionState) => void =
+        undefined;
+    /**
+     * Store the timestamp at which the last moveToPregrasp state was received
      */
     private lastMoveToPregraspStateTimestamp: number = 0;
+    /**
+     * Store the timestamp at which the last showTablet state was received
+     */
+    private lastShowTabletStateTimestamp: number = 0;
 
     /**
      * Called when a response is received from the robot for the move to pregrasp.
@@ -108,6 +122,15 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         this.lastMoveToPregraspStateTimestamp = Date.now();
         if (this.moveToPregraspOperatorCallback)
             this.moveToPregraspOperatorCallback(state);
+    }
+    /**
+     * Called when a response is received from the robot for the show tablet action.
+     * @param state the show tablet state to set
+     */
+    public setShowTabletState(state: ActionState) {
+        this.lastShowTabletStateTimestamp = Date.now();
+        if (this.showTabletOperatorCallback)
+            this.showTabletOperatorCallback(state);
     }
 
     public provideFunctions(
@@ -271,6 +294,43 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                         return this.tabletOrientation;
                     },
                 };
+            case UnderVideoButton.RealsenseBodyPoseEstimate:
+                return {
+                    onCheck: (toggle: boolean) =>
+                        FunctionProvider.remoteRobot?.setToggle(
+                            "setRealsenseBodyPoseEstimate",
+                            toggle,
+                        ),
+                };
+            case UnderVideoButton.RealsenseShowTablet:
+                return {
+                    onClick: () => FunctionProvider.remoteRobot?.showTablet(),
+                };
+            case UnderVideoButton.RealsenseStopShowTablet:
+                return {
+                    onClick: () =>
+                        FunctionProvider.remoteRobot?.stopShowTablet(),
+                };
+            case UnderVideoButton.RealsenseShowTabletGoalReached:
+                // TODO: Add timeouts to this and the other GoalReached promises!
+                return {
+                    getFuture: () => {
+                        let currentTimestamp = Date.now();
+                        let that = this;
+                        const promise = new Promise((resolve, reject) => {
+                            let interval = setInterval(() => {
+                                let goalReached =
+                                    that.lastShowTabletStateTimestamp >
+                                    currentTimestamp;
+                                if (goalReached) {
+                                    clearInterval(interval);
+                                    resolve(true);
+                                }
+                            });
+                        });
+                        return promise;
+                    },
+                };
             default:
                 throw Error(
                     `Cannot get function for unknown UnderVideoButton ${button}`,
@@ -316,6 +376,16 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         callback: (state: ActionState) => void,
     ) {
         this.moveToPregraspOperatorCallback = callback;
+    }
+
+    /**
+     * Sets the local pointer to the operator's callback function, to be called
+     * whenever the show tablet state changes.
+     */
+    public setShowTabletOperatorCallback(
+        callback: (state: ActionState) => void,
+    ) {
+        this.showTabletOperatorCallback = callback;
     }
 
     /**

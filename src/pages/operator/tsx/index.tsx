@@ -188,6 +188,10 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             console.log("moveToPregraspState", message.message);
             underVideoFunctionProvider.setMoveToPregraspState(message.message);
             break;
+        case "showTabletState":
+            console.log("showTabletState", message.message);
+            underVideoFunctionProvider.setShowTabletState(message.message);
+            break;
         case "relativePose":
             remoteRobot.setRelativePose(message.message);
             break;

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import math
 import sys
 import threading
@@ -22,12 +23,14 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, CompressedImage, Image, JointState, PointCloud2
+from std_msgs.msg import String
 from std_srvs.srv import SetBool
 
 from stretch_web_teleop_helpers.conversions import (
     cv2_image_to_ros_msg,
     deproject_pixel_to_pointcloud_point,
     depth_img_to_pointcloud,
+    project_points_to_pixels,
     ros_msg_to_cv2_image,
     tf2_get_transform,
 )
@@ -38,9 +41,11 @@ from stretch_web_teleop_helpers.conversions import (
 class ConfigureVideoStreams(Node):
     # Define constant colors and alpha values for the depth AR overlay
     BACKGROUND_COLOR = (200, 200, 200)
-    REALSENSE_DEPTH_AR_COLOR = np.array((0, 191, 255), dtype=np.uint8)
+    REALSENSE_DEPTH_AR_COLOR = np.array((0, 191, 255), dtype=np.uint8)  # cyan
     REALSENSE_DEPTH_AR_ALPHA = 0.6
-    GRIPPER_DEPTH_AR_COLOR = np.array((255, 0, 191), dtype=np.uint8)
+    REALSENSE_BODY_LANDMARKS_AR_COLOR = np.array((255, 0, 191), dtype=np.uint8)  # pink
+    REALSENSE_BODY_LANDMARKS_AR_ALPHA = 0.6
+    GRIPPER_DEPTH_AR_COLOR = np.array((255, 0, 191), dtype=np.uint8)  # pink
     GRIPPER_DEPTH_AR_ALPHA = 0.6
 
     # Define constants related to downsampling the pointcloud. Combine pixels
@@ -278,6 +283,18 @@ class ConfigureVideoStreams(Node):
                 callback_group=MutuallyExclusiveCallbackGroup(),
             )
 
+            # Also subscribe to body landmarks to overlay the user's pose
+            self.latest_body_landmarks_str = None
+            self.latest_body_landmarks_str_recv_time = None
+            self.latest_body_landmarks_str_lock = threading.Lock()
+            self.body_landmarks_subscriber = self.create_subscription(
+                String,
+                "/human_estimates/latest_body_pose",
+                self.realsense_body_landmarks_cb,
+                QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
+                callback_group=MutuallyExclusiveCallbackGroup(),
+            )
+
         # Default image perspectives
         if self.use_overhead:
             self.overhead_camera_perspective = (
@@ -296,6 +313,10 @@ class ConfigureVideoStreams(Node):
                 SetBool, "realsense_depth_ar", self.realsense_depth_ar_callback
             )
             self.realsense_depth_ar = False
+            self.realsense_body_pose_ar_service = self.create_service(
+                SetBool, "realsense_body_pose_ar", self.realsense_body_pose_ar_callback
+            )
+            self.realsense_body_pose_ar = False
         if self.use_gripper:
             self.gripper_depth_ar_service = self.create_service(
                 SetBool, "gripper_depth_ar", self.gripper_depth_ar_callback
@@ -409,25 +430,17 @@ class ConfigureVideoStreams(Node):
         # Get filtered points in camera frame
         pts_in_range = pcl_cloud_filtered.to_array()[filtered_indices, :]
 
-        # Convert to homogeneous coordinates
-        pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
-
         # Change color of pixels in robot's reach
         if img is not None:
             # Get pixel coordinates
-            coords = np.matmul(self.realsense_P, np.transpose(pts_in_range))  # 3 x N
-            u_idx = (coords[0, :] / coords[2, :]).astype(int)
-            v_idx = (coords[1, :] / coords[2, :]).astype(int)
-            uv = np.vstack((u_idx, v_idx)).T  # N x 2
-            uv_dedup = np.unique(uv, axis=0)
-            in_bounds_idx = np.where(
-                (uv_dedup[:, 0] >= 0)
-                & (uv_dedup[:, 0] < img.shape[1])
-                & (uv_dedup[:, 1] >= 0)
-                & (uv_dedup[:, 1] < img.shape[0])
+            uv_mask = project_points_to_pixels(
+                pts_in_range,
+                self.realsense_P,
+                width=img.shape[1],
+                height=img.shape[0],
             )
-            u_mask = uv_dedup[in_bounds_idx][:, 0]
-            v_mask = uv_dedup[in_bounds_idx][:, 1]
+            u_mask = uv_mask[:, 0]
+            v_mask = uv_mask[:, 1]
 
             # Overlay the pixels in the robot's reach
             overlay_mask = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
@@ -456,9 +469,102 @@ class ConfigureVideoStreams(Node):
             img = np.where(overlay_mask[:, :, None], overlaid_img, img)
         return img
 
+    def overlay_realsense_body_pose_ar(
+        self,
+        body_landmarks_str: str,
+        body_landmarks_str_recv_time: Time,
+        img: npt.NDArray[np.uint8],
+        timeout_sec: float = 2.0,
+    ) -> npt.NDArray[np.uint8]:
+        """
+        Overlay the detected body landmarks on the image.
+
+        Parameters
+        ----------
+        body_landmarks_str : str
+            The body landmarks as a JSON string.
+        body_landmarks_str_recv_time : Time
+            The time at which the body landmarks string was received.
+        img : np.ndarray
+            The image to overlay the body landmarks on.
+        timeout_sec : float, optional
+            The maximum time for which the body landmark string is not considered stale.
+
+        Returns
+        -------
+        np.ndarray
+            The image with the body landmarks overlaid.
+        """
+        if self.realsense_P is None:
+            self.get_logger().warn(
+                "Camera projection matrix is not available. Skipping point cloud processing."
+            )
+            return img
+
+        if self.get_clock().now() - body_landmarks_str_recv_time > Duration(
+            seconds=timeout_sec
+        ):
+            self.get_logger().debug(
+                "Body landmarks are stale. Skipping body pose AR overlay.",
+                throttle_duration_sec=1.0,
+            )
+            return img
+
+        try:
+            body_landmarks_xyz = json.loads(body_landmarks_str)
+        except json.JSONDecodeError as err:
+            self.get_logger().warn(
+                f"Could not decode body landmarks: {repr(body_landmarks_str)}. {err}"
+            )
+            return img
+        self.get_logger().debug(f"Body landmarks: {repr(body_landmarks_xyz)}")
+        if len(body_landmarks_xyz) == 0:
+            self.get_logger().warn(
+                "No body landmarks detected.", throttle_duration_sec=1.0
+            )
+            return img
+        body_landmark_order = list(body_landmarks_xyz.keys())
+
+        # Convert the 3D body landmarks to 2D pixel coordinates
+        body_landmarks_3d = np.array(
+            [list(body_landmarks_xyz[name]) for name in body_landmark_order]
+        )  # N x 3
+        self.get_logger().debug(f"Body landmarks 3D: {body_landmarks_3d.shape}")
+        body_landmarks_2d = project_points_to_pixels(
+            body_landmarks_3d,
+            self.realsense_P,
+            width=img.shape[1],
+            height=img.shape[0],
+        )
+
+        # Overlay circles on the detected body landmarks
+        overlay_mask = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+        radius = min(img.shape[0], img.shape[1]) // 40
+        for u, v in body_landmarks_2d:
+            overlay_mask = cv2.circle(overlay_mask, (u, v), radius, (255,), -1)
+        overlay_img = np.tile(
+            self.REALSENSE_BODY_LANDMARKS_AR_COLOR, (img.shape[0], img.shape[1], 1)
+        )
+        overlaid_img = cv2.addWeighted(
+            img,
+            1 - self.REALSENSE_BODY_LANDMARKS_AR_ALPHA,
+            overlay_img,
+            self.REALSENSE_BODY_LANDMARKS_AR_ALPHA,
+            0,
+        )
+        img = np.where(overlay_mask[:, :, None], overlaid_img, img)
+
+        return img
+
     def realsense_depth_ar_callback(self, req, res):
         self.get_logger().info(f"Realsense depth AR service: {req.data}")
         self.realsense_depth_ar = req.data
+        res.success = True
+        return res
+
+    def realsense_body_pose_ar_callback(self, req, res):
+        self.get_logger().info(f"Realsense body pose AR service: {req.data}")
+        self.realsense_body_pose_ar = req.data
         res.success = True
         return res
 
@@ -611,6 +717,11 @@ class ConfigureVideoStreams(Node):
         with self.latest_realsense_rgb_image_lock:
             self.latest_realsense_rgb_image = rgb_ros_image
 
+    def realsense_body_landmarks_cb(self, msg):
+        with self.latest_body_landmarks_str_lock:
+            self.latest_body_landmarks_str_recv_time = self.get_clock().now()
+            self.latest_body_landmarks_str = msg.data
+
     def process_realsense_image(
         self,
         rgb_ros_image: Union[CompressedImage, Image],
@@ -619,12 +730,22 @@ class ConfigureVideoStreams(Node):
         if isinstance(rgb_ros_image, CompressedImage):
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         for image_config_name in self.realsense_params:
-            # Overlay the pointcloud *before* cropping/masking/rotating the image,
+            # Perform overlays *before* cropping/masking/rotating the image,
             # for consistent (de)projection and transformations
             if self.realsense_depth_ar:
                 with self.latest_realsense_depth_image_lock:
                     depth_msg = self.latest_realsense_depth_image
                 image = self.overlay_realsense_depth_ar(depth_msg, image)
+            if self.realsense_body_pose_ar:
+                with self.latest_body_landmarks_str_lock:
+                    body_landmarks_str = self.latest_body_landmarks_str
+                    body_landmarks_str_recv_time = (
+                        self.latest_body_landmarks_str_recv_time
+                    )
+                if body_landmarks_str is not None and len(body_landmarks_str) > 0:
+                    image = self.overlay_realsense_body_pose_ar(
+                        body_landmarks_str, body_landmarks_str_recv_time, image
+                    )
             img = self.configure_images(image, self.realsense_params[image_config_name])
             # if self.aruco_markers: img = self.aruco_markers_callback(marker_msg, img)
             self.realsense_images[image_config_name] = img
@@ -838,20 +959,14 @@ class ConfigureVideoStreams(Node):
 
         # Convert filtered points to (u, v) indices
         pts_in_range = pcl_cloud_filtered.to_array()
-        pts_in_range = np.hstack((pts_in_range, np.ones((pts_in_range.shape[0], 1))))
-        coords = np.matmul(self.gripper_P, np.transpose(pts_in_range))  # 3 x N
-        u_idx = (coords[0, :] / coords[2, :]).astype(int)
-        v_idx = (coords[1, :] / coords[2, :]).astype(int)
-        uv = np.vstack((u_idx, v_idx)).T  # N x 2
-        uv_dedup = np.unique(uv, axis=0)
-        in_bounds_idx = np.where(
-            (uv_dedup[:, 0] >= 0)
-            & (uv_dedup[:, 0] < image.shape[1])
-            & (uv_dedup[:, 1] >= 0)
-            & (uv_dedup[:, 1] < image.shape[0])
+        uv_mask = project_points_to_pixels(
+            pts_in_range,
+            self.gripper_P,
+            width=image.shape[1],
+            height=image.shape[0],
         )
-        u_mask = uv_dedup[in_bounds_idx][:, 0]
-        v_mask = uv_dedup[in_bounds_idx][:, 1]
+        u_mask = uv_mask[:, 0]
+        v_mask = uv_mask[:, 1]
 
         # Overlay the pixels in the robot's reach
         overlay_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)

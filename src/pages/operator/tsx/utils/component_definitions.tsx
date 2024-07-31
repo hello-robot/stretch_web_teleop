@@ -202,6 +202,10 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      * move to the pre-grasp position relative to the clicked object.
      */
     selectObjectForMoveToPregrasp?: boolean;
+    /**
+     * If the user has toggled on the human body pose estimate overlay.
+     */
+    bodyPoseAR?: boolean;
 };
 
 /**

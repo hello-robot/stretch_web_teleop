@@ -162,11 +162,16 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel(cmd);
     }
 
+    showTablet() {
+        this.robotChannel({ type: "showTablet" });
+    }
+
     setToggle(
         type:
             | "setFollowGripper"
             | "setRealsenseDepthSensing"
             | "setGripperDepthSensing"
+            | "setRealsenseBodyPoseEstimate"
             | "setRunStop",
         toggle: boolean,
     ) {
@@ -223,6 +228,10 @@ export class RemoteRobot extends React.Component<{}, any> {
 
     stopMoveToPregrasp() {
         this.robotChannel({ type: "stopMoveToPregrasp" });
+    }
+
+    stopShowTablet() {
+        this.robotChannel({ type: "stopShowTablet" });
     }
 
     /**
