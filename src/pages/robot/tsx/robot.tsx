@@ -550,7 +550,7 @@ export class Robot extends React.Component {
         this.showTabletClient = new ROSLIB.ActionHandle({
             ros: this.ros,
             name: showTabletActionName,
-            actionType: "stretch_tablet_interfaces/action/ShowTablet",
+            actionType: "stretch_show_tablet_interfaces/action/ShowTablet",
         });
     }
 

@@ -558,21 +558,21 @@ def generate_launch_description():
 
     if stretch_tool == "eoa_wrist_dw3_tool_tablet_12in":
         detect_body_landmarks_node = Node(
-            package="stretch_tablet",
+            package="stretch_show_tablet",
             executable="detect_body_landmarks",
             output="screen",
         )
         ld.add_action(detect_body_landmarks_node)
 
         plan_tablet_pose_node = Node(
-            package="stretch_tablet",
+            package="stretch_show_tablet",
             executable="plan_tablet_pose_service",
             output="screen",
         )
         ld.add_action(plan_tablet_pose_node)
 
         show_tablet_node = Node(
-            package="stretch_tablet",
+            package="stretch_show_tablet",
             executable="show_tablet_server",
             output="screen",
         )
