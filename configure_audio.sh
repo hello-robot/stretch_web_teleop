@@ -13,11 +13,11 @@
 SPEAKER_NAME="alsa_output.pci-0000_00_1f.3.analog-stereo"
 MIC_NAME=""
 while getopts ":s:m:" opt
-   do
-     case $opt in
-        s ) SPEAKER_NAME="$OPTARG";;
-        m ) MIC_NAME="$OPTARG";;
-     esac
+do
+    case $opt in
+        s ) SPEAKER_NAME="$OPTARG" ;;
+        m ) MIC_NAME="$OPTARG" ;;
+    esac
 done
 
 
