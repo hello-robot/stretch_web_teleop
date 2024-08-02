@@ -311,7 +311,7 @@ export const MovementRecorder = (props: {
                         }}
                     >
                         <span hidden={props.hideLabels}>Play</span>
-                        <PlayCircle/>
+                        <PlayCircle />
                     </button>
                 </Tooltip>
                 <Tooltip
@@ -354,7 +354,7 @@ export const MovementRecorder = (props: {
                         }}
                     >
                         <span hidden={props.hideLabels}>Delete</span>
-                        <DeleteForeverIcon/>
+                        <DeleteForeverIcon />
                     </button>
                 </Tooltip>
             </div>
@@ -397,7 +397,7 @@ export const MovementRecorder = (props: {
                         }
                     }}
                 >
-                    <PlayCircle/>
+                    <PlayCircle />
                     <i>Play</i>
                 </div>
             </div>
