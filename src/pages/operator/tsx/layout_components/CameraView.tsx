@@ -311,16 +311,15 @@ export const CameraView = (props: CustomizableComponentProps) => {
             />
             {overlayContainer}
             {selectObjectScaledXY ? (
-                <span
-                    className="realsense"
+                <AddIcon
                     style={{
+                        position: "absolute",
                         left: (selectObjectScaledXY[0] * 100).toString() + "%",
                         top: (selectObjectScaledXY[1] * 100).toString() + "%",
-                        fontSize: selectObjectFontSize,
+                        color: "red",
+                        transform: "translateX(-50%) translateY(-50%)",
                     }}
-                >
-                    <AddIcon />
-                </span>
+                />
             ) : undefined}
         </div>
     );
