@@ -48,7 +48,6 @@ import { AccordionSelect } from "../basic_components/AccordionSelect";
 import "operator/css/CameraView.css";
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 
 /**

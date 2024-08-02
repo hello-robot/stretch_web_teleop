@@ -576,7 +576,13 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         <div className="provider-tab" key={props.type}>
             <button
                 onClick={clickExpand}
-                className={tabActive && !props.ids ? "active" : props.expanded}
+                className={
+                    tabActive && !props.ids
+                        ? "active"
+                        : props.expanded
+                          ? "expanded"
+                          : ""
+                }
             >
                 {props.ids ? (
                     props.expanded ? (
