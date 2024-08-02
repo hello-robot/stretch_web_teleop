@@ -49,6 +49,7 @@ import "operator/css/CameraView.css";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CancelIcon from "@mui/icons-material/Cancel";
+import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -384,8 +385,8 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
             onMouseUp={functs.onRelease}
             onMouseLeave={functs.onLeave}
         >
-            <ArrowRightIcon
-                fontSize="large"
+            <PlayCircleFilledIcon
+                className="panTiltIcon"
                 style={{ transform: `rotate(${rotation}deg)` }}
             />
         </button>
@@ -429,7 +430,7 @@ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
         >
             {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
             <span
-                className="material-icons icon"
+                className="icon"
                 style={{ transform: `rotate(${rotation}deg)` }}
             >
                 arrow_right
