@@ -10,13 +10,19 @@ import "operator/css/ButtonGrid.css";
 import "operator/css/KeyboardControl.css";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "../index";
-import { SingleButton } from "./ButtonPad";
 import {
   ButtonState,
   ButtonPadButton,
 } from "../function_providers/ButtonFunctionProvider";
 import { getIcon } from "../utils/svg";
+import {
+  buttonStateMap,
+  ButtonStateMap,
+} from "../function_providers/ButtonFunctionProvider";
 
+/**
+ * Each of the possible keys that could be pressed
+ */
 export enum PossibleKeys {
   w = "w",
   a = "a",
@@ -55,6 +61,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
       }
     : {};
 
+  /**
+   * The state of each keyboard button, allowing the input to only run
+   */
   const [keyState, setKeyState] = React.useState({
     w: false,
     a: false,
@@ -70,6 +79,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
     ArrowRight: false,
   });
 
+  /**
+   * Button pad buttons for each input for rendering the correct icon for the button
+   */
   const buttonImages = {
     [Mode.Base]: {
       w: ButtonPadButton.BaseForward,
@@ -86,11 +98,16 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
     [Mode.Wrist]: {
       w: ButtonPadButton.WristPitchUp,
       a: ButtonPadButton.WristRotateIn,
-      s: ButtonPadButton.WristRotateOut,
-      d: ButtonPadButton.WristPitchDown,
+      s: ButtonPadButton.WristPitchDown,
+      d: ButtonPadButton.WristRotateOut,
+      q: ButtonPadButton.WristRollLeft,
+      e: ButtonPadButton.WristRollRight,
     },
   };
 
+  /**
+   * Toggle logic for keyboard inputs and showing SVGs
+   */
   const toggleButton = () => {
     setToggleState((prevToggleState) => !prevToggleState);
     console.log("keys on?", toggleState);
@@ -103,9 +120,6 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
     setToggleSVG((prevToggleSVG) => !prevToggleSVG);
   };
 
-  const buttonState: ButtonState =
-    props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
-
   const releaseAllKeys = () => {
     Object.keys(keyState).forEach((key) => {
       if (keyState[key]) {
@@ -113,6 +127,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
       }
     });
   };
+
   const handleKeyPress = React.useCallback(
     (event) => {
       if (keyPressed === true) {
@@ -145,10 +160,9 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
       } else {
         console.log("Unexpected key pressed", event.key);
       }
-
       setKeyState((prevState) => ({ ...prevState, [event.key]: true }));
     },
-    [mode, keyPressed, ButtonState],
+    [mode, keyPressed],
   );
 
   const handleKeyRelease = React.useCallback(
@@ -159,7 +173,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
       let functs = keyboardFunctionProvider.provideFunctions(mode, event.key);
       functs.onRelease();
     },
-    [mode, keyPressed, ButtonState],
+    [mode, keyPressed],
   );
 
   React.useEffect(() => {
@@ -179,9 +193,10 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
 
   return (
     <div
-      className={className("keyboard-control", { customizing, selected })}
+      className={className("keyboard-container", { customizing, selected })}
       onClick={handleSelect}
     >
+      <div className="keyboard-row"></div>
       <div className="keyboard-row">
         <div className="keyboard-column">
           <div className="toggle-row">
@@ -203,21 +218,21 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
           <div className="mode-button">
             <button
-              className={`${activeMode === 1 ? "mode-button active" : "mode-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`${activeMode === 1 ? "mode-button active" : "mode-button"}`}
               disabled
             >
               {" "}
               1{" "}
             </button>
             <button
-              className={`${activeMode === 2 ? "mode-button active" : "mode-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`${activeMode === 2 ? "mode-button active" : "mode-button"}`}
               disabled
             >
               {" "}
               2{" "}
             </button>
             <button
-              className={`${activeMode === 3 ? "mode-button active" : "mode-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`${activeMode === 3 ? "mode-button active" : "mode-button"}`}
               disabled
             >
               {" "}
@@ -233,7 +248,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           <div className="controls-column">
             {activeMode === 3 && (
               <button
-                className={`${keyState.q ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+                className={`keyboard-button ${buttonStateMap.get(buttonImages[Mode.Wrist].q)} ${toggleSVG ? "images" : ""}`}
                 disabled
               >
                 {toggleSVG ? (
@@ -241,7 +256,6 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
                     src={getIcon(ButtonPadButton.WristRollLeft)}
                     height="15"
                     width="15"
-                    className={`${buttonState}`}
                   />
                 ) : (
                   "Q"
@@ -249,15 +263,13 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
               </button>
             )}
             <button
-              className={`${keyState.w ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(buttonImages[mode].w)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
               {toggleSVG ? (
                 <img
                   src={getIcon(buttonImages[mode].w)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
+                  className={`${buttonStateMap.get(buttonImages[mode].w)}`}
                 />
               ) : (
                 "W"
@@ -265,7 +277,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
             </button>
             {activeMode === 3 && (
               <button
-                className={`${keyState.e ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+                className={`keyboard-button ${buttonStateMap.get(buttonImages[Mode.Wrist].e)} ${toggleSVG ? "images" : ""}`}
                 disabled
               >
                 {toggleSVG ? (
@@ -273,7 +285,6 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
                     src={getIcon(ButtonPadButton.WristRollRight)}
                     height="15"
                     width="15"
-                    className={`${buttonState}`}
                   />
                 ) : (
                   "E"
@@ -283,49 +294,22 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
           <div className="controls-column">
             <button
-              className={`${keyState.a ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(buttonImages[mode].a)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
-              {toggleSVG ? (
-                <img
-                  src={getIcon(buttonImages[mode].a)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
-                />
-              ) : (
-                "A"
-              )}
+              {toggleSVG ? <img src={getIcon(buttonImages[mode].a)} /> : "A"}
             </button>
             <button
-              className={`${keyState.s ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(buttonImages[mode].s)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
-              {toggleSVG ? (
-                <img
-                  src={getIcon(buttonImages[mode].s)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
-                />
-              ) : (
-                "S"
-              )}
+              {toggleSVG ? <img src={getIcon(buttonImages[mode].s)} /> : "S"}
             </button>
             <button
-              className={`${keyState.d ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(buttonImages[mode].d)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
-              {toggleSVG ? (
-                <img
-                  src={getIcon(buttonImages[mode].d)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
-                />
-              ) : (
-                "D"
-              )}
+              {toggleSVG ? <img src={getIcon(buttonImages[mode].d)} /> : "D"}
             </button>
           </div>
         </div>
@@ -335,7 +319,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           Camera Controls <br />
           <div className="controls-column">
             <button
-              className={`${keyState.ArrowUp ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.CameraTiltUp)}`}
               disabled
             >
               {" "}
@@ -344,21 +328,21 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
           <div className="controls-column">
             <button
-              className={`${keyState.ArrowLeft ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.CameraPanLeft)}`}
               disabled
             >
               {" "}
               &lt;{" "}
             </button>
             <button
-              className={`${keyState.ArrowDown ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.CameraTiltDown)}`}
               disabled
             >
               {" "}
               v{" "}
             </button>
             <button
-              className={`${keyState.ArrowRight ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.CameraPanRight)}`}
               disabled
             >
               {" "}
@@ -370,31 +354,21 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           Gripper Controls <br />
           <div className="gripper-column">
             <button
-              className={`${keyState.z ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.GripperClose)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
               {toggleSVG ? (
-                <img
-                  src={getIcon(ButtonPadButton.GripperClose)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
-                />
+                <img src={getIcon(ButtonPadButton.GripperClose)} />
               ) : (
                 "Z"
               )}
             </button>
             <button
-              className={`${keyState.x ? "keyboard-button active" : "keyboard-button"} ${toggleSVG ? "keyboard-button images" : ""}`}
+              className={`keyboard-button ${buttonStateMap.get(ButtonPadButton.GripperOpen)} ${toggleSVG ? "images" : ""}`}
               disabled
             >
               {toggleSVG ? (
-                <img
-                  src={getIcon(ButtonPadButton.GripperOpen)}
-                  height="15"
-                  width="15"
-                  className={`${buttonState}`}
-                />
+                <img src={getIcon(ButtonPadButton.GripperOpen)} />
               ) : (
                 "X"
               )}
@@ -402,6 +376,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           </div>
         </div>
       </div>
+      <div className="keyboard-row"></div>
     </div>
   );
 };

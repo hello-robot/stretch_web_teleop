@@ -5,6 +5,7 @@ import { ButtonPadButton, ButtonFunctions } from "./ButtonFunctionProvider";
 import { ActionMode } from "../utils/component_definitions";
 //import { keyState } from "../layout_components/KeyboardControl"
 import { ConsoleView } from "react-device-detect";
+import { buttonStateMap, ButtonStateMap } from "./ButtonFunctionProvider";
 
 export enum Mode {
   Base = "Base",
@@ -13,15 +14,12 @@ export enum Mode {
 }
 
 export class KeyboardFunctionProvider extends FunctionProvider {
+  private operatorCallback?: (buttonStateMap: ButtonStateMap) => void =
+    undefined;
+
   constructor() {
     super();
     this.provideFunctions = this.provideFunctions.bind(this);
-  }
-
-  public setOperatorCallback(
-    callback: (buttonStateMap: ButtonStateMap) => void,
-  ) {
-    this.operatorCallback = callback;
   }
 
   private getButtonPadButton(
@@ -160,10 +158,12 @@ export class KeyboardFunctionProvider extends FunctionProvider {
     key: string,
   ): ButtonFunctions | null {
     const button = this.getButtonPadButton(modeFunction, key);
+    const currentState = buttonStateMap.get(button);
     console.log(
       "**********************",
       `${button}`,
-      "************************",
+      "**********************",
+      `${currentState}`,
     );
     return buttonFunctionProvider.provideFunctions(button);
   }

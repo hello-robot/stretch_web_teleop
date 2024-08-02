@@ -1,11 +1,16 @@
-.keyboard-control {
-  background-color: #f4f7f8;
-  margin: 1em;
+/*************** MAIN KEYBOARD CONTAINER ***************/
+.keyboard-container {
+  position: relative;
   display: grid;
-  resize: vertical;
+  justify-items: center;
+  padding: 0.4rem;
+  height: 100%;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr repeat(3, auto) 1fr;
+  justify-content: center;
 }
 
-.keyboard-control.selected {
+.keyboard-container.selected {
   opacity: 100%;
   stroke: var(--selected-color);
   opacity: 100%;
@@ -15,7 +20,7 @@
   pointer-events: none;
 }
 
-.keyboard-control.customizing path {
+.keyboard-container.customizing path {
   pointer-events: none;
 }
 
@@ -26,22 +31,24 @@
 .keyboard-column {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   margin: 0.5em;
   flex: 1;
 }
 
-/* WASD AND ARROW KEYS LAYOUT */
+/*************** WASD AND ARROW KEYS LAYOUT ***************/
 .controls-container {
   position: relative;
   display: grid;
-  margin: 0.5em;
-  grid-template-rows: repeat(3, 1fr);
+  margin: 1em;
+  grid-template-rows: repeat(3, min-content);
   align-items: flex-start;
   justify-content: center;
   text-align: center;
   flex: auto;
+  gap: 0.5em;
+  height: fit-content;
 }
 
 .controls-column {
@@ -53,11 +60,12 @@
 .gripper-container {
   position: relative;
   display: grid;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(2, min-content);
   align-items: flex-start;
   justify-content: center;
   flex: auto;
-  margin: 0.5em;
+  margin: 1em;
+  gap: 2em;
 }
 .gripper-column {
   position: relative;
@@ -65,43 +73,51 @@
   align-items: center;
 }
 
+div button.keyboard-button {
+  background-color: white;
+  margin: 1px;
+  border: 1px solid black;
+  height: 48px;
+  width: 48px;
+  padding: 0;
+}
+
 .keyboard-button.images {
-  background-color: hsl(0, 0%, 31%);
-  color: hsl(0, 0%, 79%);
+  /* background-color: white;
   fill-opacity: 40%;
-  height: 100%;
+  border: 1px solid black;
+  width: 100%; */
 }
 
-.keyboard-button.active {
+.keyboard-button img {
+  height: 30px;
+  width: 30px;
+  object-fit: contain;
+}
+
+button.keyboard-button.active {
   fill-opacity: 60%;
   background-color: hsl(200, 50%, 60%);
   color: hsl(0, 0%, 79%);
-}
-
-.keyboard-button.active img {
-  fill-opacity: 60%;
-  background-color: hsl(200, 50%, 60%);
-  color: hsl(0, 0%, 79%);
-  /* filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg); */
 }
 
 .keyboard-button.collision {
-  background-color: orange;
-  fill-opacity: 40%;
+  background-color: rgba(255, 166, 0, 0.4);
 }
 
-.keyboard-button path.limit {
-  background-color: red;
-  fill-opacity: 40%;
+.keyboard-button.limit {
+  background-color: rgba(255, 0, 0, 0.4);
 }
 
-/* BUTTON MODES */
-.mode-button {
+/*************** MODE BUTTONS  ***************/
+div button.mode-button {
+  background-color: white;
   stroke-linecap: round;
   stroke-linejoin: round;
   position: relative;
   margin-top: 0.1em;
   margin-inline: 0.1em;
+  border: 1px solid black;
 }
 
 .mode-button.active {
@@ -109,7 +125,7 @@
   color: hsl(0, 0%, 79%);
 }
 
-/* TOGGLE BUTTONS */
+/*************** TOGGLE BUTTONS  ***************/
 .toggle-row {
   display: flex;
 }
@@ -134,16 +150,15 @@
 .toggle-icons {
   background-color: var(--selected-color);
   color: black;
-  margin-top: 0.1em;
 }
 
-/* TODO: MAKE LAYOUT REACTIVE TO SCREEN SIZE */
-/* @media screen and (orientation: portrait) {
+/* TODO: MAKE LAYOUT REACTIVE TO SCREEN SIZE
+ @media screen and (orientation: portrait) {
   .keyboard-control {
     width: 100%;
   }
-} */
+}
 
-/* button {
+button {
   background-color: hsl(0, 0%, 31%);
 } */

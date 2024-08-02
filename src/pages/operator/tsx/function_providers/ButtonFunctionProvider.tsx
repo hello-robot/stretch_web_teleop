@@ -74,15 +74,15 @@ export enum ButtonState {
 /** Mapping from each type of button pad button to the state for that button */
 export type ButtonStateMap = Map<ButtonPadButton, ButtonState>;
 
+export const buttonStateMap: ButtonStateMap = new Map<
+  ButtonPadButton,
+  ButtonState
+>();
+
 /**
  * Provides functions for the button pads
  */
 export class ButtonFunctionProvider extends FunctionProvider {
-  private buttonStateMap: ButtonStateMap = new Map<
-    ButtonPadButton,
-    ButtonState
-  >();
-
   /**
    * Callback function to update the button state map in the operator so it
    * can rerender the button pads.
@@ -123,17 +123,17 @@ export class ButtonFunctionProvider extends FunctionProvider {
           : buttons.reverse();
 
       // TODO: i think there's still something wrong with this logic
-      const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg);
-      const prevButtonStatePos = this.buttonStateMap.get(buttonPos);
+      const prevButtonStateNeg = buttonStateMap.get(buttonNeg);
+      const prevButtonStatePos = buttonStateMap.get(buttonPos);
       const prevInCollisionNeg = prevButtonStateNeg === ButtonState.Collision;
       const prevInCollisionPos = prevButtonStatePos === ButtonState.Collision;
       if (!prevButtonStateNeg || inCollisionNeg !== prevInCollisionNeg)
-        this.buttonStateMap.set(
+        buttonStateMap.set(
           buttonNeg,
           inCollisionNeg ? ButtonState.Collision : ButtonState.Inactive,
         );
       if (!prevButtonStatePos || inCollisionPos !== prevInCollisionPos)
-        this.buttonStateMap.set(
+        buttonStateMap.set(
           buttonPos,
           inCollisionPos ? ButtonState.Collision : ButtonState.Inactive,
         );
@@ -148,23 +148,23 @@ export class ButtonFunctionProvider extends FunctionProvider {
       const buttons = getButtonsFromJointName(key);
       if (!buttons) return;
       const [buttonNeg, buttonPos] = buttons;
-      const prevButtonStateNeg = this.buttonStateMap.get(buttonNeg);
-      const prevButtonStatePos = this.buttonStateMap.get(buttonPos);
+      const prevButtonStateNeg = buttonStateMap.get(buttonNeg);
+      const prevButtonStatePos = buttonStateMap.get(buttonPos);
       const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit;
       const prevInLimitPos = prevButtonStatePos !== ButtonState.Limit;
       if (prevButtonStateNeg == undefined || inLimitNeg !== prevInLimitNeg)
-        this.buttonStateMap.set(
+        buttonStateMap.set(
           buttonNeg,
           inLimitNeg ? ButtonState.Inactive : ButtonState.Limit,
         );
       if (prevButtonStatePos == undefined || inLimitPos !== prevInLimitPos)
-        this.buttonStateMap.set(
+        buttonStateMap.set(
           buttonPos,
           inLimitPos ? ButtonState.Inactive : ButtonState.Limit,
         );
     });
 
-    if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
+    if (this.operatorCallback) this.operatorCallback(buttonStateMap);
   }
 
   /**
@@ -185,7 +185,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
    * @param buttonType the button pad button to set active
    */
   private setButtonActiveState(buttonType: ButtonPadButton) {
-    const currentState = this.buttonStateMap.get(buttonType);
+    const currentState = buttonStateMap.get(buttonType);
 
     // Don't set to active if in collision or at it's limit
     if (
@@ -194,8 +194,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
     )
       return;
 
-    this.buttonStateMap.set(buttonType, ButtonState.Active);
-    if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
+    buttonStateMap.set(buttonType, ButtonState.Active);
+    if (this.operatorCallback) this.operatorCallback(buttonStateMap);
   }
 
   /**
@@ -204,7 +204,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
    * @param buttonType the button pad button to set active
    */
   private setButtonInactiveState(buttonType: ButtonPadButton) {
-    const currentState = this.buttonStateMap.get(buttonType);
+    const currentState = buttonStateMap.get(buttonType);
 
     // Don't set to inactive if in collision or at it's limit
     if (
@@ -214,8 +214,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
     )
       return;
 
-    this.buttonStateMap.set(buttonType, ButtonState.Inactive);
-    if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
+    buttonStateMap.set(buttonType, ButtonState.Inactive);
+    if (this.operatorCallback) this.operatorCallback(buttonStateMap);
   }
 
   /**
