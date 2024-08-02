@@ -7,6 +7,7 @@ import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
 import { isMobile } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
+import PlayCircle from "@mui/icons-material/PlayCircle";
 
 /** All the possible button functions */
 export enum MovementRecorderFunction {
@@ -159,7 +160,8 @@ export const MovementRecorder = (props: {
                         }}
                     >
                         <span hidden={props.hideLabels}>Play</span>
-                        <span className="material-icons">play_circle</span>
+                        {/* <span className="material-icons">play_circle</span> */}
+                        <PlayCircle />
                     </button>
                 </Tooltip>
                 <Tooltip
