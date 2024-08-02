@@ -5,6 +5,10 @@ import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/TextToSpeech.css";
 import "operator/css/basic_components.css";
 import { isMobile } from "react-device-detect";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
+import SaveIcon from "@mui/icons-material/Save";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 /** All the possible button functions */
 export enum TextToSpeechFunction {
@@ -73,7 +77,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                         }}
                     >
                         <span hidden={props.hideLabels}>Play</span>
-                        <span className="material-icons">play_circle</span>
+                        <PlayCircleIcon />
                     </button>
                 </Tooltip>
                 {/* Stop the playing text */}
@@ -85,7 +89,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                         }}
                     >
                         <span hidden={props.hideLabels}>Stop</span>
-                        <span className="material-icons">stop_circle</span>
+                        <StopCircleIcon />
                     </button>
                 </Tooltip>
                 {/* If we are on saved text, then we show a delete button, else a save button. */}
@@ -102,9 +106,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                             }}
                         >
                             <span hidden={props.hideLabels}>Delete</span>
-                            <span className="material-icons">
-                                delete_forever
-                            </span>
+                            <DeleteForeverIcon />
                         </button>
                     </Tooltip>
                 ) : (
@@ -117,7 +119,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                             }}
                         >
                             <i hidden={props.hideLabels}>Save</i>
-                            <span className="material-icons">save</span>
+                            <SaveIcon />
                         </button>
                     </Tooltip>
                 )}

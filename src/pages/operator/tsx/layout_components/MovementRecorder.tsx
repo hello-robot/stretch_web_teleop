@@ -8,6 +8,9 @@ import "operator/css/basic_components.css";
 import { isMobile } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import SaveIcon from "@mui/icons-material/Save";
 
 /** All the possible button functions */
 export enum MovementRecorderFunction {
@@ -160,7 +163,6 @@ export const MovementRecorder = (props: {
                         }}
                     >
                         <span hidden={props.hideLabels}>Play</span>
-                        {/* <span className="material-icons">play_circle</span> */}
                         <PlayCircle />
                     </button>
                 </Tooltip>
@@ -186,11 +188,9 @@ export const MovementRecorder = (props: {
                             <i hidden={props.hideLabels}>Save</i>
                         )}
                         {!isRecording ? (
-                            <span className="material-icons">
-                                radio_button_checked
-                            </span>
+                            <RadioButtonCheckedIcon />
                         ) : (
-                            <span className="material-icons">save</span>
+                            <SaveIcon />
                         )}
                     </button>
                 </Tooltip>
@@ -206,7 +206,7 @@ export const MovementRecorder = (props: {
                         }}
                     >
                         <span hidden={props.hideLabels}>Delete</span>
-                        <span className="material-icons">delete_forever</span>
+                        <DeleteForeverIcon />
                     </button>
                 </Tooltip>
             </div>
@@ -245,7 +245,7 @@ export const MovementRecorder = (props: {
                         }
                     }}
                 >
-                    <span className="material-icons">play_circle</span>
+                    <PlayCircle />
                     <i>Play</i>
                 </div>
             </div>

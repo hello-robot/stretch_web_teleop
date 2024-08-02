@@ -11,6 +11,7 @@ import { SharedState } from "./CustomizableComponent";
 import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
 import "operator/css/DropZone.css";
+import PushPinIcon from "@mui/icons-material/PushPin";
 
 /** State required for drop zones */
 export type DropZoneState = {
@@ -149,7 +150,7 @@ export const DropZone = (props: DropZoneProps) => {
     return (
         <React.Fragment>
             <span
-                className={className("drop-zone material-icons", {
+                className={className("drop-zone", {
                     tab: inTab,
                     overlay,
                     standard,
@@ -157,7 +158,7 @@ export const DropZone = (props: DropZoneProps) => {
                 hidden={!isActive}
                 onClick={handleClick}
             >
-                save_alt
+                <PushPinIcon />
             </span>
             <NewPanelModal
                 show={showNewPanelModal}

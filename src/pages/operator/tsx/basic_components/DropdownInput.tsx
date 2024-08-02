@@ -3,6 +3,7 @@ import { className } from "shared/util";
 import "operator/css/basic_components.css";
 import e from "express";
 import { text } from "stream/consumers";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const DropdownInput = <T extends string>(props: {
     text: string;
@@ -114,7 +115,7 @@ export const DropdownInput = <T extends string>(props: {
                     setShowDropdown(!showDropdown);
                 }}
             >
-                <span className="material-icons">expand_more</span>
+                <ExpandMoreIcon />
             </button>
             <div
                 hidden={!showDropdown}

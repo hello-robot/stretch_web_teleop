@@ -1,6 +1,8 @@
 import "operator/css/AudioControl.css";
 import { className, RemoteStream } from "shared/util";
 import React from "react";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 
 /**Props for {@link AudioControl} */
 type AudioControlProps = {
@@ -49,11 +51,7 @@ export const AudioControl = (props: AudioControlProps) => {
                 Robot audio playback is not supported on this browser
             </audio>
             <button className="button audioControlButton" onClick={toggleMute}>
-                {muted ? (
-                    <span className="material-icons">volume_off</span>
-                ) : (
-                    <span className="material-icons">volume_up</span>
-                )}
+                {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
             </button>
         </div>
     );

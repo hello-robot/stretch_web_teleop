@@ -2,6 +2,8 @@ import { className } from "shared/util";
 import "operator/css/basic_components.css";
 import { isMobile } from "react-device-detect";
 import React from "react";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 /**
  * Properties for {@link CheckToggleButton}
@@ -28,7 +30,7 @@ type CheckToggleButtonProps = {
  */
 export const CheckToggleButton = (props: CheckToggleButtonProps) => {
     const { checked } = props;
-    const icon = checked ? "check_box" : "check_box_outline_blank";
+    const icon = checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
     return (
         <button
             className={className(

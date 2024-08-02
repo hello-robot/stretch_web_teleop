@@ -1,4 +1,6 @@
 import "operator/css/CustomizeButton.css";
+import CheckIcon from "@mui/icons-material/Check";
+import BuildIcon from "@mui/icons-material/Build";
 
 type CustomizeButtonProps = {
     /** If the interface is in customization mode */
@@ -9,7 +11,7 @@ type CustomizeButtonProps = {
 
 /** Button to toggle customization mode. */
 export const CustomizeButton = (props: CustomizeButtonProps) => {
-    const icon = props.customizing ? "check" : "build";
+    const icon = props.customizing ? <CheckIcon /> : <BuildIcon />;
     const text = props.customizing ? "Done" : "Customize";
     return (
         <button
@@ -19,7 +21,7 @@ export const CustomizeButton = (props: CustomizeButtonProps) => {
                 props.customizing ? "btn-turquoise font-white" : undefined
             }
         >
-            <span className="material-icons">{icon}</span>
+            {icon}
             {text}
         </button>
     );
