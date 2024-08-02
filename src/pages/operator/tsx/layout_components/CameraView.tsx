@@ -187,7 +187,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             console.log("scaled x", scaled_x, "scaled y", scaled_y);
             // underVideoFunctionProvider.provideFunctions(
             //   UnderVideoButton.MoveToPregrasp,
-            // ).onClick!(scaled_x, scaled_y);
+            // ).onClick!(scaled_x, scaled_y);add
         }
     }
 
