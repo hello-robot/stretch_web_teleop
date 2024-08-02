@@ -425,7 +425,9 @@ class RobotSensors extends React.Component {
         head: boolean,
         arm: boolean,
         lift: boolean,
-        wrist: boolean,
+        wrist_roll: boolean,
+        wrist_pitch: boolean,
+        wrist_yaw: boolean,
         gripper: boolean,
     ): RobotPose {
         let filteredPose: RobotPose = {};
@@ -439,11 +441,15 @@ class RobotSensors extends React.Component {
         if (lift) {
             filteredPose["joint_lift"] = this.robotPose["joint_lift"];
         }
-        if (wrist) {
+        if (wrist_roll) {
             filteredPose["joint_wrist_roll"] =
                 this.robotPose["joint_wrist_roll"];
+        }
+        if (wrist_pitch) {
             filteredPose["joint_wrist_pitch"] =
                 this.robotPose["joint_wrist_pitch"];
+        }
+        if (wrist_yaw) {
             filteredPose["joint_wrist_yaw"] = this.robotPose["joint_wrist_yaw"];
         }
         if (gripper) {

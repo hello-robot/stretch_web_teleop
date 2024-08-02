@@ -30,7 +30,9 @@ export interface MovementRecorderFunctions {
         head: boolean,
         arm: boolean,
         lift: boolean,
-        wrist: boolean,
+        wrist_roll: boolean,
+        wrist_pitch: boolean,
+        wrist_yaw: boolean,
         gripper: boolean,
     ) => void;
     SaveRecording: (name: string) => void;
@@ -52,7 +54,9 @@ export const MovementRecorder = (props: {
             head: boolean,
             arm: boolean,
             lift: boolean,
-            wrist: boolean,
+            wrist_roll: boolean,
+            wrist_pitch: boolean,
+            wrist_yaw: boolean,
             gripper: boolean,
         ) => void,
         SaveRecording: movementRecorderFunctionProvider.provideFunctions(
@@ -97,18 +101,30 @@ export const MovementRecorder = (props: {
         setShow: (show: boolean) => void;
         show: boolean;
     }) => {
-        const [head, setHead] = React.useState<boolean>(true);
-        const [arm, setArm] = React.useState<boolean>(true);
-        const [lift, setLift] = React.useState<boolean>(true);
-        const [wrist, setWrist] = React.useState<boolean>(true);
-        const [gripper, setGripper] = React.useState<boolean>(true);
+        const [head, setHead] = React.useState<boolean>(false);
+        const [arm, setArm] = React.useState<boolean>(false);
+        const [lift, setLift] = React.useState<boolean>(false);
+        const [wristRoll, setWristRoll] = React.useState<boolean>(false);
+        const [wristPitch, setWristPitch] = React.useState<boolean>(false);
+        const [wristYaw, setWristYaw] = React.useState<boolean>(false);
+        const [gripper, setGripper] = React.useState<boolean>(false);
 
         function handleAccept() {
-            functions.Record(head, arm, lift, wrist, gripper);
+            functions.Record(
+                head,
+                arm,
+                lift,
+                wristRoll,
+                wristPitch,
+                wristYaw,
+                gripper,
+            );
             setHead(false);
             setArm(false);
             setLift(false);
-            setWrist(false);
+            setWristRoll(false);
+            setWristPitch(false);
+            setWristYaw(false);
             setGripper(false);
         }
 
@@ -165,13 +181,35 @@ export const MovementRecorder = (props: {
                     <li>
                         <input
                             type="checkbox"
-                            id="wrist"
-                            name="save-wrist-pose"
-                            value="Wrist"
-                            defaultChecked={wrist}
-                            onChange={(e) => setWrist(e.target.checked)}
+                            id="wristRoll"
+                            name="save-wrist-roll-pose"
+                            value="Wrist Roll"
+                            defaultChecked={wristRoll}
+                            onChange={(e) => setWristRoll(e.target.checked)}
                         />
-                        <label>Wrist</label>
+                        <label>Wrist Roll</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="wristPitch"
+                            name="save-wrist-pitch-pose"
+                            value="Wrist Pitch"
+                            defaultChecked={wristPitch}
+                            onChange={(e) => setWristPitch(e.target.checked)}
+                        />
+                        <label>Wrist Pitch</label>
+                    </li>
+                    <li>
+                        <input
+                            type="checkbox"
+                            id="wristYaw"
+                            name="save-wrist-yaw-pose"
+                            value="Wrist Yaw"
+                            defaultChecked={wristYaw}
+                            onChange={(e) => setWristYaw(e.target.checked)}
+                        />
+                        <label>Wrist Yaw</label>
                     </li>
                     <li>
                         <input

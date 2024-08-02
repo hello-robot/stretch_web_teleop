@@ -25,7 +25,9 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                     head: boolean,
                     arm: boolean,
                     lift: boolean,
-                    wrist: boolean,
+                    wrist_roll: boolean,
+                    wrist_pitch: boolean,
+                    wrist_yaw: boolean,
                     gripper: boolean,
                 ) => {
                     let prevJoint: ValidJoints | undefined;
@@ -37,7 +39,9 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                 head,
                                 arm,
                                 lift,
-                                wrist,
+                                wrist_roll,
+                                wrist_pitch,
+                                wrist_yaw,
                                 gripper,
                             );
                         const prevPose =
