@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import "operator/css/basic_components.css";
 import { className } from "shared/util";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 export const AccordionSelect = <T extends string | JSX.Element>(props: {
     title: string;
@@ -46,7 +48,7 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
                 style={{ backgroundColor: props.backgroundColor }}
             >
                 {props.title}
-                <span className="material-icons">expand_more</span>
+                {active ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </button>
             <div
                 ref={content}

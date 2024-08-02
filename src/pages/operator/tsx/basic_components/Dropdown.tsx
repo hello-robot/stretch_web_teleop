@@ -1,6 +1,7 @@
 import React from "react";
 import { className } from "shared/util";
 import "operator/css/basic_components.css";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const Dropdown = <T extends string | JSX.Element>(props: {
     onChange: (selectedIndex: number) => void;
@@ -78,7 +79,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
                 {props.selectedIndex === undefined
                     ? props.placeholderText
                     : props.possibleOptions[props.selectedIndex]}
-                <span className="material-icons">expand_more</span>
+                <ExpandMoreIcon />
             </button>
             <div
                 hidden={!showDropdown}

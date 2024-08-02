@@ -18,6 +18,9 @@ import { PopupModal } from "../basic_components/PopupModal";
 import { Dropdown } from "../basic_components/Dropdown";
 import "operator/css/Sidebar.css";
 import { storageHandler } from "operator/tsx/index";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 type SidebarProps = {
     hidden: boolean;
@@ -64,12 +67,12 @@ export const Sidebar = (props: SidebarProps) => {
                     id="delete-button"
                     disabled={deleteDisabled}
                     title={deleteTooltip}
-                    className={className("material-icons btn-red", {})}
+                    className={className("btn-red", {})}
                     onClick={
                         deleteDisabled ? undefined : () => props.onDelete()
                     }
                 >
-                    delete_forever
+                    <DeleteForeverIcon fontSize="large" />
                 </button>
             </div>
         </div>
@@ -581,9 +584,15 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
                           : ""
                 }
             >
-                <span className="material-icons">
-                    {props.ids ? "expand_more" : ""}
-                </span>
+                {props.ids ? (
+                    props.expanded ? (
+                        <ExpandLessIcon />
+                    ) : (
+                        <ExpandMoreIcon />
+                    )
+                ) : (
+                    <></>
+                )}
                 {props.type}
             </button>
             <div className="provider-tab-dropdown" hidden={!props.expanded}>

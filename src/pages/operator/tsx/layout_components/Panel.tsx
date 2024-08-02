@@ -14,6 +14,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import "operator/css/Panel.css";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 /*
 TODO:
@@ -189,10 +190,10 @@ export const Panel = (props: CustomizableComponentProps) => {
                     // In customization mode show an extra plus to add a new tab
                     props.sharedState.customizing ? (
                         <button
-                            className="tab-button add-tab material-icons"
+                            className="tab-button add-tab"
                             onClick={() => setShowTabModal(true)}
                         >
-                            add_circle
+                            <AddCircleIcon />
                         </button>
                     ) : undefined
                 }

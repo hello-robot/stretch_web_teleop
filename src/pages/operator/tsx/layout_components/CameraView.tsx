@@ -46,6 +46,10 @@ import {
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import { AccordionSelect } from "../basic_components/AccordionSelect";
 import "operator/css/CameraView.css";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import CancelIcon from "@mui/icons-material/Cancel";
+import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -308,14 +312,14 @@ export const CameraView = (props: CustomizableComponentProps) => {
             {overlayContainer}
             {selectObjectScaledXY ? (
                 <span
-                    className="realsense material-icons"
+                    className="realsense"
                     style={{
                         left: (selectObjectScaledXY[0] * 100).toString() + "%",
                         top: (selectObjectScaledXY[1] * 100).toString() + "%",
                         fontSize: selectObjectFontSize,
                     }}
                 >
-                    add
+                    <AddIcon />
                 </span>
             ) : undefined}
         </div>
@@ -386,12 +390,10 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
             onMouseUp={functs.onRelease}
             onMouseLeave={functs.onLeave}
         >
-            <span
-                className="material-icons"
+            <PlayCircleFilledIcon
+                className="panTiltIcon"
                 style={{ transform: `rotate(${rotation}deg)` }}
-            >
-                arrow_right
-            </span>
+            />
         </button>
     );
 };
@@ -433,7 +435,7 @@ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
         >
             {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
             <span
-                className="material-icons icon"
+                className="icon"
                 style={{ transform: `rotate(${rotation}deg)` }}
             >
                 arrow_right
@@ -901,7 +903,7 @@ const UnderRealsenseButtons = (props: {
                         }}
                     >
                         <span>Cancel</span>
-                        <span className="material-icons">cancel</span>
+                        <CancelIcon />
                     </button>
                 ) : (
                     <AccordionSelect

@@ -157,11 +157,12 @@
     padding: 0px;
 }
 
-.realsense-pan-tilt-grid button .material-icons {
+.realsense-pan-tilt-grid .panTiltIcon {
     margin: 0;
     font-size: xxx-large;
-    background-color: whitesmoke;
+    fill: whitesmoke;
     opacity: 40%;
+    background-color: black;
     border-radius: 60px;
 }
 
