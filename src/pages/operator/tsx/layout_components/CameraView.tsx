@@ -47,7 +47,6 @@ import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import { AccordionSelect } from "../basic_components/AccordionSelect";
 import "operator/css/CameraView.css";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 
@@ -185,7 +184,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             console.log("scaled x", scaled_x, "scaled y", scaled_y);
             // underVideoFunctionProvider.provideFunctions(
             //   UnderVideoButton.MoveToPregrasp,
-            // ).onClick!(scaled_x, scaled_y);
+            // ).onClick!(scaled_x, scaled_y);add
         }
     }
 
@@ -308,16 +307,15 @@ export const CameraView = (props: CustomizableComponentProps) => {
             />
             {overlayContainer}
             {selectObjectScaledXY ? (
-                <span
-                    className="realsense"
+                <AddIcon
                     style={{
+                        position: "absolute",
                         left: (selectObjectScaledXY[0] * 100).toString() + "%",
                         top: (selectObjectScaledXY[1] * 100).toString() + "%",
-                        fontSize: selectObjectFontSize,
+                        color: "red",
+                        transform: "translateX(-50%) translateY(-50%)",
                     }}
-                >
-                    <AddIcon />
-                </span>
+                />
             ) : undefined}
         </div>
     );
