@@ -473,7 +473,7 @@ class StretchIKControl:
                     # and we need to re-invoke the action.
                     if (
                         result.status != GoalStatus.STATUS_SUCCEEDED
-                        and result.result.error_code
+                        or result.result.error_code
                         != FollowJointTrajectory.Result.SUCCESSFUL
                     ):
                         num_failures += 1

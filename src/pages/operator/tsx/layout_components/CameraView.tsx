@@ -73,6 +73,9 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // Whether the robot is currently in the process of moving to a pregrasp position
     const [isMovingToPregrasp, setIsMovingToPregrasp] =
         React.useState<boolean>(false);
+    // Whether the robot is currently moving to show the tablet to the user
+    const [isShowingTablet, setIsShowingTablet] =
+        React.useState<boolean>(false);
     const definition = React.useMemo(
         () => props.definition as CameraViewDefinition,
         [props.definition],
@@ -334,6 +337,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
                         setSelectObjectScaledXY={setSelectObjectScaledXY}
                         isMovingToPregrasp={isMovingToPregrasp}
                         setIsMovingToPregrasp={setIsMovingToPregrasp}
+                        isShowingTablet={isShowingTablet}
+                        setIsShowingTablet={setIsShowingTablet}
                         underVideoAreaRef={underVideoAreaRef}
                         stretchTool={props.sharedState.stretchTool}
                     />
@@ -672,6 +677,9 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
     underVideoFunctionProvider.provideFunctions(
         UnderVideoButton.RealsenseDepthSensing,
     ).onCheck!(definition.depthSensing || false);
+    underVideoFunctionProvider.provideFunctions(
+        UnderVideoButton.RealsenseBodyPoseEstimate,
+    ).onCheck!(definition.bodyPoseAR || false);
 }
 
 /**
@@ -703,6 +711,8 @@ const UnderVideoButtons = (props: {
     setSelectObjectScaledXY: (scaledXY: [number, number] | null) => void;
     isMovingToPregrasp: boolean;
     setIsMovingToPregrasp: (isMoving: boolean) => void;
+    isShowingTablet: boolean;
+    setIsShowingTablet: (isShowing: boolean) => void;
     underVideoAreaRef: React.RefObject<HTMLDivElement>;
     betaTeleopKit: boolean;
     stretchTool: StretchTool;
@@ -740,6 +750,8 @@ const UnderVideoButtons = (props: {
                     setSelectObjectScaledXY={props.setSelectObjectScaledXY}
                     isMovingToPregrasp={props.isMovingToPregrasp}
                     setIsMovingToPregrasp={props.setIsMovingToPregrasp}
+                    isShowingTablet={props.isShowingTablet}
+                    setIsShowingTablet={props.setIsShowingTablet}
                     underVideoAreaRef={props.underVideoAreaRef}
                     stretchTool={props.stretchTool}
                 />
@@ -848,6 +860,8 @@ const UnderRealsenseButtons = (props: {
     setSelectObjectScaledXY: (scaledXY: [number, number] | null) => void;
     isMovingToPregrasp: boolean;
     setIsMovingToPregrasp: (isMoving: boolean) => void;
+    isShowingTablet: boolean;
+    setIsShowingTablet: (isShowing: boolean) => void;
     underVideoAreaRef: React.RefObject<HTMLDivElement>;
     stretchTool: StretchTool;
 }) => {
@@ -855,7 +869,11 @@ const UnderRealsenseButtons = (props: {
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
 
-    console.log("UnderRealsenseButtons", props.isMovingToPregrasp);
+    console.log(
+        "UnderRealsenseButtons",
+        props.isMovingToPregrasp,
+        props.isShowingTablet,
+    );
 
     // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
     let moveToPregraspButtons = <></>;
@@ -941,6 +959,61 @@ const UnderRealsenseButtons = (props: {
         );
     }
 
+    // Only show ShowTablet buttons if the robot has a tablet attached.
+    // TODO: Un-comment the tool conditional!
+    let showTabletButtons = <></>;
+    if (props.stretchTool === StretchTool.TABLET) {
+        showTabletButtons = (
+            <React.Fragment>
+                <CheckToggleButton
+                    checked={props.definition.bodyPoseAR || false}
+                    onClick={() => {
+                        props.definition.bodyPoseAR =
+                            !props.definition.bodyPoseAR;
+                        setRerender(!rerender);
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.RealsenseBodyPoseEstimate,
+                        ).onCheck!(props.definition.bodyPoseAR);
+                    }}
+                    label="Show Body Pose"
+                />
+                {props.definition.bodyPoseAR &&
+                    (props.isShowingTablet ? (
+                        <button
+                            className="map-cancel-btn"
+                            onPointerDown={() => {
+                                underVideoFunctionProvider.provideFunctions(
+                                    UnderVideoButton.RealsenseStopShowTablet,
+                                ).onClick!();
+                                props.setIsShowingTablet(false);
+                            }}
+                        >
+                            <span>Cancel</span>
+                            <span className="material-icons">cancel</span>
+                        </button>
+                    ) : (
+                        <button
+                            className="map-play-btn"
+                            onPointerDown={() => {
+                                underVideoFunctionProvider.provideFunctions(
+                                    UnderVideoButton.RealsenseShowTablet,
+                                ).onClick!();
+                                props.setIsShowingTablet(true);
+                                underVideoFunctionProvider.provideFunctions(
+                                    UnderVideoButton.RealsenseShowTabletGoalReached,
+                                ).getFuture!().then(() => {
+                                    props.setIsShowingTablet(false);
+                                });
+                            }}
+                        >
+                            <span>Show Tablet</span>
+                            <span className="material-icons">play_circle</span>
+                        </button>
+                    ))}
+            </React.Fragment>
+        );
+    }
+
     return (
         <React.Fragment>
             <AccordionSelect
@@ -982,6 +1055,7 @@ const UnderRealsenseButtons = (props: {
                 label="Depth Sensing"
             />
             {moveToPregraspButtons}
+            {showTabletButtons}
             {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
                 onClick={() => {

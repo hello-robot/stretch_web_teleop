@@ -38,6 +38,8 @@ export const robot = new Robot({
         forwardActionState(goalState, "moveBaseState"),
     moveToPregraspResultCallback: (goalState: ActionState) =>
         forwardActionState(goalState, "moveToPregraspState"),
+    showTabletResultCallback: (goalState: ActionState) =>
+        forwardActionState(goalState, "showTabletState"),
     amclPoseCallback: forwardAMCLPose,
     isRunStoppedCallback: forwardIsRunStopped,
     hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
@@ -270,6 +272,10 @@ function handleMessage(message: WebRTCMessage) {
         case "setExpandedGripper":
             robot.setExpandedGripper(message.toggle);
             break;
+        case "setRealsenseBodyPoseEstimate":
+            robot.setComputeBodyPose(message.toggle);
+            robot.setRealsenseShowBodyPose(message.toggle);
+            break;
         case "setRunStop":
             robot.setRunStop(message.toggle);
             break;
@@ -303,6 +309,12 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "stopTextToSpeech":
             robot.stopTextToSpeech();
+            break;
+        case "showTablet":
+            robot.executeShowTabletGoal();
+            break;
+        case "stopShowTablet":
+            robot.stopShowTabletClient();
             break;
     }
 }

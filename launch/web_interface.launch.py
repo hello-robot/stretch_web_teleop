@@ -409,7 +409,12 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([core_package, "launch", "stretch_driver.launch.py"])
         ),
-        launch_arguments={"broadcast_odom_tf": "True"}.items(),
+        # TODO: The tablet_placement code should change the mode, not the launch file
+        launch_arguments={
+            "mode": "position",
+            "broadcast_odom_tf": "True",
+            "fail_out_of_range_goal": "False",
+        }.items(),
     )
     ld.add_action(stretch_driver_launch)
 
@@ -545,7 +550,10 @@ def generate_launch_description():
     # )
 
     # Move To Pre-grasp Action Server
-    if stretch_tool == "eoa_wrist_dw3_tool_sg3":
+    if (
+        stretch_tool == "eoa_wrist_dw3_tool_sg3"
+        or stretch_tool == "tool_stretch_dex_wrist"
+    ):
         move_to_pregrasp_node = Node(
             package="stretch_web_teleop",
             executable="move_to_pregrasp.py",
@@ -564,5 +572,27 @@ def generate_launch_description():
         parameters=[],
     )
     ld.add_action(text_to_speech_node)
+
+    if stretch_tool == "eoa_wrist_dw3_tool_tablet_12in":
+        detect_body_landmarks_node = Node(
+            package="stretch_show_tablet",
+            executable="detect_body_landmarks",
+            output="screen",
+        )
+        ld.add_action(detect_body_landmarks_node)
+
+        plan_tablet_pose_node = Node(
+            package="stretch_show_tablet",
+            executable="plan_tablet_pose_service",
+            output="screen",
+        )
+        ld.add_action(plan_tablet_pose_node)
+
+        show_tablet_node = Node(
+            package="stretch_show_tablet",
+            executable="show_tablet_server",
+            output="screen",
+        )
+        ld.add_action(show_tablet_node)
 
     return ld

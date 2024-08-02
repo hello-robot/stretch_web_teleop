@@ -249,6 +249,51 @@ def deproject_pixel_to_pointcloud_point(
     return p[closest_point_idx]
 
 
+def project_points_to_pixels(
+    points: npt.NDArray[np.float32],
+    proj: npt.NDArray[np.float32],
+    width: int,
+    height: int,
+) -> npt.NDArray[np.float32]:
+    """
+    Given an array of (x, y, z) points, this function returns an array of deduplicated
+    (u, v) pixel coordinates within the width and height.
+
+    Parameters
+    ----------
+    points: The array of (x, y, z) points. Size: (N, 3).
+    proj: The camera's projection matrix of size (3, 4).
+    width: The width of the image.
+    height: The height of the image.
+
+    Returns
+    -------
+    npt.NDArray[np.float32]: The array of (u, v) pixel coordinates. Size: (N, 2).
+    """
+    # Project the points to the image plane
+    points_homogeneous = np.hstack((points, np.ones((points.shape[0], 1))))
+    coords = np.matmul(proj, np.transpose(points_homogeneous))  # 3 x N
+
+    # Filter our all points whose third homogeneous coordinate is 0 or nan
+    coords = coords[:, ~np.isnan(coords[2, :]) & (coords[2, :] != 0)]
+
+    # Convert the coordinates to pixel indices
+    u_idx = (coords[0, :] / coords[2, :]).astype(int)
+    v_idx = (coords[1, :] / coords[2, :]).astype(int)
+    uv = np.vstack((u_idx, v_idx)).T  # N x 2
+
+    # Remove duplicate and out-of-bounds pixel coordinates
+    uv_dedup = np.unique(uv, axis=0)
+    in_bounds_idx = np.where(
+        (uv_dedup[:, 0] >= 0)
+        & (uv_dedup[:, 0] < width)
+        & (uv_dedup[:, 1] >= 0)
+        & (uv_dedup[:, 1] < height)
+    )
+
+    return uv_dedup[in_bounds_idx]
+
+
 def create_ros_pose(
     pos: npt.NDArray, quat: npt.NDArray, frame: Optional[str] = None
 ) -> Union[Pose, PoseStamped]:
