@@ -1,0 +1,16 @@
+[DMESG]...[ 8673.670905] usb 3-5.1: new full-speed USB device number 24 using xhci_hcd
+[DMESG]...[ 8673.828883] usb 3-5.1: New USB device found, idVendor=045e, idProduct=0b0a, bcdDevice= 4.05
+[DMESG]...[ 8673.828886] usb 3-5.1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[DMESG]...[ 8673.828887] usb 3-5.1: Product: Controller
+[DMESG]...[ 8673.828888] usb 3-5.1: Manufacturer: Microsoft
+[DMESG]...[ 8673.828889] usb 3-5.1: SerialNumber: 3032353630303135383932303533
+[DMESG]...[ 8673.835812] input: Microsoft X-Box Adaptive Controller as /devices/pci0000:00/0000:00:14.0/usb3/3-5/3-5.1/3-5.1:1.0/input/input14
+
+
+from stretch_body.gamepad_controller import GamePadController
+g = GamePadController()
+g.start()
+adap = g.devices.gamepads[0]
+adap.read()
+
+/bin/python3.10 /home/hello-robot/log/gamepad.py

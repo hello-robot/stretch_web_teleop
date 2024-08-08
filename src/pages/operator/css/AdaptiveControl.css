@@ -1,0 +1,20 @@
+.adaptive-container {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: 0.4rem;
+  height: 100%;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr min-content auto 1fr;
+  justify-content: center;
+}
+
+.toggle-adaptive.on {
+  background-color: var(--btn-turquoise);
+  color: white;
+}
+
+.toggle-adaptive.off {
+  background-color: var(--btn-red);
+  color: black;
+}

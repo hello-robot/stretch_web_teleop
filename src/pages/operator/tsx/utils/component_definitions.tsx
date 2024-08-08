@@ -26,6 +26,7 @@ export enum ComponentType {
   RunStopButton = "Run Stop Button",
   BatteryGuage = "Battery Gauge",
   KeyboardControl = "Keyboard Control",
+  AdaptiveControl = "Adaptive Control",
 }
 
 /**
@@ -220,6 +221,11 @@ export type MapDefinition = ComponentDefinition & {
 export type RunStopDefinition = ComponentDefinition;
 
 /**
- * Definition for the keyboard
+ * Definition for the keyboard controller component
  */
 export type KeyboardControlDefinition = ComponentDefinition;
+
+/**
+ * Definition for the adaptive controller component
+ */
+export type AdaptiveControlDefinition = ComponentDefinition;

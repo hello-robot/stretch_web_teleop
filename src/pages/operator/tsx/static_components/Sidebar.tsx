@@ -91,6 +91,7 @@ function componentDescription(definition: ComponentDefinition): string {
     case ComponentType.ButtonGrid:
     case ComponentType.Map:
     case ComponentType.KeyboardControl:
+    case ComponentType.AdaptiveControl:
       return definition.type;
     default:
       throw Error(
@@ -468,6 +469,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     { type: ComponentType.VirtualJoystick },
     { type: ComponentType.Map },
     { type: ComponentType.KeyboardControl },
+    { type: ComponentType.AdaptiveControl },
   ];
 
   function handleSelect(type: ComponentType, id?: ComponentId) {

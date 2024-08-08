@@ -9,7 +9,6 @@ import {
   LayoutDefinition,
   ActionMode,
   LayoutGridDefinition,
-  KeyboardControlDefinition,
 } from "../utils/component_definitions";
 
 /**
