@@ -52,14 +52,14 @@ fi
 
 # Unmute and set volume to 100% for relevant audio devices
 amixer_output=$(amixer scontrols)
-amixer_devices=('Master' 'Mic' 'Capture' 'PCM' 'Digital')
+amixer_devices=('Master' 'PCM' 'Capture' 'Mic' 'Digital')
 for device in "${amixer_devices[@]}"
 do
     if [[ $amixer_output == *"'$device'"* ]]; then
         echo "    Unmuting '$device'"
         device_output=$(amixer get $device)
         if [[ $device_output == *"[off]"* ]]; then
-            if [[ $device_output == *"Cap"* ]]; then
+            if [[ $device_output == *"Capture"* ]]; then
                 amixer set $device cap -q
             else
                 amixer set $device unmute -q
