@@ -6,20 +6,64 @@ import {
 } from "./CustomizableComponent";
 import { className } from "shared/util";
 import "operator/css/AdaptiveControl.css";
+import { adaptiveFunctionProvider } from "operator/tsx/index";
 
 export const AdaptiveControl = (props: CustomizableComponentProps) => {
   const [toggleAdaptive, setToggleAdaptive] = React.useState(false);
   const { customizing } = props.sharedState;
   const selected = isSelected(props);
 
+  let controllerIndex = null;
+  let aPressed = false;
+  let upPad = false;
+  let downPad = false;
+  let leftPad = false;
+  let rightPad = false;
+
   const toggleButton = () => {
     setToggleAdaptive((prevToggleSVG) => !prevToggleSVG);
+    if (!toggleAdaptive || customizing) {
+      console.log("toggled on");
+    }
   };
 
   function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
     event.stopPropagation();
     props.sharedState.onSelect(props.definition, props.path);
   }
+
+  function controllerInput() {
+    if (controllerIndex !== null) {
+      const pollingInterval = setInterval(() => {
+        const gamepad = navigator.getGamepads()[controllerIndex];
+        const buttons = gamepad.buttons;
+        aPressed = buttons[0].pressed;
+        upPad = buttons[12].pressed;
+        downPad = buttons[13].pressed;
+        leftPad = buttons[14].pressed;
+        rightPad = buttons[15].pressed;
+
+        if (aPressed) {
+          console.log("A button pressed");
+        }
+
+        // let functs = adaptiveFunctionProvider.provideFunctions();
+        // functs.onClick();
+      }, 100);
+    }
+  }
+
+  React.useEffect(() => {
+    window.addEventListener("gamepadconnected", (event) => {
+      controllerIndex = event.gamepad.index;
+      console.log("connected");
+      controllerInput();
+    });
+    window.addEventListener("gamepaddisconnected", (event) => {
+      console.log("disconnected");
+      controllerIndex = null;
+    });
+  }, [controllerIndex]);
 
   return (
     <div

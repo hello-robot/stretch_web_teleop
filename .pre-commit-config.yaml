@@ -39,7 +39,6 @@ repos:
     rev: 5.0.4
     hooks:
       - id: flake8
-        exclude: scripts/Controllers.py | scripts/Gamepad.py
 
   # MyPy does static type-checking in Python
   # Note: In practice this doesn't currently do much, since we don't have type hints in our Python scripts.
