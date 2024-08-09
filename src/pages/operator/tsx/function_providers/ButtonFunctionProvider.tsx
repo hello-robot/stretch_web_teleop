@@ -33,7 +33,17 @@ export enum ButtonPadButton {
   CameraPanLeft = "Camera pan left",
   CameraPanRight = "Camera pan right",
 }
-
+// 0:  'A',
+// 1:  'B',
+// 2:  'X',
+// 3:  'Y',
+// 4:  'LB',
+// 5:  'RB',
+// 6:  'SELECT', #two boxes
+// 7:  'START', #three lines
+// 8:  'POWER',
+// 9:  'L3',
+// 10: 'R3',
 /** Array of the pan tilt buttons */
 export const panTiltButtons: ButtonPadButton[] = [
   ButtonPadButton.CameraTiltUp,

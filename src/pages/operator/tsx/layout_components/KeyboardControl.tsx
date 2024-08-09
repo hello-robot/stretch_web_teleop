@@ -62,7 +62,7 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
     : {};
 
   /**
-   * The state of each keyboard button, allowing the input to only run
+   * The state of each keyboard button, allowing the input to only run once
    */
   const [keyState, setKeyState] = React.useState({
     w: false,

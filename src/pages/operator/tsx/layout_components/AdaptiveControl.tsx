@@ -9,21 +9,16 @@ import "operator/css/AdaptiveControl.css";
 import { adaptiveFunctionProvider } from "operator/tsx/index";
 
 export const AdaptiveControl = (props: CustomizableComponentProps) => {
-  const [toggleAdaptive, setToggleAdaptive] = React.useState(false);
+  const [toggleAdaptive, setToggleAdaptive] = React.useState(true);
+  const [controllerIndex, setControllerIndex] = React.useState(null);
+  const buttonStateRef = React.useRef([false]);
   const { customizing } = props.sharedState;
   const selected = isSelected(props);
-
-  let controllerIndex = null;
-  let aPressed = false;
-  let upPad = false;
-  let downPad = false;
-  let leftPad = false;
-  let rightPad = false;
 
   const toggleButton = () => {
     setToggleAdaptive((prevToggleSVG) => !prevToggleSVG);
     if (!toggleAdaptive || customizing) {
-      console.log("toggled on");
+      console.log("toggled off");
     }
   };
 
@@ -32,37 +27,82 @@ export const AdaptiveControl = (props: CustomizableComponentProps) => {
     props.sharedState.onSelect(props.definition, props.path);
   }
 
-  function controllerInput() {
-    if (controllerIndex !== null) {
-      const pollingInterval = setInterval(() => {
-        const gamepad = navigator.getGamepads()[controllerIndex];
-        const buttons = gamepad.buttons;
-        aPressed = buttons[0].pressed;
-        upPad = buttons[12].pressed;
-        downPad = buttons[13].pressed;
-        leftPad = buttons[14].pressed;
-        rightPad = buttons[15].pressed;
-
-        if (aPressed) {
-          console.log("A button pressed");
-        }
-
-        // let functs = adaptiveFunctionProvider.provideFunctions();
-        // functs.onClick();
-      }, 100);
-    }
-  }
-
+  /**
+   ******** Get controller input ********
+   */
   React.useEffect(() => {
-    window.addEventListener("gamepadconnected", (event) => {
-      controllerIndex = event.gamepad.index;
-      console.log("connected");
-      controllerInput();
-    });
-    window.addEventListener("gamepaddisconnected", (event) => {
-      console.log("disconnected");
-      controllerIndex = null;
-    });
+    const handleControllerInput = () => {
+      if (controllerIndex !== null) {
+        const gamepad = navigator.getGamepads()[controllerIndex];
+        if (gamepad) {
+          const newButtonState = gamepad.buttons.map(
+            (button) => button.pressed,
+          );
+          gamepad.buttons.forEach((button, index) => {
+            const isPressed = newButtonState[index];
+            const wasPressed = buttonStateRef.current[index];
+
+            if (isPressed && !wasPressed) {
+              handleButtonPress(index);
+            } else if (!isPressed && wasPressed) {
+              handleButtonRelease(index);
+            }
+          });
+          buttonStateRef.current = newButtonState;
+        }
+      }
+      requestAnimationFrame(handleControllerInput);
+    };
+
+    requestAnimationFrame(handleControllerInput);
+  }, [controllerIndex]);
+
+  /**
+   ******** Handle button press and release ********
+   */
+  const handleButtonPress = (buttonIndex) => {
+    let functs = adaptiveFunctionProvider.provideFunctions(buttonIndex);
+    if (functs !== null) {
+      functs.onClick();
+    } else {
+      console.log(`Button ${buttonIndex} is not mapped.`);
+    }
+  };
+
+  const handleButtonRelease = (buttonIndex) => {
+    let functs = adaptiveFunctionProvider.provideFunctions(buttonIndex);
+    if (functs !== null) {
+      functs.onRelease();
+    }
+  };
+
+  /**
+   ******** Look for gamepad connection ********
+   */
+  React.useEffect(() => {
+    const connectHandler = (event) => {
+      setControllerIndex(event.gamepad.index);
+      buttonStateRef.current = event.gamepad.buttons.map(
+        (button) => button.pressed,
+      );
+      console.log("Gamepad connected: ", event.gamepad);
+    };
+
+    const disconnectHandler = (event) => {
+      if (event.gamepad.index === controllerIndex) {
+        setControllerIndex(null);
+        buttonStateRef.current = [];
+      }
+      console.log("Gamepad disconnected: ", event.gamepad);
+    };
+
+    window.addEventListener("gamepadconnected", connectHandler);
+    window.addEventListener("gamepaddisconnected", disconnectHandler);
+
+    return () => {
+      window.removeEventListener("gamepadconnected", connectHandler);
+      window.removeEventListener("gamepaddisconnected", disconnectHandler);
+    };
   }, [controllerIndex]);
 
   return (
