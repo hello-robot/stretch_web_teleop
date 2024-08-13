@@ -128,19 +128,19 @@ export class KeyboardFunctionProvider extends FunctionProvider {
         console.log("x pressed; gripper opened");
         keyInput = ButtonPadButton.GripperOpen;
         break;
-      case "ArrowUp":
+      case "arrowup":
         console.log("camera moved up");
         keyInput = ButtonPadButton.CameraTiltUp;
         break;
-      case "ArrowLeft":
+      case "arrowleft":
         console.log("camera moved left");
         keyInput = ButtonPadButton.CameraPanLeft;
         break;
-      case "ArrowDown":
+      case "arrowdown":
         console.log("camera moved down");
         keyInput = ButtonPadButton.CameraTiltDown;
         break;
-      case "ArrowRight":
+      case "arrowright":
         console.log("camera moved right");
         keyInput = ButtonPadButton.CameraPanRight;
         break;

@@ -32,10 +32,10 @@ export enum PossibleKeys {
   e = "e",
   z = "z",
   x = "x",
-  ArrowUp = "ArrowUp",
-  ArrowLeft = "ArrowLeft",
-  ArrowDown = "ArrowDown",
-  ArrowRight = "ArrowRight",
+  ArrowUp = "arrowup",
+  ArrowLeft = "arrowleft",
+  ArrowDown = "arrowdown",
+  ArrowRight = "arrowright",
 }
 
 const possibleKeysArray = Object.values(PossibleKeys);
@@ -73,10 +73,10 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
     e: false,
     z: false,
     x: false,
-    ArrowUp: false,
-    ArrowLeft: false,
-    ArrowDown: false,
-    ArrowRight: false,
+    arrowup: false,
+    arrowleft: false,
+    arrowdown: false,
+    arrowright: false,
   });
 
   /**
@@ -135,7 +135,8 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
       }
       setKeyPressed(true);
 
-      switch (event.key) {
+      const key = event.key.toLowerCase();
+      switch (key) {
         case "1":
           setMode(Mode.Base);
           setActiveMode(1);
@@ -153,24 +154,25 @@ export const KeyboardControl = (props: CustomizableComponentProps) => {
           break;
       }
 
-      let functs = keyboardFunctionProvider.provideFunctions(mode, event.key);
+      let functs = keyboardFunctionProvider.provideFunctions(mode, key);
 
-      if (possibleKeysArray.includes(event.key as PossibleKeys)) {
+      if (possibleKeysArray.includes(key as PossibleKeys)) {
         functs.onClick();
       } else {
-        console.log("Unexpected key pressed", event.key);
+        console.log("Unexpected key pressed", key);
       }
-      setKeyState((prevState) => ({ ...prevState, [event.key]: true }));
+      setKeyState((prevState) => ({ ...prevState, [key]: true }));
     },
     [mode, keyPressed],
   );
 
   const handleKeyRelease = React.useCallback(
     (event) => {
+      const key = event.key.toLowerCase();
       setKeyPressed(false);
-      setKeyState((prevState) => ({ ...prevState, [event.key]: false }));
+      setKeyState((prevState) => ({ ...prevState, [key]: false }));
 
-      let functs = keyboardFunctionProvider.provideFunctions(mode, event.key);
+      let functs = keyboardFunctionProvider.provideFunctions(mode, key);
       functs.onRelease();
     },
     [mode, keyPressed],
