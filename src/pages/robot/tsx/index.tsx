@@ -316,6 +316,9 @@ function handleMessage(message: WebRTCMessage) {
         case "stopShowTablet":
             robot.stopShowTabletClient();
             break;
+        case "homeTheRobot":
+            robot.homeTheRobot();
+            break;
     }
 }
 

@@ -15,6 +15,7 @@ import {
     PlaybackPosesCommand,
     PlayTextToSpeech,
     StopTextToSpeech,
+    HomeTheRobotCommand,
 } from "shared/commands";
 import {
     ValidJointStateDict,
@@ -261,6 +262,16 @@ export class RemoteRobot extends React.Component<{}, any> {
     stopTextToSpeech() {
         let cmd: StopTextToSpeech = {
             type: "stopTextToSpeech",
+        };
+        this.robotChannel(cmd);
+    }
+
+    /**
+     * Ask the robot to home itself.
+     */
+    homeTheRobot() {
+        let cmd: HomeTheRobotCommand = {
+            type: "homeTheRobot",
         };
         this.robotChannel(cmd);
     }

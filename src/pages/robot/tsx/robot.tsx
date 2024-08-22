@@ -78,6 +78,7 @@ export class Robot extends React.Component {
     private hasBetaTeleopKitParam: ROSLIB.Param;
     private stretchToolParam: ROSLIB.Param;
     private textToSpeechTopic?: ROSLIB.Topic;
+    private homeTheRobotService?: ROSLIB.Service;
 
     constructor(props: {
         jointStateCallback: (
@@ -291,6 +292,7 @@ export class Robot extends React.Component {
         this.subscribeToHeadTiltTF();
         this.subscribeToMapTF();
         this.createTextToSpeechTopic();
+        this.createHomeTheRobotService();
 
         return Promise.resolve();
     }
@@ -586,6 +588,14 @@ export class Robot extends React.Component {
         });
     }
 
+    createHomeTheRobotService() {
+        this.homeTheRobotService = new ROSLIB.Service({
+            ros: this.ros,
+            name: "/home_the_robot",
+            serviceType: "std_srvs/Trigger",
+        });
+    }
+
     createRealsenseDepthSensingService() {
         this.setRealsenseDepthSensingService = new ROSLIB.Service({
             ros: this.ros,
@@ -807,6 +817,17 @@ export class Robot extends React.Component {
             });
         }
     };
+
+    /**
+     * Ask the robot to home itself.
+     */
+    homeTheRobot() {
+        var request = new ROSLIB.ServiceRequest({});
+        this.homeTheRobotService!.callService(request, () => {
+            robotMode = "unknown"; // returns to whatever mode the robot was in before this service was called
+            console.log("Homing complete");
+        });
+    }
 
     executeBaseVelocity = (props: { linVel: number; angVel: number }): void => {
         this.switchToNavigationMode();

@@ -64,6 +64,7 @@ export const Operator = (props: {
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>(false);
+    const [robotNotHomed, setRobotNotHomed] = React.useState<ActionState>(false);
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -405,6 +406,18 @@ export const Operator = (props: {
                 </div>
             )}
             <div id="operator-global-controls">
+                {robotNotHomed && (
+                    <div
+                        className={className("operator-pose-recorder", {
+                            hideLabels: !layout.current.displayLabels,
+                        })}
+                        hidden={!layout.current.displayMovementRecorder}
+                    >
+                        <MovementRecorder
+                            hideLabels={!layout.current.displayLabels}
+                        />
+                    </div>
+                )}
                 <div
                     className={className("operator-pose-recorder", {
                         hideLabels: !layout.current.displayLabels,
