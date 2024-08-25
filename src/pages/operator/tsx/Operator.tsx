@@ -39,6 +39,7 @@ import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
+import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -64,7 +65,7 @@ export const Operator = (props: {
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>(false);
-    const [robotNotHomed, setRobotNotHomed] = React.useState<ActionState>(false);
+    const [robotNotHomed, setRobotNotHomed] = React.useState<ActionState>(true);
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -408,12 +409,11 @@ export const Operator = (props: {
             <div id="operator-global-controls">
                 {robotNotHomed && (
                     <div
-                        className={className("operator-pose-recorder", {
+                        className={className("operator-home-the-robot", {
                             hideLabels: !layout.current.displayLabels,
                         })}
-                        hidden={!layout.current.displayMovementRecorder}
                     >
-                        <MovementRecorder
+                        <HomeTheRobot
                             hideLabels={!layout.current.displayLabels}
                         />
                     </div>

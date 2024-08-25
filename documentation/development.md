@@ -194,9 +194,10 @@ The `src/pages/operator` folder contains the website being run on the operator b
 
  - `index.tsx`
  - `Operator.tsx`
- - `MobileOperator.tsx`
  - `function_providers/`
- - other folders
+ - `layout_components/`
+
+and a few other folders/files we won't need to cover for now.
 
 ### `index.tsx`
 
@@ -278,5 +279,107 @@ function renderOperator(storageHandler: StorageHandler) {
 }
 ```
 
+Adding new capabilities to the web interface may involve creating a function provider. Let's take `HomeTheRobotFunctionProvider` for example. We instantiate it like so:
+
+```js
+export var homeTheRobotFunctionProvider: HomeTheRobotFunctionProvider = new HomeTheRobotFunctionProvider();
+```
+
+You will need to import it as well, but you might see "unresolvable module" errors until we create the `HomeTheRobotFunctionProvider.tsx` file in the [`function_providers/`](#function_providers) folder.
+
+### `function_providers/`
+
+The `function_providers/` folder contains all of the interface's "function providers", which are classes that literally provide functionality as anonmous functions, so that a UI component can map user actions to function calls. We'll create `HomeTheRobotFunctionProvider.tsx` with the following code:
+
+```js
+import { FunctionProvider } from "./FunctionProvider";
+import { HomeTheRobotFunction } from "../layout_components/HomeTheRobot";
+
+export class HomeTheRobotFunctionProvider extends FunctionProvider {
+
+    constructor() {
+        super();
+        this.provideFunctions = this.provideFunctions.bind(this);
+    }
+
+    public provideFunctions(homeTheRobotFunction: HomeTheRobotFunction) {
+        switch (homeTheRobotFunction) {
+            case HomeTheRobotFunction.Home:
+                return () => {
+                    FunctionProvider.remoteRobot?.homeTheRobot();
+                };
+        }
+    }
+}
+
+```
+
+Notice that `HomeTheRobotFunctionProvider` is a subclass of `FunctionProvider`. It is an abstract class and your function providers should extend it as well.
+
+Notice that we use `remoteRobot` to call into `homeTheRobot()`, which we defined in [`shared/remoterobot.tsx`](#remoterobottsx).
+
+Lastly, notice that we import `HomeTheRobotFunction` from `layout_components/`. It is an interface that defines all the functions that the UI component will need. For this example, there's only one function: homing. We will define this interface in the next section.
+
+### Components
+
+There are three component folders:
+
+ - `layout_components/`: for components that will be displayed as part of the interface's layout. These are typically top-level components.
+ - `static_components/`: TODO - what is the difference between a static component and a basic component??
+ - `basic_components/`: building block components that can be used within your own component to build up complex interfaces
+
+The intended UX for the robot homing component is that it should appear prominently when the robot is un-homed. It won't be incorporated into other components, and it won't be dismissable by the user. Therefore, we decided to define the component in layout_components as `src/pages/operator/tsx/layout_components/HomeTheRobot.tsx`. The code looks like this:
+
+```js
+import "operator/css/HomeTheRobot.css";
+import { homeTheRobotFunctionProvider } from "../index";
+
+/** All the possible button functions */
+export enum HomeTheRobotFunction {
+    Home,
+}
+
+export interface HomeTheRobotFunctions {
+    Home: () => void;
+}
+
+export const HomeTheRobot = (props: { hideLabels: boolean }) => {
+    let functions: HomeTheRobotFunctions = {
+        Home: homeTheRobotFunctionProvider.provideFunctions(
+            HomeTheRobotFunction.Home,
+        ) as () => void,
+    };
+
+    return (
+        <React.Fragment>
+            <div id="home-the-robot-container">
+                <p>Home the Robot. Un-homed joints will be greyed-out until this procedure occurs. You can use teleop the mobile base and head to find a clear place for the robot to home.</p>
+                <button onClick={() => { functions.Home(); }}>
+                    <span hidden={props.hideLabels}>Home</span>
+                    <HomeIcon />
+                </button>
+            </div>
+        </React.Fragment>
+    );
+};
+```
+
+Notice that we import the instance of `homeTheRobotFunctionProvider` that was created in [`index.tsx`](#indextsx-1). Further notice that we define the set of functions required for the component in an enum called `HomeTheRobotFunction`. This enables us to map the button's `onClick` callback to the `HomeTheRobotFunction.Home` method. The function provider uses the same enum to map a method that gets called when the button is clicked. The function provider is defined in [`HomeTheRobotFunctionProvider`](#function_providers).
+
+We dress up the HTML in this component with a stylesheet defined in `src/pages/operator/css/HomeTheRobot.css`.
+
 ### `Operator.tsx`
 
+Lastly, we render the `HomeTheRobot` component in the interface by adding it to the render method:
+
+```js
+export const Operator = () => {
+    ...
+    return (
+        <div id="operator">
+            ...
+            <HomeTheRobot hideLabels={!layout.current.displayLabels} />
+        </div>
+    );
+};
+```

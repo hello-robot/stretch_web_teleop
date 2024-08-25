@@ -80,6 +80,7 @@
 .operator-pose-library,
 .operator-pose-recorder,
 .operator-text-to-speech,
+.operator-home-the-robot,
 .operator-aruco-markers {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
@@ -96,6 +97,10 @@
     grid-column: 1/1; */
     transition: all 0.2s ease-out;
     font-size: large;
+}
+
+.operator-home-the-robot {
+    background-color: orange;
 }
 
 .operator-pose-library.hideLabels,
@@ -115,6 +120,7 @@
 .operator-pose-library[hidden],
 .operator-pose-recorder[hidden],
 .operator-text-to-speech[hidden],
+.operator-home-the-robot[hidden],
 .operator-aruco-markers[hidden] {
     display: none;
 }

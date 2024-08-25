@@ -1,0 +1,30 @@
+#home-the-robot-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 1300px) {
+    #home-the-robot-container {
+        font-size: smaller;
+    }
+}
+
+.home-btn {
+    display: flex;
+}
+
+.mobile-text-home-btn {
+    /* width: 97%; */
+    border-radius: 13px;
+    border: 5px solid whitesmoke;
+    font-size: 20px;
+    padding: 10px;
+    margin: 0.5rem;
+    text-align: center;
+    background: #06c7e1;
+    vertical-align: middle;
+    display: flex;
+    justify-content: center;
+}

@@ -27,6 +27,7 @@ import { MapFunctionProvider } from "./function_providers/MapFunctionProvider";
 import { UnderMapFunctionProvider } from "./function_providers/UnderMapFunctionProvider";
 import { MovementRecorderFunctionProvider } from "./function_providers/MovementRecorderFunctionProvider";
 import { TextToSpeechFunctionProvider } from "./function_providers/TextToSpeechFunctionProvider";
+import { HomeTheRobotFunctionProvider } from "./function_providers/HomeTheRobotFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
 import { isMobile } from "react-device-detect";
 import "operator/css/index.css";
@@ -59,6 +60,8 @@ export var mapFunctionProvider: MapFunctionProvider;
 export var underMapFunctionProvider: UnderMapFunctionProvider;
 export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
 export var textToSpeechFunctionProvider: TextToSpeechFunctionProvider;
+export var homeTheRobotFunctionProvider: HomeTheRobotFunctionProvider =
+    new HomeTheRobotFunctionProvider();
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
