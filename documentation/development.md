@@ -33,7 +33,7 @@ export type cmd =
 
 ### `remoterobot.tsx`
 
-This file wraps the logic for receiving and transmission commands, sensor streams, etc. over the WebRTC channels in a nice API for the operator browser. The interface creates a single instance of `RemoteRobot` and uses it for the duration of the session that it is connected to the robot. On the other end, the robot browser is listening for commands from / transmitting data to `RemoteRobot`. The robot-side logic can be found in `src/pages/robot/tsx/index.tsx`.
+This file wraps the logic for receiving and transmitting commands, sensor streams, etc. over the WebRTC channels in a nice API for the operator browser. The interface creates a single instance of `RemoteRobot` and uses it for the duration of the session that it is connected to the robot. On the other end, the robot browser is listening for commands from / transmitting data to `RemoteRobot`. The robot-side logic can be found in `src/pages/robot/tsx/index.tsx`, which is described [at this section](#indextsx).
 
 Adding new capabilities to the web interface will involve adding functionality to the `RemoteRobot` class. Let's take homing the robot for example. We add a method to the class like so:
 
@@ -50,7 +50,7 @@ At the top of the file, be sure to import `HomeTheRobotCommand` from [`commands.
 
 ### `utils.tsx` and `webrtcconnections.tsx`
 
-TODO: document these files
+These files are not needed to add homing functionality. TODO: document these files elsewhere and link to it.
 
 ## `src/pages/robot`
 
@@ -156,7 +156,7 @@ export class Robot extends React.Component {
 }
 ```
 
-The above code is greatly abridged, but it gives you the general idea. Create clients of type `ROSLIB.ActionClient` for each ROS action, subscribers of type `ROSLIB.Topic` for each topic, and callers of type `ROSLIB.Service` for each service. Then, connect them in the `async onConnect()` method. Lastly, define execution logic in `execute<Something>()` methods. Let's take homing the robot for example. We add a caller for the `/home_the_robot` service and connect it like so:
+The above code is greatly abridged, but it gives you the general idea. Create clients of type `ROSLIB.ActionClient` for each ROS action, subscribers of type `ROSLIB.Topic` for each topic, and callers of type `ROSLIB.Service` for each service. Then, connect them in the `onConnect()` method. Lastly, define execution logic in `execute<Something>()` methods. Let's take homing the robot for example. We add a caller for the `/home_the_robot` service and connect it like so:
 
 ```js
 export class Robot extends React.Component {
@@ -186,7 +186,7 @@ export class Robot extends React.Component {
 
 ### `audiostreams.tsx` and `videostreams.tsx`
 
-TODO: document these files
+These files are not needed to add homing functionality. TODO: document these files elsewhere and link to it.
 
 ## `src/pages/operator`
 
@@ -211,7 +211,7 @@ remoteRobot.sensors.setBatteryFunctionProviderCallback(
 );
 ```
 
-We set up the function providers from the `src/pages/operator/tsx/function_providers` folder. Function providers provides logic to connect the information from `RemoteRobot` with the components being rendered on the screen. Some function providers require a storage handler, which gives those components a way to persist data/preferences across sessions (e.g. if I change the layout, it should remember my preferred layout next time I launch the web interface).
+We set up the "function providers" from the `src/pages/operator/tsx/function_providers` folder. Function providers connect the information from `RemoteRobot` with the UI components being rendered on the screen. Some function providers require a storage handler, which gives those components a way to persist data/preferences across sessions (e.g. if I change the layout, it should remember my preferred layout next time I launch the web interface).
 
 ```js
 export var batteryVoltageFunctionProvider = new BatteryVoltageFunctionProvider();
@@ -235,26 +235,25 @@ connection = new WebRTCConnection({
 });
 ```
 
-We define a series of callbacks:
+We define two callbacks for the WebRTC connection: `handleRemoteTrackAdded()`, which subscribes to the video/audio WebRTC channels so they can be rendered to the interface's camera feeds, and `handleWebRTCMessage()`, which receives messages sent by the robot browser. `handleWebRTCMessage()` is a big switch statement which interprets the commands and calls into `RemoteRobot`:
 
- - The WebRTC connection gets `handleRemoteTrackAdded()`, which connects the video/audio WebRTC channels from the robot browser to the interface's camera feeds, and `handleWebRTCMessage()`, which receives messages sent by the robot browser. `handleWebRTCMessage()` is a big switch statement which interprets the commands and calls into `RemoteRobot`:
-    ```js
-    function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
-        switch (message.type) {
-            case "isRunStopped":
-                remoteRobot.sensors.setRunStopState(message.enabled);
-                break;
-            case "amclPose":
-                remoteRobot.setMapPose(message.message);
-                break;
-            case "moveBaseState":
-                console.log("moveBaseState", message.message);
-                underMapFunctionProvider.setMoveBaseState(message.message);
-                break;
-            ...
-        }
+```js
+function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
+    switch (message.type) {
+        case "isRunStopped":
+            remoteRobot.sensors.setRunStopState(message.enabled);
+            break;
+        case "amclPose":
+            remoteRobot.setMapPose(message.message);
+            break;
+        case "moveBaseState":
+            console.log("moveBaseState", message.message);
+            underMapFunctionProvider.setMoveBaseState(message.message);
+            break;
+        ...
     }
-    ```
+}
+```
 
 Lastly, we render the interface:
 
