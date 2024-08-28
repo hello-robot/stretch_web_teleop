@@ -25,12 +25,12 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
     return !isMobile ? (
         <React.Fragment>
             <div id="home-the-robot-container">
-                <Tooltip text="Robots with relative encoders (vs absolute encoders) need a homing procedure when they power on. For Stretch, it is a 45-second sequence of motions to find each joint's zero position." position="top">
-                    <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Home the Robot</b>. Un-homed joints will be greyed-out until this procedure occurs. You can use teleop the mobile base and head to find a clear place for the robot to home.</p>
+                <Tooltip text="Robots with relative encoders (vs absolute encoders) need a homing procedure when they power on. For Stretch, it is a 45-second sequence of motions to find each joint's zero position. Un-homed joints will be greyed-out until this procedure occurs." position="top">
+                    <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is not homed.</b> Please drive the robot to a safe position and press the home button.</p>
                 </Tooltip>
                 <div style={{marginRight: "100px"}}>
                     <button
-                        className="home-btn btn-label"
+                        className="home-btn"
                         onClick={() => {
                             functions.Home();
                         }}

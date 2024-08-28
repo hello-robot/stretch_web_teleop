@@ -13,6 +13,7 @@
 
 .home-btn {
     display: flex;
+    padding: 20px;
 }
 
 .mobile-text-home-btn {
