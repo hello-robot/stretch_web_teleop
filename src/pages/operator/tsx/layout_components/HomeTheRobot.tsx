@@ -4,6 +4,7 @@ import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/HomeTheRobot.css";
 import { isMobile } from "react-device-detect";
 import HomeIcon from "@mui/icons-material/Home";
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 /** All the possible button functions */
@@ -42,8 +43,8 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
                 >
                     {loading ? (
                         <div className="home-btn">
-                            <span hidden={props.hideLabels}>Home</span>
-                            <HomeIcon />
+                            <span hidden={props.hideLabels}>Loading...</span>
+                            <CircularProgress size="1.2rem" color="inherit" />
                         </div>
                     ) : (
                         <div className="home-btn">
