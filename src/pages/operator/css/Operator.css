@@ -131,6 +131,7 @@
     row-gap: 10px;
     column-gap: 10px;
     justify-content: center;
+    padding-top: 20px;
 }
 
 #operator-body {

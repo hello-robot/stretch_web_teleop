@@ -30,31 +30,28 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
             <div id="home-the-robot-container">
                 <Tooltip text="Robots with relative encoders (vs absolute encoders) need a homing procedure when they power on. For Stretch, it is a 45-second sequence of motions to find each joint's zero position. Un-homed joints will be greyed-out until this procedure occurs." position="top">
                     {loading ? (
-                        <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is homing...</b> Please wait.</p>
+                        <p className="home-msg"><b style={{fontWeight: "bold"}}>Robot is homing...</b> Please wait.</p>
                     ) : (
-                        <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is not homed.</b> Please drive the robot to a safe position and press the home button.</p>
+                        <p className="home-msg"><b style={{fontWeight: "bold"}}>Robot is not homed.</b> Please drive the robot to a safe position and press the home button.</p>
                     )}
                 </Tooltip>
-                <div style={{marginRight: "100px"}}>
-                    <button
-                        className="home-btn"
-                        onClick={() => {
-                            functions.Home();
-                        }}
-                    >
+                <button
+                    onClick={() => {
+                        functions.Home();
+                    }}
+                >
                     {loading ? (
-                        <div>
+                        <div className="home-btn">
                             <span hidden={props.hideLabels}>Home</span>
                             <HomeIcon />
                         </div>
                     ) : (
-                        <div>
+                        <div className="home-btn">
                             <span hidden={props.hideLabels}>Home</span>
                             <HomeIcon />
                         </div>
                     )}
-                    </button>
-                </div>
+                </button>
             </div>
         </React.Fragment>
     ) : (
