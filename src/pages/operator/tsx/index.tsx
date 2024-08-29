@@ -157,6 +157,12 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
                 message.jointsInCollision,
             );
             break;
+        case "mode":
+            remoteRobot.sensors.setMode(message.value);
+            break;
+        case "isHomed":
+            remoteRobot.sensors.setIsHomed(message.value);
+            break;
         case "isRunStopped":
             remoteRobot.sensors.setRunStopState(message.enabled);
             break;
@@ -246,6 +252,12 @@ function configureRemoteRobot() {
     );
     remoteRobot.sensors.setBatteryFunctionProviderCallback(
         batteryVoltageFunctionProvider.updateVoltage,
+    );
+    remoteRobot.sensors.setModeFunctionProviderCallback(
+        homeTheRobotFunctionProvider.updateModeState,
+    );
+    remoteRobot.sensors.setIsHomedFunctionProviderCallback(
+        homeTheRobotFunctionProvider.updateIsHomedState,
     );
     remoteRobot.sensors.setRunStopFunctionProviderCallback(
         runStopFunctionProvider.updateRunStopState,

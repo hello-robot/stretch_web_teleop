@@ -16,6 +16,9 @@ export interface HomeTheRobotFunctions {
 }
 
 export const HomeTheRobot = (props: { hideLabels: boolean }) => {
+    const [loading, setLoading] = useState<boolean>(false);
+    homeTheRobotFunctionProvider.setModeIsHomingCallback(setLoading);
+
     let functions: HomeTheRobotFunctions = {
         Home: homeTheRobotFunctionProvider.provideFunctions(
             HomeTheRobotFunction.Home,
@@ -26,7 +29,11 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
         <React.Fragment>
             <div id="home-the-robot-container">
                 <Tooltip text="Robots with relative encoders (vs absolute encoders) need a homing procedure when they power on. For Stretch, it is a 45-second sequence of motions to find each joint's zero position. Un-homed joints will be greyed-out until this procedure occurs." position="top">
-                    <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is not homed.</b> Please drive the robot to a safe position and press the home button.</p>
+                    {loading ? (
+                        <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is homing...</b> Please wait.</p>
+                    ) : (
+                        <p style={{marginLeft: "40px"}}><b style={{fontWeight: "bold"}}>Robot is not homed.</b> Please drive the robot to a safe position and press the home button.</p>
+                    )}
                 </Tooltip>
                 <div style={{marginRight: "100px"}}>
                     <button
@@ -35,8 +42,17 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
                             functions.Home();
                         }}
                     >
-                        <span hidden={props.hideLabels}>Home</span>
-                        <HomeIcon />
+                    {loading ? (
+                        <div>
+                            <span hidden={props.hideLabels}>Home</span>
+                            <HomeIcon />
+                        </div>
+                    ) : (
+                        <div>
+                            <span hidden={props.hideLabels}>Home</span>
+                            <HomeIcon />
+                        </div>
+                    )}
                     </button>
                 </div>
             </div>

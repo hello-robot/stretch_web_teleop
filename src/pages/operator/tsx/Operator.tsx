@@ -15,6 +15,7 @@ import {
     buttonFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
+    homeTheRobotFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
 } from ".";
@@ -65,7 +66,11 @@ export const Operator = (props: {
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>(false);
-    const [robotNotHomed, setRobotNotHomed] = React.useState<ActionState>(true);
+    const [robotNotHomed, setRobotNotHomed] = React.useState<ActionState>(false);
+    function showHomeTheRobotGlobalControl(isHomed: ActionState) {
+        setRobotNotHomed(!isHomed);
+    }
+    homeTheRobotFunctionProvider.setIsHomedCallback(showHomeTheRobotGlobalControl);
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 

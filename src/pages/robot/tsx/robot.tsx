@@ -70,6 +70,8 @@ export class Robot extends React.Component {
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
     private showTabletResultCallback: (goalState: ActionState) => void;
     private amclPoseCallback: (pose: ROSLIB.Transform) => void;
+    private modeCallback: (mode: string) => void;
+    private isHomedCallback: (isHomed: boolean) => void;
     private isRunStoppedCallback: (isRunStopped: boolean) => void;
     private hasBetaTeleopKitCallback: (value: boolean) => void;
     private stretchToolCallback: (value: string) => void;
@@ -92,6 +94,8 @@ export class Robot extends React.Component {
         moveToPregraspResultCallback: (goalState: ActionState) => void;
         showTabletResultCallback: (goalState: ActionState) => void;
         amclPoseCallback: (pose: ROSLIB.Transform) => void;
+        modeCallback: (mode: string) => void;
+        isHomedCallback: (isHomed: boolean) => void;
         isRunStoppedCallback: (isRunStopped: boolean) => void;
         hasBetaTeleopKitCallback: (value: boolean) => void;
         stretchToolCallback: (value: string) => void;
@@ -104,6 +108,8 @@ export class Robot extends React.Component {
         this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
         this.showTabletResultCallback = props.showTabletResultCallback;
         this.amclPoseCallback = props.amclPoseCallback;
+        this.modeCallback = props.modeCallback;
+        this.isHomedCallback = props.isHomedCallback;
         this.isRunStoppedCallback = props.isRunStoppedCallback;
         this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
         this.stretchToolCallback = props.stretchToolCallback;
@@ -252,6 +258,9 @@ export class Robot extends React.Component {
         this.subscribeToJointState();
         this.subscribeToJointLimits();
         this.subscribeToBatteryState();
+        this.subscribeToMode();
+        this.subscribeToIsHomed();
+        this.subscribeToIsRunStopped();
         this.subscribeToActionResult(
             moveBaseActionName,
             this.moveBaseResultCallback,
@@ -273,7 +282,6 @@ export class Robot extends React.Component {
             "Show Tablet succeeded!",
             "Show Tablet failed!",
         );
-        this.subscribeToIsRunStopped();
         this.createTrajectoryClient();
         this.createMoveBaseClient();
         this.createMoveToPregraspClient();
@@ -368,6 +376,45 @@ export class Robot extends React.Component {
 
         batteryStateTopic.subscribe((msg: ROSBatteryState) => {
             if (this.batteryStateCallback) this.batteryStateCallback(msg);
+        });
+    }
+
+    subscribeToMode() {
+        const modeTopic: ROSLIB.Topic = new ROSLIB.Topic({
+            ros: this.ros,
+            name: "/mode",
+            messageType: "std_msgs/msg/String",
+        });
+        this.subscriptions.push(modeTopic);
+
+        modeTopic.subscribe((msg) => {
+            if (this.modeCallback) this.modeCallback(msg.data);
+        });
+    }
+
+    subscribeToIsHomed() {
+        const isHomedTopic: ROSLIB.Topic = new ROSLIB.Topic({
+            ros: this.ros,
+            name: "/is_homed",
+            messageType: "std_msgs/msg/Bool",
+        });
+        this.subscriptions.push(isHomedTopic);
+
+        isHomedTopic.subscribe((msg) => {
+            if (this.isHomedCallback) this.isHomedCallback(msg.data);
+        });
+    }
+
+    subscribeToIsRunStopped() {
+        let topic: ROSLIB.Topic = new ROSLIB.Topic({
+            ros: this.ros,
+            name: "is_runstopped",
+            messageType: "std_msgs/msg/Bool",
+        });
+        this.subscriptions.push(topic);
+
+        topic.subscribe((msg) => {
+            if (this.isRunStoppedCallback) this.isRunStoppedCallback(msg.data);
         });
     }
 
@@ -507,19 +554,6 @@ export class Robot extends React.Component {
                         alert_type: "error",
                     });
             }
-        });
-    }
-
-    subscribeToIsRunStopped() {
-        let topic: ROSLIB.Topic = new ROSLIB.Topic({
-            ros: this.ros,
-            name: "is_runstopped",
-            messageType: "std_msgs/msg/Bool",
-        });
-        this.subscriptions.push(topic);
-
-        topic.subscribe((msg) => {
-            if (this.isRunStoppedCallback) this.isRunStoppedCallback(msg.data);
         });
     }
 
