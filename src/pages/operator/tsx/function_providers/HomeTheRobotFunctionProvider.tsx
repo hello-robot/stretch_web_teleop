@@ -42,8 +42,7 @@ export class HomeTheRobotFunctionProvider extends FunctionProvider {
 
     public updateIsHomedState(isHomed: boolean): void {
         this.isHomed = isHomed;
-        if (this.isHomedCallback)
-            this.isHomedCallback(this.isHomed);
+        if (this.isHomedCallback) this.isHomedCallback(this.isHomed);
     }
 
     public provideFunctions(homeTheRobotFunction: HomeTheRobotFunction) {
