@@ -383,3 +383,7 @@ export const Operator = () => {
     );
 };
 ```
+
+## Wrap-up
+
+In this tutorials, we've covered the files you'd need to edit to add new development to the interface. We've taken the example of homing, and added UI that enables the operator to home the robot remotely. In practice, the homing UX is a bit more complicated; we'd like the UI to show some indication of loading as the homing sequence is occurring, and to disappear once the robot is homed. Check out [the pull request](https://github.com/hello-robot/stretch_web_teleop/pull/98) that implements the complete homing feature to see what set of changes is required for a real feature. 
