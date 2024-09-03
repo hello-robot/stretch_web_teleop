@@ -15,13 +15,13 @@
     display: flex;
 }
 
-.delete-btn { 
+.delete-btn {
     background-color: var(--btn-red);
     display: flex;
 }
 
-@media(max-width:1300px) {
-    #pose-library-container { 
+@media (max-width: 1300px) {
+    #pose-library-container {
         font-size: smaller;
     }
 }

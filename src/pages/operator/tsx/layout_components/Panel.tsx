@@ -1,13 +1,22 @@
 import React from "react";
-import { ComponentType, ParentComponentDefinition, TabDefinition, PanelDefinition, ComponentDefinition } from "../utils/component_definitions"
+import {
+    ComponentType,
+    ParentComponentDefinition,
+    TabDefinition,
+    PanelDefinition,
+} from "../utils/component_definitions";
 import { className } from "shared/util";
 import { PopupModal } from "../basic_components/PopupModal";
 import { ComponentListProps, ComponentList } from "./ComponentList";
 import { DropZone } from "./DropZone";
-import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
-import "operator/css/Panel.css"
+import {
+    CustomizableComponentProps,
+    isSelected,
+} from "./CustomizableComponent";
+import "operator/css/Panel.css";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
-/* 
+/*
 TODO:
 implement behavior:
 - delete of all tabs deletes the tabs element
@@ -25,7 +34,7 @@ export const Panel = (props: CustomizableComponentProps) => {
     const [showTabModal, setShowTabModal] = React.useState(false);
     const definition = props.definition as PanelDefinition;
     const countChildren = definition.children.length;
-    
+
     // Handle case where active tab was moved or deleted, just use last remaining tab
     if (activeTab >= countChildren) {
         setActiveTab(countChildren - 1);
@@ -34,26 +43,32 @@ export const Panel = (props: CustomizableComponentProps) => {
 
     const activeTabDef = definition.children[activeTab] as TabDefinition;
     if (!activeTabDef) {
-        throw Error(`Tabs at: ${props.path}\nActive tab not defined\nActive tab: ${activeTab}`)
+        throw Error(
+            `Tabs at: ${props.path}\nActive tab not defined\nActive tab: ${activeTab}`,
+        );
     }
     if (activeTabDef.type != ComponentType.SingleTab) {
-        throw Error(`Tabs element at path ${props.path} has child of type ${activeTabDef.type}`)
+        throw Error(
+            `Tabs element at path ${props.path} has child of type ${activeTabDef.type}`,
+        );
     }
 
     // Should take up screen size proportional to number of children
     let flex = Math.max(activeTabDef.children.length + 1, 1);
-    if (activeTabDef.label === "Safety") flex = 1 
-    else if (activeTabDef.children.some(c => c.type === ComponentType.ButtonGrid)) {
+    if (activeTabDef.label === "Safety") flex = 1;
+    else if (
+        activeTabDef.children.some((c) => c.type === ComponentType.ButtonGrid)
+    ) {
         flex = 3;
     }
 
     /** Props for rendering the children elements inside the active tab */
     const componentListProps: ComponentListProps = {
-        path: props.path + '-' + activeTab,
+        path: props.path + "-" + activeTab,
         sharedState: props.sharedState,
         // Use active tab as the definition for what to render
-        definition: activeTabDef
-    }
+        definition: activeTabDef,
+    };
 
     /**
      * Creates a definition for the new tab and adds it to the layout
@@ -64,7 +79,7 @@ export const Panel = (props: CustomizableComponentProps) => {
         const newTabDef = {
             type: ComponentType.SingleTab,
             label: name,
-            children: []
+            children: [],
         } as TabDefinition;
         // Add it as a new child
         definition.children.push(newTabDef);
@@ -81,7 +96,7 @@ export const Panel = (props: CustomizableComponentProps) => {
         // If customizing and tab already active
         if (props.sharedState.customizing && idx === activeTab) {
             // Mark tab as selected
-            const tabPath = props.path + '-' + idx;
+            const tabPath = props.path + "-" + idx;
             props.sharedState.onSelect(definition.children[idx], tabPath);
             return;
         }
@@ -98,13 +113,15 @@ export const Panel = (props: CustomizableComponentProps) => {
     }
 
     // Add onClick listener to tab content in customization mode
-    const selectProp = props.sharedState.customizing ? {
-        onClick: selectContent
-    } : {};
+    const selectProp = props.sharedState.customizing
+        ? {
+              onClick: selectContent,
+          }
+        : {};
 
     /**
      * Checks if this tabs or one of its immediate children is currently selected
-     * 
+     *
      * @returns null if currently selected component is not either this tabs
      * or one of it's immediate SingleTab children, -1 if the selected component
      * is this entire tabs component, or the index of the selected single tab
@@ -112,11 +129,13 @@ export const Panel = (props: CustomizableComponentProps) => {
      */
     function checkChildTabSelected(): number | null {
         const selectedPath = props.sharedState.selectedPath;
-        if (!selectedPath) return null;  // nothing is selected/active
-        const activeSplitPath = selectedPath.split('-');
-        const thisSplitPath = props.path.split('-');
-        const activeChild = thisSplitPath.every((val, index) => val === activeSplitPath[index]);
-        if (!activeChild) return null;  // active path is not a child element
+        if (!selectedPath) return null; // nothing is selected/active
+        const activeSplitPath = selectedPath.split("-");
+        const thisSplitPath = props.path.split("-");
+        const activeChild = thisSplitPath.every(
+            (val, index) => val === activeSplitPath[index],
+        );
+        if (!activeChild) return null; // active path is not a child element
         // The paths are exactly the same, the entire Tabs structure is selected
         if (activeSplitPath.length == thisSplitPath.length) return -1;
         // Path points to a child of a tab
@@ -138,7 +157,7 @@ export const Panel = (props: CustomizableComponentProps) => {
         return (
             <React.Fragment key={`${idx}`}>
                 <DropZone
-                    path={props.path + '-' + idx}
+                    path={props.path + "-" + idx}
                     sharedState={props.sharedState}
                     parentDef={props.definition}
                 />
@@ -157,7 +176,10 @@ export const Panel = (props: CustomizableComponentProps) => {
 
     return (
         <div
-            className={className("tabs-component", { customizing: props.sharedState.customizing, selected: thisSelected })}
+            className={className("tabs-component", {
+                customizing: props.sharedState.customizing,
+                selected: thisSelected,
+            })}
             style={{ flex: `${flex} ${flex} 0` }}
         >
             <div className="tabs-header">
@@ -169,13 +191,14 @@ export const Panel = (props: CustomizableComponentProps) => {
                 />
                 {
                     // In customization mode show an extra plus to add a new tab
-                    props.sharedState.customizing ?
+                    props.sharedState.customizing ? (
                         <button
-                            className="tab-button add-tab material-icons"
+                            className="tab-button add-tab"
                             onClick={() => setShowTabModal(true)}
                         >
-                            add_circle
-                        </button> : undefined
+                            <AddCircleIcon />
+                        </button>
+                    ) : undefined
                 }
             </div>
             <div className="tabs-content" {...selectProp}>
@@ -186,16 +209,15 @@ export const Panel = (props: CustomizableComponentProps) => {
                 setShow={setShowTabModal}
                 addTab={addTab}
             />
-
         </div>
-    )
-}
+    );
+};
 
 /** Modal for creating a new tab on a panel component. */
 const NewTabModal = (props: {
-    show: boolean,
-    setShow: (show: boolean) => void,
-    addTab: (name: string) => void
+    show: boolean;
+    setShow: (show: boolean) => void;
+    addTab: (name: string) => void;
 }) => {
     const [text, setText] = React.useState("");
     function handleAccept() {
@@ -213,11 +235,18 @@ const NewTabModal = (props: {
             acceptButtonText="Create Tab"
             acceptDisabled={text.length < 1}
         >
-            <label htmlFor="new-tab-name"><b>New Tab Label</b></label>
-            <input autoFocus type="text" id="new-tab-name" name="new-tab-name"
-                value={text} onChange={e => setText(e.target.value)}
+            <label htmlFor="new-tab-name">
+                <b>New Tab Label</b>
+            </label>
+            <input
+                autoFocus
+                type="text"
+                id="new-tab-name"
+                name="new-tab-name"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
                 placeholder="label for the new tab"
             />
         </PopupModal>
-    )
-}
+    );
+};

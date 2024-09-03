@@ -9,8 +9,8 @@
     margin-right: 2rem;
 }
 
-@media(max-width:900px) {
-    #customize-button { 
-        width: var(--btn-header-width-med); 
+@media (max-width: 900px) {
+    #customize-button {
+        width: var(--btn-header-width-med);
     }
 }

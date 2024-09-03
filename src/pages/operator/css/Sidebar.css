@@ -16,12 +16,10 @@
     width: 0;
 }
 
-
 #sidebar p {
     margin-top: 0;
     margin-bottom: 1rem;
 }
-
 
 #sidebar-header {
     background-color: var(--header-bg);
@@ -57,7 +55,7 @@
 
 /* Options ********************************************************************/
 
-#sidebar-options>button {
+#sidebar-options > button {
     height: 5rem;
     width: 100%;
 }
@@ -141,21 +139,20 @@
 }
 
 /* Global settings area *******************************************************/
-#global-settings>button {
+#global-settings > button {
     display: block;
 }
 
 #global-settings button {
     height: 3rem;
-}   
+}
 
-#global-settings>* {
+#global-settings > * {
     width: 100%;
 }
 
-#global-settings>*,
-.provider-tab
-{
+#global-settings > *,
+.provider-tab {
     margin-bottom: 0.4rem;
 }
 
@@ -182,8 +179,8 @@
     text-wrap: wrap;
 }
 
-@media(max-width:900px) {
-    #sidebar { 
+@media (max-width: 900px) {
+    #sidebar {
         grid-template-rows: auto;
     }
 

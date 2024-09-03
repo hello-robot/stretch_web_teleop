@@ -1,8 +1,15 @@
 import { buttonFunctionProvider } from "operator/tsx/index";
-import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
-import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
+import {
+    ButtonFunctions,
+    ButtonPadButton,
+    ButtonState,
+} from "../function_providers/ButtonFunctionProvider";
+import {
+    CustomizableComponentProps,
+    isSelected,
+} from "./CustomizableComponent";
 import { className } from "shared/util";
-import "operator/css/ButtonGrid.css"
+import "operator/css/ButtonGrid.css";
 
 const BUTTON_NAMES = [
     "Forward",
@@ -23,8 +30,8 @@ const BUTTON_NAMES = [
     "Rotate Right",
 
     "Open Gripper",
-    "Close Gripper"
-]
+    "Close Gripper",
+];
 
 const BUTTON_FUNCTIONS = [
     ButtonPadButton.BaseForward,
@@ -42,15 +49,15 @@ const BUTTON_FUNCTIONS = [
     ButtonPadButton.WristRotateIn,
     ButtonPadButton.WristRotateOut,
     ButtonPadButton.GripperOpen,
-    ButtonPadButton.GripperClose
-]
+    ButtonPadButton.GripperClose,
+];
 
 const HEADER_NAMES = [
     "Base",
     "Arm/Lift",
     "Wrist/Gripper",
     // "Gripper Controls"
-]
+];
 
 const BACKGROUND_COLORS: JSX.Element[] = [];
 for (let i = 0; i < 4; i++) {
@@ -62,8 +69,8 @@ for (let i = 0; i < 4; i++) {
                 // backgroundColor: `hsl(210, 100%, ${10 + (i * 6)}%)`
             }}
             className="button-grid-bkg-color"
-        />
-    )
+        />,
+    );
 }
 
 export const ButtonGrid = (props: CustomizableComponentProps) => {
@@ -74,20 +81,30 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     }
     return (
-        <div className={className("button-grid", { selected, customizing })} onClick={handleSelect}>
+        <div
+            className={className("button-grid", { selected, customizing })}
+            onClick={handleSelect}
+        >
             {/* {BACKGROUND_COLORS} */}
             {HEADER_NAMES.map((headerName, idx) => (
-                <p key={idx} style={{ gridArea: `header${idx}` }}>{headerName}</p>
+                <p key={idx} style={{ gridArea: `header${idx}` }}>
+                    {headerName}
+                </p>
             ))}
             {BUTTON_NAMES.map((buttonName, idx) => {
                 const buttonFunction = BUTTON_FUNCTIONS[idx];
-                const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(buttonFunction) || ButtonState.Inactive;
-                const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(buttonFunction);
-                const clickProps = props.sharedState.customizing ? {} : {
-                    onPointerDown: functs.onClick,
-                    onPointerUp: functs.onRelease,
-                    onPointerLeave: functs.onLeave
-                }
+                const buttonState: ButtonState =
+                    props.sharedState.buttonStateMap?.get(buttonFunction) ||
+                    ButtonState.Inactive;
+                const functs: ButtonFunctions =
+                    buttonFunctionProvider.provideFunctions(buttonFunction);
+                const clickProps = props.sharedState.customizing
+                    ? {}
+                    : {
+                          onPointerDown: functs.onClick,
+                          onPointerUp: functs.onRelease,
+                          onPointerLeave: functs.onLeave,
+                      };
                 return (
                     <button
                         key={idx}
@@ -100,5 +117,5 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
                 );
             })}
         </div>
-    )
-}
+    );
+};

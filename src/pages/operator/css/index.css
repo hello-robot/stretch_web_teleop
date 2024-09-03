@@ -1,6 +1,6 @@
 :root {
     --btn-brdr-radius: 0.4rem;
-    --btn-padding: .5em 1em;
+    --btn-padding: 0.5em 1em;
     --btn-padding-med: 0.4rem 0.5rem;
 
     --selected-color: hsl(33, 95%, 63%);
@@ -9,7 +9,7 @@
     --btn-blue: hsl(200deg 83.23% 22.29%);
     --btn-green: rgb(129, 218, 129);
     --btn-red: hsl(0, 70%, 70%);
-    --btn-turquoise: hsl(171,32%,46%);
+    --btn-turquoise: hsl(171, 32%, 46%);
 
     --shadow-color: rgba(112, 112, 112, 0.196);
 
@@ -37,9 +37,9 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background-color);
@@ -64,11 +64,11 @@ body,
     user-select: none;
 }
 
-@media screen and (orientation:landscape) and (max-device-width: 900px) {
+@media screen and (orientation: landscape) and (max-device-width: 900px) {
     html,
     body,
     #root {
-            overflow: scroll;
+        overflow: scroll;
     }
 }
 
@@ -136,16 +136,16 @@ button .material-icons {
 }
 
 .font-white {
-    color: var(--font-white)
+    color: var(--font-white);
 }
 
 .btn-yellow {
     background-color: var(--selected-color);
 }
 
-@media(max-width:1300px) {
-    button { 
-        padding: var(--btn-padding-med); 
+@media (max-width: 1300px) {
+    button {
+        padding: var(--btn-padding-med);
         /* font-size: 90px; */
     }
 

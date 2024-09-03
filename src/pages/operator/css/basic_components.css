@@ -16,7 +16,7 @@
     /* align-items: center; */
     justify-content: space-between;
     opacity: 100%;
-    touch-action: manipulation
+    touch-action: manipulation;
 }
 
 .popup-modal.small {
@@ -28,12 +28,12 @@
 .popup-modal.medium {
     height: 50rem;
     width: 47rem;
-    top: -10%
+    top: -10%;
     /* height: 35%; */
 }
 
 .popup-modal.large {
-    height: 50%;
+    height: 60%;
 }
 
 .mobile {
@@ -75,12 +75,13 @@
 
 .popup-modal-bottom-buttons button {
     width: 45%;
-    padding: .5em;
+    padding: 0.5em;
     color: black;
 }
 
 /* Dark background behind popup */
-#popup-background, .loader-background {
+#popup-background,
+.loader-background {
     position: fixed;
     top: 0;
     left: 0;
@@ -106,7 +107,8 @@
     position: relative;
 }
 
-.dropdown-button {
+.dropdown-button,
+.dropdown-input-button {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -117,13 +119,15 @@
     color: black;
 }
 
-.dropdown-button.expanded.bottom {
+.dropdown-button.expanded.bottom,
+.dropdown-input-button.expanded.bottom {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     color: black;
 }
 
-.dropdown-button.expanded.top {
+.dropdown-button.expanded.top,
+.dropdown-input-button.expanded.top {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     margin: 0 !important;
@@ -131,29 +135,37 @@
 }
 
 /* Flip the dropdown arrow when active */
-.dropdown-button span {
+.dropdown-button span,
+.dropdown-input-button span {
     transition: transform 0.2s linear;
 }
 
-.dropdown-button.expanded span {
+.dropdown-button.expanded span,
+.dropdown-input-button.expanded span {
     transform: scaleY(-1);
 }
 
-.dropdown-popup {
+.dropdown-popup,
+.dropdown-input-popup {
     position: absolute;
     min-width: 100%;
     z-index: 3;
     box-shadow: var(--shadow);
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
+    top: 100%;
+    bottom: auto;
+    overflow-y: auto; /* Make it scrollable */
 }
 
-.dropdown-popup.top {
+.dropdown-popup.top,
+.dropdown-input-popup.top {
     top: auto;
     bottom: 100%;
     box-shadow: var(--shadow-bottom);
 }
 
-.dropdown-option {
+.dropdown-option,
+.dropdown-input-option {
     padding-top: 1rem;
     padding-bottom: 1rem;
     cursor: pointer;
@@ -165,20 +177,63 @@
     color: black;
 }
 
-.dropdown-option.active {
+.dropdown-option.active,
+.dropdown-input-option.active {
     filter: brightness(80%);
 }
 
-.dropdown-popup.top .dropdown-option:first-of-type {
+.dropdown-popup.top .dropdown-option:first-of-type,
+.dropdown-input-popup.top .dropdown-option:first-of-type {
     border-radius: var(--btn-brdr-radius) var(--btn-brdr-radius) 0 0;
 }
 
-.dropdown-popup.top .dropdown-option:last-of-type {
+.dropdown-popup.top .dropdown-option:last-of-type,
+.dropdown-input-popup.top .dropdown-option:last-of-type {
     box-shadow: none;
 }
 
-.dropdown-popup.bottom .dropdown-option:last-of-type {
+.dropdown-popup.bottom .dropdown-option:last-of-type,
+.dropdown-input-popup.bottom .dropdown-option:last-of-type {
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
+}
+
+/* Dropdown Input **************************************************************/
+
+.dropdown-input {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.dropdown-input:focus-within {
+    border: 1px solid black;
+    border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
+}
+
+.dropdown-input-textarea {
+    border-right-width: 0px !important;
+    resize: none;
+    border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
+    box-shadow: var(--shadow);
+    border: none;
+    padding: 0.25rem 0 0.25rem 0.5rem;
+}
+
+.dropdown-input-textarea:focus {
+    border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
+    outline: none;
+}
+
+.dropdown-input-button {
+    width: auto !important;
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+    box-shadow: none;
+    border-radius: 0 var(--btn-brdr-radius) var(--btn-brdr-radius) 0;
+    box-shadow: var(--shadow);
+    /* border: 1px solid light-dark(rgb(118, 118, 118), rgb(133, 133, 133)); */
+    border-left-width: 0px !important;
 }
 
 /* CheckToggleButton **********************************************************/
@@ -193,7 +248,8 @@
     margin-right: 1rem;
 }
 
-.check-toggle-button, .check-toggle-button-mobile {
+.check-toggle-button,
+.check-toggle-button-mobile {
     border-radius: 13px;
     display: flex;
     justify-content: center;
@@ -236,14 +292,14 @@ ul.checkbox li {
 }
 
 hr {
-    width: 100%
+    width: 100%;
 }
 
 button .material-icons {
     margin: 0 !important;
 }
 
-input[type='checkbox'] {
+input[type="checkbox"] {
     width: 1.5rem;
     height: 1.5rem;
     background: white;
@@ -253,7 +309,7 @@ input[type='checkbox'] {
 }
 
 @media screen and (max-device-width: 700px) {
-    input[type='checkbox'] {
+    input[type="checkbox"] {
         margin-right: 3rem;
         transform: scale(2);
     }
@@ -270,7 +326,7 @@ input[type='checkbox'] {
     display: flex;
     flex-direction: column;
 }
-  
+
 /* Style the buttons that are used to open and close the accordion panel */
 .accordion {
     /* background-color: #eee; */
@@ -284,20 +340,20 @@ input[type='checkbox'] {
     transition: background-color 0.6s ease;
     justify-content: space-between;
 }
-  
+
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .accordion:hover,
 .active {
-    background-color: #ccc;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.05) 0 0);
 }
-  
+
 /* Style the accordion content title */
 .accordion_title {
     font-family: "Open Sans", sans-serif;
     font-weight: 600;
     font-size: 14px;
 }
-  
+
 /* Style the accordion content panel. Note: hidden by default */
 .accordion_content {
     background-color: var(--btn-gray);
@@ -305,7 +361,7 @@ input[type='checkbox'] {
     transition: max-height 0.6s ease;
 }
 
-  /* Flip the dropdown arrow when active */
+/* Flip the dropdown arrow when active */
 .accordion span {
     transition: transform 0.2s linear;
 }
@@ -320,5 +376,5 @@ input[type='checkbox'] {
 }
 
 .accordion-item:hover {
-    background-color: #ccc;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.15) 0 0);
 }

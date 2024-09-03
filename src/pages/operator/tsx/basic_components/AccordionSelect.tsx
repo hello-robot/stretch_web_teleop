@@ -1,12 +1,15 @@
-
 import React, { useRef, useState } from "react";
-import "operator/css/basic_components.css"
+import "operator/css/basic_components.css";
 import { className } from "shared/util";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 export const AccordionSelect = <T extends string | JSX.Element>(props: {
-    title: string,
-    possibleOptions: T[],
-    onChange: (selectedIndex: number) => void,
+    title: string;
+    possibleOptions: T[];
+    backgroundColor?: string;
+    onChange: (selectedIndex: number) => void;
+    toggleAccordianCallback?: () => void;
 }) => {
     const [active, setActiveState] = useState<boolean>(false);
     const [height, setHeightState] = useState("0px");
@@ -14,41 +17,49 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
     const content = useRef(null);
 
     function toggleAccordion() {
+        if (props.toggleAccordianCallback) {
+            props.toggleAccordianCallback();
+        }
         setActiveState(active ? false : true);
-        setHeightState(
-            active ? "0px" : `${content.current.scrollHeight}px`
-        );
-        setRotateState(
-            active ? "accordion_icon" : "accordion_icon rotate"
-        );
+        setHeightState(active ? "0px" : `${content.current.scrollHeight}px`);
+        setRotateState(active ? "accordion_icon" : "accordion_icon rotate");
     }
-  
+
     function mapFunc(option: T, idx: number) {
         return (
-            <div 
+            <div
                 className="accordion-item"
                 key={idx}
-                onClick={() => { props.onChange(idx); toggleAccordion()}}>
+                onClick={() => {
+                    props.onChange(idx);
+                    toggleAccordion();
+                }}
+            >
                 {option}
             </div>
-        )
+        );
     }
 
     return (
         <div className="accordion_section">
-            <button className={className("accordion", {active})} onClick={toggleAccordion}>
+            <button
+                className={className("accordion", { active })}
+                onClick={toggleAccordion}
+                style={{ backgroundColor: props.backgroundColor }}
+            >
                 {props.title}
-                <span className="material-icons">expand_more</span>
+                {active ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </button>
             <div
                 ref={content}
-                style={{ maxHeight: `${height}` }}
+                style={{
+                    maxHeight: `${height}`,
+                    backgroundColor: props.backgroundColor,
+                }}
                 className="accordion_content"
             >
-                <div>
-                    {props.possibleOptions.map(mapFunc)}
-                </div>
+                <div>{props.possibleOptions.map(mapFunc)}</div>
             </div>
         </div>
     );
-}
+};

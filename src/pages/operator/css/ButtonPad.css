@@ -10,14 +10,14 @@
     fill-opacity: 100%;
     stroke-width: 6px;
     stroke: var(--background-color);
-    fill: hsl(0,0%,31%);
+    fill: hsl(0, 0%, 31%);
     flex: 1 1 0;
     padding: 0.4rem;
     max-height: 100%;
     /* max-width: fit-content; */
     touch-action: none;
     user-select: none;
-    -webkit-tap-highlight-color:rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .button-pads svg {
@@ -47,7 +47,9 @@
 }
 
 @media (hover: none) {
-    .button-pads path.inactive:hover+image { filter: none !important; };
+    .button-pads path.inactive:hover + image {
+        filter: none !important;
+    }
 }
 
 .button-pads image {
@@ -55,7 +57,7 @@
     touch-action: none;
 }
 
-.button-pads path.inactive:hover+image {
+.button-pads path.inactive:hover + image {
     filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg);
 }
 
@@ -97,19 +99,21 @@
     justify-items: center;
 }
 
-@media(max-width:1300px) {
-    .title { 
+@media (max-width: 1300px) {
+    .title {
         font-size: smaller;
         margin: 0.5rem;
     }
 }
 
-@media screen and (orientation:portrait) {
+@media screen and (orientation: portrait) {
     .button-pad {
         width: 100%;
     }
 }
 
-@media(max-width:500px) {
-    .button-pads { filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4)); };
+@media (max-width: 500px) {
+    .button-pads {
+        filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4));
+    }
 }

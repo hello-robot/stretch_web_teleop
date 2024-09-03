@@ -60,14 +60,14 @@
     from {
         opacity: 1;
     }
-    
+
     to {
         opacity: 0;
     }
 }
 
-/* Make all the components in the header fill the avaliable height */
-#operator-header>*,
+/* Make all the components in the header fill the available height */
+#operator-header > *,
 #operator-header button {
     height: 100%;
 }
@@ -79,11 +79,12 @@
 .operator-voice,
 .operator-pose-library,
 .operator-pose-recorder,
+.operator-text-to-speech,
 .operator-aruco-markers {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
     height: 6rem;
-    width: 40rem;
+    width: 50rem;
     display: inline-grid;
     align-items: center;
     justify-content: center;
@@ -113,6 +114,7 @@
 .operator-voice[hidden],
 .operator-pose-library[hidden],
 .operator-pose-recorder[hidden],
+.operator-text-to-speech[hidden],
 .operator-aruco-markers[hidden] {
     display: none;
 }
@@ -175,12 +177,12 @@
     }
 }
 
-@media(max-width:900px) {
+@media (max-width: 900px) {
     #operator-header .dropdown {
         width: var(--header-btn-width-med);
     }
 
-    #operator-header>*,
+    #operator-header > *,
     #operator-header button {
         height: 3rem;
     }

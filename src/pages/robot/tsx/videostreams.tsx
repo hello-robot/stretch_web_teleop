@@ -1,12 +1,35 @@
 import React from "react";
 import { ROSCompressedImage } from "shared/util";
-var jpeg = require('jpeg-js');
+var jpeg = require("jpeg-js");
 
 type VideoStreamProps = {
-    width: number,
-    height: number,
-    scale: number,
-    fps: number
+    width: number;
+    height: number;
+    scale: number;
+    fps: number;
+    streamName: string;
+};
+
+// Adapted from https://github.com/personalrobotics/feeding_web_interface/blob/2dc2dfe3a67b840b619fa9b00ef2f2ee66c46962/feedingwebapp/src/robot/VideoStream.jsx#L10C1-L31C2
+function dataURItoBlob(dataURI: string) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var splitString = dataURI.split(",");
+    var byteString = atob(splitString[1]);
+
+    // separate out the mime component
+    var mimeString = splitString[0].split(":")[1].split(";")[0];
+
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    var blob = new Blob([ab], { type: mimeString });
+    return blob;
 }
 
 export class VideoStream extends React.Component<VideoStreamProps> {
@@ -17,9 +40,11 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     height: number;
     scale: number;
     fps: number;
+    streamName: string;
     className?: string;
-    outputVideoStream?: MediaStream
+    outputVideoStream?: MediaStream;
     aspectRatio: any;
+    started: boolean;
 
     constructor(props: VideoStreamProps) {
         super(props);
@@ -27,12 +52,14 @@ export class VideoStream extends React.Component<VideoStreamProps> {
         this.height = props.height;
         this.scale = props.scale;
         this.fps = props.fps;
+        this.streamName = props.streamName;
         this.img = document.createElement("img");
         this.video = document.createElement("video");
         this.video.style.display = "block";
         this.video.setAttribute("width", this.width.toString());
         this.video.setAttribute("height", this.height.toString());
         this.outputVideoStream = new MediaStream();
+        this.started = false;
 
         this.updateImage = this.updateImage.bind(this);
     }
@@ -45,19 +72,38 @@ export class VideoStream extends React.Component<VideoStreamProps> {
         if (!this.imageReceived) {
             return;
         }
-        this.canvas.current?.getContext('2d')?.drawImage(this.img, 0, 0, this.width, this.height)
+        this.canvas.current
+            ?.getContext("2d")
+            ?.drawImage(this.img, 0, 0, this.width, this.height);
     }
 
-    updateImage(message: ROSCompressedImage) {
-        if (!this.imageReceived) {
-            let {width, height, data} = jpeg.decode(Uint8Array.from(atob(message.data), c => c.charCodeAt(0)), true)
-            this.aspectRatio = width / height
-            this.height = Math.max(height * this.aspectRatio, 1000)
-            this.width = this.height * this.aspectRatio;
-            this.canvas.current!.width = this.width
-            this.canvas.current!.height = this.height
+    updateImage(message: ROSCompressedImage, verbose: boolean = false) {
+        if (verbose) {
+            console.log(
+                this.streamName,
+                "stream got image with latency",
+                Date.now() / 1.0e3 -
+                    (message.header.stamp.sec +
+                        message.header.stamp.nanosec / 1.0e9),
+            );
         }
-        this.img.src = 'data:image/jpg;base64,' + message.data;
+        if (!this.imageReceived) {
+            let { width, height } = jpeg.decode(
+                Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0)),
+                true,
+            );
+            this.aspectRatio = width / height;
+            this.height = Math.max(height * this.aspectRatio, 1000);
+            this.width = this.height * this.aspectRatio;
+            this.canvas.current!.width = this.width;
+            this.canvas.current!.height = this.height;
+        }
+        if (this.img.src) {
+            URL.revokeObjectURL(this.img.src);
+        }
+        this.img.src = URL.createObjectURL(
+            dataURItoBlob("data:image/jpg;base64," + message.data),
+        );
     }
 
     drawVideo() {
@@ -66,10 +112,18 @@ export class VideoStream extends React.Component<VideoStreamProps> {
     }
 
     start() {
-        if (!this.canvas.current) throw 'Video stream canvas null'
-        this.outputVideoStream = this.canvas.current.captureStream(this.fps);
-        this.video.srcObject = this.outputVideoStream;
-        this.drawVideo();
+        if (!this.started) {
+            console.log("Starting video stream", this.streamName);
+            if (!this.canvas.current) throw "Video stream canvas null";
+            this.outputVideoStream = this.canvas.current.captureStream(
+                this.fps,
+            );
+            this.video.srcObject = this.outputVideoStream;
+            this.drawVideo();
+            this.started = true;
+        } else {
+            console.log("Video stream already started", this.streamName);
+        }
     }
 
     render() {
@@ -80,14 +134,13 @@ export class VideoStream extends React.Component<VideoStreamProps> {
                 height={this.height}
                 className={this.className}
             />
-        )
+        );
     }
 }
 
-
 /** Renders all three video streams side by side */
 export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
-    console.log(props.streams)
+    console.log(props.streams);
     // let buttonPads = Bp.ExampleButtonPads;
     // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
@@ -96,11 +149,14 @@ export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
     return (
         <div id="video-stream-container">
             {props.streams.map((stream, i) => (
-                <div key={i} className="video-container" style={{ width: widths[i] }}>
+                <div
+                    key={i}
+                    className="video-container"
+                    style={{ width: widths[i] }}
+                >
                     {stream.render()}
                 </div>
-            )
-            )}
+            ))}
         </div>
     );
 };

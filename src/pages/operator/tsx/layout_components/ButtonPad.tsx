@@ -1,12 +1,29 @@
 import React from "react";
-import { CustomizableComponentProps, SharedState, isSelected } from "./CustomizableComponent";
-import { ButtonPadDefinition, ButtonPadId, ButtonPadIdMobile } from "../utils/component_definitions";
+import {
+    CustomizableComponentProps,
+    SharedState,
+    isSelected,
+} from "./CustomizableComponent";
+import {
+    ButtonPadDefinition,
+    ButtonPadId,
+    ButtonPadIdMobile,
+} from "../utils/component_definitions";
 import { className } from "shared/util";
 import { buttonFunctionProvider } from "operator/tsx/index";
-import { ButtonPadShape, getIcon, getPathsFromShape, SVG_RESOLUTION } from "../utils/svg";
-import { ButtonFunctions, ButtonPadButton, ButtonState } from "../function_providers/ButtonFunctionProvider";
-import {isMobile} from 'react-device-detect';
-import "operator/css/ButtonPad.css"
+import {
+    ButtonPadShape,
+    getIcon,
+    getPathsFromShape,
+    SVG_RESOLUTION,
+} from "../utils/svg";
+import {
+    ButtonFunctions,
+    ButtonPadButton,
+    ButtonState,
+} from "../function_providers/ButtonFunctionProvider";
+import { isMobile } from "react-device-detect";
+import "operator/css/ButtonPad.css";
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {
@@ -14,12 +31,12 @@ type ButtonPadProps = CustomizableComponentProps & {
     overlay?: boolean;
     /* Aspect ratio of the button pad */
     aspectRatio?: number;
-}
+};
 
 /**
- * A set of buttons which can be overlaid as a child of a camera view or 
+ * A set of buttons which can be overlaid as a child of a camera view or
  * standalone.
- * 
+ *
  * @param props {@link ButtonPadProps}
  */
 export const ButtonPad = (props: ButtonPadProps) => {
@@ -34,7 +51,9 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     // Paths and functions should be the same length
     if (paths.length !== functions.length) {
-        throw Error(`paths length: ${paths.length}, functions length: ${functions.length}`);
+        throw Error(
+            `paths length: ${paths.length}, functions length: ${functions.length}`,
+        );
     }
 
     const { customizing } = props.sharedState;
@@ -47,8 +66,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
             iconPosition: iconPositions[i],
             svgPath,
             funct: functions[i],
-            sharedState: props.sharedState
-        }
+            sharedState: props.sharedState,
+        };
         // Buttons will not function during customization mode
         return <SingleButton {...buttonProps} key={i} />;
     }
@@ -57,14 +76,17 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const onSelect = (event: React.MouseEvent<SVGSVGElement>) => {
         // Make sure the container of the button pad doesn't get selected
         event.stopPropagation();
-        props.sharedState.onSelect(props.definition, props.path);;
-    }
+        props.sharedState.onSelect(props.definition, props.path);
+    };
 
     // In customizing state add onClick callback to button pad SVG element
     // note: if overlaid on a video stream, let the parent video stream handle the click
-    const selectProp = customizing && !overlay ? {
-        "onClick": onSelect
-    } : {};
+    const selectProp =
+        customizing && !overlay
+            ? {
+                  onClick: onSelect,
+              }
+            : {};
 
     return (
         <div className="button-pad">
@@ -73,32 +95,41 @@ export const ButtonPad = (props: ButtonPadProps) => {
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
-                className={className("button-pads", { customizing, selected, overlay })}
+                className={className("button-pads", {
+                    customizing,
+                    selected,
+                    overlay,
+                })}
                 {...selectProp}
             >
                 {paths.map(mapPaths)}
             </svg>
         </div>
     );
-}
-
+};
 
 /** Properties for a single button on a button pad */
 export type SingleButtonProps = {
-    svgPath: string,
-    funct: ButtonPadButton,
-    sharedState: SharedState,
-    iconPosition: { x: number, y: number }
-}
+    svgPath: string;
+    funct: ButtonPadButton;
+    sharedState: SharedState;
+    iconPosition: { x: number; y: number };
+};
 
 const SingleButton = (props: SingleButtonProps) => {
-    const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(props.funct);
-    const clickProps = props.sharedState.customizing ? {} : {
-        onPointerDown: functs.onClick,
-        onPointerUp: functs.onRelease,
-        onPointerLeave: functs.onLeave
-    }
-    const buttonState: ButtonState = props.sharedState.buttonStateMap?.get(props.funct) || ButtonState.Inactive;
+    const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
+        props.funct,
+    );
+    const clickProps = props.sharedState.customizing
+        ? {}
+        : {
+              onPointerDown: functs.onClick,
+              onPointerUp: functs.onRelease,
+              onPointerLeave: functs.onLeave,
+          };
+    const buttonState: ButtonState =
+        props.sharedState.buttonStateMap?.get(props.funct) ||
+        ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
     const height = isMobile ? 75 : 85;
@@ -106,25 +137,34 @@ const SingleButton = (props: SingleButtonProps) => {
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     return (
-        <React.Fragment >
+        <React.Fragment>
             <path d={props.svgPath} {...clickProps} className={buttonState}>
                 <title>{title}</title>
             </path>
-            <image x={x} y={y} height={height} width={width} href={icon} className={buttonState} />
+            <image
+                x={x}
+                y={y}
+                height={height}
+                width={width}
+                href={icon}
+                className={buttonState}
+            />
             <p>{title}</p>
         </React.Fragment>
-    )
-}
+    );
+};
 
 /**
- * Provides the shape and fuctions for a button pad based on the identifier
- * 
+ * Provides the shape and functions for a button pad based on the identifier
+ *
  * @param id the identifier of the button pad
- * @returns the shape of the button pad {@link ButtonPadShape} and a list of 
+ * @returns the shape of the button pad {@link ButtonPadShape} and a list of
  * {@link ButtonPadButton} where each element informs the function of
  * the corresponding button on the button pad
  */
-function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [ButtonPadShape, ButtonPadButton[]] {
+function getShapeAndFunctionsFromId(
+    id: ButtonPadId | ButtonPadIdMobile,
+): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
     let functions: ButtonPadButton[];
     const B = ButtonPadButton;
@@ -149,8 +189,8 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.ArmLift,
                 B.ArmLower,
                 B.GripperClose,
-                B.GripperOpen
-            ]
+                B.GripperOpen,
+            ];
             shape = ButtonPadShape.ManipRealsense;
             break;
         case ButtonPadId.GripperLift:
@@ -161,7 +201,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.WristRotateOut,
                 B.GripperOpen,
                 B.GripperClose,
-            ]
+            ];
             shape = ButtonPadShape.GripperLift;
             break;
         case ButtonPadId.DexWrist:
@@ -173,7 +213,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.WristRollLeft,
                 B.WristRollRight,
                 B.GripperOpen,
-                B.GripperClose
+                B.GripperClose,
             ];
             shape = ButtonPadShape.DexWrist;
             break;
@@ -182,7 +222,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.BaseForward,
                 B.BaseReverse,
                 B.BaseRotateLeft,
-                B.BaseRotateRight
+                B.BaseRotateRight,
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
@@ -191,7 +231,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.CameraTiltUp,
                 B.CameraTiltDown,
                 B.CameraPanLeft,
-                B.CameraPanRight
+                B.CameraPanRight,
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
@@ -209,21 +249,11 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
         //     shape = ButtonPadShape.StackedButtonPad;
         //     break;
         case ButtonPadId.Arm:
-            functions = [
-                B.ArmLift,
-                B.ArmLower,
-                B.ArmRetract,
-                B.ArmExtend
-            ];
+            functions = [B.ArmLift, B.ArmLower, B.ArmRetract, B.ArmExtend];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
         case ButtonPadIdMobile.Arm:
-            functions = [
-                B.ArmLift,
-                B.ArmLower,
-                B.ArmRetract,
-                B.ArmExtend
-            ];
+            functions = [B.ArmLift, B.ArmLower, B.ArmRetract, B.ArmExtend];
             shape = ButtonPadShape.RowButtonPad;
             break;
         case ButtonPadIdMobile.Gripper:
@@ -231,7 +261,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.WristRotateIn,
                 B.WristRotateOut,
                 B.GripperOpen,
-                B.GripperClose
+                B.GripperClose,
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
@@ -240,7 +270,7 @@ function getShapeAndFunctionsFromId(id: ButtonPadId | ButtonPadIdMobile): [Butto
                 B.BaseForward,
                 B.BaseReverse,
                 B.BaseRotateLeft,
-                B.BaseRotateRight
+                B.BaseRotateRight,
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;

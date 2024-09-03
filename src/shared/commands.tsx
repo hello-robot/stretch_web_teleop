@@ -1,79 +1,139 @@
-import ROSLIB from "roslib"
-import { ROSPose, RobotPose } from "./util"
-import { ValidJoints } from "./util"
+import ROSLIB from "roslib";
+import { ROSPose, RobotPose } from "./util";
+import { ValidJoints } from "./util";
 
-export type cmd = DriveCommand | IncrementalMove | setRobotModeCommand | CameraPerspectiveCommand | RobotPoseCommand | ToggleCommand | LookAtGripper | GetOccupancyGrid | MoveBaseCommand | StopTrajectoryCommand | StopMoveBaseCommand | PlaybackPosesCommand | GetBatteryVoltageCommand | GetHasBetaTeleopKit
+export type cmd =
+    | DriveCommand
+    | IncrementalMove
+    | setRobotModeCommand
+    | CameraPerspectiveCommand
+    | RobotPoseCommand
+    | ToggleCommand
+    | LookAtGripper
+    | GetOccupancyGrid
+    | MoveBaseCommand
+    | StopTrajectoryCommand
+    | StopMoveBaseCommand
+    | MoveToPregraspCommand
+    | StopMoveToPregraspCommand
+    | PlaybackPosesCommand
+    | GetBatteryVoltageCommand
+    | GetHasBetaTeleopKit
+    | GetStretchTool
+    | PlayTextToSpeech
+    | StopTextToSpeech
+    | ShowTabletCommand
+    | StopShowTabletCommand;
 
 export interface VelocityCommand {
-    stop: () => void,
-    affirm?: () => void
+    stop: () => void;
+    affirm?: () => void;
 }
 
 export interface DriveCommand {
-    type: "driveBase",
+    type: "driveBase";
     modifier: {
-        linVel: number,
-        angVel: number
-    }
+        linVel: number;
+        angVel: number;
+    };
 }
 
 export interface IncrementalMove {
-    type: "incrementalMove"
-    jointName: ValidJoints,
-    increment: number
+    type: "incrementalMove";
+    jointName: ValidJoints;
+    increment: number;
 }
 
 export interface RobotPoseCommand {
-    type: "setRobotPose"
-    pose: RobotPose
+    type: "setRobotPose";
+    pose: RobotPose;
 }
 
 export interface PlaybackPosesCommand {
-    type: "playbackPoses"
-    poses: RobotPose[]
+    type: "playbackPoses";
+    poses: RobotPose[];
 }
 
 export interface setRobotModeCommand {
-    type: "setRobotMode",
-    modifier: "position" | "navigation"
+    type: "setRobotMode";
+    modifier: "position" | "navigation";
 }
 
 export interface CameraPerspectiveCommand {
-    type: "setCameraPerspective"
-    camera: "overhead" | "realsense" | "gripper"
-    perspective: string
+    type: "setCameraPerspective";
+    camera: "overhead" | "realsense" | "gripper";
+    perspective: string;
 }
 
 export interface ToggleCommand {
-    type: "setFollowGripper" | "setDepthSensing" | "setRunStop"
-    toggle: boolean
+    type:
+        | "setFollowGripper"
+        | "setRealsenseDepthSensing"
+        | "setGripperDepthSensing"
+        | "setRealsenseBodyPoseEstimate"
+        | "setRunStop";
+    toggle: boolean;
 }
 
 export interface LookAtGripper {
-    type: "lookAtGripper"
+    type: "lookAtGripper";
 }
 
 export interface GetOccupancyGrid {
-    type: "getOccupancyGrid"
+    type: "getOccupancyGrid";
 }
 
 export interface GetHasBetaTeleopKit {
-    type: "getHasBetaTeleopKit"
+    type: "getHasBetaTeleopKit";
+}
+
+export interface GetStretchTool {
+    type: "getStretchTool";
 }
 
 export interface MoveBaseCommand {
-    type: "moveBase"
-    pose: ROSPose
+    type: "moveBase";
+    pose: ROSPose;
 }
 
 export interface StopTrajectoryCommand {
-    type: "stopTrajectory"
+    type: "stopTrajectory";
 }
 
 export interface StopMoveBaseCommand {
-    type: "stopMoveBase"
+    type: "stopMoveBase";
+}
+
+export interface MoveToPregraspCommand {
+    type: "moveToPregrasp";
+    x: number;
+    y: number;
+}
+
+export interface StopMoveToPregraspCommand {
+    type: "stopMoveToPregrasp";
+}
+
+export interface ShowTabletCommand {
+    type: "showTablet";
+    url: string;
+}
+
+export interface StopShowTabletCommand {
+    type: "stopShowTablet";
 }
 
 export interface GetBatteryVoltageCommand {
-    type: "getBatteryVoltage"
+    type: "getBatteryVoltage";
+}
+
+export interface PlayTextToSpeech {
+    type: "playTextToSpeech";
+    text: string;
+    override_behavior: number;
+    is_slow: boolean;
+}
+
+export interface StopTextToSpeech {
+    type: "stopTextToSpeech";
 }

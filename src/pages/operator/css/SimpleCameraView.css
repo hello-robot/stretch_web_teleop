@@ -11,7 +11,7 @@
     justify-content: center;
     /* align-items: center;
     flex-direction: column; */
-    text-align: -webkit-center
+    text-align: -webkit-center;
 }
 
 .simple-video-area {
@@ -103,7 +103,6 @@
     grid-row: 2/2;
 }
 
-
 .video-context-menu li {
     padding: var(--padding);
     cursor: pointer;
@@ -126,11 +125,11 @@
     text-align: center;
 }
 
-@media screen and (orientation:landscape) and (max-device-width: 900px) {
+@media screen and (orientation: landscape) and (max-device-width: 900px) {
     .realsense-pan-tilt-grid button .material-icons {
         font-size: larger;
     }
-    
+
     .title {
         font-size: smaller;
     }

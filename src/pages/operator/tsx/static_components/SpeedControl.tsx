@@ -4,9 +4,9 @@ import "operator/css/SpeedControl.css";
 /**Details of a velocity setting */
 type VelocityDetails = {
     /**Name of the setting to display on the button */
-    label: string,
+    label: string;
     /**The speed of this setting */
-    scale: number
+    scale: number;
 };
 
 /**Props for {@link SpeedControl} */
@@ -18,7 +18,7 @@ type SpeedControlProps = {
      * @param newSpeed the new selected speed
      */
     onChange: (newScale: number) => void;
-}
+};
 
 /**The different velocity settings to display. */
 export const VELOCITY_SCALE: VelocityDetails[] = [
@@ -26,8 +26,8 @@ export const VELOCITY_SCALE: VelocityDetails[] = [
     { label: "Slow", scale: 0.4 },
     { label: "Medium", scale: 0.8 },
     { label: "Fast", scale: 1.2 },
-    { label: "Fastest", scale: 1.6 }
-]
+    { label: "Fastest", scale: 1.6 },
+];
 
 /**The speed the interface should initialize with */
 export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].scale;
@@ -45,13 +45,13 @@ export const SpeedControl = (props: SpeedControlProps) => {
                 key={label}
                 className={active ? "btn-blue font-white" : ""}
                 onClick={() => props.onChange(scale)}
-            >{label}</button>
-        )
-    }
+            >
+                {label}
+            </button>
+        );
+    };
 
     return (
-        <div id="velocity-control-container">
-            {VELOCITY_SCALE.map(mapFunc)}
-        </div>
+        <div id="velocity-control-container">{VELOCITY_SCALE.map(mapFunc)}</div>
     );
-}
+};

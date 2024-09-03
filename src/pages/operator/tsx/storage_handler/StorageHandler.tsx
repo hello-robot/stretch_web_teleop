@@ -8,29 +8,30 @@ import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 export type DefaultLayoutName = "Basic Layout";
 
 /** Object with all the default layouts. */
-export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } = {
-    "Basic Layout": BASIC_LAYOUT,
-}
+export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } =
+    {
+        "Basic Layout": BASIC_LAYOUT,
+    };
 
-/** 
+/**
  * Handles logic to store data, specifically maintain state between browser
  * reloads and save user custom layouts.
  */
 export abstract class StorageHandler {
-    /** 
-     * Callback to execute once the storage is ready, for example after the 
+    /**
+     * Callback to execute once the storage is ready, for example after the
      * user has signed into Firebase.
      */
     public onReadyCallback: () => void;
 
     constructor(onStorageHandlerReadyCallback: () => void) {
-        this.onReadyCallback = onStorageHandlerReadyCallback.bind(this)
+        this.onReadyCallback = onStorageHandlerReadyCallback.bind(this);
     }
 
     /**
      * Loads a user saved custom layout.
      * @param layoutName name of the layout to load
-     * @returns the layout defintion
+     * @returns the layout definition
      */
     public abstract loadCustomLayout(layoutName: string): LayoutDefinition;
 
@@ -39,7 +40,10 @@ export abstract class StorageHandler {
      * @param layout the definition of the layout to save
      * @param layoutName the name of the layout
      */
-    public abstract saveCustomLayout(layout: LayoutDefinition, layoutName: string): void;
+    public abstract saveCustomLayout(
+        layout: LayoutDefinition,
+        layoutName: string,
+    ): void;
 
     /**
      * Saves the current layout to preserve state between reloading the browser.
@@ -63,7 +67,11 @@ export abstract class StorageHandler {
      * @param name the name of the pose
      * @param pose the pose on the map to save
      */
-    public abstract saveMapPose(poseName: string, pose: ROSLIB.Transform, poseType: string): void;
+    public abstract saveMapPose(
+        poseName: string,
+        pose: ROSLIB.Transform,
+        poseType: string,
+    ): void;
 
     /**
      * Get an array of all saved map poses
@@ -80,7 +88,7 @@ export abstract class StorageHandler {
 
     /**
      * Gets an array of all saved poses
-     * @returns an array of all saved poses  
+     * @returns an array of all saved poses
      */
     public abstract getMapPoses(): ROSLIB.Transform[];
 
@@ -114,7 +122,10 @@ export abstract class StorageHandler {
      * @param recordingName the name of the recording
      * @param poses the pose sequence to save
      */
-    public abstract savePoseRecording(recordingName: string, poses: RobotPose[]): void;
+    public abstract savePoseRecording(
+        recordingName: string,
+        poses: RobotPose[],
+    ): void;
 
     /**
      * Removes the recording from storage
@@ -123,7 +134,25 @@ export abstract class StorageHandler {
     public abstract deleteRecording(recordingName: string): void;
 
     /**
-     * Gets the last saved state from the user's layout, or gets the default 
+     * Gets all the text to speech messages saved by the user.
+     * @returns list of all saved text to speech messages
+     */
+    public abstract getSavedTexts(): string[];
+
+    /**
+     * Saves a text to speech message to the storage device.
+     * @param text the text to save
+     */
+    public abstract saveText(text: string): void;
+
+    /**
+     * Deletes a text to speech message from the storage device.
+     * @param text the text to delete
+     */
+    public abstract deleteText(text: string): void;
+
+    /**
+     * Gets the last saved state from the user's layout, or gets the default
      * layout if the user has no saved state.
      * @returns layout definition for the layout that should be loaded into the
      *          operator page.
@@ -131,7 +160,7 @@ export abstract class StorageHandler {
     public loadCurrentLayoutOrDefault(): LayoutDefinition {
         const currentLayout = this.loadCurrentLayout();
         if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
-        console.log('loading saved layout')
+        console.log("loading saved layout");
         return currentLayout;
     }
 

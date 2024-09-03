@@ -6,7 +6,7 @@
     padding: 0.4rem;
     height: 100%;
     grid-template-columns: auto;
-    grid-template-rows: 1fr auto minmax(9rem, 1fr);
+    grid-template-rows: 1fr auto minmax(15rem, 2fr);
     object-fit: cover;
     justify-content: center;
     /* align-items: center;
@@ -24,7 +24,8 @@
     left: 0;
 }
 
-.video-overlay-container.realsense, .video-overlay-container.overhead {
+.video-overlay-container.realsense,
+.video-overlay-container.overhead {
     z-index: 2;
     position: absolute;
     width: calc(100% - 102px);
@@ -36,6 +37,13 @@
     top: 51px;
     display: flex;
     align-items: center;
+}
+
+/* The style for the plus icon overlay for click-to-pregrasp */
+.realsense.material-icons {
+    color: rgba(255, 0, 0, 0.6);
+    position: absolute;
+    transform: translate(-50%, -50%);
 }
 
 .video-overlay-container.overhead.predictiveDisplay {
@@ -149,11 +157,12 @@
     padding: 0px;
 }
 
-.realsense-pan-tilt-grid button .material-icons {
+.realsense-pan-tilt-grid .panTiltIcon {
     margin: 0;
     font-size: xxx-large;
-    background-color: whitesmoke;
+    fill: whitesmoke;
     opacity: 40%;
+    background-color: black;
     border-radius: 60px;
 }
 
@@ -196,8 +205,6 @@
     box-shadow: none;
 }
 
-
-
 /* Context menu popup *********************************************************/
 .video-context-menu {
     list-style-type: none;
@@ -214,7 +221,6 @@
     grid-row: 2/2;
     z-index: 4;
 }
-
 
 .video-context-menu li {
     padding: var(--padding);
@@ -239,13 +245,13 @@
     margin: 10px;
 }
 
-@media screen and (orientation:portrait) and (max-device-width: 900px) {
+@media screen and (orientation: portrait) and (max-device-width: 900px) {
     .video-container {
-        grid-template-rows: 1fr auto minmax(3rem, 1fr);
+        grid-template-rows: 1fr auto minmax(3rem, 2fr);
     }
 }
 
-@media screen and (orientation:landscape) and (max-device-width: 900px) {
+@media screen and (orientation: landscape) and (max-device-width: 900px) {
     .video-container {
         grid-template-rows: auto;
     }
@@ -253,7 +259,7 @@
     .realsense-pan-tilt-grid button .material-icons {
         font-size: larger;
     }
-    
+
     .title {
         font-size: smaller;
     }

@@ -18,8 +18,8 @@
         "b12 b10 b10 b13"
         "b12 b14 b15 b13"
         "b8 b14 b15 b9"
-        "b8 b11 b11 b9";   
-         /* 
+        "b8 b11 b11 b9";
+    /*
          "header0 header0 header0 header0 header0 header0"
          "b0 b0 b1 b1 b2 b3"
          "header1 header1 header1 header1 header1 header1"
@@ -28,8 +28,6 @@
          "b8 b9 b10 b11 b12 b13"
          "header3 header3 header3 header3 header3 header3"
          "b14 b14 b14 b15 b15 b15" */
-    ;
-
     padding: 0.4rem;
     position: relative;
     z-index: 1;

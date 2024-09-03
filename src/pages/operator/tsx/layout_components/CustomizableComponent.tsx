@@ -1,8 +1,11 @@
 import React from "react";
-import { ComponentDefinition, ComponentType } from "../utils/component_definitions";
+import {
+    ComponentDefinition,
+    ComponentType,
+} from "../utils/component_definitions";
 import { DropZoneState } from "./DropZone";
 import { Panel } from "./Panel";
-import { RemoteStream } from "shared/util";
+import { RemoteStream, StretchTool } from "shared/util";
 import { ButtonPad } from "./ButtonPad";
 import { CameraView } from "./CameraView";
 import { PredictiveDisplay } from "./PredictiveDisplay";
@@ -15,21 +18,23 @@ import { BatteryGuage } from "../static_components/BatteryGauge";
 
 /** State required for all elements */
 export type SharedState = {
-    customizing: boolean,
+    customizing: boolean;
     /** Called when user clicks on a component */
-    onSelect: (def: ComponentDefinition, path?: string) => void,
+    onSelect: (def: ComponentDefinition, path?: string) => void;
     /** Remote robot video streams */
-    remoteStreams: Map<string, RemoteStream>
+    remoteStreams: Map<string, RemoteStream>;
     /** State required for all dropzones */
-    dropZoneState: DropZoneState,
+    dropZoneState: DropZoneState;
     /** Path to the active component */
-    selectedPath?: string,
+    selectedPath?: string;
     /** Mapping of each button pad function to a {@link ButtonState} */
-    buttonStateMap?: ButtonStateMap,
+    buttonStateMap?: ButtonStateMap;
     /** Whether or not to hide the button labels */
-    hideLabels?: boolean,
+    hideLabels?: boolean;
     /** Whether or not the beta teleop cameras are being used */
-    hasBetaTeleopKit: boolean
+    hasBetaTeleopKit: boolean;
+    /** What tool is attached to the stretch gripper. */
+    stretchTool: StretchTool;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
@@ -40,19 +45,19 @@ export type CustomizableComponentProps = {
      * Path to the component
      * @example "0-2" would represent the 2nd child of the 0th element in the layout
      */
-    path: string,
-    /** 
-     * Definition of the component (all the info required to know that type 
+    path: string;
+    /**
+     * Definition of the component (all the info required to know that type
      * of component to render
      */
     definition: ComponentDefinition;
     /** see {@link SharedState} */
-    sharedState: SharedState,
-}
+    sharedState: SharedState;
+};
 
 /**
  * Takes a definition for a component and returns the react component.
- * 
+ *
  * @note switch on the component definition's `type` field
  * @returns rendered component
  */
@@ -64,7 +69,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
     // switch on the component type to render specific type of component
     switch (props.definition.type) {
         case ComponentType.Panel:
-            return <Panel {...props} />
+            return <Panel {...props} />;
         case ComponentType.ButtonPad:
             return <ButtonPad {...props} />;
         case ComponentType.CameraView:
@@ -82,9 +87,11 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
         case ComponentType.BatteryGuage:
             return <BatteryGuage {...props} />;
         default:
-            throw Error(`CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`);
+            throw Error(
+                `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`,
+            );
     }
-}
+};
 
 /**
  * Checks if the component is currently selected

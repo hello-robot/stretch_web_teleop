@@ -1,4 +1,15 @@
-import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonPadDefinition, PanelDefinition, TabDefinition, LayoutDefinition, ActionMode, LayoutGridDefinition } from "../utils/component_definitions";
+import {
+    ComponentType,
+    CameraViewId,
+    ButtonPadId,
+    CameraViewDefinition,
+    ButtonPadDefinition,
+    PanelDefinition,
+    TabDefinition,
+    LayoutDefinition,
+    ActionMode,
+    LayoutGridDefinition,
+} from "../utils/component_definitions";
 
 /**
  * Basic Layout
@@ -6,6 +17,7 @@ import { ComponentType, CameraViewId, ButtonPadId, CameraViewDefinition, ButtonP
 export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayMovementRecorder: false,
+    displayTextToSpeech: false,
     displayLabels: true,
     actionMode: ActionMode.StepActions,
     children: [
@@ -17,26 +29,26 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                     children: [
                         {
                             type: ComponentType.SingleTab,
-                            label: 'Camera Views',
+                            label: "Camera Views",
                             children: [
                                 // Overhead camera
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.overhead,
                                     displayButtons: true,
-                                    children: []
+                                    children: [],
                                 } as CameraViewDefinition,
                                 {
                                     type: ComponentType.CameraView,
                                     id: CameraViewId.gripper,
                                     displayButtons: true,
-                                    children: []
-                                } as CameraViewDefinition
-                            ]
-                        }
-                    ]
-                } as PanelDefinition
-            ]    
+                                    children: [],
+                                } as CameraViewDefinition,
+                            ],
+                        },
+                    ],
+                } as PanelDefinition,
+            ],
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
@@ -76,33 +88,33 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                         // } as TabDefinition
                         {
                             type: ComponentType.SingleTab,
-                            label: 'Controls',
+                            label: "Controls",
                             children: [
                                 {
-                                    type: ComponentType.ButtonGrid
-                                } 
-                            ]
-                        } as TabDefinition
-                    ]
+                                    type: ComponentType.ButtonGrid,
+                                },
+                            ],
+                        } as TabDefinition,
+                    ],
                 } as PanelDefinition,
                 {
                     type: ComponentType.Panel,
                     children: [
                         {
                             type: ComponentType.SingleTab,
-                            label: 'Safety',
+                            label: "Safety",
                             children: [
                                 {
-                                    type: ComponentType.RunStopButton
+                                    type: ComponentType.RunStopButton,
                                 },
                                 {
-                                    type: ComponentType.BatteryGuage
-                                }
-                            ]
-                        }
-                    ] 
-                } as PanelDefinition
-            ]
-        }  as LayoutGridDefinition
-    ]
-}
+                                    type: ComponentType.BatteryGuage,
+                                },
+                            ],
+                        },
+                    ],
+                } as PanelDefinition,
+            ],
+        } as LayoutGridDefinition,
+    ],
+};

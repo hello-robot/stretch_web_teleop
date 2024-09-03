@@ -22,7 +22,7 @@
     height: auto;
     background: #052a33;
     margin: 1rem auto 1rem;
-    color: #E8F0F2;
+    color: #e8f0f2;
     border-radius: 10rem;
     list-style: none;
 }
@@ -57,7 +57,7 @@ li.pill-tab-btn:last-child {
 }
 
 .pill-tab-btn.active {
-    background: #39A2DB;
+    background: #39a2db;
 }
 
 .tab-content {

@@ -1,4 +1,5 @@
-.map-container, .mobile-map-container {
+.map-container,
+.mobile-map-container {
     position: relative;
     /* flex: 1 1 0; */
     display: grid;

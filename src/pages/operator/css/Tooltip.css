@@ -1,7 +1,7 @@
 .tooltip-trigger .tooltip-top::after {
     content: " ";
     position: absolute;
-    top: 100%; 
+    top: 100%;
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
@@ -12,7 +12,7 @@
 .tooltip-trigger .tooltip-bottom::after {
     content: " ";
     position: absolute;
-    bottom: 100%; 
+    bottom: 100%;
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
@@ -67,20 +67,19 @@
     left: 105%;
 }
 
-
 .tooltip-left {
     top: -5px;
     right: 105%;
 }
-  
+
 .tooltip-top {
-    bottom:105%;
-    left:0%;
+    bottom: 105%;
+    left: 0%;
 }
 
 .tooltip-bottom {
-    top:105%;
-    left:0%;
+    top: 105%;
+    left: 0%;
 }
 
 .tooltip-trigger .tooltip-right::after {
@@ -94,7 +93,6 @@
     border-color: transparent black transparent transparent;
 }
 
-
 .tooltip-trigger .tooltip-left::after {
     content: " ";
     position: absolute;
@@ -103,5 +101,5 @@
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent  transparent transparent black;
+    border-color: transparent transparent transparent black;
 }
