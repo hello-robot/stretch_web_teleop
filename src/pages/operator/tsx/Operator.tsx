@@ -350,6 +350,20 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
+            {robotNotHomed && (
+                <div className="operator-collision-alerts">
+                    <div
+                        className={className("operator-alert", {
+                            fadeIn: robotNotHomed,
+                            fadeOut: !robotNotHomed,
+                        })}
+                    >
+                        <HomeTheRobot
+                            hideLabels={!layout.current.displayLabels}
+                        />
+                    </div>
+                </div>
+            )}
             {
                 <div className="operator-collision-alerts">
                     <div
@@ -415,17 +429,6 @@ export const Operator = (props: {
                 </div>
             )}
             <div id="operator-global-controls">
-                {robotNotHomed && (
-                    <div
-                        className={className("operator-home-the-robot", {
-                            hideLabels: !layout.current.displayLabels,
-                        })}
-                    >
-                        <HomeTheRobot
-                            hideLabels={!layout.current.displayLabels}
-                        />
-                    </div>
-                )}
                 <div
                     className={className("operator-pose-recorder", {
                         hideLabels: !layout.current.displayLabels,
