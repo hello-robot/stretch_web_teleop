@@ -22,8 +22,16 @@ export const Alert = (props: {
     }, [props]);
 
     return (
-        <div className={className("alert " + props.type, { hide: !isShow })} style={ props.style }>
-            <span className={className("closebtn", { hide: props.hide_close_button })} onClick={() => setIsShow(false)}>
+        <div
+            className={className("alert " + props.type, { hide: !isShow })}
+            style={props.style}
+        >
+            <span
+                className={className("closebtn", {
+                    hide: props.hide_close_button,
+                })}
+                onClick={() => setIsShow(false)}
+            >
                 &times;
             </span>
             {props.children ? renderElAlert() : props.message}

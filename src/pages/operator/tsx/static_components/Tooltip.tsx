@@ -15,7 +15,10 @@ export const Tooltip = (props: TooltipProps) => {
     return (
         <div className="tooltip-trigger">
             {props.children}
-            <div className={`tooltip tooltip-${props.position}`} style={ props.style }>
+            <div
+                className={`tooltip tooltip-${props.position}`}
+                style={props.style}
+            >
                 {props.text}
             </div>
         </div>
