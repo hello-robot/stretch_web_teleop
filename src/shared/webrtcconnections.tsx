@@ -202,7 +202,7 @@ export class WebRTCConnection extends React.Component {
             };
 
             this.peerConnection.onnegotiationneeded = async () => {
-                console.log("Negotiation needed");
+                console.log("Negotiation needed", this.peerRole);
                 try {
                     this.makingOffer = true;
                     if (!this.peerConnection)

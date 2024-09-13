@@ -6,19 +6,6 @@ var options = {
     cert: fs.readFileSync(`certificates/${process.env.certfile}`),
 };
 
-// const http = require('http');
-// const socket = require('socket.io');
-// const server = http.createServer(options);
-// const port = 5000;
-// const io = socket(server, {
-//     allowEIO3: true
-// });
-
-// server.listen(port, () => {
-//     console.log('listening on *:' + port);
-// });
-
-var pm2 = require("pm2");
 const socket = require("socket.io");
 var express = require("express");
 var app = express();
@@ -102,7 +89,7 @@ io.on("connection", function (socket) {
     });
 
     socket.on("bye", (role) => {
-        console.log(role, socket.rooms);
+        console.log("bye", role, socket.rooms);
         if (socket.rooms.has("robot")) {
             socket.to("robot").emit("bye");
             console.log(
