@@ -41,62 +41,78 @@ io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
 });
 
+ROOM = 'default';
+is_robot_in_room = false;
+is_operator_in_room = false;
+
 io.on("connection", function (socket) {
     console.log("new socket.io connection");
-    // console.log('socket.handshake = ');
-    // console.log(socket.handshake);
 
-    socket.on("join", function (room) {
-        console.log("Received request to join room " + room);
-        // A room can have atmost two clients
-        if (
-            !io.sockets.adapter.rooms.get(room) ||
-            io.sockets.adapter.rooms.get(room).size < 2
-        ) {
-            socket.join(room);
-            socket.emit("join", room, socket.id);
+    socket.on("join_as_robot", (callback) => {
+        console.log("Received join_as_robot request...");
+        if (!is_robot_in_room) {
+            socket.join(ROOM);
+            console.log("join_as_robot SUCCESS");
+            is_robot_in_room = true;
+            callback({ success: true });
         } else {
-            console.log("room full");
-            socket.emit("full", room);
-        }
-    });
-
-    socket.on("add operator to robot room", (callback) => {
-        // The robot room is only available if another operator is not connected to it
-        if (io.sockets.adapter.rooms.get("robot")) {
-            if (io.sockets.adapter.rooms.get("robot").size < 2) {
-                socket.join("robot");
-                socket.in("robot").emit("joined", "robot");
-                callback({ success: true });
-            } else {
-                console.log("could not connect because robot room is full");
-                callback({ success: false });
-            }
-        } else {
-            console.log("could not connect because robot is not available");
+            console.log("join_as_robot FAILURE: there's already a robot in the room");
             callback({ success: false });
         }
     });
 
-    socket.on("signalling", function (message) {
-        if (io.sockets.adapter.rooms.get("robot")) {
-            socket.to("robot").emit("signalling", message);
+    // TODO: The browsers shouldnt have to call this. Can socketio tell us when the clients have left?
+    socket.on("leave_as_robot", (callback) => {
+        console.log("Received leave_as_robot request...");
+        if (is_robot_in_room) {
+            socket.to(ROOM).emit("bye");
+            socket.leave(ROOM);
+            console.log("leave_as_robot SUCCESS");
+            is_robot_in_room = false;
+            callback({ success: true });
         } else {
-            console.log(
-                "robot_operator_room is none, so there is nobody to send the WebRTC message to",
-            );
+            callback({ success: false });
         }
     });
 
-    socket.on("bye", (role) => {
-        console.log("bye", role, socket.rooms);
-        if (socket.rooms.has("robot")) {
-            socket.to("robot").emit("bye");
-            console.log(
-                "Attempting to have the " + role + " leave the robot room.",
-            );
-            console.log("");
-            socket.leave("robot");
+    socket.on("join_as_operator", (callback) => {
+        console.log("Received join_as_operator request...");
+        if (is_robot_in_room) {
+            if (!is_operator_in_room) {
+                socket.join(ROOM);
+                socket.in(ROOM).emit("joined", ROOM);
+                console.log("join_as_operator SUCCESS");
+                is_operator_in_room = true;
+                callback({ success: true });
+            } else {
+                console.log("join_as_operator FAILURE: there's already a operator in the room");
+                callback({ success: false });
+            }
+        } else {
+            console.log("join_as_operator FAILURE: could not join because robot is not available");
+            callback({ success: false });
+        }
+    });
+
+    // TODO: The browsers shouldnt have to call this. Can socketio tell us when the clients have left?
+    socket.on("leave_as_operator", (callback) => {
+        console.log("Received leave_as_operator request...");
+        if (is_operator_in_room) {
+            socket.to(ROOM).emit("bye");
+            socket.leave(ROOM);
+            console.log("leave_as_operator SUCCESS");
+            is_operator_in_room = false;
+            callback({ success: true });
+        } else {
+            callback({ success: false });
+        }
+    });
+
+    socket.on("signaling", (message) => {
+        if (is_robot_in_room && is_operator_in_room && io.sockets.adapter.rooms.get(ROOM)) {
+            socket.to(ROOM).emit("signaling", message);
+        } else {
+            console.log("signaling FAILURE: ", is_robot_in_room, is_operator_in_room, io.sockets.adapter.rooms.get(ROOM));
         }
     });
 });
