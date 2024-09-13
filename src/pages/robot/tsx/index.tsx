@@ -60,7 +60,6 @@ export let audioStream = new AudioStream(audioProps);
 connection = new WebRTCConnection({
     peerRole: "robot",
     polite: false,
-    onRobotConnectionStart: handleSessionStart,
     onMessage: handleMessage,
     onConnectionEnd: disconnectFromRobot,
 });
@@ -88,7 +87,12 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
-    connection.joinRobotRoom();
+    let did_join = await connection.joinRobotRoom();
+    if (did_join) {
+        handleSessionStart();
+    } else {
+        // TODO: Handle failure
+    }
 
     return Promise.resolve();
 });
@@ -243,7 +247,7 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
     } as MapPoseMessage);
 }
 
-function handleMessage(message: WebRTCMessage) {
+function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
     if (!("type" in message)) {
         console.error("Malformed message:", message);
         return;
