@@ -474,10 +474,10 @@ def generate_launch_description():
         )
         ld.add_action(configure_video_streams_node)
 
-    rplidar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
-    )
-    ld.add_action(rplidar_launch)
+    # rplidar_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
+    # )
+    # ld.add_action(rplidar_launch)
 
     navigation_bringup_launch = GroupAction(
         condition=LaunchConfigurationNotEquals("map_yaml", ""),
