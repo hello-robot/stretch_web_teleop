@@ -3,9 +3,9 @@ import { homeTheRobotFunctionProvider } from "../index";
 import { Alert } from "../basic_components/Alert";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/HomeTheRobot.css";
-import { isMobile } from "react-device-detect";
+import { isTablet, isBrowser } from "react-device-detect";
 import HomeIcon from "@mui/icons-material/Home";
-import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
+import QuestionMarkIcon from "@mui/icons-material/Help";
 import CircularProgress from "@mui/material/CircularProgress";
 import { className } from "../../../../shared/util";
 
@@ -28,71 +28,58 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
         ) as () => void,
     };
 
-    return !isMobile ? (
+    return isTablet || isBrowser ? (
         <React.Fragment>
             <Alert
                 type="loud-warning"
                 hide_close_button={true}
                 style={loading ? {} : { paddingTop: "0.8em" }}
             >
-                <div>
-                    <button
-                        onClick={() => {
-                            functions.Home();
-                        }}
-                        className={
-                            "home-btn-container" +
-                            (loading ? " fix-home-btn-margin" : "")
-                        }
-                    >
-                        {loading ? (
-                            <div className="home-btn">
-                                <span hidden={props.hideLabels}>
-                                    Loading...
-                                </span>
-                                <CircularProgress
-                                    size="1.2rem"
-                                    color="inherit"
-                                />
-                            </div>
-                        ) : (
+                <div className="home-alert-container">
+                    {loading ? (
+                        <div>
+                            <span>
+                                <b style={{ fontWeight: "bold" }}>
+                                    Robot is homing.
+                                </b>{" "}
+                                Please wait...{" "}
+                            </span>
+                            <CircularProgress size="1.2rem" color="inherit" />
+                        </div>
+                    ) : (
+                        <span className="home-info">
+                            <b style={{ fontWeight: "bold" }}>
+                                Robot is not homed.
+                            </b>{" "}
+                            Please drive the robot to a safe position and press
+                            the home button.
+                            <Tooltip
+                                text="Stretch has a homing procedure when powered on. It consists of 45-second sequence of motions to find each joint's zero position. Un-homed joints will be greyed-out until this procedure occurs."
+                                position="bottom"
+                                style={{
+                                    width: "400px",
+                                    padding: "10px",
+                                    zIndex: "10",
+                                }}
+                            >
+                                <QuestionMarkIcon />
+                            </Tooltip>
+                        </span>
+                    )}
+                    {loading ? (
+                        <></>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                functions.Home();
+                            }}
+                            className="home-btn-container"
+                        >
                             <div className="home-btn">
                                 <span hidden={props.hideLabels}>Home</span>
                                 <HomeIcon />
                             </div>
-                        )}
-                    </button>
-                    {loading ? (
-                        <span>
-                            <b style={{ fontWeight: "bold" }}>
-                                Robot is homing...
-                            </b>{" "}
-                            Please wait.
-                        </span>
-                    ) : (
-                        <span>
-                            <b style={{ fontWeight: "bold" }}>
-                                Robot is not homed
-                                <Tooltip
-                                    text="Robots with relative encoders need a homing procedure when they power on. For Stretch, it is a 45-second sequence of motions to find each joint's zero position. Un-homed joints will be greyed-out until this procedure occurs."
-                                    position="bottom"
-                                    style={{
-                                        width: "500px",
-                                        padding: "10px",
-                                        zIndex: "10",
-                                    }}
-                                >
-                                    <sup>
-                                        <QuestionMarkIcon
-                                            fontSize="inherit"
-                                            style={{ fontSize: "14px" }}
-                                        />
-                                    </sup>
-                                </Tooltip>
-                            </b>{" "}
-                            Please drive the robot to a safe position and press
-                            the home button.
-                        </span>
+                        </button>
                     )}
                 </div>
             </Alert>

@@ -1,17 +1,20 @@
-.home-btn-container {
-    float: right;
-    font-size: small;
-    margin-top: -10px;
+.home-alert-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
 }
 
-.fix-home-btn-margin {
-    margin-top: -20px;
+.home-btn-container {
+    margin-left: auto;
+}
+
+.home-info {
+    margin-left: auto;
 }
 
 .home-btn {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    padding: 10px;
+    justify-content: center;
 }
