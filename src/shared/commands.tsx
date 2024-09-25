@@ -23,7 +23,8 @@ export type cmd =
     | PlayTextToSpeech
     | StopTextToSpeech
     | ShowTabletCommand
-    | StopShowTabletCommand;
+    | StopShowTabletCommand
+    | HomeTheRobotCommand;
 
 export interface VelocityCommand {
     stop: () => void;
@@ -136,4 +137,8 @@ export interface PlayTextToSpeech {
 
 export interface StopTextToSpeech {
     type: "stopTextToSpeech";
+}
+
+export interface HomeTheRobotCommand {
+    type: "homeTheRobot";
 }

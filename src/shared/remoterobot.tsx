@@ -15,6 +15,7 @@ import {
     PlaybackPosesCommand,
     PlayTextToSpeech,
     StopTextToSpeech,
+    HomeTheRobotCommand,
 } from "shared/commands";
 import {
     ValidJointStateDict,
@@ -264,6 +265,16 @@ export class RemoteRobot extends React.Component<{}, any> {
         };
         this.robotChannel(cmd);
     }
+
+    /**
+     * Ask the robot to home itself.
+     */
+    homeTheRobot() {
+        let cmd: HomeTheRobotCommand = {
+            type: "homeTheRobot",
+        };
+        this.robotChannel(cmd);
+    }
 }
 
 class RobotSensors extends React.Component {
@@ -271,12 +282,16 @@ class RobotSensors extends React.Component {
     private robotPose: RobotPose = {};
     private inJointLimits: ValidJointStateDict = {};
     private inCollision: ValidJointStateDict = {};
+    private mode: string | undefined = undefined;
+    private isHomed: boolean | undefined = undefined;
     private runStopEnabled: boolean = false;
     private functionProviderCallback?: (
         inJointLimits: ValidJointStateDict,
         inCollision: ValidJointStateDict,
     ) => void;
     private batteryFunctionProviderCallback?: (voltage: number) => void;
+    private modeFunctionProviderCallback?: (mode: string) => void;
+    private isHomedFunctionProviderCallback?: (isHomed: boolean) => void;
     private runStopFunctionProviderCallback?: (enabled: boolean) => void;
     private jointStateFunctionProviderCallback?: (robotPose: RobotPose) => void;
 
@@ -284,11 +299,17 @@ class RobotSensors extends React.Component {
         super(props);
         this.functionProviderCallback = () => {};
         this.batteryFunctionProviderCallback = () => {};
+        this.modeFunctionProviderCallback = () => {};
+        this.isHomedFunctionProviderCallback = () => {};
         this.runStopFunctionProviderCallback = () => {};
         this.setFunctionProviderCallback =
             this.setFunctionProviderCallback.bind(this);
         this.setBatteryFunctionProviderCallback =
             this.setBatteryFunctionProviderCallback.bind(this);
+        this.setModeFunctionProviderCallback =
+            this.setModeFunctionProviderCallback.bind(this);
+        this.setIsHomedFunctionProviderCallback =
+            this.setIsHomedFunctionProviderCallback.bind(this);
         this.setRunStopFunctionProviderCallback =
             this.setRunStopFunctionProviderCallback.bind(this);
         this.setJointStateFunctionProviderCallback =
@@ -392,6 +413,18 @@ class RobotSensors extends React.Component {
         }
     }
 
+    setMode(mode: string) {
+        this.mode = mode;
+        if (this.modeFunctionProviderCallback)
+            this.modeFunctionProviderCallback(this.mode);
+    }
+
+    setIsHomed(isHomed: boolean) {
+        this.isHomed = isHomed;
+        if (this.isHomedFunctionProviderCallback)
+            this.isHomedFunctionProviderCallback(this.isHomed);
+    }
+
     setRunStopState(enabled: boolean) {
         this.runStopEnabled = enabled;
         if (this.runStopFunctionProviderCallback)
@@ -406,6 +439,26 @@ class RobotSensors extends React.Component {
      */
     setBatteryFunctionProviderCallback(callback: (voltage: number) => void) {
         this.batteryFunctionProviderCallback = callback;
+    }
+
+    /**
+     * Records a callback from the function provider. The callback is called
+     * whenever the driver's mode changes.
+     *
+     * @param callback callback to function provider
+     */
+    setModeFunctionProviderCallback(callback: (mode: string) => void) {
+        this.modeFunctionProviderCallback = callback;
+    }
+
+    /**
+     * Records a callback from the function provider. The callback is called
+     * whenever the "is_homed" state changes.
+     *
+     * @param callback callback to function provider
+     */
+    setIsHomedFunctionProviderCallback(callback: (isHomed: boolean) => void) {
+        this.isHomedFunctionProviderCallback = callback;
     }
 
     /**
