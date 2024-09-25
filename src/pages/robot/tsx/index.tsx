@@ -11,6 +11,8 @@ import {
     WebRTCMessage,
     ValidJointStateDict,
     ValidJointStateMessage,
+    ModeMessage,
+    IsHomedMessage,
     IsRunStoppedMessage,
     RobotPose,
     ROSOccupancyGrid,
@@ -41,6 +43,8 @@ export const robot = new Robot({
     showTabletResultCallback: (goalState: ActionState) =>
         forwardActionState(goalState, "showTabletState"),
     amclPoseCallback: forwardAMCLPose,
+    modeCallback: forwardMode,
+    isHomedCallback: forwardIsHomed,
     isRunStoppedCallback: forwardIsRunStopped,
     hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
     stretchToolCallback: forwardStretchTool,
@@ -132,6 +136,24 @@ function forwardActionState(state: ActionState, type: string) {
         type: type,
         message: state,
     } as ActionStateMessage);
+}
+
+function forwardMode(mode: string) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "mode",
+        value: mode,
+    } as ModeMessage);
+}
+
+function forwardIsHomed(isHomed: boolean) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "isHomed",
+        value: isHomed,
+    } as IsHomedMessage);
 }
 
 function forwardIsRunStopped(isRunStopped: boolean) {
@@ -315,6 +337,9 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "stopShowTablet":
             robot.stopShowTabletClient();
+            break;
+        case "homeTheRobot":
+            robot.homeTheRobot();
             break;
     }
 }

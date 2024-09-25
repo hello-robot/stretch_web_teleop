@@ -8,13 +8,17 @@ type TooltipProps = {
     text: string;
     divProps?: { [x: string]: any };
     position: "top" | "bottom" | "left" | "right";
+    style?: React.CSSProperties;
 };
 
 export const Tooltip = (props: TooltipProps) => {
     return (
         <div className="tooltip-trigger">
             {props.children}
-            <div className={`tooltip tooltip-${props.position}`}>
+            <div
+                className={`tooltip tooltip-${props.position}`}
+                style={props.style}
+            >
                 {props.text}
             </div>
         </div>

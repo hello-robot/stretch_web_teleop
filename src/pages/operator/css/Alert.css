@@ -27,6 +27,12 @@
     border-color: #ffecb5;
 }
 
+.loud-warning {
+    color: #664d03;
+    background-color: orange;
+    border-color: #ffecb5;
+}
+
 .primary {
     color: #084298;
     background-color: #cfe2ff;
