@@ -15,6 +15,7 @@ import {
     buttonFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
+    homeTheRobotFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
 } from ".";
@@ -39,6 +40,7 @@ import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
+import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -64,6 +66,14 @@ export const Operator = (props: {
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>(false);
+    const [robotNotHomed, setRobotNotHomed] =
+        React.useState<ActionState>(false);
+    function showHomeTheRobotGlobalControl(isHomed: ActionState) {
+        setRobotNotHomed(!isHomed);
+    }
+    homeTheRobotFunctionProvider.setIsHomedCallback(
+        showHomeTheRobotGlobalControl,
+    );
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -340,6 +350,20 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
+            {robotNotHomed && (
+                <div className="operator-collision-alerts">
+                    <div
+                        className={className("operator-alert", {
+                            fadeIn: robotNotHomed,
+                            fadeOut: !robotNotHomed,
+                        })}
+                    >
+                        <HomeTheRobot
+                            hideLabels={!layout.current.displayLabels}
+                        />
+                    </div>
+                </div>
+            )}
             {
                 <div className="operator-collision-alerts">
                     <div

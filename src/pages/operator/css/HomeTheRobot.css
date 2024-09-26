@@ -1,0 +1,20 @@
+.home-alert-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.home-btn-container {
+    margin-left: auto;
+}
+
+.home-info {
+    margin-left: auto;
+}
+
+.home-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
