@@ -112,6 +112,8 @@ export type WebRTCMessage =
     | StopMoveBaseMessage
     | FollowJointTrajectoryActionResultMessage
     | BatteryVoltageMessage
+    | ModeMessage
+    | IsHomedMessage
     | IsRunStoppedMessage
     | HasBetaTeleopKitMessage
     | StretchToolMessage
@@ -132,6 +134,16 @@ export interface ValidJointStateMessage {
     robotPose: RobotPose;
     jointsInLimits: { [key in ValidJoints]?: [boolean, boolean] };
     jointsInCollision: { [key in ValidJoints]?: [boolean, boolean] };
+}
+
+export interface ModeMessage {
+    type: "mode";
+    value: string;
+}
+
+export interface IsHomedMessage {
+    type: "isHomed";
+    value: boolean;
 }
 
 export interface IsRunStoppedMessage {
