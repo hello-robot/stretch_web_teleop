@@ -496,7 +496,9 @@ def generate_launch_description():
                 }.items(),
             ),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
+                PythonLaunchDescriptionSource(
+                    [stretch_core_path, "/launch/rplidar.launch.py"]
+                )
             ),
         ],
     )
