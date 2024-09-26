@@ -341,6 +341,9 @@ function handleMessage(message: WebRTCMessage) {
         case "homeTheRobot":
             robot.homeTheRobot();
             break;
+        case "stopTheRobot":
+            robot.stopTheRobot();
+            break;
     }
 }
 

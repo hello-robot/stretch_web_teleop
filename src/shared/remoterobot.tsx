@@ -235,6 +235,10 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel({ type: "stopShowTablet" });
     }
 
+    stopTheRobot() {
+        this.robotChannel({ type: "stopTheRobot" });
+    }
+
     /**
      * Speak the specified text.
      *

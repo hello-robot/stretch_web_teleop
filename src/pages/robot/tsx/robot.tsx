@@ -46,6 +46,7 @@ export class Robot extends React.Component {
     private cmdVelTopic?: ROSLIB.Topic;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
+    private stopTheRobotService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
     private setRealsenseDepthSensingService?: ROSLIB.Service;
     private setGripperDepthSensingService?: ROSLIB.Service;
@@ -289,6 +290,7 @@ export class Robot extends React.Component {
         this.createCmdVelTopic();
         this.createSwitchToNavigationService();
         this.createSwitchToPositionService();
+        this.createStopTheRobotService();
         this.createRealsenseDepthSensingService();
         this.createGripperDepthSensingService();
         this.createExpandedGripperService();
@@ -622,6 +624,14 @@ export class Robot extends React.Component {
         });
     }
 
+    createStopTheRobotService() {
+        this.stopTheRobotService = new ROSLIB.Service({
+            ros: this.ros,
+            name: "/stop_the_robot",
+            serviceType: "std_srvs/Trigger",
+        });
+    }
+
     createHomeTheRobotService() {
         this.homeTheRobotService = new ROSLIB.Service({
             ros: this.ros,
@@ -851,6 +861,16 @@ export class Robot extends React.Component {
             });
         }
     };
+
+    /**
+     * Call a service to stop all robot movements
+     */
+    stopTheRobot() {
+        var request = new ROSLIB.ServiceRequest({});
+        this.stopTheRobotService!.callService(request, () => {
+            console.log("Stopped the robot");
+        });
+    }
 
     /**
      * Ask the robot to home itself.

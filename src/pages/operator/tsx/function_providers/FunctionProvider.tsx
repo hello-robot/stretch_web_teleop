@@ -80,18 +80,20 @@ export abstract class FunctionProvider {
     // NOTE: When we undo this temp fix (of not stopping the
     // trajectory client) we also need to undo it in robot.jsx
     // `stopExecution()`.
-    public stopCurrentAction(send_stop_command: boolean = false) {
+    public stopCurrentAction(send_stop_command: boolean = true) {
         if (send_stop_command) FunctionProvider.remoteRobot?.stopTrajectory();
+        if (this.velocityExecutionHeartbeat) {
+            clearInterval(this.velocityExecutionHeartbeat);
+            this.velocityExecutionHeartbeat = undefined;
+        }
         if (this.activeVelocityAction) {
             // TODO: this.activeVelocityAction.stop sometimes (always?) executes the
             // exact same cancellation command(s) as FunctionProvider.remoteRobot?.stopTrajectory,
             // which means we are unnecessarily calling it twice.
+            console.log("stopping the robot")
+            FunctionProvider.remoteRobot?.stopTheRobot();
             if (send_stop_command) this.activeVelocityAction.stop();
             this.activeVelocityAction = undefined;
-        }
-        if (this.velocityExecutionHeartbeat) {
-            clearInterval(this.velocityExecutionHeartbeat);
-            this.velocityExecutionHeartbeat = undefined;
         }
     }
 }

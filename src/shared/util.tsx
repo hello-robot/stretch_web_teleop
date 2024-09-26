@@ -117,6 +117,7 @@ export type WebRTCMessage =
     | IsRunStoppedMessage
     | HasBetaTeleopKitMessage
     | StretchToolMessage
+    | StopTheRobotMessage
     | cmd;
 
 interface StopTrajectoryMessage {
@@ -144,6 +145,10 @@ export interface ModeMessage {
 export interface IsHomedMessage {
     type: "isHomed";
     value: boolean;
+}
+
+export interface StopTheRobotMessage {
+    type: "stopTheRobot";
 }
 
 export interface IsRunStoppedMessage {
