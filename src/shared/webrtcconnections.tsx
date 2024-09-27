@@ -1,6 +1,5 @@
 import React from "react";
 import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
-import io, { Socket } from "socket.io-client";
 import { safelyParseJSON, generateUUID } from "shared/util";
 import { BaseSignaling } from "shared/signaling/Signaling";
 import { LocalSignaling } from "shared/signaling/LocalSignaling";
@@ -23,7 +22,6 @@ interface WebRTCProps {
 }
 
 export class WebRTCConnection extends React.Component {
-    private socket: Socket;
     private peerConnection?: RTCPeerConnection;
     private peerRole: string;
     private polite: boolean;
@@ -35,7 +33,7 @@ export class WebRTCConnection extends React.Component {
     private dataChannelReceivedTimestamp: number = 0;
     private dataChannelConnectionState: boolean = false;
     public robotAvailable: boolean;
-    public signaling_client: BaseSignaling;
+    public signaler: BaseSignaling;
 
     cameraInfo: CameraInfo = {};
 
@@ -58,15 +56,17 @@ export class WebRTCConnection extends React.Component {
 
         this.createPeerConnection();
 
-        this.signaling_client = new LocalSignaling({
+        this.signaler = new LocalSignaling({
             onSignal: this.onSignal,
             onGoodbye: this.stop
         });
     }
 
     onSignal(message: SignallingMessage) {
-        let { candidate, sessionDescription, cameraInfo } = message;
         console.log("Received message:", message);
+        let { candidate, sessionDescription, cameraInfo } = message;
+
+        // Update my stream ID to camera name map
         if (cameraInfo) {
             if (Object.keys(cameraInfo).length === 0) {
                 console.warn(
@@ -75,6 +75,8 @@ export class WebRTCConnection extends React.Component {
             }
             this.cameraInfo = cameraInfo;
         }
+
+        // Handle session descriptions or ICE candidates sent by peer
         if (
             sessionDescription?.type === "offer" ||
             sessionDescription?.type === "answer"
@@ -111,10 +113,10 @@ export class WebRTCConnection extends React.Component {
                 .then(() => {
                     if (!this.peerConnection?.localDescription)
                         throw "peerConnection is undefined";
-                    this.sendSignallingMessage({
-                        sessionDescription:
-                            this.peerConnection.localDescription,
-                    });
+                    let signal: SignallingMessage = {
+                        sessionDescription: this.peerConnection.localDescription,
+                    }
+                    this.signaler.send(signal);
                 });
         } else if (candidate !== undefined && this.peerConnection) {
             // Note that the last candidate will be null, so we check whether
@@ -139,8 +141,8 @@ export class WebRTCConnection extends React.Component {
      * in which case the necessary event handlers will be installed in `createPeerConnection` during `ondatachannel`.
      */
     openDataChannels() {
-        console.log("opened data channels");
-        if (!this.peerConnection) throw "peerConnection undefined";
+        console.log("opening data channels");
+        if (!this.peerConnection) throw "openDataChannels - peerConnection is undefined";
         this.messageChannel = this.peerConnection.createDataChannel("messages");
         this.messageChannel.onmessage =
             this.onReceiveMessageCallback.bind(this);
@@ -151,9 +153,10 @@ export class WebRTCConnection extends React.Component {
             this.peerConnection = new RTCPeerConnection(peerConstraints);
             this.peerConnection.onicecandidate = (event) => {
                 console.log("ICE candidate available");
-                this.sendSignallingMessage({
+                let signal: SignallingMessage = {
                     candidate: event.candidate!,
-                });
+                }
+                this.signaler.send(signal);
             };
 
             this.peerConnection.ontrack = this.onTrackAdded!;
@@ -166,7 +169,7 @@ export class WebRTCConnection extends React.Component {
                         this.onReceiveMessageCallback.bind(this);
                     let onDataChannelStateChange = () => {
                         if (!this.messageChannel)
-                            throw "messageChannel is undefined";
+                            throw "onDataChannelStateChange - messageChannel is undefined";
                         const readyState = this.messageChannel.readyState;
                         console.log("Data channel state is: " + readyState);
                         if (readyState === "open") {
@@ -189,14 +192,14 @@ export class WebRTCConnection extends React.Component {
                 try {
                     this.makingOffer = true;
                     if (!this.peerConnection)
-                        throw "peerConnection is undefined";
+                        throw "onnegotiationneeded - peerConnection is undefined";
                     await this.peerConnection.setLocalDescription();
                     if (this.peerConnection.localDescription) {
-                        this.sendSignallingMessage({
-                            sessionDescription:
-                                this.peerConnection.localDescription,
+                        let signal: SignallingMessage = {
+                            sessionDescription: this.peerConnection.localDescription,
                             cameraInfo: this.cameraInfo,
-                        });
+                        }
+                        this.signaler.send(signal);
                     }
                 } catch (err) {
                     console.error(err);
@@ -206,15 +209,15 @@ export class WebRTCConnection extends React.Component {
             };
 
             this.peerConnection.oniceconnectionstatechange = () => {
-                if (!this.peerConnection) throw "peerConnection is undefined";
+                if (!this.peerConnection) throw "oniceconnectionstatechange - peerConnection is undefined";
                 if (this.peerConnection.iceConnectionState === "failed") {
                     this.peerConnection.restartIce();
                 }
             };
 
             this.peerConnection.onconnectionstatechange = () => {
-                if (!this.peerConnection) throw "pc is undefined";
-                console.log(this.peerConnection.connectionState);
+                if (!this.peerConnection) throw "onconnectionstatechange - peerConnection is undefined";
+                console.log("onconnectionstatechange", this.peerConnection.connectionState);
                 if (this.peerConnection.connectionState === "failed") {
                     console.error(
                         this.peerConnection.connectionState,
@@ -251,16 +254,16 @@ export class WebRTCConnection extends React.Component {
     }
 
     joinRobotRoom() {
-        return this.signaling_client.join_as_robot();
+        return this.signaler.join_as_robot();
     }
 
     addOperatorToRobotRoom() {
-        return this.signaling_client.join_as_operator();
+        return this.signaler.join_as_operator();
     }
 
     addTrack(track: MediaStreamTrack, stream: MediaStream, streamName: string) {
         this.cameraInfo[stream.id] = streamName;
-        if (!this.peerConnection) throw "pc is undefined";
+        if (!this.peerConnection) throw "addTrack - peerConnection is undefined";
         this.peerConnection.addTrack(track, stream);
         console.log("added track");
     }
@@ -269,7 +272,7 @@ export class WebRTCConnection extends React.Component {
         // Tell the other end that we're ending the call so they can stop, and get us kicked out of the robot room
         console.warn("Hanging up");
         this.socket.emit("bye", this.peerRole);
-        if (!this.peerConnection) throw "pc is undefined";
+        if (!this.peerConnection) throw "hangout - peerConnection is undefined";
         if (this.peerConnection.connectionState === "new") {
             // Don't reset PCs that don't have any state to reset
             return;
@@ -288,10 +291,6 @@ export class WebRTCConnection extends React.Component {
         if (!this.peerConnection) throw "peerConnection is undefined";
         const senders = this.peerConnection.getSenders();
         senders.forEach((sender) => this.peerConnection?.removeTrack(sender));
-    }
-
-    sendSignallingMessage(message: SignallingMessage) {
-        this.socket.emit("signalling", message);
     }
 
     ////////////////////////////////////////////////////////////

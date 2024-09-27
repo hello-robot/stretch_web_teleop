@@ -346,6 +346,8 @@ function disconnectFromRobot() {
     connection.stop();
 }
 
+// How reliable is this? What about mobile browsers?
+// https://stackoverflow.com/questions/16840349/
 window.onbeforeunload = () => {
     connection.hangup();
     connection.stop();

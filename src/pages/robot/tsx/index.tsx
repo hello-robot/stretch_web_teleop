@@ -353,6 +353,8 @@ function disconnectFromRobot() {
     connection.hangup();
 }
 
+// How reliable is this? What about mobile browsers?
+// https://stackoverflow.com/questions/16840349/
 window.onbeforeunload = () => {
     robot.closeROSConnection();
     connection.hangup();

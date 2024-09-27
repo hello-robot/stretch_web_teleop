@@ -27,12 +27,7 @@ export abstract class BaseSignaling {
     public abstract join_as_operator(): Promise<boolean>;
 
     /**
-     * Leaves the signaling room as a robot
+     * Send offer and meta info to peer
      */
-    public abstract leave_as_robot(): Promise<boolean>;
-
-    /**
-     * Leaves the signaling room as an operator
-     */
-    public abstract leave_as_operator(): Promise<boolean>;
+    public abstract send(signal: SignallingMessage): void;
 }

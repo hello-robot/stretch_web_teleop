@@ -42,18 +42,29 @@ io.on("connect_error", (err) => {
 });
 
 ROOM = 'default';
-is_robot_in_room = false;
-is_operator_in_room = false;
+robo_sock = undefined;
+oper_sock = undefined;
 
 io.on("connection", function (socket) {
     console.log("new socket.io connection");
 
+    socket.on("disconnect", () => {
+        if (socket.id == robo_sock) {
+            robo_sock = undefined
+            console.log("Robot disconnected");
+        }
+        if (socket.id == oper_sock) {
+            oper_sock = undefined
+            console.log("Operator disconnected");
+        }
+    });
+
     socket.on("join_as_robot", (callback) => {
         console.log("Received join_as_robot request...");
-        if (!is_robot_in_room) {
+        if (!robo_sock) {
             socket.join(ROOM);
+            robo_sock = socket.id;
             console.log("join_as_robot SUCCESS");
-            is_robot_in_room = true;
             callback({ success: true });
         } else {
             console.log("join_as_robot FAILURE: there's already a robot in the room");
@@ -61,28 +72,14 @@ io.on("connection", function (socket) {
         }
     });
 
-    // TODO: The browsers shouldnt have to call this. Can socketio tell us when the clients have left?
-    socket.on("leave_as_robot", (callback) => {
-        console.log("Received leave_as_robot request...");
-        if (is_robot_in_room) {
-            socket.to(ROOM).emit("bye");
-            socket.leave(ROOM);
-            console.log("leave_as_robot SUCCESS");
-            is_robot_in_room = false;
-            callback({ success: true });
-        } else {
-            callback({ success: false });
-        }
-    });
-
     socket.on("join_as_operator", (callback) => {
         console.log("Received join_as_operator request...");
-        if (is_robot_in_room) {
-            if (!is_operator_in_room) {
+        if (robo_sock) {
+            if (!oper_sock) {
                 socket.join(ROOM);
                 socket.in(ROOM).emit("joined", ROOM);
+                oper_sock = socket.id;
                 console.log("join_as_operator SUCCESS");
-                is_operator_in_room = true;
                 callback({ success: true });
             } else {
                 console.log("join_as_operator FAILURE: there's already a operator in the room");
@@ -94,25 +91,13 @@ io.on("connection", function (socket) {
         }
     });
 
-    // TODO: The browsers shouldnt have to call this. Can socketio tell us when the clients have left?
-    socket.on("leave_as_operator", (callback) => {
-        console.log("Received leave_as_operator request...");
-        if (is_operator_in_room) {
-            socket.to(ROOM).emit("bye");
-            socket.leave(ROOM);
-            console.log("leave_as_operator SUCCESS");
-            is_operator_in_room = false;
+    socket.on("signaling", (message, callback) => {
+        if (robo_sock && oper_sock && io.sockets.adapter.rooms.get(ROOM)) {
+            socket.to(ROOM).emit("signaling", message);
             callback({ success: true });
         } else {
+            console.log(`signaling FAILURE: robo_sock=${robo_sock} oper_sock=${oper_sock} room=${io.sockets.adapter.rooms.get(ROOM)}`);
             callback({ success: false });
-        }
-    });
-
-    socket.on("signaling", (message) => {
-        if (is_robot_in_room && is_operator_in_room && io.sockets.adapter.rooms.get(ROOM)) {
-            socket.to(ROOM).emit("signaling", message);
-        } else {
-            console.log("signaling FAILURE: ", is_robot_in_room, is_operator_in_room, io.sockets.adapter.rooms.get(ROOM));
         }
     });
 });
