@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const dotenv = require("dotenv");
 
-const pages = ["robot", "operator"];
+const pages = ["robot", "operator", "test"];
 
 // call dotenv and it will return an Object with a parsed key
 const env = dotenv.config().parsed;
@@ -93,7 +93,7 @@ module.exports = (env) => {
             express: "commonjs express",
         },
         resolve: {
-            extensions: [".tsx", ".js"],
+            extensions: [".ts", ".tsx", ".js"],
             alias: {
                 shared: path.resolve(__dirname, "./src/shared/"),
                 operator: path.resolve(__dirname, "./src/pages/operator/"),

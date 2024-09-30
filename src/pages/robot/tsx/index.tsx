@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "robot/css/index.css";
 import { Robot } from "../../robot/tsx/robot";
-import { WebRTCConnection } from "../../../shared/webrtcconnections";
+import { WebRTCConnection } from "shared/webrtcconnections";
 import {
     navigationProps,
     realsenseProps,
@@ -23,14 +23,13 @@ import {
     ActionStateMessage,
     ROSBatteryState,
     BatteryVoltageMessage,
+    HasBetaTeleopKitMessage,
+    StretchToolMessage,
+    delay,
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import { AudioStream } from "./audiostreams";
 import ROSLIB from "roslib";
-import {
-    HasBetaTeleopKitMessage,
-    StretchToolMessage,
-} from "../../../shared/util";
 
 export const robot = new Robot({
     jointStateCallback: forwardJointStates,
@@ -60,7 +59,6 @@ export let audioStream = new AudioStream(audioProps);
 connection = new WebRTCConnection({
     peerRole: "robot",
     polite: false,
-    onRobotConnectionStart: handleSessionStart,
     onMessage: handleMessage,
     onConnectionEnd: disconnectFromRobot,
 });
@@ -88,7 +86,15 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
-    connection.joinRobotRoom();
+    let did_join = false;
+    while (!did_join) {
+        did_join = await connection.joinRobotRoom();
+        if (!did_join) {
+            console.error("Couldn't connect to signaling server");
+            await delay(500);
+        }
+    }
+    handleSessionStart();
 
     return Promise.resolve();
 });
@@ -243,7 +249,7 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
     } as MapPoseMessage);
 }
 
-function handleMessage(message: WebRTCMessage) {
+function handleMessage(message: WebRTCMessage | WebRTCMessage[]) {
     if (!("type" in message)) {
         console.error("Malformed message:", message);
         return;
@@ -349,6 +355,8 @@ function disconnectFromRobot() {
     connection.hangup();
 }
 
+// How reliable is this? What about mobile browsers?
+// https://stackoverflow.com/questions/16840349/
 window.onbeforeunload = () => {
     robot.closeROSConnection();
     connection.hangup();
