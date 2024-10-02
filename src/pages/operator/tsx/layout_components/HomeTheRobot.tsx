@@ -74,6 +74,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
                                 functions.Home();
                             }}
                             className="home-btn-container"
+                            aria-labelledby="Home"
                         >
                             <div className="home-btn">
                                 <span hidden={props.hideLabels}>Home</span>

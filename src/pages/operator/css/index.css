@@ -43,7 +43,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background-color);
-    zoom: 75%;
+    /* zoom: 75%; */
 }
 
 html {
