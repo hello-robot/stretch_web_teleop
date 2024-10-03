@@ -1,11 +1,25 @@
 import 'home/css/index.css';
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { createLoginHandler } from './utils';
+import { LoginHandler } from './login_handler/LoginHandler';
 
-
-
+let loginHandler: LoginHandler;
 const container = document.getElementById("root");
 const root = createRoot(container!);
-root.render(
-    <div>Hey</div>
-);
+
+const loginHandlerReadyCallback = () => {
+    renderHomePage();
+};
+loginHandler = createLoginHandler(loginHandlerReadyCallback);
+
+
+function renderHomePage() {
+    loginHandler.loginState() == "authenticated"
+        ? root.render(
+              <div>Logged In</div>
+          )
+        : root.render(
+              <div>Not Logged In</div>
+          );
+}
