@@ -3,6 +3,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { createLoginHandler } from './utils';
 import { LoginHandler } from './login_handler/LoginHandler';
+import { SideBySideView } from './components/SideBySideView';
 
 let loginHandler: LoginHandler;
 const container = document.getElementById("root");
@@ -17,7 +18,7 @@ loginHandler = createLoginHandler(loginHandlerReadyCallback);
 function renderHomePage() {
     loginHandler.loginState() == "authenticated"
         ? root.render(
-              <div>Logged In</div>
+              <SideBySideView />
           )
         : root.render(
               <div>Not Logged In</div>

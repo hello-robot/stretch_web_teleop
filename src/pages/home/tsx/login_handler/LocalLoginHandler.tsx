@@ -21,4 +21,12 @@ export class LocalLoginHandler extends LoginHandler {
     public loginState(): string {
         return "authenticated";
     }
+
+    public listRooms(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            this.socket.emit("list_rooms", (rooms) => {
+                resolve(rooms);
+            });
+        });
+    }
 }
