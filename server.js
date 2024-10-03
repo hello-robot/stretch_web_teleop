@@ -74,6 +74,15 @@ io.on("connection", function (socket) {
         }
     });
 
+    socket.on("list_rooms", (callback) => {
+        callback([{
+            "roomid": "robot",
+            "protocol": undefined, // TODO(binit): ensure robot/operator protocol match
+            "is_online": true, // TODO
+            "is_occupied": true, // TODO
+        }]);
+    });
+
     socket.on("add operator to robot room", (callback) => {
         // The robot room is only available if another operator is not connected to it
         if (io.sockets.adapter.rooms.get("robot")) {

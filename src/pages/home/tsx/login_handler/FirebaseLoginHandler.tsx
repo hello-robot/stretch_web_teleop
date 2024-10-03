@@ -14,4 +14,10 @@ export class FirebaseLoginHandler extends LoginHandler {
     public loginState(): string {
         return "authenticated";
     }
+
+    public listRooms(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            // TODO(binit)
+        });
+    }
 }
