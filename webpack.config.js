@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const dotenv = require("dotenv");
 
-const pages = ["robot", "operator"];
+const pages = ["robot", "operator", "home"];
 
 // call dotenv and it will return an Object with a parsed key
 const env = dotenv.config().parsed;
@@ -52,7 +52,7 @@ module.exports = (env) => {
                     new HtmlWebpackPlugin({
                         inject: true,
                         template: `./src/pages/${page}/html/index.html`,
-                        filename: `${page}/index.html`,
+                        filename: page == "home" ? "index.html" : `${page}/index.html`,
                         chunks: [page],
                     }),
             ),
@@ -98,6 +98,7 @@ module.exports = (env) => {
                 shared: path.resolve(__dirname, "./src/shared/"),
                 operator: path.resolve(__dirname, "./src/pages/operator/"),
                 robot: path.resolve(__dirname, "./src/pages/robot/"),
+                home: path.resolve(__dirname, "./src/pages/home/"),
             },
             fallback: {
                 fs: false,
