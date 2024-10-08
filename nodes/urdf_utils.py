@@ -145,6 +145,42 @@ def merge_arm(robot):
         joint.type = "fixed"
 
 
+def add_virtual_rotary_joint(robot):
+    """
+    Add virtual rotary joint for mobile base.
+
+    Parameters
+    ----------
+    robot: urdf_parser_py.urdf.Robot
+        a manipulable URDF representation
+
+    Returns
+    -------
+    urdf_parser_py.urdf.Robot:
+        modified URDF with mobile base rotation joint
+    """
+    link_virtual_base_rotary = ud.Link(
+        name="virtual_base", visual=None, inertial=None, collision=None, origin=None
+    )
+    origin_rotary = ud.Pose(xyz=[0, 0, 0], rpy=[0, 0, 0])
+    limit_rotary = ud.JointLimit(effort=10, velocity=1, lower=-np.pi, upper=np.pi)
+    joint_mobile_base_rotation = ud.Joint(
+        name="joint_mobile_base_rotation",
+        parent="virtual_base",
+        child="base_link",
+        joint_type="revolute",
+        axis=[0, 0, 1],
+        origin=origin_rotary,
+        limit=limit_rotary,
+        dynamics=None,
+        safety_controller=None,
+        calibration=None,
+        mimic=None,
+    )
+    robot.add_link(link_virtual_base_rotary)
+    robot.add_joint(joint_mobile_base_rotation)
+
+
 def generate_urdf():
     pass
 
@@ -166,5 +202,8 @@ if __name__ == "__main__":
     # print_joint_type()
     # make_joints_rigid(robot)
     # print_joint_type()
-    merge_arm(robot)
+    # merge_arm(robot)
+    # print_joint_type()
+    print_joint_type()
+    add_virtual_rotary_joint(robot)
     print_joint_type()
