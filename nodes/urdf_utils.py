@@ -196,7 +196,46 @@ def add_virtual_rotary_joint(robot):
     robot.add_joint(joint_mobile_base_rotation)
 
 
-def generate_ik_urdfs(rigid_wrist_urdf=True):
+def generate_urdf_from_robot(robot, app_name, description=None):
+    """
+    Renders a `robot` URDF object out to a file in the /tmp
+    folder. The file will be unique to your application given
+    the `app_name` isn't the same as other applications.
+
+    This enables you to safety generate URDFs on-the-fly
+    to be used by your app. E.g. `generate_ik_urdfs()` uses
+    this method to generate "calibrated" inverse kinematics
+    URDFs, so each robot's unique backlash and skew parameters
+    are baked into the IK calculations.
+
+    Parameters
+    ----------
+    robot: urdf_parser_py.urdf.Robot
+        the URDF representation to render out to a file
+    app_name: str
+        the name of your application
+    description: str or None
+        further description of the URDF
+
+    Returns
+    -------
+    str: filepath of the generated URDF
+    """
+    if description is None:
+        description = "custom"
+
+    def save_urdf(robot, file_name):
+        urdf_string = robot.to_xml_string()
+        with open(file_name, "w") as fid:
+            fid.write(urdf_string)
+
+    filename = f'/tmp/{app_name}_{description}.urdf'
+    save_urdf(robot, filename)
+
+    return filename
+
+
+def generate_ik_urdfs(app_name, rigid_wrist_urdf=True):
     """
     Generates URDFs for IK packages. The latest calibrated
     URDF is used as a starting point, then these modifications
@@ -209,7 +248,9 @@ def generate_ik_urdfs(rigid_wrist_urdf=True):
 
     Parameters
     ----------
-    rigid_wrist_urdf: bool
+    app_name: str
+        the name of your application
+    rigid_wrist_urdf: bool or None
         whether to also generate a IK URDF with a fixed dex wrist
 
     Returns
@@ -218,10 +259,6 @@ def generate_ik_urdfs(rigid_wrist_urdf=True):
         one or two filepaths, depending on `rigid_wrist_urdf`,
         to the generated URDFs
     """
-    def save_urdf(robot, file_name):
-        urdf_string = robot.to_xml_string()
-        with open(file_name, "w") as fid:
-            fid.write(urdf_string)
 
     robot = ud.Robot.from_xml_file(get_latest_urdf())
     clip_joint_limits(robot)
@@ -242,8 +279,9 @@ def generate_ik_urdfs(rigid_wrist_urdf=True):
 
     add_virtual_rotary_joint(robot)
 
-    ret = ['/tmp/stretch_base_rotation_ik.urdf']
-    save_urdf(robot, ret[-1])
+    ret = []
+    fpath = generate_urdf_from_robot(robot, app_name, 'base_rotation_ik')
+    ret.append(fpath)
 
     if rigid_wrist_urdf:
         ignore_joints = [
@@ -254,13 +292,13 @@ def generate_ik_urdfs(rigid_wrist_urdf=True):
         ]
         make_joints_rigid(robot, ignore_joints)
 
-        ret.append('/tmp/stretch_base_rotation_ik_with_fixed_wrist.urdf')
-        save_urdf(robot, ret[-1])
+        fpath = generate_urdf_from_robot(robot, app_name, 'base_rotation_ik_with_fixed_wrist')
+        ret.append(fpath)
 
     return ret
 
 
 if __name__ == "__main__":
-    print(generate_ik_urdfs())
-    with open('/tmp/stretch_base_rotation_ik.urdf', 'r') as fid:
+    print(generate_ik_urdfs('stretch_web_teleop'))
+    with open('/tmp/stretch_web_teleop_base_rotation_ik.urdf', 'r') as fid:
         print(fid.read())
