@@ -1,6 +1,7 @@
 import pathlib
 import numpy as np
 import stretch_body.hello_utils as hu
+from urdf_parser_py import urdf as ud
 from typing import Dict, Optional, Tuple
 
 
@@ -70,6 +71,32 @@ def get_joint_limits(use_original_limits=True):
     return ik_joint_limits
 
 
+def make_joints_rigid(robot, ignore_joints=None):
+    """
+    Change any joint that should be immobile for end effector IK
+    into a fixed joint.
+
+    Parameters
+    ----------
+    robot: urdf_parser_py.urdf.Robot
+        a manipulable URDF representation
+    ignore_joints: list(str) or None
+        which joints to keep as-is
+
+    Returns
+    -------
+    urdf_parser_py.urdf.Robot:
+        modified URDF where joints are "fixed"
+    """
+    if ignore_joints is None:
+        ignore_joints = []
+
+    for j in robot.joint_map.keys():
+        if j not in ignore_joints:
+            joint = robot.joint_map[j]
+            joint.type = "fixed"
+
+
 def generate_urdf():
     pass
 
@@ -80,3 +107,14 @@ if __name__ == "__main__":
     import pprint; pprint.pprint(get_joint_limits())
     print('')
     pprint.pprint(get_joint_limits(use_original_limits=False))
+    print('')
+    def print_joint_type():
+        i = {}
+        for j in robot.joint_map:
+            i[j] = robot.joint_map[j].type
+        print(f'len={len(i)}')
+        pprint.pprint(i)
+    robot = ud.Robot.from_xml_file(get_latest_urdf())
+    print_joint_type()
+    make_joints_rigid(robot)
+    print_joint_type()
