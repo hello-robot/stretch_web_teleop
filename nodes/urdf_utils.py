@@ -97,6 +97,54 @@ def make_joints_rigid(robot, ignore_joints=None):
             joint.type = "fixed"
 
 
+def merge_arm(robot):
+    """
+    Replace telescoping arm with a single prismatic joint,
+    which makes end-effector IK computation easier.
+
+    Parameters
+    ----------
+    robot: urdf_parser_py.urdf.Robot
+        a manipulable URDF representation
+
+    Returns
+    -------
+    urdf_parser_py.urdf.Robot:
+        modified URDF with single arm joint
+    """
+    all_arm_joints = [
+        "joint_arm_l4",
+        "joint_arm_l3",
+        "joint_arm_l2",
+        "joint_arm_l1",
+        "joint_arm_l0",
+    ]
+    prismatic_arm_joints = all_arm_joints[1:]
+    removed_arm_joints = all_arm_joints[1:-1]
+    near_proximal_arm_joint = robot.joint_map[all_arm_joints[1]]
+    distal_arm_joint = robot.joint_map[all_arm_joints[-1]]
+
+    # Calculate aggregate joint characteristics
+    xyz_total = np.array([0.0, 0.0, 0.0])
+    limit_upper_total = 0.0
+    for j in prismatic_arm_joints:
+        joint = robot.joint_map[j]
+        xyz_total = xyz_total + joint.origin.xyz
+        limit_upper_total = limit_upper_total + joint.limit.upper
+
+    # Directly connect the proximal and distal parts of the arm
+    distal_arm_joint.parent = near_proximal_arm_joint.parent
+
+    # Make the distal prismatic joint act like the full arm
+    distal_arm_joint.origin.xyz = xyz_total
+    distal_arm_joint.limit.upper = limit_upper_total
+
+    # Mark the eliminated joints as "fixed"
+    for j in removed_arm_joints:
+        joint = robot.joint_map[j]
+        joint.type = "fixed"
+
+
 def generate_urdf():
     pass
 
@@ -115,6 +163,8 @@ if __name__ == "__main__":
         print(f'len={len(i)}')
         pprint.pprint(i)
     robot = ud.Robot.from_xml_file(get_latest_urdf())
-    print_joint_type()
-    make_joints_rigid(robot)
+    # print_joint_type()
+    # make_joints_rigid(robot)
+    # print_joint_type()
+    merge_arm(robot)
     print_joint_type()
