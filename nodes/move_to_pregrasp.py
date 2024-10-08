@@ -49,6 +49,7 @@ from stretch_web_teleop_helpers.stretch_ik_control import (
     MotionGeneratorRetval,
     StretchIKControl,
 )
+import urdf_utils as uu
 
 
 class MoveToPregraspNode(Node):
@@ -100,14 +101,12 @@ class MoveToPregraspNode(Node):
         self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
-        urdf_abs_path = os.path.join(
-            get_package_share_directory("stretch_web_teleop"),
-            "urdf/stretch_base_rotation_ik.urdf",
-        )
+        urdf_fpaths = uu.generate_ik_urdfs("stretch_web_teleop", rigid_wrist_urdf=False)
+        urdf_fpath = urdf_fpaths[0]
         self.controller = StretchIKControl(
             self,
             tf_buffer=self.tf_buffer,
-            urdf_path=urdf_abs_path,
+            urdf_path=urdf_fpath,
             static_transform_broadcaster=self.static_transform_broadcaster,
         )
 

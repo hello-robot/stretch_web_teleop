@@ -257,7 +257,9 @@ def generate_ik_urdfs(app_name, rigid_wrist_urdf=True):
     -------
     list(str):
         one or two filepaths, depending on `rigid_wrist_urdf`,
-        to the generated URDFs
+        to the generated URDFs. The first element will be the
+        full IK version, and the second will be the rigid
+        wrist version.
     """
 
     robot = ud.Robot.from_xml_file(get_latest_urdf())
