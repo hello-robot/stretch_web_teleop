@@ -27,7 +27,7 @@ def get_latest_urdf():
     return urdf_filename
 
 
-def get_joint_limits(use_original_limits=True):
+def clip_joint_limits(robot, use_original_limits=True):
     """
     Enables more conservative joint limits to be set than in the
     original URDF.
@@ -38,13 +38,15 @@ def get_joint_limits(use_original_limits=True):
 
     Parameters
     ----------
+    robot: urdf_parser_py.urdf.Robot
+        a manipulable URDF representation
     use_original_limits: bool
         don't impose any additional limits
 
     Returns
     -------
-    dict[str, tuple(float or None, float or None)]:
-        mapping between joint and (lower limit, upper limit)
+    urdf_parser_py.urdf.Robot:
+        modified URDF where joint limits are clipped
     """
     ik_joint_limits: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
     if use_original_limits:
@@ -68,7 +70,20 @@ def get_joint_limits(use_original_limits=True):
             "joint_wrist_roll": (-(np.pi / 2.0), np.pi / 2.0),
         }
 
-    return ik_joint_limits
+    for j in ik_joint_limits:
+        joint = robot.joint_map.get(j, None)
+        if joint is not None:
+            original_upper = joint.limit.upper
+            requested_upper = ik_joint_limits[j][1]
+            if requested_upper is not None:
+                new_upper = min(requested_upper, original_upper)
+                robot.joint_map[j].limit.upper = new_upper
+
+            original_lower = joint.limit.lower
+            requested_lower = ik_joint_limits[j][0]
+            if requested_lower is not None:
+                new_lower = max(requested_lower, original_lower)
+                robot.joint_map[j].limit.lower = new_lower
 
 
 def make_joints_rigid(robot, ignore_joints=None):
@@ -186,16 +201,16 @@ def generate_urdf():
 
 
 if __name__ == "__main__":
+    import pprint
     print(get_latest_urdf())
-    print('')
-    import pprint; pprint.pprint(get_joint_limits())
-    print('')
-    pprint.pprint(get_joint_limits(use_original_limits=False))
     print('')
     def print_joint_type():
         i = {}
         for j in robot.joint_map:
-            i[j] = robot.joint_map[j].type
+            try:
+                i[j] = robot.joint_map[j].limit.upper, robot.joint_map[j].limit.lower
+            except:
+                pass
         print(f'len={len(i)}')
         pprint.pprint(i)
     robot = ud.Robot.from_xml_file(get_latest_urdf())
@@ -204,6 +219,7 @@ if __name__ == "__main__":
     # print_joint_type()
     # merge_arm(robot)
     # print_joint_type()
+    # add_virtual_rotary_joint(robot)
     print_joint_type()
-    add_virtual_rotary_joint(robot)
+    clip_joint_limits(robot)
     print_joint_type()
