@@ -196,30 +196,71 @@ def add_virtual_rotary_joint(robot):
     robot.add_joint(joint_mobile_base_rotation)
 
 
-def generate_urdf():
-    pass
+def generate_ik_urdfs(rigid_wrist_urdf=True):
+    """
+    Generates URDFs for IK packages. The latest calibrated
+    URDF is used as a starting point, then these modifications
+    are applied:
+      1. Clip joint limits
+      2. Make non-IK joints rigid
+      3. Merge arm joints
+      4. Add virtual rotary base joint
+      5. (optionally) Make wrist joints rigid
+
+    Parameters
+    ----------
+    rigid_wrist_urdf: bool
+        whether to also generate a IK URDF with a fixed dex wrist
+
+    Returns
+    -------
+    list(str):
+        one or two filepaths, depending on `rigid_wrist_urdf`,
+        to the generated URDFs
+    """
+    def save_urdf(robot, file_name):
+        urdf_string = robot.to_xml_string()
+        with open(file_name, "w") as fid:
+            fid.write(urdf_string)
+
+    robot = ud.Robot.from_xml_file(get_latest_urdf())
+    clip_joint_limits(robot)
+
+    ignore_joints = [
+        "joint_lift",
+        "joint_arm_l0",
+        "joint_arm_l1",
+        "joint_arm_l2",
+        "joint_arm_l3",
+        "joint_wrist_yaw",
+        "joint_wrist_pitch",
+        "joint_wrist_roll",
+    ]
+    make_joints_rigid(robot, ignore_joints)
+
+    merge_arm(robot)
+
+    add_virtual_rotary_joint(robot)
+
+    ret = ['/tmp/stretch_base_rotation_ik.urdf']
+    save_urdf(robot, ret[-1])
+
+    if rigid_wrist_urdf:
+        ignore_joints = [
+            "joint_mobile_base_translation",
+            "joint_mobile_base_rotation",
+            "joint_lift",
+            "joint_arm_l0",
+        ]
+        make_joints_rigid(robot, ignore_joints)
+
+        ret.append('/tmp/stretch_base_rotation_ik_with_fixed_wrist.urdf')
+        save_urdf(robot, ret[-1])
+
+    return ret
 
 
 if __name__ == "__main__":
-    import pprint
-    print(get_latest_urdf())
-    print('')
-    def print_joint_type():
-        i = {}
-        for j in robot.joint_map:
-            try:
-                i[j] = robot.joint_map[j].limit.upper, robot.joint_map[j].limit.lower
-            except:
-                pass
-        print(f'len={len(i)}')
-        pprint.pprint(i)
-    robot = ud.Robot.from_xml_file(get_latest_urdf())
-    # print_joint_type()
-    # make_joints_rigid(robot)
-    # print_joint_type()
-    # merge_arm(robot)
-    # print_joint_type()
-    # add_virtual_rotary_joint(robot)
-    print_joint_type()
-    clip_joint_limits(robot)
-    print_joint_type()
+    print(generate_ik_urdfs())
+    with open('/tmp/stretch_base_rotation_ik.urdf', 'r') as fid:
+        print(fid.read())
