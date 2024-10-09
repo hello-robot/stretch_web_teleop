@@ -7,11 +7,12 @@ import threading
 import traceback
 from typing import Dict, Generator, List, Optional, Tuple
 
-# Third-Party Imports
-import stretch_urdf.urdf_utils as uu
 import numpy as np
 import numpy.typing as npt
 import rclpy
+
+# Third-Party Imports
+import stretch_urdf.urdf_utils as uu
 import tf2_ros
 import yaml
 from ament_index_python import get_package_share_directory
