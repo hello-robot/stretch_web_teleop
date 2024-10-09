@@ -8,6 +8,7 @@ import traceback
 from typing import Dict, Generator, List, Optional, Tuple
 
 # Third-Party Imports
+import stretch_urdf.urdf_utils as uu
 import numpy as np
 import numpy.typing as npt
 import rclpy
@@ -49,7 +50,6 @@ from stretch_web_teleop_helpers.stretch_ik_control import (
     MotionGeneratorRetval,
     StretchIKControl,
 )
-import urdf_utils as uu
 
 
 class MoveToPregraspNode(Node):
