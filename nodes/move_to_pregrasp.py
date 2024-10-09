@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # Standard Imports
-import os
 import sys
 import threading
 import traceback
@@ -15,7 +14,6 @@ import rclpy
 import stretch_urdf.urdf_utils as uu
 import tf2_ros
 import yaml
-from ament_index_python import get_package_share_directory
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
