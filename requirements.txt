@@ -8,3 +8,5 @@ pyquaternion
 pyttsx3
 simpleaudio
 sounddevice
+hello-robot-stretch-urdf>=0.1.0
+
