@@ -78,8 +78,7 @@ io.on("connection", function (socket) {
         callback([{
             "roomid": "robot",
             "protocol": undefined, // TODO(binit): ensure robot/operator protocol match
-            "is_online": true, // TODO
-            "is_occupied": true, // TODO
+            "status": "online" // ["online", "offline", "occupied"] TODO(binit): don't hardcode
         }]);
     });
 
