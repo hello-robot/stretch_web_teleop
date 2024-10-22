@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { createLoginHandler } from './utils';
 import { LoginHandler } from './login_handler/LoginHandler';
 import { SideBySideView } from './components/SideBySideView';
+import { LoginView } from './components/LoginView';
 
 export let loginHandler: LoginHandler;
 const container = document.getElementById("root");
@@ -21,6 +22,6 @@ function renderHomePage() {
               <SideBySideView />
           )
         : root.render(
-              <div>Not Logged In</div>
+              <LoginView />
           );
 }

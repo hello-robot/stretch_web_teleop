@@ -8,7 +8,7 @@ export class LocalLoginHandler extends LoginHandler {
 
     constructor(onLoginHandlerReadyCallback: () => void) {
         super(onLoginHandlerReadyCallback);
-        this._loginState = "authenticated";
+        this._loginState = "not_authenticated";
         this.socket = io();
         this.socket.on("connect", () => {
             console.log("Connected to local socket");
