@@ -17,6 +17,7 @@ import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import { styled } from '@mui/material/styles';
 import { ForgotPassword } from "./ForgotPassword";
+import { loginHandler } from "../index";
 
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -71,11 +72,12 @@ export const LoginView = (props) => {
         }
 
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
+        let l = {
+            email: data.get('email') as string,
+            password: data.get('password') as string,
             remember: data.get('remember') ? true : false,
-        });
+        };
+        loginHandler.login(l['email'], l['password'], l['remember'])
     };
 
     const validateInputs = () => {

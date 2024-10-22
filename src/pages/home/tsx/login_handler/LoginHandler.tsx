@@ -12,4 +12,6 @@ export abstract class LoginHandler {
     public abstract listRooms(): Promise<boolean>;
 
     public abstract logout();
+
+    public abstract login(username: string, password: string, remember_me: boolean);
 }

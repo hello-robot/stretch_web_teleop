@@ -15,7 +15,7 @@ import Button from '@mui/material/Button';
 export const ForgotPassword = (props: {
     open: boolean;
     handleClose: () => void;
-    handleExecute: (email) => void;
+    handleExecute: (email: string) => void;
 }) => {
 
     return isTablet || isBrowser ? (
@@ -27,7 +27,7 @@ export const ForgotPassword = (props: {
             onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
                 const data = new FormData(event.currentTarget);
-                props.handleExecute(data.get('email'));
+                props.handleExecute(data.get('email') as string);
                 props.handleClose();
                 event.stopPropagation();
             }}}>

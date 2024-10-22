@@ -37,4 +37,9 @@ export class LocalLoginHandler extends LoginHandler {
         this._loginState = "not_authenticated";
         this.onReadyCallback();
     }
+
+    public login(username: string, password: string, remember_me: boolean) {
+        this._loginState = "authenticated";
+        this.onReadyCallback();
+    }
 }
