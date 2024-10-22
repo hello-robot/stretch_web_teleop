@@ -5,7 +5,7 @@ import { createLoginHandler } from './utils';
 import { LoginHandler } from './login_handler/LoginHandler';
 import { SideBySideView } from './components/SideBySideView';
 
-let loginHandler: LoginHandler;
+export let loginHandler: LoginHandler;
 const container = document.getElementById("root");
 const root = createRoot(container!);
 

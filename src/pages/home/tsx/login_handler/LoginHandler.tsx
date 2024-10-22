@@ -10,4 +10,6 @@ export abstract class LoginHandler {
     public abstract loginState(): string;
 
     public abstract listRooms(): Promise<boolean>;
+
+    public abstract logout();
 }

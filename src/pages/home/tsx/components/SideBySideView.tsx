@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Changelog } from "./Changelog";
 import { CallRobotSelector } from "./CallRobotSelector";
+import { loginHandler } from "../index";
 
 
 export const SideBySideView = (props) => {
@@ -20,7 +21,7 @@ export const SideBySideView = (props) => {
                     <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit">Logout</Button>
+                    <Button color="inherit" onClick={loginHandler.logout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <Grid container rowSpacing={1} columnSpacing={{ lg: 4, xl: 5 }} className='sbs-container'>
@@ -39,7 +40,7 @@ export const SideBySideView = (props) => {
                     <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit">Logout</Button>
+                    <Button color="inherit" onClick={loginHandler.logout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <Grid container spacing={2} className='sbs-container'>
