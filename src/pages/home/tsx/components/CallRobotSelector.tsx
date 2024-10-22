@@ -9,6 +9,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircleIcon from "@mui/icons-material/Circle";
 import { green, red, yellow, grey } from '@mui/material/colors';
+import { loginHandler } from "../index";
+
 
 function get_indicator_text(status_str) {
     switch (status_str) {
@@ -111,23 +113,26 @@ const CallRobotItem = (props: {
 export const CallRobotSelector = (props: {
     style?: React.CSSProperties;
 }) => {
+    const [callableRobots, setCallableRobots] = useState([]);
+
+    const handleCRResult = (result) => {
+        setCallableRobots(result);
+    };
+    loginHandler.listRooms(handleCRResult);
 
     return (
         <Box sx={{ flexGrow: 1 }}>
             <h2>Robots:</h2>
             <Grid container spacing={2} className='rs-container' style={props.style}>
-                <Grid size={{md: 12, lg: 6}}>
-                    <CallRobotItem name="stretch-se3-3004" status="online" />
-                </Grid>
-                <Grid size={{md: 12, lg: 6}}>
-                    <CallRobotItem name="stretch-re1-1002" status="offline" />
-                </Grid>
-                <Grid size={{md: 12, lg: 6}}>
-                    <CallRobotItem name="stretch-re1-1002" status="occupied" />
-                </Grid>
-                <Grid size={{md: 12, lg: 6}}>
-                    <CallRobotItem name="stretch-re1-1002" status="whatever" />
-                </Grid>
+                {
+                    callableRobots.map((robot, idx) => {
+                        return (
+                            <Grid key={idx} size={{md: 12, lg: 6}}>
+                                <CallRobotItem key={idx} name={robot["roomid"]} status={robot["status"]} />
+                            </Grid>
+                        )
+                    })
+                }
             </Grid>
         </Box>
     );

@@ -76,7 +76,7 @@ io.on("connection", function (socket) {
 
     socket.on("list_rooms", (callback) => {
         callback([{
-            "roomid": "robot",
+            "roomid": process.env.HELLO_FLEET_ID,
             "protocol": undefined, // TODO(binit): ensure robot/operator protocol match
             "status": "online" // ["online", "offline", "occupied"] TODO(binit): don't hardcode
         }]);
