@@ -53,7 +53,7 @@ export const LoginView = (props) => {
     };
 
     const handleForgotPassword = (email: string) => {
-        console.log('handleForgotPassword', email);
+        loginHandler.forgot_password(email);
         setOpenToast(true);
     };
 

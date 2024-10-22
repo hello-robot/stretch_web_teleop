@@ -42,4 +42,8 @@ export class LocalLoginHandler extends LoginHandler {
         this._loginState = "authenticated";
         this.onReadyCallback();
     }
+
+    public forgot_password(username: string) {
+        // saddness :(
+    }
 }

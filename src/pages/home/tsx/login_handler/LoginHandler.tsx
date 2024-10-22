@@ -14,4 +14,6 @@ export abstract class LoginHandler {
     public abstract logout();
 
     public abstract login(username: string, password: string, remember_me: boolean);
+
+    public abstract forgot_password(username: string);
 }
