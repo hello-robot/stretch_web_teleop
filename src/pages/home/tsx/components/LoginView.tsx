@@ -14,7 +14,10 @@ import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
 import { styled } from '@mui/material/styles';
+import { ForgotPassword } from "./ForgotPassword";
+
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -42,13 +45,23 @@ export const LoginView = (props) => {
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [open, setOpen] = useState(false);
+    const [openToast, setOpenToast] = useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
     };
 
+    const handleForgotPassword = (email: string) => {
+        console.log('handleForgotPassword', email);
+        setOpenToast(true);
+    };
+
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleToastClose = () => {
+        setOpenToast(false);
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -152,7 +165,6 @@ export const LoginView = (props) => {
                           type="password"
                           id="password"
                           autoComplete="current-password"
-                          autoFocus
                           required
                           fullWidth
                           variant="outlined"
@@ -161,7 +173,7 @@ export const LoginView = (props) => {
                     <FormControlLabel
                       control={<Checkbox name="remember" value="remember" color="primary" />}
                       label="Remember me" />
-                    {/* <ForgotPassword open={open} handleClose={handleClose} /> */}
+                    <ForgotPassword open={open} handleClose={handleClose} handleExecute={handleForgotPassword} />
                     <Button
                       type="submit"
                       fullWidth
@@ -171,6 +183,12 @@ export const LoginView = (props) => {
                     </Button>
                 </Box>
             </Card>
+            <Snackbar
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              open={openToast}
+              onClose={handleToastClose}
+              autoHideDuration={6000}
+              message="We'll send you an email soon" />
         </Box>
     ) : (
         <p>Not implemented</p>
