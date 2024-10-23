@@ -76,7 +76,7 @@ io.on("connection", function (socket) {
 
     socket.on("list_rooms", (callback) => {
         let s = "online";
-        if (!(io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2)) {
+        if (io.sockets.adapter.rooms.get("robot") && io.sockets.adapter.rooms.get("robot").size >= 2) {
             s = "occupied"
         }
 
