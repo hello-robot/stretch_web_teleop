@@ -31,16 +31,18 @@ export class LocalLoginHandler extends LoginHandler {
 
     public logout(): Promise<undefined> {
         return new Promise<undefined>((resolve, reject) => {
-            // reject(Error("LocalLoginHandler.logout() is not implemented"));
             this._loginState = "not_authenticated";
             this.onReadyCallback();
             resolve(undefined);
         });
     }
 
-    public login(username: string, password: string, remember_me: boolean) {
-        this._loginState = "authenticated";
-        this.onReadyCallback();
+    public login(username: string, password: string, remember_me: boolean): Promise<undefined> {
+        return new Promise<undefined>((resolve, reject) => {
+            this._loginState = "authenticated";
+            this.onReadyCallback();
+            resolve(undefined);
+        });
     }
 
     public forgot_password(username: string): Promise<undefined> {

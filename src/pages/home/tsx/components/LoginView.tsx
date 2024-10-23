@@ -86,6 +86,11 @@ export const LoginView = (props) => {
             remember: data.get('remember') ? true : false,
         };
         loginHandler.login(l['email'], l['password'], l['remember'])
+            .catch((error) => {
+                // https://stackoverflow.com/a/76014219/4753010 TODO(binit): handle failed login
+                setfailureToastMessage(`Please contact Hello Robot Support. ERROR ${error.code}: ${error.message}`);
+                setOpenFailureToast(true);
+            });
     };
 
     const validateInputs = () => {

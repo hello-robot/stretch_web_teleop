@@ -33,29 +33,28 @@ export class FirebaseLoginHandler extends LoginHandler {
 
         return new Promise<undefined>((resolve, reject) => {
             signOut(this.auth)
+                .then(() => { resolve(undefined) })
                 .catch(reject);
         });
     }
 
-    public login(username: string, password: string, remember_me: boolean) {
+    public login(username: string, password: string, remember_me: boolean): Promise<undefined> {
         // Tutorial here:
         // https://firebase.google.com/docs/auth/web/start?hl=en#sign_in_existing_users
         // Auth State Persistence tutorial here:
         // https://firebase.google.com/docs/auth/web/auth-state-persistence
 
-        setPersistence(this.auth, remember_me ? browserLocalPersistence : browserSessionPersistence)
-            .then(() => {
-                signInWithEmailAndPassword(this.auth, username, password)
-                    .then((userCredential) => {
-                        // TODO
-                    })
-                    .catch((sign_in_error) => {
-                        // TODO
-                    });
-            })
-            .catch((set_persistence_error) => {
-                // TODO
-            });
+        return new Promise<undefined>((resolve, reject) => {
+            setPersistence(this.auth, remember_me ? browserLocalPersistence : browserSessionPersistence)
+                .then(() => {
+                    signInWithEmailAndPassword(this.auth, username, password)
+                        .then((userCredential) => {
+                            resolve(undefined);
+                        })
+                        .catch(reject);
+                })
+                .catch(reject);
+        });
     }
 
     public forgot_password(username: string): Promise<undefined> {
@@ -64,6 +63,7 @@ export class FirebaseLoginHandler extends LoginHandler {
 
         return new Promise<undefined>((resolve, reject) => {
             sendPasswordResetEmail(this.auth, username)
+                .then(() => { resolve(undefined) })
                 .catch(reject);
         });
     }
