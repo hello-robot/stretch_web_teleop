@@ -7,12 +7,23 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
 import { Changelog } from "./Changelog";
 import { CallRobotSelector } from "./CallRobotSelector";
 import { loginHandler } from "../index";
 
 
 export const SideBySideView = (props) => {
+    const [openFailureToast, setOpenFailureToast] = useState(false);
+    const [failureToastMessage, setfailureToastMessage] = useState('');
+
+    const handleLogout = () => {
+        loginHandler.logout()
+            .catch((error) => {
+                setfailureToastMessage(`Please contact Hello Robot Support. ERROR ${error.code}: ${error.message}`);
+                setOpenFailureToast(true);
+            });
+    };
 
     return isTablet || isBrowser ? (
         <Box sx={{ flexGrow: 1 }}>
@@ -21,7 +32,7 @@ export const SideBySideView = (props) => {
                     <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit" onClick={loginHandler.logout}>Logout</Button>
+                    <Button color="inherit" onClick={handleLogout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <Grid container rowSpacing={1} columnSpacing={{ lg: 4, xl: 5 }} className='sbs-container'>
@@ -32,6 +43,15 @@ export const SideBySideView = (props) => {
                     <CallRobotSelector style={{ height: "500px", maxHeight: "500px" }} />
                 </Grid>
             </Grid>
+            <Snackbar
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              open={openFailureToast}
+              message={failureToastMessage}
+              ContentProps={{
+                sx: {
+                  background: "red"
+                }
+              }} />
         </Box>
     ) : (
         <Box sx={{ flexGrow: 1 }}>
@@ -40,7 +60,7 @@ export const SideBySideView = (props) => {
                     <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit" onClick={loginHandler.logout}>Logout</Button>
+                    <Button color="inherit" onClick={handleLogout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <Grid container spacing={2} className='sbs-container'>
@@ -51,6 +71,15 @@ export const SideBySideView = (props) => {
                     <Changelog style={{ height: "500px", maxHeight: "500px" }} />
                 </Grid>
             </Grid>
+            <Snackbar
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              open={openFailureToast}
+              message={failureToastMessage}
+              ContentProps={{
+                sx: {
+                  background: "red"
+                }
+              }} />
         </Box>
     );
 };

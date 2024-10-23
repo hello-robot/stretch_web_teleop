@@ -29,9 +29,13 @@ export class LocalLoginHandler extends LoginHandler {
         this.socket.emit("list_rooms", resultCallback);
     }
 
-    public logout() {
-        this._loginState = "not_authenticated";
-        this.onReadyCallback();
+    public logout(): Promise<undefined> {
+        return new Promise<undefined>((resolve, reject) => {
+            // reject(Error("LocalLoginHandler.logout() is not implemented"));
+            this._loginState = "not_authenticated";
+            this.onReadyCallback();
+            resolve(undefined);
+        });
     }
 
     public login(username: string, password: string, remember_me: boolean) {

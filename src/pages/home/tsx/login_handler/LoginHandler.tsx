@@ -11,7 +11,7 @@ export abstract class LoginHandler {
 
     public abstract listRooms(resultCallback);
 
-    public abstract logout();
+    public abstract logout(): Promise<undefined>;
 
     public abstract login(username: string, password: string, remember_me: boolean);
 

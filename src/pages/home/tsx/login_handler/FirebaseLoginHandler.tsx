@@ -27,17 +27,14 @@ export class FirebaseLoginHandler extends LoginHandler {
         // TODO(binit)
     }
 
-    public logout() {
+    public logout(): Promise<undefined> {
         // Tutorial here:
         // https://firebase.google.com/docs/auth/web/password-auth#next_steps
 
-        signOut(this.auth)
-            .then(() => {
-                // signed out succcessfully TODO
-            })
-            .catch((error) => {
-                // TODO
-            });
+        return new Promise<undefined>((resolve, reject) => {
+            signOut(this.auth)
+                .catch(reject);
+        });
     }
 
     public login(username: string, password: string, remember_me: boolean) {
