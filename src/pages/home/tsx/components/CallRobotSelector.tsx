@@ -74,16 +74,16 @@ function get_indicator(status_str) {
 
 
 
-function get_action(status_str) {
+function get_action(status_str, robot_name) {
     switch (status_str) {
         case "online":
-            return <Button variant="contained" size="small">Call Robot</Button>
+            return <Button href={`/operator/${robot_name}`} variant="contained" size="small">Call Robot</Button>
         case "offline":
-            return <Button variant="contained" size="small" disabled>Call Robot</Button>
+            return <Button href={`/operator/${robot_name}`} variant="contained" size="small" disabled>Call Robot</Button>
         case "occupied":
-            return <Button variant="contained" size="small" disabled>Call Robot</Button>
+            return <Button href={`/operator/${robot_name}`} variant="contained" size="small" disabled>Call Robot</Button>
         default:
-            return <Button variant="contained" size="small" disabled>Call Robot</Button>
+            return <Button href={`/operator/${robot_name}`} variant="contained" size="small" disabled>Call Robot</Button>
     }
 }
 
@@ -103,7 +103,7 @@ const CallRobotItem = (props: {
                 </Typography>
             </CardContent>
             <CardActions>
-                {get_action(props.status)}
+                {get_action(props.status, props.name)}
             </CardActions>
         </Card>
     );
