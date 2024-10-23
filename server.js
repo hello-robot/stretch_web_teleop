@@ -75,10 +75,15 @@ io.on("connection", function (socket) {
     });
 
     socket.on("list_rooms", (callback) => {
+        let s = "online";
+        if (!(io.sockets.adapter.rooms.get(room) || io.sockets.adapter.rooms.get(room).size < 2)) {
+            s = "occupied"
+        }
+
         callback([{
             "roomid": process.env.HELLO_FLEET_ID,
             "protocol": undefined, // TODO(binit): ensure robot/operator protocol match
-            "status": "online" // ["online", "offline", "occupied"] TODO(binit): don't hardcode
+            "status": s // ["online", "offline", "occupied"]
         }]);
     });
 
