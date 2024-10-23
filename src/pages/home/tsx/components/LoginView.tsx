@@ -40,6 +40,15 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 
+const SignInError = styled(Box)(({ theme }) => ({
+    backgroundColor: '#d32f2f',
+    margin: `calc(-1 * ${theme.spacing(4)})`,
+    marginBottom: 0,
+    padding: 10,
+    color: "white",
+}));
+
+
 export const LoginView = (props) => {
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
@@ -49,6 +58,7 @@ export const LoginView = (props) => {
     const [openToast, setOpenToast] = useState(false);
     const [openFailureToast, setOpenFailureToast] = useState(false);
     const [failureToastMessage, setfailureToastMessage] = useState('');
+    const [failureLogin, setfailureLogin] = useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -86,10 +96,21 @@ export const LoginView = (props) => {
             remember: data.get('remember') ? true : false,
         };
         loginHandler.login(l['email'], l['password'], l['remember'])
+            .then(() => {
+                // reset failure messages
+                setfailureLogin(false);
+                setOpenFailureToast(false);
+                setfailureToastMessage('');
+            })
             .catch((error) => {
-                // https://stackoverflow.com/a/76014219/4753010 TODO(binit): handle failed login
-                setfailureToastMessage(`Please contact Hello Robot Support. ERROR ${error.code}: ${error.message}`);
-                setOpenFailureToast(true);
+                if (error.code === 'auth/user-not-found') {
+                    setfailureLogin(true);
+                } else if (error.code === 'auth/invalid-email') {
+                    setfailureLogin(true);
+                } else {
+                    setfailureToastMessage(`Please contact Hello Robot Support. ERROR ${error.code}: ${error.message}`);
+                    setOpenFailureToast(true);
+                }
             });
     };
 
@@ -127,6 +148,13 @@ export const LoginView = (props) => {
           alignItems="center"
           minHeight="100vh">
             <Card variant="outlined">
+                { failureLogin ? (
+                    <SignInError>
+                        Incorrect email or password
+                    </SignInError>
+                ) : (
+                    <></>
+                )}
                 <Typography
                   component="h1"
                   variant="h4"
