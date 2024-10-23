@@ -18,6 +18,10 @@ loginHandler = createLoginHandler(loginHandlerReadyCallback);
 
 function renderHomePage() {
     loginHandler.loginState() == "authenticated"
+        ? document.title = "Home - Stretch Web Teleop"
+        : document.title = "Login - Stretch Web Teleop";
+
+    loginHandler.loginState() == "authenticated"
         ? root.render(
               <SideBySideView />
           )
