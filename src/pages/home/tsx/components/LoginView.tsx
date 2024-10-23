@@ -47,14 +47,22 @@ export const LoginView = (props) => {
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [open, setOpen] = useState(false);
     const [openToast, setOpenToast] = useState(false);
+    const [openFailureToast, setOpenFailureToast] = useState(false);
+    const [failureToastMessage, setfailureToastMessage] = useState('');
 
     const handleClickOpen = () => {
         setOpen(true);
     };
 
     const handleForgotPassword = (email: string) => {
-        loginHandler.forgot_password(email);
-        setOpenToast(true);
+        loginHandler.forgot_password(email)
+            .then(() => {
+                setOpenToast(true);
+            })
+            .catch((error) => {
+                setfailureToastMessage(`Please contact Hello Robot Support. ERROR ${error.code}: ${error.message}`);
+                setOpenFailureToast(true);
+            });
     };
 
     const handleClose = () => {
@@ -173,7 +181,7 @@ export const LoginView = (props) => {
                           color={passwordError ? 'error' : 'primary'} />
                     </FormControl>
                     <FormControlLabel
-                      control={<Checkbox name="remember" value="remember" color="primary" />}
+                      control={<Checkbox name="remember" value="remember" color="primary" defaultChecked />}
                       label="Remember me" />
                     <ForgotPassword open={open} handleClose={handleClose} handleExecute={handleForgotPassword} />
                     <Button
@@ -190,7 +198,16 @@ export const LoginView = (props) => {
               open={openToast}
               onClose={handleToastClose}
               autoHideDuration={6000}
-              message="We'll send you an email soon" />
+              message="We'll send you a password reset email soon" />
+            <Snackbar
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              open={openFailureToast}
+              message={failureToastMessage}
+              ContentProps={{
+                sx: {
+                  background: "red"
+                }
+              }} />
         </Box>
     ) : (
         <p>Not implemented</p>

@@ -15,5 +15,5 @@ export abstract class LoginHandler {
 
     public abstract login(username: string, password: string, remember_me: boolean);
 
-    public abstract forgot_password(username: string);
+    public abstract forgot_password(username: string): Promise<undefined>;
 }

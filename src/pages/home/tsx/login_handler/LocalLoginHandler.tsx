@@ -39,7 +39,10 @@ export class LocalLoginHandler extends LoginHandler {
         this.onReadyCallback();
     }
 
-    public forgot_password(username: string) {
-        // saddness :(
+    public forgot_password(username: string): Promise<undefined> {
+        return new Promise<undefined>((resolve, reject) => {
+            reject(Error("LocalLoginHandler.forgot_password() is not implemented"));
+            // resolve(undefined);
+        });
     }
 }
