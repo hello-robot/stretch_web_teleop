@@ -103,7 +103,9 @@ export const LoginView = (props) => {
                 setfailureToastMessage('');
             })
             .catch((error) => {
-                if (error.code === 'auth/user-not-found') {
+                if (error.code === 'auth/invalid-login-credentials') {
+                    setfailureLogin(true);
+                } else if (error.code === 'auth/user-not-found') {
                     setfailureLogin(true);
                 } else if (error.code === 'auth/invalid-email') {
                     setfailureLogin(true);
@@ -204,7 +206,7 @@ export const LoginView = (props) => {
                           error={passwordError}
                           helperText={passwordErrorMessage}
                           name="password"
-                          placeholder="••••••"
+                          placeholder="••••••••••••"
                           type="password"
                           id="password"
                           autoComplete="current-password"

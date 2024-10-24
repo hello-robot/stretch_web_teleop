@@ -115,10 +115,11 @@ export const CallRobotSelector = (props: {
 }) => {
     const [callableRobots, setCallableRobots] = useState([]);
 
-    const handleCRResult = (result) => {
-        setCallableRobots(result);
-    };
-    loginHandler.listRooms(handleCRResult);
+    // TODO(binit)
+    // const handleCRResult = (result) => {
+    //     setCallableRobots(result);
+    // };
+    // loginHandler.listRooms(handleCRResult);
 
     return (
         <Box sx={{ flexGrow: 1 }}>
