@@ -116,11 +116,7 @@ export const CallRobotSelector = (props: {
     const [callableRobots, setCallableRobots] = useState({});
 
     useEffect(() => {
-        const updateRooms = (result) => {
-            console.log('updateRooms');
-            setCallableRobots(result);
-        };
-        loginHandler.listRooms(updateRooms);
+        loginHandler.listRooms(setCallableRobots);
     },[props]);
 
     return (

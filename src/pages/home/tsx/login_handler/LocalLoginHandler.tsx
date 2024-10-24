@@ -26,7 +26,8 @@ export class LocalLoginHandler extends LoginHandler {
     }
 
     public listRooms(resultCallback) {
-        this.socket.emit("list_rooms", resultCallback);
+        this.socket.emit("list_rooms");
+        this.socket.on("update_rooms", resultCallback);
     }
 
     public logout(): Promise<undefined> {
