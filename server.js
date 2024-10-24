@@ -80,11 +80,11 @@ io.on("connection", function (socket) {
             s = "occupied"
         }
 
-        callback([{
-            "roomid": process.env.HELLO_FLEET_ID,
+        callback({ "robot_id": {
+            "name": process.env.HELLO_FLEET_ID,
             "protocol": undefined, // TODO(binit): ensure robot/operator protocol match
             "status": s // ["online", "offline", "occupied"]
-        }]);
+        }});
     });
 
     socket.on("add operator to robot room", (callback) => {

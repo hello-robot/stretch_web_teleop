@@ -1,19 +1,24 @@
 import { LoginHandler } from "./LoginHandler";
 import { initializeApp, FirebaseOptions } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence, Auth } from "firebase/auth";
+import { getDatabase, ref, onValue, Database } from "firebase/database";
 
 
 export class FirebaseLoginHandler extends LoginHandler {
     private auth: Auth;
     private _loginState: string;
+    private db: Database;
+    private uid; string;
 
     constructor(onLoginHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onLoginHandlerReadyCallback);
         this._loginState = "not_authenticated";
         const app = initializeApp(config);
         this.auth = getAuth(app);
+        this.db = getDatabase(app);
 
         onAuthStateChanged(this.auth, (user) => {
+            this.uid = user.uid;
             this._loginState = user ? "authenticated" : "not_authenticated";
             this.onReadyCallback();
         });
@@ -24,7 +29,13 @@ export class FirebaseLoginHandler extends LoginHandler {
     }
 
     public listRooms(resultCallback) {
-        // TODO(binit)
+        if (this.uid === undefined) {
+            return; // TODO(binit): throw an exception? reject a promise?
+        }
+
+        onValue(ref(this.db, 'rooms/' + this.uid + '/robots'), (snapshot) => {
+            resultCallback(snapshot.val());
+        });
     }
 
     public logout(): Promise<undefined> {

@@ -113,23 +113,23 @@ const CallRobotItem = (props: {
 export const CallRobotSelector = (props: {
     style?: React.CSSProperties;
 }) => {
-    const [callableRobots, setCallableRobots] = useState([]);
+    const [callableRobots, setCallableRobots] = useState({});
 
-    // TODO(binit)
-    // const handleCRResult = (result) => {
-    //     setCallableRobots(result);
-    // };
-    // loginHandler.listRooms(handleCRResult);
+    // TODO(binit): doesn't work
+    const updateRooms = (result) => {
+        setCallableRobots(result);
+    };
+    loginHandler.listRooms(updateRooms);
 
     return (
         <Box sx={{ flexGrow: 1 }}>
             <h2>Robots:</h2>
             <Grid container spacing={2} className='rs-container' style={props.style}>
                 {
-                    callableRobots.map((robot, idx) => {
+                    Object.entries(callableRobots).map(([key, value], idx) => {
                         return (
                             <Grid key={idx} size={{md: 12, lg: 6}}>
-                                <CallRobotItem key={idx} name={robot["roomid"]} status={robot["status"]} />
+                                <CallRobotItem key={idx} name={value["name"]} status={value["status"]} />
                             </Grid>
                         )
                     })
