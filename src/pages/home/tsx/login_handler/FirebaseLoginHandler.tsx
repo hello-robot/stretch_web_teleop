@@ -30,7 +30,7 @@ export class FirebaseLoginHandler extends LoginHandler {
 
     public listRooms(resultCallback) {
         if (this.uid === undefined) {
-            return; // TODO(binit): throw an exception? reject a promise?
+            throw new Error("FirebaseLoginHandler.listRooms(): this.uid is null");
         }
 
         onValue(ref(this.db, 'rooms/' + this.uid + '/robots'), (snapshot) => {
