@@ -73,7 +73,6 @@ function get_indicator(status_str) {
 }
 
 
-
 function get_action(status_str, robot_name) {
     switch (status_str) {
         case "online":
@@ -86,6 +85,7 @@ function get_action(status_str, robot_name) {
             return <Button href={`/operator/${robot_name}`} variant="contained" size="small" disabled>Call Robot</Button>
     }
 }
+
 
 const CallRobotItem = (props: {
     name: String;
