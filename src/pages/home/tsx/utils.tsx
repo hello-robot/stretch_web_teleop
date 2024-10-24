@@ -2,7 +2,6 @@ import { FirebaseOptions } from "firebase/app";
 import { FirebaseLoginHandler } from "./login_handler/FirebaseLoginHandler";
 import { LocalLoginHandler } from "./login_handler/LocalLoginHandler";
 
-
 /**
  * Creates a login handler based on the `storage` property in the process
  * environment.

@@ -57,11 +57,13 @@ io.on("connect_error", (err) => {
 let protocol = undefined; // TODO(binit): ensure robot/operator protocol match
 let status = "offline"; // ["online", "offline", "occupied"]
 function updateRooms() {
-    io.emit("update_rooms", { "robot_id": {
-        "name": process.env.HELLO_FLEET_ID,
-        "protocol": protocol,
-        "status": status
-    }})
+    io.emit("update_rooms", {
+        robot_id: {
+            name: process.env.HELLO_FLEET_ID,
+            protocol: protocol,
+            status: status,
+        },
+    });
 }
 
 io.on("connection", function (socket) {
@@ -88,8 +90,11 @@ io.on("connection", function (socket) {
     });
 
     socket.on("list_rooms", () => {
-        if (io.sockets.adapter.rooms.get("robot") && io.sockets.adapter.rooms.get("robot").size >= 2) {
-            status = "occupied"
+        if (
+            io.sockets.adapter.rooms.get("robot") &&
+            io.sockets.adapter.rooms.get("robot").size >= 2
+        ) {
+            status = "occupied";
         }
         updateRooms();
     });

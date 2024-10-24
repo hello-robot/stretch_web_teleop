@@ -52,7 +52,10 @@ module.exports = (env) => {
                     new HtmlWebpackPlugin({
                         inject: true,
                         template: `./src/pages/${page}/html/index.html`,
-                        filename: page == "home" ? "index.html" : `${page}/index.html`,
+                        filename:
+                            page == "home"
+                                ? "index.html"
+                                : `${page}/index.html`,
                         chunks: [page],
                     }),
             ),

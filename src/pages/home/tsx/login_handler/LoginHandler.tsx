@@ -1,5 +1,3 @@
-
-
 export abstract class LoginHandler {
     public onReadyCallback: () => void;
 
@@ -13,7 +11,11 @@ export abstract class LoginHandler {
 
     public abstract logout(): Promise<undefined>;
 
-    public abstract login(username: string, password: string, remember_me: boolean): Promise<undefined>;
+    public abstract login(
+        username: string,
+        password: string,
+        remember_me: boolean,
+    ): Promise<undefined>;
 
     public abstract forgot_password(username: string): Promise<undefined>;
 }

@@ -1,8 +1,17 @@
 import { LoginHandler } from "./LoginHandler";
 import { initializeApp, FirebaseOptions } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence, Auth } from "firebase/auth";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    signOut,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence,
+    Auth,
+} from "firebase/auth";
 import { getDatabase, ref, onValue, Database } from "firebase/database";
-
 
 export class FirebaseLoginHandler extends LoginHandler {
     private auth: Auth;
@@ -10,7 +19,10 @@ export class FirebaseLoginHandler extends LoginHandler {
     private db: Database;
     private uid: string;
 
-    constructor(onLoginHandlerReadyCallback: () => void, config: FirebaseOptions) {
+    constructor(
+        onLoginHandlerReadyCallback: () => void,
+        config: FirebaseOptions,
+    ) {
         super(onLoginHandlerReadyCallback);
         this._loginState = "not_authenticated";
         const app = initializeApp(config);
@@ -30,10 +42,12 @@ export class FirebaseLoginHandler extends LoginHandler {
 
     public listRooms(resultCallback) {
         if (this.uid === undefined) {
-            throw new Error("FirebaseLoginHandler.listRooms(): this.uid is null");
+            throw new Error(
+                "FirebaseLoginHandler.listRooms(): this.uid is null",
+            );
         }
 
-        onValue(ref(this.db, 'rooms/' + this.uid + '/robots'), (snapshot) => {
+        onValue(ref(this.db, "rooms/" + this.uid + "/robots"), (snapshot) => {
             resultCallback(snapshot.val());
         });
     }
@@ -44,19 +58,30 @@ export class FirebaseLoginHandler extends LoginHandler {
 
         return new Promise<undefined>((resolve, reject) => {
             signOut(this.auth)
-                .then(() => { resolve(undefined) })
+                .then(() => {
+                    resolve(undefined);
+                })
                 .catch(reject);
         });
     }
 
-    public login(username: string, password: string, remember_me: boolean): Promise<undefined> {
+    public login(
+        username: string,
+        password: string,
+        remember_me: boolean,
+    ): Promise<undefined> {
         // Tutorial here:
         // https://firebase.google.com/docs/auth/web/start?hl=en#sign_in_existing_users
         // Auth State Persistence tutorial here:
         // https://firebase.google.com/docs/auth/web/auth-state-persistence
 
         return new Promise<undefined>((resolve, reject) => {
-            setPersistence(this.auth, remember_me ? browserLocalPersistence : browserSessionPersistence)
+            setPersistence(
+                this.auth,
+                remember_me
+                    ? browserLocalPersistence
+                    : browserSessionPersistence,
+            )
                 .then(() => {
                     signInWithEmailAndPassword(this.auth, username, password)
                         .then((userCredential) => {
@@ -74,7 +99,9 @@ export class FirebaseLoginHandler extends LoginHandler {
 
         return new Promise<undefined>((resolve, reject) => {
             sendPasswordResetEmail(this.auth, username)
-                .then(() => { resolve(undefined) })
+                .then(() => {
+                    resolve(undefined);
+                })
                 .catch(reject);
         });
     }
