@@ -70,12 +70,12 @@ export const Changelog = (props: { style?: React.CSSProperties }) => {
                         <p>
                             Lorem ipsum odor amet, consectetuer adipiscing elit.
                             Mattis purus potenti orci per torquent scelerisque.
-                            Feugiat fringilla tristique varius feugiat quis cras
-                            magnis efficitur. Aptent curabitur mattis dui congue
-                            porta cubilia. Lorem scelerisque convallis tempor
-                            himenaeos donec inceptos ultricies dis. Efficitur
-                            feugiat senectus nullam semper conubia risus mi
-                            volutpat.
+                            Feugiat fringilla tristique various feugiat quis
+                            cras magnis efficitur. Aptent curabitur mattis dui
+                            congue porta cubilia. Lorem scelerisque convallis
+                            tempor himenaeos donec inceptos ultricies dis.
+                            Efficitur feugiat senectus nullam semper conubia
+                            risus mi volutpat.
                         </p>
                     </LogItem>
                 </Grid>
@@ -90,12 +90,12 @@ export const Changelog = (props: { style?: React.CSSProperties }) => {
                         <p>
                             Lorem ipsum odor amet, consectetuer adipiscing elit.
                             Mattis purus potenti orci per torquent scelerisque.
-                            Feugiat fringilla tristique varius feugiat quis cras
-                            magnis efficitur. Aptent curabitur mattis dui congue
-                            porta cubilia. Lorem scelerisque convallis tempor
-                            himenaeos donec inceptos ultricies dis. Efficitur
-                            feugiat senectus nullam semper conubia risus mi
-                            volutpat.
+                            Feugiat fringilla tristique various feugiat quis
+                            cras magnis efficitur. Aptent curabitur mattis dui
+                            congue porta cubilia. Lorem scelerisque convallis
+                            tempor himenaeos donec inceptos ultricies dis.
+                            Efficitur feugiat senectus nullam semper conubia
+                            risus mi volutpat.
                         </p>
                     </LogItem>
                 </Grid>
@@ -110,12 +110,12 @@ export const Changelog = (props: { style?: React.CSSProperties }) => {
                         <p>
                             Lorem ipsum odor amet, consectetuer adipiscing elit.
                             Mattis purus potenti orci per torquent scelerisque.
-                            Feugiat fringilla tristique varius feugiat quis cras
-                            magnis efficitur. Aptent curabitur mattis dui congue
-                            porta cubilia. Lorem scelerisque convallis tempor
-                            himenaeos donec inceptos ultricies dis. Efficitur
-                            feugiat senectus nullam semper conubia risus mi
-                            volutpat.
+                            Feugiat fringilla tristique various feugiat quis
+                            cras magnis efficitur. Aptent curabitur mattis dui
+                            congue porta cubilia. Lorem scelerisque convallis
+                            tempor himenaeos donec inceptos ultricies dis.
+                            Efficitur feugiat senectus nullam semper conubia
+                            risus mi volutpat.
                         </p>
                     </LogItem>
                 </Grid>
