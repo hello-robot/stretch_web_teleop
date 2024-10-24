@@ -8,7 +8,7 @@ export class FirebaseLoginHandler extends LoginHandler {
     private auth: Auth;
     private _loginState: string;
     private db: Database;
-    private uid; string;
+    private uid: string;
 
     constructor(onLoginHandlerReadyCallback: () => void, config: FirebaseOptions) {
         super(onLoginHandlerReadyCallback);
@@ -18,7 +18,7 @@ export class FirebaseLoginHandler extends LoginHandler {
         this.db = getDatabase(app);
 
         onAuthStateChanged(this.auth, (user) => {
-            this.uid = user.uid;
+            this.uid = user ? user.uid : undefined;
             this._loginState = user ? "authenticated" : "not_authenticated";
             this.onReadyCallback();
         });
