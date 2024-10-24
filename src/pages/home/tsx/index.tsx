@@ -17,8 +17,6 @@ loginHandler = createLoginHandler(loginHandlerReadyCallback);
 
 
 function renderHomePage() {
-    loginHandler.listRooms(() => {}); // TODO: remove
-
     loginHandler.loginState() == "authenticated"
         ? document.title = "Home - Stretch Web Teleop"
         : document.title = "Login - Stretch Web Teleop";

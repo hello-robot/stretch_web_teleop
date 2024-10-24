@@ -115,11 +115,13 @@ export const CallRobotSelector = (props: {
 }) => {
     const [callableRobots, setCallableRobots] = useState({});
 
-    // TODO(binit): doesn't work
-    const updateRooms = (result) => {
-        setCallableRobots(result);
-    };
-    loginHandler.listRooms(updateRooms);
+    useEffect(() => {
+        const updateRooms = (result) => {
+            console.log('updateRooms');
+            setCallableRobots(result);
+        };
+        loginHandler.listRooms(updateRooms);
+    },[props]);
 
     return (
         <Box sx={{ flexGrow: 1 }}>
