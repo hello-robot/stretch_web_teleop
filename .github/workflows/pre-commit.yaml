@@ -6,7 +6,7 @@ on:
       - main
       - master
   pull_request:
-    types: [review_requested, ready_for_review]
+    types: [opened, reopened, synchronize, review_requested, ready_for_review]
   workflow_dispatch:
 
 concurrency:
@@ -19,6 +19,7 @@ env:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
