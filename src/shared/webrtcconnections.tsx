@@ -1,7 +1,9 @@
 import React from "react";
 import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
-import io, { Socket } from "socket.io-client";
 import { safelyParseJSON, generateUUID } from "shared/util";
+import { BaseSignaling } from "shared/signaling/Signaling";
+import { LocalSignaling } from "shared/signaling/LocalSignaling";
+
 
 const peerConstraints = {
     iceServers: [
@@ -22,7 +24,7 @@ interface WebRTCProps {
 }
 
 export class WebRTCConnection extends React.Component {
-    private socket: Socket;
+    private signaler: BaseSignaling;
     private peerConnection?: RTCPeerConnection;
     private peerRole: string;
     private polite: boolean;
@@ -41,7 +43,6 @@ export class WebRTCConnection extends React.Component {
 
     private onTrackAdded?: (ev: RTCTrackEvent) => void;
     private onMessage: (obj: WebRTCMessage) => void;
-    private onRobotConnectionStart?: () => void;
     private onMessageChannelOpen?: () => void;
     private onConnectionEnd?: () => void;
 
@@ -49,7 +50,6 @@ export class WebRTCConnection extends React.Component {
         super(props);
         this.peerRole = props.peerRole;
         this.polite = props.polite;
-        this.onRobotConnectionStart = props.onRobotConnectionStart;
         this.onMessage = props.onMessage;
         this.onTrackAdded = props.onTrackAdded;
         this.onMessageChannelOpen = props.onMessageChannelOpen;
@@ -58,95 +58,12 @@ export class WebRTCConnection extends React.Component {
 
         this.createPeerConnection();
 
-        this.socket = io();
-
-        this.socket.on("connect", () => {
-            console.log("WebRTCConnection socket connected");
-        });
-
-        this.socket.on("join", (room: string) => {
-            console.log("Another peer made a request to join room " + room);
-            console.log("I am " + this.peerRole + "!");
-        });
-
-        this.socket.on("bye", () => {
-            console.log("Session terminated.");
-            this.stop();
-        });
-
-        this.socket.on("joined", (room: String) => {
-            console.log("I am " + this.peerRole + "!");
-            console.log("joined: " + room);
-            if (this.onRobotConnectionStart) this.onRobotConnectionStart();
-        });
-
-        this.socket.on("signalling", (message: SignallingMessage) => {
-            let { candidate, sessionDescription, cameraInfo } = message;
-            console.log("Received message:", message);
-            if (cameraInfo) {
-                if (Object.keys(cameraInfo).length === 0) {
-                    console.warn(
-                        "Received a camera info mapping with no entries",
-                    );
-                }
-                this.cameraInfo = cameraInfo;
-            }
-            if (
-                sessionDescription?.type === "offer" ||
-                sessionDescription?.type === "answer"
-            ) {
-                if (!this.peerConnection) throw "peerConnection is undefined";
-                const readyForOffer =
-                    !this.makingOffer &&
-                    (this.peerConnection.signalingState === "stable" ||
-                        this.isSettingRemoteAnswerPending);
-                const offerCollision =
-                    sessionDescription.type === "offer" && !readyForOffer;
-
-                this.ignoreOffer = !this.polite && offerCollision;
-
-                if (this.ignoreOffer) {
-                    console.error("Ignoring offer");
-                    return;
-                }
-                this.isSettingRemoteAnswerPending =
-                    sessionDescription.type === "answer";
-
-                this.peerConnection
-                    .setRemoteDescription(sessionDescription)
-                    .then(async () => {
-                        this.isSettingRemoteAnswerPending = false;
-                        if (!this.peerConnection)
-                            throw "peerConnection is undefined";
-                        if (sessionDescription?.type === "offer") {
-                            return this.peerConnection.setLocalDescription();
-                        } else {
-                            return false;
-                        }
-                    })
-                    .then(() => {
-                        if (!this.peerConnection?.localDescription)
-                            throw "peerConnection is undefined";
-                        this.sendSignallingMessage({
-                            sessionDescription:
-                                this.peerConnection.localDescription,
-                        });
-                    });
-            } else if (candidate !== undefined && this.peerConnection) {
-                // Note that the last candidate will be null, so we check whether
-                // the candidate variable is defined at all versus being truthy.
-                // if (this.peerConnection.remoteDescription !== null) {
-                this.peerConnection.addIceCandidate(candidate).catch((e) => {
-                    if (!this.ignoreOffer) {
-                        console.log(
-                            "Failure during addIceCandidate(): " + e.name,
-                        );
-                        throw e;
-                    }
-                });
-            } else {
-                console.error("Unable to handle message");
-            }
+        this.onSignal = this.onSignal.bind(this);
+        this.stop = this.stop.bind(this);
+        this.signaler = new LocalSignaling({
+            onSignal: this.onSignal,
+            onGoodbye: this.stop,
+            onRobotConnectionStart: props.onRobotConnectionStart,
         });
     }
 
@@ -168,7 +85,7 @@ export class WebRTCConnection extends React.Component {
             this.peerConnection = new RTCPeerConnection(peerConstraints);
             this.peerConnection.onicecandidate = (event) => {
                 console.log("ICE candidate available");
-                this.sendSignallingMessage({
+                this.signaler.send({
                     candidate: event.candidate!,
                 });
             };
@@ -209,7 +126,7 @@ export class WebRTCConnection extends React.Component {
                         throw "peerConnection is undefined";
                     await this.peerConnection.setLocalDescription();
                     if (this.peerConnection.localDescription) {
-                        this.sendSignallingMessage({
+                        this.signaler.send({
                             sessionDescription:
                                 this.peerConnection.localDescription,
                             cameraInfo: this.cameraInfo,
@@ -268,17 +185,13 @@ export class WebRTCConnection extends React.Component {
     }
 
     joinRobotRoom() {
-        console.log("attempting to join room = robot");
-        this.socket.emit("join", "robot");
+        console.log("joining room as robot");
+        return this.signaler.join_as_robot();
     }
 
     addOperatorToRobotRoom() {
-        return new Promise<boolean>((resolve) => {
-            this.socket.emit("add operator to robot room", (response) => {
-                console.log("SUCCESS: ", response.success);
-                resolve(response.success);
-            });
-        });
+        console.log("joining room as operator");
+        return this.signaler.join_as_operator();
     }
 
     addTrack(track: MediaStreamTrack, stream: MediaStream, streamName: string) {
@@ -291,7 +204,7 @@ export class WebRTCConnection extends React.Component {
     hangup() {
         // Tell the other end that we're ending the call so they can stop, and get us kicked out of the robot room
         console.warn("Hanging up");
-        this.socket.emit("bye", this.peerRole);
+        this.signaler.leave();
         if (!this.peerConnection) throw "pc is undefined";
         if (this.peerConnection.connectionState === "new") {
             // Don't reset PCs that don't have any state to reset
@@ -303,6 +216,7 @@ export class WebRTCConnection extends React.Component {
 
     stop() {
         if (!this.peerConnection) throw "peerConnection is undefined";
+        console.log("Session terminated.");
         this.removeTracks();
         this.peerConnection.close();
         this.createPeerConnection();
@@ -314,8 +228,73 @@ export class WebRTCConnection extends React.Component {
         senders.forEach((sender) => this.peerConnection?.removeTrack(sender));
     }
 
-    sendSignallingMessage(message: SignallingMessage) {
-        this.socket.emit("signalling", message);
+    onSignal(message: SignallingMessage) {
+        let { candidate, sessionDescription, cameraInfo } = message;
+        console.log("Received message:", message);
+        if (cameraInfo) {
+            if (Object.keys(cameraInfo).length === 0) {
+                console.warn(
+                    "Received a camera info mapping with no entries",
+                );
+            }
+            this.cameraInfo = cameraInfo;
+        }
+        if (
+            sessionDescription?.type === "offer" ||
+            sessionDescription?.type === "answer"
+        ) {
+            if (!this.peerConnection) throw "peerConnection is undefined";
+            const readyForOffer =
+                !this.makingOffer &&
+                (this.peerConnection.signalingState === "stable" ||
+                    this.isSettingRemoteAnswerPending);
+            const offerCollision =
+                sessionDescription.type === "offer" && !readyForOffer;
+
+            this.ignoreOffer = !this.polite && offerCollision;
+
+            if (this.ignoreOffer) {
+                console.error("Ignoring offer");
+                return;
+            }
+            this.isSettingRemoteAnswerPending =
+                sessionDescription.type === "answer";
+
+            this.peerConnection
+                .setRemoteDescription(sessionDescription)
+                .then(async () => {
+                    this.isSettingRemoteAnswerPending = false;
+                    if (!this.peerConnection)
+                        throw "peerConnection is undefined";
+                    if (sessionDescription?.type === "offer") {
+                        return this.peerConnection.setLocalDescription();
+                    } else {
+                        return false;
+                    }
+                })
+                .then(() => {
+                    if (!this.peerConnection?.localDescription)
+                        throw "peerConnection is undefined";
+                    this.signaler.send({
+                        sessionDescription:
+                            this.peerConnection.localDescription,
+                    });
+                });
+        } else if (candidate !== undefined && this.peerConnection) {
+            // Note that the last candidate will be null, so we check whether
+            // the candidate variable is defined at all versus being truthy.
+            // if (this.peerConnection.remoteDescription !== null) {
+            this.peerConnection.addIceCandidate(candidate).catch((e) => {
+                if (!this.ignoreOffer) {
+                    console.log(
+                        "Failure during addIceCandidate(): " + e.name,
+                    );
+                    throw e;
+                }
+            });
+        } else {
+            console.error("Unable to handle message");
+        }
     }
 
     ////////////////////////////////////////////////////////////
