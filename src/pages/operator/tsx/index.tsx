@@ -31,7 +31,7 @@ import { TextToSpeechFunctionProvider } from "./function_providers/TextToSpeechF
 import { HomeTheRobotFunctionProvider } from "./function_providers/HomeTheRobotFunctionProvider";
 import { VoiceFunctionProvider } from "./function_providers/VoiceFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
-import { isBrowser, isMobile, isTablet } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from "./function_providers/RunStopFunctionProvider";
 import { BatteryVoltageFunctionProvider } from "./function_providers/BatteryVoltageFunctionProvider";
