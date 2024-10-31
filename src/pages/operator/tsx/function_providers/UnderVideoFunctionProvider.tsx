@@ -13,8 +13,10 @@ import {
     TABLET_ORIENTATION_LANDSCAPE,
     TABLET_ORIENTATION_PORTRAIT,
     StretchTool,
+    BoundingBox2D,
 } from "../../../../shared/util";
 import { stretchTool } from "..";
+import React from "react";
 
 export enum UnderVideoButton {
     DriveView = "Drive View",
@@ -35,6 +37,8 @@ export enum UnderVideoButton {
     MoveToPregraspGoalReached = "Goal Reached",
     ToggleTabletOrientation = "Toggle Tablet Orientation",
     GetTabletOrientation = "Get Tablet Orientation",
+    GetDetectedObjects = "Get Detected Objects",
+    DetectObjects = "Detect Objects",
     RealsenseBodyPoseEstimate = "Show Body Pose",
     RealsenseShowTablet = "Show Tablet",
     RealsenseStopShowTablet = "Stop Show Tablet",
@@ -79,13 +83,16 @@ export type UnderVideoButtonFunctions = {
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
     private tabletOrientation: TabletOrientation;
+    public detectedObjects: BoundingBox2D[];
 
     constructor() {
         super();
         this.tabletOrientation = TabletOrientation.LANDSCAPE;
+        this.detectedObjects = [];
         this.provideFunctions = this.provideFunctions.bind(this);
         this.jointStateCallback = this.jointStateCallback.bind(this);
-    }
+        this.detectedObjectsCallback = this.detectedObjectsCallback.bind(this);
+    }   
 
     /**
      * Callback function for when the tablet orientation changes
@@ -294,6 +301,20 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                         return this.tabletOrientation;
                     },
                 };
+            case UnderVideoButton.GetDetectedObjects:
+                return {
+                    get: () => {
+                        return this.detectedObjects;
+                    },
+                };
+            case UnderVideoButton.DetectObjects:
+                return {
+                    onCheck: (toggle: boolean) =>
+                        FunctionProvider.remoteRobot?.setToggle(
+                            "setDetectObjects",
+                            toggle,
+                        ),
+                };
             case UnderVideoButton.RealsenseBodyPoseEstimate:
                 return {
                     onCheck: (toggle: boolean) =>
@@ -365,6 +386,22 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             this.tabletOrientationOperatorCallback(this.tabletOrientation);
         }
     }
+
+    public detectedObjectsCallback(objects: BoundingBox2D[]) {
+        this.detectedObjects = objects
+        console.log("updating detected objects")
+    }
+
+    // public detectedObjectCallback(bbox: BoundingBox) {
+    //     console.log("detected object: ", bbox)
+    //     let scaledY = Math.round((bbox.x_max + bbox.x_min)/2)
+    //     let scaledX = Math.round((bbox.y_max + bbox.y_min)/2)
+    //     FunctionProvider.remoteRobot?.moveToPregrasp(
+    //         scaledY,
+    //         scaledX,
+    //         false
+    //     );
+    // }
 
     /**
      * Sets the local pointer to the operator's callback function, to be called

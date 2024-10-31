@@ -108,6 +108,8 @@ export type WebRTCMessage =
     | ValidJointStateMessage
     | OccupancyGridMessage
     | MapPoseMessage
+    | DetectObjectsMessage
+    | DetectedObjectMessage
     | StopTrajectoryMessage
     | StopMoveBaseMessage
     | FollowJointTrajectoryActionResultMessage
@@ -206,6 +208,18 @@ export interface MapPoseMessage {
     message: ROSLIB.Transform;
 }
 
+export interface DetectObjectsMessage {
+    type: "detectObjects";
+    // message: BoundingBox;
+    toggle: boolean;
+}
+
+export interface DetectedObjectMessage {
+    type: "detectedObjects";
+    // message: BoundingBox;
+    message: BoundingBox2D[];
+}
+
 export interface BatteryVoltageMessage {
     type: "batteryVoltage";
     message: number;
@@ -258,6 +272,29 @@ export interface ROSOccupancyGrid {
     header: string;
     info: ROSMapMetaData;
     data: number[];
+}
+
+export interface BoundingBox {
+    x_min: number;
+    x_max: number;
+    y_min: number;
+    y_max: number;
+}
+
+export interface BoundingBox2D {
+    center: Pose2D
+    size_x: number;
+    size_y: number;
+}
+
+export interface Pose2D {
+    position: Point2D;
+    theta: number;
+}
+
+export interface Point2D {
+    x: number;
+    y: number;
 }
 
 export const STOW_WRIST_GRIPPER: RobotPose = {

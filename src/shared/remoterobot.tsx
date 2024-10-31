@@ -16,6 +16,7 @@ import {
     PlayTextToSpeech,
     StopTextToSpeech,
     HomeTheRobotCommand,
+    DetectObjectsCommand,
 } from "shared/commands";
 import {
     ValidJointStateDict,
@@ -23,6 +24,8 @@ import {
     ValidJoints,
     ROSPose,
     waitUntil,
+    BoundingBox,
+    BoundingBox2D,
 } from "shared/util";
 import { GetHasBetaTeleopKit, GetStretchTool } from "./commands";
 export type robotMessageChannel = (message: cmd) => void;
@@ -173,7 +176,8 @@ export class RemoteRobot extends React.Component<{}, any> {
             | "setRealsenseDepthSensing"
             | "setGripperDepthSensing"
             | "setRealsenseBodyPoseEstimate"
-            | "setRunStop",
+            | "setRunStop"
+            | "setDetectObjects",
         toggle: boolean,
     ) {
         let cmd: ToggleCommand = {
@@ -275,6 +279,16 @@ export class RemoteRobot extends React.Component<{}, any> {
         };
         this.robotChannel(cmd);
     }
+
+    // detectObject(x: number, y: number) {
+    //     console.log(x, y)
+    //     let cmd: DetectObjectCommand = {
+    //         type: "detectObject",
+    //         x: x,
+    //         y: y
+    //     }
+    //     this.robotChannel(cmd)
+    // }
 }
 
 class RobotSensors extends React.Component {
@@ -285,6 +299,7 @@ class RobotSensors extends React.Component {
     private mode: string | undefined = undefined;
     private isHomed: boolean | undefined = undefined;
     private runStopEnabled: boolean = false;
+    private detectedObjects: BoundingBox2D[] = [];
     private functionProviderCallback?: (
         inJointLimits: ValidJointStateDict,
         inCollision: ValidJointStateDict,
@@ -294,6 +309,7 @@ class RobotSensors extends React.Component {
     private isHomedFunctionProviderCallback?: (isHomed: boolean) => void;
     private runStopFunctionProviderCallback?: (enabled: boolean) => void;
     private jointStateFunctionProviderCallback?: (robotPose: RobotPose) => void;
+    private detectedObjectFunctionProviderCallback?: (objects: BoundingBox2D[]) => void;
 
     constructor(props: {}) {
         super(props);
@@ -302,6 +318,7 @@ class RobotSensors extends React.Component {
         this.modeFunctionProviderCallback = () => {};
         this.isHomedFunctionProviderCallback = () => {};
         this.runStopFunctionProviderCallback = () => {};
+        this.detectedObjectFunctionProviderCallback = () => {};
         this.setFunctionProviderCallback =
             this.setFunctionProviderCallback.bind(this);
         this.setBatteryFunctionProviderCallback =
@@ -314,6 +331,8 @@ class RobotSensors extends React.Component {
             this.setRunStopFunctionProviderCallback.bind(this);
         this.setJointStateFunctionProviderCallback =
             this.setJointStateFunctionProviderCallback.bind(this);
+        this.setDetectedObjectFunctionProviderCallback = 
+            this.setDetectedObjectFunctionProviderCallback.bind(this);
     }
 
     /**
@@ -431,6 +450,12 @@ class RobotSensors extends React.Component {
             this.runStopFunctionProviderCallback(this.runStopEnabled);
     }
 
+    setDetectedObjects(objects: BoundingBox2D[]) {
+        this.detectedObjects = objects;
+        if (this.detectedObjectFunctionProviderCallback)
+            this.detectedObjectFunctionProviderCallback(this.detectedObjects)
+    }
+
     /**
      * Records a callback from the function provider. The callback is called
      * whenever the battery voltage changes.
@@ -469,6 +494,10 @@ class RobotSensors extends React.Component {
      */
     setRunStopFunctionProviderCallback(callback: (enabled: boolean) => void) {
         this.runStopFunctionProviderCallback = callback;
+    }
+
+    setDetectedObjectFunctionProviderCallback(callback: (objects: BoundingBox2D[]) => void) {
+        this.detectedObjectFunctionProviderCallback = callback;
     }
 
     /**

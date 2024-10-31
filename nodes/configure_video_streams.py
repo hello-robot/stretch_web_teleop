@@ -250,7 +250,7 @@ class ConfigureVideoStreams(Node):
             self.latest_realsense_rgb_image_lock = threading.Lock()
             self.camera_rgb_subscriber = self.create_subscription(
                 CompressedImage if use_compressed_image else Image,
-                "/camera/color/image_raw"
+                "/camera/color/image_with_bb"
                 + ("/compressed" if use_compressed_image else ""),
                 self.realsense_rgb_cb,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
