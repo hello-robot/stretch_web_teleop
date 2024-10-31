@@ -1,7 +1,7 @@
 import React from "react";
 import { className } from "shared/util";
 import "operator/css/RadioGroup.css";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 
 export const RadioButton = (props: {
     label: string;
@@ -11,13 +11,13 @@ export const RadioButton = (props: {
 }) => {
     return (
         <div
-            className={isMobile ? "radio-btn-mobile" : "radio-btn"}
+            className={!isBrowser && !isTablet  ? "radio-btn-mobile" : "radio-btn"}
             onClick={props.onClick}
         >
             <label key={props.label}>
                 <input
                     type="radio"
-                    className={isMobile ? "radio-mobile" : "radio"}
+                    className={!isBrowser && !isTablet  ? "radio-mobile" : "radio"}
                     value={props.label}
                     key={props.label}
                     checked={props.selected}
@@ -59,7 +59,7 @@ export const RadioGroup = (props: { functs: RadioFunctions }) => {
 
     return (
         <div
-            className={isMobile ? "radio-group-mobile" : "radio-group"}
+            className={!isBrowser && !isTablet  ? "radio-group-mobile" : "radio-group"}
             onContextMenu={(e) => e.preventDefault()}
         >
             {props.functs.GetLabels().map((label, index) => (

@@ -24,7 +24,7 @@ import { useState } from "react";
 import { Dropdown } from "../basic_components/Dropdown";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Tooltip } from "operator/tsx/static_components/Tooltip";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 
 export enum MapFunction {
@@ -185,9 +185,9 @@ export const Map = (props: CustomizableComponentProps) => {
     return (
         <React.Fragment>
             <div
-                className={isMobile ? "mobile-map-container" : "map-container"}
+                className={!isBrowser && !isTablet  ? "mobile-map-container" : "map-container"}
             >
-                {!isMobile ? <h4 className="map-title">Map</h4> : <></>}
+                {isBrowser || isTablet ? <h4 className="map-title">Map</h4> : <></>}
                 <div
                     id="map"
                     className={className("map", {
@@ -198,7 +198,7 @@ export const Map = (props: CustomizableComponentProps) => {
                     onClick={handleSelect}
                 ></div>
                 {
-                    !isMobile && (
+                    isBrowser || isTablet && (
                         // <div className={"under-video-area"}>
                         <UnderMapButtons
                             handleSelectGoal={handleSelectGoal}
@@ -209,7 +209,7 @@ export const Map = (props: CustomizableComponentProps) => {
                     // </div>
                 }
             </div>
-            {isMobile && (
+            {!isBrowser && !isTablet  && (
                 <UnderMapButtons
                     handleSelectGoal={handleSelectGoal}
                     functs={underMapFn}
@@ -277,13 +277,13 @@ const UnderMapButtons = (props: {
                 id="save-pose-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-pose-name"><b>Save Current Pose on Map</b></label>
                 <hr /> */}
                 <div
-                    className={"pose-name" + isMobile ? "mobile-pose-name" : ""}
+                    className={"pose-name" + !isBrowser && !isTablet  ? "mobile-pose-name" : ""}
                 >
                     {/* <label>Pose Name</label> */}
                     <input
@@ -315,7 +315,7 @@ const UnderMapButtons = (props: {
         return elements;
     }
 
-    return !isMobile ? (
+    return isBrowser || isTablet ? (
         <React.Fragment>
             <div className="map-fn-btns">
                 <CheckToggleButton

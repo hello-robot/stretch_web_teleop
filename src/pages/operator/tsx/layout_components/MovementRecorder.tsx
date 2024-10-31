@@ -5,7 +5,7 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -141,8 +141,8 @@ export const MovementRecorder = (props: {
                 }}
                 id="save-recording-modal"
                 acceptButtonText="Save"
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
                 <hr/> */}
@@ -256,8 +256,8 @@ export const MovementRecorder = (props: {
                 id="save-recording-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
                 <hr/> */}
@@ -295,7 +295,7 @@ export const MovementRecorder = (props: {
             />
         );
 
-    return !isMobile ? (
+    return isBrowser || isTablet ? (
         <React.Fragment>
             <div id="movement-recorder-container">Movement Recorder</div>
             <div id="movement-recorder-container">

@@ -1,6 +1,6 @@
 import { className } from "shared/util";
 import "operator/css/basic_components.css";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import React from "react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -34,7 +34,7 @@ export const CheckToggleButton = (props: CheckToggleButtonProps) => {
     return (
         <button
             className={className(
-                isMobile ? "check-toggle-button-mobile" : "check-toggle-button",
+                !isBrowser && !isTablet  ? "check-toggle-button-mobile" : "check-toggle-button",
                 { checked },
             )}
             onPointerDown={props.onClick}

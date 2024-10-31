@@ -24,7 +24,6 @@ import yawLeft from "operator/icons/Yaw_Left.svg";
 import yawRight from "operator/icons/Yaw_Right.svg";
 
 import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider";
-import { isMobile } from "react-device-detect";
 
 /** The pixel width of SVG components. */
 export const SVG_RESOLUTION = 500;

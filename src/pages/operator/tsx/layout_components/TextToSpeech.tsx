@@ -4,7 +4,7 @@ import { DropdownInput } from "../basic_components/DropdownInput";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/TextToSpeech.css";
 import "operator/css/basic_components.css";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StopCircleIcon from "@mui/icons-material/StopCircle";
 import SaveIcon from "@mui/icons-material/Save";
@@ -54,7 +54,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
     );
     const [text, setText] = React.useState<string>("");
 
-    return !isMobile ? (
+    return isBrowser || isTablet ? (
         <React.Fragment>
             <div id="text-to-speech-container">Text-to-Speech</div>
             <div id="text-to-speech-container">

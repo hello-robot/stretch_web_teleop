@@ -29,7 +29,7 @@ import { MovementRecorderFunctionProvider } from "./function_providers/MovementR
 import { TextToSpeechFunctionProvider } from "./function_providers/TextToSpeechFunctionProvider";
 import { HomeTheRobotFunctionProvider } from "./function_providers/HomeTheRobotFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from "./function_providers/RunStopFunctionProvider";
 import { BatteryVoltageFunctionProvider } from "./function_providers/BatteryVoltageFunctionProvider";
@@ -300,7 +300,7 @@ function renderOperator(storageHandler: StorageHandler) {
     const layout = storageHandler.loadCurrentLayoutOrDefault();
     FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
 
-    !isMobile
+    isBrowser || isTablet
         ? root.render(
               <Operator
                   remoteStreams={allRemoteStreams}
@@ -315,7 +315,7 @@ function renderOperator(storageHandler: StorageHandler) {
               />,
           );
 
-    if (!isMobile) {
+    if (isBrowser || isTablet) {
         var loader = document.createElement("div");
         loader.className = "loader";
         var loaderText = document.createElement("div");
