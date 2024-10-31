@@ -126,6 +126,22 @@
     width: 99%;
 }
 
+.inline-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.autocomplete {
+    display: flex;
+    width: 150%
+}
+
+.autocomplete button {
+    padding: 0 !important;
+    width: 0%;
+    transform: translate(50%, 0%);
+}
+
 /* Realsense pan-tilt controls ************************************************/
 .realsense-pan-tilt-grid {
     width: 100%;

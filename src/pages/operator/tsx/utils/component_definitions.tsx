@@ -203,6 +203,11 @@ export type RealsenseVideoStreamDef = CameraViewDefinition & {
      */
     selectObjectForMoveToPregrasp?: boolean;
     /**
+     * If the user should be allowed to detect objects and have the robot
+     * move to the pre-grasp position relative to the selected object.
+     */
+    selectDetectObjects?: boolean;
+    /**
      * If the user has toggled on the human body pose estimate overlay.
      */
     bodyPoseAR?: boolean;

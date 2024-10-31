@@ -1,0 +1,3 @@
+bool data
+---
+vision_msgs/BoundingBox2D[] boxes

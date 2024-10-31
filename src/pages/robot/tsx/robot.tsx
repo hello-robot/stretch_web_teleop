@@ -10,6 +10,7 @@ import {
     ActionState,
     ActionStatusList,
     ROSBatteryState,
+    BoundingBox2D,
 } from "shared/util";
 import {
     rosJointStatetoRobotPose,
@@ -44,6 +45,7 @@ export class Robot extends React.Component {
     private moveToPregraspClient?: ROSLIB.ActionClient;
     private showTabletClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
+    private detectObjectService?: ROSLIB.Service;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
     private setCameraPerspectiveService?: ROSLIB.Service;
@@ -66,6 +68,8 @@ export class Robot extends React.Component {
     ) => void;
     private batteryStateCallback: (batteryState: ROSBatteryState) => void;
     private occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
+    // private detectObjectCallback: (bbox: BoundingBox) => void;
+    private detectObjectCallback: (objects: BoundingBox2D[]) => void;
     private moveBaseResultCallback: (goalState: ActionState) => void;
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
     private showTabletResultCallback: (goalState: ActionState) => void;
@@ -90,6 +94,7 @@ export class Robot extends React.Component {
         ) => void;
         batteryStateCallback: (batteryState: ROSBatteryState) => void;
         occupancyGridCallback: (occupancyGrid: ROSOccupancyGrid) => void;
+        detectObjectCallback: (objects: BoundingBox2D[]) => void;
         moveBaseResultCallback: (goalState: ActionState) => void;
         moveToPregraspResultCallback: (goalState: ActionState) => void;
         showTabletResultCallback: (goalState: ActionState) => void;
@@ -104,6 +109,7 @@ export class Robot extends React.Component {
         this.jointStateCallback = props.jointStateCallback;
         this.batteryStateCallback = props.batteryStateCallback;
         this.occupancyGridCallback = props.occupancyGridCallback;
+        this.detectObjectCallback = props.detectObjectCallback;
         this.moveBaseResultCallback = props.moveBaseResultCallback;
         this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
         this.showTabletResultCallback = props.showTabletResultCallback;
@@ -287,6 +293,7 @@ export class Robot extends React.Component {
         this.createMoveToPregraspClient();
         this.createShowTabletClient();
         this.createCmdVelTopic();
+        this.createdetectObjectService();
         this.createSwitchToNavigationService();
         this.createSwitchToPositionService();
         this.createRealsenseDepthSensingService();
@@ -606,6 +613,14 @@ export class Robot extends React.Component {
         });
     }
 
+    createdetectObjectService() {
+        this.detectObjectService = new ROSLIB.Service({
+            ros: this.ros,
+            name: "/detect_object",
+            serviceType: "stretch_web_teleop/srv/DetectObject",
+        });
+    }
+
     createSwitchToNavigationService() {
         this.switchToNavigationService = new ROSLIB.Service({
             ros: this.ros,
@@ -821,6 +836,15 @@ export class Robot extends React.Component {
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
         this.setRunStopService?.callService(request, (response: boolean) => {});
+    }
+
+    detectObjects(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        // var request = new ROSLIB.ServiceRequest({ x: x, y: y });
+        this.detectObjectService.callService(request, (response) => {
+            if (this.detectObjectCallback) 
+                this.detectObjectCallback(response.boxes)
+        })
     }
 
     /**

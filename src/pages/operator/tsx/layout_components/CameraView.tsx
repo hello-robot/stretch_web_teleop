@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
+    BoundingBox2D,
     className,
     gripperProps,
     navigationProps,
@@ -49,6 +50,9 @@ import "operator/css/CameraView.css";
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Box, Popper } from "@mui/material";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -875,15 +879,23 @@ const UnderRealsenseButtons = (props: {
     underVideoAreaRef: React.RefObject<HTMLDivElement>;
     stretchTool: StretchTool;
 }) => {
+    let detectedObjects = underVideoFunctionProvider.provideFunctions(
+        UnderVideoButton.GetDetectedObjects
+    ).get!();
     const [rerender, setRerender] = React.useState<boolean>(false);
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
+    const [detectedObjectsKeys, setDetectedObjectsKeys] = React.useState<string[]>([]);
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
+    useEffect(() => {
+        console.log("updated object keys...")
+        setDetectedObjectsKeys(detectedObjects.map((_, index) => index.toString()))
+    }, [underVideoFunctionProvider.detectedObjects])
 
-    // Toggle select object when initiated via voice control
-    React.useEffect(() => {
-        props.setSelectObjectScaledXY(null);
-        setRerender(!rerender);
-    }, [props.definition.selectObjectForMoveToPregrasp])
+    // console.log(
+    //     "UnderRealsenseButtons",
+    //     props.isMovingToPregrasp,
+    //     props.isShowingTablet,
+    // );
 
     // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
     let moveToPregraspButtons = <></>;
@@ -892,81 +904,181 @@ const UnderRealsenseButtons = (props: {
             <React.Fragment>
                 <CheckToggleButton
                     checked={
-                        props.definition.selectObjectForMoveToPregrasp || false
+                        props.definition.selectDetectObjects || false
                     }
                     onClick={() => {
-                        props.definition.selectObjectForMoveToPregrasp =
-                            !props.definition.selectObjectForMoveToPregrasp;
-                        props.setSelectObjectScaledXY(null);
+                        props.definition.selectDetectObjects =
+                            !props.definition.selectDetectObjects;
                         setRerender(!rerender);
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.DetectObjects,
+                        ).onCheck!(props.definition.selectDetectObjects);
                     }}
-                    label="Select Object"
+                    label="Detect Objects"
                 />
-                {props.isMovingToPregrasp ? (
-                    <button
-                        className="map-cancel-btn"
-                        onPointerDown={() => {
-                            underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.CancelMoveToPregrasp,
-                            ).onClick!();
-                            props.setIsMovingToPregrasp(false);
-                        }}
-                    >
-                        <span>Cancel</span>
-                        <CancelIcon />
-                    </button>
-                ) : (
-                    <AccordionSelect
-                        title="Align Gripper to Object"
-                        possibleOptions={Object.values(
-                            realsenseMoveToPregraspButtons,
-                        )}
-                        backgroundColor="var(--selected-color)"
-                        onChange={(idx: number) => {
-                            if (props.selectObjectScaledXY == null) {
-                                underVideoFunctionProvider.setMoveToPregraspState(
-                                    {
-                                        state: "Please select an object first.",
-                                        alert_type: "error",
-                                    },
-                                );
-                                return;
-                            }
-                            underVideoFunctionProvider.provideFunctions(
-                                realsenseMoveToPregraspButtons[idx],
-                            ).onClick!(props.selectObjectScaledXY);
-                            props.setSelectObjectScaledXY(null);
-                            props.setIsMovingToPregrasp(true);
-                            props.definition.selectObjectForMoveToPregrasp =
-                                false;
-                            underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.MoveToPregraspGoalReached,
-                            ).getFuture!().then(() => {
+                <div className="inline-buttons">
+                    <div className="autocomplete"
+                            onClick={() => { setRerender(!rerender)}}>
+                            <Autocomplete
+                                onChange={(event, value) => {
+                                    let object: BoundingBox2D = detectedObjects[Number(value)]
+                                    props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
+                                }}
+                                disablePortal
+                                options={detectedObjectsKeys}
+                                sx={{ width: '100%', padding: '0' }}
+                                renderInput={(params) => <TextField {...params} label="Object #" />}
+                                PopperComponent={(props) => (
+                                    <Popper {...props} placement="top-start" />
+                                )}
+                            />
+                    </div>
+                    {props.isMovingToPregrasp ? (
+                        <button
+                            className="map-cancel-btn"
+                            onPointerDown={() => {
+                                underVideoFunctionProvider.provideFunctions(
+                                    UnderVideoButton.CancelMoveToPregrasp,
+                                ).onClick!();
                                 props.setIsMovingToPregrasp(false);
-                            });
-                        }}
-                        toggleAccordianCallback={() => {
-                            if (props.underVideoAreaRef.current) {
-                                // Over the next 600ms, which is the CSS-specified transition time for
-                                // an accordion, keep scrolling the underVideoArea to the bottom, in case
-                                // the expanded accordion is off-screen.
-                                let startTime = Date.now();
-                                let scrollInterval = setInterval(() => {
-                                    let currentTime = Date.now();
-                                    let timeElapsed = currentTime - startTime;
-                                    if (timeElapsed >= 600) {
-                                        clearInterval(scrollInterval);
-                                    } else {
-                                        props.underVideoAreaRef.current!.scrollTop =
-                                            props.underVideoAreaRef.current!.scrollHeight;
-                                    }
-                                }, 10);
-                            }
-                        }}
-                    />
-                )}
+                            }}
+                        >
+                            <span>Cancel</span>
+                            <CancelIcon />
+                        </button>
+                    ) : (
+                        <><button
+                                className="map-play-btn"
+                                onPointerDown={() => {
+                                    console.log(props.selectObjectScaledXY);
+                                    underVideoFunctionProvider.provideFunctions(
+                                        realsenseMoveToPregraspButtons[0]
+                                    ).onClick!(props.selectObjectScaledXY);
+                                    props.setSelectObjectScaledXY(null);
+                                    props.setIsMovingToPregrasp(true);
+                                    props.definition.selectObjectForMoveToPregrasp =
+                                        false;
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.MoveToPregraspGoalReached
+                                    ).getFuture!().then(() => {
+                                        props.setIsMovingToPregrasp(false);
+                                    });
+                                    props.definition.selectDetectObjects =
+                                        !props.definition.selectDetectObjects;
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.DetectObjects,
+                                    ).onCheck!(props.definition.selectDetectObjects);
+                                }}
+                            >
+                                <span>Horizontal</span>
+                            </button><button
+                                className="map-play-btn"
+                                onPointerDown={() => {
+                                    console.log(props.selectObjectScaledXY);
+                                    underVideoFunctionProvider.provideFunctions(
+                                        realsenseMoveToPregraspButtons[1]
+                                    ).onClick!(props.selectObjectScaledXY);
+                                    props.setSelectObjectScaledXY(null);
+                                    props.setIsMovingToPregrasp(true);
+                                    props.definition.selectObjectForMoveToPregrasp =
+                                        false;
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.MoveToPregraspGoalReached
+                                    ).getFuture!().then(() => {
+                                        props.setIsMovingToPregrasp(false);
+                                    });
+                                    props.definition.selectDetectObjects =
+                                        !props.definition.selectDetectObjects;
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.DetectObjects,
+                                    ).onCheck!(props.definition.selectDetectObjects);
+                                } }
+                            >
+                                    <span>Vertical</span>
+                                </button></>
+                    )}
+                </div>
             </React.Fragment>
-        );
+        )
+        // moveToPregraspButtons = (
+        //     <React.Fragment>
+        //         <CheckToggleButton
+        //             checked={
+        //                 props.definition.selectObjectForMoveToPregrasp || false
+        //             }
+        //             onClick={() => {
+        //                 props.definition.selectObjectForMoveToPregrasp =
+        //                     !props.definition.selectObjectForMoveToPregrasp;
+        //                 props.setSelectObjectScaledXY(null);
+        //                 setRerender(!rerender);
+        //             }}
+        //             label="Select Object"
+        //         />
+        //         {props.isMovingToPregrasp ? (
+        //             <button
+        //                 className="map-cancel-btn"
+        //                 onPointerDown={() => {
+        //                     underVideoFunctionProvider.provideFunctions(
+        //                         UnderVideoButton.CancelMoveToPregrasp,
+        //                     ).onClick!();
+        //                     props.setIsMovingToPregrasp(false);
+        //                 }}
+        //             >
+        //                 <span>Cancel</span>
+        //                 <CancelIcon />
+        //             </button>
+        //         ) : (
+        //             <AccordionSelect
+        //                 title="Align Gripper to Object"
+        //                 possibleOptions={Object.values(
+        //                     realsenseMoveToPregraspButtons,
+        //                 )}
+        //                 backgroundColor="var(--selected-color)"
+        //                 onChange={(idx: number) => {
+        //                     if (props.selectObjectScaledXY == null) {
+        //                         underVideoFunctionProvider.setMoveToPregraspState(
+        //                             {
+        //                                 state: "Please select an object first.",
+        //                                 alert_type: "error",
+        //                             },
+        //                         );
+        //                         return;
+        //                     }
+        //                     underVideoFunctionProvider.provideFunctions(
+        //                         realsenseMoveToPregraspButtons[idx],
+        //                     ).onClick!(props.selectObjectScaledXY);
+        //                     props.setSelectObjectScaledXY(null);
+        //                     props.setIsMovingToPregrasp(true);
+        //                     props.definition.selectObjectForMoveToPregrasp =
+        //                         false;
+        //                     underVideoFunctionProvider.provideFunctions(
+        //                         UnderVideoButton.MoveToPregraspGoalReached,
+        //                     ).getFuture!().then(() => {
+        //                         props.setIsMovingToPregrasp(false);
+        //                     });
+        //                 }}
+        //                 toggleAccordianCallback={() => {
+        //                     if (props.underVideoAreaRef.current) {
+        //                         // Over the next 600ms, which is the CSS-specified transition time for
+        //                         // an accordion, keep scrolling the underVideoArea to the bottom, in case
+        //                         // the expanded accordion is off-screen.
+        //                         let startTime = Date.now();
+        //                         let scrollInterval = setInterval(() => {
+        //                             let currentTime = Date.now();
+        //                             let timeElapsed = currentTime - startTime;
+        //                             if (timeElapsed >= 600) {
+        //                                 clearInterval(scrollInterval);
+        //                             } else {
+        //                                 props.underVideoAreaRef.current!.scrollTop =
+        //                                     props.underVideoAreaRef.current!.scrollHeight;
+        //                             }
+        //                         }, 10);
+        //                     }
+        //                 }}
+        //             />
+        //         )}
+        //     </React.Fragment>
+        // );
     }
 
     // Only show ShowTablet buttons if the robot has a tablet attached.

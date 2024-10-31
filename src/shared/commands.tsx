@@ -24,7 +24,8 @@ export type cmd =
     | StopTextToSpeech
     | ShowTabletCommand
     | StopShowTabletCommand
-    | HomeTheRobotCommand;
+    | HomeTheRobotCommand
+    | DetectObjectsCommand;
 
 export interface VelocityCommand {
     stop: () => void;
@@ -72,7 +73,8 @@ export interface ToggleCommand {
         | "setRealsenseDepthSensing"
         | "setGripperDepthSensing"
         | "setRealsenseBodyPoseEstimate"
-        | "setRunStop";
+        | "setRunStop"
+        | "setDetectObjects";
     toggle: boolean;
 }
 
@@ -141,4 +143,11 @@ export interface StopTextToSpeech {
 
 export interface HomeTheRobotCommand {
     type: "homeTheRobot";
+}
+
+export interface DetectObjectsCommand {
+    type: "detectObjects";
+    toggle: boolean;
+    // x: number;
+    // y: number;
 }

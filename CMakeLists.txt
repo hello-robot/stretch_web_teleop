@@ -11,6 +11,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(vision_msgs REQUIRED)
 find_package(rosbridge_server REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 # find_package(tf2_web_republisher REQUIRED)
@@ -21,7 +22,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/MoveToPregrasp.action"
   "msg/TextToSpeech.msg"
-  DEPENDENCIES geometry_msgs
+  "srv/DetectObject.srv"
+  DEPENDENCIES geometry_msgs vision_msgs
 )
 
 
@@ -40,6 +42,7 @@ install(PROGRAMS
   nodes/compressed_image_visualizer.py
   nodes/configure_video_streams.py
   nodes/move_to_pregrasp.py
+  nodes/detect_objects.py
   nodes/navigation_camera.py
   nodes/text_to_speech.py
   nodes/text_to_speech_ui.py
