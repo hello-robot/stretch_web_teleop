@@ -76,7 +76,7 @@
     width: var(--header-btn-width);
 }
 
-.operator-voice,
+.operator-voice-commands,
 .operator-pose-library,
 .operator-pose-recorder,
 .operator-text-to-speech,

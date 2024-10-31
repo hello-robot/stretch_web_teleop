@@ -1,4 +1,5 @@
 import React from "react";
+import 'regenerator-runtime/runtime'
 import { createRoot, Root } from "react-dom/client";
 import { WebRTCConnection } from "shared/webrtcconnections";
 import {
@@ -28,6 +29,7 @@ import { UnderMapFunctionProvider } from "./function_providers/UnderMapFunctionP
 import { MovementRecorderFunctionProvider } from "./function_providers/MovementRecorderFunctionProvider";
 import { TextToSpeechFunctionProvider } from "./function_providers/TextToSpeechFunctionProvider";
 import { HomeTheRobotFunctionProvider } from "./function_providers/HomeTheRobotFunctionProvider";
+import { VoiceFunctionProvider } from "./function_providers/VoiceFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
 import { isBrowser, isTablet } from "react-device-detect";
 import "operator/css/index.css";
@@ -62,6 +64,7 @@ export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
 export var textToSpeechFunctionProvider: TextToSpeechFunctionProvider;
 export var homeTheRobotFunctionProvider: HomeTheRobotFunctionProvider =
     new HomeTheRobotFunctionProvider();
+export var voiceFunctionProvider: VoiceFunctionProvider = new VoiceFunctionProvider();
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({

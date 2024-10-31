@@ -1,0 +1,18 @@
+#microphone-button {
+    padding: var(--btn-padding);
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    border: 0.2rem solid black;
+}
+
+#voice-command-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+#record-icon {
+    color: red;
+}

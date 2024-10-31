@@ -88,6 +88,7 @@ export type ParentComponentDefinition = ComponentDefinition & {
 
 export type LayoutDefinition = ComponentDefinition & {
     displayMovementRecorder: boolean;
+    displayVoiceCommands: boolean;
     displayTextToSpeech: boolean;
     displayLabels: boolean;
     actionMode: ActionMode;
