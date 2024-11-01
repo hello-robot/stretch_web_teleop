@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "@babel/runtime": "^7.26.0",
         "@emotion/react": "^11.13.0",
         "@emotion/styled": "^11.13.0",
         "@mui/icons-material": "^5.16.6",
@@ -34,6 +35,8 @@
         "react-native-keyboard-aware-scrollview": "^2.1.0",
         "react-native-web": "^0.19.7",
         "react-path-tooltip": "^1.0.25",
+        "react-speech-recognition": "^3.10.0",
+        "regenerator-runtime": "^0.14.1",
         "roslib": "github:hello-vinitha/roslibjs#ros2actionclient",
         "socket.io": "^4.6.1",
         "socket.io-client": "^4.6.1",
@@ -64,7 +67,7 @@
         ]
     },
     "devDependencies": {
-        "@babel/plugin-transform-runtime": "^7.21.4",
+        "@babel/plugin-transform-runtime": "^7.25.9",
         "@babel/preset-env": "^7.22.6",
         "@babel/preset-react": "^7.18.6",
         "@babel/preset-typescript": "^7.21.4",
