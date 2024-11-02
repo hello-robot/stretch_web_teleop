@@ -268,7 +268,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                     command: "* detect objects",
                     callback: (action) => {
                         const actions = ["check", "uncheck"]
-                        if (!actions.includes(action as string)) return;
+                        if (!actions.includes(action.toLowerCase() as string)) return;
                         const toggle = action == "check" ? true : false
                         props.onToggleUnderVideoButtons(toggle, UnderVideoButton.DetectObjects)
                         underVideoFunctionProvider.provideFunctions(
@@ -305,7 +305,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                         underVideoFunctionProvider.provideFunctions(
                             UnderVideoButton.VoiceMoveToPregraspVertical
                         ).onClick()
-                        handleCommand(`Moving to horizontal pregrasp position`)
+                        handleCommand(`Moving to vertical pregrasp position`)
                     }
                 }
         }

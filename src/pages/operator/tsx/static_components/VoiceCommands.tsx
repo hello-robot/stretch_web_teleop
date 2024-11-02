@@ -198,6 +198,7 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
                         ref={microphoneRef}
                         onClick={listenHandle}
                     >
+                        <p>{transcript}</p>
                         {isListening
                             ? <Mic />
                             : <MicOff />}
