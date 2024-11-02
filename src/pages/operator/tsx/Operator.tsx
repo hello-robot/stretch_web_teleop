@@ -426,6 +426,18 @@ export const Operator = (props: {
                     </div>
                 </div>
             }
+            {/* <div
+                className={className("operator-voice-commands", {
+                    hideLabels: !layout.current.displayLabels,
+                })}
+                hidden={!layout.current.displayVoiceCommands}
+            >
+                <VoiceCommands
+                    onUpdateVelocityScale=
+                    {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
+                
+                />
+            </div> */}
             {moveBaseState && (
                 <div className="operator-collision-alerts">
                     <div
