@@ -121,10 +121,6 @@ export type GlobalOptionsProps = {
     displayLabels: boolean;
     setDisplayLabels: (displayLabels: boolean) => void;
 
-    /** If the voice controls should be displayed. */
-    displayVoiceCommands: boolean;
-    setDisplayVoiceCommands: (displayVoiceCommands: boolean) => void;
-
     /** List of names of the default layouts. */
     defaultLayouts: string[];
     /** List of names of the user's custom layouts. */
@@ -153,11 +149,6 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
         <React.Fragment>
             <div id="global-settings">
                 {/* <p>Global settings:</p> */}
-                <OnOffToggleButton
-                    on={props.displayVoiceCommands}
-                    onClick={() => props.setDisplayVoiceCommands(!props.displayVoiceCommands)}
-                    label="Display voice control"
-                />
                 <OnOffToggleButton
                     on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}

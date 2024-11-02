@@ -221,17 +221,6 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the movement recorder component to display or hidden.
-     *
-     * @param displayMovementRecorder if the movement recorder component at the
-     *                             top of the operator body should be displayed
-     */
-    function setDisplayVoiceCommands(displayVoiceCommands: boolean) {
-        layout.current.displayVoiceCommands = displayVoiceCommands;
-        updateLayout();
-    }
-
-    /**
      * Sets the text-to-speech component to display or hidden.
      *
      * @param displayTextToSpeech whether the text-to-speech component should
@@ -348,11 +337,9 @@ export const Operator = (props: {
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
         displayMovementRecorder: layout.current.displayMovementRecorder,
-        displayVoiceCommands: layout.current.displayVoiceCommands,
         displayTextToSpeech: layout.current.displayTextToSpeech,
         displayLabels: layout.current.displayLabels,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
-        setDisplayVoiceCommands: setDisplayVoiceCommands,
         setDisplayTextToSpeech: setDisplayTextToSpeech,
         setDisplayLabels: setDisplayLabels,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
@@ -439,18 +426,6 @@ export const Operator = (props: {
                     </div>
                 </div>
             }
-            {/* <div
-                className={className("operator-voice-commands", {
-                    hideLabels: !layout.current.displayLabels,
-                })}
-                hidden={!layout.current.displayVoiceCommands}
-            >
-                <VoiceCommands
-                    onUpdateVelocityScale=
-                    {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
-                
-                />
-            </div> */}
             {moveBaseState && (
                 <div className="operator-collision-alerts">
                     <div

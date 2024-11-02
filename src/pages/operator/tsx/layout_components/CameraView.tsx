@@ -802,7 +802,6 @@ const UnderAdjustableOverheadButtons = (props: {
 
     // Toggle Predictive Display when initiated via voice control
     React.useEffect(() => {
-        console.log(props.definition.predictiveDisplay)
         if (props.definition.predictiveDisplay) {
             underVideoFunctionProvider.provideFunctions(
                 UnderVideoButton.LookAtBase,
