@@ -524,3 +524,59 @@ export function className(baseName: string, flags: {}): string {
     }
     return className;
 }
+  
+export function wordsToNumbers(input: string): number {
+    const numbersToWords = {
+        0: "zero",
+        1: "one",
+        2: "two",
+        3: "three",
+        4: "four",
+        5: "five",
+        6: "six",
+        7: "seven",
+        8: "eight",
+        9: "nine",
+        10: "ten",
+        11: "eleven",
+        12: "twelve",
+        13: "thirteen",
+        14: "fourteen",
+        15: "fifteen",
+        16: "sixteen",
+        17: "seventeen",
+        18: "eighteen",
+        19: "nineteen",
+        20: "twenty",
+        30: "thirty",
+        40: "forty",
+        50: "fifty",
+        60: "sixty",
+        70: "seventy",
+        80: "eighty",
+        90: "ninety",
+    };
+
+    const words = input.toLowerCase().split(/[\s-]+/); // Split by spaces and hyphens
+    let result = 0;
+    let currentNumber = 0;
+
+    words.forEach(word => {
+        for (const [num, w] of Object.entries(numbersToWords)) {
+            if (word === w) {
+                currentNumber += Number(num);
+                break;
+            }
+        }
+
+        if (word === "hundred") {
+            currentNumber *= 100; // If "hundred" is found, multiply current number by 100
+        } else if (word === "thousand") {
+            currentNumber *= 1000; // If "thousand" is found, multiply current number by 1000
+            result += currentNumber; // Add current number to the result
+            currentNumber = 0; // Reset current number
+        }
+    });
+
+    return result + currentNumber; // Add any remaining current number to the result
+};

@@ -45,6 +45,7 @@ export enum UnderVideoButton {
     RealsenseShowTablet = "Show Tablet",
     RealsenseStopShowTablet = "Stop Show Tablet",
     RealsenseShowTabletGoalReached = "Show Tablet Goal Reached",
+    VoiceSelectObject = "Voice Select Object"
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -79,6 +80,7 @@ export type UnderVideoButtonFunctions = {
     onClick?: (...args: any[]) => void;
     onCheck?: (toggle: boolean) => void;
     get?: () => any;
+    set?: (value: any) => void;
     send?: (name: string) => void;
     getFuture?: () => Promise<any>;
 };
@@ -86,15 +88,17 @@ export type UnderVideoButtonFunctions = {
 export class UnderVideoFunctionProvider extends FunctionProvider {
     private tabletOrientation: TabletOrientation;
     public detectedObjects: BoundingBox2D[];
+    public selectedObject: number | undefined;
 
     constructor() {
         super();
         this.tabletOrientation = TabletOrientation.LANDSCAPE;
         this.detectedObjects = [];
+        this.selectedObject = undefined;
         this.provideFunctions = this.provideFunctions.bind(this);
         this.jointStateCallback = this.jointStateCallback.bind(this);
         this.detectedObjectsCallback = this.detectedObjectsCallback.bind(this);
-    }   
+    }
 
     /**
      * Callback function for when the tablet orientation changes
@@ -316,6 +320,18 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                             "setDetectObjects",
                             toggle,
                         ),
+                };
+            case UnderVideoButton.VoiceSelectObject:
+                return {
+                    set: (value: number) => {
+                        if (value < this.detectedObjects.length) {
+                            console.log("setting value")
+                            this.selectedObject = value
+                        }
+                    },
+                    get: () => {
+                        return this.selectedObject
+                    }
                 };
             case UnderVideoButton.RealsenseBodyPoseEstimate:
                 return {

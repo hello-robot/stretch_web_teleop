@@ -883,14 +883,27 @@ const UnderRealsenseButtons = (props: {
     let detectedObjects = underVideoFunctionProvider.provideFunctions(
         UnderVideoButton.GetDetectedObjects
     ).get!();
+    let voiceSelectObject = underVideoFunctionProvider.provideFunctions(
+        UnderVideoButton.VoiceSelectObject
+    ).get!();
     const [rerender, setRerender] = React.useState<boolean>(false);
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [detectedObjectsKeys, setDetectedObjectsKeys] = React.useState<string[]>([]);
+    const [voiceSelectedObject, setVoiceSelectedObject] = React.useState<string>("");
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
     useEffect(() => {
-        console.log("updated object keys...")
         setDetectedObjectsKeys(detectedObjects.map((_, index) => index.toString()))
     }, [underVideoFunctionProvider.detectedObjects])
+
+    useEffect(() => {
+        if (voiceSelectObject !== undefined) {
+            setVoiceSelectedObject(String(voiceSelectObject))
+            console.log(voiceSelectObject)
+            setRerender(!rerender)
+            let object: BoundingBox2D = detectedObjects[voiceSelectObject]
+            props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
+        }
+    }, [underVideoFunctionProvider.selectedObject])
 
     // Toggle select object when initiated via voice control
     React.useEffect(() => {
@@ -921,6 +934,7 @@ const UnderRealsenseButtons = (props: {
                     <div className="autocomplete"
                             onClick={() => { setRerender(!rerender)}}>
                             <Autocomplete
+                                value={String(voiceSelectedObject)}
                                 onChange={(event, value) => {
                                     let object: BoundingBox2D = detectedObjects[Number(value)]
                                     props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])

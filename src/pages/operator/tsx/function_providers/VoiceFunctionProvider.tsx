@@ -1,6 +1,6 @@
 import { FunctionProvider } from "./FunctionProvider"
 import { VoiceCommandFunction, VoiceCommandFunctions, VoiceCommandsProps } from "../static_components/VoiceCommands"
-import { JOINT_VELOCITIES, JOINT_INCREMENTS } from 'shared/util'
+import { JOINT_VELOCITIES, JOINT_INCREMENTS, wordsToNumbers } from 'shared/util'
 import { VELOCITY_SCALE } from "../static_components/SpeedControl"
 import { ActionMode, LayoutGridDefinition, ComponentType, CameraViewId, CameraViewDefinition, RealsenseVideoStreamDef, AdjustableOverheadVideoStreamDef } from "../utils/component_definitions";
 import { buttonFunctionProvider, underVideoFunctionProvider } from "..";
@@ -261,6 +261,31 @@ export class VoiceFunctionProvider extends FunctionProvider {
                         const toggle = action == "check" ? true : false
                         props.onToggleUnderVideoButtons(toggle, UnderVideoButton.SelectObject)
                         handleCommand(`${action}ed select object`)
+                    }
+                }
+            case VoiceCommandFunction.DetectObjects:
+                return {
+                    command: "* detect objects",
+                    callback: (action) => {
+                        const actions = ["check", "uncheck"]
+                        if (!actions.includes(action as string)) return;
+                        const toggle = action == "check" ? true : false
+                        props.onToggleUnderVideoButtons(toggle, UnderVideoButton.DetectObjects)
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.DetectObjects,
+                        ).onCheck(toggle);
+                        handleCommand(`${action}ed detect objects`)
+                    }
+                }
+            case VoiceCommandFunction.SelectDetectedObject:
+                return {
+                    command: "select object number *",
+                    callback: (objNumber) => {
+                        let objNum = wordsToNumbers(objNumber)
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.VoiceSelectObject,
+                        ).set(objNum);
+                        handleCommand(`Selected object number ${objNum}`)
                     }
                 }
         }

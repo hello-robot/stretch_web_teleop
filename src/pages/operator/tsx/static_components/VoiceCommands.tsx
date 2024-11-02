@@ -33,6 +33,8 @@ export enum VoiceCommandFunction {
     FollowGripper,
     PredictiveDisplay,
     RealsenseDepthSensing,
+    DetectObjects,
+    SelectDetectedObject,
     SelectObject,
     // Global functions
     Stop,
@@ -93,6 +95,8 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
             VoiceCommandFunction.FollowGripper,
             VoiceCommandFunction.PredictiveDisplay,
             VoiceCommandFunction.RealsenseDepthSensing,
+            VoiceCommandFunction.DetectObjects,
+            VoiceCommandFunction.SelectDetectedObject,
             VoiceCommandFunction.SelectObject,
             VoiceCommandFunction.Stop,
             VoiceCommandFunction.SetSpeed,

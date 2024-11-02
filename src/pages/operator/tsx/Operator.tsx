@@ -201,6 +201,9 @@ export const Operator = (props: {
                             else if (button == UnderVideoButton.SelectObject && component.id == CameraViewId.realsense) {
                                 (component as RealsenseVideoStreamDef).selectObjectForMoveToPregrasp = toggle
                             }
+                            else if (button == UnderVideoButton.DetectObjects && component.id == CameraViewId.realsense) {
+                                (component as RealsenseVideoStreamDef).selectDetectObjects = toggle
+                            }
                         }
                     })
                 })
