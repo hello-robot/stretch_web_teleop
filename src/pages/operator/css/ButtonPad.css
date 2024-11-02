@@ -54,6 +54,7 @@
 
 .button-pads image {
     pointer-events: none;
+    touch-action: none;
 }
 
 .button-pads path.inactive:hover + image {
@@ -78,6 +79,7 @@
 /* Disable hover actions */
 .button-pads.customizing path {
     pointer-events: none;
+    touch-action: none;
 }
 
 .button-pads.selected {

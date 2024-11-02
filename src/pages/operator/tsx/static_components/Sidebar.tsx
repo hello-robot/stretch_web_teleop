@@ -21,6 +21,7 @@ import { storageHandler } from "operator/tsx/index";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { isTablet } from "react-device-detect";
 
 type SidebarProps = {
     hidden: boolean;
@@ -163,13 +164,15 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     }
                     label="Display movement recorder"
                 />
-                <OnOffToggleButton
-                    on={!props.displayTextToSpeech}
-                    onClick={() =>
-                        props.setDisplayTextToSpeech(!props.displayTextToSpeech)
-                    }
-                    label="Display text-to-speech"
-                />
+                {isTablet ? <></> :
+                    <OnOffToggleButton
+                        on={!props.displayTextToSpeech}
+                        onClick={() =>
+                            props.setDisplayTextToSpeech(!props.displayTextToSpeech)
+                        }
+                        label="Display text-to-speech"
+                    />
+                }
                 <button onClick={() => setShowLoadLayoutModal(true)}>
                     Load layout
                 </button>
@@ -490,6 +493,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Map },
     ];
 
+    const sidebarRef = React.useRef<HTMLDivElement>(null);
+
     function handleSelect(type: ComponentType, id?: ComponentId) {
         const definition: ComponentDefinition = id ? { type, id } : { type };
 
@@ -507,7 +512,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         props.onSelect(definition);
     }
 
-    function mapTabs(outline: ComponentProviderTabOutline) {
+    function mapTabs(outline: ComponentProviderTabOutline, index: number) {
         const expanded = outline.type === expandedType;
         const tabProps: ComponentProviderTabProps = {
             ...outline,
@@ -516,6 +521,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             onExpand: () =>
                 setExpandedType(expanded ? undefined : outline.type),
             onSelect: (id?: ComponentId) => handleSelect(outline.type, id),
+            sidebarRef: sidebarRef,
+            index: index
         };
         return <ComponentProviderTab {...tabProps} key={outline.type} />;
     }
@@ -523,7 +530,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     return (
         <div id="sidebar-component-provider">
             <p>Select a component to add:</p>
-            <div id="components-set">{outlines.map(mapTabs)}</div>
+            <div id="components-set" ref={sidebarRef}>{outlines.map((outline, index) => mapTabs(outline, index))}</div>
         </div>
     );
 };
@@ -545,6 +552,8 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
     selectedDefinition?: ComponentDefinition;
     onSelect: (id?: ComponentId) => void;
     onExpand: () => void;
+    sidebarRef: React.Ref<HTMLDivElement>;
+    index: number;
 };
 
 /**
@@ -554,6 +563,8 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
  */
 const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     const tabActive = props.type === props.selectedDefinition?.type;
+    const componentRef = React.useRef<HTMLButtonElement>(null);
+
     function mapIds(id: ComponentId) {
         const active = tabActive && id === props.selectedDefinition?.id;
         return (
@@ -569,7 +580,13 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
 
     function clickExpand() {
         console.log("click", props.type);
-        props.ids ? props.onExpand() : props.onSelect();
+        if (props.ids) {
+            props.onExpand(); 
+            props.sidebarRef!.current.scrollTop =
+                componentRef.current!.clientHeight * props.index;
+        } else {
+            props.onSelect();
+        }
     }
 
     return (
@@ -583,6 +600,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
                           ? "expanded"
                           : ""
                 }
+                ref={componentRef}
             >
                 {props.ids ? (
                     props.expanded ? (

@@ -147,13 +147,23 @@ export const CameraView = (props: CustomizableComponentProps) => {
     }
 
     /** Opens a popup  */
-    function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    function handleClick(event: React.TouchEvent<HTMLDivElement>) {
         event.stopPropagation();
-
         // Get the coordinates of the click within the camera view
-        const { clientX, clientY } = event;
         const { left, top, right, bottom } =
             videoRef.current!.getBoundingClientRect();
+
+        let clientX, clientY;
+        // if (event.nativeEvent instanceof TouchEvent) {
+        // event = event as React.TouchEvent<HTMLDivElement>
+        clientX = event.touches[0].clientX
+        clientY = event.touches[0].clientY
+        // } else {
+            // event = event as React.MouseEvent<HTMLDivElement>
+            // clientX = event.clientX
+            // clientY = event.clientY
+        // }
+        
         const x = clientX - left;
         const y = clientY - top;
 
@@ -234,7 +244,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
                 predictiveDisplay,
             })}
             // style={overlayDimensions}
-            onClick={handleClick}
+            onTouchStart={handleClick}
         >
             {
                 // Display overlay on top of video stream

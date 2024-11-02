@@ -397,7 +397,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                                   this.setButtonActiveState(buttonPadFunction);
                               }
                           },
-                          onLeave: onLeave,
+                          // onLeave: onLeave,
                       };
         }
     }

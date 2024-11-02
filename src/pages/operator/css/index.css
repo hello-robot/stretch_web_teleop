@@ -25,6 +25,8 @@
     --path-blue: hsl(170, 37%, 53%);
 
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
+
+    touch-action: none;
 }
 
 * {
@@ -41,6 +43,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background-color);
+    /* zoom: 75%; */
 }
 
 html {

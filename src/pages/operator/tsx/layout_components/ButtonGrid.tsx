@@ -17,10 +17,10 @@ const BUTTON_NAMES = [
     "Turn Left",
     "Turn Right",
 
-    "Move Lift Up",
-    "Move Lift Down",
+    "Lift Up",
+    "Lift Down",
     "Extend Arm",
-    "Collapse Arm",
+    "Retract Arm",
 
     "Roll Left",
     "Roll Right",
@@ -53,10 +53,10 @@ const BUTTON_FUNCTIONS = [
 ];
 
 const HEADER_NAMES = [
-    "Basic Driving Controls",
-    "Basic Arm Controls",
-    "Wrist Controls",
-    "Gripper Controls",
+    "Base",
+    "Arm/Lift",
+    "Wrist/Gripper",
+    // "Gripper Controls"
 ];
 
 const BACKGROUND_COLORS: JSX.Element[] = [];
@@ -66,7 +66,7 @@ for (let i = 0; i < 4; i++) {
             key={i}
             style={{
                 gridRow: (i + 1) * 2,
-                backgroundColor: `hsl(317, 79%, ${35 - 6 * i}%)`,
+                // backgroundColor: `hsl(210, 100%, ${10 + (i * 6)}%)`
             }}
             className="button-grid-bkg-color"
         />,
@@ -85,7 +85,7 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
             className={className("button-grid", { selected, customizing })}
             onClick={handleSelect}
         >
-            {BACKGROUND_COLORS}
+            {/* {BACKGROUND_COLORS} */}
             {HEADER_NAMES.map((headerName, idx) => (
                 <p key={idx} style={{ gridArea: `header${idx}` }}>
                     {headerName}
@@ -101,9 +101,9 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
                 const clickProps = props.sharedState.customizing
                     ? {}
                     : {
-                          onMouseDown: functs.onClick,
-                          onMouseUp: functs.onRelease,
-                          onMouseLeave: functs.onLeave,
+                          onPointerDown: functs.onClick,
+                          onPointerUp: functs.onRelease,
+                          onPointerLeave: functs.onLeave,
                       };
                 return (
                     <button

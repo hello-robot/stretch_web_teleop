@@ -33,6 +33,8 @@ export const CheckToggleButton = (props: CheckToggleButtonProps) => {
     const icon = checked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
     return (
         <button
+            aria-label={props.label}
+            aria-required="true"
             className={className(
                 !isBrowser && !isTablet  ? "check-toggle-button-mobile" : "check-toggle-button",
                 { checked },
