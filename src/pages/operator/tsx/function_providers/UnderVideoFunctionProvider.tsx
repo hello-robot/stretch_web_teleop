@@ -45,7 +45,9 @@ export enum UnderVideoButton {
     RealsenseShowTablet = "Show Tablet",
     RealsenseStopShowTablet = "Stop Show Tablet",
     RealsenseShowTabletGoalReached = "Show Tablet Goal Reached",
-    VoiceSelectObject = "Voice Select Object"
+    VoiceSelectObject = "Voice Select Object",
+    VoiceMoveToPregraspHorizontal = "Voice Gripper Horizonal",
+    VoiceMoveToPregraspVertical = "Voice Gripper Vertical",
 }
 
 /** Array of different perspectives for the overhead camera */
@@ -87,17 +89,18 @@ export type UnderVideoButtonFunctions = {
 
 export class UnderVideoFunctionProvider extends FunctionProvider {
     private tabletOrientation: TabletOrientation;
+    private selectedObjectCallback: (object: number) => void;
     public detectedObjects: BoundingBox2D[];
-    public selectedObject: number | undefined;
+    private selectedObject: number | undefined;
 
     constructor() {
         super();
         this.tabletOrientation = TabletOrientation.LANDSCAPE;
         this.detectedObjects = [];
-        this.selectedObject = undefined;
         this.provideFunctions = this.provideFunctions.bind(this);
         this.jointStateCallback = this.jointStateCallback.bind(this);
         this.detectedObjectsCallback = this.detectedObjectsCallback.bind(this);
+        this.setSelectedObjectCallback = this.setSelectedObjectCallback.bind(this);
     }
 
     /**
@@ -325,14 +328,41 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 return {
                     set: (value: number) => {
                         if (value < this.detectedObjects.length) {
-                            console.log("setting value")
-                            this.selectedObject = value
+                            this.selectedObjectCallback(value)
+                            this.selectedObject = value;
                         }
-                    },
-                    get: () => {
-                        return this.selectedObject
                     }
                 };
+            case UnderVideoButton.VoiceMoveToPregraspVertical:
+                return {
+                    onClick: () => {
+                        let bbox: BoundingBox2D = this.detectedObjects[this.selectedObject]
+                        this.provideFunctions(
+                            UnderVideoButton.StartMoveToPregraspVertical
+                        ).onClick([bbox.center.position.x, bbox.center.position.y])
+                        this.provideFunctions(
+                            UnderVideoButton.MoveToPregraspGoalReached
+                        ).getFuture!();
+                        this.provideFunctions(
+                            UnderVideoButton.DetectObjects,
+                        ).onCheck!(true);
+                    }
+                }
+            case UnderVideoButton.VoiceMoveToPregraspHorizontal:
+                return {
+                    onClick: () => {
+                        let bbox: BoundingBox2D = this.detectedObjects[this.selectedObject]
+                        this.provideFunctions(
+                            UnderVideoButton.StartMoveToPregraspHorizontal
+                        ).onClick([bbox.center.position.x, bbox.center.position.y])
+                        this.provideFunctions(
+                            UnderVideoButton.MoveToPregraspGoalReached
+                        ).getFuture!();
+                        this.provideFunctions(
+                            UnderVideoButton.DetectObjects,
+                        ).onCheck!(true);
+                    }
+                }
             case UnderVideoButton.RealsenseBodyPoseEstimate:
                 return {
                     onCheck: (toggle: boolean) =>
@@ -410,6 +440,9 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         console.log("updating detected objects")
     }
 
+    public setSelectedObjectCallback(callback: (object: number) => void) {
+        this.selectedObjectCallback = callback;
+    }
     // public detectedObjectCallback(bbox: BoundingBox) {
     //     console.log("detected object: ", bbox)
     //     let scaledY = Math.round((bbox.x_max + bbox.x_min)/2)

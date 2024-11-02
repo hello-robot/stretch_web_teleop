@@ -36,6 +36,8 @@ export enum VoiceCommandFunction {
     DetectObjects,
     SelectDetectedObject,
     SelectObject,
+    HorizontalGrasp,
+    VerticalGrasp,
     // Global functions
     Stop,
     SetSpeed,
@@ -98,6 +100,8 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
             VoiceCommandFunction.DetectObjects,
             VoiceCommandFunction.SelectDetectedObject,
             VoiceCommandFunction.SelectObject,
+            VoiceCommandFunction.HorizontalGrasp,
+            VoiceCommandFunction.VerticalGrasp,
             VoiceCommandFunction.Stop,
             VoiceCommandFunction.SetSpeed,
             VoiceCommandFunction.SetActionMode

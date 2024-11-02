@@ -288,6 +288,26 @@ export class VoiceFunctionProvider extends FunctionProvider {
                         handleCommand(`Selected object number ${objNum}`)
                     }
                 }
+            case VoiceCommandFunction.HorizontalGrasp:
+                return {
+                    command: "click horizontal",
+                    callback: () => {
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.VoiceMoveToPregraspHorizontal
+                        ).onClick()
+                        handleCommand(`Moving to horizontal pregrasp position`)
+                    }
+                }
+            case VoiceCommandFunction.VerticalGrasp:
+                return {
+                    command: "click vertical",
+                    callback: () => {
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.VoiceMoveToPregraspVertical
+                        ).onClick()
+                        handleCommand(`Moving to horizontal pregrasp position`)
+                    }
+                }
         }
     }
 }
