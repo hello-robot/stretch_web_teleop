@@ -158,6 +158,17 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos);
             const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit;
             const prevInLimitPos = prevButtonStatePos !== ButtonState.Limit;
+            // If the joint associated with the active button is at the joint limit then
+            // stop the current action. This will stop the robot from constantly sending
+            // move commands when in click-click mode.
+            if (prevButtonStateNeg === ButtonState.Active && !inLimitNeg) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonNeg, ButtonState.Limit);
+            } else if (prevButtonStatePos === ButtonState.Active && !inLimitPos) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonPos, ButtonState.Limit);
+            }
+
             if (
                 prevButtonStateNeg == undefined ||
                 inLimitNeg !== prevInLimitNeg
@@ -189,6 +200,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
         callback: (buttonStateMap: ButtonStateMap) => void,
     ) {
         this.operatorCallback = callback;
+    }
+
+    public getActiveButton() {
+        return [...this.buttonStateMap].find(([key, value]) => value === ButtonState.Active)
     }
 
     /**

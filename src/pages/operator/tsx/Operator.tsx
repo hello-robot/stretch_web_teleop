@@ -7,8 +7,13 @@ import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import {
     ActionMode,
+    AdjustableOverheadVideoStreamDef,
+    CameraViewId,
     ComponentDefinition,
+    ComponentType,
     LayoutDefinition,
+    LayoutGridDefinition,
+    RealsenseVideoStreamDef,
 } from "./utils/component_definitions";
 import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
 import {
@@ -42,6 +47,7 @@ import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 import { VoiceCommands } from "./static_components/VoiceCommands";
+import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -175,6 +181,34 @@ export const Operator = (props: {
         updateLayout();
     }
 
+    function toggleUnderVideoButtons(toggle: boolean, button: UnderVideoButton) {
+        let layoutGrids: LayoutGridDefinition[] = layout.current.children
+        layoutGrids.forEach((layoutGrid, _) => {
+            layoutGrid.children.forEach((panel, _) => {
+                panel.children.forEach((tab, _) => {
+                    tab.children.forEach((component, _) => {
+                        if (component.type == ComponentType.CameraView) {
+                            if (button == UnderVideoButton.FollowGripper && component.id !== CameraViewId.gripper) {
+                                component.id == CameraViewId.realsense 
+                                    ? (component as RealsenseVideoStreamDef).followGripper = toggle
+                                    : (component as AdjustableOverheadVideoStreamDef).followGripper = toggle
+                            } else if (button == UnderVideoButton.PredictiveDisplay && component.id == CameraViewId.overhead) {
+                                (component as AdjustableOverheadVideoStreamDef).predictiveDisplay = toggle
+                            }
+                            else if (button == UnderVideoButton.RealsenseDepthSensing && component.id == CameraViewId.realsense) {
+                                (component as RealsenseVideoStreamDef).depthSensing = toggle
+                            }
+                            else if (button == UnderVideoButton.SelectObject && component.id == CameraViewId.realsense) {
+                                (component as RealsenseVideoStreamDef).selectObjectForMoveToPregrasp = toggle
+                            }
+                        }
+                    })
+                })
+            })
+        })
+        props.storageHandler.saveCurrentLayout(layout.current);
+        updateLayout();
+    }
     /**
      * Sets the movement recorder component to display or hidden.
      *
@@ -352,6 +386,14 @@ export const Operator = (props: {
                     placement="bottom"
                 />
                 <AudioControl remoteStreams={remoteStreams} />
+                <VoiceCommands
+                    onUpdateVelocityScale=
+                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
+                    onUpdateActionMode =
+                        {(newActionMode: ActionMode) => { setActionMode(newActionMode)} }
+                    onToggleUnderVideoButtons = 
+                        {(toggle: boolean, button: UnderVideoButton) => toggleUnderVideoButtons(toggle, button) }
+                />
                 <SpeedControl
                     scale={velocityScale}
                     onChange={(newScale: number) => {
@@ -397,6 +439,18 @@ export const Operator = (props: {
                     </div>
                 </div>
             }
+            {/* <div
+                className={className("operator-voice-commands", {
+                    hideLabels: !layout.current.displayLabels,
+                })}
+                hidden={!layout.current.displayVoiceCommands}
+            >
+                <VoiceCommands
+                    onUpdateVelocityScale=
+                    {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
+                
+                />
+            </div> */}
             {moveBaseState && (
                 <div className="operator-collision-alerts">
                     <div
@@ -443,18 +497,6 @@ export const Operator = (props: {
                 </div>
             )}
             <div id="operator-global-controls">
-                <div
-                    className={className("operator-voice-commands", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayVoiceCommands}
-                >
-                    <VoiceCommands
-                        onUpdateVelocityScale=
-                        {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
-                    
-                    />
-                </div>
                 <div
                     className={className("operator-pose-recorder", {
                         hideLabels: !layout.current.displayLabels,

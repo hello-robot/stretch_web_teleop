@@ -7,9 +7,12 @@ import Info from "@mui/icons-material/Info";
 import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked" 
 import "operator/css/basic_components.css"
 import "operator/css/VoiceCommands.css"
+import { ActionMode, LayoutDefinition } from "../utils/component_definitions";
+import { UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
 
 /** All the possible button functions */
 export enum VoiceCommandFunction {
+    // Button Pad Functions
     BaseForward,
     BaseReverse,
     BaseRotateRight,
@@ -22,8 +25,19 @@ export enum VoiceCommandFunction {
     GripperClose,
     WristRotateIn,
     WristRotateOut,
+    WristPitchUp,
+    WristPitchDown,
+    WristRollLeft,
+    WristRollRight,
+    // Under video functions
+    FollowGripper,
+    PredictiveDisplay,
+    RealsenseDepthSensing,
+    SelectObject,
+    // Global functions
     Stop,
-    SetSpeed
+    SetSpeed,
+    SetActionMode
 }
 
 /** Defining keyword and associated callback. */
@@ -31,12 +45,24 @@ export type VoiceCommandFunctions = {
     command: string,
     callback: (speed?: string) => void
 }
-type VoiceCommandsProps = {
+export type VoiceCommandsProps = {
      /**
      * Callback function when a new speed is selected.
      * @param newScale the new selected speed
      */
       onUpdateVelocityScale: (newScale: number) => void;
+
+    /**
+     * Callback function when a new action mode is selected.
+     * @param newActionMode the new selected action mode
+     */
+      onUpdateActionMode: (newActionMode: ActionMode) => void;
+
+    /**
+     * Callback function to toggle buttons under the camera views.
+     * @param toggle boolean indicating whether to enable or disable the button
+     */
+    onToggleUnderVideoButtons: (toggle: boolean, button: UnderVideoButton) => void;
 }
 
 export const VoiceCommands = (props: VoiceCommandsProps) => {
@@ -60,16 +86,30 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
             VoiceCommandFunction.GripperClose,
             VoiceCommandFunction.WristRotateIn,
             VoiceCommandFunction.WristRotateOut,
+            VoiceCommandFunction.WristPitchUp,
+            VoiceCommandFunction.WristPitchDown,
+            VoiceCommandFunction.WristRollLeft,
+            VoiceCommandFunction.WristRollRight,
+            VoiceCommandFunction.FollowGripper,
+            VoiceCommandFunction.PredictiveDisplay,
+            VoiceCommandFunction.RealsenseDepthSensing,
+            VoiceCommandFunction.SelectObject,
             VoiceCommandFunction.Stop,
-            VoiceCommandFunction.SetSpeed
+            VoiceCommandFunction.SetSpeed,
+            VoiceCommandFunction.SetActionMode
         ]
     
         let commands: VoiceCommandFunctions[] = functions.map((funct: VoiceCommandFunction) => {
             return {
                 ...voiceFunctionProvider.provideFunctions(
                     funct, 
-                    props.onUpdateVelocityScale, 
-                    (command: string) => setDisplay(command)
+                    props, 
+                    (command: string) => {
+                        setDisplay(command)
+                        setTimeout(() => {
+                            setDisplay('Listening...');
+                        }, 2000);
+                    }
                 ) as VoiceCommandFunctions,
             };
         });
@@ -143,32 +183,35 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
         );
     } else {
         return (
-            <div id="voice-command-container">
-                {isListening
-                    ? <span id="record-icon"><RadioButtonChecked/></span>
-                    : <></>
-                }
-                <button
-                    id="microphone-button"
-                    ref={microphoneRef}
-                    onClick={listenHandle}
-                >
-                    {isListening
-                        ? <Mic/>
-                        : <MicOff/>
-                    }
-                </button>
-                <p>{display}</p>
-                <div onClick={commandsModalHandle}>
-                    <button>
-                        <Info/>
+            <>
+                <div className="voiceControlContainer">
+                    <button
+                        className="microphoneButton"
+                        ref={microphoneRef}
+                        onClick={listenHandle}
+                    >
+                        {isListening
+                            ? <Mic />
+                            : <MicOff />}
                     </button>
-                    {showModal 
-                        ? commandsModal()
-                        : null
-                    }
                 </div>
-            </div>
+                <div className="operator-voice-commands">
+                    <div id="voice-command-container">
+                        {isListening
+                            ? <><span id="record-icon"><RadioButtonChecked /></span><p>{display}</p></>
+                            : <></>
+                        }
+                        {/* <div onClick={commandsModalHandle}>
+                            <button>
+                                <Info />
+                            </button>
+                            {showModal
+                                ? commandsModal()
+                                : null}
+                        </div> */}
+                    </div>
+                </div>
+            </>
         );
     }
 }

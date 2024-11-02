@@ -76,7 +76,6 @@
     width: var(--header-btn-width);
 }
 
-.operator-voice-commands,
 .operator-pose-library,
 .operator-pose-recorder,
 .operator-text-to-speech,
@@ -96,6 +95,20 @@
     grid-column: 1/1; */
     transition: all 0.2s ease-out;
     font-size: large;
+}
+
+.operator-voice-commands {
+    height: auto !important;
+    position: absolute;
+    width: 100%;
+    padding: 0.5rem 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transform: translateY(4rem);
+    font-size: x-large;
 }
 
 .operator-pose-library.hideLabels,

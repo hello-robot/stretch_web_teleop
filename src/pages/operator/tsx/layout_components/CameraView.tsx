@@ -800,6 +800,19 @@ const UnderAdjustableOverheadButtons = (props: {
 }) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
 
+    // Toggle Predictive Display when initiated via voice control
+    React.useEffect(() => {
+        console.log(props.definition.predictiveDisplay)
+        if (props.definition.predictiveDisplay) {
+            underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.LookAtBase,
+            ).onClick!();
+            props.setPredictiveDisplay(true);
+        } else {
+            props.setPredictiveDisplay(false);
+        }
+    }, [props.definition.predictiveDisplay])
+
     return (
         <React.Fragment>
             <AccordionSelect
@@ -867,11 +880,11 @@ const UnderRealsenseButtons = (props: {
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     // const [markers, setMarkers] = React.useState<string[]>(['light_switch'])
 
-    console.log(
-        "UnderRealsenseButtons",
-        props.isMovingToPregrasp,
-        props.isShowingTablet,
-    );
+    // Toggle select object when initiated via voice control
+    React.useEffect(() => {
+        props.setSelectObjectScaledXY(null);
+        setRerender(!rerender);
+    }, [props.definition.selectObjectForMoveToPregrasp])
 
     // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
     let moveToPregraspButtons = <></>;

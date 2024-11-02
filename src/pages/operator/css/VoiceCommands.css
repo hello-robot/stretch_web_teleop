@@ -1,9 +1,13 @@
-#microphone-button {
-    padding: var(--btn-padding);
+.voiceControlContainer {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: left;
-    border: 0.2rem solid black;
+    text-align: center;
+}
+
+.microphoneButton {
+    border-radius: 50%;
+    aspect-ratio: 1;
 }
 
 #voice-command-container {
