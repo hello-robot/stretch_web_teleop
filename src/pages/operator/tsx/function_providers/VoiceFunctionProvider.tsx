@@ -201,6 +201,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "set speed to *",
                     callback: (speed) => {
+                        speed = speed.toLocaleLowerCase()
                         const speeds = ["slowest", "slow", "medium", "fast", "fastest"]
                         if (!speeds.includes(speed as string)) return;
                         props.onUpdateVelocityScale(VELOCITY_SCALE[speeds.indexOf(speed as string)].scale)
@@ -211,6 +212,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "set action mode to *",
                     callback: (actionMode) => {
+                        actionMode = actionMode.toLocaleLowerCase()
                         const actionModes = ["step actions", "press release", "click click"]
                         const modes = Object.values(ActionMode)
                         if (!actionModes.includes(actionMode as string)) return;
@@ -222,6 +224,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "* follow gripper",
                     callback: (action) => {
+                        action = action.toLocaleLowerCase()
                         const actions = ["check", "uncheck"]
                         if (!actions.includes(action as string)) return;
                         const toggle = action == "check" ? true : false
@@ -234,6 +237,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "* predictive display",
                     callback: (action) => {
+                        action = action.toLocaleLowerCase()
                         const actions = ["check", "uncheck"]
                         if (!actions.includes(action as string)) return;
                         const toggle = action == "check" ? true : false
@@ -245,6 +249,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "* depth sensing",
                     callback: (action) => {
+                        action = action.toLocaleLowerCase()
                         const actions = ["check", "uncheck"]
                         if (!actions.includes(action as string)) return;
                         const toggle = action == "check" ? true : false
@@ -256,6 +261,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "* select object",
                     callback: (action) => {
+                        action = action.toLocaleLowerCase()
                         const actions = ["check", "uncheck"]
                         if (!actions.includes(action as string)) return;
                         const toggle = action == "check" ? true : false
@@ -267,6 +273,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return {
                     command: "* detect objects",
                     callback: (action) => {
+                        action = action.toLocaleLowerCase()
                         const actions = ["check", "uncheck"]
                         if (!actions.includes(action.toLowerCase() as string)) return;
                         const toggle = action == "check" ? true : false
