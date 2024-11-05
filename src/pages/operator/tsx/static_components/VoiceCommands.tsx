@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+// import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { voiceFunctionProvider } from "operator/tsx/index";
 import MicOff from "@mui/icons-material/MicOff";
 import Mic from "@mui/icons-material/Mic";
@@ -9,6 +9,7 @@ import "operator/css/basic_components.css"
 import "operator/css/VoiceCommands.css"
 import { ActionMode, LayoutDefinition } from "../utils/component_definitions";
 import { UnderVideoButton } from "../function_providers/UnderVideoFunctionProvider";
+// import useSpeechToText from 'react-hook-speech-to-text';
 
 /** All the possible button functions */
 export enum VoiceCommandFunction {
@@ -44,6 +45,47 @@ export enum VoiceCommandFunction {
     SetActionMode
 }
 
+export enum Speed {
+    Slowest = 0,
+    Slow = 1,
+    Medium = 2,
+    Fast = 3,
+    Fastest = 4
+}
+
+export interface VoiceCommand {
+    funct: VoiceCommandFunction;
+    arg?: Speed | ActionMode;
+}
+
+const commandFuncts: Map<string, VoiceCommand> = new Map([
+    ['slowest', { funct: VoiceCommandFunction.SetSpeed, arg: Speed.Slowest}],
+    ['slow', { funct: VoiceCommandFunction.SetSpeed, arg: Speed.Slow}],
+    ['medium', { funct: VoiceCommandFunction.SetSpeed, arg: Speed.Medium}],
+    ['fast', { funct: VoiceCommandFunction.SetSpeed, arg: Speed.Fast}],
+    ['fastest', { funct: VoiceCommandFunction.SetSpeed, arg: Speed.Fastest}],
+    ['step actions', { funct: VoiceCommandFunction.SetActionMode, arg: ActionMode.StepActions}],    
+    ['press and hold', { funct: VoiceCommandFunction.SetActionMode, arg: ActionMode.PressAndHold}],    
+    ['click click', { funct: VoiceCommandFunction.SetActionMode, arg: ActionMode.ClickClick}],  
+    ['forward', { funct: VoiceCommandFunction.BaseForward}],    
+    ['backward', { funct: VoiceCommandFunction.BaseReverse}],    
+    ['turn left', { funct: VoiceCommandFunction.BaseRotateLeft}],    
+    ['turn right', { funct: VoiceCommandFunction.BaseRotateRight}],    
+    ['raise arm', { funct: VoiceCommandFunction.ArmLift}],    
+    ['lower arm', { funct: VoiceCommandFunction.ArmLower}],    
+    ['extend arm', { funct: VoiceCommandFunction.ArmExtend}],    
+    ['retract arm', { funct: VoiceCommandFunction.ArmRetract}],    
+    ['open gripper', { funct: VoiceCommandFunction.GripperOpen}],    
+    ['close gripper', { funct: VoiceCommandFunction.GripperClose}], 
+    ['rotate left', { funct: VoiceCommandFunction.BaseRotateLeft}],    
+    ['rotate right', { funct: VoiceCommandFunction.BaseRotateRight}],    
+    ['pitch up', { funct: VoiceCommandFunction.WristPitchUp}],    
+    ['pitch down', { funct: VoiceCommandFunction.WristPitchDown}],    
+    ['roll left', { funct: VoiceCommandFunction.WristRollLeft}],    
+    ['roll right', { funct: VoiceCommandFunction.WristRollRight}],    
+    ['stop', { funct: VoiceCommandFunction.Stop}],    
+])
+
 /** Defining keyword and associated callback. */
 export type VoiceCommandFunctions = {
     command: string,
@@ -70,126 +112,139 @@ export type VoiceCommandsProps = {
 }
 
 export const VoiceCommands = (props: VoiceCommandsProps) => {
-    const { transcript, resetTranscript } = useSpeechRecognition({ commands: createCommands() });
+    // const { transcript, resetTranscript } = useSpeechRecognition({ commands: createCommands() });
     const [isListening, setIsListening] = useState(false);
     const [display, setDisplay] = useState("Microphone off");
     const [showModal, setShowModal] = useState(false);
+    const [command, setCommand] = useState<string>();
     const microphoneRef = useRef<HTMLButtonElement>(null);
 
-    function createCommands(): VoiceCommandFunctions[] {
-        let functions: VoiceCommandFunction[] = [
-            VoiceCommandFunction.BaseForward,
-            VoiceCommandFunction.BaseReverse,
-            VoiceCommandFunction.BaseRotateRight,
-            VoiceCommandFunction.BaseRotateLeft,
-            VoiceCommandFunction.ArmLift,
-            VoiceCommandFunction.ArmLower,
-            VoiceCommandFunction.ArmExtend,
-            VoiceCommandFunction.ArmRetract,
-            VoiceCommandFunction.GripperOpen,
-            VoiceCommandFunction.GripperClose,
-            VoiceCommandFunction.WristRotateIn,
-            VoiceCommandFunction.WristRotateOut,
-            VoiceCommandFunction.WristPitchUp,
-            VoiceCommandFunction.WristPitchDown,
-            VoiceCommandFunction.WristRollLeft,
-            VoiceCommandFunction.WristRollRight,
-            VoiceCommandFunction.FollowGripper,
-            VoiceCommandFunction.PredictiveDisplay,
-            VoiceCommandFunction.RealsenseDepthSensing,
-            VoiceCommandFunction.DetectObjects,
-            VoiceCommandFunction.SelectDetectedObject,
-            VoiceCommandFunction.SelectObject,
-            VoiceCommandFunction.HorizontalGrasp,
-            VoiceCommandFunction.VerticalGrasp,
-            VoiceCommandFunction.Stop,
-            VoiceCommandFunction.SetSpeed,
-            VoiceCommandFunction.SetActionMode
-        ]
-    
-        let commands: VoiceCommandFunctions[] = functions.map((funct: VoiceCommandFunction) => {
-            return {
-                ...voiceFunctionProvider.provideFunctions(
-                    funct, 
-                    props, 
-                    (command: string) => {
-                        setDisplay(command)
-                        setTimeout(() => {
-                            setDisplay('Listening...');
-                        }, 2000);
-                    }
-                ) as VoiceCommandFunctions,
-            };
-        });
-        return commands
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    const SpeechRecognition =
+        window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    const audioContextRef = useRef<AudioContext>();
+    let recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 2;
+
+    recognition.onresult = (e) => {
+        const results = e.results[e.results.length - 1];
+        console.log(results)
+        for (let i = 0; i < results.length; i++) {
+            let command = results[i].transcript.trimStart()
+            if (commandFuncts.has(command)) {
+                setCommand(command)
+                let voiceCommand = commandFuncts.get(command)
+                voiceFunctionProvider.provideFunctions(voiceCommand.funct, voiceCommand.arg, props)()
+            }
+        }
     }
+
+    if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+    }
+    // let {
+    //     isRecording,
+    //     startSpeechToText,
+    //     stopSpeechToText,
+    //     results,
+    // } = useSpeechToText({
+    //     continuous: true,
+    //     useLegacyResults: false,
+    // })
+
+    // useEffect(() => {
+    //     if(results.length > 0) {
+    //       const latestResult = results[results.length - 1]
+    //       const { transcript } = latestResult
+    //     }
+    //   }, [results])
+
+    function executeCommand(command: string) {
+        if (commandFuncts.has(command)) {
+            console.log(command)
+            let voiceCommand = commandFuncts.get(command)
+            voiceFunctionProvider.provideFunctions(voiceCommand.funct, voiceCommand.arg, props)()
+        }
+    }
+
+    // function createCommands(): VoiceCommandFunctions[] {
+    //     let functions: VoiceCommandFunction[] = [
+    //         VoiceCommandFunction.BaseForward,
+    //         VoiceCommandFunction.BaseReverse,
+    //         VoiceCommandFunction.BaseRotateRight,
+    //         VoiceCommandFunction.BaseRotateLeft,
+    //         VoiceCommandFunction.ArmLift,
+    //         VoiceCommandFunction.ArmLower,
+    //         VoiceCommandFunction.ArmExtend,
+    //         VoiceCommandFunction.ArmRetract,
+    //         VoiceCommandFunction.GripperOpen,
+    //         VoiceCommandFunction.GripperClose,
+    //         VoiceCommandFunction.WristRotateIn,
+    //         VoiceCommandFunction.WristRotateOut,
+    //         VoiceCommandFunction.WristPitchUp,
+    //         VoiceCommandFunction.WristPitchDown,
+    //         VoiceCommandFunction.WristRollLeft,
+    //         VoiceCommandFunction.WristRollRight,
+    //         VoiceCommandFunction.FollowGripper,
+    //         VoiceCommandFunction.PredictiveDisplay,
+    //         VoiceCommandFunction.RealsenseDepthSensing,
+    //         VoiceCommandFunction.DetectObjects,
+    //         VoiceCommandFunction.SelectDetectedObject,
+    //         VoiceCommandFunction.SelectObject,
+    //         VoiceCommandFunction.HorizontalGrasp,
+    //         VoiceCommandFunction.VerticalGrasp,
+    //         VoiceCommandFunction.Stop,
+    //         VoiceCommandFunction.SetSpeed,
+    //         VoiceCommandFunction.SetActionMode
+    //     ]
+    
+    //     let commands: VoiceCommandFunctions[] = functions.map((funct: VoiceCommandFunction) => {
+    //         return {
+    //             ...voiceFunctionProvider.provideFunctions(
+    //                 funct, 
+    //                 props, 
+    //                 (command: string) => {
+    //                     setDisplay(command)
+    //                     setTimeout(() => {
+    //                         setDisplay('Listening...');
+    //                     }, 2000);
+    //                 }
+    //             ) as VoiceCommandFunctions,
+    //         };
+    //     });
+    //     return commands
+    // }
 
     const listenHandle = () => {
         if (!isListening) {
             setIsListening(true);
             setDisplay("Listening...")
+            // startSpeechToText()
+            recognition.start();
             microphoneRef.current?.classList.add("listening");
-            SpeechRecognition.startListening({
-                continuous: true,
-            });
+            // SpeechRecognition.startListening({
+            //     continuous: true,
+            // });
         } else {
             setIsListening(false);
             setDisplay("Microphone off");
             microphoneRef.current?.classList.remove("listening");
-            SpeechRecognition.stopListening();
-            resetTranscript();
+            // stopSpeechToText()
+            // SpeechRecognition.stopListening();
+            // resetTranscript();
         }
     };
 
-    const commandsModalHandle = () => {
-        if (showModal) {
-            setShowModal(false);
-        } else {
-            setShowModal(true);
-        }
-    }
-
-    const commandsModal = () => {
-        return (
-            <React.Fragment>
-                <div className="voice-commands-popup-modal">
-                    <div id="close-modal">
-                        <button onClick={() => setShowModal(false)}>
-                            <span className="material-icons">cancel</span>
-                        </button>
-                    </div>
-                <div id="commands">
-                    <p>Commands: </p>
-                    <ul>
-                        <li>Drive Forward</li> 
-                        <li>Drive Backward</li> 
-                        <li>Rotate Robot Left</li> 
-                        <li>Rotate Robot Right</li> 
-                        <li>Lower Arm</li>
-                        <li>Raise Arm</li>
-                        <li>Extend Arm</li>
-                        <li>Retract Arm</li>
-                        <li>Rotate Wrist Counterclockwise</li>
-                        <li>Rotate Wrist Clockwise</li>
-                        <li>Open Gripper</li>
-                        <li>Close Gripper</li>
-                        <li>Stop</li>
-                        <li>Set Speed To *</li>
-                    </ul>
-                </div>
-                </div>
-                <div onClick={() => setShowModal(false)} id="popup-background"></div>
-            </React.Fragment>
-        )
-    }
-
-    if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
-        return (
-            <div className="mircophone-container">
-                Browser is not Support Speech Recognition.
-            </div>
-        );
-    } else {
+    // if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
+    //     return (
+    //         <div className="mircophone-container">
+    //             Browser is not Support Speech Recognition.
+    //         </div>
+    //     );
+    // } else {
         return (
             <>
                 <div className="voiceControlContainer">
@@ -198,7 +253,6 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
                         ref={microphoneRef}
                         onClick={listenHandle}
                     >
-                        <p>{transcript}</p>
                         {isListening
                             ? <Mic />
                             : <MicOff />}
@@ -207,7 +261,11 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
                 <div className="operator-voice-commands">
                     <div id="voice-command-container">
                         {isListening
-                            ? <><span id="record-icon"><RadioButtonChecked /></span><p>{display}</p></>
+                            ? <><span id="record-icon"><RadioButtonChecked /></span>
+                                <p>{command}</p>
+                                {/* {results && results.length > 0 
+                                    ? <p>{results.pop().transcript}</p> : ""} */}
+                              </>
                             : <></>
                         }
                         {/* <div onClick={commandsModalHandle}>
@@ -223,4 +281,3 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
             </>
         );
     }
-}
