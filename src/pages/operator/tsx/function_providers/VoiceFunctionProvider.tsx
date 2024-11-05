@@ -1,5 +1,5 @@
 import { FunctionProvider } from "./FunctionProvider"
-import { Speed, VoiceCommandFunction, VoiceCommandFunctions, VoiceCommandsProps } from "../static_components/VoiceCommands"
+import { CheckboxAction, Speed, VoiceCommandFunction, VoiceCommandFunctions, VoiceCommandsProps } from "../static_components/VoiceCommands"
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, wordsToNumbers } from 'shared/util'
 import { VELOCITY_SCALE } from "../static_components/SpeedControl"
 import { ActionMode, LayoutGridDefinition, ComponentType, CameraViewId, CameraViewDefinition, RealsenseVideoStreamDef, AdjustableOverheadVideoStreamDef } from "../utils/component_definitions";
@@ -41,7 +41,7 @@ export class VoiceFunctionProvider extends FunctionProvider {
     */
     public provideFunctions(
         voiceCommandFunction: VoiceCommandFunction,
-        arg: Speed | ActionMode,
+        arg: Speed | ActionMode | CheckboxAction,
         props: VoiceCommandsProps,
         // handleCommand: (command: string) => void
         ): () => void 
@@ -139,43 +139,22 @@ export class VoiceFunctionProvider extends FunctionProvider {
                 return () => {
                         this.stopCurrentAction()
                 }
-        //     case VoiceCommandFunction.FollowGripper:
-        //         return {
-        //             command: "* follow gripper",
-        //             callback: (action) => {
-        //                 action = action.toLocaleLowerCase()
-        //                 const actions = ["check", "uncheck"]
-        //                 if (!actions.includes(action as string)) return;
-        //                 const toggle = action == "check" ? true : false
-        //                 underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck(toggle)
-        //                 props.onToggleUnderVideoButtons(toggle, UnderVideoButton.FollowGripper)
-        //                 handleCommand(`${action}ed follow gripper`)
-        //             }
-        //         }
-        //     case VoiceCommandFunction.PredictiveDisplay:
-        //         return {
-        //             command: "* predictive display",
-        //             callback: (action) => {
-        //                 action = action.toLocaleLowerCase()
-        //                 const actions = ["check", "uncheck"]
-        //                 if (!actions.includes(action as string)) return;
-        //                 const toggle = action == "check" ? true : false
-        //                 props.onToggleUnderVideoButtons(toggle, UnderVideoButton.PredictiveDisplay)
-        //                 handleCommand(`${action}ed predictive display`)
-        //             }
-        //         }
-        //     case VoiceCommandFunction.RealsenseDepthSensing:
-        //         return {
-        //             command: "* depth sensing",
-        //             callback: (action) => {
-        //                 action = action.toLocaleLowerCase()
-        //                 const actions = ["check", "uncheck"]
-        //                 if (!actions.includes(action as string)) return;
-        //                 const toggle = action == "check" ? true : false
-        //                 props.onToggleUnderVideoButtons(toggle, UnderVideoButton.RealsenseDepthSensing)
-        //                 handleCommand(`${action}ed realsense depth sensing`)
-        //             }
-        //         }
+        case VoiceCommandFunction.FollowGripper:
+            return () => {
+                    const toggle = arg == CheckboxAction.Check 
+                    underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper).onCheck(toggle)
+                    props.onToggleUnderVideoButtons(toggle, UnderVideoButton.FollowGripper)
+            }
+        case VoiceCommandFunction.PredictiveDisplay:
+            return () => {
+                const toggle = arg == CheckboxAction.Check
+                props.onToggleUnderVideoButtons(toggle, UnderVideoButton.PredictiveDisplay)
+            }
+        case VoiceCommandFunction.RealsenseDepthSensing:
+            return () => {
+                const toggle = arg == CheckboxAction.Check
+                props.onToggleUnderVideoButtons(toggle, UnderVideoButton.RealsenseDepthSensing)
+            }
         //     case VoiceCommandFunction.SelectObject:
         //         return {
         //             command: "* select object",

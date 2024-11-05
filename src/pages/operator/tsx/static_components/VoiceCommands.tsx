@@ -53,9 +53,14 @@ export enum Speed {
     Fastest = 4
 }
 
+export enum CheckboxAction {
+    Check,
+    Uncheck
+}
+
 export interface VoiceCommand {
     funct: VoiceCommandFunction;
-    arg?: Speed | ActionMode;
+    arg?: Speed | ActionMode | CheckboxAction;
 }
 
 const commandFuncts: Map<string, VoiceCommand> = new Map([
@@ -83,7 +88,12 @@ const commandFuncts: Map<string, VoiceCommand> = new Map([
     ['pitch down', { funct: VoiceCommandFunction.WristPitchDown}],    
     ['roll left', { funct: VoiceCommandFunction.WristRollLeft}],    
     ['roll right', { funct: VoiceCommandFunction.WristRollRight}],    
-    ['stop', { funct: VoiceCommandFunction.Stop}],    
+    ['check follow gripper', { funct: VoiceCommandFunction.FollowGripper, arg: CheckboxAction.Check}],    
+    ['uncheck follow gripper', { funct: VoiceCommandFunction.FollowGripper, arg: CheckboxAction.Uncheck}], 
+    ['check predictive display', { funct: VoiceCommandFunction.PredictiveDisplay, arg: CheckboxAction.Check}],    
+    ['uncheck predictive display', { funct: VoiceCommandFunction.PredictiveDisplay, arg: CheckboxAction.Uncheck}], 
+    ['check depth sensing', { funct: VoiceCommandFunction.RealsenseDepthSensing, arg: CheckboxAction.Check}],    
+    ['uncheck depth sensing', { funct: VoiceCommandFunction.RealsenseDepthSensing, arg: CheckboxAction.Uncheck}],    
 ])
 
 /** Defining keyword and associated callback. */
@@ -133,7 +143,7 @@ export const VoiceCommands = (props: VoiceCommandsProps) => {
         const results = e.results[e.results.length - 1];
         console.log(results)
         for (let i = 0; i < results.length; i++) {
-            let command = results[i].transcript.trimStart()
+            let command = results[i].transcript.trimStart().toLowerCase()
             if (commandFuncts.has(command)) {
                 setCommand(command)
                 let voiceCommand = commandFuncts.get(command)
