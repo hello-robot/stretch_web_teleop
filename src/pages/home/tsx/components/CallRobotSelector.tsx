@@ -139,7 +139,9 @@ export const CallRobotSelector = (props: { style?: React.CSSProperties }) => {
     const [callableRobots, setCallableRobots] = useState({});
 
     useEffect(() => {
-        loginHandler.listRooms(setCallableRobots);
+        loginHandler.listRooms((robo_uid, robo_info) => {
+            setCallableRobots(prev => ({...prev, [robo_uid]: robo_info}))
+        });
     }, [props]);
 
     return (
@@ -152,15 +154,17 @@ export const CallRobotSelector = (props: { style?: React.CSSProperties }) => {
                 style={props.style}
             >
                 {Object.entries(callableRobots).map(([key, value], idx) => {
-                    return (
-                        <Grid key={idx} size={{ md: 12, lg: 6 }}>
-                            <CallRobotItem
-                                key={idx}
-                                name={value["name"]}
-                                status={value["status"]}
-                            />
-                        </Grid>
-                    );
+                    if (value["is_active"]) {
+                        return (
+                            <Grid key={idx} size={{ md: 12, lg: 6 }}>
+                                <CallRobotItem
+                                    key={idx}
+                                    name={value["name"]}
+                                    status={value["status"]}
+                                />
+                            </Grid>
+                        );
+                    }
                 })}
             </Grid>
         </Box>

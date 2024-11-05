@@ -47,8 +47,15 @@ export class FirebaseLoginHandler extends LoginHandler {
             );
         }
 
-        onValue(ref(this.db, "rooms/" + this.uid + "/robots"), (snapshot) => {
-            resultCallback(snapshot.val());
+        onValue(ref(this.db, "assignments/" + this.uid + "/robots"), (snapshot) => {
+            let robots = snapshot.val();
+            Object.entries(robots).forEach(([robo_uid, is_active]) => {
+                onValue(ref(this.db, "robots/" + robo_uid), (snapshot2) => {
+                    let robo_info = snapshot2.val();
+                    robo_info["is_active"] = is_active;
+                    resultCallback(robo_uid, robo_info);
+                });
+            });
         });
     }
 
