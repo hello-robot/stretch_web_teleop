@@ -2,7 +2,7 @@ import React from "react";
 import { CameraInfo, SignallingMessage, WebRTCMessage } from "shared/util";
 import { safelyParseJSON, generateUUID } from "shared/util";
 import { BaseSignaling } from "shared/signaling/Signaling";
-import { LocalSignaling } from "shared/signaling/LocalSignaling";
+import { createSignaler } from "shared/signaling/get_signaler";
 
 
 const peerConstraints = {
@@ -24,7 +24,7 @@ interface WebRTCProps {
 }
 
 export class WebRTCConnection extends React.Component {
-    private signaler: BaseSignaling;
+    public signaler: BaseSignaling;
     private peerConnection?: RTCPeerConnection;
     private peerRole: string;
     private polite: boolean;
@@ -60,7 +60,7 @@ export class WebRTCConnection extends React.Component {
 
         this.onSignal = this.onSignal.bind(this);
         this.stop = this.stop.bind(this);
-        this.signaler = new LocalSignaling({
+        this.signaler = createSignaler({
             onSignal: this.onSignal,
             onGoodbye: this.stop,
             onRobotConnectionStart: props.onRobotConnectionStart,
