@@ -31,6 +31,7 @@ import {
     HasBetaTeleopKitMessage,
     StretchToolMessage,
 } from "../../../shared/util";
+import { loginFirebaseSignalerAsRobot } from "shared/signaling/get_signaler";
 
 export const robot = new Robot({
     jointStateCallback: forwardJointStates,
@@ -88,6 +89,10 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
+    console.log("Waiting for configured signaler (i.e. logging in if using Firebase)")
+    await loginFirebaseSignalerAsRobot();
+    await connection.configure_signaler();
+    console.log("Signaler ready! Joining room.")
     connection.joinRobotRoom();
 
     return Promise.resolve();

@@ -24,7 +24,7 @@ interface WebRTCProps {
 }
 
 export class WebRTCConnection extends React.Component {
-    public signaler: BaseSignaling;
+    private signaler: BaseSignaling;
     private peerConnection?: RTCPeerConnection;
     private peerRole: string;
     private polite: boolean;
@@ -65,6 +65,10 @@ export class WebRTCConnection extends React.Component {
             onGoodbye: this.stop,
             onRobotConnectionStart: props.onRobotConnectionStart,
         });
+    }
+
+    configure_signaler() {
+        return this.signaler.configure();
     }
 
     /**

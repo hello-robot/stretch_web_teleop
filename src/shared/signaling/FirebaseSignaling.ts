@@ -52,6 +52,13 @@ export class FirebaseSignaling extends BaseSignaling {
         });
     }
 
+    public configure(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            while (this._loginState !== "authenticated") {}
+            resolve();
+        });
+    }
+
     public join_as_robot(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             this.socket.emit("join_as_robot", (response) => {

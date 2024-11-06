@@ -25,6 +25,12 @@ export class LocalSignaling extends BaseSignaling {
         });
     }
 
+    public configure(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            resolve();
+        });
+    }
+
     public join_as_robot(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             this.socket.emit("join_as_robot", (response) => {
