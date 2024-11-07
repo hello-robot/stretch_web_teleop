@@ -26,6 +26,7 @@ if (process.argv.length > 2) {
 
     const browser = await firefox.launch({
         headless: true, // default is true
+        handleSIGINT: false,
         defaultViewport: null,
         // NOTE: I (Amal) believe the below args are unnecessary now that we've switched from Chromium to Firefox.
         args: [
@@ -57,4 +58,17 @@ if (process.argv.length > 2) {
     }
 
     console.log(logId + ": start script complete");
+    async function closeRobotBrowser() {
+        await new Promise(resolve => {
+            console.log('doing it');
+            page.goto(`https://${robotHostname}/whatever`); // page.close() doesnt work to trigger window.onbeforeunload
+            setTimeout(resolve, 500)
+        });
+    }
+    process.on("SIGTERM", () => {
+        closeRobotBrowser().finally(() => process.exit(0));
+    });
+    process.on("SIGINT", () => {
+        closeRobotBrowser().finally(() => process.exit(0));
+    });
 })();
