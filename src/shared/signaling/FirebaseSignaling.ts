@@ -141,16 +141,26 @@ export class FirebaseSignaling extends BaseSignaling {
 
     public join_as_operator(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
-                let is_active = snapshot.val();
-                if (is_active) {
+            let opposite_role = this.role === "robot" ? "operator" : "robot";
+            get(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role + "/active")).then((snapshot) => {
+                let is_robot_active = snapshot.val();
+                if (!is_robot_active) {
+                    console.log("Robot is not active");
                     resolve(false);
                 } else {
-                    update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                        active: true
-                    }).then(() => {
-                        this.is_joined = true;
-                        resolve(true)
+                    get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot2) => {
+                        let is_operator_active = snapshot2.val();
+                        if (is_operator_active) {
+                            console.log("Another operator is already active");
+                            resolve(false);
+                        } else {
+                            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                                active: true
+                            }).then(() => {
+                                this.is_joined = true;
+                                resolve(true)
+                            });
+                        }
                     });
                 }
             });
