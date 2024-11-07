@@ -75,7 +75,7 @@ function get_action(status_str, robot_name) {
         case "online":
             return (
                 <Button
-                    href={`/operator/${robot_name}`}
+                    href={`/operator/?robot=${robot_name}`}
                     variant="contained"
                     size="small"
                 >
@@ -85,7 +85,7 @@ function get_action(status_str, robot_name) {
         case "offline":
             return (
                 <Button
-                    href={`/operator/${robot_name}`}
+                    href={`/operator/?robot=${robot_name}`}
                     variant="contained"
                     size="small"
                     disabled
@@ -96,7 +96,7 @@ function get_action(status_str, robot_name) {
         case "occupied":
             return (
                 <Button
-                    href={`/operator/${robot_name}`}
+                    href={`/operator/?robot=${robot_name}`}
                     variant="contained"
                     size="small"
                     disabled
@@ -107,7 +107,7 @@ function get_action(status_str, robot_name) {
         default:
             return (
                 <Button
-                    href={`/operator/${robot_name}`}
+                    href={`/operator/?robot=${robot_name}`}
                     variant="contained"
                     size="small"
                     disabled
