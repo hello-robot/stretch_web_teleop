@@ -6,7 +6,7 @@ import {
     onAuthStateChanged,
     Auth,
 } from "firebase/auth";
-import { getDatabase, ref, onValue, get, update, Database } from "firebase/database";
+import { getDatabase, ref, onValue, get, set, update, Database } from "firebase/database";
 
 
 export class FirebaseSignaling extends BaseSignaling {
@@ -171,7 +171,7 @@ export class FirebaseSignaling extends BaseSignaling {
     public leave(): void {
         if (this.is_joined) {
             console.log(`Leaving. My role: ${this.role}.`);
-            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+            set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
                 active: false
             });
         }
