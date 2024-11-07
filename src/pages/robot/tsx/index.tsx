@@ -93,7 +93,12 @@ robot.setOnRosConnectCallback(async () => {
     await loginFirebaseSignalerAsRobot();
     await connection.configure_signaler("");
     console.log("Signaler ready! Joining room.")
-    connection.joinRobotRoom();
+    let joinedRobotRoom = await connection.joinRobotRoom();
+    while (!joinedRobotRoom) {
+        await delay(500);
+        joinedRobotRoom = await connection.joinRobotRoom();
+    }
+
 
     return Promise.resolve();
 });
