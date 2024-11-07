@@ -76,8 +76,9 @@ connection = new WebRTCConnection({
 new Promise<void>(async (resolve) => {
     let connected = false;
     while (!connected) {
-        let room_name = window.location.pathname.replace("operator", "").replaceAll("/", "");
-        if (!/^stretch-(re1|re2|se3)-\d{4}$/.test(room_name)) {
+        let currURL = new URL(window.location.href);
+        let room_name = currURL.searchParams.get("robot");
+        if (process.env.storage === "firebase" && !/^stretch-(re1|re2|se3)-\d{4}$/.test(room_name)) {
             console.error(`ERROR: Invalid room ${room_name}`)
             throw new Error("Invalid room name");
         }

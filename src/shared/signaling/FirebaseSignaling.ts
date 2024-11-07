@@ -30,11 +30,6 @@ export class FirebaseSignaling extends BaseSignaling {
         const app = initializeApp(config);
         this.auth = getAuth(app);
         this.db = getDatabase(app);
-
-        onAuthStateChanged(this.auth, (user) => {
-            this.uid = user ? user.uid : undefined;
-            this._loginState = user ? "authenticated" : "not_authenticated";
-        });
     }
 
     private _get_room_uid(room_name: string): Promise<string> {
@@ -60,55 +55,60 @@ export class FirebaseSignaling extends BaseSignaling {
     public configure(room_name: string): Promise<void> {
         return new Promise<void>((resolve) => {
             // wait to be authenticated
-            while (this._loginState !== "authenticated") {}
+            onAuthStateChanged(this.auth, (user) => {
+                this.uid = user ? user.uid : undefined;
+                this._loginState = user ? "authenticated" : "not_authenticated";
 
-            // get my role + set up listeners
-            get(ref(this.db, "assignments/" + this.uid + "/role")).then((snapshot) => {
-                this.role = snapshot.val();
-                console.log(`My role: ${this.role}`);
-                if (!["robot", "operator"].includes(this.role)) {
-                    console.error("ERROR: invalid role");
-                    throw new Error("Invalid role");
-                }
-
-                this._get_room_uid(room_name).then((room_uid) => {
-                    this.room_uid = room_uid;
-                    let opposite_role = this.role === "robot" ? "operator" : "robot";
-                    onValue(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role), (snapshot) => {
-                        let currSignal = snapshot.val();
-                        let changes = {};
-                        for (const key in currSignal) {
-                            if (currSignal[key] !== this.prevSignal[key]) {
-                                changes[key] = currSignal[key];
-                            }
+                if (this._loginState === "authenticated") {
+                    // get my role + set up listeners
+                    get(ref(this.db, "assignments/" + this.uid + "/role")).then((snapshot) => {
+                        this.role = snapshot.val();
+                        console.log(`My role: ${this.role}`);
+                        if (!["robot", "operator"].includes(this.role)) {
+                            console.error("ERROR: invalid role");
+                            throw new Error("Invalid role");
                         }
-                        this.prevSignal = currSignal;
 
-                        console.log("changes", changes);
-                        if (!Object.keys(changes).includes("active") &&
-                                (Object.keys(changes).includes("candidate") ||
-                                 Object.keys(changes).includes("sessionDescription") ||
-                                 Object.keys(changes).includes("cameraInfo"))) {
-                                    this.onSignal(changes);
-                        }
-                        if (Object.keys(changes).includes("active") && !changes["active"]) {
-                            console.log("bye");
-                            update(ref(this.db, "robots/" + this.uid), {
-                                status: "online",
+                        this._get_room_uid(room_name).then((room_uid) => {
+                            this.room_uid = room_uid;
+                            let opposite_role = this.role === "robot" ? "operator" : "robot";
+                            onValue(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role), (snapshot) => {
+                                let currSignal = snapshot.val();
+                                let changes = {};
+                                for (const key in currSignal) {
+                                    if (currSignal[key] !== this.prevSignal[key]) {
+                                        changes[key] = currSignal[key];
+                                    }
+                                }
+                                this.prevSignal = currSignal;
+
+                                console.log("changes", changes);
+                                if (!Object.keys(changes).includes("active") &&
+                                        (Object.keys(changes).includes("candidate") ||
+                                        Object.keys(changes).includes("sessionDescription") ||
+                                        Object.keys(changes).includes("cameraInfo"))) {
+                                            this.onSignal(changes);
+                                }
+                                if (Object.keys(changes).includes("active") && !changes["active"]) {
+                                    console.log("bye");
+                                    update(ref(this.db, "robots/" + this.uid), {
+                                        status: "online",
+                                    });
+                                    this.onGoodbye();
+                                }
+                                if (this.role === "robot" && Object.keys(changes).includes("active") && changes["active"]) {
+                                    console.log(`Operator has joined the room. My role: ${this.role}.`);
+                                    update(ref(this.db, "robots/" + this.uid), {
+                                        status: "occupied",
+                                    });
+                                    if (this.onRobotConnectionStart) this.onRobotConnectionStart();
+                                }
                             });
-                            this.onGoodbye();
-                        }
-                        if (this.role === "robot" && Object.keys(changes).includes("active") && changes["active"]) {
-                            console.log(`Operator has joined the room. My role: ${this.role}.`);
-                            update(ref(this.db, "robots/" + this.uid), {
-                                status: "occupied",
-                            });
-                            if (this.onRobotConnectionStart) this.onRobotConnectionStart();
-                        }
+
+                            resolve();
+                        });
                     });
-
-                    resolve();
-                });
+                }
             });
         });
     }
