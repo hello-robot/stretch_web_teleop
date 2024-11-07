@@ -123,6 +123,7 @@ export class FirebaseSignaling extends BaseSignaling {
             get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
                 let is_active = snapshot.val();
                 if (is_active) {
+                    console.log("Another robot is already active");
                     resolve(false);
                 } else {
                     update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
