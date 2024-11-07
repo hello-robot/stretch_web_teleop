@@ -60,7 +60,6 @@ if (process.argv.length > 2) {
     console.log(logId + ": start script complete");
     async function closeRobotBrowser() {
         await new Promise(resolve => {
-            console.log('doing it');
             page.goto(`https://${robotHostname}/whatever`); // page.close() doesnt work to trigger window.onbeforeunload
             setTimeout(resolve, 500)
         });

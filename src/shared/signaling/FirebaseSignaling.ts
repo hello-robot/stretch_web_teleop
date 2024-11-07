@@ -8,6 +8,30 @@ import {
 } from "firebase/auth";
 import { getDatabase, ref, onValue, get, set, update, Database } from "firebase/database";
 
+// TODO: use lodash isequal
+function isEqual(obj1, obj2) {
+    if (!isObject(obj1) && !isObject(obj2)) {
+        return obj1 === obj2;
+    }
+    var props1 = Object.getOwnPropertyNames(obj1);
+    var props2 = Object.getOwnPropertyNames(obj2);
+    if (props1.length != props2.length) {
+        return false;
+    }
+    for (var i = 0; i < props1.length; i++) {
+        let val1 = obj1[props1[i]];
+        let val2 = obj2[props1[i]];
+        let isObjects = isObject(val1) && isObject(val2);
+        if (isObjects && !isEqual(val1, val2) || !isObjects && val1 !== val2) {
+            return false;
+        }
+    }
+    return true;
+}
+function isObject(object) {
+  return object != null && typeof object === 'object';
+}
+
 
 export class FirebaseSignaling extends BaseSignaling {
     private auth: Auth;
@@ -77,11 +101,10 @@ export class FirebaseSignaling extends BaseSignaling {
                                     let currSignal = snapshot.val();
                                     let changes = {};
                                     for (const key in currSignal) {
-                                        if (!this.prevSignal || !(key in this.prevSignal) || currSignal[key] !== this.prevSignal[key]) {
+                                        if (!this.prevSignal || !(key in this.prevSignal) || !isEqual(currSignal[key], this.prevSignal[key])) {
                                             changes[key] = currSignal[key];
                                         }
                                     }
-                                    console.log("changes", changes, "prev", this.prevSignal, "curr", currSignal);
                                     this.prevSignal = currSignal;
 
                                     // Trigger callbacks based on what's changed
@@ -126,7 +149,7 @@ export class FirebaseSignaling extends BaseSignaling {
                     console.log("Another robot is already active");
                     resolve(false);
                 } else {
-                    update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                    set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
                         active: true
                     }).then(() => {
                         this.is_joined = true;
@@ -155,7 +178,7 @@ export class FirebaseSignaling extends BaseSignaling {
                             console.log("Another operator is already active");
                             resolve(false);
                         } else {
-                            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                            set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
                                 active: true
                             }).then(() => {
                                 this.is_joined = true;
