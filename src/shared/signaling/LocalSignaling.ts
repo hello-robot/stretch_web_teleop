@@ -25,7 +25,7 @@ export class LocalSignaling extends BaseSignaling {
         });
     }
 
-    public configure(): Promise<void> {
+    public configure(room_name: string): Promise<void> {
         return new Promise<void>((resolve) => {
             resolve();
         });

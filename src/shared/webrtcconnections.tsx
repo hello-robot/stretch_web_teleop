@@ -67,8 +67,8 @@ export class WebRTCConnection extends React.Component {
         });
     }
 
-    configure_signaler() {
-        return this.signaler.configure();
+    configure_signaler(room_name: string) {
+        return this.signaler.configure(room_name);
     }
 
     /**

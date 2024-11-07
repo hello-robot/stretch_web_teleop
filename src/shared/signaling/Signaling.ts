@@ -19,7 +19,7 @@ export abstract class BaseSignaling {
         this.onRobotConnectionStart = props.onRobotConnectionStart;
     }
 
-    public abstract configure(): Promise<void>;
+    public abstract configure(room_name: string): Promise<void>;
 
     /**
      * Joins the signaling room as a robot
