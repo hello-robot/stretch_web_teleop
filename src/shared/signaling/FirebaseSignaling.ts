@@ -17,6 +17,7 @@ export class FirebaseSignaling extends BaseSignaling {
     private role: string;
     private prevSignal;
     private room_uid: string;
+    private is_joined: boolean;
 
     constructor(props: SignalingProps, config: FirebaseOptions,) {
         super(props);
@@ -114,38 +115,55 @@ export class FirebaseSignaling extends BaseSignaling {
 
     public join_as_robot(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            // TODO: check that not already active before entering room
-            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                active: true
-            }).then(() => {
-                update(ref(this.db, "robots/" + this.uid), {
-                    status: "online",
-                });
-                resolve(true)
+            get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
+                let is_active = snapshot.val();
+                if (is_active) {
+                    resolve(false);
+                } else {
+                    update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                        active: true
+                    }).then(() => {
+                        this.is_joined = true;
+                        update(ref(this.db, "robots/" + this.uid), {
+                            status: "online",
+                        });
+                        resolve(true)
+                    });
+                }
             });
         });
     }
 
     public join_as_operator(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            // TODO: check that not already active before entering room
-            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                active: true
-            }).then(() => {
-                resolve(true)
+            get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
+                let is_active = snapshot.val();
+                if (is_active) {
+                    resolve(false);
+                } else {
+                    update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                        active: true
+                    }).then(() => {
+                        this.is_joined = true;
+                        resolve(true)
+                    });
+                }
             });
         });
     }
 
     public leave(): void {
-        console.log(`Leaving. My role: ${this.role}.`);
-        // TODO: check that am in room, before exiting it
-        update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-            active: false
-        });
+        if (this.is_joined) {
+            console.log(`Leaving. My role: ${this.role}.`);
+            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
+                active: false
+            });
+        }
     }
 
     public send(signal: SignallingMessage): void {
-        update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), signal);
+        if (this.is_joined) {
+            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), signal);
+        }
     }
 }
