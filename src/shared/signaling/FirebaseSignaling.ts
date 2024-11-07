@@ -21,12 +21,6 @@ export class FirebaseSignaling extends BaseSignaling {
     constructor(props: SignalingProps, config: FirebaseOptions,) {
         super(props);
         this._loginState = "not_authenticated";
-        this.prevSignal = {
-            active: undefined,
-            candidate: undefined,
-            sessionDescription: undefined,
-            cameraInfo: undefined
-        };
         const app = initializeApp(config);
         this.auth = getAuth(app);
         this.db = getDatabase(app);
@@ -45,6 +39,10 @@ export class FirebaseSignaling extends BaseSignaling {
                             if (robo_info["name"] === room_name) {
                                 resolve(robo_uid);
                             }
+                        })
+                        .catch((error) => {
+                            // We can ignore the robots the operator cannot access
+                            // console.error(error.message, "Cannot access: ", "robots/" + robo_uid);
                         });
                     });
                 });
@@ -73,16 +71,17 @@ export class FirebaseSignaling extends BaseSignaling {
                             this.room_uid = room_uid;
                             let opposite_role = this.role === "robot" ? "operator" : "robot";
                             onValue(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role), (snapshot) => {
+                                // Filter out what's changed
                                 let currSignal = snapshot.val();
                                 let changes = {};
                                 for (const key in currSignal) {
-                                    if (currSignal[key] !== this.prevSignal[key]) {
+                                    if (!this.prevSignal || !(key in this.prevSignal) || currSignal[key] !== this.prevSignal[key]) {
                                         changes[key] = currSignal[key];
                                     }
                                 }
+                                console.log("changes", changes, "prev", this.prevSignal, "curr", currSignal);
                                 this.prevSignal = currSignal;
 
-                                console.log("changes", changes);
                                 if (!Object.keys(changes).includes("active") &&
                                         (Object.keys(changes).includes("candidate") ||
                                         Object.keys(changes).includes("sessionDescription") ||
