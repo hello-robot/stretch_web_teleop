@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const { firefox } = require("playwright");
+const chalk = require('chalk');
 const logId = "start_robot_browser.js";
 
 // You may want to change this to test that the
@@ -7,6 +8,46 @@ const logId = "start_robot_browser.js";
 let robotHostname = "localhost"; // or NGROK_URL
 if (process.argv.length > 2) {
     robotHostname = process.argv[2];
+}
+
+const listenConsole = async (page) => {
+    // make args accessible
+    const describe = (jsHandle) => {
+        return jsHandle.evaluate((obj) => {
+            // serialize |obj| however you want
+            return obj;
+            // return `OBJ: ${typeof obj}, ${obj}`;
+        }, jsHandle);
+    }
+
+    const colors = {
+        LOG: chalk.grey, // (text: any) => text,
+        ERR: chalk.red,
+        WAR: chalk.yellow,
+        INF: chalk.cyan,
+    };
+
+    // listen to browser console
+    page.on("console", async (msg) => {
+        const args = await Promise.all(msg.args().map(arg => describe(arg)));
+
+        // make ability to paint different console[types]
+        const type = msg.type().substr(0, 3).toUpperCase();
+        const color = colors[type] || chalk.blue;
+        let text = '';
+        let objs = [];
+        for (let i = 0; i < args.length; ++i) {
+            if (typeof args[i] !== "object") {
+                text += `${args[i]} `;
+            } else {
+                objs.push(args[i]);
+            }
+        }
+        console.log(color(`CONSOLE.${type}: ${text} `));
+        for (let i = 0; i < objs.length; ++i) {
+            console.log(objs[i]);
+        }
+    });
 }
 
 (async () => {
@@ -42,7 +83,7 @@ if (process.argv.length > 2) {
     const context = await browser.newContext({ ignoreHTTPSErrors: true }); // avoid ERR_CERT_COMMON_NAME_INVALID
 
     const page = await context.newPage();
-    page.on("console", (msg) => console.log(msg));
+    await listenConsole(page);
 
     while (try_again) {
         try {
