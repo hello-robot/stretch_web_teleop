@@ -116,25 +116,31 @@ io.on("connection", function (socket) {
         if (socket.rooms.has(ROOM)) {
             socket.to(ROOM).emit("bye");
             if (socket.id == robo_sock) {
+                status = "offline";
                 robo_sock = undefined;
                 console.log("Robot disconnected");
             }
             if (socket.id == oper_sock) {
+                status = "online";
                 oper_sock = undefined;
                 console.log("Operator disconnected");
             }
             socket.leave(ROOM);
         }
+        updateRooms();
     });
 
     socket.on("disconnect", () => {
         if (socket.id == robo_sock) {
+            status = "offline";
             robo_sock = undefined;
             console.log("Robot disconnected");
         }
         if (socket.id == oper_sock) {
+            status = "online";
             oper_sock = undefined;
             console.log("Operator disconnected");
         }
+        updateRooms();
     });
 });
