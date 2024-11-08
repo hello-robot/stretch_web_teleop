@@ -193,10 +193,16 @@ export class FirebaseSignaling extends BaseSignaling {
 
     public leave(): void {
         if (this.is_joined) {
+            this.is_joined = false;
             console.log(`Leaving. My role: ${this.role}.`);
             set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
                 active: false
             });
+            if (this.role === "robot") {
+                update(ref(this.db, "robots/" + this.uid), {
+                    status: "offline",
+                });
+            }
         }
     }
 
