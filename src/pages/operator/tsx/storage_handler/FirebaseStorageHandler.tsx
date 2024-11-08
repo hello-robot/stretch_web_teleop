@@ -4,7 +4,7 @@ import { LayoutDefinition } from "../utils/component_definitions";
 import {
     FirebaseOptions,
     FirebaseError,
-    initializeApp,
+    getApp,
     FirebaseApp,
 } from "firebase/app";
 import {
@@ -53,7 +53,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     ) {
         super(onStorageHandlerReadyCallback);
         this.config = config;
-        this.app = initializeApp(this.config);
+        this.app = getApp();
         this.database = getDatabase(this.app);
         this.auth = getAuth(this.app);
 
