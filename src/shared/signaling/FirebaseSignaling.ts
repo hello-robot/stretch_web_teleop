@@ -108,11 +108,13 @@ export class FirebaseSignaling extends BaseSignaling {
                                     this.prevSignal = currSignal;
 
                                     // Trigger callbacks based on what's changed
-                                    if (!Object.keys(changes).includes("active") &&
-                                            (Object.keys(changes).includes("candidate") ||
-                                            Object.keys(changes).includes("sessionDescription") ||
-                                            Object.keys(changes).includes("cameraInfo"))) {
-                                                this.onSignal(changes);
+                                    if (Object.keys(changes).includes("candidate") ||
+                                        Object.keys(changes).includes("sessionDescription") ||
+                                        Object.keys(changes).includes("cameraInfo")) {
+                                        if (Object.keys(changes).includes("active")) {
+                                            delete changes["active"];
+                                        }
+                                        this.onSignal(changes);
                                     }
                                     if (Object.keys(changes).includes("active") && !changes["active"]) {
                                         console.log("bye");
@@ -145,7 +147,7 @@ export class FirebaseSignaling extends BaseSignaling {
         return new Promise<boolean>((resolve) => {
             get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
                 let is_active = snapshot.val();
-                if (is_active) {
+                if (false) { // TODO: onwindowunload is flaky. is_active might stay true when the robot browser exits. For now, let's ignore if firebase says theres already a robot in the room.
                     console.log("Another robot is already active");
                     resolve(false);
                 } else {
