@@ -96,7 +96,7 @@ module.exports = (env) => {
             express: "commonjs express",
         },
         resolve: {
-            extensions: [".tsx", ".js"],
+            extensions: [".ts", ".tsx", ".js"],
             alias: {
                 shared: path.resolve(__dirname, "./src/shared/"),
                 operator: path.resolve(__dirname, "./src/pages/operator/"),
