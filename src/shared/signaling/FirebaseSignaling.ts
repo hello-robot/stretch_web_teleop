@@ -225,7 +225,7 @@ export class FirebaseSignaling extends BaseSignaling {
             ).then((snapshot) => {
                 let is_active = snapshot.val();
                 if (false) {
-                    // TODO: onwindowunload is flaky. is_active might stay true when the robot browser exits. For now, let's ignore if firebase says theres already a robot in the room.
+                    // TODO: onwindowunload is flaky. is_active might stay true when the robot browser exits. For now, let's ignore if firebase says there's already a robot in the room.
                     console.log("Another robot is already active");
                     resolve(false);
                 } else {

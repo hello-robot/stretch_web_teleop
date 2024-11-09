@@ -101,7 +101,7 @@ const listenConsole = async (page) => {
     console.log(logId + ": start script complete");
     async function closeRobotBrowser() {
         await new Promise((resolve) => {
-            page.goto(`https://${robotHostname}/whatever`); // page.close() doesnt work to trigger window.onbeforeunload
+            page.goto(`https://${robotHostname}/whatever`); // page.close() doesn't work to trigger window.onbeforeunload
             setTimeout(resolve, 500);
         });
     }
