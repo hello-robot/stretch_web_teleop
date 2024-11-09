@@ -92,7 +92,9 @@ io.on("connection", function (socket) {
                 console.log("join_as_operator SUCCESS");
                 callback({ success: true });
             } else {
-                console.log("join_as_operator FAILURE: occupied by another operator");
+                console.log(
+                    "join_as_operator FAILURE: occupied by another operator",
+                );
                 callback({ success: false });
             }
         } else {
@@ -107,7 +109,9 @@ io.on("connection", function (socket) {
         if (robo_sock && oper_sock && io.sockets.adapter.rooms.get(ROOM)) {
             socket.to(ROOM).emit("signalling", message);
         } else {
-            console.log(`signaling FAILURE: robo_sock=${robo_sock} oper_sock=${oper_sock} room=${io.sockets.adapter.rooms.get(ROOM)}`);
+            console.log(
+                `signaling FAILURE: robo_sock=${robo_sock} oper_sock=${oper_sock} room=${io.sockets.adapter.rooms.get(ROOM)}`,
+            );
         }
     });
 

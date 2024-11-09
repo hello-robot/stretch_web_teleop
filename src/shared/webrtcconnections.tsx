@@ -4,7 +4,6 @@ import { safelyParseJSON, generateUUID } from "shared/util";
 import { BaseSignaling } from "shared/signaling/Signaling";
 import { createSignaler } from "shared/signaling/get_signaler";
 
-
 const peerConstraints = {
     iceServers: [
         {
@@ -237,9 +236,7 @@ export class WebRTCConnection extends React.Component {
         console.log("Received message:", message);
         if (cameraInfo) {
             if (Object.keys(cameraInfo).length === 0) {
-                console.warn(
-                    "Received a camera info mapping with no entries",
-                );
+                console.warn("Received a camera info mapping with no entries");
             }
             this.cameraInfo = cameraInfo;
         }
@@ -290,9 +287,7 @@ export class WebRTCConnection extends React.Component {
             // if (this.peerConnection.remoteDescription !== null) {
             this.peerConnection.addIceCandidate(candidate).catch((e) => {
                 if (!this.ignoreOffer) {
-                    console.log(
-                        "Failure during addIceCandidate(): " + e.name,
-                    );
+                    console.log("Failure during addIceCandidate(): " + e.name);
                     throw e;
                 }
             });

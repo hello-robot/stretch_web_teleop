@@ -55,12 +55,13 @@ export function loginFirebaseSignalerAsRobot() {
         const app = initializeApp(config);
         let auth: Auth = getAuth(app);
         return new Promise<void>((resolve, reject) => {
-            setPersistence(
-                auth,
-                inMemoryPersistence,
-            )
+            setPersistence(auth, inMemoryPersistence)
                 .then(() => {
-                    signInWithEmailAndPassword(auth, process.env.roboUsername, process.env.roboPassword)
+                    signInWithEmailAndPassword(
+                        auth,
+                        process.env.roboUsername,
+                        process.env.roboPassword,
+                    )
                         .then((userCredential) => {
                             resolve();
                         })

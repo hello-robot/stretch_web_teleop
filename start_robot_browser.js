@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const { firefox } = require("playwright");
-const chalk = require('chalk');
+const chalk = require("chalk");
 const logId = "start_robot_browser.js";
 
 // You may want to change this to test that the
@@ -18,7 +18,7 @@ const listenConsole = async (page) => {
             return obj;
             // return `OBJ: ${typeof obj}, ${obj}`;
         }, jsHandle);
-    }
+    };
 
     const colors = {
         LOG: chalk.grey, // (text: any) => text,
@@ -29,12 +29,12 @@ const listenConsole = async (page) => {
 
     // listen to browser console
     page.on("console", async (msg) => {
-        const args = await Promise.all(msg.args().map(arg => describe(arg)));
+        const args = await Promise.all(msg.args().map((arg) => describe(arg)));
 
         // make ability to paint different console[types]
         const type = msg.type().substr(0, 3).toUpperCase();
         const color = colors[type] || chalk.blue;
-        let text = '';
+        let text = "";
         let objs = [];
         for (let i = 0; i < args.length; ++i) {
             if (typeof args[i] !== "object") {
@@ -48,7 +48,7 @@ const listenConsole = async (page) => {
             console.log(objs[i]);
         }
     });
-}
+};
 
 (async () => {
     const navigation_timeout_ms = 30000; //30 seconds (default is 30 seconds)
@@ -100,9 +100,9 @@ const listenConsole = async (page) => {
 
     console.log(logId + ": start script complete");
     async function closeRobotBrowser() {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
             page.goto(`https://${robotHostname}/whatever`); // page.close() doesnt work to trigger window.onbeforeunload
-            setTimeout(resolve, 500)
+            setTimeout(resolve, 500);
         });
     }
     process.on("SIGTERM", () => {

@@ -1,17 +1,15 @@
 import { SignallingMessage } from "shared/util";
 
-
 export interface SignalingProps {
     onSignal: (SignallingMessage) => void;
     onGoodbye?: () => void;
     onRobotConnectionStart?: () => void;
 }
 
-
 export abstract class BaseSignaling {
     public onSignal: (SignallingMessage) => void;
     public onGoodbye?: () => void;
-    public onRobotConnectionStart?: () => void
+    public onRobotConnectionStart?: () => void;
 
     constructor(props: SignalingProps) {
         this.onSignal = props.onSignal;

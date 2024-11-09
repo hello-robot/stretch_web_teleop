@@ -2,7 +2,6 @@ import { SignallingMessage } from "shared/util";
 import { BaseSignaling, SignalingProps } from "./Signaling";
 import io, { Socket } from "socket.io-client";
 
-
 export class LocalSignaling extends BaseSignaling {
     private socket: Socket;
     private role: string;

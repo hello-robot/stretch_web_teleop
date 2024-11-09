@@ -90,16 +90,17 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
-    console.log("Waiting for configured signaler (i.e. logging in if using Firebase)")
+    console.log(
+        "Waiting for configured signaler (i.e. logging in if using Firebase)",
+    );
     await loginFirebaseSignalerAsRobot();
     await connection.configure_signaler("");
-    console.log("Signaler ready! Joining room.")
+    console.log("Signaler ready! Joining room.");
     let joinedRobotRoom = await connection.joinRobotRoom();
     while (!joinedRobotRoom) {
         await delay(500);
         joinedRobotRoom = await connection.joinRobotRoom();
     }
-
 
     return Promise.resolve();
 });

@@ -140,7 +140,7 @@ export const CallRobotSelector = (props: { style?: React.CSSProperties }) => {
 
     useEffect(() => {
         loginHandler.listRooms((robo_uid, robo_info) => {
-            setCallableRobots(prev => ({...prev, [robo_uid]: robo_info}))
+            setCallableRobots((prev) => ({ ...prev, [robo_uid]: robo_info }));
         });
     }, [props]);
 

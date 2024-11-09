@@ -1,12 +1,16 @@
 import { SignallingMessage } from "shared/util";
 import { BaseSignaling, SignalingProps } from "./Signaling";
 import { initializeApp, FirebaseOptions } from "firebase/app";
+import { getAuth, onAuthStateChanged, Auth } from "firebase/auth";
 import {
-    getAuth,
-    onAuthStateChanged,
-    Auth,
-} from "firebase/auth";
-import { getDatabase, ref, onValue, get, set, update, Database } from "firebase/database";
+    getDatabase,
+    ref,
+    onValue,
+    get,
+    set,
+    update,
+    Database,
+} from "firebase/database";
 
 // TODO: use lodash isequal
 function isEqual(obj1, obj2) {
@@ -22,16 +26,18 @@ function isEqual(obj1, obj2) {
         let val1 = obj1[props1[i]];
         let val2 = obj2[props1[i]];
         let isObjects = isObject(val1) && isObject(val2);
-        if (isObjects && !isEqual(val1, val2) || !isObjects && val1 !== val2) {
+        if (
+            (isObjects && !isEqual(val1, val2)) ||
+            (!isObjects && val1 !== val2)
+        ) {
             return false;
         }
     }
     return true;
 }
 function isObject(object) {
-  return object != null && typeof object === 'object';
+    return object != null && typeof object === "object";
 }
-
 
 export class FirebaseSignaling extends BaseSignaling {
     private auth: Auth;
@@ -43,7 +49,7 @@ export class FirebaseSignaling extends BaseSignaling {
     private room_uid: string;
     private is_joined: boolean;
 
-    constructor(props: SignalingProps, config: FirebaseOptions,) {
+    constructor(props: SignalingProps, config: FirebaseOptions) {
         super(props);
         this._loginState = "not_authenticated";
         const app = initializeApp(config);
@@ -56,21 +62,26 @@ export class FirebaseSignaling extends BaseSignaling {
             if (this.role === "robot") {
                 resolve(this.uid);
             } else if (this.role === "operator") {
-                get(ref(this.db, "assignments/" + this.uid + "/robots")).then((snapshot) => {
-                    let robots = snapshot.val();
-                    Object.entries(robots).forEach(([robo_uid, is_active]) => {
-                        get(ref(this.db, "robots/" + robo_uid)).then((snapshot2) => {
-                            let robo_info = snapshot2.val();
-                            if (robo_info["name"] === room_name) {
-                                resolve(robo_uid);
-                            }
-                        })
-                        .catch((error) => {
-                            // We can ignore the robots the operator cannot access
-                            // console.error(error.message, "Cannot access: ", "robots/" + robo_uid);
-                        });
-                    });
-                });
+                get(ref(this.db, "assignments/" + this.uid + "/robots")).then(
+                    (snapshot) => {
+                        let robots = snapshot.val();
+                        Object.entries(robots).forEach(
+                            ([robo_uid, is_active]) => {
+                                get(ref(this.db, "robots/" + robo_uid))
+                                    .then((snapshot2) => {
+                                        let robo_info = snapshot2.val();
+                                        if (robo_info["name"] === room_name) {
+                                            resolve(robo_uid);
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        // We can ignore the robots the operator cannot access
+                                        // console.error(error.message, "Cannot access: ", "robots/" + robo_uid);
+                                    });
+                            },
+                        );
+                    },
+                );
             }
         });
     }
@@ -84,60 +95,121 @@ export class FirebaseSignaling extends BaseSignaling {
 
                 if (this._loginState === "authenticated") {
                     // get my role + set up listeners
-                    get(ref(this.db, "assignments/" + this.uid + "/role")).then((snapshot) => {
-                        this.role = snapshot.val();
-                        console.log(`My role: ${this.role}`);
-                        if (!["robot", "operator"].includes(this.role)) {
-                            console.error("ERROR: invalid role");
-                            throw new Error("Invalid role");
-                        }
+                    get(ref(this.db, "assignments/" + this.uid + "/role")).then(
+                        (snapshot) => {
+                            this.role = snapshot.val();
+                            console.log(`My role: ${this.role}`);
+                            if (!["robot", "operator"].includes(this.role)) {
+                                console.error("ERROR: invalid role");
+                                throw new Error("Invalid role");
+                            }
 
-                        this._get_room_uid(room_name).then((room_uid) => {
-                            this.room_uid = room_uid;
-                            let opposite_role = this.role === "robot" ? "operator" : "robot";
-                            onValue(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role), (snapshot) => {
-                                if (this.is_joined) {
-                                    // Filter out what's changed
-                                    let currSignal = snapshot.val();
-                                    let changes = {};
-                                    for (const key in currSignal) {
-                                        if (!this.prevSignal || !(key in this.prevSignal) || !isEqual(currSignal[key], this.prevSignal[key])) {
-                                            changes[key] = currSignal[key];
-                                        }
-                                    }
-                                    this.prevSignal = currSignal;
+                            this._get_room_uid(room_name).then((room_uid) => {
+                                this.room_uid = room_uid;
+                                let opposite_role =
+                                    this.role === "robot"
+                                        ? "operator"
+                                        : "robot";
+                                onValue(
+                                    ref(
+                                        this.db,
+                                        "rooms/" +
+                                            this.room_uid +
+                                            "/" +
+                                            opposite_role,
+                                    ),
+                                    (snapshot) => {
+                                        if (this.is_joined) {
+                                            // Filter out what's changed
+                                            let currSignal = snapshot.val();
+                                            let changes = {};
+                                            for (const key in currSignal) {
+                                                if (
+                                                    !this.prevSignal ||
+                                                    !(key in this.prevSignal) ||
+                                                    !isEqual(
+                                                        currSignal[key],
+                                                        this.prevSignal[key],
+                                                    )
+                                                ) {
+                                                    changes[key] =
+                                                        currSignal[key];
+                                                }
+                                            }
+                                            this.prevSignal = currSignal;
 
-                                    // Trigger callbacks based on what's changed
-                                    if (Object.keys(changes).includes("candidate") ||
-                                        Object.keys(changes).includes("sessionDescription") ||
-                                        Object.keys(changes).includes("cameraInfo")) {
-                                        if (Object.keys(changes).includes("active")) {
-                                            delete changes["active"];
+                                            // Trigger callbacks based on what's changed
+                                            if (
+                                                Object.keys(changes).includes(
+                                                    "candidate",
+                                                ) ||
+                                                Object.keys(changes).includes(
+                                                    "sessionDescription",
+                                                ) ||
+                                                Object.keys(changes).includes(
+                                                    "cameraInfo",
+                                                )
+                                            ) {
+                                                if (
+                                                    Object.keys(
+                                                        changes,
+                                                    ).includes("active")
+                                                ) {
+                                                    delete changes["active"];
+                                                }
+                                                this.onSignal(changes);
+                                            }
+                                            if (
+                                                Object.keys(changes).includes(
+                                                    "active",
+                                                ) &&
+                                                !changes["active"]
+                                            ) {
+                                                console.log("bye");
+                                                if (this.role === "robot") {
+                                                    update(
+                                                        ref(
+                                                            this.db,
+                                                            "robots/" +
+                                                                this.uid,
+                                                        ),
+                                                        {
+                                                            status: "online",
+                                                        },
+                                                    );
+                                                }
+                                                this.onGoodbye();
+                                            }
+                                            if (
+                                                this.role === "robot" &&
+                                                Object.keys(changes).includes(
+                                                    "active",
+                                                ) &&
+                                                changes["active"]
+                                            ) {
+                                                console.log(
+                                                    `Operator has joined the room. My role: ${this.role}.`,
+                                                );
+                                                update(
+                                                    ref(
+                                                        this.db,
+                                                        "robots/" + this.uid,
+                                                    ),
+                                                    {
+                                                        status: "occupied",
+                                                    },
+                                                );
+                                                if (this.onRobotConnectionStart)
+                                                    this.onRobotConnectionStart();
+                                            }
                                         }
-                                        this.onSignal(changes);
-                                    }
-                                    if (Object.keys(changes).includes("active") && !changes["active"]) {
-                                        console.log("bye");
-                                        if (this.role === "robot") {
-                                            update(ref(this.db, "robots/" + this.uid), {
-                                                status: "online",
-                                            });
-                                        }
-                                        this.onGoodbye();
-                                    }
-                                    if (this.role === "robot" && Object.keys(changes).includes("active") && changes["active"]) {
-                                        console.log(`Operator has joined the room. My role: ${this.role}.`);
-                                        update(ref(this.db, "robots/" + this.uid), {
-                                            status: "occupied",
-                                        });
-                                        if (this.onRobotConnectionStart) this.onRobotConnectionStart();
-                                    }
-                                }
+                                    },
+                                );
+
+                                resolve();
                             });
-
-                            resolve();
-                        });
-                    });
+                        },
+                    );
                 }
             });
         });
@@ -145,20 +217,32 @@ export class FirebaseSignaling extends BaseSignaling {
 
     public join_as_robot(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
-            get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot) => {
+            get(
+                ref(
+                    this.db,
+                    "rooms/" + this.room_uid + "/" + this.role + "/active",
+                ),
+            ).then((snapshot) => {
                 let is_active = snapshot.val();
-                if (false) { // TODO: onwindowunload is flaky. is_active might stay true when the robot browser exits. For now, let's ignore if firebase says theres already a robot in the room.
+                if (false) {
+                    // TODO: onwindowunload is flaky. is_active might stay true when the robot browser exits. For now, let's ignore if firebase says theres already a robot in the room.
                     console.log("Another robot is already active");
                     resolve(false);
                 } else {
-                    set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                        active: true
-                    }).then(() => {
+                    set(
+                        ref(
+                            this.db,
+                            "rooms/" + this.room_uid + "/" + this.role,
+                        ),
+                        {
+                            active: true,
+                        },
+                    ).then(() => {
                         this.is_joined = true;
                         update(ref(this.db, "robots/" + this.uid), {
                             status: "online",
                         });
-                        resolve(true)
+                        resolve(true);
                     });
                 }
             });
@@ -168,23 +252,43 @@ export class FirebaseSignaling extends BaseSignaling {
     public join_as_operator(): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             let opposite_role = this.role === "robot" ? "operator" : "robot";
-            get(ref(this.db, "rooms/" + this.room_uid + "/" + opposite_role + "/active")).then((snapshot) => {
+            get(
+                ref(
+                    this.db,
+                    "rooms/" + this.room_uid + "/" + opposite_role + "/active",
+                ),
+            ).then((snapshot) => {
                 let is_robot_active = snapshot.val();
                 if (!is_robot_active) {
                     console.log("Robot is not active");
                     resolve(false);
                 } else {
-                    get(ref(this.db, "rooms/" + this.room_uid + "/" + this.role + "/active")).then((snapshot2) => {
+                    get(
+                        ref(
+                            this.db,
+                            "rooms/" +
+                                this.room_uid +
+                                "/" +
+                                this.role +
+                                "/active",
+                        ),
+                    ).then((snapshot2) => {
                         let is_operator_active = snapshot2.val();
                         if (is_operator_active) {
                             console.log("Another operator is already active");
                             resolve(false);
                         } else {
-                            set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                                active: true
-                            }).then(() => {
+                            set(
+                                ref(
+                                    this.db,
+                                    "rooms/" + this.room_uid + "/" + this.role,
+                                ),
+                                {
+                                    active: true,
+                                },
+                            ).then(() => {
                                 this.is_joined = true;
-                                resolve(true)
+                                resolve(true);
                             });
                         }
                     });
@@ -198,7 +302,7 @@ export class FirebaseSignaling extends BaseSignaling {
             this.is_joined = false;
             console.log(`Leaving. My role: ${this.role}.`);
             set(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), {
-                active: false
+                active: false,
             });
             if (this.role === "robot") {
                 update(ref(this.db, "robots/" + this.uid), {
@@ -210,7 +314,10 @@ export class FirebaseSignaling extends BaseSignaling {
 
     public send(signal: SignallingMessage): void {
         if (this.is_joined) {
-            update(ref(this.db, "rooms/" + this.room_uid + "/" + this.role), signal);
+            update(
+                ref(this.db, "rooms/" + this.room_uid + "/" + this.role),
+                signal,
+            );
         }
     }
 }
