@@ -26,6 +26,7 @@ import {
     BoundingBox,
     DetectedObjectMessage,
     BoundingBox2D,
+    delay,
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import { AudioStream } from "./audiostreams";
@@ -34,6 +35,7 @@ import {
     HasBetaTeleopKitMessage,
     StretchToolMessage,
 } from "../../../shared/util";
+import { loginFirebaseSignalerAsRobot } from "shared/signaling/get_signaler";
 
 export const robot = new Robot({
     jointStateCallback: forwardJointStates,
@@ -92,7 +94,17 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
-    connection.joinRobotRoom();
+    console.log(
+        "Waiting for configured signaler (i.e. logging in if using Firebase)",
+    );
+    await loginFirebaseSignalerAsRobot();
+    await connection.configure_signaler("");
+    console.log("Signaler ready! Joining room.");
+    let joinedRobotRoom = await connection.joinRobotRoom();
+    while (!joinedRobotRoom) {
+        await delay(500);
+        joinedRobotRoom = await connection.joinRobotRoom();
+    }
 
     return Promise.resolve();
 });

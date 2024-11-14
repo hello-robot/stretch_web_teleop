@@ -4,7 +4,7 @@ import { LayoutDefinition } from "../utils/component_definitions";
 import {
     FirebaseOptions,
     FirebaseError,
-    initializeApp,
+    getApp,
     FirebaseApp,
 } from "firebase/app";
 import {
@@ -33,7 +33,6 @@ export class FirebaseStorageHandler extends StorageHandler {
     private app: FirebaseApp;
     private database: Database;
     private auth: Auth;
-    private GAuthProvider: GoogleAuthProvider;
 
     private userEmail: string;
     private uid: string;
@@ -54,10 +53,9 @@ export class FirebaseStorageHandler extends StorageHandler {
     ) {
         super(onStorageHandlerReadyCallback);
         this.config = config;
-        this.app = initializeApp(this.config);
+        this.app = getApp();
         this.database = getDatabase(this.app);
         this.auth = getAuth(this.app);
-        this.GAuthProvider = new GoogleAuthProvider();
 
         this.userEmail = "";
         this.uid = "";
@@ -74,8 +72,6 @@ export class FirebaseStorageHandler extends StorageHandler {
         onAuthStateChanged(this.auth, (user) =>
             this.handleAuthStateChange(user),
         );
-
-        this.signInWithGoogle();
     }
 
     private handleAuthStateChange(user: User | null) {
@@ -106,27 +102,13 @@ export class FirebaseStorageHandler extends StorageHandler {
 
     private async getUserDataFirebase() {
         const snapshot = await get(
-            child(ref(this.database), "/users/" + this.uid),
+            child(ref(this.database), "/operators/" + this.uid),
         );
 
         if (snapshot.exists()) {
             return snapshot.val();
         } else {
             throw "No data available";
-        }
-    }
-
-    public signInWithGoogle() {
-        if (this.userEmail == "") {
-            signInWithPopup(this.auth, this.GAuthProvider)
-                .then((result) => {
-                    const credential =
-                        GoogleAuthProvider.credentialFromResult(result);
-                    const token = credential!.accessToken;
-                    const user = result.user;
-                    return Promise.resolve();
-                })
-                .catch(this.handleError);
         }
     }
 
@@ -156,7 +138,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.currentLayout = layout;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/currentLayout"] = layout;
+        updates["/operators/" + this.uid + "/currentLayout"] = layout;
         update(ref(this.database), updates);
     }
 
@@ -173,7 +155,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.layouts = layouts;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/layouts"] = layouts;
+        updates["/operators/" + this.uid + "/layouts"] = layouts;
         return update(ref(this.database), updates);
     }
 
@@ -194,7 +176,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.mapPoses = poses;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/map_poses"] = poses;
+        updates["/operators/" + this.uid + "/map_poses"] = poses;
         return update(ref(this.database), updates);
     }
 
@@ -202,7 +184,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.mapPoseTypes = poseTypes;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/map_pose_types"] = poseTypes;
+        updates["/operators/" + this.uid + "/map_pose_types"] = poseTypes;
         return update(ref(this.database), updates);
     }
 
@@ -257,7 +239,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.recordings = recordings;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/recordings"] = recordings;
+        updates["/operators/" + this.uid + "/recordings"] = recordings;
         return update(ref(this.database), updates);
     }
 
@@ -288,7 +270,7 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.textToSpeech = textToSpeech;
 
         let updates: any = {};
-        updates["/users/" + this.uid + "/text_to_speech"] = textToSpeech;
+        updates["/operators/" + this.uid + "/text_to_speech"] = textToSpeech;
         return update(ref(this.database), updates);
     }
 

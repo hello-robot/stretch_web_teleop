@@ -77,6 +77,18 @@ connection = new WebRTCConnection({
 });
 
 new Promise<void>(async (resolve) => {
+    let currURL = new URL(window.location.href);
+    let room_name = currURL.searchParams.get("robot");
+    if (
+        process.env.storage === "firebase" &&
+        !/^stretch-(re1|re2|se3)-\d{4}$/.test(room_name)
+    ) {
+        console.error(`ERROR: Invalid room ${room_name}`);
+        throw new Error("Invalid room name");
+    }
+    await connection.configure_signaler(room_name);
+    console.log("Signaler ready!");
+
     let connected = false;
     while (!connected) {
         connection.hangup();
