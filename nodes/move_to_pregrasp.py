@@ -49,7 +49,7 @@ from stretch_web_teleop_helpers.stretch_ik_control import (
     MotionGeneratorRetval,
     StretchIKControl,
 )
-
+from std_srvs.srv import SetBool
 
 class MoveToPregraspNode(Node):
     """
@@ -100,14 +100,25 @@ class MoveToPregraspNode(Node):
         self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
-        urdf_fpaths = uu.generate_ik_urdfs("stretch_web_teleop", rigid_wrist_urdf=False)
+        urdf_fpaths = uu.generate_ik_urdfs("stretch_web_teleop", rigid_wrist_urdf=False, base_rotation=True)
         urdf_fpath = urdf_fpaths[0]
-        self.controller = StretchIKControl(
+        self.rotation_controller = StretchIKControl(
             self,
             tf_buffer=self.tf_buffer,
             urdf_path=urdf_fpath,
             static_transform_broadcaster=self.static_transform_broadcaster,
         )
+
+        urdf_fpaths = uu.generate_ik_urdfs("stretch_web_teleop", rigid_wrist_urdf=False, base_rotation=False)
+        urdf_fpath = urdf_fpaths[0]
+        self.translation_controller = StretchIKControl(
+            self,
+            tf_buffer=self.tf_buffer,
+            urdf_path=urdf_fpath,
+            static_transform_broadcaster=self.static_transform_broadcaster,
+        )
+
+        self.controller = self.rotation_controller
 
         # Subscribe to the Realsense's RGB, pointcloud, and camera info feeds
         self.cv_bridge = CvBridge()
@@ -131,6 +142,27 @@ class MoveToPregraspNode(Node):
         # Create the action timeout
         self.action_timeout = Duration(seconds=action_timeout_secs)
 
+        # Services for expanding the gripper image
+        self.feeding_mode = False
+        self.food_stabbed = False
+        self.feeding_mode_service = self.create_service(
+            SetBool, "feeding_mode", self.feeding_mode_callback
+        )
+
+    def feeding_mode_callback(self, req, res):
+        self.get_logger().info(f"Feeding mode service: {req.data}")
+        if req.data == True:
+            self.feeding_mode = True
+            self.food_stabbed = False
+            self.controller = self.translation_controller
+        else:
+            self.feeding_mode = False
+            self.food_stabbed = False
+            self.controller = self.rotation_controller
+        self.controller.set_mode(self.feeding_mode)
+        res.success = True
+        return res
+
     def initialize(self) -> bool:
         """
         Initialize the MoveToPregraspNode.
@@ -143,7 +175,15 @@ class MoveToPregraspNode(Node):
         bool: Whether the initialization was successful.
         """
         # Initialize the controller
-        ok = self.controller.initialize()
+        ok = self.rotation_controller.initialize(False)
+        if not ok:
+            self.get_logger().error(
+                "Failed to initialize the inverse jacobian controller"
+            )
+            return False
+
+        # Initialize the controller
+        ok = self.translation_controller.initialize(True)
         if not ok:
             self.get_logger().error(
                 "Failed to initialize the inverse jacobian controller"
@@ -244,6 +284,7 @@ class MoveToPregraspNode(Node):
         goal_handle: The goal handle.
         """
         self.get_logger().info("Received cancel request, accepting")
+        self.food_stabbed = False
         return CancelResponse.ACCEPT
 
     async def execute_callback(
@@ -309,6 +350,7 @@ class MoveToPregraspNode(Node):
             """
             Callback for when the action encounters an error.
             """
+            self.food_stabbed = False
             self.get_logger().error(error_msg)
             goal_handle.abort()
             cleanup()
@@ -331,6 +373,7 @@ class MoveToPregraspNode(Node):
             """
             Callback for when the action is canceled.
             """
+            self.food_stabbed = False
             self.get_logger().info(cancel_msg)
             goal_handle.canceled()
             cleanup()
@@ -673,9 +716,10 @@ class MoveToPregraspNode(Node):
             wrist_rotation = get_pregrasp_wrist_configuration(horizontal_grasp)
             joint_overrides = {}
             joint_overrides.update(wrist_rotation)
-            if base_rotation is not None:
+            if not self.feeding_mode and base_rotation is not None:
                 # Seed IK with the estimated base rotation
                 joint_overrides[Joint.BASE_ROTATION] = base_rotation
+
             reachable, ik_solution = self.controller.solve_ik(
                 goal_pose, joint_position_overrides=joint_overrides
             )
@@ -944,15 +988,22 @@ class MoveToPregraspNode(Node):
             [Joint.ARM_L0], partial=True
         )[Joint.ARM_L0]
 
-        # Get the states. If the robot is in a vertical grasp position and the arm
-        # needs to descend, lengthn the arm before deploying the wrist.
-        states = MoveToPregraspState.get_state_machine(
-            horizontal_grasp=horizontal_grasp,
-            init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
-            goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
-            init_length_near_mast=init_joints[Joint.ARM_L0]
-            < arm_length_when_partially_stowed,
-        )
+        if self.feeding_mode and not self.food_stabbed:
+            self.food_stabbed = True
+            states = MoveToPregraspState.get_feeding_state_machine()
+        elif self.feeding_mode and self.food_stabbed:
+            states = MoveToPregraspState.get_feed_state_machine()
+            self.food_stabbed = False
+        else:
+            # Get the states. If the robot is in a vertical grasp position and the arm
+            # needs to descend, lengthn the arm before deploying the wrist.
+            states = MoveToPregraspState.get_state_machine(
+                horizontal_grasp=horizontal_grasp,
+                init_lift_near_base=init_joints[Joint.ARM_LIFT] < arm_lift_when_stowed,
+                goal_lift_near_base=ik_solution[Joint.ARM_LIFT] < arm_lift_when_stowed,
+                init_length_near_mast=init_joints[Joint.ARM_L0]
+                < arm_length_when_partially_stowed,
+            )
 
         # Ensure the terminal state is the last state
         if not (len(states[-1]) == 1 and MoveToPregraspState.TERMINAL in states[-1]):

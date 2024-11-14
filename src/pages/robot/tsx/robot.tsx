@@ -45,6 +45,7 @@ export class Robot extends React.Component {
     private moveToPregraspClient?: ROSLIB.ActionClient;
     private showTabletClient?: ROSLIB.ActionClient;
     private cmdVelTopic?: ROSLIB.Topic;
+    private feedingService?: ROSLIB.Service;
     private detectObjectService?: ROSLIB.Service;
     private switchToNavigationService?: ROSLIB.Service;
     private switchToPositionService?: ROSLIB.Service;
@@ -294,6 +295,7 @@ export class Robot extends React.Component {
         this.createShowTabletClient();
         this.createCmdVelTopic();
         this.createdetectObjectService();
+        this.createFeedingService();
         this.createSwitchToNavigationService();
         this.createSwitchToPositionService();
         this.createRealsenseDepthSensingService();
@@ -621,6 +623,14 @@ export class Robot extends React.Component {
         });
     }
 
+    createFeedingService() {
+        this.feedingService = new ROSLIB.Service({
+            ros: this.ros,
+            name: "/feeding_mode",
+            serviceType: "std_srvs/srv/SetBool",
+        });
+    }
+
     createSwitchToNavigationService() {
         this.switchToNavigationService = new ROSLIB.Service({
             ros: this.ros,
@@ -836,6 +846,11 @@ export class Robot extends React.Component {
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
         this.setRunStopService?.callService(request, (response: boolean) => {});
+    }
+
+    setFeedingMode(toggle: boolean) {
+        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        this.feedingService?.callService(request, (response: boolean) => {});
     }
 
     detectObjects(toggle: boolean) {

@@ -2,6 +2,7 @@ import { ActionState, ROSPose, waitUntil } from "shared/util";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 import { FunctionProvider } from "./FunctionProvider";
 import { resolve } from "path";
+import ROSLIB from "roslib";
 
 export enum UnderMapButton {
     SelectGoal,
@@ -25,6 +26,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
      * Callback function to update the move base state in the operator
      */
     private operatorCallback?: (state: ActionState) => void = undefined;
+    private mapPoseCallback?: (pose: ROSLIB.Vector3) => void = undefined;
 
     constructor(storageHandler: StorageHandler) {
         super();
@@ -76,6 +78,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                         },
                     } as ROSPose;
                     FunctionProvider.remoteRobot?.moveBase(rosPose);
+                    if (this.mapPoseCallback) this.mapPoseCallback(pose.translation);
                     return pose.translation;
                 };
             case UnderMapButton.NavigateToAruco:
@@ -168,5 +171,9 @@ export class UnderMapFunctionProvider extends FunctionProvider {
      */
     public setOperatorCallback(callback: (state: ActionState) => void) {
         this.operatorCallback = callback;
+    }
+
+    public setMapPoseCallback(callback: (pose: ROSLIB.Vector3) => void) {
+        this.mapPoseCallback = callback;
     }
 }

@@ -74,7 +74,8 @@ export interface ToggleCommand {
         | "setGripperDepthSensing"
         | "setRealsenseBodyPoseEstimate"
         | "setRunStop"
-        | "setDetectObjects";
+        | "setDetectObjects"
+        | "setFeedingMode";
     toggle: boolean;
 }
 

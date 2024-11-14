@@ -17,6 +17,7 @@ class Joint(Enum):
     Joint names of Stretch.
     """
 
+    BASE_TRANSLATION = "joint_mobile_base_translation"
     BASE_ROTATION = "joint_mobile_base_rotation"
     ARM_LIFT = "joint_lift"
     ARM_L0 = "joint_arm_l0"
@@ -131,6 +132,33 @@ def get_stow_configuration(
             ] = 0.0  # close gripper when stowed. An open gripper can sometimes get caught in the mast.
     return retval
 
+def get_feeding_configuration() -> Dict[Joint, float]:
+    retval = {}
+    retval[Joint.ARM_L0] = 0.0
+    retval[Joint.ARM_LIFT] = 1.1 # Max height
+    retval[Joint.WRIST_YAW] = 0.0  # Should match src/shared/util.tsx
+    retval[Joint.WRIST_PITCH] = -np.pi / 2.0  # Should match src/shared/util.tsx
+    retval[Joint.WRIST_ROLL] = 0.0  # Should match src/shared/util.tsx
+    return retval
+
+def get_feeding_lift_configuration() -> Dict[Joint, float]:
+    retval = {}
+    retval[Joint.ARM_LIFT] = 0.92 # stabbing height
+    return retval
+
+def get_stabbing_configuration() -> Dict[Joint, float]:
+    retval = {}
+    retval[Joint.ARM_LIFT] = 0.99 # stabbing height
+    return retval
+
+def get_feed_configuration() -> Dict[Joint, float]:
+    retval = {}
+    retval[Joint.ARM_LIFT] = 1.1 # max height
+    retval[Joint.WRIST_YAW] = 0.0
+    retval[Joint.WRIST_PITCH] = 0.17
+    retval[Joint.WRIST_ROLL] = 0.0
+    retval[Joint.WRIST_EXTENSION] = 0.512
+    return retval
 
 def adjust_arm_lift_for_base_collision(
     ik_solution: Dict[Joint, float],
@@ -201,7 +229,7 @@ def get_gripper_configuration(closed: bool) -> Dict[Joint, float]:
     """
     return {
         # We only need to command one gripper joint, as the other is coupled.
-        Joint.GRIPPER_LEFT: 0.0
+        Joint.GRIPPER_LEFT: -0.52
         if closed
         else 0.84,
     }

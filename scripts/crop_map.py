@@ -1,17 +1,9 @@
-# Adapted from https://github.com/ros-planning/navigation/blob/noetic-devel/map_server/scripts/crop_map
-#
-# Example usage:
-#   python crop_map.py /home/hello-robot/stretch_user/maps/map.yaml /home/hello-robot/stretch_user/maps/cropped
+#!/usr/bin/env python3
 
-from __future__ import print_function
-
-import math
 import sys
-
-import numpy as np
 import yaml
 from PIL import Image
-
+import math
 
 def find_bounds(map_image):
     x_min = map_image.size[0]
@@ -22,16 +14,17 @@ def find_bounds(map_image):
     for x in range(map_image.size[0]):
         for y in range(map_image.size[1]):
             val = pix[x, y]
-            if val != 206:  # not unknown
+            print(val)
+            if val != (205, 205, 205, 255):  # not unknown
                 x_min = min(x, x_min)
                 x_end = max(x, x_end)
                 y_min = min(y, y_min)
                 y_end = max(y, y_end)
+    print(x_min, x_end, y_min, y_end)
     return x_min, x_end, y_min, y_end
 
-
 def computed_cropped_origin(map_image, bounds, resolution, origin):
-    """Compute the image for the cropped map when map_image is cropped by bounds and had origin before."""
+    """ Compute the image for the cropped map when map_image is cropped by bounds and had origin before. """
     ox = origin[0]
     oy = origin[1]
     oth = origin[2]
@@ -39,7 +32,7 @@ def computed_cropped_origin(map_image, bounds, resolution, origin):
     # First figure out the delta we have to translate from the lower left corner (which is the origin)
     # in the image system
     dx = bounds[0] * resolution
-    dy = (map_image.size[1] - bounds[3] - 1) * resolution
+    dy = (map_image.size[1] - bounds[3]) * resolution
 
     # Next rotate this by the theta and add to the old origin
 
@@ -48,10 +41,9 @@ def computed_cropped_origin(map_image, bounds, resolution, origin):
 
     return [new_ox, new_oy, oth]
 
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: %s map.yaml [cropped.yaml]" % sys.argv[0], file=sys.stderr)
+        print >> sys.stderr, "Usage: %s map.yaml [cropped.yaml]" % sys.argv[0]
         sys.exit(1)
 
     with open(sys.argv[1]) as f:
@@ -77,10 +69,6 @@ if __name__ == "__main__":
 
     # left, upper, right, lower
     cropped_image = map_image.crop((bounds[0], bounds[2], bounds[1] + 1, bounds[3] + 1))
-
-    np_cropped_image = np.array(cropped_image)
-    np_cropped_image[np.where(np_cropped_image == 206)] = 0
-    cropped_image = Image.fromarray(np_cropped_image)
 
     cropped_image.save(crop_image)
     map_data["image"] = crop_image

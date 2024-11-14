@@ -12,9 +12,13 @@ from geometry_msgs.msg import PoseStamped
 # Local imports
 from .constants import (
     Joint,
+    get_feeding_configuration,
+    get_stabbing_configuration,
+    get_feed_configuration,
     get_gripper_configuration,
     get_pregrasp_wrist_configuration,
     get_stow_configuration,
+    get_feeding_lift_configuration
 )
 from .stretch_ik_control import (
     MotionGeneratorRetval,
@@ -43,7 +47,62 @@ class MoveToPregraspState(Enum):
     MOVE_WRIST = 6
     LENGTHEN_ARM = 7
     TERMINAL = 8
+    TRANSLATE_BASE = 9
 
+    RAISE_ARM_MAX_HEIGHT = 10
+    STAB_FOOD = 11
+    FEED = 12
+    RAISE_ARM_FOOD = 13
+    CENTER_BASE = 14
+    MOVE_WRIST_FEED = 15
+
+    @staticmethod
+    def get_feeding_state_machine() -> List[List[MoveToPregraspState]]:
+        """
+        Get the feeding state machine.
+
+        Returns
+        -------
+        List[List[MoveToPregraspState]]: The feeding state machine. Each list of states
+            (axis 0) will be executed sequentially. Within a list of states (axis 1), the
+            states will be executed in parallel.
+        """
+        states = []
+        states.append([MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL])
+        states.append([MoveToPregraspState.RAISE_ARM_MAX_HEIGHT])
+        states.append([MoveToPregraspState.TRANSLATE_BASE])
+        
+        # Move to bite pre-stab position
+        states.append([MoveToPregraspState.LENGTHEN_ARM])
+        states.append([MoveToPregraspState.MOVE_WRIST_FEED])
+        # states.append([MoveToPregraspState.LIFT_ARM])
+
+        # Feed
+        states.append([MoveToPregraspState.STAB_FOOD])
+        # states.append([MoveToPregraspState.FEED])
+        states.append([MoveToPregraspState.TERMINAL])
+
+        return states
+
+    @staticmethod
+    def get_feed_state_machine() -> List[List[MoveToPregraspState]]:
+        """
+        Get the feeding state machine.
+
+        Returns
+        -------
+        List[List[MoveToPregraspState]]: The feeding state machine. Each list of states
+            (axis 0) will be executed sequentially. Within a list of states (axis 1), the
+            states will be executed in parallel.
+        """
+        states = []
+        states.append([MoveToPregraspState.RAISE_ARM_MAX_HEIGHT])
+        states.append([MoveToPregraspState.CENTER_BASE])
+        states.append([MoveToPregraspState.FEED])
+        states.append([MoveToPregraspState.TERMINAL])
+
+        return states
+        
     @staticmethod
     def get_state_machine(
         horizontal_grasp: bool,
@@ -133,6 +192,14 @@ class MoveToPregraspState(Enum):
         # Configure the parameters depending on the state
         if self == MoveToPregraspState.TERMINAL:
             return None
+        elif self == MoveToPregraspState.RAISE_ARM_MAX_HEIGHT:
+            joints_for_position_control.update(get_feeding_configuration())
+        elif self == MoveToPregraspState.RAISE_ARM_FOOD:
+            joints_for_position_control.update(get_feeding_lift_configuration())
+        elif self == MoveToPregraspState.STAB_FOOD:
+            joints_for_position_control.update(get_stabbing_configuration())
+        elif self == MoveToPregraspState.FEED:
+            joints_for_position_control.update(get_feed_configuration())
         elif self == MoveToPregraspState.STOW_ARM_LENGTH_FULL:
             joints_for_position_control.update(get_stow_configuration([Joint.ARM_L0]))
         elif self == MoveToPregraspState.STOW_ARM_LENGTH_PARTIAL:
@@ -157,6 +224,30 @@ class MoveToPregraspState(Enum):
             joint_position_overrides.update(
                 get_pregrasp_wrist_configuration(horizontal_grasp)
             )
+        elif self == MoveToPregraspState.TRANSLATE_BASE:
+            joints_for_velocity_control += [Joint.BASE_TRANSLATION]
+            joint_position_overrides.update(
+                {
+                    joint: position
+                    for joint, position in ik_solution.items()
+                    if joint != Joint.BASE_TRANSLATION
+                }
+            )
+            joint_position_overrides.update(
+                get_pregrasp_wrist_configuration(horizontal_grasp)
+            )
+        elif self == MoveToPregraspState.CENTER_BASE:
+            joints_for_velocity_control += [Joint.BASE_TRANSLATION]
+            joint_position_overrides.update(
+                {
+                    joint: position
+                    for joint, position in ik_solution.items()
+                    if joint != Joint.BASE_TRANSLATION and joint != Joint.ARM_LIFT
+                }
+            )
+            joint_position_overrides.update(
+                get_pregrasp_wrist_configuration(horizontal_grasp)
+            )
 
             # Care about yaw error when error is large, but for final positioning,
             # care about x error. This is because our yaw is slightly off, so if
@@ -170,7 +261,7 @@ class MoveToPregraspState(Enum):
                 return cartesian_mask
 
         elif self == MoveToPregraspState.HEAD_PAN:
-            desired_base_rotation = ik_solution[Joint.BASE_ROTATION]
+            desired_base_rotation = 0 # ik_solution[Joint.BASE_ROTATION]
             curr_head_pan = controller.get_current_joints()[Joint.HEAD_PAN]
             # The head should rotate in the opposite direction of the base, to
             # keep the field of view roughly the same
@@ -189,6 +280,11 @@ class MoveToPregraspState(Enum):
             joints_for_position_control[Joint.ARM_LIFT] = ik_solution[Joint.ARM_LIFT]
         elif self == MoveToPregraspState.MOVE_WRIST:
             joints_for_position_control.update(get_gripper_configuration(closed=False))
+            joints_for_position_control.update(
+                get_pregrasp_wrist_configuration(horizontal_grasp)
+            )
+        elif self == MoveToPregraspState.MOVE_WRIST_FEED:
+            joints_for_position_control.update(get_gripper_configuration(closed=True))
             joints_for_position_control.update(
                 get_pregrasp_wrist_configuration(horizontal_grasp)
             )

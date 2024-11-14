@@ -338,23 +338,24 @@ const SidebarOptions = (props: OptionsProps) => {
 /** Options for the overhead camera video stream layout component. */
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.selectedDefinition as CameraViewDefinition;
-    const pd =
-        definition.children.length > 0 &&
-        definition.children[0].type == ComponentType.PredictiveDisplay;
-    const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
+    console.log(definition)
+    // const pd =
+    //     definition.children.length > 0 &&
+    //     definition.children[0].type == ComponentType.PredictiveDisplay;
+    // const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     const [showButtons, setShowButtons] = React.useState<boolean>(true);
 
-    function togglePredictiveDisplay() {
-        const newPdOn = !predictiveDisplayOn;
-        setPredictiveDisplayOn(newPdOn);
-        if (newPdOn) {
-            // Add predictive display to the stream
-            definition.children = [{ type: ComponentType.PredictiveDisplay }];
-        } else {
-            definition.children = [];
-        }
-        props.updateLayout();
-    }
+    // function togglePredictiveDisplay() {
+    //     const newPdOn = !predictiveDisplayOn;
+    //     setPredictiveDisplayOn(newPdOn);
+    //     if (newPdOn) {
+    //         // Add predictive display to the stream
+    //         definition.children = [{ type: ComponentType.PredictiveDisplay }];
+    //     } else {
+    //         definition.children = [];
+    //     }
+    //     props.updateLayout();
+    // }
 
     function toggleButtons() {
         setShowButtons(!showButtons);
@@ -504,9 +505,9 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             case ComponentType.CameraView:
                 (definition as ParentComponentDefinition).children = [];
                 break;
-            case ComponentType.Map:
-                (definition as MapDefinition).storageHandler = storageHandler;
-                break;
+            // case ComponentType.Map:
+            //     (definition as MapDefinition).storageHandler = storageHandler;
+            //     break;
         }
 
         props.onSelect(definition);

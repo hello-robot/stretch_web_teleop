@@ -13,12 +13,12 @@ import "operator/css/ButtonGrid.css";
 
 const BUTTON_NAMES = [
     "Forward",
-    "Backwards",
+    "Backward",
     "Turn Left",
     "Turn Right",
 
-    "Lift Up",
-    "Lift Down",
+    "Arm Up",
+    "Arm Down",
     "Extend Arm",
     "Retract Arm",
 

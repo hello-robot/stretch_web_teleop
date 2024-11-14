@@ -2,6 +2,7 @@ import React from "react";
 import { className } from "shared/util";
 import "operator/css/RadioGroup.css";
 import { isBrowser, isTablet } from "react-device-detect";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 
 export const RadioButton = (props: {
     label: string;
@@ -12,7 +13,7 @@ export const RadioButton = (props: {
     return (
         <div
             className={!isBrowser && !isTablet  ? "radio-btn-mobile" : "radio-btn"}
-            onClick={props.onClick}
+            onPointerDown={props.onClick}
         >
             <label key={props.label}>
                 <input
@@ -33,11 +34,8 @@ export const RadioButton = (props: {
                 )}
                 {props.functs.Delete && (
                     <span
-                        className="material-icons"
-                        onClick={() => props.functs.Delete!(props.label)}
-                    >
-                        delete_outline
-                    </span>
+                        onPointerDown={() => props.functs.Delete!(props.label)}
+                    ><DeleteOutline /></span>
                 )}
             </div>
         </div>

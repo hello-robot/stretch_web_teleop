@@ -51,6 +51,17 @@ class ObjectDetectionNode(Node):
             DetectObject, "detect_object", self.detect_objects_callback
         )
 
+        self.feeding_mode = False
+        self.feeding_mode_service = self.create_service(
+            SetBool, "feeding_mode", self.feeding_mode_callback
+        )
+
+    def feeding_mode_callback(self, req, res):
+        self.get_logger().info(f"Feeding mode service: {req.data}")
+        self.feeding_mode = req.data
+        res.success = True
+        return res
+
     def get_pixels_in_radius(self, center, radius):
         x, y = center
         
@@ -70,12 +81,41 @@ class ObjectDetectionNode(Node):
         
         return pixels
 
+    def find_minimum_encapsulating_box_for_selected(selected_bbox):
+        # Function to compute the area of a bounding box
+        def area(bbox):
+            x_min, y_min, x_max, y_max = bbox
+            return (x_max - x_min) * (y_max - y_min)
+        
+        # Initialize the minimum area and box to be None
+        min_area = float('inf')
+        min_area_box = None
+        
+        # Iterate over the candidate bounding boxes
+        for candidate in self.detected_objects:
+            # Find the minimum encapsulating box for the selected_bbox and the candidate
+            x_min = min(selected_bbox[0], candidate[0])
+            y_min = min(selected_bbox[1], candidate[1])
+            x_max = max(selected_bbox[2], candidate[2])
+            y_max = max(selected_bbox[3], candidate[3])
+            
+            # Calculate the area of the encapsulating box
+            encapsulating_box = [x_min, y_min, x_max, y_max]
+            box_area = area(encapsulating_box)
+            
+            # If this box has a smaller area, update the result
+            if box_area < min_area:
+                min_area = box_area
+                min_area_box = encapsulating_box
+        
+        return min_area_box
+        
     def detect_objects_callback(self, req, res):
         rotated_image = cv2.rotate(self.rgb_image, cv2.ROTATE_90_CLOCKWISE)
         self.detected_objects = []
         bboxes = []
         if req.data == True:
-            object_detections = self.model(rotated_image, device='cpu', conf=0.85, iou=0.9, stream=True)
+            object_detections = self.model(rotated_image, device='cpu', conf=0.75, iou=0.9, stream=True)
             self.detected_objects = []
             for detection in object_detections:
                 objects = detection.boxes
@@ -87,13 +127,13 @@ class ObjectDetectionNode(Node):
                     self.detected_objects.append([x_min, y_min, x_max, y_max])
 
                     bbox = BoundingBox2D()
-                    bbox.center.position.x = ((x_max + x_min)/2)/240.0
-                    bbox.center.position.y = ((y_max + y_min)/2)/424.0
-                    bbox.size_x = (x_max - x_min)/240.0
-                    bbox.size_y = (y_max - y_min)/424.0
+                    bbox.center.position.x = ((x_max + x_min)/2)/self.rgb_image.shape[0]
+                    bbox.center.position.y = ((y_max + y_min)/2)/self.rgb_image.shape[1]
+                    bbox.size_x = (x_max - x_min)/self.rgb_image.shape[0]
+                    bbox.size_y = (y_max - y_min)/self.rgb_image.shape[1]
                     bboxes.append(bbox)
 
-                    print([x_min, y_min, x_max, y_max], bbox.center.position.x, bbox.center.position.y)
+                    print([x_min, y_min, x_max, y_max], bbox.center.position.x, bbox.center.position.y, self.rgb_image.shape)
         res.boxes = bboxes
         return res
     

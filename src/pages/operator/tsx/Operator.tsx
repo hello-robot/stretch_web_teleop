@@ -308,6 +308,7 @@ export const Operator = (props: {
     const handleToggleCustomize = () => {
         if (customizing) {
             console.log("saving layout");
+            console.log(layout.current)
             props.storageHandler.saveCurrentLayout(layout.current);
         }
         setCustomizing(!customizing);

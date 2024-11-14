@@ -87,10 +87,10 @@ export class FirebaseStorageHandler extends StorageHandler {
                 .then(async (userData) => {
                     this.layouts = userData.layouts;
                     this.currentLayout = userData.currentLayout;
-                    this.mapPoses = userData.map_poses;
-                    this.mapPoseTypes = userData.map_pose_types;
-                    this.recordings = userData.recordings;
-                    this.textToSpeech = userData.text_to_speech;
+                    this.mapPoses = userData.map_poses || {};
+                    this.mapPoseTypes = userData.map_pose_types || {};
+                    this.recordings = userData.recordings || {};
+                    this.textToSpeech = userData.text_to_speech || [];
 
                     this.onReadyCallback();
                 })
@@ -183,6 +183,7 @@ export class FirebaseStorageHandler extends StorageHandler {
     }
 
     public saveMapPose(name: string, pose: ROSLIB.Transform, poseType: string) {
+        console.log(this.mapPoses)
         this.mapPoses[name] = pose;
         this.mapPoseTypes[name] = poseType;
         this.writeMapPoses(this.mapPoses);

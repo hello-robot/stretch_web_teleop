@@ -944,6 +944,7 @@ const UnderRealsenseButtons = (props: {
                                 value={String(voiceSelectedObject)}
                                 onChange={(event, value) => {
                                     let object: BoundingBox2D = detectedObjects[Number(value)]
+                                    console.log(object.center.position.x, object.center.position.y)
                                     props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
                                 }}
                                 disablePortal

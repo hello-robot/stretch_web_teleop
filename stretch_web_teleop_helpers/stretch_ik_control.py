@@ -107,46 +107,11 @@ class StretchIKControl:
         self.use_ik_optimizer = use_ik_optimizer
         self.initialized = False
 
-    def initialize(self):
+    def initialize(self, translation):
         """
         Initialize the StretchIKControl object.
         """
-        # Load the IK solver.
-        # We restrict IK to the base rotation, arm lift, and arm joints,
-        # to avoid non-ideal IK solutions that either take advantage of
-        # joint redundancies (e.g., base rotation and wrist yaw) or get
-        # stuck in the gimbal lock that occurs when the wrist pitch is
-        # -pi/2. Note that this also means we can only control the below
-        # joints with inverse jacobian control.
-        self.controllable_joints = [
-            Joint.BASE_ROTATION,
-            Joint.ARM_LIFT,
-            Joint.ARM_L0,  # The URDF uses the most distal of the telescoping joints
-        ]
-        self.base_ik_solver = PinocchioIKSolver(
-            self.urdf_path,
-            Frame.END_EFFECTOR_LINK.value,
-            [joint.value for joint in self.controllable_joints],
-        )
-        if self.use_ik_optimizer:
-            # In practice, I've found that this doesn't work at times when
-            # the base IK solver does. Perhaps it requires tuning.
-            self.ik_solver = PositionIKOptimizer(
-                ik_solver=self.base_ik_solver,
-                pos_error_tol=0.005,
-                ori_error_range=np.array([0.0, 0.0, 0.2]),
-            )
-        else:
-            self.ik_solver = self.base_ik_solver
-        self.all_joints_str = self.base_ik_solver.get_all_joint_names()
-        self.all_joints = [Joint(name) for name in self.all_joints_str]
-        # Store the control gains
-        # NOTE: The CMU implementation had controller gains of 0.2 on the
-        # telescoping arm joints and 1.0 otherwise, but for this implementation
-        # 1.0 everywhere seems to work fine.
-        self.K = np.eye(len(self.all_joints), dtype=float)
-        base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
-        self.K[base_rotation_i, base_rotation_i] = 1.0
+        self.set_mode(translation)
 
         # Subscribe to the robot's joint limits and state
         self.latest_joint_limits_lock = threading.Lock()
@@ -197,7 +162,55 @@ class StretchIKControl:
         )
 
         self.initialized = True
+        self.feeding_mode = False
         return True
+
+    def set_mode(self, feeding_mode: bool):
+        self.feeding_mode = feeding_mode
+        base_joint = Joint.BASE_TRANSLATION if feeding_mode else Joint.BASE_ROTATION
+
+        self.controllable_joints = [
+            base_joint,
+            Joint.ARM_LIFT,
+            Joint.ARM_L0,  # The URDF uses the most distal of the telescoping joints
+        ]
+
+        # Load the IK solver.
+        # We restrict IK to the base rotation, arm lift, and arm joints,
+        # to avoid non-ideal IK solutions that either take advantage of
+        # joint redundancies (e.g., base rotation and wrist yaw) or get
+        # stuck in the gimbal lock that occurs when the wrist pitch is
+        # -pi/2. Note that this also means we can only control the below
+        # joints with inverse jacobian control.
+        self.base_ik_solver = PinocchioIKSolver(
+            self.urdf_path,
+            Frame.END_EFFECTOR_LINK.value,
+            [joint.value for joint in self.controllable_joints],
+        )
+        if self.use_ik_optimizer:
+            # In practice, I've found that this doesn't work at times when
+            # the base IK solver does. Perhaps it requires tuning.
+            self.ik_solver = PositionIKOptimizer(
+                ik_solver=self.base_ik_solver,
+                pos_error_tol=0.005,
+                ori_error_range=np.array([0.0, 0.0, 0.2]),
+            )
+        else:
+            self.ik_solver = self.base_ik_solver
+        self.all_joints_str = self.base_ik_solver.get_all_joint_names()
+        self.all_joints = [Joint(name) for name in self.all_joints_str]
+        # Store the control gains
+        # NOTE: The CMU implementation had controller gains of 0.2 on the
+        # telescoping arm joints and 1.0 otherwise, but for this implementation
+        # 1.0 everywhere seems to work fine.
+        self.K = np.eye(len(self.all_joints), dtype=float)
+
+        if feeding_mode:
+            base_translation_i = self.all_joints.index(Joint.BASE_TRANSLATION)
+            self.K[base_translation_i, base_translation_i] = 1.0
+        else:
+            base_rotation_i = self.all_joints.index(Joint.BASE_ROTATION)
+            self.K[base_rotation_i, base_rotation_i] = 1.0
 
     def __load_joint_limits(self, speed_profile: SpeedProfile) -> bool:
         """
@@ -270,7 +283,7 @@ class StretchIKControl:
                     )
                     max_abs_vel = 0.0
                     min_abs_vel = 0.0
-            elif joint_name == Joint.BASE_ROTATION:
+            elif joint_name == Joint.BASE_ROTATION or joint_name == Joint.BASE_TRANSLATION:
                 # https://github.com/hello-robot/stretch_visual_servoing/blob/f99342/normalized_velocity_control.py#L21
                 max_abs_vel = 0.5  # rad/s
                 min_abs_vel = 0.05  # rad/s
@@ -297,6 +310,7 @@ class StretchIKControl:
                 joint_name = Joint.ARM_L0
             self.joint_pos_lim[joint_name] = (min_pos, max_pos)
         self.joint_pos_lim[Joint.BASE_ROTATION] = (-np.pi, np.pi)
+        self.joint_pos_lim[Joint.BASE_TRANSLATION] = (-0.5, 0.5)
 
         return True
 
@@ -573,7 +587,7 @@ class StretchIKControl:
         move_base = False
         move_arm = False
         for joint_name in articulated_joints:
-            if joint_name == Joint.BASE_ROTATION:
+            if joint_name == Joint.BASE_ROTATION or joint_name == Joint.BASE_TRANSLATION:
                 move_base = True
             else:
                 move_arm = True
@@ -955,7 +969,10 @@ class StretchIKControl:
         # Send base commands
         if move_base:
             base_vel = Twist()
-            base_vel.angular.z = clipped_velocities[Joint.BASE_ROTATION]
+            if self.feeding_mode:
+                base_vel.linear.x = clipped_velocities[Joint.BASE_TRANSLATION]
+            else:
+                base_vel.angular.z = clipped_velocities[Joint.BASE_ROTATION]
             self.base_vel_pub.publish(base_vel)
             return True
 

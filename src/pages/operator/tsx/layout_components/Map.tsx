@@ -26,6 +26,9 @@ import { PopupModal } from "../basic_components/PopupModal";
 import { Tooltip } from "operator/tsx/static_components/Tooltip";
 import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
+import PlayCircle from "@mui/icons-material/PlayCircle";
+import Save from "@mui/icons-material/Save";
+import Cancel from "@mui/icons-material/Cancel";
 
 export enum MapFunction {
     GetMap,
@@ -93,10 +96,11 @@ export const Map = (props: CustomizableComponentProps) => {
             occupancyGridMap.width,
             occupancyGridMap.height,
         );
+        console.log(map.info.width, map.info.height)
         setOccupanyGrid(occupancyGridMap);
     }, []);
 
-    function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
+    function handleSelect(event: React.TouchEvent<HTMLDivElement>) {
         event.stopPropagation();
         props.sharedState.onSelect(props.definition, props.path);
     }
@@ -107,7 +111,7 @@ export const Map = (props: CustomizableComponentProps) => {
             return selectGoal;
         };
     }, []);
-
+    
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
             MapFunction.GetMap,
@@ -187,7 +191,7 @@ export const Map = (props: CustomizableComponentProps) => {
             <div
                 className={!isBrowser && !isTablet  ? "mobile-map-container" : "map-container"}
             >
-                {isBrowser || isTablet ? <h4 className="map-title">Map</h4> : <></>}
+                {/* {isBrowser || isTablet ? <h4 className="map-title">Map</h4> : <></>} */}
                 <div
                     id="map"
                     className={className("map", {
@@ -195,7 +199,7 @@ export const Map = (props: CustomizableComponentProps) => {
                         selected,
                         active,
                     })}
-                    onClick={handleSelect}
+                    onTouchStart={handleSelect}
                 ></div>
                 {
                     isBrowser || isTablet && (
@@ -246,6 +250,16 @@ const UnderMapButtons = (props: {
         SelectedLabel: (label: string) =>
             setSelectedIdx(props.functs.GetSavedPoseNames().indexOf(label)),
     };
+
+    underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
+        props.functs.DisplayGoalMarker(pose);
+        props.functs.NavigateToAruco(selectedIdx);
+        setPlay(true);
+        setSelectGoal(false);
+        props.functs
+            .GoalReached()
+            .then((goalReached) => setPlay(false));
+    })
 
     const SavePoseModal = (props: {
         functs: UnderMapFunctions;
@@ -342,18 +356,18 @@ const UnderMapButtons = (props: {
                             } else if (!play && selectedIdx != undefined) {
                                 let pose: ROSLIB.Vector3 =
                                     props.functs.LoadGoal(selectedIdx)!;
-                                props.functs.DisplayGoalMarker(pose);
-                                props.functs.NavigateToAruco(selectedIdx);
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
+                                // props.functs.DisplayGoalMarker(pose);
+                                // props.functs.NavigateToAruco(selectedIdx);
+                                // setPlay(true);
+                                // setSelectGoal(false);
+                                // props.functs
+                                //     .GoalReached()
+                                //     .then((goalReached) => setPlay(false));
                             }
                         }}
                     >
                         <span>Start</span>
-                        <span className="material-icons">play_circle</span>
+                        <PlayCircle />
                     </button>
                 )}
                 {play && (
@@ -365,7 +379,7 @@ const UnderMapButtons = (props: {
                         }}
                     >
                         <span>Cancel</span>
-                        <span className="material-icons">cancel</span>
+                        <Cancel/>
                     </button>
                 )}
                 <button
@@ -380,7 +394,7 @@ const UnderMapButtons = (props: {
                     }}
                 >
                     <span hidden={props.hideLabels}>Save new destination</span>
-                    <span className="material-icons">save</span>
+                    <Save/>
                 </button>
             </div>
             <RadioGroup functs={radioFuncts} />
@@ -422,13 +436,13 @@ const UnderMapButtons = (props: {
                             } else if (!play && selectedIdx != undefined) {
                                 let pose: ROSLIB.Vector3 =
                                     props.functs.LoadGoal(selectedIdx)!;
-                                props.functs.DisplayGoalMarker(pose);
-                                props.functs.NavigateToAruco(selectedIdx);
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
+                                // props.functs.DisplayGoalMarker(pose);
+                                // props.functs.NavigateToAruco(selectedIdx);
+                                // setPlay(true);
+                                // setSelectGoal(false);
+                                // props.functs
+                                //     .GoalReached()
+                                //     .then((goalReached) => setPlay(false));
                             }
                         }}
                     >

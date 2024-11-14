@@ -14,6 +14,7 @@ import {
     TABLET_ORIENTATION_PORTRAIT,
     StretchTool,
     BoundingBox2D,
+    findMinimumEncapsulatingBoxForSelected,
 } from "../../../../shared/util";
 import { stretchTool } from "..";
 import React from "react";
@@ -46,6 +47,7 @@ export enum UnderVideoButton {
     RealsenseStopShowTablet = "Stop Show Tablet",
     RealsenseShowTabletGoalReached = "Show Tablet Goal Reached",
     VoiceSelectObject = "Voice Select Object",
+    VoiceSelectBite = "Voice Select Bite",
     VoiceMoveToPregraspHorizontal = "Voice Gripper Horizonal",
     VoiceMoveToPregraspVertical = "Voice Gripper Vertical",
 }
@@ -330,6 +332,40 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                         if (value < this.detectedObjects.length) {
                             this.selectedObjectCallback(value)
                             this.selectedObject = value;
+                        }
+                    }
+                };
+            case UnderVideoButton.VoiceSelectBite:
+                return {
+                    set: (value: number) => {
+                        if (value < this.detectedObjects.length) {
+                            this.selectedObjectCallback(value)
+                            this.selectedObject = value;
+                            let bbox: BoundingBox2D = this.detectedObjects[this.selectedObject]
+                            let encapsulatingBox: BoundingBox2D = findMinimumEncapsulatingBoxForSelected(bbox, this.detectedObjects)
+                            let plate_x = encapsulatingBox.center.position.x + (encapsulatingBox.center.position.x - bbox.center.position.x)
+                            console.log(this.detectedObjects.indexOf(bbox), this.detectedObjects.indexOf(encapsulatingBox))
+                            console.log(bbox.center.position.x, encapsulatingBox.center.position.x, plate_x)
+                            this.provideFunctions(
+                                UnderVideoButton.StartMoveToPregraspVertical
+                            ).onClick([bbox.center.position.x, bbox.center.position.y])
+                            this.provideFunctions(
+                                UnderVideoButton.DetectObjects,
+                            ).onCheck!(false);
+                            this.provideFunctions(
+                                UnderVideoButton.MoveToPregraspGoalReached
+                            ).getFuture!().then(() => {
+                                this.provideFunctions(
+                                    UnderVideoButton.StartMoveToPregraspVertical
+                                ).onClick([plate_x, bbox.center.position.y])
+                                this.provideFunctions(
+                                    UnderVideoButton.MoveToPregraspGoalReached
+                                ).getFuture!().then(() => {
+                                    this.provideFunctions(
+                                        UnderVideoButton.DetectObjects,
+                                    ).onCheck!(true);
+                                });
+                            });
                         }
                     }
                 };

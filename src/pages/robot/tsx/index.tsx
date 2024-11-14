@@ -314,6 +314,9 @@ function handleMessage(message: WebRTCMessage) {
         case "setDetectObjects":
             robot.detectObjects(message.toggle);
             break;
+        case "setFeedingMode":
+            robot.setFeedingMode(message.toggle);
+            break;
         case "setRunStop":
             robot.setRunStop(message.toggle);
             break;

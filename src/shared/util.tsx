@@ -297,10 +297,27 @@ export interface Point2D {
     y: number;
 }
 
+export const STOW_ARM_WRIST_GRIPPER: RobotPose = {
+    wrist_extension: 0.0,
+    joint_wrist_roll: 0.0,
+    joint_wrist_pitch: -0.497,
+    joint_wrist_yaw: 3.19579,
+};
+
 export const STOW_WRIST_GRIPPER: RobotPose = {
     joint_wrist_roll: 0.0,
     joint_wrist_pitch: -0.497,
     joint_wrist_yaw: 3.19579,
+};
+
+export const FEEDING_CONFIGURATION: RobotPose = {
+    wrist_extension: 0.0,
+    joint_lift : 1.1,
+    joint_wrist_yaw: 0.0,
+    joint_wrist_pitch: 0.0,
+    joint_wrist_roll: 0.0,
+    joint_head_pan: -1.57,
+    joint_head_tilt: -1.29
 };
 
 export const STOW_WRIST_TABLET: RobotPose = {
@@ -526,6 +543,10 @@ export function className(baseName: string, flags: {}): string {
 }
   
 export function wordsToNumbers(input: string): number {
+    let num = parseInt(input)
+    console.log(input, num)
+    if (!isNaN(num)) return num;
+
     const numbersToWords = {
         0: "zero",
         1: "one",
@@ -580,3 +601,60 @@ export function wordsToNumbers(input: string): number {
 
     return result + currentNumber; // Add any remaining current number to the result
 };
+
+// Function to compute the area of a bounding box
+function computeArea(bbox: BoundingBox2D): number {
+    return bbox.size_x * bbox.size_y;
+}
+
+// Function to find the minimum encapsulating bounding box
+export function findMinimumEncapsulatingBoxForSelected(
+    selectedBBox: BoundingBox2D,
+    candidateBBoxes: BoundingBox2D[]
+): BoundingBox2D {
+    const filteredBBoxes = candidateBBoxes.filter((bbox) => bbox !== selectedBBox);
+
+    // Helper function to get the bounding box corner coordinates
+    const getBoundingBoxCoordinates = (bbox: BoundingBox2D): { x_min: number, y_min: number, x_max: number, y_max: number } => {
+        const x_min = bbox.center.position.x - bbox.size_x / 2;
+        const y_min = bbox.center.position.y - bbox.size_y / 2;
+        const x_max = bbox.center.position.x + bbox.size_x / 2;
+        const y_max = bbox.center.position.y + bbox.size_y / 2;
+        return { x_min, y_min, x_max, y_max };
+    };
+
+    // Convert selected bounding box to coordinates
+    const selectedCoords = getBoundingBoxCoordinates(selectedBBox);
+
+    let minArea = Infinity;
+    let minAreaBox: BoundingBox2D | null = null;
+
+    // Iterate over candidate bounding boxes and calculate the minimum encapsulating box
+    for (const candidate of filteredBBoxes) {
+        const candidateCoords = getBoundingBoxCoordinates(candidate);
+
+        // Find the minimum and maximum coordinates of the encapsulating box
+        const encapsulated = 
+        selectedCoords.x_min >= candidateCoords.x_min &&
+        selectedCoords.x_max <= candidateCoords.x_max &&
+        selectedCoords.y_min >= candidateCoords.y_min &&
+        selectedCoords.y_max <= candidateCoords.y_max
+
+        if (!encapsulated) continue;
+
+        // Calculate the area of the current encapsulating box
+        const boxArea = computeArea(candidate);
+
+        // If the area of this box is smaller, update the minimum area and box
+        if (boxArea < minArea) {
+            minArea = boxArea;
+            minAreaBox = candidate;
+        }
+    }
+
+    // Return the bounding box with the smaller area
+    if (minAreaBox === null) {
+        throw new Error("No valid bounding boxes found.");
+    }
+    return minAreaBox;
+}

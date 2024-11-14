@@ -487,20 +487,20 @@ def generate_launch_description():
     )
     ld.add_action(navigation_bringup_launch)
 
-    ld.add_action(
-        ExecuteProcess(
-            cmd=[
-                [
-                    FindExecutable(name="ros2"),
-                    " service call ",
-                    "/reinitialize_global_localization ",
-                    "std_srvs/srv/Empty ",
-                    '"{}"',
-                ]
-            ],
-            shell=True,
-        ),
-    )
+    # ld.add_action(
+    #     ExecuteProcess(
+    #         cmd=[
+    #             [
+    #                 FindExecutable(name="ros2"),
+    #                 " service call ",
+    #                 "/reinitialize_global_localization ",
+    #                 "std_srvs/srv/Empty ",
+    #                 '"{}"',
+    #             ]
+    #         ],
+    #         shell=True,
+    #     ),
+    # )
 
     ld.add_action(
         ExecuteProcess(
@@ -545,6 +545,13 @@ def generate_launch_description():
             parameters=[],
         )
         ld.add_action(move_to_pregrasp_node)
+
+        detect_objects_node = Node(
+            package="stretch_web_teleop",
+            executable="detect_objects.py",
+            name="detect_objects_node",
+        )
+        ld.add_action(detect_objects_node)
 
     # Text to speech
     text_to_speech_node = Node(
