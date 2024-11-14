@@ -40,7 +40,7 @@ source ~/ament_ws/install/setup.bash &>> $REDIRECT_LOGFILE
 source /usr/share/colcon_cd/function/colcon_cd.sh &>> $REDIRECT_LOGFILE
 
 echo "Freeing robot process..."
-/usr/bin/python3 $HOME/.local/bin/stretch_free_robot_process.py; &>> $REDIRECT_LOGFILE
+/usr/bin/python3 $HOME/.local/bin/stretch_free_robot_process.py &>> $REDIRECT_LOGFILE
 
 echo "Stopping previous instances..."
 ./stop_interface.sh &>> $REDIRECT_LOGFILE

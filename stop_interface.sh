@@ -9,7 +9,7 @@
 # but this would not arise if this script properly terminates
 # realsense nodes.
 screen -S "web_teleop_ros" -X stuff '^C'
-local t1=$?
+t1=$?
 sleep 3;
 if [[ $t1 -ne 0 ]]; then
     echo "Using pkill"

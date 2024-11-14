@@ -48,7 +48,7 @@ if [ $? -ne 0 ]; then
     echo_failure_help
 fi
 
-echo ""
+# echo ""
 cd $HOME/ament_ws/src/stretch_web_teleop
 ./start_web_server_and_robot_browser.sh -l $logdir $FIREBASE |& tee $logfile_node
 if [ $? -ne 0 ]; then
@@ -59,9 +59,9 @@ zip -r $logzip $logdir/ > /dev/null
 
 echo ""
 echo "#############################################"
-echo "DONE! WEB TELEOP IS UP."
+echo "DONE! WEB TELEOP IS UP!"
 echo "Visit the URL(s) below to see the web interface:"
-if [ -z $FIREBASE ]; then
+if [ "$FIREBASE" = "-f" ]; then
     echo "https://web.hello-robot.com/"
 else
     echo "https://localhost/operator"
