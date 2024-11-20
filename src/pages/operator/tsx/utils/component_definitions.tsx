@@ -9,6 +9,12 @@ export enum ActionMode {
     ClickClick = "Click-Click",
 }
 
+/** Enumerator for the possible task modes */
+export enum TaskMode {
+    Feeding = "Feeding",
+    Default = "Default",
+}
+
 /**
  * High-level type of the component
  */

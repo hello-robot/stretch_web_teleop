@@ -18,6 +18,7 @@ import {
     RealsenseVideoStreamDef,
     AdjustableOverheadVideoStreamDef,
     GripperVideoStreamDef,
+    TaskMode,
 } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import {
@@ -53,6 +54,7 @@ import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Popper } from "@mui/material";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -918,6 +920,76 @@ const UnderRealsenseButtons = (props: {
         setRerender(!rerender);
     }, [props.definition.selectObjectForMoveToPregrasp])
 
+    let feedingButtons = (
+        <React.Fragment>
+            <button
+                className="map-play-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.VoiceSelectBite,
+                    ).set(Number(voiceSelectedObject));
+                }}
+            >
+                <span>Grab Bite</span>
+            </button>
+        </React.Fragment>
+    )
+
+    let objectPregraspButtons = (
+        <React.Fragment>
+            <button
+                className="map-play-btn"
+                onPointerDown={() => {
+                    console.log(props.selectObjectScaledXY);
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseMoveToPregraspButtons[0]
+                    ).onClick!(props.selectObjectScaledXY);
+                    props.setSelectObjectScaledXY(null);
+                    props.setIsMovingToPregrasp(true);
+                    props.definition.selectObjectForMoveToPregrasp =
+                        false;
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.MoveToPregraspGoalReached
+                    ).getFuture!().then(() => {
+                        props.setIsMovingToPregrasp(false);
+                    });
+                    props.definition.selectDetectObjects =
+                        !props.definition.selectDetectObjects;
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.DetectObjects,
+                    ).onCheck!(props.definition.selectDetectObjects);
+                }}
+            >
+                <span>Horizontal</span>
+            </button>
+            <button
+                className="map-play-btn"
+                onPointerDown={() => {
+                    console.log(props.selectObjectScaledXY);
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseMoveToPregraspButtons[1]
+                    ).onClick!(props.selectObjectScaledXY);
+                    props.setSelectObjectScaledXY(null);
+                    props.setIsMovingToPregrasp(true);
+                    props.definition.selectObjectForMoveToPregrasp =
+                        false;
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.MoveToPregraspGoalReached
+                    ).getFuture!().then(() => {
+                        props.setIsMovingToPregrasp(false);
+                    });
+                    props.definition.selectDetectObjects =
+                        !props.definition.selectDetectObjects;
+                    underVideoFunctionProvider.provideFunctions(
+                        UnderVideoButton.DetectObjects,
+                    ).onCheck!(props.definition.selectDetectObjects);
+                } }
+            >
+                    <span>Vertical</span>
+            </button>
+        </React.Fragment>
+    )
+
     // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
     let moveToPregraspButtons = <></>;
     if (props.stretchTool === StretchTool.DEX_GRIPPER) {
@@ -943,6 +1015,7 @@ const UnderRealsenseButtons = (props: {
                             <Autocomplete
                                 value={String(voiceSelectedObject)}
                                 onChange={(event, value) => {
+                                    setVoiceSelectedObject(value)
                                     let object: BoundingBox2D = detectedObjects[Number(value)]
                                     console.log(object.center.position.x, object.center.position.y)
                                     props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
@@ -970,59 +1043,12 @@ const UnderRealsenseButtons = (props: {
                             <CancelIcon />
                         </button>
                     ) : (
-                        <><button
-                                className="map-play-btn"
-                                onPointerDown={() => {
-                                    console.log(props.selectObjectScaledXY);
-                                    underVideoFunctionProvider.provideFunctions(
-                                        realsenseMoveToPregraspButtons[0]
-                                    ).onClick!(props.selectObjectScaledXY);
-                                    props.setSelectObjectScaledXY(null);
-                                    props.setIsMovingToPregrasp(true);
-                                    props.definition.selectObjectForMoveToPregrasp =
-                                        false;
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.MoveToPregraspGoalReached
-                                    ).getFuture!().then(() => {
-                                        props.setIsMovingToPregrasp(false);
-                                    });
-                                    props.definition.selectDetectObjects =
-                                        !props.definition.selectDetectObjects;
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.DetectObjects,
-                                    ).onCheck!(props.definition.selectDetectObjects);
-                                }}
-                            >
-                                <span>Horizontal</span>
-                            </button><button
-                                className="map-play-btn"
-                                onPointerDown={() => {
-                                    console.log(props.selectObjectScaledXY);
-                                    underVideoFunctionProvider.provideFunctions(
-                                        realsenseMoveToPregraspButtons[1]
-                                    ).onClick!(props.selectObjectScaledXY);
-                                    props.setSelectObjectScaledXY(null);
-                                    props.setIsMovingToPregrasp(true);
-                                    props.definition.selectObjectForMoveToPregrasp =
-                                        false;
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.MoveToPregraspGoalReached
-                                    ).getFuture!().then(() => {
-                                        props.setIsMovingToPregrasp(false);
-                                    });
-                                    props.definition.selectDetectObjects =
-                                        !props.definition.selectDetectObjects;
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.DetectObjects,
-                                    ).onCheck!(props.definition.selectDetectObjects);
-                                } }
-                            >
-                                    <span>Vertical</span>
-                                </button></>
+                        FunctionProvider.taskMode == TaskMode.Feeding ? feedingButtons : objectPregraspButtons
                     )}
                 </div>
             </React.Fragment>
         )
+
         // moveToPregraspButtons = (
         //     <React.Fragment>
         //         <CheckToggleButton

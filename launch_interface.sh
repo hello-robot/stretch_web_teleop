@@ -1,71 +1,41 @@
 #!/bin/bash
 set -o pipefail
 
-while getopts m:t:f opt; do
-    case $opt in
-        m)
-            # Usage: ./launch_interface.sh -m $HELLO_FLEET_PATH/maps/<map_name>.yaml
-            if [[ -f $OPTARG ]]; then
-                MAP="-m $OPTARG"
-            fi
-            ;;
-        t)
-            # Usage: ./launch_interface.sh -t pyttsx3
-            TTS="-t $OPTARG"
-            ;;
-        f)
-            # Usage: ./launch_interface.sh -f
-            FIREBASE="-f"
-    esac
-done
+# Usage: ./launch_interface.sh -m $HELLO_FLEET_PATH/maps/<map_name>.yaml
+MAP_ARG=""
+if getopts ":m:" opt && [[ $opt == "m" && -f $OPTARG ]]; then
+    echo "Setting map..."
+    MAP_ARG="map_yaml:=$OPTARG"
+fi
 
-timestamp='stretch_web_teleop_'`date '+%Y%m%d%H%M'`;
-logdir="$HOME/stretch_user/log/web_teleop/$timestamp"
-logfile_ros="$logdir/start_ros2.txt"
-logfile_node="$logdir/start_web_server_and_robot_browser.txt"
-logzip="$logdir/stretch_web_teleop_logs.zip"
-mkdir -p $logdir
+# Usage: ./launch_interface.sh -t pyttsx3
+TTS_ARG=""
+if getopts ":t:" opt && [[ $opt == "t" ]]; then
+    echo "Setting tts engine..."
+    TTS_ARG="tts_engine:=$OPTARG"
+fi
 
-function echo_failure_help {
-    zip -r $logzip $logdir/ > /dev/null
-    echo ""
-    echo "#############################################"
-    echo "FAILURE. COULD NOT LAUNCH WEB TELEOP."
-    echo "Look at the troubleshooting guide for solutions to common issues: https://docs.hello-robot.com/0.3/getting_started/demos_web_teleop/#troubleshooting"
-    echo "or contact Hello Robot support and include $logzip"
-    echo "#############################################"
-    echo ""
-    exit 1
-}
-
-echo "#############################################"
-echo "LAUNCHING WEB TELEOP"
-echo "#############################################"
-
+REDIRECT_LOGFILE="$REDIRECT_LOGDIR/launch_interface.`date '+%Y%m%d%H%M'`_redirected.txt"
 cd $HOME/ament_ws/src/stretch_web_teleop
-./start_ros2.sh -l $logdir $MAP $TTS |& tee $logfile_ros
-if [ $? -ne 0 ]; then
-    echo_failure_help
-fi
+echo "Setup environment..."
+. /etc/hello-robot/hello-robot.conf
+export HELLO_FLEET_ID HELLO_FLEET_ID
+export HELLO_FLEET_PATH=$HOME/stretch_user
+source /opt/ros/humble/setup.bash 
+source ~/ament_ws/install/setup.bash 
+source /usr/share/colcon_cd/function/colcon_cd.sh 
 
-# echo ""
-cd $HOME/ament_ws/src/stretch_web_teleop
-./start_web_server_and_robot_browser.sh -l $logdir $FIREBASE |& tee $logfile_node
-if [ $? -ne 0 ]; then
-    echo_failure_help
-fi
+echo "Freeing robot process..."
+/usr/bin/python3 $HOME/.local/bin/stretch_free_robot_process.py 
 
-zip -r $logzip $logdir/ > /dev/null
+echo "Stopping previous instances..."
+./stop_interface.sh 
 
-echo ""
-echo "#############################################"
-echo "DONE! WEB TELEOP IS UP!"
-echo "Visit the URL(s) below to see the web interface:"
-if [ "$FIREBASE" = "-f" ]; then
-    echo "https://web.hello-robot.com/"
-else
-    echo "https://localhost/operator"
-    ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/https:\/\/\2\/operator/p'
-fi
-echo "#############################################"
-echo ""
+echo "Reload USB bus..."
+sudo udevadm control --reload-rules && sudo udevadm trigger 
+
+echo "Start ROS2..."
+sleep 2;
+screen -dm -S "web_teleop_ros" ros2 launch stretch_web_teleop web_interface.launch.py $MAP_ARG $TTS_ARG 
+sleep 3;
+./start_web_server_and_robot_browser.sh
