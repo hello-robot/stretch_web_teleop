@@ -14,6 +14,7 @@ import {
     LayoutDefinition,
     LayoutGridDefinition,
     RealsenseVideoStreamDef,
+    TaskMode,
 } from "./utils/component_definitions";
 import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
 import {
@@ -21,6 +22,7 @@ import {
     underMapFunctionProvider,
     underVideoFunctionProvider,
     homeTheRobotFunctionProvider,
+    voiceFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
 } from ".";
@@ -46,8 +48,9 @@ import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
-import { VoiceCommands } from "./static_components/VoiceCommands";
+import { VoiceCommandFunction, VoiceCommands } from "./static_components/VoiceCommands";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
+import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -376,7 +379,15 @@ export const Operator = (props: {
                     showActive
                     placement="bottom"
                 />
-                <AudioControl remoteStreams={remoteStreams} />
+                <CheckToggleButton
+                    checked={FunctionProvider.taskMode == TaskMode.Feeding || false}
+                    onClick={() => {
+                        FunctionProvider.updateTaskMode()
+                        updateLayout()
+                    }}
+                    label="Feeding Mode"
+                />
+                {/* <AudioControl remoteStreams={remoteStreams} /> */}
                 <VoiceCommands
                     onUpdateVelocityScale=
                         {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}

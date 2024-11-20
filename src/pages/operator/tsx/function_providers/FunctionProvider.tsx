@@ -1,7 +1,7 @@
 import { RemoteRobot } from "shared/remoterobot";
 import { VelocityCommand } from "shared/commands";
-import { ValidJoints } from "shared/util";
-import { ActionMode } from "../utils/component_definitions";
+import { FEEDING_CONFIGURATION, STOW_WRIST_GRIPPER, ValidJoints } from "shared/util";
+import { ActionMode, TaskMode } from "../utils/component_definitions";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the
@@ -11,6 +11,7 @@ export abstract class FunctionProvider {
     protected static remoteRobot?: RemoteRobot;
     public static velocityScale: number;
     public static actionMode: ActionMode;
+    public static taskMode: TaskMode;
     public activeVelocityAction?: VelocityCommand;
     public velocityExecutionHeartbeat?: number; // ReturnType<typeof setInterval>
 
@@ -34,6 +35,7 @@ export abstract class FunctionProvider {
     static initialize(velocityScale: number, actionMode: ActionMode) {
         this.velocityScale = velocityScale;
         this.actionMode = actionMode;
+        this.taskMode = TaskMode.Default;
     }
 
     public incrementalBaseDrive(linVel: number, angVel: number) {
@@ -92,6 +94,18 @@ export abstract class FunctionProvider {
         if (this.velocityExecutionHeartbeat) {
             clearInterval(this.velocityExecutionHeartbeat);
             this.velocityExecutionHeartbeat = undefined;
+        }
+    }
+
+    static updateTaskMode() {
+        this.taskMode = this.taskMode == TaskMode.Feeding ? TaskMode.Default : TaskMode.Feeding
+        if (this.taskMode == TaskMode.Feeding) {
+            FunctionProvider.remoteRobot?.setRobotPose(
+                FEEDING_CONFIGURATION,
+            )
+            FunctionProvider.remoteRobot.setToggle("setFeedingMode", true)
+        } else {
+            FunctionProvider.remoteRobot.setToggle("setFeedingMode", false)
         }
     }
 }
