@@ -14,13 +14,27 @@ if getopts ":t:" opt && [[ $opt == "t" ]]; then
     TTS_ARG="tts_engine:=$OPTARG"
 fi
 
-stretch_free_robot_process.py;
-./stop_interface.sh
-sudo udevadm control --reload-rules && sudo udevadm trigger
-source /opt/ros/humble/setup.bash
-source ~/ament_ws/install/setup.bash
-source /usr/share/colcon_cd/function/colcon_cd.sh
+REDIRECT_LOGFILE="$REDIRECT_LOGDIR/launch_interface.`date '+%Y%m%d%H%M'`_redirected.txt"
+cd $HOME/ament_ws/src/stretch_web_teleop
+echo "Setup environment..."
+. /etc/hello-robot/hello-robot.conf
+export HELLO_FLEET_ID HELLO_FLEET_ID
+export HELLO_FLEET_PATH=$HOME/stretch_user
+source /opt/ros/humble/setup.bash 
+source ~/ament_ws/install/setup.bash 
+source /usr/share/colcon_cd/function/colcon_cd.sh 
+
+echo "Freeing robot process..."
+/usr/bin/python3 $HOME/.local/bin/stretch_free_robot_process.py 
+
+echo "Stopping previous instances..."
+./stop_interface.sh 
+
+echo "Reload USB bus..."
+sudo udevadm control --reload-rules && sudo udevadm trigger 
+
+echo "Start ROS2..."
 sleep 2;
-screen -dm -S "web_teleop_ros" ros2 launch stretch_web_teleop web_interface.launch.py $MAP_ARG $TTS_ARG
+screen -dm -S "web_teleop_ros" ros2 launch stretch_web_teleop web_interface.launch.py $MAP_ARG $TTS_ARG 
 sleep 3;
-~/ament_ws/src/stretch_web_teleop/start_web_server_and_robot_browser.sh
+./start_web_server_and_robot_browser.sh
