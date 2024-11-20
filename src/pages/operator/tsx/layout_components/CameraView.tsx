@@ -829,9 +829,46 @@ const UnderAdjustableOverheadButtons = (props: {
         }
     }, [props.definition.predictiveDisplay])
 
+    let lookButtons = (
+        <div className="inline-buttons">
+            {/* <span>Look: </span> */}
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[0],
+                    ).onClick!();
+                }}
+            >
+                Look Ahead
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[1],
+                    ).onClick!();
+                }}
+            >
+                Look At Base
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[2],
+                    ).onClick!();
+                }}
+            >
+                Look At Gripper
+            </button>
+        </div>
+    )
+
     return (
         <React.Fragment>
-            <AccordionSelect
+            {lookButtons}
+            {/* <AccordionSelect
                 title="Look..."
                 possibleOptions={realsenseButtons.map((button) => {
                     if (button === UnderVideoButton.LookAtGripper) {
@@ -844,8 +881,8 @@ const UnderAdjustableOverheadButtons = (props: {
                         realsenseButtons[idx],
                     ).onClick!();
                 }}
-            />
-            <CheckToggleButton
+            /> */}
+            {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
                     props.definition.followGripper =
@@ -856,7 +893,7 @@ const UnderAdjustableOverheadButtons = (props: {
                     ).onCheck!(props.definition.followGripper);
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
-            />
+            /> */}
             <CheckToggleButton
                 checked={props.definition.predictiveDisplay || false}
                 onClick={() => {
@@ -919,6 +956,42 @@ const UnderRealsenseButtons = (props: {
         props.setSelectObjectScaledXY(null);
         setRerender(!rerender);
     }, [props.definition.selectObjectForMoveToPregrasp])
+
+    let lookButtons = (
+        <div className="inline-buttons">
+            {/* <span>Look: </span> */}
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[0],
+                    ).onClick!();
+                }}
+            >
+                Look Ahead
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[1],
+                    ).onClick!();
+                }}
+            >
+                Look At Base
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[2],
+                    ).onClick!();
+                }}
+            >
+                Look At Gripper
+            </button>
+        </div>
+    )
 
     let feedingButtons = (
         <React.Fragment>
@@ -995,20 +1068,6 @@ const UnderRealsenseButtons = (props: {
     if (props.stretchTool === StretchTool.DEX_GRIPPER) {
         moveToPregraspButtons = (
             <React.Fragment>
-                <CheckToggleButton
-                    checked={
-                        props.definition.selectDetectObjects || false
-                    }
-                    onClick={() => {
-                        props.definition.selectDetectObjects =
-                            !props.definition.selectDetectObjects;
-                        setRerender(!rerender);
-                        underVideoFunctionProvider.provideFunctions(
-                            UnderVideoButton.DetectObjects,
-                        ).onCheck!(props.definition.selectDetectObjects);
-                    }}
-                    label="Detect Objects"
-                />
                 <div className="inline-buttons">
                     <div className="autocomplete"
                             onClick={() => { setRerender(!rerender)}}>
@@ -1021,7 +1080,7 @@ const UnderRealsenseButtons = (props: {
                                     props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
                                 }}
                                 disablePortal
-                                options={detectedObjectsKeys}
+                                options={detectedObjectsKeys.reverse()}
                                 sx={{ width: '100%', padding: '0' }}
                                 renderInput={(params) => <TextField {...params} label="Object #" />}
                                 PopperComponent={(props) => (
@@ -1187,7 +1246,8 @@ const UnderRealsenseButtons = (props: {
 
     return (
         <React.Fragment>
-            <AccordionSelect
+            {lookButtons}
+            {/* <AccordionSelect
                 title="Look..."
                 possibleOptions={realsenseButtons.map((button) => {
                     if (button === UnderVideoButton.LookAtGripper) {
@@ -1200,8 +1260,8 @@ const UnderRealsenseButtons = (props: {
                         realsenseButtons[idx],
                     ).onClick!();
                 }}
-            />
-            <CheckToggleButton
+            /> */}
+            {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
                     props.definition.followGripper =
@@ -1212,19 +1272,35 @@ const UnderRealsenseButtons = (props: {
                     ).onCheck!(props.definition.followGripper);
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
-            />
-            <CheckToggleButton
-                checked={props.definition.depthSensing || false}
-                onClick={() => {
-                    props.definition.depthSensing =
-                        !props.definition.depthSensing;
-                    setRerender(!rerender);
-                    underVideoFunctionProvider.provideFunctions(
-                        UnderVideoButton.RealsenseDepthSensing,
-                    ).onCheck!(props.definition.depthSensing);
-                }}
-                label="Depth Sensing"
-            />
+            /> */}
+            <div className="inline-buttons">
+                <CheckToggleButton
+                    checked={props.definition.depthSensing || false}
+                    onClick={() => {
+                        props.definition.depthSensing =
+                            !props.definition.depthSensing;
+                        setRerender(!rerender);
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.RealsenseDepthSensing,
+                        ).onCheck!(props.definition.depthSensing);
+                    }}
+                    label="Depth Sensing"
+                />
+                <CheckToggleButton
+                    checked={
+                        props.definition.selectDetectObjects || false
+                    }
+                    onClick={() => {
+                        props.definition.selectDetectObjects =
+                            !props.definition.selectDetectObjects;
+                        setRerender(!rerender);
+                        underVideoFunctionProvider.provideFunctions(
+                            UnderVideoButton.DetectObjects,
+                        ).onCheck!(props.definition.selectDetectObjects);
+                    }}
+                    label="Detect Objects"
+                />
+            </div>
             {moveToPregraspButtons}
             {showTabletButtons}
             {/* <CheckToggleButton
@@ -1273,9 +1349,34 @@ const UnderGripperButtons = (props: {
     ).get!();
     const [rerender, setRerender] = React.useState<boolean>(false);
 
+    let quickActionButtons = (
+        <div className="inline-buttons">
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        wristButtons[0],
+                    ).onClick!();
+                }}
+            >
+                Center Wrist
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        wristButtons[1],
+                    ).onClick!();
+                }}
+            >
+                Tuck Wrist
+            </button>
+        </div>
+    )
+
     return (
         <React.Fragment>
-            <AccordionSelect
+            {/* <AccordionSelect
                 title="Quick Actions..."
                 possibleOptions={Object.values(wristButtons)}
                 onChange={(idx: number) => {
@@ -1283,38 +1384,41 @@ const UnderGripperButtons = (props: {
                         wristButtons[idx],
                     ).onClick!();
                 }}
-            />
+            /> */}
+            {quickActionButtons}
             {props.betaTeleopKit ? (
                 <></>
             ) : (
                 <React.Fragment>
-                    <CheckToggleButton
-                        checked={props.definition.expandedGripperView || false}
-                        onClick={() => {
-                            props.definition.expandedGripperView =
-                                !props.definition.expandedGripperView;
-                            setRerender(!rerender);
-                            underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.ExpandedGripperView,
-                            ).onCheck!(props.definition.expandedGripperView!);
-                        }}
-                        label="Expanded Gripper View"
-                    />
-                    {(props.stretchTool === StretchTool.GRIPPER ||
-                        props.stretchTool === StretchTool.DEX_GRIPPER) && (
+                    <div className="inline-buttons">
                         <CheckToggleButton
-                            checked={props.definition.depthSensing || false}
+                            checked={props.definition.expandedGripperView || false}
                             onClick={() => {
-                                props.definition.depthSensing =
-                                    !props.definition.depthSensing;
+                                props.definition.expandedGripperView =
+                                    !props.definition.expandedGripperView;
                                 setRerender(!rerender);
                                 underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.GripperDepthSensing,
-                                ).onCheck!(props.definition.depthSensing);
+                                    UnderVideoButton.ExpandedGripperView,
+                                ).onCheck!(props.definition.expandedGripperView!);
                             }}
-                            label="Depth Sensing"
+                            label="Expanded Gripper View"
                         />
-                    )}
+                        {(props.stretchTool === StretchTool.GRIPPER ||
+                            props.stretchTool === StretchTool.DEX_GRIPPER) && (
+                            <CheckToggleButton
+                                checked={props.definition.depthSensing || false}
+                                onClick={() => {
+                                    props.definition.depthSensing =
+                                        !props.definition.depthSensing;
+                                    setRerender(!rerender);
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.GripperDepthSensing,
+                                    ).onCheck!(props.definition.depthSensing);
+                                }}
+                                label="Gripper Depth Sensing"
+                            />
+                        )}
+                    </div>
                 </React.Fragment>
             )}
             {props.stretchTool === StretchTool.TABLET && (

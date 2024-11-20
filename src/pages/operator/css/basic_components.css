@@ -378,3 +378,13 @@ input[type="checkbox"] {
 .accordion-item:hover {
     background-image: linear-gradient(rgba(0, 0, 0, 0.15) 0 0);
 }
+
+.inline-buttons {
+    display: flex;
+}
+
+.quick-action-btn {
+    border-radius: 13px;
+    background: transparent;
+    border: 5px solid transparent;
+}
