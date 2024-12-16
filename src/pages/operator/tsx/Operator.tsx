@@ -51,6 +51,7 @@ import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 import { VoiceCommandFunction, VoiceCommands } from "./static_components/VoiceCommands";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
+import { BatteryBar } from "./static_components/BatteryBar";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -403,6 +404,7 @@ export const Operator = (props: {
                         FunctionProvider.velocityScale = newScale;
                     }}
                 />
+                <BatteryBar/>
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleToggleCustomize}

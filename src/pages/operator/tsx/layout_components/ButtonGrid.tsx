@@ -10,6 +10,7 @@ import {
 } from "./CustomizableComponent";
 import { className } from "shared/util";
 import "operator/css/ButtonGrid.css";
+import React from "react";
 
 const BUTTON_NAMES = [
     "Forward",
@@ -86,11 +87,13 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
             onClick={handleSelect}
         >
             {/* {BACKGROUND_COLORS} */}
-            {HEADER_NAMES.map((headerName, idx) => (
+            {/* {HEADER_NAMES.map((headerName, idx) => (
                 <p key={idx} style={{ gridArea: `header${idx}` }}>
                     {headerName}
                 </p>
-            ))}
+            ))} */}
+            <p key={0} style={{ gridArea: `a0` }}></p>
+            <p key={1} style={{ gridArea: `a1` }}></p>
             {BUTTON_NAMES.map((buttonName, idx) => {
                 const buttonFunction = BUTTON_FUNCTIONS[idx];
                 const buttonState: ButtonState =
