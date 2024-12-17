@@ -54,10 +54,10 @@
 }
 
 .button-grid button {
-    font-size: x-large;
+    font-size: larger;
     width: 100%;
     border-radius: 0px;
-    min-height: 4rem;
+    min-height: 3rem;
     height: 100%;
     justify-self: center;
     align-self: center;

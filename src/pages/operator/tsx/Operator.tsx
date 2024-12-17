@@ -389,14 +389,14 @@ export const Operator = (props: {
                     label="Feeding Mode"
                 />
                 {/* <AudioControl remoteStreams={remoteStreams} /> */}
-                <VoiceCommands
+                {/* <VoiceCommands
                     onUpdateVelocityScale=
                         {(newScale: number) => { setVelocityScale(newScale); FunctionProvider.velocityScale = newScale; }}
                     onUpdateActionMode =
                         {(newActionMode: ActionMode) => { setActionMode(newActionMode)} }
                     onToggleUnderVideoButtons = 
                         {(toggle: boolean, button: UnderVideoButton) => toggleUnderVideoButtons(toggle, button) }
-                />
+                /> */}
                 <SpeedControl
                     scale={velocityScale}
                     onChange={(newScale: number) => {
