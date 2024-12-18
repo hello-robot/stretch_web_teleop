@@ -52,6 +52,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Popper } from "@mui/material";
 import { FunctionProvider } from "../function_providers/FunctionProvider";
@@ -403,6 +404,7 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
             onMouseDown={functs.onClick}
             onMouseUp={functs.onRelease}
             onMouseLeave={functs.onLeave}
+            aria-label={props.direction}
         >
             <PlayCircleFilledIcon
                 className="panTiltIcon"
@@ -1071,7 +1073,25 @@ const UnderRealsenseButtons = (props: {
                 <div className="inline-buttons">
                     <div className="autocomplete"
                             onClick={() => { setRerender(!rerender)}}>
-                            <Autocomplete
+                            <TextField
+                                id="outlined-start-adornment"
+                                label="Object #"
+                                inputMode='numeric'
+                                sx={{  width: '100%', padding: '0' }}
+                                onChange={(event) => {
+                                    let value = event.target.value
+                                    setVoiceSelectedObject(value)
+                                    let object: BoundingBox2D = detectedObjects[Number(value)]
+                                    console.log(object.center.position.x, object.center.position.y)
+                                    props.setSelectObjectScaledXY([object.center.position.x, object.center.position.y])
+                                }}
+                                slotProps={{
+                                    htmlInput: {
+                                        pattern: '[0-9]*'
+                                    }
+                                }}
+                            />
+                            {/* <Autocomplete
                                 value={String(voiceSelectedObject)}
                                 onChange={(event, value) => {
                                     setVoiceSelectedObject(value)
@@ -1086,7 +1106,7 @@ const UnderRealsenseButtons = (props: {
                                 PopperComponent={(props) => (
                                     <Popper {...props} placement="top-start" />
                                 )}
-                            />
+                            /> */}
                     </div>
                     {props.isMovingToPregrasp ? (
                         <button

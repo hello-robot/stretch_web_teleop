@@ -143,6 +143,13 @@
     transform: translate(50%, 0%);
 }
 
+
+@media (max-width: 1200px) {
+    .autocomplete {
+        height: 2.75rem;
+    }
+}
+
 /* Realsense pan-tilt controls ************************************************/
 .realsense-pan-tilt-grid {
     width: 100%;

@@ -30,9 +30,10 @@
     }
 }
 
-@media screen and (orientation: landscape) and (max-device-width: 900px) {
+@media screen and (orientation: landscape) and (max-device-width: 1200px) {
     #layout-area,
     .tabs-content {
         overflow: scroll;
+        min-width: min-content;
     }
 }

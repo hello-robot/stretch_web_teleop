@@ -28,10 +28,10 @@ export enum ButtonPadButton {
     WristPitchDown = "Wrist pitch down",
     WristRollLeft = "Wrist roll left",
     WristRollRight = "Wrist roll right",
-    CameraTiltUp = "Camera tilt up",
-    CameraTiltDown = "Camera tilt down",
-    CameraPanLeft = "Camera pan left",
-    CameraPanRight = "Camera pan right",
+    CameraTiltUp = "Look up",
+    CameraTiltDown = "Look down",
+    CameraPanLeft = "Look left",
+    CameraPanRight = "Look right",
 }
 
 /** Array of the pan tilt buttons */

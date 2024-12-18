@@ -18,20 +18,20 @@ const BUTTON_NAMES = [
     "Turn Left",
     "Turn Right",
 
-    "Arm Up",
-    "Arm Down",
+    "Raise Arm",
+    "Lower Arm",
     "Extend Arm",
     "Retract Arm",
 
-    "Roll Left",
-    "Roll Right",
-    "Pitch Up",
-    "Pitch Down",
+    "Twist Left",
+    "Twist Right",
+    "Bend Up",
+    "Bend Down",
     "Rotate Left",
     "Rotate Right",
 
-    "Open Gripper",
-    "Close Gripper",
+    "Open",
+    "Close",
 ];
 
 const BUTTON_FUNCTIONS = [

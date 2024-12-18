@@ -33,6 +33,14 @@
     /* border-radius: var(--radius); */
 }
 
+@media screen and (orientation: landscape) and (max-device-width: 1200px) {
+    .button-grid button {
+        min-width: fit-content;
+        padding: 0rem 0.5rem 0rem 0.5rem;
+    }
+}
+
+
 .button-grid::after {
     border-radius: var(--radius);
 }
