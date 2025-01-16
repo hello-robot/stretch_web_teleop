@@ -5,7 +5,7 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
-import { isBrowser, isTablet } from "react-device-detect";
+import { isBrowser, isMobile, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -192,7 +192,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristRoll}
                             onChange={(e) => setWristRoll(e.target.checked)}
                         />
-                        <label>Wrist Roll</label>
+                        <label>Wrist Twist</label>
                     </li>
                     <li>
                         <input
@@ -203,7 +203,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristPitch}
                             onChange={(e) => setWristPitch(e.target.checked)}
                         />
-                        <label>Wrist Pitch</label>
+                        <label>Wrist Bend</label>
                     </li>
                     <li>
                         <input
@@ -214,7 +214,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristYaw}
                             onChange={(e) => setWristYaw(e.target.checked)}
                         />
-                        <label>Wrist Yaw</label>
+                        <label>Wrist Rotate</label>
                     </li>
                     <li>
                         <input
@@ -277,15 +277,19 @@ export const MovementRecorder = (props: {
         );
     };
 
-    // useEffect(() => {
-    //     if (props.isRecording == undefined) {
-    //         return;
-    //     } else if (props.isRecording) {
-    //         functions.Record();
-    //     } else {
-    //         setShowSaveRecordingModal(true);
-    //     }
-    // }, [props.isRecording]);
+    useEffect(() => {
+        if (isMobile) {
+            if (props.isRecording == undefined) {
+                return;
+            } else if (props.isRecording) {
+                setIsRecording(true);
+                setShowJointSelectionModal(true);
+            } else {
+                setIsRecording(false);
+                setShowSaveRecordingModal(true);
+            }
+        }
+    }, [props.isRecording]);
 
     if (props.globalRecord !== undefined && !props.globalRecord)
         return (

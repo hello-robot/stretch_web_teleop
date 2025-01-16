@@ -12,6 +12,14 @@
     width: 7rem;
 }
 
+.velocity-radio-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    vertical-align: middle;
+    align-items: center;
+}
+
 @media (max-width: 1000px) {
     #velocity-control-container button {
         width: auto;

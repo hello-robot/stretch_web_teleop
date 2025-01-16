@@ -43,6 +43,10 @@ import {
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { Alert } from "./basic_components/Alert";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import MapIcon from "@mui/icons-material/Map";
+import { SpeedControl } from "./static_components/SpeedControl";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -219,7 +223,14 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-                <div className="slider-container">
+                <SpeedControl
+                    scale={velocityScale}
+                    onChange={(newScale: number) => {
+                        setVelocityScale(newScale);
+                        FunctionProvider.velocityScale = newScale;
+                    }}
+                />
+                {/* <div className="slider-container">
                     <span className="label">Slow</span>
                     <input
                         type="range"
@@ -238,7 +249,7 @@ export const MobileOperator = (props: {
                         }}
                     />
                     <span className="label">Fast</span>
-                </div>
+                </div> */}
                 <TabGroup
                     tabLabels={["Drive", "Arm", "Gripper"]}
                     tabContent={[driveMode, armMode, gripperMode]}
@@ -288,7 +299,9 @@ export const MobileOperator = (props: {
                                     setCameraID(CameraViewId.realsense);
                             }}
                         >
-                            <span className="material-icons">photo_camera</span>
+                            <PhotoCameraIcon
+                                className="material-icons icon"
+                            />
                         </button>
                         <button
                             onPointerDown={() => {
@@ -296,7 +309,9 @@ export const MobileOperator = (props: {
                                 setHideControls(true);
                             }}
                         >
-                            <span className="material-icons">map</span>
+                            <MapIcon
+                                className="material-icons icon"
+                            />
                         </button>
                     </div>
                     {cameraID == CameraViewId.realsense && (
@@ -321,9 +336,7 @@ export const MobileOperator = (props: {
                     >
                         {!isRecording ? (
                             <>
-                                <span className="material-icons">
-                                    radio_button_checked
-                                </span>
+                                <RadioButtonCheckedIcon/>
                                 <i>Record</i>
                             </>
                         ) : (
@@ -361,10 +374,12 @@ export const MobileOperator = (props: {
                                 setHideControls(false);
                             }}
                         >
-                            <span className="material-icons">photo_camera</span>
+                            <PhotoCameraIcon
+                                className="material-icons icon"
+                            />
                         </button>
                     </div>
-                    <Map
+                    {/* <Map
                         {...{
                             path: "",
                             definition: {
@@ -373,7 +388,7 @@ export const MobileOperator = (props: {
                             } as MapDefinition,
                             sharedState: sharedState,
                         }}
-                    />
+                    /> */}
                 </div>
             </div>
         </div>
