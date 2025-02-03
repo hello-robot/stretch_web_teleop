@@ -8,6 +8,7 @@ import {
     MapDefinition,
 } from "./utils/component_definitions";
 import {
+    ActionState,
     className,
     ActionState as MoveBaseState,
     RemoteStream,
@@ -19,6 +20,7 @@ import {
     movementRecorderFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
+    homeTheRobotFunctionProvider,
 } from ".";
 import {
     ButtonPadButton,
@@ -47,6 +49,8 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import MapIcon from "@mui/icons-material/Map";
 import { SpeedControl } from "./static_components/SpeedControl";
+import { ScreenRecorder } from "./static_components/ScreenRecorder";
+import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -103,6 +107,12 @@ export const MobileOperator = (props: {
     underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
         setTabletOrientationRerender(!tabletOrientationRerender);
     });
+
+    const [robotNotHomed, setRobotNotHomed] =
+        React.useState<ActionState>(false);
+    homeTheRobotFunctionProvider.setIsHomedCallback(
+        (isHomed: ActionState) => setRobotNotHomed(!isHomed)
+    );
 
     function moveBaseStateCallback(state: MoveBaseState) {
         setMoveBaseState(state);
@@ -278,7 +288,7 @@ export const MobileOperator = (props: {
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
-                {showAlert ? (
+                {/* {showAlert ? (
                     <div className="mobile-alert">
                         <Alert type="error">
                             <span>Beta feature, use at your own risk</span>
@@ -286,7 +296,22 @@ export const MobileOperator = (props: {
                     </div>
                 ) : (
                     <></>
+                )} */}
+                {robotNotHomed && (
+                    <div className="operator-collision-alerts">
+                        <div
+                            className={className("mobile-alert", {
+                                fadeIn: robotNotHomed,
+                                fadeOut: !robotNotHomed,
+                            })}
+                        >
+                            <HomeTheRobot
+                                hideLabels={false}
+                            />
+                        </div>
+                    </div>
                 )}
+                {/* <ScreenRecorder/> */}
                 <div className={className("controls", { hideControls })}>
                     <div className={"switch-camera"}>
                         <button
