@@ -96,7 +96,6 @@ export const Map = (props: CustomizableComponentProps) => {
             occupancyGridMap.width,
             occupancyGridMap.height,
         );
-        console.log(map.info.width, map.info.height)
         setOccupanyGrid(occupancyGridMap);
     }, []);
 
@@ -420,7 +419,7 @@ const UnderMapButtons = (props: {
                     }}
                 >
                     <span hidden={props.hideLabels}>Save new destination</span>
-                    <span className="material-icons">save</span>
+                    <Save/>
                 </div>
                 {!play && (
                     <div
@@ -447,7 +446,7 @@ const UnderMapButtons = (props: {
                         }}
                     >
                         <span>Play</span>
-                        <span className="material-icons">play_circle</span>
+                        <PlayCircle/>
                     </div>
                 )}
                 {play && (
@@ -459,7 +458,7 @@ const UnderMapButtons = (props: {
                         }}
                     >
                         <span>Cancel</span>
-                        <span className="material-icons">cancel</span>
+                        <Cancel/>
                     </div>
                 )}
                 <CheckToggleButton

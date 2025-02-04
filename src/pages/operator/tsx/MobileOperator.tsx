@@ -339,7 +339,7 @@ export const MobileOperator = (props: {
                             />
                         </button>
                     </div>
-                    {cameraID == CameraViewId.realsense && (
+                    {/* {cameraID == CameraViewId.realsense && (
                         <div className="depth-sensing">
                             <CheckToggleButton
                                 checked={depthSensing}
@@ -352,7 +352,7 @@ export const MobileOperator = (props: {
                                 label="Depth Sensing"
                             />
                         </div>
-                    )}
+                    )} */}
                     <button
                         className="record"
                         onPointerDown={() => {
@@ -404,7 +404,7 @@ export const MobileOperator = (props: {
                             />
                         </button>
                     </div>
-                    {/* <Map
+                    <Map
                         {...{
                             path: "",
                             definition: {
@@ -413,7 +413,7 @@ export const MobileOperator = (props: {
                             } as MapDefinition,
                             sharedState: sharedState,
                         }}
-                    /> */}
+                    />
                 </div>
             </div>
         </div>
