@@ -332,6 +332,12 @@ export const CENTER_WRIST: RobotPose = {
     joint_wrist_yaw: 0.0,
 };
 
+export const POINT_WRIST_DOWN: RobotPose = {
+    joint_wrist_roll: 0.0,
+    joint_wrist_pitch: -Math.PI / 2.0,
+    joint_wrist_yaw: 0.0,
+};
+
 export const TABLET_ORIENTATION_LANDSCAPE: RobotPose = {
     joint_wrist_roll: 0.0,
 };
