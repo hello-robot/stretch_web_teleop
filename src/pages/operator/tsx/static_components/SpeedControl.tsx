@@ -3,7 +3,7 @@ import "operator/css/SpeedControl.css";
 import { RadioGroup, Radio, FormControlLabel } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { Theme } from '@mui/material/styles';
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 
 /** Details of a velocity setting */
 type VelocityDetails = {
@@ -44,7 +44,7 @@ export const SpeedControl = (props: SpeedControlProps) => {
   /** Maps the velocity labels and speeds to radio buttons (for mobile) or buttons (for desktop) */
   const mapFunc = ({ scale, label }: VelocityDetails) => {
     const active = scale === props.scale;
-    if (isMobile) {
+    if (!isBrowser && !isTablet) {
       // Render radio buttons for mobile
       return (
         <FormControlLabel
@@ -73,7 +73,7 @@ export const SpeedControl = (props: SpeedControlProps) => {
 
   return (
     <div id="velocity-control-container">
-        {isMobile ? (
+        {!isBrowser && !isTablet ? (
             <div className="velocity-radio-group">
                 <span className="label">Slowest</span>
                 <RadioGroup

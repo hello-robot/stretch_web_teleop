@@ -5,7 +5,7 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
-import { isBrowser, isMobile, isTablet } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -278,7 +278,7 @@ export const MovementRecorder = (props: {
     };
 
     useEffect(() => {
-        if (isMobile) {
+        if (!isBrowser && !isTablet) {
             if (props.isRecording == undefined) {
                 return;
             } else if (props.isRecording) {

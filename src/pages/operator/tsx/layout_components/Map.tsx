@@ -332,56 +332,58 @@ const UnderMapButtons = (props: {
     return isBrowser || isTablet ? (
         <React.Fragment>
             <div className="map-fn-btns">
+                <div className="inline-buttons">
                 <CheckToggleButton
-                    checked={selectGoal}
-                    onClick={() => {
-                        props.handleSelectGoal(!selectGoal);
-                        setSelectGoal(!selectGoal);
-                        if (selectGoal) props.functs.RemoveGoalMarker();
-                        else radioFuncts.SelectedLabel(undefined);
-                    }}
-                    label="Select Goal"
-                />
-                {!play && (
-                    <button
-                        className="map-play-btn"
-                        onPointerDown={() => {
-                            if (!play && selectGoal) {
-                                props.functs.Play();
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
-                            } else if (!play && selectedIdx != undefined) {
-                                let pose: ROSLIB.Vector3 =
-                                    props.functs.LoadGoal(selectedIdx)!;
-                                // props.functs.DisplayGoalMarker(pose);
-                                // props.functs.NavigateToAruco(selectedIdx);
-                                // setPlay(true);
-                                // setSelectGoal(false);
-                                // props.functs
-                                //     .GoalReached()
-                                //     .then((goalReached) => setPlay(false));
-                            }
+                        checked={selectGoal}
+                        onClick={() => {
+                            props.handleSelectGoal(!selectGoal);
+                            setSelectGoal(!selectGoal);
+                            if (selectGoal) props.functs.RemoveGoalMarker();
+                            else radioFuncts.SelectedLabel(undefined);
                         }}
-                    >
-                        <span>Start</span>
-                        <PlayCircle />
-                    </button>
-                )}
-                {play && (
-                    <button
-                        className="map-cancel-btn"
-                        onPointerDown={() => {
-                            props.functs.CancelGoal();
-                            setPlay(!play);
-                        }}
-                    >
-                        <span>Cancel</span>
-                        <Cancel/>
-                    </button>
-                )}
+                        label="Select Goal"
+                    />
+                    {!play && (
+                        <button
+                            className="map-play-btn"
+                            onPointerDown={() => {
+                                if (!play && selectGoal) {
+                                    props.functs.Play();
+                                    setPlay(true);
+                                    setSelectGoal(false);
+                                    props.functs
+                                        .GoalReached()
+                                        .then((goalReached) => setPlay(false));
+                                } else if (!play && selectedIdx != undefined) {
+                                    let pose: ROSLIB.Vector3 =
+                                        props.functs.LoadGoal(selectedIdx)!;
+                                    // props.functs.DisplayGoalMarker(pose);
+                                    // props.functs.NavigateToAruco(selectedIdx);
+                                    // setPlay(true);
+                                    // setSelectGoal(false);
+                                    // props.functs
+                                    //     .GoalReached()
+                                    //     .then((goalReached) => setPlay(false));
+                                }
+                            }}
+                        >
+                            <span>Start</span>
+                            <PlayCircle />
+                        </button>
+                    )}
+                    {play && (
+                        <button
+                            className="map-cancel-btn"
+                            onPointerDown={() => {
+                                props.functs.CancelGoal();
+                                setPlay(!play);
+                            }}
+                        >
+                            <span>Cancel</span>
+                            <Cancel/>
+                        </button>
+                    )}
+                </div>
                 <button
                     className="map-save-btn"
                     onPointerDown={() => {
