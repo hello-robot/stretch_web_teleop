@@ -196,23 +196,6 @@ def generate_launch_description():
         stretch_has_nav_head_cam,
     )
 
-    # If the stretch tool has the configuration(s) that require the specialized URDFs
-    # (e.g., move-to-pregrasp, enabled with the dex wrist, requires the specialized URDFs),
-    # check if the specialized URDFs exist and raise an exception if they don't.
-    if stretch_tool == "eoa_wrist_dw3_tool_sg3":
-        specialized_urdf_path = os.path.join(
-            teleop_interface_package, "urdf", "stretch_base_rotation_ik.urdf"
-        )
-        if not os.path.exists(specialized_urdf_path):
-            raise FileNotFoundError(
-                "Could not find the specialized URDF, which is required for move-to-pregrasp, "
-                f"at {specialized_urdf_path}. Run the following:\n"
-                "    1. `colcon_cd stretch_web_teleop`\n"
-                "    2. `python3 prepare_specialized_urdf.py`\n"
-                "    3. `cd ~/ament_ws`\n"
-                "    4. `colcon build`"
-            )
-
     # Declare launch arguments
     params_file = DeclareLaunchArgument(
         "params",
@@ -474,11 +457,6 @@ def generate_launch_description():
         )
         ld.add_action(configure_video_streams_node)
 
-    rplidar_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([stretch_core_path, "/launch/rplidar.launch.py"])
-    )
-    ld.add_action(rplidar_launch)
-
     navigation_bringup_launch = GroupAction(
         condition=LaunchConfigurationNotEquals("map_yaml", ""),
         actions=[
@@ -499,7 +477,12 @@ def generate_launch_description():
                     "params_file": LaunchConfiguration("nav2_params_file"),
                     "use_rviz": "false",
                 }.items(),
-            )
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [stretch_core_path, "/launch/rplidar.launch.py"]
+                )
+            ),
         ],
     )
     ld.add_action(navigation_bringup_launch)
