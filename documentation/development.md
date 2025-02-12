@@ -33,7 +33,7 @@ export type cmd =
 
 ### `remoterobot.tsx`
 
-This file wraps the logic for receiving and transmitting commands, sensor streams, etc. over the WebRTC channels in a nice API for the operator browser. The interface creates a single instance of `RemoteRobot` and uses it for the duration of the session that it is connected to the robot. On the other end, the robot browser is listening for commands from / transmitting data to `RemoteRobot`. The robot-side logic can be found in `src/pages/robot/tsx/index.tsx`, which is described [at this section](#indextsx).
+This file wraps the logic for receiving and transmitting commands, sensor streams, etc. over the WebRTC channels in a nice API for the operator browser. You can think of `RemoteRobot` as the bridge between the operator browser and the robot. The interface creates a single instance of `RemoteRobot` and uses it for the duration of the session that it is connected to the robot. On the other end, the robot browser is listening for commands from / transmitting data to `RemoteRobot`. The robot-side logic can be found in `src/pages/robot/tsx/index.tsx`, which is described [at this section](#indextsx).
 
 Adding new capabilities to the web interface will involve adding functionality to the `RemoteRobot` class. Let's take homing the robot for example. We add a method to the class like so:
 
@@ -48,9 +48,24 @@ homeTheRobot() {
 
 At the top of the file, be sure to import `HomeTheRobotCommand` from [`commands.tsx`](#commandstsx).
 
-### `utils.tsx` and `webrtcconnections.tsx`
+### `utils.tsx`
 
-These files are not needed to add homing functionality. TODO: document these files elsewhere and link to it.
+*Note: This file is not needed to add homing functionality.* 
+
+This file contains shared custom message types, variables, and enums For example, this file defines the WebRTC message types:
+```js
+export type WebRTCMessage =
+    ...
+    | cmd;
+```
+
+`cmd` is imported from `commands.tsx`. This means all commands defined in `commands.tsx` can be transmitted over WebRTC. You do not need to edit this file for the homing functionality, you just need to define your command as described [in this section](#commandstsx).
+
+### `webrtcconnections.tsx`
+
+*Note: You should never have to touch this file!* 
+
+This file contains the code used for establishing a peer connection between the operator and robot browser and setting up data channels such that they can communicate.  
 
 ## `src/pages/robot`
 
@@ -153,6 +168,7 @@ export class Robot extends React.Component {
         this.switchToNavigationMode();
         this.moveBaseClient.sendGoal(pose);
     }
+    ...
 }
 ```
 
@@ -164,6 +180,7 @@ export class Robot extends React.Component {
     ...
 
     async onConnect() {
+        ...
         this.createHomeTheRobotService();
     }
 
@@ -212,7 +229,7 @@ remoteRobot.sensors.setBatteryFunctionProviderCallback(
 );
 ```
 
-We set up the "function providers" from the `src/pages/operator/tsx/function_providers` folder. Function providers connect the information from `RemoteRobot` with the UI components being rendered on the screen. Some function providers require a storage handler, which gives those components a way to persist data/preferences across sessions (e.g. if I change the layout, it should remember my preferred layout next time I launch the web interface).
+We set up the "function providers" from the `src/pages/operator/tsx/function_providers` folder. Function providers provide functionality to the UI components being rendered on the operatory browser by triggering robot behaviors through `RemoteRobot`. Some function providers require a storage handler, which gives those components a way to persist data/preferences across sessions (e.g. if I change the layout, it should remember my preferred layout next time I launch the web interface).
 
 ```js
 export var batteryVoltageFunctionProvider = new BatteryVoltageFunctionProvider();
@@ -289,7 +306,7 @@ You will need to import it as well, but you might see "unresolvable module" erro
 
 ### `function_providers/`
 
-The `function_providers/` folder contains all of the interface's "function providers", which are classes that literally provide functionality as anonmous functions, so that a UI component can map user actions to function calls. We'll create `HomeTheRobotFunctionProvider.tsx` with the following code:
+The `function_providers/` folder contains all of the interface's "function providers", which are classes that literally provide functionality as anonymous functions, so that a UI component can map user actions to function calls. We'll create `HomeTheRobotFunctionProvider.tsx` with the following code:
 
 ```js
 import { FunctionProvider } from "./FunctionProvider";
@@ -318,17 +335,17 @@ Notice that `HomeTheRobotFunctionProvider` is a subclass of `FunctionProvider`. 
 
 Notice that we use `remoteRobot` to call into `homeTheRobot()`, which we defined in [`shared/remoterobot.tsx`](#remoterobottsx).
 
-Lastly, notice that we import `HomeTheRobotFunction` from `layout_components/`. It is an interface that defines all the functions that the UI component will need. For this example, there's only one function: homing. We will define this interface in the next section.
+Lastly, notice that we import `HomeTheRobotFunction` from `static_components/`. It is an interface that defines all the functions that the UI component will need. For this example, there's only one function: homing. We will define this interface in the next section.
 
 ### Components
 
 There are three component folders:
 
-- `layout_components/`: for components that will be displayed as part of the interface's layout. These are typically top-level components.
-- `static_components/`: TODO - what is the difference between a static component and a basic component??
-- `basic_components/`: building block components that can be used within your own component to build up complex interfaces
+- `layout_components/`: for *customizable* components that will be displayed as part of the interface's layout. The components can be added, deleted or rearranged on the interface by toggling the "Customize" button.
+- `static_components/`: for *static* components that will be displayed as part of the interface's layout. These components are fixed on layout and cannot be moved--they are typically found in the header (e.g. speed controls, customize button, etc.)
+- `basic_components/`: building block components that can be used within your own component to build up complex interfaces (e.g. dropdowns, modals. alerts, etc.).
 
-The intended UX for the robot homing component is that it should appear prominently when the robot is un-homed. It won't be incorporated into other components, and it won't be dismissable by the user. Therefore, we decided to define the component in layout_components as `src/pages/operator/tsx/layout_components/HomeTheRobot.tsx`. The code looks like this:
+The intended UX for the robot homing component is that it should appear prominently when the robot is un-homed. It won't be incorporated into other components, and it won't be dismissable by the user. Therefore, we decided to define the component in layout_components as `src/pages/operator/tsx/static_components/HomeTheRobot.tsx`. The simplified version of the code looks like this:
 
 ```js
 import "operator/css/HomeTheRobot.css";
@@ -353,7 +370,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
     return (
         <React.Fragment>
             <div id="home-the-robot-container">
-                <p>Home the Robot. Un-homed joints will be greyed-out until this procedure occurs. You can use teleop the mobile base and head to find a clear place for the robot to home.</p>
+                <p>Robot is not homed. Please drive the robot to a safe position and press the home button.</p>
                 <button onClick={() => { functions.Home(); }}>
                     <span hidden={props.hideLabels}>Home</span>
                     <HomeIcon />
@@ -386,4 +403,4 @@ export const Operator = () => {
 
 ## Wrap-up
 
-In this tutorials, we've covered the files you'd need to edit to add new development to the interface. We've taken the example of homing, and added UI that enables the operator to home the robot remotely. In practice, the homing UX is a bit more complicated; we'd like the UI to show some indication of loading as the homing sequence is occurring, and to disappear once the robot is homed. Check out [the pull request](https://github.com/hello-robot/stretch_web_teleop/pull/98) that implements the complete homing feature to see what set of changes is required for a real feature.
+In this tutorial, we've covered the files you'd need to edit to add new development to the interface. We've taken the example of homing, and added UI that enables the operator to home the robot remotely. In practice, the homing UX is a bit more complex than what we showed in this example. Check out [the pull request](https://github.com/hello-robot/stretch_web_teleop/pull/98) to see the complete functionality for this feature!
