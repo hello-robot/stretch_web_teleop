@@ -50,9 +50,10 @@ At the top of the file, be sure to import `HomeTheRobotCommand` from [`commands.
 
 ### `utils.tsx`
 
-*Note: This file is not needed to add homing functionality.* 
+*Note: This file is not needed to add homing functionality.*
 
 This file contains shared custom message types, variables, and enums For example, this file defines the WebRTC message types:
+
 ```js
 export type WebRTCMessage =
     ...
@@ -63,9 +64,9 @@ export type WebRTCMessage =
 
 ### `webrtcconnections.tsx`
 
-*Note: You should never have to touch this file!* 
+*Note: You should never have to touch this file!*
 
-This file contains the code used for establishing a peer connection between the operator and robot browser and setting up data channels such that they can communicate.  
+This file contains the code used for establishing a peer connection between the operator and robot browser and setting up data channels such that they can communicate.
 
 ## `src/pages/robot`
 
