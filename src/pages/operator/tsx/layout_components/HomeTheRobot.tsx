@@ -7,7 +7,8 @@ import { isTablet, isBrowser } from "react-device-detect";
 import HomeIcon from "@mui/icons-material/Home";
 import QuestionMarkIcon from "@mui/icons-material/Help";
 import CircularProgress from "@mui/material/CircularProgress";
-import { className } from "../../../../shared/util";
+import { ButtonAction, className } from "../../../../shared/util";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 
 /** All the possible button functions */
 export enum HomeTheRobotFunction {
@@ -74,6 +75,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
                         <button
                             onClick={() => {
                                 functions.Home();
+                                FunctionProvider.logButtonAction(ButtonAction.CLICK, "Home")
                             }}
                             className="home-btn-container"
                             aria-labelledby="Home"

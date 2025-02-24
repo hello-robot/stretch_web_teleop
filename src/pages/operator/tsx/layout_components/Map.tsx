@@ -400,7 +400,10 @@ const UnderMapButtons = (props: {
                     <Save/>
                 </button>
             </div>
-            <RadioGroup functs={radioFuncts} />
+            <RadioGroup 
+                functs={radioFuncts} 
+                onChange={(label: string) => FunctionProvider.logButtonAction(ButtonAction.CLICK, label)}
+            />
             <SavePoseModal
                 functs={props.functs}
                 setShow={setShowSavePoseModal}
@@ -409,7 +412,10 @@ const UnderMapButtons = (props: {
         </React.Fragment>
     ) : (
         <React.Fragment>
-            <RadioGroup functs={radioFuncts} />
+            <RadioGroup 
+                functs={radioFuncts} 
+                onChange={(label: string) => FunctionProvider.logButtonAction(ButtonAction.CLICK, label)}
+            />
             <div className="map-fn-btns-mobile">
                 <div
                     className="mobile-map-save-btn"
