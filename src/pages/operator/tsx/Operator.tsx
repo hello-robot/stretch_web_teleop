@@ -1,6 +1,6 @@
 import React from "react";
 import { AudioControl } from "./static_components/AudioControl";
-import { SpeedControl } from "./static_components/SpeedControl";
+import { SpeedControl, VELOCITY_SCALE } from "./static_components/SpeedControl";
 import { LayoutArea } from "./static_components/LayoutArea";
 import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
@@ -16,7 +16,7 @@ import {
     RealsenseVideoStreamDef,
     TaskMode,
 } from "./utils/component_definitions";
-import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
+import { className, ActionState, RemoteStream, RobotPose, ButtonAction } from "shared/util";
 import {
     buttonFunctionProvider,
     underMapFunctionProvider,
@@ -399,9 +399,11 @@ export const Operator = (props: {
                 /> */}
                 <SpeedControl
                     scale={velocityScale}
-                    onChange={(newScale: number) => {
+                    onChange={(newScale: number, newLabel?: string) => {
                         setVelocityScale(newScale);
                         FunctionProvider.velocityScale = newScale;
+                        if (newLabel) 
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, newLabel)
                     }}
                 />
                 <BatteryBar/>

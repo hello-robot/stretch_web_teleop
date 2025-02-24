@@ -9,6 +9,7 @@ import {
 } from "./utils/component_definitions";
 import {
     ActionState,
+    ButtonAction,
     className,
     ActionState as MoveBaseState,
     RemoteStream,
@@ -73,6 +74,8 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    const controlTabLabels = ["Drive", "Arm", "Gripper"];
+    const headingTabLabels = ["Controls", "Recordings"];
 
     React.useEffect(() => {
         setTimeout(function () {
@@ -235,9 +238,11 @@ export const MobileOperator = (props: {
             <>
                 <SpeedControl
                     scale={velocityScale}
-                    onChange={(newScale: number) => {
+                    onChange={(newScale: number, newLabel?: string) => {
                         setVelocityScale(newScale);
                         FunctionProvider.velocityScale = newScale;
+                        if (newLabel) 
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, newLabel)
                     }}
                 />
                 {/* <div className="slider-container">
@@ -261,10 +266,13 @@ export const MobileOperator = (props: {
                     <span className="label">Fast</span>
                 </div> */}
                 <TabGroup
-                    tabLabels={["Drive", "Arm", "Gripper"]}
+                    tabLabels={controlTabLabels}
                     tabContent={[driveMode, armMode, gripperMode]}
                     startIdx={activeControlTab}
-                    onChange={(index: number) => setActiveControlTab(index)}
+                    onChange={(index: number) => {
+                        setActiveControlTab(index)
+                        FunctionProvider.logButtonAction(ButtonAction.CLICK, controlTabLabels[index] + " Tab")
+                    }}
                     pill={true}
                     key={"controls-group"}
                 />
@@ -316,12 +324,16 @@ export const MobileOperator = (props: {
                     <div className={"switch-camera"}>
                         <button
                             onPointerDown={() => {
+                                let newCameraID = cameraID
                                 if (cameraID == CameraViewId.realsense)
-                                    setCameraID(CameraViewId.overhead);
+                                    newCameraID = CameraViewId.overhead;
                                 else if (cameraID == CameraViewId.overhead)
-                                    setCameraID(CameraViewId.gripper);
+                                    newCameraID = CameraViewId.gripper;
                                 else if (cameraID == CameraViewId.gripper)
-                                    setCameraID(CameraViewId.realsense);
+                                    newCameraID = CameraViewId.realsense;
+
+                                setCameraID(newCameraID)
+                                FunctionProvider.logButtonAction(ButtonAction.CLICK, newCameraID + " Camera")
                             }}
                         >
                             <PhotoCameraIcon
@@ -332,6 +344,7 @@ export const MobileOperator = (props: {
                             onPointerDown={() => {
                                 setHideMap(false);
                                 setHideControls(true);
+                                FunctionProvider.logButtonAction(ButtonAction.CLICK, "Map")
                             }}
                         >
                             <MapIcon
@@ -353,7 +366,7 @@ export const MobileOperator = (props: {
                             />
                         </div>
                     )} */}
-                    <button
+                    {/* <button
                         className="record"
                         onPointerDown={() => {
                             setIsRecording(!isRecording);
@@ -371,7 +384,7 @@ export const MobileOperator = (props: {
                                 <i>Stop Recording</i>
                             </>
                         )}
-                    </button>
+                    </button> */}
                     {/* <div {...swipeHandlers}> */}
                     <div>
                         <SimpleCameraView
@@ -380,12 +393,13 @@ export const MobileOperator = (props: {
                         />
                     </div>
                     <TabGroup
-                        tabLabels={["Controls", "Recordings"]}
+                        tabLabels={headingTabLabels}
                         tabContent={[controlModes, recordingList]}
                         startIdx={activeMainGroupTab}
-                        onChange={(index: number) =>
+                        onChange={(index: number) => {
                             setActiveMainGroupTab(index)
-                        }
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, headingTabLabels[index] + " Tab")
+                        }}
                         pill={false}
                         key={"main-group"}
                     />
@@ -397,6 +411,7 @@ export const MobileOperator = (props: {
                             onPointerDown={() => {
                                 setHideMap(true);
                                 setHideControls(false);
+                                FunctionProvider.logButtonAction(ButtonAction.CLICK, cameraID + " Camera")
                             }}
                         >
                             <PhotoCameraIcon

@@ -25,8 +25,10 @@ export type cmd =
     | ShowTabletCommand
     | StopShowTabletCommand
     | HomeTheRobotCommand
-    | DetectObjectsCommand;
-
+    | DetectObjectsCommand
+    | StartSession
+    | StopSession;
+ 
 export interface VelocityCommand {
     stop: () => void;
     affirm?: () => void;
@@ -151,4 +153,14 @@ export interface DetectObjectsCommand {
     toggle: boolean;
     // x: number;
     // y: number;
+}
+
+export interface StartSession {
+    type: "startSession";
+    timestamp: string;
+}
+
+export interface StopSession {
+    type: "stopSession";
+    timestamp: string;
 }

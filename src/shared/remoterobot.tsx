@@ -178,7 +178,8 @@ export class RemoteRobot extends React.Component<{}, any> {
             | "setRealsenseBodyPoseEstimate"
             | "setRunStop"
             | "setDetectObjects"
-            | "setFeedingMode",
+            | "setFeedingMode"
+            | "setExpandedGripper",
         toggle: boolean,
     ) {
         let cmd: ToggleCommand = {

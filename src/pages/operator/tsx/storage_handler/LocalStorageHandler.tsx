@@ -1,7 +1,8 @@
 import { StorageHandler } from "./StorageHandler";
 import { LayoutDefinition } from "../utils/component_definitions";
-import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { ArucoMarkersInfo, ButtonAction, RobotPose } from "shared/util";
 import ROSLIB from "roslib";
+import { cmd } from "shared/commands";
 
 /** Uses browser local storage to store data. */
 export class LocalStorageHandler extends StorageHandler {
@@ -211,4 +212,8 @@ export class LocalStorageHandler extends StorageHandler {
             JSON.stringify(texts),
         );
     }
+
+    public logCommand(cmd: cmd): void {}
+
+    public logButtonAction(action: ButtonAction, name: string): void {}
 }

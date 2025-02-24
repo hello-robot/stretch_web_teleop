@@ -1,7 +1,8 @@
 import { RemoteRobot } from "shared/remoterobot";
 import { VelocityCommand } from "shared/commands";
-import { FEEDING_CONFIGURATION, STOW_WRIST_GRIPPER, ValidJoints } from "shared/util";
+import { ButtonAction, FEEDING_CONFIGURATION, STOW_WRIST_GRIPPER, ValidJoints } from "shared/util";
 import { ActionMode, TaskMode } from "../utils/component_definitions";
+import { StorageHandler } from "../storage_handler/StorageHandler";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the
@@ -9,6 +10,7 @@ import { ActionMode, TaskMode } from "../utils/component_definitions";
  */
 export abstract class FunctionProvider {
     protected static remoteRobot?: RemoteRobot;
+    protected static storageHandler?: StorageHandler;
     public static velocityScale: number;
     public static actionMode: ActionMode;
     public static taskMode: TaskMode;
@@ -24,6 +26,10 @@ export abstract class FunctionProvider {
      */
     static addRemoteRobot(remoteRobot: RemoteRobot) {
         FunctionProvider.remoteRobot = remoteRobot;
+    }
+
+    static addStorageHandler(storageHandler: StorageHandler) {
+        FunctionProvider.storageHandler = storageHandler
     }
 
     /**
@@ -107,5 +113,9 @@ export abstract class FunctionProvider {
         } else {
             FunctionProvider.remoteRobot.setToggle("setFeedingMode", false)
         }
+    }
+
+    static logButtonAction(action: ButtonAction, name: string) {
+        this.storageHandler.logButtonAction(action, name)
     }
 }

@@ -75,6 +75,12 @@ export function getStretchTool(stretchTool: string) {
     }
 }
 
+export enum ButtonAction {
+    CLICK = "click",
+    RELEASE = "release",
+    LEAVE = "leave"
+}
+
 export enum TabletOrientation {
     PORTRAIT = "portrait",
     LANDSCAPE = "landscape",
@@ -663,4 +669,19 @@ export function findMinimumEncapsulatingBoxForSelected(
         throw new Error("No valid bounding boxes found.");
     }
     return minAreaBox;
+}
+
+export function getFormattedDateTime(): string {
+    const now = new Date();
+
+    // Extract individual components
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2); // Get last two digits of the year
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    // Format as MM-DD-YY:HH:MM:SS
+    return `${month}-${day}-${year}:${hours}:${minutes}:${seconds}`;
 }

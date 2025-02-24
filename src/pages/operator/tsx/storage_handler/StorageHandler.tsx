@@ -1,8 +1,9 @@
 import ROSLIB from "roslib";
 import { BASIC_LAYOUT } from "../default_layouts/SIMPLE_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
-import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { ArucoMarkersInfo, ButtonAction, RobotPose } from "shared/util";
 import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
+import { cmd } from "shared/commands";
 
 /** Type for all the possible names of default layouts. */
 export type DefaultLayoutName = "Basic Layout";
@@ -151,6 +152,9 @@ export abstract class StorageHandler {
      */
     public abstract deleteText(text: string): void;
 
+    public abstract logCommand(cmd: cmd): void;
+
+    public abstract logButtonAction(action: ButtonAction, name: string): void;
     /**
      * Gets the last saved state from the user's layout, or gets the default
      * layout if the user has no saved state.

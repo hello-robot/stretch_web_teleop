@@ -11,6 +11,8 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SaveIcon from "@mui/icons-material/Save";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
+import { ButtonAction } from "shared/util";
 
 /** All the possible button functions */
 export enum MovementRecorderFunction {
@@ -379,7 +381,10 @@ export const MovementRecorder = (props: {
         </React.Fragment>
     ) : (
         <React.Fragment>
-            <RadioGroup functs={radioFuncts} />
+            <RadioGroup 
+                functs={radioFuncts} 
+                onChange={(label: string) => FunctionProvider.logButtonAction(ButtonAction.CLICK, label)}
+            />
             <div className="global-btns">
                 {/* <div className="mobile-movement-save-btn" onClick={() => {
                         if (!isRecording) {
@@ -404,6 +409,7 @@ export const MovementRecorder = (props: {
                     onClick={() => {
                         if (selectedIdx != undefined && selectedIdx > -1) {
                             functions.LoadRecording(selectedIdx);
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, "Play Recording")
                         }
                     }}
                 >

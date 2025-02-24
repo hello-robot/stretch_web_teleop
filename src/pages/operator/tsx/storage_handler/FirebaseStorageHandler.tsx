@@ -1,4 +1,4 @@
-import { StorageHandler } from "./StorageHandler";
+import { DEFAULT_LAYOUTS, StorageHandler } from "./StorageHandler";
 import { LayoutDefinition } from "../utils/component_definitions";
 
 import {
@@ -24,8 +24,9 @@ import {
     update,
     push,
 } from "firebase/database";
-import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { ArucoMarkersInfo, getFormattedDateTime, RobotPose } from "shared/util";
 import ROSLIB from "roslib";
+import { cmd } from "shared/commands";
 
 /** Uses Firebase to store data. */
 export class FirebaseStorageHandler extends StorageHandler {
@@ -34,9 +35,9 @@ export class FirebaseStorageHandler extends StorageHandler {
     private database: Database;
     private auth: Auth;
     private GAuthProvider: GoogleAuthProvider;
-
     private userEmail: string;
     private uid: string;
+    private sid: string;
     private layouts: { [name: string]: LayoutDefinition };
     private currentLayout: LayoutDefinition | null;
     private poses: { [name: string]: RobotPose };
@@ -47,6 +48,8 @@ export class FirebaseStorageHandler extends StorageHandler {
     private markerNames: string[];
     private markerIDs: string[];
     private markerInfo: ArucoMarkersInfo;
+    private sessions: string[] = [];
+    protected enabled = true;
 
     constructor(
         onStorageHandlerReadyCallback: () => void,
@@ -61,6 +64,7 @@ export class FirebaseStorageHandler extends StorageHandler {
 
         this.userEmail = "";
         this.uid = "";
+        this.sid = "";
         this.layouts = {};
         this.currentLayout = null;
         this.poses = {};
@@ -91,6 +95,9 @@ export class FirebaseStorageHandler extends StorageHandler {
                     this.mapPoseTypes = userData.map_pose_types || {};
                     this.recordings = userData.recordings || {};
                     this.textToSpeech = userData.text_to_speech || [];
+                    this.sessions = userData.sessions ? userData.sessions : [];
+                    
+                    this.startSession();
 
                     this.onReadyCallback();
                 })
@@ -99,9 +106,22 @@ export class FirebaseStorageHandler extends StorageHandler {
                         "Detected that FirebaseModel isn't initialized for user ",
                         this.uid,
                     );
+                    this.layouts = DEFAULT_LAYOUTS;
+                    this.currentLayout = DEFAULT_LAYOUTS[0];
+                    this.mapPoses = {};
+                    this.mapPoseTypes = {};
+                    this.recordings = {};
+                    this.textToSpeech = [];
+                    this.sessions = [];
+
+                    this.startSession();
                     this.onReadyCallback();
                 });
         }
+    }
+
+    public addNewUser(): void {
+        
     }
 
     private async getUserDataFirebase() {
@@ -298,4 +318,67 @@ export class FirebaseStorageHandler extends StorageHandler {
         this.textToSpeech.splice(index, 1);
         this.writeTextToSpeech(this.textToSpeech);
     }
+
+    /**
+     * Telemetry logging
+     */
+
+    async startSession(sessionId?: string) {
+		if (!this.enabled) {
+			return
+		}
+		this.sid = sessionId ? sessionId : getFormattedDateTime();
+
+		this.sessions.push(this.sid);
+
+		const updates: any = {};
+		updates[`/users/${this.uid}/sessions`] = this.sessions;
+		await update(ref(this.database), updates);
+
+		return this.logCommand({
+			type: "startSession",
+            timestamp: getFormattedDateTime()
+		});
+	}
+
+    stopSession() {
+		if (!this.enabled) {
+			return
+		}
+		this.logCommand({
+			type: "stopSession",
+            timestamp: getFormattedDateTime()
+		})
+
+		this.sid = "";
+	}
+
+    async logCommand(cmd: cmd) {
+		if (!this.enabled || this.sid == "") {
+			return
+		}
+
+		const updates: any = {};
+		updates[`/sessions/${this.uid}/${this.sid}/commands/${getFormattedDateTime()}`] = cmd;
+
+		return update(ref(this.database), updates);
+	}
+
+    async logButtonAction(action: string, name: string) {
+		if (!this.enabled || this.sid == "") {
+			return
+		}
+
+		const updates: any = {};
+		updates[`/sessions/${this.uid}/${this.sid}/buttons/${getFormattedDateTime()}`] = {
+            "action": action,
+            "button": name
+        };
+
+		return update(ref(this.database), updates);
+	}
+
+    getSessions(): string[] {
+		return this.sessions;
+	}
 }

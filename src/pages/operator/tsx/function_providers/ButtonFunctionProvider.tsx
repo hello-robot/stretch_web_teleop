@@ -3,6 +3,7 @@ import {
     JOINT_INCREMENTS,
     ValidJoints,
     ValidJointStateDict,
+    ButtonAction,
 } from "shared/util";
 import { ActionMode } from "../utils/component_definitions";
 import { FunctionProvider } from "./FunctionProvider";
@@ -320,6 +321,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                 return {
                     onClick: () => {
                         action();
+                        FunctionProvider.logButtonAction(ButtonAction.CLICK, buttonPadFunction);
                         this.setButtonActiveState(buttonPadFunction);
                         // Set button state inactive after 1 second
                         setTimeout(
@@ -375,11 +377,13 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     ? {
                           onClick: () => {
                               action();
+                              FunctionProvider.logButtonAction(ButtonAction.CLICK, buttonPadFunction);
                               this.setButtonActiveState(buttonPadFunction);
                           },
                           // For press-release, stop when button released
                           onRelease: () => {
                               this.stopCurrentAction();
+                              FunctionProvider.logButtonAction(ButtonAction.RELEASE, buttonPadFunction);
                               this.setButtonInactiveState(buttonPadFunction);
                           },
                           onLeave: onLeave,
@@ -387,6 +391,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     : {
                           // For click-click, stop if button already active
                           onClick: () => {
+                              FunctionProvider.logButtonAction(ButtonAction.CLICK, buttonPadFunction);
                               if (this.activeVelocityAction) {
                                   this.stopCurrentAction();
                                   this.setButtonInactiveState(

@@ -11,6 +11,7 @@ import { Canvas } from "../static_components/Canvas";
 import { OccupancyGrid } from "../static_components/OccupancyGrid";
 import {
     AMCLPose,
+    ButtonAction,
     ROSOccupancyGrid,
     ROSPose,
     className,
@@ -29,6 +30,7 @@ import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import Save from "@mui/icons-material/Save";
 import Cancel from "@mui/icons-material/Cancel";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 
 export enum MapFunction {
     GetMap,
@@ -418,6 +420,7 @@ const UnderMapButtons = (props: {
                             props.handleSelectGoal(false);
                             setSelectGoal(false);
                         }
+                        FunctionProvider.logButtonAction(ButtonAction.CLICK, "Save New Destination")
                     }}
                 >
                     <span hidden={props.hideLabels}>Save new destination</span>
@@ -445,6 +448,7 @@ const UnderMapButtons = (props: {
                                 //     .GoalReached()
                                 //     .then((goalReached) => setPlay(false));
                             }
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, "Start Navigation")
                         }}
                     >
                         <span>Play</span>
@@ -457,6 +461,7 @@ const UnderMapButtons = (props: {
                         onPointerDown={() => {
                             props.functs.CancelGoal();
                             setPlay(!play);
+                            FunctionProvider.logButtonAction(ButtonAction.CLICK, "Cancel Navigation")
                         }}
                     >
                         <span>Cancel</span>
@@ -468,6 +473,7 @@ const UnderMapButtons = (props: {
                     onClick={() => {
                         props.handleSelectGoal(!selectGoal);
                         setSelectGoal(!selectGoal);
+                        FunctionProvider.logButtonAction(ButtonAction.CLICK, "Select Goal")
                     }}
                     label="Select Goal"
                 />

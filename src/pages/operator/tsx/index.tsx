@@ -224,6 +224,25 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
  */
 function initializeOperator() {
     // configureRemoteRobot();
+    // const storageHandlerReadyCallback = () => {
+    //     underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler);
+    //     movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(
+    //         storageHandler,
+    //     );
+    //     textToSpeechFunctionProvider = new TextToSpeechFunctionProvider(
+    //         storageHandler,
+    //     );
+    //     renderOperator(storageHandler);
+    // };
+    // storageHandler = createStorageHandler(storageHandlerReadyCallback);
+    renderOperator(storageHandler);
+}
+
+/**
+ * Configures the remote robot, which connects with the robot browser over the
+ * WebRTC connection.
+ */
+function configureRemoteRobot() {
     const storageHandlerReadyCallback = () => {
         underMapFunctionProvider = new UnderMapFunctionProvider(storageHandler);
         movementRecorderFunctionProvider = new MovementRecorderFunctionProvider(
@@ -232,23 +251,20 @@ function initializeOperator() {
         textToSpeechFunctionProvider = new TextToSpeechFunctionProvider(
             storageHandler,
         );
-        renderOperator(storageHandler);
     };
     storageHandler = createStorageHandler(storageHandlerReadyCallback);
-}
 
-/**
- * Configures the remote robot, which connects with the robot browser over the
- * WebRTC connection.
- */
-function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
-        robotChannel: (message: cmd) => connection.sendData(message),
+        robotChannel: (message: cmd) => {
+            connection.sendData(message)
+            storageHandler.logCommand(message)
+        }
     });
     occupancyGrid = undefined;
     remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit");
     remoteRobot.getStretchTool("getStretchTool");
     FunctionProvider.addRemoteRobot(remoteRobot);
+    FunctionProvider.addStorageHandler(storageHandler)
     mapFunctionProvider = new MapFunctionProvider();
     remoteRobot.sensors.setFunctionProviderCallback(
         buttonFunctionProvider.updateJointStates,

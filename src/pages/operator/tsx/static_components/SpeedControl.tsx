@@ -21,7 +21,7 @@ type SpeedControlProps = {
    * Callback function when a new speed is selected.
    * @param newSpeed the new selected speed
    */
-  onChange: (newScale: number) => void;
+  onChange: (newScale: number, label?: string) => void;
 };
 
 /** The different velocity settings to display. */
@@ -36,6 +36,11 @@ export const VELOCITY_SCALE: VelocityDetails[] = [
 /** The speed the interface should initialize with */
 export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].scale;
 
+const getLabelByScale = (scale: number): string => {
+  const velocityDetail = VELOCITY_SCALE.find(item => item.scale === scale);
+  return velocityDetail ? velocityDetail.label : undefined;
+};
+
 /**
  * Set of buttons so the user can control the scaling of the speed for all controls.
  * @param props see {@link SpeedControlProps}
@@ -48,13 +53,12 @@ export const SpeedControl = (props: SpeedControlProps) => {
       // Render radio buttons for mobile
       return (
         <FormControlLabel
-            key={label}
-            value={scale}
-            control={<Radio />}
-            label={""}
-            checked={active}
-            onChange={() => props.onChange(scale)}
-            style={{ margin: 0}}
+          key={label}
+          value={JSON.stringify({ scale, label })} // Pass both scale and label
+          control={<Radio />}
+          label={""}
+          checked={active}
+          style={{ margin: 0 }}
         />
       );
     } else {
@@ -63,7 +67,7 @@ export const SpeedControl = (props: SpeedControlProps) => {
         <button
           key={label}
           className={active ? "btn-blue font-white" : ""}
-          onClick={() => props.onChange(scale)}
+          onClick={() => props.onChange(scale, label)}
         >
           {label}
         </button>
@@ -73,21 +77,24 @@ export const SpeedControl = (props: SpeedControlProps) => {
 
   return (
     <div id="velocity-control-container">
-        {!isBrowser && !isTablet ? (
-            <div className="velocity-radio-group">
-                <span className="label">Slowest</span>
-                <RadioGroup
-                    style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}
-                    value={props.scale}
-                    onChange={(e) => props.onChange(Number(e.target.value))}
-                >
-                    {VELOCITY_SCALE.map(mapFunc)}
-                </RadioGroup>
-                <span className="label">Fastest</span>
-            </div>
-        ) : (
-            VELOCITY_SCALE.map(mapFunc)
-        )}
+      {!isBrowser && !isTablet ? (
+        <div className="velocity-radio-group">
+          <span className="label">Slowest</span>
+          <RadioGroup
+            style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}
+            value={JSON.stringify({ scale: props.scale, label: getLabelByScale(props.scale)})} // Match the format
+            onChange={(e) => {
+              const selectedItem = JSON.parse(e.target.value); // Parse the selected item
+              props.onChange(selectedItem.scale, selectedItem.label); // Call props.onChange
+            }}
+          >
+            {VELOCITY_SCALE.map(mapFunc)}
+          </RadioGroup>
+          <span className="label">Fastest</span>
+        </div>
+      ) : (
+        VELOCITY_SCALE.map(mapFunc)
+      )}
     </div>
   );
 };

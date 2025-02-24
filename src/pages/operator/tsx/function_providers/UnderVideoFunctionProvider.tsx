@@ -15,8 +15,9 @@ import {
     StretchTool,
     BoundingBox2D,
     findMinimumEncapsulatingBoxForSelected,
+    ButtonAction,
 } from "../../../../shared/util";
-import { stretchTool } from "..";
+import { storageHandler, stretchTool } from "..";
 import React from "react";
 
 export enum UnderVideoButton {
@@ -174,56 +175,70 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.LookAtBase:
                 return {
-                    onClick: () =>
+                    onClick: () => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.LookAtBase)
                         FunctionProvider.remoteRobot?.setRobotPose(
                             REALSENSE_BASE_POSE,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.LookAhead:
                 return {
-                    onClick: () =>
+                    onClick: () => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.LookAhead)
                         FunctionProvider.remoteRobot?.setRobotPose(
                             REALSENSE_FORWARD_POSE,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.LookAtGripper:
                 return {
-                    onClick: () =>
+                    onClick: () => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.LookAtGripper)
                         FunctionProvider.remoteRobot?.lookAtGripper(
                             "lookAtGripper",
-                        ), //setRobotPose(REALSENSE_GRIPPER_POSE)
+                        ) //setRobotPose(REALSENSE_GRIPPER_POSE)
+                    }
                 };
             case UnderVideoButton.FollowGripper:
                 return {
-                    onCheck: (toggle: boolean) =>
+                    onCheck: (toggle: boolean) => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.FollowGripper)
                         FunctionProvider.remoteRobot?.setToggle(
                             "setFollowGripper",
                             toggle,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.RealsenseDepthSensing:
                 return {
-                    onCheck: (toggle: boolean) =>
+                    onCheck: (toggle: boolean) => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.RealsenseDepthSensing)
                         FunctionProvider.remoteRobot?.setToggle(
                             "setRealsenseDepthSensing",
                             toggle,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.GripperDepthSensing:
                 return {
-                    onCheck: (toggle: boolean) =>
+                    onCheck: (toggle: boolean) => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.GripperDepthSensing)
                         FunctionProvider.remoteRobot?.setToggle(
                             "setGripperDepthSensing",
                             toggle,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.ExpandedGripperView:
                 return {
-                    onCheck: (toggle: boolean) =>
+                    onCheck: (toggle: boolean) => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.ExpandedGripperView)
                         FunctionProvider.remoteRobot?.setToggle(
                             "setExpandedGripper",
                             toggle,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.StartMoveToPregraspHorizontal:
                 horizontal = true;
@@ -239,6 +254,10 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                             scaledXY[1],
                             horizontal,
                         );
+                        storageHandler.logButtonAction(
+                            ButtonAction.CLICK, 
+                            horizontal ? UnderVideoButton.StartMoveToPregraspHorizontal : UnderVideoButton.StartMoveToPregraspVertical
+                        )
                     },
                 };
             case UnderVideoButton.MoveToPregraspGoalReached:
@@ -263,8 +282,10 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.CancelMoveToPregrasp:
                 return {
-                    onClick: () =>
-                        FunctionProvider.remoteRobot?.stopMoveToPregrasp(),
+                    onClick: () => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.CancelMoveToPregrasp)
+                        FunctionProvider.remoteRobot?.stopMoveToPregrasp()
+                    }
                 };
             case UnderVideoButton.ToggleArucoMarkers:
                 return {
@@ -276,25 +297,31 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.CenterWrist:
                 return {
-                    onClick: () =>
+                    onClick: () => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.CenterWrist)
                         FunctionProvider.remoteRobot?.setRobotPose(
                             CENTER_WRIST,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.StowWrist:
                 if (stretchTool === StretchTool.TABLET) {
                     return {
-                        onClick: () =>
+                        onClick: () => {
+                            storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.StowWrist)
                             FunctionProvider.remoteRobot?.setRobotPose(
                                 STOW_WRIST_TABLET,
-                            ),
+                            )
+                        }
                     };
                 } else {
                     return {
-                        onClick: () =>
+                        onClick: () => {
+                            storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.StowWrist)
                             FunctionProvider.remoteRobot?.setRobotPose(
                                 STOW_WRIST_GRIPPER,
-                            ),
+                            )
+                        }
                     };
                 }
             case UnderVideoButton.ToggleTabletOrientation:
@@ -320,11 +347,13 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.DetectObjects:
                 return {
-                    onCheck: (toggle: boolean) =>
+                    onCheck: (toggle: boolean) => {
+                        storageHandler.logButtonAction(ButtonAction.CLICK, UnderVideoButton.DetectObjects)
                         FunctionProvider.remoteRobot?.setToggle(
                             "setDetectObjects",
                             toggle,
-                        ),
+                        )
+                    }
                 };
             case UnderVideoButton.VoiceSelectObject:
                 return {
