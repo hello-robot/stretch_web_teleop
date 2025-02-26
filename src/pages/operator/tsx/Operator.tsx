@@ -52,6 +52,8 @@ import { VoiceCommandFunction, VoiceCommands } from "./static_components/VoiceCo
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { BatteryBar } from "./static_components/BatteryBar";
+import { isBrowser, isTablet } from "react-device-detect";
+import { PopupModal } from "./basic_components/PopupModal";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -85,7 +87,7 @@ export const Operator = (props: {
     homeTheRobotFunctionProvider.setIsHomedCallback(
         showHomeTheRobotGlobalControl,
     );
-
+    const [showRecordModal, setShowRecordModal] = React.useState<boolean>(true);
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -365,6 +367,30 @@ export const Operator = (props: {
         },
     };
 
+    const LoomRecordingModal = (props: {
+        setShow: (show: boolean) => void;
+        show: boolean;
+    }) => {
+
+        function handleAccept() {
+            props.setShow(false)
+        }
+
+        return (
+            <PopupModal
+                setShow={props.setShow}
+                show={props.show}
+                onAccept={handleAccept}
+                id="start-recording-modal"
+                acceptButtonText="Continue"
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
+            >
+                <p style={{ fontSize: "xx-large" }}>Please start the Loom recording, then press "Continue".</p>
+            </PopupModal>
+        );
+    };
+
     const actionModes = Object.values(ActionMode);
 
     return (
@@ -412,6 +438,7 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
+            {showRecordModal && <LoomRecordingModal setShow={setShowRecordModal} show={showRecordModal}/>}
             {robotNotHomed && (
                 <div className="operator-collision-alerts">
                     <div
