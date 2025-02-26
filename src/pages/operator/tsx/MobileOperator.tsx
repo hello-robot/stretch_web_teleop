@@ -52,6 +52,8 @@ import MapIcon from "@mui/icons-material/Map";
 import { SpeedControl } from "./static_components/SpeedControl";
 import { ScreenRecorder } from "./static_components/ScreenRecorder";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { PopupModal } from "./basic_components/PopupModal";
+import { isBrowser, isTablet } from "react-device-detect";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -76,7 +78,8 @@ export const MobileOperator = (props: {
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
     const controlTabLabels = ["Drive", "Arm", "Gripper"];
     const headingTabLabels = ["Controls", "Recordings"];
-
+    const [showRecordModal, setShowRecordModal] = React.useState<boolean>(true);
+    
     React.useEffect(() => {
         setTimeout(function () {
             setShowAlert(false);
@@ -293,6 +296,30 @@ export const MobileOperator = (props: {
         );
     };
 
+    const LoomRecordingModal = (props: {
+        setShow: (show: boolean) => void;
+        show: boolean;
+    }) => {
+
+        function handleAccept() {
+            props.setShow(false)
+        }
+
+        return (
+            <PopupModal
+                setShow={props.setShow}
+                show={props.show}
+                onAccept={handleAccept}
+                id="start-recording-modal"
+                acceptButtonText="Continue"
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
+            >
+                <p>Please start the Loom recording, then press "Continue".</p>
+            </PopupModal>
+        );
+    };
+
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
@@ -305,6 +332,7 @@ export const MobileOperator = (props: {
                 ) : (
                     <></>
                 )} */}
+                {showRecordModal && <LoomRecordingModal setShow={setShowRecordModal} show={showRecordModal}/>}
                 {robotNotHomed && (
                     <div className="operator-collision-alerts">
                         <div
