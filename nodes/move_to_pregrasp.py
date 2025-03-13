@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # Standard Imports
-import os
 import sys
 import threading
 import traceback
 from typing import Dict, Generator, List, Optional, Tuple
 
-# Third-Party Imports
 import numpy as np
 import numpy.typing as npt
 import rclpy
+
+# Third-Party Imports
+import stretch_urdf.urdf_utils as uu
 import tf2_ros
 import yaml
-from ament_index_python import get_package_share_directory
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Point, Quaternion, Transform, TransformStamped, Vector3
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -100,14 +100,12 @@ class MoveToPregraspNode(Node):
         self.wrist_offset: Optional[Tuple[float, float]] = None
 
         # Create the inverse jacobian controller to execute motions
-        urdf_abs_path = os.path.join(
-            get_package_share_directory("stretch_web_teleop"),
-            "urdf/stretch_base_rotation_ik.urdf",
-        )
+        urdf_fpaths = uu.generate_ik_urdfs("stretch_web_teleop", rigid_wrist_urdf=False)
+        urdf_fpath = urdf_fpaths[0]
         self.controller = StretchIKControl(
             self,
             tf_buffer=self.tf_buffer,
-            urdf_path=urdf_abs_path,
+            urdf_path=urdf_fpath,
             static_transform_broadcaster=self.static_transform_broadcaster,
         )
 
