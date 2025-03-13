@@ -58,10 +58,6 @@ install(DIRECTORY nodes
   DESTINATION share/${PROJECT_NAME}
 )
 
-install(DIRECTORY urdf
-  DESTINATION share/${PROJECT_NAME}
-)
-
 install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )

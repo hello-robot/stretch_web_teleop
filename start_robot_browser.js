@@ -69,12 +69,6 @@ const listenConsole = async (page) => {
         headless: true, // default is true
         handleSIGINT: false,
         defaultViewport: null,
-        // NOTE: I (Amal) believe the below args are unnecessary now that we've switched from Chromium to Firefox.
-        args: [
-            "--use-fake-ui-for-media-stream", //gives permission to access the robot's cameras and microphones (cleaner and simpler than changing the user directory)
-            "--disable-features=WebRtcHideLocalIpsWithMdns", // Disables mDNS hostname use in local network P2P discovery. Necessary for enterprise networks that don't forward mDNS traffic
-            "--ignore-certificate-errors",
-        ],
         firefoxUserPrefs: {
             "permissions.default.microphone": 1, // Give permission to access the robot's microphone
         },
