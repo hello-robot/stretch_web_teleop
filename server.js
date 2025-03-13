@@ -97,12 +97,10 @@ io.on("connection", function (socket) {
                 );
                 callback({ success: false });
             }
-            status = "occupied";
         } else {
             status = "offline";
             console.log("join_as_operator FAILURE: robot is not available");
             callback({ success: false });
-            status = "offline";
         }
         updateRooms();
     });
