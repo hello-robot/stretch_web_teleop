@@ -6,19 +6,6 @@ var options = {
     cert: fs.readFileSync(`certificates/${process.env.certfile}`),
 };
 
-// const http = require('http');
-// const socket = require('socket.io');
-// const server = http.createServer(options);
-// const port = 5000;
-// const io = socket(server, {
-//     allowEIO3: true
-// });
-
-// server.listen(port, () => {
-//     console.log('listening on *:' + port);
-// });
-
-var pm2 = require("pm2");
 const socket = require("socket.io");
 var express = require("express");
 var app = express();
@@ -54,6 +41,9 @@ io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
 });
 
+ROOM = "default";
+let robo_sock = undefined;
+let oper_sock = undefined;
 let protocol = undefined; // TODO(binit): ensure robot/operator protocol match
 let status = "offline"; // ["online", "offline", "occupied"]
 function updateRooms() {
@@ -71,73 +61,90 @@ io.on("connection", function (socket) {
     // console.log('socket.handshake = ');
     // console.log(socket.handshake);
 
-    socket.on("join", function (room) {
-        console.log("Received request to join room " + room);
-        // A room can have atmost two clients
-        if (
-            !io.sockets.adapter.rooms.get(room) ||
-            io.sockets.adapter.rooms.get(room).size < 2
-        ) {
-            socket.join(room);
-            socket.emit("join", room, socket.id);
+    socket.on("join_as_robot", (callback) => {
+        console.log("Received join_as_robot request");
+        if (!robo_sock) {
+            socket.join(ROOM);
+            robo_sock = socket.id;
             status = "online";
+            console.log("join_as_robot SUCCESS");
+            callback({ success: true });
         } else {
-            console.log("room full");
-            socket.emit("full", room);
             status = "occupied";
+            console.log("join_as_robot FAILURE");
+            callback({ success: false });
         }
         updateRooms();
     });
 
     socket.on("list_rooms", () => {
-        if (
-            io.sockets.adapter.rooms.get("robot") &&
-            io.sockets.adapter.rooms.get("robot").size >= 2
-        ) {
-            status = "occupied";
-        }
         updateRooms();
     });
 
-    socket.on("add operator to robot room", (callback) => {
-        // The robot room is only available if another operator is not connected to it
-        if (io.sockets.adapter.rooms.get("robot")) {
-            if (io.sockets.adapter.rooms.get("robot").size < 2) {
-                socket.join("robot");
-                socket.in("robot").emit("joined", "robot");
+    socket.on("join_as_operator", (callback) => {
+        console.log("Received join_as_operator request");
+        if (robo_sock) {
+            status = "occupied";
+            if (!oper_sock) {
+                socket.join(ROOM);
+                socket.in(ROOM).emit("joined");
+                oper_sock = socket.id;
+                console.log("join_as_operator SUCCESS");
                 callback({ success: true });
             } else {
-                console.log("could not connect because robot room is full");
+                console.log(
+                    "join_as_operator FAILURE: occupied by another operator",
+                );
                 callback({ success: false });
             }
-            status = "occupied";
         } else {
-            console.log("could not connect because robot is not available");
-            callback({ success: false });
             status = "offline";
+            console.log("join_as_operator FAILURE: robot is not available");
+            callback({ success: false });
         }
         updateRooms();
     });
 
-    socket.on("signalling", function (message) {
-        if (io.sockets.adapter.rooms.get("robot")) {
-            socket.to("robot").emit("signalling", message);
+    socket.on("signalling", (message) => {
+        if (robo_sock && oper_sock && io.sockets.adapter.rooms.get(ROOM)) {
+            socket.to(ROOM).emit("signalling", message);
         } else {
             console.log(
-                "robot_operator_room is none, so there is nobody to send the WebRTC message to",
+                `signaling FAILURE: robo_sock=${robo_sock} oper_sock=${oper_sock} room=${io.sockets.adapter.rooms.get(ROOM)}`,
             );
         }
     });
 
     socket.on("bye", (role) => {
-        console.log(role, socket.rooms);
-        if (socket.rooms.has("robot")) {
-            socket.to("robot").emit("bye");
-            console.log(
-                "Attempting to have the " + role + " leave the robot room.",
-            );
-            console.log("");
-            socket.leave("robot");
+        console.log(`Received bye from ${role}`);
+        if (socket.rooms.has(ROOM)) {
+            socket.to(ROOM).emit("bye");
+            if (socket.id == robo_sock) {
+                status = "offline";
+                robo_sock = undefined;
+                console.log("Robot disconnected");
+            }
+            if (socket.id == oper_sock) {
+                status = "online";
+                oper_sock = undefined;
+                console.log("Operator disconnected");
+            }
+            socket.leave(ROOM);
         }
+        updateRooms();
+    });
+
+    socket.on("disconnect", () => {
+        if (socket.id == robo_sock) {
+            status = "offline";
+            robo_sock = undefined;
+            console.log("Robot disconnected");
+        }
+        if (socket.id == oper_sock) {
+            status = "online";
+            oper_sock = undefined;
+            console.log("Operator disconnected");
+        }
+        updateRooms();
     });
 });
