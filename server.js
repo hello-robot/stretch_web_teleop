@@ -54,6 +54,18 @@ io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
 });
 
+let protocol = undefined; // TODO(binit): ensure robot/operator protocol match
+let status = "offline"; // ["online", "offline", "occupied"]
+function updateRooms() {
+    io.emit("update_rooms", {
+        robot_id: {
+            name: process.env.HELLO_FLEET_ID,
+            protocol: protocol,
+            status: status,
+        },
+    });
+}
+
 io.on("connection", function (socket) {
     console.log("new socket.io connection");
     // console.log('socket.handshake = ');
@@ -68,10 +80,23 @@ io.on("connection", function (socket) {
         ) {
             socket.join(room);
             socket.emit("join", room, socket.id);
+            status = "online";
         } else {
             console.log("room full");
             socket.emit("full", room);
+            status = "occupied";
         }
+        updateRooms();
+    });
+
+    socket.on("list_rooms", () => {
+        if (
+            io.sockets.adapter.rooms.get("robot") &&
+            io.sockets.adapter.rooms.get("robot").size >= 2
+        ) {
+            status = "occupied";
+        }
+        updateRooms();
     });
 
     socket.on("add operator to robot room", (callback) => {
@@ -85,10 +110,13 @@ io.on("connection", function (socket) {
                 console.log("could not connect because robot room is full");
                 callback({ success: false });
             }
+            status = "occupied";
         } else {
             console.log("could not connect because robot is not available");
             callback({ success: false });
+            status = "offline";
         }
+        updateRooms();
     });
 
     socket.on("signalling", function (message) {
