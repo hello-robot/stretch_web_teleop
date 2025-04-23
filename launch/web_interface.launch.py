@@ -342,44 +342,6 @@ def generate_launch_description():
             )
         )
 
-    if driver_navigation_cam is False and driver_nav_head_cam is False:
-        # Blank Navigation Camera Node
-        # Publish blank image if no navigation camera exists
-        ld.add_action(
-            Node(
-                package="image_publisher",
-                executable="image_publisher_node",
-                name="navigation_camera_node",
-                output="screen",
-                parameters=[{"publish_rate": 15.0}],
-                remappings=[("image_raw", "/navigation_camera/image_raw")],
-                arguments=[
-                    PathJoinSubstitution(
-                        [teleop_interface_package, "nodes", "blank_image.png"]
-                    )
-                ],
-            )
-        )
-
-    if drivers_realsense == "d435-only" and driver_gripper_cam is False:
-        # Blank Gripper Camera Node
-        # Publish blank image if there is no gripper camera exists
-        ld.add_action(
-            Node(
-                package="image_publisher",
-                executable="image_publisher_node",
-                name="gripper_camera_node",
-                output="screen",
-                parameters=[{"publish_rate": 15.0}],
-                remappings=[("image_raw", "/gripper_camera/color/image_rect_raw")],
-                arguments=[
-                    PathJoinSubstitution(
-                        [teleop_interface_package, "nodes", "blank_image.png"]
-                    )
-                ],
-            )
-        )
-
     tf2_web_republisher_node = Node(
         package="tf2_web_republisher_py",
         executable="tf2_web_republisher",
