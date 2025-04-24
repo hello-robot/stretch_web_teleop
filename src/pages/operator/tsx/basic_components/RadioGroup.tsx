@@ -2,6 +2,8 @@ import React from "react";
 import { className } from "shared/util";
 import "operator/css/RadioGroup.css";
 import { isMobile } from "react-device-detect";
+import Delete from "@mui/icons-material/DeleteOutline";
+import ModeEdit from "@mui/icons-material/ModeEditOutline";
 
 export const RadioButton = (props: {
     label: string;
@@ -27,17 +29,13 @@ export const RadioButton = (props: {
             </label>
             <div className="modify">
                 {props.functs.Edit && (
-                    <span className="material-icons radio-icon">
-                        mode_edit_outline
-                    </span>
+                    <ModeEdit/>
                 )}
                 {props.functs.Delete && (
-                    <span
+                    <Delete
                         className="material-icons"
                         onClick={() => props.functs.Delete!(props.label)}
-                    >
-                        delete_outline
-                    </span>
+                    />
                 )}
             </div>
         </div>
