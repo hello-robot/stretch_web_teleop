@@ -28,9 +28,7 @@ export const RadioButton = (props: {
                 {props.label}
             </label>
             <div className="modify">
-                {props.functs.Edit && (
-                    <ModeEdit/>
-                )}
+                {props.functs.Edit && <ModeEdit />}
                 {props.functs.Delete && (
                     <Delete
                         className="material-icons"

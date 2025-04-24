@@ -110,7 +110,7 @@ export const Map = (props: CustomizableComponentProps) => {
             return selectGoal;
         };
     }, []);
-    
+
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
             MapFunction.GetMap,
@@ -368,7 +368,7 @@ const UnderMapButtons = (props: {
                         }}
                     >
                         <span>Cancel</span>
-                        <Cancel/>
+                        <Cancel />
                     </button>
                 )}
                 <button
@@ -383,7 +383,7 @@ const UnderMapButtons = (props: {
                     }}
                 >
                     <span hidden={props.hideLabels}>Save new destination</span>
-                    <Save/>
+                    <Save />
                 </button>
             </div>
             <RadioGroup functs={radioFuncts} />
