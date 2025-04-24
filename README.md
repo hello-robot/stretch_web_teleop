@@ -335,7 +335,13 @@ Stay tuned for instructions on using the web interface with a tablet as an end e
 
 # Troubleshooting
 
-TODO
+## Collecting logs
+
+First, ensure that your robot has the latest version of Web Teleop by [updating your ROS workspace](https://docs.hello-robot.com/0.3/installation/ros_workspace/).
+
+Then, launch the program normally, and if you see "FAILURE. COULD NOT LAUNCH WEB TELEOP.", then locate the zipped-up logs file and send them to Hello Robot Support (support@hello-robot.com).
+
+To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
 
 # Licenses
 

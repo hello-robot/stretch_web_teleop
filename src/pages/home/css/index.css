@@ -6,7 +6,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: rgb(245, 245, 245);
-    overflow: hidden;
 }
 
 html,
@@ -23,17 +22,4 @@ code {
 #root {
     margin: 0;
     height: 100%;
-}
-
-.imageViewer {
-    position: relative;
-}
-
-#video-stream-container {
-    margin: 1%;
-    width: auto;
-    height: 95%;
-    display: flex;
-    justify-content: space-between;
-    clear: both;
 }
