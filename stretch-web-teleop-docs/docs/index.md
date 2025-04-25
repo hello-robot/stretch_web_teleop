@@ -17,24 +17,40 @@ colcon_cd stretch_web_teleop
 Next, launch the interface:
 
 ```
-./launch_interface
+./launch_interface.sh
 ```
 
 If you'd like to launch the interface with a map run:
 
 ```
-./launch_interface -m maps/<NAME_OF_MAP>.yaml
+./launch_interface.sh -m maps/<NAME_OF_MAP>.yaml
 ```
 
 In the terminal, you will see output similar to:
 
 ```
+#############################################
+LAUNCHING WEB TELEOP
+#############################################
+Setup environment...
+Freeing robot process...
+Stopping previous instances...
+Reload USB bus...
+Start ROS2...
+Run webpack...
+Start local server...
+Start robot browser...
+
+#############################################
+DONE! WEB TELEOP IS UP!
 Visit the URL(s) below to see the web interface:
 https://localhost/operator
-https://192.168.1.14/operator
+https://100.45.161.30/operator
+https://192.168.43.12/operator
+#############################################
 ```
 
-Look for a URL like `https://<ip_address>/operator`. Visit this URL in a web browser on your personal laptop or desktop to see the web interface. Ensure your personal computer is connected to the same network as Stretch. You might see a warning that says "Your connection is not private". If you do, click `Advanced` and `Proceed`.
+URLs with IP addresses that start with `192` can be used if your are on the same WiFi network as the robot. URLs with IP addresses that start with `100` can be used if you are using tailscale to connect to the robot. Visit the appropiate URL in a web browser on your personal laptop or desktop to see the web interface. Ensure your personal computer is connected to the same network as Stretch. You might see a warning that says "Your connection is not private". If you do, click `Advanced` and `Proceed`.
 
 Once you're done with the interface, close the browser and run:
 
