@@ -2,6 +2,8 @@
 
 Stretch Web Teleop is an interface, designed for users with motor impairments, to remotely teleoperate a Stretch robot through a web browser using click-based input. It can be set up to teleoperate the robot remotely from anywhere in the world with an internet connection, or simply eyes-off teleop from the next room on a local network. The codebase is built on ROS2, WebRTC, Nav2, and TypeScript.
 
+Recommended: Browse the documentation with MkDocs by running `cd stretch-web-teleop-docs && mkdocs serve`. Ensure [MkDocs](https://www.mkdocs.org/getting-started/) has already been installed on your computer.
+
 ## Setup & Installation
 
 The interface is compatible with the Stretch RE1, RE2 and SE3. It currently only supports Ubuntu 22.04 and ROS2 Humble. All Stretch SE3's arrive with the interface pre-installed. For Stretch RE1 and RE2, upgrade your operating system if necessary ([instructions](https://docs.hello-robot.com/0.3/installation/robot_install/)) and create/update the Stretch ROS2 Humble workspace ([instructions](https://docs.hello-robot.com/0.3/installation/ros_workspace/)). This will install all package dependencies and install the web teleop interface.
