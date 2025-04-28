@@ -71,8 +71,12 @@
 }
 
 .button-pads path.limit {
-    fill: rgb(255, 0, 191);
+    fill: red;
     fill-opacity: 40%;
+}
+
+.button-pads path.foo {
+    opacity:  0.1;
 }
 
 /* Disable hover actions */

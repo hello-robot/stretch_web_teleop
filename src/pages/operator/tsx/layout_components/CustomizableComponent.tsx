@@ -35,6 +35,8 @@ export type SharedState = {
     hasBetaTeleopKit: boolean;
     /** What tool is attached to the stretch gripper. */
     stretchTool: StretchTool;
+    /** Whether or not robot has been homed */
+    robotNotHomed: boolean;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
@@ -88,7 +90,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <BatteryGuage {...props} />;
         default:
             throw Error(
-                `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`,
+                `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`
             );
     }
 };
