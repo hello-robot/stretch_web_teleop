@@ -71,7 +71,7 @@
 }
 
 .button-pads path.limit {
-    fill: red;
+    fill: rgb(255, 0, 191);
     fill-opacity: 40%;
 }
 
