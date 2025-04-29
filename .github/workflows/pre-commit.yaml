@@ -6,12 +6,7 @@ on:
       - main
       - master
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - review_requested
-      - ready_for_review
+    types: [opened, reopened, synchronize, review_requested, ready_for_review]
   workflow_dispatch:
 
 concurrency:

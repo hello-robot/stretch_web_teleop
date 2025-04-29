@@ -11,6 +11,8 @@ import {
     WebRTCMessage,
     ValidJointStateDict,
     ValidJointStateMessage,
+    ModeMessage,
+    IsHomedMessage,
     IsRunStoppedMessage,
     RobotPose,
     ROSOccupancyGrid,
@@ -21,6 +23,7 @@ import {
     ActionStateMessage,
     ROSBatteryState,
     BatteryVoltageMessage,
+    delay,
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import { AudioStream } from "./audiostreams";
@@ -29,6 +32,7 @@ import {
     HasBetaTeleopKitMessage,
     StretchToolMessage,
 } from "../../../shared/util";
+import { loginFirebaseSignalerAsRobot } from "shared/signaling/get_signaler";
 
 export const robot = new Robot({
     jointStateCallback: forwardJointStates,
@@ -41,6 +45,8 @@ export const robot = new Robot({
     showTabletResultCallback: (goalState: ActionState) =>
         forwardActionState(goalState, "showTabletState"),
     amclPoseCallback: forwardAMCLPose,
+    modeCallback: forwardMode,
+    isHomedCallback: forwardIsHomed,
     isRunStoppedCallback: forwardIsRunStopped,
     hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
     stretchToolCallback: forwardStretchTool,
@@ -84,7 +90,17 @@ robot.setOnRosConnectCallback(async () => {
     robot.getOccupancyGrid();
     robot.getJointLimits();
 
-    connection.joinRobotRoom();
+    console.log(
+        "Waiting for configured signaler (i.e. logging in if using Firebase)",
+    );
+    await loginFirebaseSignalerAsRobot();
+    await connection.configure_signaler("");
+    console.log("Signaler ready! Joining room.");
+    let joinedRobotRoom = await connection.joinRobotRoom();
+    while (!joinedRobotRoom) {
+        await delay(500);
+        joinedRobotRoom = await connection.joinRobotRoom();
+    }
 
     return Promise.resolve();
 });
@@ -132,6 +148,24 @@ function forwardActionState(state: ActionState, type: string) {
         type: type,
         message: state,
     } as ActionStateMessage);
+}
+
+function forwardMode(mode: string) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "mode",
+        value: mode,
+    } as ModeMessage);
+}
+
+function forwardIsHomed(isHomed: boolean) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "isHomed",
+        value: isHomed,
+    } as IsHomedMessage);
 }
 
 function forwardIsRunStopped(isRunStopped: boolean) {
@@ -315,6 +349,9 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "stopShowTablet":
             robot.stopShowTabletClient();
+            break;
+        case "homeTheRobot":
+            robot.homeTheRobot();
             break;
     }
 }
