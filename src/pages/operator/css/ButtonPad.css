@@ -77,14 +77,14 @@
 }
 
 /* When buttons are disabled... */
-.button-pads path.collision:hover,
-.button-pads path.disable:hover {
-    cursor: not-allowed;
-    pointer-events: none;
+.button-pads path.collision,
+.button-pads path.disable {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
 }
 
 .button-pads path.disable.active,
-.button-pads path.disable.active,
+.button-pads path.disable.inactive,
 .button-pads path.disable.collision,
 .button-pads path.disable.limit {
     fill: #efeff0;
