@@ -6,6 +6,12 @@ on:
       - main
       - master
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - review_requested
+      - ready_for_review
   workflow_dispatch:
 
 concurrency:
@@ -18,22 +24,23 @@ env:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      ## Run pre-commit and try to apply fixes
-      - name: Use Node.js 21.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 21.x
-      - name: NPM install dev dependencies
-        working-directory: ./
-        run: npm install --dev --legacy-peer-deps
+      # Run pre-commit checks & auto-fix
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
+
+      # Only save/apply fixes when it’s a PR
       - name: Apply fixes from pre-commit
+        if: ${{ github.event_name == 'pull_request' }}
         uses: pre-commit-ci/lite-action@v1.0.2
-        if: always()
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
