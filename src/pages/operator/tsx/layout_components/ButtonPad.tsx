@@ -168,6 +168,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 className={className(buttonState, {
                     disable: isDisabled,
                 })}
+                aria-label={`${title} ${isDisabled ? "(Disabled until robot is homed)" : ""}`}
             >
                 <title>{title}</title>
             </path>
@@ -177,6 +178,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 height={height}
                 width={width}
                 href={icon}
+                role="img"
                 className={className(buttonState, {
                     disable: isDisabled,
                 })}
