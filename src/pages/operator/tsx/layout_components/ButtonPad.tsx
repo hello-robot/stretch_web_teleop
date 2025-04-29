@@ -105,8 +105,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                        ? SVG_RESOLUTION / props.aspectRatio
-                        : SVG_RESOLUTION
+                    ? SVG_RESOLUTION / props.aspectRatio
+                    : SVG_RESOLUTION
                     }`}
                 preserveAspectRatio="none"
                 className={className("button-pads", {
@@ -166,7 +166,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 d={props.svgPath}
                 {...clickProps}
                 className={className(buttonState, {
-                    foo: isDisabled,
+                    disable: isDisabled,
                 })}
             >
                 <title>{title}</title>
@@ -178,7 +178,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 width={width}
                 href={icon}
                 className={className(buttonState, {
-                    foo: isDisabled,
+                    disable: isDisabled,
                 })}
             />
             <p>{title}</p>
