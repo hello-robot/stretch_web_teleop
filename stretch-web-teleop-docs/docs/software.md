@@ -21,12 +21,12 @@ When the `Operator` first renders, it gets the `layout` from the `StorageHandler
 ## Code layout
 
     configure_audio.sh                    # Script for configuring robot speaker and microphone
-    launch_interface.sh                   # Script for launching the interface in the background.
+    launch_interface.sh                   # Script that launches the interface and watches for any file changes
     server.js                             # Sets up a secure web server with WebSocket support for managing robot-operator connections
     start_robot_browser.js                # Launches headless robot browser used to establish peer connection with the operator
     start_ros2.sh                         # Starts ROS2 nodes used by web teleop
     start_web_server_and_robot_browser.sh # Script for launching the web server and robot browser
-    stop_interface.sh                     # The script for stopping all background processes launched by the launch_interface script
+    stop_interface.sh                     # The script for stopping all background processes launched by ./launch_interface.sh
     tsconfig.json                         # Configures the TypeScript compiler
     webpack.config.js                     # Sets up a development build process for a multi-page React application 
     action/                               # Files defining custom ROS2 Actions
