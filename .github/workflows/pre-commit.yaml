@@ -23,19 +23,21 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true # lets us push back fixes
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      # Run pre-commit checks & auto-fix
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
-      # Only save/apply fixes when it’s a PR
-      - name: Apply fixes from pre-commit
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: pre-commit-ci/lite-action@v1.0.2
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit auto-fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: apply pre-commit fixes" || echo "no fixes needed"
+          git push || echo "nothing to push"
