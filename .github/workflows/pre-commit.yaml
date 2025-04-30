@@ -1,39 +1,74 @@
 name: pre-commit
 
 on:
+  # Run on push to master
   push:
     branches:
-      - main
       - master
+  # Run on pull request actions
   pull_request:
-    types: [opened, reopened, synchronize, review_requested, ready_for_review]
+    types: [opened, reopened, synchronize]
+  # Manual trigger
   workflow_dispatch:
 
+# Prevent parallel runs
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
 
+# Global env vars
 env:
   PYTHON_VERSION: "3.10"
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft }}
     steps:
+      # Checkout code and keep creds for push
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          persist-credentials: true # lets us push back fixes
+          persist-credentials: true
 
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      # Setup Node.js for JS hooks
+      - name: Use Node.js 21.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21.x"
+
+      # Cache NPM deps
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Cache pip for Python hook installs
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Install JS devDependencies
+      - name: NPM install dev dependencies
+        run: npm ci --omit=prod --legacy-peer-deps
+
+      # Run pre-commit hooks
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
+      # Commit & push any auto-fixes
       - name: Commit auto-fixes
         run: |
           git config user.name "github-actions[bot]"
