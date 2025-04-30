@@ -867,8 +867,8 @@ const UnderAdjustableOverheadButtons = (props: {
 
     return (
         <React.Fragment>
-            {lookButtons}
-            {/* <AccordionSelect
+            {/* {lookButtons} */}
+            <AccordionSelect
                 title="Look..."
                 possibleOptions={realsenseButtons.map((button) => {
                     if (button === UnderVideoButton.LookAtGripper) {
@@ -881,7 +881,7 @@ const UnderAdjustableOverheadButtons = (props: {
                         realsenseButtons[idx],
                     ).onClick!();
                 }}
-            /> */}
+            />
             {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
@@ -1094,7 +1094,7 @@ const UnderRealsenseButtons = (props: {
                     ).onClick!();
                 }}
             />
-            <CheckToggleButton
+            {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
                 onClick={() => {
                     props.definition.followGripper =
@@ -1105,7 +1105,7 @@ const UnderRealsenseButtons = (props: {
                     ).onCheck!(props.definition.followGripper);
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
-            />
+            /> */}
             <CheckToggleButton
                 checked={props.definition.depthSensing || false}
                 onClick={() => {
