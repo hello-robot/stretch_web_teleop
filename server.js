@@ -41,7 +41,7 @@ io.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
 });
 
-ROOM = "default";
+const ROOM = "default";
 let robo_sock = undefined;
 let oper_sock = undefined;
 let protocol = undefined; // TODO(binit): ensure robot/operator protocol match
