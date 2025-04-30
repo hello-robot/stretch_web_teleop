@@ -1,7 +1,7 @@
 :root {
     --btn-brdr-radius: 0.4rem;
     --btn-padding: 0.5em 1em;
-    --btn-padding-med: 0.4rem 0.5rem;
+    --btn-padding-med: 0.2rem 0.25rem;
 
     --selected-color: hsl(33, 95%, 63%);
 
@@ -25,6 +25,8 @@
     --path-blue: hsl(170, 37%, 53%);
 
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
+
+    touch-action: none;
 }
 
 * {
@@ -42,6 +44,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background-color);
+    /* zoom: 75%; */
 }
 
 html {
@@ -153,7 +156,7 @@ button .material-icons {
 
     .under-video-area button {
         /* font-size: 30px; */
-        padding: var(--btn-padding);
+        padding: var(--btn-padding-med);
         gap: 10px;
     }
 }

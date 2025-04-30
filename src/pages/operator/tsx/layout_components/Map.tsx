@@ -24,7 +24,7 @@ import { useState } from "react";
 import { Dropdown } from "../basic_components/Dropdown";
 import { PopupModal } from "../basic_components/PopupModal";
 import { Tooltip } from "operator/tsx/static_components/Tooltip";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import Save from "@mui/icons-material/Save";
@@ -99,7 +99,7 @@ export const Map = (props: CustomizableComponentProps) => {
         setOccupanyGrid(occupancyGridMap);
     }, []);
 
-    function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
+    function handleSelect(event: React.TouchEvent<HTMLDivElement>) {
         event.stopPropagation();
         props.sharedState.onSelect(props.definition, props.path);
     }
@@ -110,7 +110,7 @@ export const Map = (props: CustomizableComponentProps) => {
             return selectGoal;
         };
     }, []);
-
+    
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
             MapFunction.GetMap,
@@ -188,9 +188,9 @@ export const Map = (props: CustomizableComponentProps) => {
     return (
         <React.Fragment>
             <div
-                className={isMobile ? "mobile-map-container" : "map-container"}
+                className={!isBrowser && !isTablet  ? "mobile-map-container" : "map-container"}
             >
-                {!isMobile ? <h4 className="map-title">Map</h4> : <></>}
+                {/* {isBrowser || isTablet ? <h4 className="map-title">Map</h4> : <></>} */}
                 <div
                     id="map"
                     className={className("map", {
@@ -198,10 +198,10 @@ export const Map = (props: CustomizableComponentProps) => {
                         selected,
                         active,
                     })}
-                    onClick={handleSelect}
+                    onTouchStart={handleSelect}
                 ></div>
                 {
-                    !isMobile && (
+                    isBrowser || isTablet && (
                         // <div className={"under-video-area"}>
                         <UnderMapButtons
                             handleSelectGoal={handleSelectGoal}
@@ -212,7 +212,7 @@ export const Map = (props: CustomizableComponentProps) => {
                     // </div>
                 }
             </div>
-            {isMobile && (
+            {!isBrowser && !isTablet  && (
                 <UnderMapButtons
                     handleSelectGoal={handleSelectGoal}
                     functs={underMapFn}
@@ -250,6 +250,16 @@ const UnderMapButtons = (props: {
             setSelectedIdx(props.functs.GetSavedPoseNames().indexOf(label)),
     };
 
+    underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
+        props.functs.DisplayGoalMarker(pose);
+        props.functs.NavigateToAruco(selectedIdx);
+        setPlay(true);
+        setSelectGoal(false);
+        props.functs
+            .GoalReached()
+            .then((goalReached) => setPlay(false));
+    })
+
     const SavePoseModal = (props: {
         functs: UnderMapFunctions;
         setShow: (show: boolean) => void;
@@ -280,13 +290,13 @@ const UnderMapButtons = (props: {
                 id="save-pose-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-pose-name"><b>Save Current Pose on Map</b></label>
                 <hr /> */}
                 <div
-                    className={"pose-name" + isMobile ? "mobile-pose-name" : ""}
+                    className={"pose-name" + !isBrowser && !isTablet  ? "mobile-pose-name" : ""}
                 >
                     {/* <label>Pose Name</label> */}
                     <input
@@ -318,59 +328,61 @@ const UnderMapButtons = (props: {
         return elements;
     }
 
-    return !isMobile ? (
+    return isBrowser || isTablet ? (
         <React.Fragment>
             <div className="map-fn-btns">
+                <div className="inline-buttons">
                 <CheckToggleButton
-                    checked={selectGoal}
-                    onClick={() => {
-                        props.handleSelectGoal(!selectGoal);
-                        setSelectGoal(!selectGoal);
-                        if (selectGoal) props.functs.RemoveGoalMarker();
-                        else radioFuncts.SelectedLabel(undefined);
-                    }}
-                    label="Select Goal"
-                />
-                {!play && (
-                    <button
-                        className="map-play-btn"
-                        onPointerDown={() => {
-                            if (!play && selectGoal) {
-                                props.functs.Play();
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
-                            } else if (!play && selectedIdx != undefined) {
-                                let pose: ROSLIB.Vector3 =
-                                    props.functs.LoadGoal(selectedIdx)!;
-                                props.functs.DisplayGoalMarker(pose);
-                                props.functs.NavigateToAruco(selectedIdx);
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
-                            }
+                        checked={selectGoal}
+                        onClick={() => {
+                            props.handleSelectGoal(!selectGoal);
+                            setSelectGoal(!selectGoal);
+                            if (selectGoal) props.functs.RemoveGoalMarker();
+                            else radioFuncts.SelectedLabel(undefined);
                         }}
-                    >
-                        <span>Start</span>
-                        <PlayCircle />
-                    </button>
-                )}
-                {play && (
-                    <button
-                        className="map-cancel-btn"
-                        onPointerDown={() => {
-                            props.functs.CancelGoal();
-                            setPlay(!play);
-                        }}
-                    >
-                        <span>Cancel</span>
-                        <Cancel />
-                    </button>
-                )}
+                        label="Select Goal"
+                    />
+                    {!play && (
+                        <button
+                            className="map-play-btn"
+                            onPointerDown={() => {
+                                if (!play && selectGoal) {
+                                    props.functs.Play();
+                                    setPlay(true);
+                                    setSelectGoal(false);
+                                    props.functs
+                                        .GoalReached()
+                                        .then((goalReached) => setPlay(false));
+                                } else if (!play && selectedIdx != undefined) {
+                                    let pose: ROSLIB.Vector3 =
+                                        props.functs.LoadGoal(selectedIdx)!;
+                                    // props.functs.DisplayGoalMarker(pose);
+                                    // props.functs.NavigateToAruco(selectedIdx);
+                                    // setPlay(true);
+                                    // setSelectGoal(false);
+                                    // props.functs
+                                    //     .GoalReached()
+                                    //     .then((goalReached) => setPlay(false));
+                                }
+                            }}
+                        >
+                            <span>Start</span>
+                            <PlayCircle />
+                        </button>
+                    )}
+                    {play && (
+                        <button
+                            className="map-cancel-btn"
+                            onPointerDown={() => {
+                                props.functs.CancelGoal();
+                                setPlay(!play);
+                            }}
+                        >
+                            <span>Cancel</span>
+                            <Cancel/>
+                        </button>
+                    )}
+                </div>
                 <button
                     className="map-save-btn"
                     onPointerDown={() => {
@@ -409,7 +421,7 @@ const UnderMapButtons = (props: {
                     }}
                 >
                     <span hidden={props.hideLabels}>Save new destination</span>
-                    <span className="material-icons">save</span>
+                    <Save/>
                 </div>
                 {!play && (
                     <div
@@ -425,18 +437,18 @@ const UnderMapButtons = (props: {
                             } else if (!play && selectedIdx != undefined) {
                                 let pose: ROSLIB.Vector3 =
                                     props.functs.LoadGoal(selectedIdx)!;
-                                props.functs.DisplayGoalMarker(pose);
-                                props.functs.NavigateToAruco(selectedIdx);
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
+                                // props.functs.DisplayGoalMarker(pose);
+                                // props.functs.NavigateToAruco(selectedIdx);
+                                // setPlay(true);
+                                // setSelectGoal(false);
+                                // props.functs
+                                //     .GoalReached()
+                                //     .then((goalReached) => setPlay(false));
                             }
                         }}
                     >
                         <span>Play</span>
-                        <span className="material-icons">play_circle</span>
+                        <PlayCircle/>
                     </div>
                 )}
                 {play && (
@@ -448,7 +460,7 @@ const UnderMapButtons = (props: {
                         }}
                     >
                         <span>Cancel</span>
-                        <span className="material-icons">cancel</span>
+                        <Cancel/>
                     </div>
                 )}
                 <CheckToggleButton

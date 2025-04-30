@@ -1,43 +1,76 @@
 .button-grid {
-    flex: 2;
+    flex: 1;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(4, auto 1fr);
+    row-gap: 0.15rem;
+    column-gap: 0.15rem;
+    /* grid-template-columns: repeat(4, 1fr); */
+    /* grid-template-rows: repeat(3, 0fr); */
     grid-template-areas:
-        "header0 header0 header0 header0 header0 header0"
-        ". b0 b1 b2 b3 ."
-        "header1 header1 header1 header1 header1 header1"
-        ". b4 b5 b6 b7 ."
-        "header2 header2 header2 header2 header2 header2"
-        "b8 b9 b10 b11 b12 b13"
-        "header3 header3 header3 header3 header3 header3"
-        ". . b14 b15 . .";
-
+        "b0 b0 b0 b0"
+        "b2 b2 b3 b3"
+        "b1 b1 b1 b1"
+        "a0 a0 a0 a0"
+        "b4 b4 b4 b4"
+        "b6 b6 b7 b7"
+        "b5 b5 b5 b5"
+        "a1 a1 a1 a1"
+        "b12 b10 b10 b13"
+        "b12 b14 b15 b13"
+        "b8 b14 b15 b9"
+        "b8 b11 b11 b9";
+    /*
+         "header0 header0 header0 header0 header0 header0"
+         "b0 b0 b1 b1 b2 b3"
+         "header1 header1 header1 header1 header1 header1"
+         "b4 b5 b6 b6 b7 b7"
+         "header2 header2 header2 header2 header2 header2"
+         "b8 b9 b10 b11 b12 b13"
+         "header3 header3 header3 header3 header3 header3"
+         "b14 b14 b14 b15 b15 b15" */
     padding: 0.4rem;
     position: relative;
     z-index: 1;
-    border-radius: var(--radius);
+    /* border-radius: var(--radius); */
 }
+
+@media screen and (orientation: landscape) and (max-device-width: 1200px) {
+    .button-grid button {
+        min-width: fit-content;
+        padding: 0rem 0.5rem 0rem 0.5rem;
+    }
+}
+
 
 .button-grid::after {
     border-radius: var(--radius);
 }
 
 .button-grid p {
+    font-size: x-large;
     text-align: center;
-    margin: 1.5rem 0 0.5rem 0;
+    margin: 0rem;
 }
 
 .button-grid p:first-of-type {
     text-align: center;
-    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.button-grid p:last-of-type {
+    text-align: center;
+    margin-top: 0.75rem;
 }
 
 .button-grid button {
-    width: 90%;
-    height: 4rem;
+    font-size: larger;
+    width: 100%;
+    border-radius: 0px;
+    min-height: 3rem;
+    height: 100%;
     justify-self: center;
     align-self: center;
+    background-color: gray;
+    color: white;
 }
 
 .button-grid button.active {
@@ -49,10 +82,12 @@
 }
 
 .button-grid button.limit {
-    background-color: red;
+    background-color: #fc9696;
+    color: black;
 }
 
 .button-grid-bkg-color {
     grid-column: 1 / 7;
     height: 5rem;
+    border: 2px solid black;
 }

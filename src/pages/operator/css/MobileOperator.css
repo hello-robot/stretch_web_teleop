@@ -12,7 +12,6 @@
     position: absolute;
     border-radius: 0px;
     opacity: 0.5;
-    font-size: 2rem;
     padding: 0;
     float: right;
     text-align: right;
@@ -20,8 +19,9 @@
     color: black;
 }
 
-.switch-camera .material-icons {
+.switch-camera .icons {
     color: black;
+    font-size: 3rem;
 }
 
 .record {
@@ -175,7 +175,7 @@
 
 .label {
     font-size: 20px;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .map,

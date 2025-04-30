@@ -8,6 +8,7 @@ import {
     MapDefinition,
 } from "./utils/component_definitions";
 import {
+    ActionState,
     className,
     ActionState as MoveBaseState,
     RemoteStream,
@@ -19,6 +20,7 @@ import {
     movementRecorderFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
+    homeTheRobotFunctionProvider,
 } from ".";
 import {
     ButtonPadButton,
@@ -43,6 +45,12 @@ import {
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { Alert } from "./basic_components/Alert";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import MapIcon from "@mui/icons-material/Map";
+import { SpeedControl } from "./static_components/SpeedControl";
+import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { PopupModal } from "./basic_components/PopupModal";
+import { isBrowser, isTablet } from "react-device-detect";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -65,7 +73,9 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
-
+    const controlTabLabels = ["Drive", "Arm", "Gripper"];
+    const headingTabLabels = ["Controls", "Recordings"];
+    
     React.useEffect(() => {
         setTimeout(function () {
             setShowAlert(false);
@@ -99,6 +109,12 @@ export const MobileOperator = (props: {
     underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
         setTabletOrientationRerender(!tabletOrientationRerender);
     });
+
+    const [robotNotHomed, setRobotNotHomed] =
+        React.useState<ActionState>(false);
+    homeTheRobotFunctionProvider.setIsHomedCallback(
+        (isHomed: ActionState) => setRobotNotHomed(!isHomed)
+    );
 
     function moveBaseStateCallback(state: MoveBaseState) {
         setMoveBaseState(state);
@@ -219,7 +235,14 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-                <div className="slider-container">
+                <SpeedControl
+                    scale={velocityScale}
+                    onChange={(newScale: number) => {
+                        setVelocityScale(newScale);
+                        FunctionProvider.velocityScale = newScale;
+                    }}
+                />
+                {/* <div className="slider-container">
                     <span className="label">Slow</span>
                     <input
                         type="range"
@@ -238,12 +261,14 @@ export const MobileOperator = (props: {
                         }}
                     />
                     <span className="label">Fast</span>
-                </div>
+                </div> */}
                 <TabGroup
-                    tabLabels={["Drive", "Arm", "Gripper"]}
+                    tabLabels={controlTabLabels}
                     tabContent={[driveMode, armMode, gripperMode]}
                     startIdx={activeControlTab}
-                    onChange={(index: number) => setActiveControlTab(index)}
+                    onChange={(index: number) => {
+                        setActiveControlTab(index)
+                    }}
                     pill={true}
                     key={"controls-group"}
                 />
@@ -267,7 +292,7 @@ export const MobileOperator = (props: {
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
-                {showAlert ? (
+                {/* {showAlert ? (
                     <div className="mobile-alert">
                         <Alert type="error">
                             <span>Beta feature, use at your own risk</span>
@@ -275,7 +300,22 @@ export const MobileOperator = (props: {
                     </div>
                 ) : (
                     <></>
+                )} */}
+                {robotNotHomed && (
+                    <div className="operator-collision-alerts">
+                        <div
+                            className={className("mobile-alert", {
+                                fadeIn: robotNotHomed,
+                                fadeOut: !robotNotHomed,
+                            })}
+                        >
+                            <HomeTheRobot
+                                hideLabels={false}
+                            />
+                        </div>
+                    </div>
                 )}
+                {/* <ScreenRecorder/> */}
                 <div className={className("controls", { hideControls })}>
                     <div className={"switch-camera"}>
                         <button
@@ -288,7 +328,9 @@ export const MobileOperator = (props: {
                                     setCameraID(CameraViewId.realsense);
                             }}
                         >
-                            <span className="material-icons">photo_camera</span>
+                            <PhotoCameraIcon
+                                className="material-icons icon"
+                            />
                         </button>
                         <button
                             onPointerDown={() => {
@@ -296,10 +338,12 @@ export const MobileOperator = (props: {
                                 setHideControls(true);
                             }}
                         >
-                            <span className="material-icons">map</span>
+                            <MapIcon
+                                className="material-icons icon"
+                            />
                         </button>
                     </div>
-                    {cameraID == CameraViewId.realsense && (
+                    {/* {cameraID == CameraViewId.realsense && (
                         <div className="depth-sensing">
                             <CheckToggleButton
                                 checked={depthSensing}
@@ -312,8 +356,8 @@ export const MobileOperator = (props: {
                                 label="Depth Sensing"
                             />
                         </div>
-                    )}
-                    <button
+                    )} */}
+                    {/* <button
                         className="record"
                         onPointerDown={() => {
                             setIsRecording(!isRecording);
@@ -321,9 +365,7 @@ export const MobileOperator = (props: {
                     >
                         {!isRecording ? (
                             <>
-                                <span className="material-icons">
-                                    radio_button_checked
-                                </span>
+                                <RadioButtonCheckedIcon/>
                                 <i>Record</i>
                             </>
                         ) : (
@@ -333,7 +375,7 @@ export const MobileOperator = (props: {
                                 <i>Stop Recording</i>
                             </>
                         )}
-                    </button>
+                    </button> */}
                     {/* <div {...swipeHandlers}> */}
                     <div>
                         <SimpleCameraView
@@ -342,7 +384,7 @@ export const MobileOperator = (props: {
                         />
                     </div>
                     <TabGroup
-                        tabLabels={["Controls", "Recordings"]}
+                        tabLabels={headingTabLabels}
                         tabContent={[controlModes, recordingList]}
                         startIdx={activeMainGroupTab}
                         onChange={(index: number) =>
@@ -361,7 +403,9 @@ export const MobileOperator = (props: {
                                 setHideControls(false);
                             }}
                         >
-                            <span className="material-icons">photo_camera</span>
+                            <PhotoCameraIcon
+                                className="material-icons icon"
+                            />
                         </button>
                     </div>
                     <Map

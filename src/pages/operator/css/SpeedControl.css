@@ -9,7 +9,15 @@
 #velocity-control-container button {
     border-radius: 0;
     /* Make buttons wider than default */
-    width: 8rem;
+    width: 7rem;
+}
+
+.velocity-radio-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    vertical-align: middle;
+    align-items: center;
 }
 
 @media (max-width: 1000px) {

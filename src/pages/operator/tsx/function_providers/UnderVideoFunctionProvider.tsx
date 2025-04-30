@@ -23,6 +23,7 @@ export enum UnderVideoButton {
     LookAtBase = "Look At Base",
     LookAhead = "Look Ahead",
     FollowGripper = "Follow Gripper",
+    PredictiveDisplay = "Predictive Display",
     RealsenseDepthSensing = "Realsense Depth Sensing",
     GripperDepthSensing = "Gripper Depth Sensing",
     ExpandedGripperView = "Expanded Gripper View",
@@ -73,6 +74,7 @@ export type UnderVideoButtonFunctions = {
     onClick?: (...args: any[]) => void;
     onCheck?: (toggle: boolean) => void;
     get?: () => any;
+    set?: (value: any) => void;
     send?: (name: string) => void;
     getFuture?: () => Promise<any>;
 };

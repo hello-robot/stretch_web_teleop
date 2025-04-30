@@ -54,10 +54,13 @@ export const Panel = (props: CustomizableComponentProps) => {
     }
 
     // Should take up screen size proportional to number of children
-    const flex =
-        activeTabDef.label === "Safety"
-            ? 1
-            : Math.max(activeTabDef.children.length + 1, 1);
+    let flex = Math.max(activeTabDef.children.length + 1, 1);
+    if (activeTabDef.label === "Safety") flex = 1;
+    else if (
+        activeTabDef.children.some((c) => c.type === ComponentType.ButtonGrid)
+    ) {
+        flex = 3;
+    }
 
     /** Props for rendering the children elements inside the active tab */
     const componentListProps: ComponentListProps = {

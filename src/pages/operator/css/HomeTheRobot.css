@@ -9,12 +9,21 @@
     margin-left: auto;
 }
 
-.home-info {
+.home-info, .home-info-mobile {
     margin-left: auto;
 }
 
-.home-btn {
+.home-info-mobile {
+    text-align: left;
+    padding-right: 0.5rem;
+}
+
+.home-btn, .home-btn-mobile {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.home-btn-mobile {
+    padding: 0.5rem 2rem 0.5rem 1rem;
 }
