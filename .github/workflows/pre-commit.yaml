@@ -61,8 +61,8 @@ jobs:
             ${{ runner.os }}-pip-
 
       # Install JS devDependencies
-      - name: NPM install dev dependencies
-        run: npm ci --omit=prod --legacy-peer-deps
+      - name: Install devDependencies
+        run: npm install --only=dev --legacy-peer-deps
 
       # Run pre-commit hooks
       - name: Run pre-commit
