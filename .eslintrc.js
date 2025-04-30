@@ -1,31 +1,32 @@
 module.exports = {
     root: true,
-      parserOptions: {
+    parserOptions: {
         ecmaVersion: 2020,
-      sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
-      },
+        sourceType: "module",
+        ecmaFeatures: {
+            jsx: true,
+        },
     },
-      settings: {
+    settings: {
         react: {
-        version: "detect",
-      },
+            version: "detect",
+        },
     },
-      env: {
+    env: {
         jest: true,
-      browser: true,
-      amd: true,
-      node: true,
+        browser: true,
+        amd: true,
+        node: true,
     },
-      extends: [
+    extends: [
         "eslint:recommended",
-      "react-app",
-      "plugin:react/recommended",
-      "plugin:react-hooks/recommended",
-      "plugin:prettier/recommended",
+        "react-app",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:prettier/recommended",
     ],
-      rules: {
+    rules: {
         "prettier/prettier": ["error", {}, { usePrettierrc: true }],
+        eqeqeq: ["error", "always"],
     },
 };

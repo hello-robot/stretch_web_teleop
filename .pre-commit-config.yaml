@@ -47,7 +47,13 @@ repos:
     rev: v0.981
     hooks:
       - id: mypy
-        args: [--install-types, --non-interactive, --no-strict-optional, --ignore-missing-imports]
+        args:
+          [
+            --install-types,
+            --non-interactive,
+            --no-strict-optional,
+            --ignore-missing-imports,
+          ]
 
   # Beautysh formats Bash scripts
   - repo: https://github.com/lovesegfault/beautysh
@@ -60,7 +66,7 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
-        exclude: \.github/.*  # Exclude files in the .github directory
+        exclude: \.github/.* # Exclude files in the .github directory
 
   # Codespell checks the code for common misspellings
   - repo: https://github.com/codespell-project/codespell
@@ -81,8 +87,9 @@ repos:
 
   # ESLint lints Javascript/Typescript files
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v8.56.0'  # Use the sha / tag you want to point at
+    rev: "v8.56.0" # Use the sha / tag you want to point at
     hooks:
       - id: eslint
-        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+        args: ["--fix"]
+        files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
         types: [file]

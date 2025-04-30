@@ -62,7 +62,7 @@ jobs:
 
       # Install JS devDependencies
       - name: Install devDependencies
-        run: npm install --omit=prod --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       # Run pre-commit hooks
       - name: Run pre-commit
