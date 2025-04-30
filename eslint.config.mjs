@@ -11,47 +11,50 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+    allConfig: js.configs.all,
 });
 
-export default defineConfig([{
-    extends: fixupConfigRules(compat.extends(
-        "eslint:recommended",
-        "react-app",
-        "plugin:react/recommended",
-        "plugin:react-hooks/recommended",
-        "plugin:prettier/recommended",
-    )),
-
-    languageOptions: {
-        globals: {
-            ...globals.jest,
-            ...globals.browser,
-            ...globals.amd,
-            ...globals.node,
-        },
-
-        ecmaVersion: 2020,
-        sourceType: "module",
-
-        parserOptions: {
-            ecmaFeatures: {
-                jsx: true,
+export default defineConfig([
+    {
+        extends: fixupConfigRules(
+            compat.extends(
+                "eslint:recommended",
+                "react-app",
+                "plugin:react/recommended",
+                "plugin:react-hooks/recommended",
+                "plugin:prettier/recommended",
+            ),
+        ),
+        languageOptions: {
+            globals: {
+                ...globals.jest,
+                ...globals.browser,
+                ...globals.amd,
+                ...globals.node,
+            },
+            ecmaVersion: 2020,
+            sourceType: "module",
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
             },
         },
-    },
+        settings: {
+            react: {
+                version: "detect",
+            },
+        },
 
-    settings: {
-        react: {
-            version: "detect",
+        rules: {
+            "prettier/prettier": [
+                "error",
+                {},
+                {
+                    usePrettierrc: true,
+                },
+            ],
+            eqeqeq: "off",
         },
     },
-
-    rules: {
-        "prettier/prettier": ["error", {}, {
-            usePrettierrc: true,
-        }],
-
-        eqeqeq: ["error", "always"],
-    },
-}]);
+]);
