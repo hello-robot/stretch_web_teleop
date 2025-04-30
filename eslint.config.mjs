@@ -22,9 +22,10 @@ export default defineConfig([
                 "react-app",
                 "plugin:react/recommended",
                 "plugin:react-hooks/recommended",
-                "plugin:prettier/recommended",
-            ),
+                "plugin:prettier/recommended"
+            )
         ),
+
         languageOptions: {
             globals: {
                 ...globals.jest,
@@ -32,14 +33,17 @@ export default defineConfig([
                 ...globals.amd,
                 ...globals.node,
             },
+
             ecmaVersion: 2020,
             sourceType: "module",
+
             parserOptions: {
                 ecmaFeatures: {
                     jsx: true,
                 },
             },
         },
+
         settings: {
             react: {
                 version: "detect",
@@ -55,6 +59,15 @@ export default defineConfig([
                 },
             ],
             eqeqeq: "off",
+            // allow double-quotes (and auto-fix to double)
+            quotes: [
+                "error",
+                "double",
+                {
+                    avoidEscape: true, // still let ya use single if you gotta avoid escape
+                    allowTemplateLiterals: true, // keep backticks workin’ for templates
+                },
+            ],
         },
     },
 ]);
