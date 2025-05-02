@@ -56,6 +56,7 @@
     pointer-events: none;
 }
 
+/* Button pad <image> gets saturated while hovering */
 .button-pads path.inactive:hover + image {
     filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg);
 }
@@ -73,6 +74,25 @@
 .button-pads path.limit {
     fill: red;
     fill-opacity: 40%;
+}
+
+/* When buttons are disabled... */
+.button-pads path.collision,
+.button-pads path.disable {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.button-pads path.disable.active,
+.button-pads path.disable.inactive,
+.button-pads path.disable.collision,
+.button-pads path.disable.limit {
+    fill: #efeff0;
+    fill-opacity: 100%;
+}
+
+.button-pads path.disable:hover + image {
+    filter: none !important;
 }
 
 /* Disable hover actions */
