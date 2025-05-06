@@ -1,0 +1,9 @@
+site_name: Stretch Web Teleop
+nav:
+  - Home: index.md
+  - Usage Guide: usage_guide.md
+  - Software Guide: software.md
+theme: readthedocs
+markdown_extensions:
+  - md_in_html
+  - attr_list
