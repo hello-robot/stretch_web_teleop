@@ -99,9 +99,34 @@ export const ButtonPad = (props: ButtonPadProps) => {
             }
             : {};
 
-    return (
+    const mapButtons_XP = (direction: string, i: number) => {
+        const buttonProps = {
+            direction,
+            funct: functions[i],
+            sharedState: props.sharedState,
+        };
+        // Buttons will not function during customization mode
+        return <SingleButton_XP {...buttonProps} key={i} />;
+    };
+
+    // _XP
+    // TODO: Extract to React component, <DirectionalButtonPad>
+    if (isMobile && definition.id === ButtonPadIdMobile.Drive) {
+        const buttons = ['north', 'south', 'west', 'east'];
+        return (
+            <div>
+                {/* START Masking SVG isn't visible on the webpage */}
+                <svg className="mask_XP">
+                    <clipPath id="clip-path_XP" clipPathUnits="objectBoundingBox"><path d="M1,1 H0 V0.5 C0.276,0.5,0.5,0.276,0.5,0 H1 V1"></path></clipPath>
+                </svg>
+                {/* END */}
+                <div className="button-pad_XP">
+                    {buttons.map(mapButtons_XP)}
+                </div>
+            </div>
+        )
+    } else return (
         <div className="button-pad">
-            {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
@@ -183,6 +208,47 @@ const SingleButton = (props: SingleButtonProps) => {
             />
             <p>{title}</p>
         </React.Fragment>
+    );
+};
+
+/** Properties for a single button on a button pad */
+export type SingleButtonProps_XP = {
+    direction: string;
+    funct: ButtonPadButton;
+    sharedState: SharedState;
+};
+
+/**
+ * A single button on a button pad
+ *
+ * @param props {@link SingleButtonProps_XP}
+ */
+const SingleButton_XP = (props: SingleButtonProps_XP) => {
+    const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
+        props.funct
+    );
+    const clickProps = props.sharedState.customizing
+        ? {}
+        : {
+            onPointerDown: functs.onClick,
+            onPointerUp: functs.onRelease,
+            onPointerLeave: functs.onLeave,
+        };
+    const buttonState: ButtonState =
+        props.sharedState.buttonStateMap?.get(props.funct) ||
+        ButtonState.Inactive;
+    const disabledDueToNotHomed =
+        props.sharedState.robotNotHomed &&
+        notHomedDisabledFunctions.has(props.funct);
+    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
+
+    return (
+        <div className={`button-wrapper_XP ${props.direction}`} key={props.direction}>
+            <button disabled={isDisabled} {...clickProps}>
+                <span className="synthetic-bottom-border_XP"></span>
+            </button>
+            <span className="chevron_XP"></span>
+        </div>
     );
 };
 

@@ -47,7 +47,7 @@
 }
 
 @media (hover: none) {
-    .button-pads path.inactive:hover + image {
+    .button-pads path.inactive:hover+image {
         filter: none !important;
     }
 }
@@ -57,7 +57,7 @@
 }
 
 /* Button pad <image> gets saturated while hovering */
-.button-pads path.inactive:hover + image {
+.button-pads path.inactive:hover+image {
     filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg);
 }
 
@@ -91,7 +91,7 @@
     fill-opacity: 100%;
 }
 
-.button-pads path.disable:hover + image {
+.button-pads path.disable:hover+image {
     filter: none !important;
 }
 
@@ -135,3 +135,168 @@
         filter: drop-shadow(6px 7px 2px rgb(0 0 0 / 0.4));
     }
 }
+
+/**********************************
+ * CSS below only targets _XP
+ **********************************/
+
+/* START Buttonpad */
+.button-pad_XP {
+    position: absolute;
+    bottom: 50px;
+    width: 200px;
+    height: 200px;
+    margin: 200px 0 0 200px;
+}
+/* END Buttonpad */
+
+.button-wrapper_XP button {
+    width: 200px !important;
+    height: 200px !important;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0px;
+    transform-origin: 0 0;
+    mix-blend-mode: soft-light;
+    border-color: hsl(0deg 0% 100% / 50%);
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-width: 0.5px;
+    border-left-width: 0.5px;
+    border-style: solid;
+    transition-property: border-color, background-color, background-image, background-size, background-position, box-shadow, backdrop-filter;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+    rotate: -45deg;
+    box-shadow: none;
+    /* START Create a quarter-circle shape for each button */
+    border-radius: 0 0 200px 0;
+    /* END Create a quarter-circle shape for each button */
+    /* START Clip rules */
+    background-size: cover;
+    -webkit-clip-path: url(#clip-path_XP);
+    clip-path: url(#clip-path_XP);
+    /* END Clip rules */
+}
+
+.button-wrapper_XP {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    overflow: visible;
+}
+
+/* Position each button by rotating it around the center */
+.button-wrapper_XP.east button {
+    transform: rotate(0deg);
+}
+
+.button-wrapper_XP.south button {
+    transform: rotate(90deg);
+}
+
+.button-wrapper_XP.west button {
+    transform: rotate(180deg);
+}
+
+.button-wrapper_XP.north button {
+    transform: rotate(270deg);
+}
+
+/* START <button> hover */
+.button-wrapper_XP button:hover,
+.button-wrapper_XP button:hover span.synthetic-bottom-border_XP {
+    z-index: 1;
+    border-color: hsl(333deg 100% 90% / 70%);
+    background-color: hsl(333deg 100% 90% / 20%);
+    border-top-width: 1px;
+    border-left-width: 1px;
+    mix-blend-mode: normal;
+}
+/* END <button> hover */
+
+/* START <button> active */
+.button-wrapper_XP button:active,
+.button-wrapper_XP button:active span.synthetic-bottom-border_XP {
+    border-color: hsl(333deg 100% 90% / 70%);
+    border-top-width: 1px;
+    border-left-width: 1px;
+    background-color: hsl(333deg 100% 90% / 50%);
+    /* START dot grid effect */
+    background-image: radial-gradient(hsl(333deg 90% 90% / 100%) 1px, transparent 0);
+    background-size: 3px 3px;
+    background-position: -2px -2px;
+    /* END dot grid effect */
+}
+
+.button-wrapper_XP button:active {
+    mix-blend-mode: overlay;
+    box-shadow: 0px 0px 10px 0px hsl(333deg 70% 60% / 50%);
+}
+/* END <button> active */
+
+.button-wrapper_XP button span.synthetic-bottom-border_XP {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 0 0 200px 0;
+    border-color: hsl(0deg 0% 100% / 50%);
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-style: solid;
+}
+
+/* START Clip stuff */
+.mask_XP {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+/* END Clip stuff */
+
+/* START Chevron_XP icon */
+.button-wrapper_XP .chevron_XP {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: inline-block;
+    /* border-right: 5px solid #ffffff; */
+    /* border-bottom: 5px solid #ffffff; */
+    height: 36px;
+    width: 36px;
+    background-image: url('data:image/svg+xml,<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><mask id="path-1-outside-1_468_2830" maskUnits="userSpaceOnUse" x="2.59961" y="9.08008" width="31" height="20" fill="black"><rect fill="white" x="2.59961" y="9.08008" width="31" height="20"/><path d="M28.4336 10.4521C28.9298 9.95596 29.7343 9.95596 30.2305 10.4521L32.0273 12.249C32.5234 12.7452 32.5235 13.5498 32.0273 14.0459L19 27.0723C18.7257 27.3466 18.3576 27.4675 17.999 27.4385C17.6408 27.4671 17.273 27.3463 16.999 27.0723L3.97168 14.0459C3.47558 13.5498 3.47575 12.7452 3.97168 12.249L5.76855 10.4521C6.26474 9.95596 7.06925 9.95596 7.56543 10.4521L17.999 20.8848L28.4336 10.4521Z"/></mask><path d="M28.4336 10.4521C28.9298 9.95596 29.7343 9.95596 30.2305 10.4521L32.0273 12.249C32.5234 12.7452 32.5235 13.5498 32.0273 14.0459L19 27.0723C18.7257 27.3466 18.3576 27.4675 17.999 27.4385C17.6408 27.4671 17.273 27.3463 16.999 27.0723L3.97168 14.0459C3.47558 13.5498 3.47575 12.7452 3.97168 12.249L5.76855 10.4521C6.26474 9.95596 7.06925 9.95596 7.56543 10.4521L17.999 20.8848L28.4336 10.4521Z" fill="%23FF338F"/><path d="M28.4336 10.4521L29.1406 11.1593L29.1407 11.1593L28.4336 10.4521ZM30.2305 10.4521L29.5234 11.1593L30.2305 10.4521ZM32.0273 12.249L32.7345 11.542L32.7345 11.5419L32.0273 12.249ZM32.0273 14.0459L32.7344 14.753L32.7345 14.753L32.0273 14.0459ZM19 27.0723L19.7071 27.7794L19.7071 27.7794L19 27.0723ZM17.999 27.4385L18.0797 26.4417L17.9995 26.4352L17.9193 26.4417L17.999 27.4385ZM16.999 27.0723L17.7061 26.3652L17.7061 26.3651L16.999 27.0723ZM3.97168 14.0459L3.26457 14.753L3.2646 14.753L3.97168 14.0459ZM3.97168 12.249L3.26457 11.5419L3.26437 11.5421L3.97168 12.249ZM7.56543 10.4521L6.85832 11.1593L6.85836 11.1593L7.56543 10.4521ZM17.999 20.8848L17.2919 21.5919L17.999 22.2989L18.7061 21.5919L17.999 20.8848ZM28.4336 10.4521L29.1407 11.1593C29.2464 11.0536 29.4177 11.0536 29.5234 11.1593L30.2305 10.4521L30.9376 9.74504C30.0509 8.85833 28.6132 8.85833 27.7265 9.74504L28.4336 10.4521ZM30.2305 10.4521L29.5234 11.1593L31.3202 12.9561L32.0273 12.249L32.7345 11.5419L30.9376 9.74504L30.2305 10.4521ZM32.0273 12.249L31.3201 12.956C31.4259 13.0618 31.4258 13.2333 31.3202 13.3388L32.0273 14.0459L32.7345 14.753C33.6212 13.8662 33.6209 12.4286 32.7345 11.542L32.0273 12.249ZM32.0273 14.0459L31.3203 13.3388L18.2929 26.3651L19 27.0723L19.7071 27.7794L32.7344 14.753L32.0273 14.0459ZM19 27.0723L18.2929 26.3651C18.2367 26.4213 18.1614 26.4483 18.0797 26.4417L17.999 27.4385L17.9183 28.4352C18.5538 28.4867 19.2146 28.2718 19.7071 27.7794L19 27.0723ZM17.999 27.4385L17.9193 26.4417C17.8373 26.4482 17.762 26.421 17.7061 26.3652L16.999 27.0723L16.2919 27.7794C16.7841 28.2716 17.4443 28.486 18.0787 28.4353L17.999 27.4385ZM16.999 27.0723L17.7061 26.3651L4.67876 13.3388L3.97168 14.0459L3.2646 14.753L16.2919 27.7794L16.999 27.0723ZM3.97168 14.0459L4.67879 13.3388C4.57341 13.2334 4.57312 13.0619 4.67898 12.9559L3.97168 12.249L3.26437 11.5421C2.37838 12.4286 2.37775 13.8662 3.26457 14.753L3.97168 14.0459ZM3.97168 12.249L4.67879 12.9561L6.47566 11.1593L5.76855 10.4521L5.06145 9.74504L3.26457 11.5419L3.97168 12.249ZM5.76855 10.4521L6.47566 11.1593C6.58132 11.0536 6.75266 11.0536 6.85832 11.1593L7.56543 10.4521L8.27254 9.74504C7.38583 8.85833 5.94816 8.85833 5.06145 9.74504L5.76855 10.4521ZM7.56543 10.4521L6.85836 11.1593L17.2919 21.5919L17.999 20.8848L18.7061 20.1776L8.2725 9.74501L7.56543 10.4521ZM17.999 20.8848L18.7061 21.5919L29.1406 11.1593L28.4336 10.4521L27.7266 9.74498L17.292 20.1776L17.999 20.8848Z" fill="black" fill-opacity="0.2" mask="url(%23path-1-outside-1_468_2830)"/></svg>');
+    filter: saturate(0) brightness(3);
+    transition: filter 300ms ease-out
+}
+
+.button-wrapper_XP:active .chevron_XP {
+    filter: saturate(1) brightness(1);
+}
+
+.button-wrapper_XP.east .chevron_XP {
+    top: -36px;
+    left: calc(145px);
+    rotate: -90deg;
+}
+
+.button-wrapper_XP.south .chevron_XP {
+    top: calc(145px);
+    left: 0px;
+    rotate: 0deg;
+}
+
+.button-wrapper_XP.west .chevron_XP {
+    top: 0;
+    left: calc(-145px - 36px);
+    rotate: 90deg;
+}
+
+.button-wrapper_XP.north .chevron_XP {
+    top: calc(-145px - 36px);
+    left: -36px;
+    rotate: -180deg;
+}
+/* END Chevron_XP icon */

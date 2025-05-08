@@ -44,7 +44,7 @@ export const TabGroup = (props: {
 
     return (
         <div className="tab-group" onContextMenu={(e) => e.preventDefault()}>
-            <div className={props.pill ? "pill-tab" : "tab"}>
+            {/* <div className={props.pill ? "pill-tab" : "tab"}>
                 {tabLabels.map((label, index) => (
                     <Tab
                         key={label}
@@ -57,7 +57,7 @@ export const TabGroup = (props: {
                         pill={props.pill}
                     />
                 ))}
-            </div>
+            </div> */}
             <div className="tab-content">
                 {tabContent.map((renderFn, index) =>
                     renderFn(activeIndex === index),

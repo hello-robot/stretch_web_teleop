@@ -1,12 +1,6 @@
 import React from "react";
 import { className, RemoteStream } from "shared/util";
-import { buttonFunctionProvider } from "..";
 import { CameraViewId } from "../utils/component_definitions";
-import {
-    ButtonPadButton,
-    ButtonState,
-    panTiltButtons,
-} from "../function_providers/ButtonFunctionProvider";
 import "operator/css/SimpleCameraView.css";
 import { getIcon } from "../utils/svg";
 
@@ -39,7 +33,7 @@ export const SimpleCameraView = (props: {
     function setVideoSize(videoRef) {
         const videoRect = videoRef.current.getBoundingClientRect();
         let marginTop = 0;
-        let min_control_panel_size = 300; // px
+        let min_control_panel_size = 0; // in pixels
         marginTop = Math.min(
             window.innerHeight - min_control_panel_size - videoRect.height,
             0,
@@ -89,13 +83,8 @@ export const SimpleCameraView = (props: {
         props.id === CameraViewId.overhead ? (
             <>
                 <div
-                    className={className("simple-realsense", {
-                        constrainedHeight,
-                    })}
+                    className="simple-realsense"
                 >
-                    {panTiltButtons.map((dir) => (
-                        <PanTiltButton direction={dir} key={dir} />
-                    ))}
                     <div
                         className="simple-video-area"
                         style={{ gridRow: 2, gridColumn: 1 }}
@@ -107,9 +96,7 @@ export const SimpleCameraView = (props: {
                             muted={true}
                             disablePictureInPicture={true}
                             playsInline={true}
-                            className={className("simple-video-canvas", {
-                                constrainedHeight,
-                            })}
+                            className="simple-video-canvas"
                             onPlay={() => setVideoSize(videoRef)}
                         />
                     </div>
@@ -128,9 +115,7 @@ export const SimpleCameraView = (props: {
                         muted={true}
                         disablePictureInPicture={true}
                         playsInline={true}
-                        className={className("simple-video-canvas", {
-                            constrainedHeight,
-                        })}
+                        className="simple-video-canvas"
                         onPlay={() => setVideoSize(videoRef)}
                     />
                 </div>
@@ -141,52 +126,6 @@ export const SimpleCameraView = (props: {
         <div className="simple-video-container" draggable={false}>
             {videoComponent}
         </div>
-    );
-};
-
-/**
- * Creates a single button for controlling the pan or tilt of the realsense camera
- *
- * @param props the direction of the button {@link PanTiltButton}
- */
-const PanTiltButton = (props: { direction: ButtonPadButton }) => {
-    const functs = buttonFunctionProvider.provideFunctions(props.direction);
-    const dir = props.direction.split(" ")[2];
-    let rotation: string;
-
-    // Specify button details based on the direction
-    switch (props.direction) {
-        case ButtonPadButton.CameraTiltUp:
-            rotation = "-90";
-            break;
-        case ButtonPadButton.CameraTiltDown:
-            rotation = "90";
-            break;
-        case ButtonPadButton.CameraPanLeft:
-            rotation = "180";
-            break;
-        case ButtonPadButton.CameraPanRight:
-            rotation = "0"; // by default the arrow icon points right
-            break;
-        default:
-            throw Error(`unknown pan tilt button direction ${props.direction}`);
-    }
-
-    return (
-        <button
-            className={"simple-overlay btn-" + dir}
-            onPointerDown={functs.onClick}
-            onPointerUp={functs.onRelease}
-            onPointerLeave={functs.onLeave}
-        >
-            {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
-            <span
-                className="material-icons icon"
-                style={{ transform: `rotate(${rotation}deg)` }}
-            >
-                arrow_right
-            </span>
-        </button>
     );
 };
 
