@@ -71,5 +71,8 @@ li.pill-tab-btn:last-child {
 }
 
 .tab-group {
-    display: contents;
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    height: 138px;
 }
