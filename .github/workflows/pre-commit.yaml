@@ -64,15 +64,8 @@ jobs:
       - name: Install devDependencies
         run: npm install --legacy-peer-deps
 
-      # Run pre-commit hooks
-      - name: Run pre-commit
+      # Run pre-commit in check-only mode (fail on any diffs)
+      - name: Run pre-commit (check-only)
         uses: pre-commit/action@v3.0.1
-
-      # Commit & push any auto-fixes
-      - name: Commit auto-fixes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "chore: apply pre-commit fixes" || echo "no fixes needed"
-          git push || echo "nothing to push"
+        with:
+          args: run --all-files --show-diff-on-failure
