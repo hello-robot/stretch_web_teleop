@@ -57,8 +57,8 @@ module.exports = (env) => {
                                 ? "index.html"
                                 : `${page}/index.html`,
                         chunks: [page],
-                    }),
-            ),
+                    })
+            )
         ),
         module: {
             rules: [
