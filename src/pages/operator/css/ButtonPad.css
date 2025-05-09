@@ -141,8 +141,8 @@
  **********************************/
 
 /* START Buttonpad */
-.button-pad_XP {
-    --size: 140px;
+.dbutton-pad_XP {
+    --size: 120px;
     --size-icon: calc(var(--size) * 0.18);
     position: relative;
     left: calc(var(--size) * 0.5);
@@ -151,6 +151,7 @@
     height: var(--size);
     margin: 0 auto;
 }
+
 /* END Buttonpad */
 
 .button-wrapper_XP button {
@@ -182,6 +183,7 @@
     -webkit-clip-path: url(#clip-path_XP);
     clip-path: url(#clip-path_XP);
     /* END Clip rules */
+    touch-action: none;
 }
 
 .button-wrapper_XP {
@@ -218,6 +220,7 @@
     border-left-width: 1px;
     mix-blend-mode: normal;
 }
+
 /* END <button> hover */
 
 /* START <button> active */
@@ -239,6 +242,7 @@
     backdrop-filter: blur(10px);
     box-shadow: 0px 0px 10px 0px hsl(333deg 70% 60% / 50%);
 }
+
 /* END <button> active */
 
 .button-wrapper_XP button span.synthetic-bottom-border_XP {
@@ -260,10 +264,19 @@
     width: 0;
     height: 0;
 }
+
 /* END Clip stuff */
 
-/* START Chevron_XP icon */
-.button-wrapper_XP .chevron_XP {
+/* START Chevron icon */
+
+.button-wrapper_XP .chevron-wrapper_XP {
+    display: inline-block;
+    width: 0px;
+    height: 0px;
+    overflow: visible;
+}
+
+.button-wrapper_XP .chevron-wrapper_XP .chevron_XP {
     position: absolute;
     transform: translate(-50%, -50%);
     display: inline-block;
@@ -278,31 +291,61 @@
     background-position: center center;
 }
 
-.button-wrapper_XP:active .chevron_XP {
+.button-wrapper_XP:active .chevron-wrapper_XP .chevron_XP {
     filter: saturate(1) brightness(1);
 }
 
-.button-wrapper_XP.east .chevron_XP {
+.button-wrapper_XP.east .chevron-wrapper_XP .chevron_XP {
     top: calc(var(--size-icon) * -1);
     left: calc(var(--size) * 0.9 - var(--size-icon));
     rotate: -90deg;
 }
 
-.button-wrapper_XP.south .chevron_XP {
+.button-wrapper_XP.south .chevron-wrapper_XP .chevron_XP {
     top: calc(var(--size) * 0.75);
     left: 0px;
     rotate: 0deg;
 }
 
-.button-wrapper_XP.west .chevron_XP {
+.button-wrapper_XP.west .chevron-wrapper_XP .chevron_XP {
     top: 0px;
     left: calc(var(--size) * -0.9);
     rotate: 90deg;
 }
 
-.button-wrapper_XP.north .chevron_XP {
+.button-wrapper_XP.north .chevron-wrapper_XP .chevron_XP {
     top: calc(var(--size) * -0.9);
     left: calc(var(--size-icon) * -1);
     rotate: -180deg;
 }
+
 /* END Chevron_XP icon */
+
+/* START Button turn */
+.button-turn {
+    position: absolute;
+    top: 50%;
+    margin: -138px 0 0;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    border-radius: 0px;
+    padding: 0px;
+    box-shadow: none;
+    cursor: pointer;
+    mix-blend-mode: overlay;
+}
+
+.button-turn:active {
+    mix-blend-mode: normal;
+}
+
+.button-turn.left {
+    left: 10px;
+}
+
+.button-turn.right {
+    right: 10px;
+}
+
+/* END */

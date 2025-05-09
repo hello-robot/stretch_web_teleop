@@ -23,6 +23,8 @@ import {
     ButtonState,
 } from "../function_providers/ButtonFunctionProvider";
 import { isMobile } from "react-device-detect";
+import SVGTurnLeft from "../../icons/Turn_Left.svg";
+import SVGTurnRight from "../../icons/Turn_Right.svg";
 import "operator/css/ButtonPad.css";
 
 /** Properties for {@link ButtonPad} */
@@ -47,7 +49,12 @@ const notHomedDisabledFunctions = new Set<ButtonPadButton>([
 /**
  * A set of buttons which can be overlaid as a child of a camera view or
  * standalone.
- *
+ * 
+ * TODO: Probably good idea to extract this
+ * to dedicated React component for moving
+ * the robot base
+ * 
+ * <ButtonPad> 👉 <DirectionalButtonPad>
  * @param props {@link ButtonPadProps}
  */
 export const ButtonPad = (props: ButtonPadProps) => {
@@ -109,8 +116,6 @@ export const ButtonPad = (props: ButtonPadProps) => {
         return <SingleButton_XP {...buttonProps} key={i} />;
     };
 
-    // _XP
-    // TODO: Extract to React component, <DirectionalButtonPad>
     if (isMobile && definition.id === ButtonPadIdMobile.Drive) {
         const buttons = ['north', 'south', 'west', 'east'];
         return (
@@ -120,9 +125,27 @@ export const ButtonPad = (props: ButtonPadProps) => {
                     <clipPath id="clip-path_XP" clipPathUnits="objectBoundingBox"><path d="M1,1 H0 V0.5 C0.276,0.5,0.5,0.276,0.5,0 H1 V1"></path></clipPath>
                 </svg>
                 {/* END */}
-                <div className="button-pad_XP">
+                {/* START Turn left button */}
+                <button className="button-turn left" >
+                    <img
+                        src={SVGTurnLeft}
+                        draggable="false"
+                    />
+                </button>
+                {/* END */}
+                {/* START Directional button pad */}
+                <div className="dbutton-pad_XP">
                     {buttons.map(mapButtons_XP)}
                 </div>
+                {/* END */}
+                {/* START Turn right button */}
+                <button className="button-turn right">
+                    <img
+                        src={SVGTurnRight}
+                        draggable="false"
+                    />
+                </button>
+                {/* END */}
             </div>
         )
     } else return (
@@ -230,8 +253,8 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
     const clickProps = props.sharedState.customizing
         ? {}
         : {
-            onPointerDown: functs.onClick,
-            onPointerUp: functs.onRelease,
+            onTouchStart: functs.onClick,
+            onTouchEnd: functs.onRelease,
             onPointerLeave: functs.onLeave,
         };
     const buttonState: ButtonState =
@@ -247,7 +270,7 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
             <button disabled={isDisabled} {...clickProps}>
                 <span className="synthetic-bottom-border_XP"></span>
             </button>
-            <span className="chevron_XP"></span>
+            <span className="chevron-wrapper_XP"><span className="chevron_XP"></span></span>
         </div>
     );
 };
