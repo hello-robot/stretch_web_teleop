@@ -31,7 +31,7 @@ import "operator/css/MobileOperator_XP.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
-import { ButtonPad } from "./layout_components/ButtonPad";
+import { ButtonPad_XP } from "./layout_components/ButtonPad_XP";
 import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
@@ -156,7 +156,7 @@ export const MobileOperator_XP = (props: {
                     sharedState: sharedState
                 }}
             /> */}
-                <ButtonPad
+                <ButtonPad_XP
                     {...{
                         path: "",
                         definition: {
@@ -177,7 +177,7 @@ export const MobileOperator_XP = (props: {
     const armMode = (show: boolean) => {
         return show ? (
             <React.Fragment key={"arm-mode"}>
-                <ButtonPad
+                <ButtonPad_XP
                     {...{
                         path: "",
                         definition: {
@@ -198,7 +198,7 @@ export const MobileOperator_XP = (props: {
     const gripperMode = (show: boolean) => {
         return show ? (
             <React.Fragment key={"gripper-mode"}>
-                <ButtonPad
+                <ButtonPad_XP
                     {...{
                         path: "",
                         definition: {
@@ -279,6 +279,8 @@ export const MobileOperator_XP = (props: {
                     <></>
                 )}
                 <div className={className("controls", { hideControls })}>
+                    <div className="cat-ear_XP cat-ear-top_XP" />
+                    <div className="cat-ear_XP cat-ear-bottom_XP" />
                     {/* <div className={"switch-camera"}>
                         <button
                             onPointerDown={() => {
@@ -345,7 +347,7 @@ export const MobileOperator_XP = (props: {
                         else if (cameraID == CameraViewId.gripper)
                             setCameraID(CameraViewId.realsense);
                     }}
-                        style={{height: '100%'}}
+                        className="simple-camera-view-wrapper_XP"
                     >
                         <SimpleCameraView
                             id={cameraID}
@@ -385,6 +387,11 @@ export const MobileOperator_XP = (props: {
                             sharedState: sharedState,
                         }}
                     />
+                </div>
+                <div className="headcam-controls_XP">
+                    <div />
+                    <div />
+                    <div />
                 </div>
             </div>
         </div>

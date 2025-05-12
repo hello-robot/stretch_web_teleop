@@ -23,8 +23,6 @@ import {
     ButtonState,
 } from "../function_providers/ButtonFunctionProvider";
 import { isMobile } from "react-device-detect";
-import SVGTurnLeft from "../../icons/Turn_Left.svg";
-import SVGTurnRight from "../../icons/Turn_Right.svg";
 import "operator/css/ButtonPad.css";
 
 /** Properties for {@link ButtonPad} */
@@ -35,26 +33,10 @@ type ButtonPadProps = CustomizableComponentProps & {
     aspectRatio?: number;
 };
 
-/** Set of buttons which are disabled when the robot is not homed. */
-const notHomedDisabledFunctions = new Set<ButtonPadButton>([
-    ButtonPadButton.ArmLower,
-    ButtonPadButton.ArmLift,
-    ButtonPadButton.ArmExtend,
-    ButtonPadButton.ArmRetract,
-    ButtonPadButton.WristRotateIn,
-    ButtonPadButton.WristRotateOut,
-    ButtonPadButton.GripperOpen,
-    ButtonPadButton.GripperClose,
-]);
 /**
  * A set of buttons which can be overlaid as a child of a camera view or
  * standalone.
- * 
- * TODO: Probably good idea to extract this
- * to dedicated React component for moving
- * the robot base
- * 
- * <ButtonPad> 👉 <DirectionalButtonPad>
+ *
  * @param props {@link ButtonPadProps}
  */
 export const ButtonPad = (props: ButtonPadProps) => {
@@ -70,7 +52,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     // Paths and functions should be the same length
     if (paths.length !== functions.length) {
         throw Error(
-            `paths length: ${paths.length}, functions length: ${functions.length}`
+            `paths length: ${paths.length}, functions length: ${functions.length}`,
         );
     }
 
@@ -106,56 +88,12 @@ export const ButtonPad = (props: ButtonPadProps) => {
             }
             : {};
 
-    const mapButtons_XP = (direction: string, i: number) => {
-        const buttonProps = {
-            direction,
-            funct: functions[i],
-            sharedState: props.sharedState,
-        };
-        // Buttons will not function during customization mode
-        return <SingleButton_XP {...buttonProps} key={i} />;
-    };
-
-    if (isMobile && definition.id === ButtonPadIdMobile.Drive) {
-        const buttons = ['north', 'south', 'west', 'east'];
-        return (
-            <div>
-                {/* START Masking SVG isn't visible on the webpage */}
-                <svg className="mask_XP">
-                    <clipPath id="clip-path_XP" clipPathUnits="objectBoundingBox"><path d="M1,1 H0 V0.5 C0.276,0.5,0.5,0.276,0.5,0 H1 V1"></path></clipPath>
-                </svg>
-                {/* END */}
-                {/* START Turn left button */}
-                <button className="button-turn left" >
-                    <img
-                        src={SVGTurnLeft}
-                        draggable="false"
-                    />
-                </button>
-                {/* END */}
-                {/* START Directional button pad */}
-                <div className="dbutton-pad_XP">
-                    {buttons.map(mapButtons_XP)}
-                </div>
-                {/* END */}
-                {/* START Turn right button */}
-                <button className="button-turn right">
-                    <img
-                        src={SVGTurnRight}
-                        draggable="false"
-                    />
-                </button>
-                {/* END */}
-            </div>
-        )
-    } else return (
+    return (
         <div className="button-pad">
+            {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
-                viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                    ? SVG_RESOLUTION / props.aspectRatio
-                    : SVG_RESOLUTION
-                    }`}
+                viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
                 className={className("button-pads", {
                     customizing,
@@ -178,14 +116,9 @@ export type SingleButtonProps = {
     iconPosition: { x: number; y: number };
 };
 
-/**
- * A single button on a button pad
- *
- * @param props {@link SingleButtonProps}
- */
 const SingleButton = (props: SingleButtonProps) => {
     const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
-        props.funct
+        props.funct,
     );
     const clickProps = props.sharedState.customizing
         ? {}
@@ -203,20 +136,9 @@ const SingleButton = (props: SingleButtonProps) => {
     const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
-    const disabledDueToNotHomed =
-        props.sharedState.robotNotHomed &&
-        notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
-
     return (
         <React.Fragment>
-            <path
-                d={props.svgPath}
-                {...clickProps}
-                className={className(buttonState, {
-                    disable: isDisabled,
-                })}
-            >
+            <path d={props.svgPath} {...clickProps} className={buttonState}>
                 <title>{title}</title>
             </path>
             <image
@@ -225,53 +147,10 @@ const SingleButton = (props: SingleButtonProps) => {
                 height={height}
                 width={width}
                 href={icon}
-                className={className(buttonState, {
-                    disable: isDisabled,
-                })}
+                className={buttonState}
             />
             <p>{title}</p>
         </React.Fragment>
-    );
-};
-
-/** Properties for a single button on a button pad */
-export type SingleButtonProps_XP = {
-    direction: string;
-    funct: ButtonPadButton;
-    sharedState: SharedState;
-};
-
-/**
- * A single button on a button pad
- *
- * @param props {@link SingleButtonProps_XP}
- */
-const SingleButton_XP = (props: SingleButtonProps_XP) => {
-    const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
-        props.funct
-    );
-    const clickProps = props.sharedState.customizing
-        ? {}
-        : {
-            onTouchStart: functs.onClick,
-            onTouchEnd: functs.onRelease,
-            onPointerLeave: functs.onLeave,
-        };
-    const buttonState: ButtonState =
-        props.sharedState.buttonStateMap?.get(props.funct) ||
-        ButtonState.Inactive;
-    const disabledDueToNotHomed =
-        props.sharedState.robotNotHomed &&
-        notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
-
-    return (
-        <div className={`button-wrapper_XP ${props.direction}`} key={props.direction}>
-            <button disabled={isDisabled} {...clickProps}>
-                <span className="synthetic-bottom-border_XP"></span>
-            </button>
-            <span className="chevron-wrapper_XP"><span className="chevron_XP"></span></span>
-        </div>
     );
 };
 
@@ -284,7 +163,7 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
  * the corresponding button on the button pad
  */
 function getShapeAndFunctionsFromId(
-    id: ButtonPadId | ButtonPadIdMobile
+    id: ButtonPadId | ButtonPadIdMobile,
 ): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
     let functions: ButtonPadButton[];
