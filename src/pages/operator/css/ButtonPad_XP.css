@@ -140,7 +140,6 @@
 * CSS below only targets _XP
 **********************************/
 
-/* START Buttonpad */
 .dbutton-pad_XP {
   --size: 120px;
   --size-icon: calc(var(--size) * 0.18);
@@ -151,8 +150,6 @@
   height: var(--size);
   margin: 0 auto;
 }
-
-/* END Buttonpad */
 
 .button-wrapper_XP button {
   width: var(--size) !important;
