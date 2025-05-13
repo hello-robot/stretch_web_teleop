@@ -124,7 +124,7 @@ export const ButtonPad_XP = (props: ButtonPadProps) => {
         </svg>
         {/* END */}
         {/* START Turn left button */}
-        <button className="button-turn left">
+        <button className="button-turn left" aria-label="Turn left">
         </button>
         {/* END */}
         {/* START Directional button pad */}
@@ -133,7 +133,7 @@ export const ButtonPad_XP = (props: ButtonPadProps) => {
         </div>
         {/* END */}
         {/* START Turn right button */}
-        <button className="button-turn right">
+        <button className="button-turn right" aria-label="Turn right">
         </button>
         {/* END */}
       </div>
@@ -254,10 +254,25 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
     props.sharedState.robotNotHomed &&
     notHomedDisabledFunctions.has(props.funct);
   const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
+  const getAriaLabel = (direction: string): string => {
+    switch (direction) {
+      case 'north':
+        return 'Move forward';
+      case 'south':
+        return 'Move backward';
+      case 'west':
+        return 'Strafe left';
+      case 'east':
+        return 'Strafe right';
+      default:
+        return '';
+    }
+  };
+  const ariaLabel = getAriaLabel(props.direction);
 
   return (
     <div className={`button-wrapper_XP ${props.direction}`} key={props.direction}>
-      <button disabled={isDisabled} {...clickProps}>
+      <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel}>
         <span className="synthetic-bottom-border_XP"></span>
       </button>
       <span className="chevron-wrapper_XP"><span className="chevron_XP"></span></span>
