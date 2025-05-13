@@ -164,7 +164,7 @@
   padding: 0px;
   transform-origin: 0 0;
   mix-blend-mode: soft-light;
-  border-color: hsl(0deg 0% 100% / 50%);
+  border-color: hsl(0deg 0% 100% / 33%);
   border-right-width: 1px;
   border-bottom-width: 1px;
   border-top-width: 0.5px;
@@ -211,14 +211,17 @@
 }
 
 /* START <button> hover */
-.button-wrapper_XP button:hover,
-.button-wrapper_XP button:hover span.synthetic-bottom-border_XP {
-  z-index: 1;
-  border-color: hsl(333deg 100% 90% / 70%);
-  background-color: hsl(333deg 100% 90% / 20%);
-  border-top-width: 1px;
-  border-left-width: 1px;
-  mix-blend-mode: normal;
+@media (hover: hover) and (pointer: fine) {
+
+  .button-wrapper_XP button:hover,
+  .button-wrapper_XP button:hover span.synthetic-bottom-border_XP {
+    z-index: 1;
+    border-color: hsl(333deg 100% 90% / 70%);
+    background-color: hsl(333deg 100% 90% / 20%);
+    border-top-width: 1px;
+    border-left-width: 1px;
+    mix-blend-mode: normal;
+  }
 }
 
 /* END <button> hover */
@@ -253,8 +256,8 @@
   height: calc(var(--size) / 2);
   border-radius: 0 0 var(--size) 0;
   border-color: hsl(0deg 0% 100% / 50%);
-  border-right-width: 1px;
-  border-bottom-width: 1px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
   border-style: solid;
 }
 
@@ -273,7 +276,14 @@
   display: inline-block;
   width: 0px;
   height: 0px;
-  overflow: visible;
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* For Safari */
+  -webkit-touch-callout: none;
+  /* Disable long-press callout */
 }
 
 .button-wrapper_XP .chevron-wrapper_XP .chevron_XP {
@@ -292,7 +302,7 @@
 }
 
 .button-wrapper_XP:active .chevron-wrapper_XP .chevron_XP {
-  filter: saturate(1) brightness(1);
+  filter: saturate(0) brightness(3);
 }
 
 .button-wrapper_XP.east .chevron-wrapper_XP .chevron_XP {
