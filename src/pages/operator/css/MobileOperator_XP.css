@@ -275,7 +275,7 @@
     background-image: url('data:image/svg+xml,<svg width="393" height="15" viewBox="0 0 393 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 15C6.71573 15 0 8.28427 0 0V15H15ZM393 0C393 8.28427 386.284 15 378 15H393V0Z" fill="black"/></svg>');
 }
 
-.headcam-controls_XP {
+.footer-controls_XP {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -283,7 +283,7 @@
     background-color: #000000;
 }
 
-.headcam-controls_XP>div {
+.footer-controls_XP>div {
     display: inline-flex;
     width: 75px;
     height: 50px;

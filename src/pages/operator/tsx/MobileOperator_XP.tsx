@@ -388,7 +388,7 @@ export const MobileOperator_XP = (props: {
                         }}
                     />
                 </div>
-                <div className="headcam-controls_XP">
+                <div className="footer-controls_XP">
                     <div />
                     <div />
                     <div />
