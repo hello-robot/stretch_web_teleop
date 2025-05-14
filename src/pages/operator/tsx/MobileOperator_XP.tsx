@@ -54,7 +54,7 @@ export const MobileOperator_XP = (props: {
     >([]);
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>();
     const [cameraID, setCameraID] = React.useState<CameraViewId>(
-        CameraViewId.realsense,
+        CameraViewId.overhead,
     );
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [hideMap, setHideMap] = React.useState<boolean>(true);
