@@ -33,17 +33,6 @@ type ButtonPadProps = CustomizableComponentProps & {
     aspectRatio?: number;
 };
 
-/** Set of buttons which are disabled when the robot is not homed. */
-const notHomedDisabledFunctions = new Set<ButtonPadButton>([
-    ButtonPadButton.ArmLower,
-    ButtonPadButton.ArmLift,
-    ButtonPadButton.ArmExtend,
-    ButtonPadButton.ArmRetract,
-    ButtonPadButton.WristRotateIn,
-    ButtonPadButton.WristRotateOut,
-    ButtonPadButton.GripperOpen,
-    ButtonPadButton.GripperClose,
-]);
 /**
  * A set of buttons which can be overlaid as a child of a camera view or
  * standalone.
@@ -63,7 +52,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     // Paths and functions should be the same length
     if (paths.length !== functions.length) {
         throw Error(
-            `paths length: ${paths.length}, functions length: ${functions.length}`
+            `paths length: ${paths.length}, functions length: ${functions.length}`,
         );
     }
 
@@ -129,10 +118,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
         <div className="button-pad">
             <svg
                 ref={svgRef}
-                viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                    ? SVG_RESOLUTION / props.aspectRatio
-                    : SVG_RESOLUTION
-                    }`}
+                viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio ? SVG_RESOLUTION / props.aspectRatio : SVG_RESOLUTION}`}
                 preserveAspectRatio="none"
                 className={className("button-pads", {
                     customizing,
@@ -155,14 +141,9 @@ export type SingleButtonProps = {
     iconPosition: { x: number; y: number };
 };
 
-/**
- * A single button on a button pad
- *
- * @param props {@link SingleButtonProps}
- */
 const SingleButton = (props: SingleButtonProps) => {
     const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(
-        props.funct
+        props.funct,
     );
     const clickProps = props.sharedState.customizing
         ? {}
@@ -180,20 +161,9 @@ const SingleButton = (props: SingleButtonProps) => {
     const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
-    const disabledDueToNotHomed =
-        props.sharedState.robotNotHomed &&
-        notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
-
     return (
         <React.Fragment>
-            <path
-                d={props.svgPath}
-                {...clickProps}
-                className={className(buttonState, {
-                    disable: isDisabled,
-                })}
-            >
+            <path d={props.svgPath} {...clickProps} className={buttonState}>
                 <title>{title}</title>
             </path>
             <image
@@ -202,9 +172,7 @@ const SingleButton = (props: SingleButtonProps) => {
                 height={height}
                 width={width}
                 href={icon}
-                className={className(buttonState, {
-                    disable: isDisabled,
-                })}
+                className={buttonState}
             />
             <p>{title}</p>
         </React.Fragment>
@@ -261,7 +229,7 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
  * the corresponding button on the button pad
  */
 function getShapeAndFunctionsFromId(
-    id: ButtonPadId | ButtonPadIdMobile
+    id: ButtonPadId | ButtonPadIdMobile,
 ): [ButtonPadShape, ButtonPadButton[]] {
     let shape: ButtonPadShape;
     let functions: ButtonPadButton[];

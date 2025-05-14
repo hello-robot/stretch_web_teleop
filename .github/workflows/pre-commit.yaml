@@ -1,34 +1,71 @@
 name: pre-commit
 
 on:
+  # Run on push to master
   push:
     branches:
-      - main
       - master
+  # Run on pull request actions
   pull_request:
-    types: [opened, reopened, synchronize, review_requested, ready_for_review]
+    types: [opened, reopened, synchronize]
+  # Manual trigger
   workflow_dispatch:
 
+# Prevent parallel runs
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
 
+# Global env vars
 env:
   PYTHON_VERSION: "3.10"
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Checkout code and keep creds for push
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      ## Run pre-commit and try to apply fixes
-      - name: Run pre-commit
+      # Setup Node.js for JS hooks
+      - name: Use Node.js 21.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21.x"
+
+      # Cache NPM deps
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Cache pip for Python hook installs
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Install JS devDependencies
+      - name: Install devDependencies
+        run: npm install --legacy-peer-deps
+
+      # Run pre-commit in check-only mode (fail on any diffs)
+      - name: Run pre-commit (check-only)
         uses: pre-commit/action@v3.0.1
-      - name: Apply fixes from pre-commit
-        uses: pre-commit-ci/lite-action@v1.0.2
-        if: always()
+        with:
+          args: run --all-files --show-diff-on-failure
