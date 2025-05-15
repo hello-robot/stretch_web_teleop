@@ -208,6 +208,7 @@
 }
 
 /* START <button> hover */
+/* :hover styles only applied to desktop devices with a "fine" pointer */
 @media (hover: hover) and (pointer: fine) {
 
   .button-wrapper_XP button:hover,
@@ -226,21 +227,14 @@
 /* START <button> active */
 .button-wrapper_XP button:active,
 .button-wrapper_XP button:active span.synthetic-bottom-border_XP {
-  border-color: hsl(333deg 100% 90% / 70%);
+  border-color: hsl(333deg 100% 90% / 50%);
   border-top-width: 1px;
   border-left-width: 1px;
-  background-color: hsl(333deg 100% 90% / 50%);
-  /* START dot grid effect */
-  background-image: radial-gradient(hsl(333deg 90% 90% / 100%) 1px, transparent 0);
-  background-size: 3px 3px;
-  background-position: -2px -2px;
-  /* END dot grid effect */
 }
 
 .button-wrapper_XP button:active {
   mix-blend-mode: color-dodge;
-  backdrop-filter: blur(10px);
-  box-shadow: 0px 0px 10px 0px hsl(333deg 70% 60% / 50%);
+  box-shadow: 0px 0px 10px 0px hsl(333deg 70% 60% / 100%);
 }
 
 /* END <button> active */
@@ -287,8 +281,6 @@
   position: absolute;
   transform: translate(-50%, -50%);
   display: inline-block;
-  /* border-right: 5px solid #ffffff; */
-  /* border-bottom: 5px solid #ffffff; */
   height: var(--size-icon);
   width: var(--size-icon);
   filter: saturate(0) brightness(3);
@@ -299,7 +291,7 @@
 }
 
 .button-wrapper_XP:active .chevron-wrapper_XP .chevron_XP {
-  filter: saturate(0) brightness(3);
+  filter: saturate(1) brightness(1);
 }
 
 .button-wrapper_XP.east .chevron-wrapper_XP .chevron_XP {
