@@ -13,6 +13,7 @@ This document proposes a method to measure this latency and provides results cap
 * The client browser (The Operator) plays the WebRTC video streams from the WebRTC server in html video elements.
 
 ![](./assets/latency_test/webteleop_video_components.jpg) 
+
 **Diagram:** a flowchart of the components involved in providing the gripper camera video feed to the Operator’s browser.
 
 ## A method to measure the latency of WebTeleop on your network:
