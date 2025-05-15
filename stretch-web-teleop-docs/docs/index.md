@@ -52,7 +52,7 @@ https://192.168.43.12/operator
 #############################################
 ```
 
-URLs with IP addresses that start with `192` can be used if your are on the same WiFi network as the robot. URLs with IP addresses that start with `100` can be used if you are using tailscale to connect to the robot. Visit the appropiate URL in a web browser on your personal laptop or desktop to see the web interface. Ensure your personal computer is connected to the same network as Stretch. You might see a warning that says "Your connection is not private". If you do, click `Advanced` and `Proceed`.
+URLs with IP addresses that start with `192` can be used if your are on the same WiFi network as the robot. URLs with IP addresses that start with `100` can be used if you are using tailscale to connect to the robot. Visit the appropriate URL in a web browser on your personal laptop or desktop to see the web interface. Ensure your personal computer is connected to the same network as Stretch. You might see a warning that says "Your connection is not private". If you do, click `Advanced` and `Proceed`.
 
 Once you're done with the interface, close the browser and run:
 
