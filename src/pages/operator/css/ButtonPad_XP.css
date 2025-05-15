@@ -139,13 +139,17 @@
 /**********************************
 * CSS below only targets _XP
 **********************************/
+.base-movement-controls_XP {
+  --width-turn-button: 68px;
+  --height-turn-button: 72px;
+}
 
-.dbutton-pad_XP {
+.base-movement-controls_XP .dbutton-pad_XP {
   --size: 120px;
   --size-icon: calc(var(--size) * 0.18);
   position: relative;
   left: calc(var(--size) * 0.5);
-  bottom: calc(var(--size) * .25);
+  bottom: 0px;
   width: var(--size);
   height: var(--size);
   margin: 0 auto;
@@ -321,12 +325,12 @@
 /* END Chevron_XP icon */
 
 /* START Button turn */
-.button-turn {
+.base-movement-controls_XP .button-turn {
   position: absolute;
-  top: 50%;
+  top: calc(50% + (var(--height-turn-button) / 2));
   margin: -138px 0 0;
-  width: 68px;
-  height: 72px;
+  width: var(--width-turn-button);
+  height: var(--height-turn-button);
   background-color: transparent;
   border: none;
   outline: none;

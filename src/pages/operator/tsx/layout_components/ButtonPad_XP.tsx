@@ -117,7 +117,7 @@ export const ButtonPad_XP = (props: ButtonPadProps) => {
   if (isMobile && definition.id === ButtonPadIdMobile.Drive) {
     const buttons = ['north', 'south', 'west', 'east'];
     return (
-      <div>
+      <div className="base-movement-controls_XP">
         {/* START Masking SVG isn't visible on the webpage */}
         <svg className="mask_XP">
           <clipPath id="clip-path_XP" clipPathUnits="objectBoundingBox"><path d="M1,1 H0 V0.5 C0.276,0.5,0.5,0.276,0.5,0 H1 V1"></path></clipPath>
