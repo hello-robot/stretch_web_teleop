@@ -2,15 +2,15 @@
 
 ![Software Architecture](assets/imgs/software_architecture.png)
 
-Stretch Web Teleop utilizes `ROS2`, `WebRTC` (web real-time communication), `NodeJS`, and `TypeScript`. The system runs in a headless browser onboard the robot. The robot browser has access to the robot via `ROS2`, however, the operator can only send commands or receive information indirectly through the robot browser. We utilize WebRTC to establish a peer connection between the operator browser, which loads the interface, and the robot browser. The robot browser uses `rosbridge` to connect to the robot via `ROS2`. `rosbridge` translates `JSON` messages from the robot browser to `ROS2` messages and vice versa. 
+Stretch Web Teleop utilizes `ROS2`, `WebRTC` (web real-time communication), `NodeJS`, and `TypeScript`. The system runs in a headless browser onboard the robot. The robot browser has access to the robot via `ROS2`, however, the operator can only send commands or receive information indirectly through the robot browser. We utilize WebRTC to establish a peer connection between the operator browser, which loads the interface, and the robot browser. The robot browser uses `rosbridge` to connect to the robot via `ROS2`. `rosbridge` translates `JSON` messages from the robot browser to `ROS2` messages and vice versa.
 
-When the interface is launched on the robot, the `ROS2` drivers and the robot browser are launched. The robot browser creates and joins a `WebSocket` room and waits for an operator to join. In a browser, the user can either go to an IP address when on the same network as the robot or a URL when accessing it remotely. We recommend using `Ngrok` to establish a secure tunnel over the internet for remote use (see instructions here). When the user navigates to the IP address or URL, the operator browser joins the `WebSocket` room created by the robot browser and a peer connection is established. 
+When the interface is launched on the robot, the `ROS2` drivers and the robot browser are launched. The robot browser creates and joins a `WebSocket` room and waits for an operator to join. In a browser, the user can either go to an IP address when on the same network as the robot or a URL when accessing it remotely. We recommend using `Ngrok` to establish a secure tunnel over the internet for remote use (see instructions here). When the user navigates to the IP address or URL, the operator browser joins the `WebSocket` room created by the robot browser and a peer connection is established.
 
 > **_NOTE:_** Only one peer connection between the operator and robot browser can be established. If another operator attempts to open the interface, the connection will be rejected.
 
-Once a peer connection is established, the interface will render the default layout (see [render logic flow](software.md#render-logic-flow) for more details) on the operator browser and the user will be able to control the robot. 
+Once a peer connection is established, the interface will render the default layout (see [render logic flow](software.md#render-logic-flow) for more details) on the operator browser and the user will be able to control the robot.
 
-For example, assume the user clicks a button to drive the robot forward, the command is sent to the robot browser. This command is passed through rosbridge which translates the `JSON` message into a `ROS2` message. The robot browser can also send information, such as joint limits and collision information, to the operator browser. When the user closes the browser, the peer connection is disconnected and another user can connect to the interface. 
+For example, assume the user clicks a button to drive the robot forward, the command is sent to the robot browser. This command is passed through rosbridge which translates the `JSON` message into a `ROS2` message. The robot browser can also send information, such as joint limits and collision information, to the operator browser. When the user closes the browser, the peer connection is disconnected and another user can connect to the interface.
 
 ## Render Logic Flow
 
@@ -20,52 +20,54 @@ When the `Operator` first renders, it gets the `layout` from the `StorageHandler
 
 ## Code layout
 
-    configure_audio.sh                    # Script for configuring robot speaker and microphone
-    launch_interface.sh                   # Script that launches the interface and watches for any file changes
-    server.js                             # Sets up a secure web server with WebSocket support for managing robot-operator connections
-    start_robot_browser.js                # Launches headless robot browser used to establish peer connection with the operator
-    start_ros2.sh                         # Starts ROS2 nodes used by web teleop
-    start_web_server_and_robot_browser.sh # Script for launching the web server and robot browser
-    stop_interface.sh                     # The script for stopping all background processes launched by ./launch_interface.sh
-    tsconfig.json                         # Configures the TypeScript compiler
-    webpack.config.js                     # Sets up a development build process for a multi-page React application 
-    action/                               # Files defining custom ROS2 Actions
-    certificates/                         # Certificates used to  serve the interface and enable SSL for the rosbridge websocke (generated during the installation process)
-    config/                               # Configuration files for the ROS2 nodes
-    launch/                               # ROS2 launch files
-    maps/                                 # Sample map to use when launching the interface
-    msg/                                  # Custom ROS2 message files
-    nodes/                                # Custom ROS2 nodes
-    scripts/                              # Helper scripts
-    src/
-        pages/
-            home/               # Files for defining the login and home pages to connecting to the robot via the internet
-            operator/           # Files defining the page the user interacts with to teleoperate the 
-                css/            # CSS files that define the visual layout of webpage
-                html/index.html # The HTML description for the operator page
-                icons/          # The custom icons used for buttons 
-                tsx/
-                    basic_components/   # Simple components used to create custom layout and static components
-                    default_layouts/    # Javascript object definitions for layouts to load on startup or by the user
-                    function_providers/ # Subclasses of the FunctionProvider class used to determine the functionality of controls (e.g. button pads)
-                    layout_components/  # Components which can be dynamically added, rearranged, or removed from the interface by the user
-                    static_components/  # Components which are always visible to the user but cannot be modified 
-                    storage_handler/    # Subclasses of the StorageHandler class that handles logic to store and modify data
-                    utils/              # Helper typescript files used for various components 
-                    Operator.tsx        # Highest level React component for the operator page
-                    index.tsx           # Initializes state for the application; renders the operator page and attempts to establish a peer connection with the robot browser
-            robot/              # Files defining the headless robot browser and the data that flows through it
-                css/
-                html/
-                tsx/
-        shared/                 # Files shared between the operator and robot browsers
-            signaling/              # Signaling handlers based on the storage handlers
-            commands.tsx            # Custom commands (typescript interfaces) for used for communication between the operator and robot browsers
-            remoterobot.tsx         #  The bridge between the robot and operator; sends and receives data between the robot and operator via WebRTC
-            util.tsx                # Helper typescript types, interfaces and functions 
-            webrtcconnections.tsx   # Establishes WebRTC peer connection and creates data channels
-    stretch_web_teleop_helpers/  # Contains common functions and classes used across the web teleop ROS2 nodes.
-    
+```
+configure_audio.sh                    # Script for configuring robot speaker and microphone
+launch_interface.sh                   # Script that launches the interface and watches for any file changes
+server.js                             # Sets up a secure web server with WebSocket support for managing robot-operator connections
+start_robot_browser.js                # Launches headless robot browser used to establish peer connection with the operator
+start_ros2.sh                         # Starts ROS2 nodes used by web teleop
+start_web_server_and_robot_browser.sh # Script for launching the web server and robot browser
+stop_interface.sh                     # The script for stopping all background processes launched by ./launch_interface.sh
+tsconfig.json                         # Configures the TypeScript compiler
+webpack.config.js                     # Sets up a development build process for a multi-page React application
+action/                               # Files defining custom ROS2 Actions
+certificates/                         # Certificates used to  serve the interface and enable SSL for the rosbridge websocke (generated during the installation process)
+config/                               # Configuration files for the ROS2 nodes
+launch/                               # ROS2 launch files
+maps/                                 # Sample map to use when launching the interface
+msg/                                  # Custom ROS2 message files
+nodes/                                # Custom ROS2 nodes
+scripts/                              # Helper scripts
+src/
+    pages/
+        home/               # Files for defining the login and home pages to connecting to the robot via the internet
+        operator/           # Files defining the page the user interacts with to teleoperate the
+            css/            # CSS files that define the visual layout of webpage
+            html/index.html # The HTML description for the operator page
+            icons/          # The custom icons used for buttons
+            tsx/
+                basic_components/   # Simple components used to create custom layout and static components
+                default_layouts/    # Javascript object definitions for layouts to load on startup or by the user
+                function_providers/ # Subclasses of the FunctionProvider class used to determine the functionality of controls (e.g. button pads)
+                layout_components/  # Components which can be dynamically added, rearranged, or removed from the interface by the user
+                static_components/  # Components which are always visible to the user but cannot be modified
+                storage_handler/    # Subclasses of the StorageHandler class that handles logic to store and modify data
+                utils/              # Helper typescript files used for various components
+                Operator.tsx        # Highest level React component for the operator page
+                index.tsx           # Initializes state for the application; renders the operator page and attempts to establish a peer connection with the robot browser
+        robot/              # Files defining the headless robot browser and the data that flows through it
+            css/
+            html/
+            tsx/
+    shared/                 # Files shared between the operator and robot browsers
+        signaling/              # Signaling handlers based on the storage handlers
+        commands.tsx            # Custom commands (typescript interfaces) for used for communication between the operator and robot browsers
+        remoterobot.tsx         #  The bridge between the robot and operator; sends and receives data between the robot and operator via WebRTC
+        util.tsx                # Helper typescript types, interfaces and functions
+        webrtcconnections.tsx   # Establishes WebRTC peer connection and creates data channels
+stretch_web_teleop_helpers/  # Contains common functions and classes used across the web teleop ROS2 nodes.
+```
+
 ## Developing on the Web Interface
 
 This tutorial captures the organization of Web Teleop's codebase and best practices for adding new development. It takes the example of adding a "homing" button to the web interface. Homing is a 30 second sequence the robot must go through every time it wakes up to ascertain its zero positions. This document is meant to be read from top to bottom.
@@ -170,6 +172,7 @@ We define a series of callbacks:
 
 - The robot gets `forwardBatteryState()`, `forwardStretchTool()`, and many other `forward<Something>()`, all of which forward information from the robot to the operator using the WebRTC connection.
 - The WebRTC connection gets `handleSessionStart()`, which handles setting up the WebRTC streams and channels, and `handleMessage()`, which receives the commands defined in [`command.tsx`](#commandstsx) and were sent by [`remoterobot.tsx`](#remoterobottsx). `handleMessage()` is a big switch statement which interprets the commands and calls into `robot`:
+
 ```js
   function handleMessage(message: WebRTCMessage) {
       switch (message.type) {
@@ -186,6 +189,7 @@ We define a series of callbacks:
 ```
 
 Adding new capabilities to the web interface may involve interpreting new types of commands in `handleMessage()`. Let's take homing the robot for example. We add a switch case like so:
+
 ```js
 case "homeTheRobot":
     robot.homeTheRobot();
