@@ -431,7 +431,6 @@ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
         >
-            {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
             <span
                 className="icon"
                 style={{ transform: `rotate(${rotation}deg)` }}

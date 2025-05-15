@@ -28,7 +28,7 @@ import { UnderMapFunctionProvider } from "./function_providers/UnderMapFunctionP
 import { MovementRecorderFunctionProvider } from "./function_providers/MovementRecorderFunctionProvider";
 import { TextToSpeechFunctionProvider } from "./function_providers/TextToSpeechFunctionProvider";
 import { HomeTheRobotFunctionProvider } from "./function_providers/HomeTheRobotFunctionProvider";
-import { MobileOperator } from "./MobileOperator";
+import { MobileOperator_XP } from "./MobileOperator_XP";
 import { isMobile } from "react-device-detect";
 import "operator/css/index.css";
 import { RunStopFunctionProvider } from "./function_providers/RunStopFunctionProvider";
@@ -314,18 +314,18 @@ function renderOperator(storageHandler: StorageHandler) {
 
     !isMobile
         ? root.render(
-              <Operator
-                  remoteStreams={allRemoteStreams}
-                  layout={layout}
-                  storageHandler={storageHandler}
-              />,
-          )
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                storageHandler={storageHandler}
+            />,
+        )
         : root.render(
-              <MobileOperator
-                  remoteStreams={allRemoteStreams}
-                  storageHandler={storageHandler}
-              />,
-          );
+            <MobileOperator_XP
+                remoteStreams={allRemoteStreams}
+                storageHandler={storageHandler}
+            />,
+        );
 
     if (!isMobile) {
         var loader = document.createElement("div");

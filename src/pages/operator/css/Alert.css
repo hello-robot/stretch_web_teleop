@@ -3,16 +3,15 @@
     position: relative;
     padding: 2rem 1rem;
     /* margin-bottom: 1rem; */
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
     height: 5.5rem;
     text-align: center;
 }
 
 .error {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
+    font-weight: 800;
+    color: #ffffff;
+    background-color: hsl(333deg 100% 50% / 50%);
+    backdrop-filter: blur(10px);
 }
 
 .success {
@@ -52,11 +51,11 @@
 }
 /* The close button */
 .closebtn {
-    margin-left: 15px;
-    /* color: white; */
-    font-weight: bold;
+    margin: 1px 5px 0 0;
+    color: white;
+    font-weight: normal;
     float: right;
-    font-size: 3rem;
+    font-size: 2rem;
     line-height: 0.75rem;
     cursor: pointer;
     transition: 0.3s;
@@ -64,7 +63,7 @@
 
 /* When moving the mouse over the close button */
 .closebtn:hover {
-    color: black;
+    color: hsla(0, 0%, 100%, 0.5);
 }
 .hide {
     display: none;

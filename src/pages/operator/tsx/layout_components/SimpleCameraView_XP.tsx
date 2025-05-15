@@ -1,7 +1,7 @@
 import React from "react";
 import { className, RemoteStream } from "shared/util";
 import { CameraViewId } from "../utils/component_definitions";
-import "operator/css/SimpleCameraView.css";
+import "operator/css/SimpleCameraView_XP.css";
 import { getIcon } from "../utils/svg";
 
 /**
@@ -9,7 +9,7 @@ import { getIcon } from "../utils/svg";
  *
  * @param props properties
  */
-export const SimpleCameraView = (props: {
+export const SimpleCameraView_XP = (props: {
     id: CameraViewId;
     remoteStreams: Map<string, RemoteStream>;
 }) => {
@@ -43,16 +43,16 @@ export const SimpleCameraView = (props: {
             ?.setAttribute(
                 "style",
                 "margin-top:" +
-                    (videoRect.height + marginTop - 70).toString() +
-                    "px;",
+                (videoRect.height + marginTop - 70).toString() +
+                "px;",
             );
         document
             .querySelector(".depth-sensing")
             ?.setAttribute(
                 "style",
                 "margin-top:" +
-                    (videoRect.height + marginTop - 42).toString() +
-                    "px;",
+                (videoRect.height + marginTop - 42).toString() +
+                "px;",
             );
         videoRef.current.style.marginTop = marginTop.toString() + "px";
     }
@@ -80,11 +80,13 @@ export const SimpleCameraView = (props: {
 
     const videoComponent =
         props.id === CameraViewId.realsense ||
-        props.id === CameraViewId.overhead ? (
+            props.id === CameraViewId.overhead ? (
             <>
                 <div
                     className="simple-realsense"
                 >
+                    <div className="cat-ear_XP cat-ear-top_XP" />
+                    <div className="cat-ear_XP cat-ear-bottom_XP" />
                     <div
                         className="simple-video-area"
                         style={{ gridRow: 2, gridColumn: 1 }}
