@@ -168,8 +168,7 @@
 .loading-text {
     position: absolute;
     top: calc(50% - 1em);
-    left: calc(50% - 2em);
-    font-size: large;
+    left: calc(50% - 1.2em);
     z-index: 4;
 }
 

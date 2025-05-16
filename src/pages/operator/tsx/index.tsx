@@ -334,7 +334,7 @@ function renderOperator(storageHandler: StorageHandler) {
         var loaderText = document.createElement("div");
         loaderText.className = "reconnecting-text";
         var text = document.createElement("p");
-        text.textContent = "Reconnecting...";
+        text.textContent = "Reconnecting";
         loaderText.appendChild(text);
         var loaderBackground = document.createElement("div");
         loaderBackground.className = "loader-background";
