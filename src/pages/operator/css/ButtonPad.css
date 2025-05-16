@@ -54,6 +54,7 @@
 
 .button-pads image {
     pointer-events: none;
+    touch-action: none;
 }
 
 /* Button pad <image> gets saturated while hovering */
@@ -98,6 +99,7 @@
 /* Disable hover actions */
 .button-pads.customizing path {
     pointer-events: none;
+    touch-action: none;
 }
 
 .button-pads.selected {

@@ -1,3 +1,11 @@
+.batteryGaugeContainer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+
+    padding: 1rem 0.5rem 0.5rem;
+}
+
 .bar {
     width: 100%;
     height: 15px;
@@ -15,45 +23,37 @@
 }
 
 .batteryGauge {
-    height: 100px;
-    /* position: absolute; */
+    padding: 0.9rem 0 0;
     width: 100%;
-    padding: 0px 10px 10px 10px;
+    height: 50px;
 }
 
 .green {
-    filter: invert(17%) sepia(15%) saturate(6070%) hue-rotate(89deg)
-        brightness(75%) contrast(108%);
+    filter: invert(17%) sepia(15%) saturate(6070%) hue-rotate(89deg) brightness(75%) contrast(108%);
 }
 
 .yellow-green {
-    filter: brightness(70%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
-        hue-rotate(56deg) contrast(119%);
+    filter: brightness(70%) saturate(100%) invert(0%) sepia(28%) saturate(4155%) hue-rotate(56deg) contrast(119%);
 }
 
 .yellow {
-    filter: brightness(90%) saturate(100%) invert(0%) sepia(28%) saturate(4155%)
-        hue-rotate(6deg) contrast(119%);
+    filter: brightness(90%) saturate(100%) invert(0%) sepia(28%) saturate(4155%) hue-rotate(6deg) contrast(119%);
 }
 
 .orange {
-    filter: brightness(70%) saturate(100%) invert(10%) sepia(28%)
-        saturate(4155%) hue-rotate(6deg) contrast(119%);
+    filter: brightness(70%) saturate(100%) invert(10%) sepia(28%) saturate(4155%) hue-rotate(6deg) contrast(119%);
 }
 
 .orange-red {
-    filter: brightness(50%) saturate(100%) invert(10%) sepia(28%)
-        saturate(4155%) hue-rotate(6deg) contrast(119%);
+    filter: brightness(50%) saturate(100%) invert(10%) sepia(28%) saturate(4155%) hue-rotate(6deg) contrast(119%);
 }
 
 .red {
-    filter: brightness(30%) saturate(100%) invert(10%) sepia(28%)
-        saturate(4155%) hue-rotate(346deg) contrast(119%);
+    filter: brightness(30%) saturate(100%) invert(10%) sepia(28%) saturate(4155%) hue-rotate(346deg) contrast(119%);
 }
 
-.batteryGaugeContainer {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    max-height: 90%;
+.text-battery-gauge {
+    padding: 1rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
