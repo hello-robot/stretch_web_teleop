@@ -28,7 +28,7 @@ import {
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
 import "operator/css/MobileOperator_XP.css";
-import { SimpleCameraView } from "./layout_components/SimpleCameraView";
+import { SimpleCameraView_XP } from "./layout_components/SimpleCameraView_XP";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
 import { ButtonPad_XP } from "./layout_components/ButtonPad_XP";
@@ -279,8 +279,6 @@ export const MobileOperator_XP = (props: {
                     <></>
                 )}
                 <div className={className("controls", { hideControls })}>
-                    <div className="cat-ear_XP cat-ear-top_XP" />
-                    <div className="cat-ear_XP cat-ear-bottom_XP" />
                     {/* <div className={"switch-camera"}>
                         <button
                             onPointerDown={() => {
@@ -349,7 +347,7 @@ export const MobileOperator_XP = (props: {
                     }}
                         className="simple-camera-view-wrapper_XP"
                     >
-                        <SimpleCameraView
+                        <SimpleCameraView_XP
                             id={cameraID}
                             remoteStreams={remoteStreams}
                         />
