@@ -22,7 +22,7 @@ import {
     ButtonPadButton,
     ButtonState,
 } from "../function_providers/ButtonFunctionProvider";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import "operator/css/ButtonPad.css";
 
 /** Properties for {@link ButtonPad} */
@@ -101,7 +101,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
 
     return (
         <div className="button-pad">
-            {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
+            {/* {!overlay && isBrowser || isTablet? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
@@ -151,8 +151,8 @@ const SingleButton = (props: SingleButtonProps) => {
         ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = isMobile ? 75 : 85;
-    const width = isMobile ? 75 : 85;
+    const height = !isBrowser && !isTablet  ? 75 : 85;
+    const width = !isBrowser && !isTablet  ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     const disabledDueToNotHomed =

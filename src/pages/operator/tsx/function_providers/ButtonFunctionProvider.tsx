@@ -28,10 +28,10 @@ export enum ButtonPadButton {
     WristPitchDown = "Wrist pitch down",
     WristRollLeft = "Wrist roll left",
     WristRollRight = "Wrist roll right",
-    CameraTiltUp = "Camera tilt up",
-    CameraTiltDown = "Camera tilt down",
-    CameraPanLeft = "Camera pan left",
-    CameraPanRight = "Camera pan right",
+    CameraTiltUp = "Look up",
+    CameraTiltDown = "Look down",
+    CameraPanLeft = "Look left",
+    CameraPanRight = "Look right",
 }
 
 /** Array of the pan tilt buttons */
@@ -158,6 +158,17 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos);
             const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit;
             const prevInLimitPos = prevButtonStatePos !== ButtonState.Limit;
+            // If the joint associated with the active button is at the joint limit then
+            // stop the current action. This will stop the robot from constantly sending
+            // move commands when in click-click mode.
+            if (prevButtonStateNeg === ButtonState.Active && !inLimitNeg) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonNeg, ButtonState.Limit);
+            } else if (prevButtonStatePos === ButtonState.Active && !inLimitPos) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonPos, ButtonState.Limit);
+            }
+
             if (
                 prevButtonStateNeg == undefined ||
                 inLimitNeg !== prevInLimitNeg
@@ -189,6 +200,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
         callback: (buttonStateMap: ButtonStateMap) => void,
     ) {
         this.operatorCallback = callback;
+    }
+
+    public getActiveButton() {
+        return [...this.buttonStateMap].find(([key, value]) => value === ButtonState.Active)
     }
 
     /**
@@ -382,7 +397,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                                   this.setButtonActiveState(buttonPadFunction);
                               }
                           },
-                          onLeave: onLeave,
+                          // onLeave: onLeave,
                       };
         }
     }

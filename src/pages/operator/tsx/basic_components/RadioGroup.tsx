@@ -1,9 +1,9 @@
 import React from "react";
 import { className } from "shared/util";
 import "operator/css/RadioGroup.css";
-import { isMobile } from "react-device-detect";
 import Delete from "@mui/icons-material/DeleteOutline";
 import ModeEdit from "@mui/icons-material/ModeEditOutline";
+import { isBrowser, isTablet } from "react-device-detect";
 
 export const RadioButton = (props: {
     label: string;
@@ -13,13 +13,13 @@ export const RadioButton = (props: {
 }) => {
     return (
         <div
-            className={isMobile ? "radio-btn-mobile" : "radio-btn"}
-            onClick={props.onClick}
+            className={!isBrowser && !isTablet  ? "radio-btn-mobile" : "radio-btn"}
+            onPointerDown={props.onClick}
         >
             <label key={props.label}>
                 <input
                     type="radio"
-                    className={isMobile ? "radio-mobile" : "radio"}
+                    className={!isBrowser && !isTablet  ? "radio-mobile" : "radio"}
                     value={props.label}
                     key={props.label}
                     checked={props.selected}
@@ -30,10 +30,9 @@ export const RadioButton = (props: {
             <div className="modify">
                 {props.functs.Edit && <ModeEdit />}
                 {props.functs.Delete && (
-                    <Delete
-                        className="material-icons"
-                        onClick={() => props.functs.Delete!(props.label)}
-                    />
+                    <span
+                        onPointerDown={() => props.functs.Delete!(props.label)}
+                    ><Delete /></span>
                 )}
             </div>
         </div>
@@ -50,12 +49,15 @@ export interface RadioFunctions {
     // Cancel?: () => void
 }
 
-export const RadioGroup = (props: { functs: RadioFunctions }) => {
+export const RadioGroup = (props: { 
+    functs: RadioFunctions,
+    onChange? (label: string): void}
+) => {
     const [selected, setSelected] = React.useState<string>();
 
     return (
         <div
-            className={isMobile ? "radio-group-mobile" : "radio-group"}
+            className={!isBrowser && !isTablet  ? "radio-group-mobile" : "radio-group"}
             onContextMenu={(e) => e.preventDefault()}
         >
             {props.functs.GetLabels().map((label, index) => (
@@ -71,6 +73,8 @@ export const RadioGroup = (props: { functs: RadioFunctions }) => {
                             setSelected(label);
                             props.functs.SelectedLabel(label);
                         }
+                        
+                        if (props.onChange) props.onChange(label)
                     }}
                     functs={props.functs}
                 />

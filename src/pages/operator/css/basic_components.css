@@ -260,7 +260,7 @@
 
 .check-toggle-button-mobile {
     border: 5px solid whitesmoke;
-    /* margin: 1rem; */
+    margin: 0.5rem;
 }
 
 .pose-name {
@@ -310,12 +310,18 @@ input[type="checkbox"] {
 
 @media screen and (max-device-width: 700px) {
     input[type="checkbox"] {
-        margin-right: 3rem;
         transform: scale(2);
+        width: 0.75rem;
+        height: 0.75rem;
     }
 
     .popup-modal label {
-        font-size: 50px;
+        font-size: 1rem;
+    }
+
+    ul.checkbox {
+        column-count: 2;
+        margin: 0;
     }
 }
 
@@ -350,7 +356,7 @@ input[type="checkbox"] {
 /* Style the accordion content title */
 .accordion_title {
     font-family: "Open Sans", sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
 }
 
@@ -377,4 +383,14 @@ input[type="checkbox"] {
 
 .accordion-item:hover {
     background-image: linear-gradient(rgba(0, 0, 0, 0.15) 0 0);
+}
+
+.inline-buttons {
+    display: flex;
+}
+
+.quick-action-btn {
+    border-radius: 13px;
+    background: transparent;
+    border: 5px solid transparent;
 }
