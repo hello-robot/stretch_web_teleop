@@ -175,7 +175,7 @@ export class Robot extends React.Component {
             "/camera/color/image_raw/rotated/compressed",
             "/gripper_camera/image_raw/cropped/compressed",
             "/navigation_camera/image_raw/rotated/compressed",
-            "/stretch/joint_states",
+            // "/stretch/joint_states",
         ],
         timeout_ms: number = 5000,
     ): Promise<boolean> {
@@ -863,13 +863,17 @@ export class Robot extends React.Component {
         });
     }
 
-    executeBaseVelocity = (props: { linVel: number; angVel: number }): void => {
-        this.switchToNavigationMode();
+    executeBaseVelocity = (props: {
+        linVelX: number,
+        linVelY: number,
+        angVel: number,
+      }): void => {
+        // this.switchToNavigationMode();
         this.stopExecution();
         let twist = new ROSLIB.Message({
             linear: {
-                x: props.linVel,
-                y: 0,
+                x: props.linVelX,
+                y: props.linVelY,
                 z: 0,
             },
             angular: {
@@ -878,6 +882,7 @@ export class Robot extends React.Component {
                 z: props.angVel,
             },
         });
+
         if (!this.cmdVelTopic) throw "cmdVelTopic is undefined";
         console.log("Publishing base velocity twist message");
         this.cmdVelTopic.publish(twist);

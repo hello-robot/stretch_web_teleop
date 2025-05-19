@@ -1,7 +1,8 @@
 import fnmatch
 import os
 
-import stretch_body.robot_params
+import stretch_body_ii
+from stretch_body_ii import robot
 from ament_index_python import get_package_share_directory
 from ament_index_python.packages import get_package_share_path
 from launch_ros.actions import Node
@@ -164,7 +165,15 @@ def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_
         and has_nav_head_cam is True
     ):
         return "both", False, False, True
-
+    # Stretch
+    elif (
+        model == "SE4"
+        and tool == "eoa_wrist_dw4_tool_sg4"
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
+    ):
+        return "none", False, False, True
+    
     raise ValueError(
         f"cannot find valid configuration for model={model}, tool={tool}, "
         f"has_beta_teleop_kit={has_beta_teleop_kit}, has_nav_head_cam={has_nav_head_cam}"
@@ -176,9 +185,9 @@ def generate_launch_description():
     core_package = str(get_package_share_path("stretch_core"))
     rosbridge_package = str(get_package_share_path("rosbridge_server"))
     stretch_core_path = str(get_package_share_directory("stretch_core"))
-    stretch_navigation_path = str(get_package_share_directory("stretch_nav2"))
+    # stretch_navigation_path = str(get_package_share_directory("stretch_nav2"))
 
-    _, robot_params = stretch_body.robot_params.RobotParams().get_params()
+    robot_params = stretch_body_ii.params.robot_params_SE4.nominal_params
     stretch_serial_no = robot_params["robot"]["serial_no"]
     stretch_model = robot_params["robot"]["model_name"]
     stretch_tool = robot_params["robot"]["tool"]
@@ -223,20 +232,20 @@ def generate_launch_description():
     keyfile_arg = DeclareLaunchArgument(
         "keyfile", default_value=stretch_serial_no + "+6-key.pem"
     )
-    nav2_params_file_param = DeclareLaunchArgument(
-        "nav2_params_file",
-        default_value=os.path.join(
-            stretch_navigation_path, "config", "nav2_params.yaml"
-        ),
-        description="Full path to the ROS2 parameters file to use for all launched nodes",
-    )
+    # nav2_params_file_param = DeclareLaunchArgument(
+    #     "nav2_params_file",
+    #     default_value=os.path.join(
+    #         stretch_navigation_path, "config", "nav2_params.yaml"
+    #     ),
+    #     description="Full path to the ROS2 parameters file to use for all launched nodes",
+    # )
 
     # Start collecting nodes to launch
     ld = LaunchDescription(
         [
             map_yaml,
             tts_engine,
-            nav2_params_file_param,
+            # nav2_params_file_param,
             params_file,
             certfile_arg,
             keyfile_arg,
@@ -394,7 +403,7 @@ def generate_launch_description():
         ),
         # TODO: The tablet_placement code should change the mode, not the launch file
         launch_arguments={
-            "mode": "position",
+            "mode": "navigation",
             "broadcast_odom_tf": "True",
             "fail_out_of_range_goal": "False",
         }.items(),
@@ -457,35 +466,35 @@ def generate_launch_description():
         )
         ld.add_action(configure_video_streams_node)
 
-    navigation_bringup_launch = GroupAction(
-        condition=LaunchConfigurationNotEquals("map_yaml", ""),
-        actions=[
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    [stretch_navigation_path, "/launch/bringup_launch.py"]
-                ),
-                launch_arguments={
-                    "use_sim_time": "false",
-                    "autostart": "true",
-                    "map": PathJoinSubstitution(
-                        [
-                            teleop_interface_package,
-                            "maps",
-                            LaunchConfiguration("map_yaml"),
-                        ]
-                    ),
-                    "params_file": LaunchConfiguration("nav2_params_file"),
-                    "use_rviz": "false",
-                }.items(),
-            ),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(
-                    [stretch_core_path, "/launch/rplidar.launch.py"]
-                )
-            ),
-        ],
-    )
-    ld.add_action(navigation_bringup_launch)
+    # navigation_bringup_launch = GroupAction(
+    #     condition=LaunchConfigurationNotEquals("map_yaml", ""),
+    #     actions=[
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource(
+    #                 [stretch_navigation_path, "/launch/bringup_launch.py"]
+    #             ),
+    #             launch_arguments={
+    #                 "use_sim_time": "false",
+    #                 "autostart": "true",
+    #                 "map": PathJoinSubstitution(
+    #                     [
+    #                         teleop_interface_package,
+    #                         "maps",
+    #                         LaunchConfiguration("map_yaml"),
+    #                     ]
+    #                 ),
+    #                 "params_file": LaunchConfiguration("nav2_params_file"),
+    #                 "use_rviz": "false",
+    #             }.items(),
+    #         ),
+    #         IncludeLaunchDescription(
+    #             PythonLaunchDescriptionSource(
+    #                 [stretch_core_path, "/launch/rplidar.launch.py"]
+    #             )
+    #         ),
+    #     ],
+    # )
+    # ld.add_action(navigation_bringup_launch)
 
     ld.add_action(
         ExecuteProcess(
