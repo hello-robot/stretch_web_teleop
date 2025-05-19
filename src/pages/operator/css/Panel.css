@@ -3,8 +3,8 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    /* margin: 0 0.5rem; */
     margin-top: 0.5rem; /* new */
+    min-width: 250px;
     width: 100%; /* new */
     box-shadow: var(--shadow);
     position: relative;

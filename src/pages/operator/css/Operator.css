@@ -144,10 +144,9 @@
 #operator-body {
     display: flex;
     justify-content: center;
-    flex-flow: row;
-    flex: 1 1 0;
-    grid-column: 1/1;
-    grid-row: 3;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 0 1rem 1rem 1rem;
 }
 
 /** https://stackoverflow.com/a/40989121 **/
