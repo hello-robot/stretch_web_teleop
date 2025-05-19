@@ -400,6 +400,15 @@ function getShapeAndFunctionsFromId(
       ];
       shape = ButtonPadShape.RowButtonPad;
       break;
+    case ButtonPadIdMobile.OmniDrive:
+      functions = [
+        B.OmniForward, // B.BaseForward,
+        B.OmniBackward,// B.BaseReverse,
+        B.StrafeLeft,  // B.BaseRotateLeft,
+        B.StrafeRight, // B.BaseRotateRight,
+      ];
+      shape = ButtonPadShape.RowButtonPad;
+      break;
     default:
       throw new Error(`unknow button pad id: ${id}`);
   }

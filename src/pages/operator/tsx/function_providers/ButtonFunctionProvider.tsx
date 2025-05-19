@@ -12,6 +12,12 @@ import { FunctionProvider } from "./FunctionProvider";
  * the label of the button which appears in the tooltip.
  */
 export enum ButtonPadButton {
+    OmniForward = "Omni Forward",
+    OmniBackward = "Omni Backward",
+    StrafeLeft = "Strafe Left",
+    StrafeRight = "Strafe Right",
+    OmniRotateLeft = "Omni Rotate Left",
+    OmniRotateRight = "Omni Rotate Right",
     BaseForward = "Base Forward",
     BaseReverse = "Base Reverse",
     BaseRotateRight = "Base rotate right",
@@ -44,6 +50,8 @@ export const panTiltButtons: ButtonPadButton[] = [
 
 /** Button functions which require moving a joint in the negative direction. */
 const negativeButtonPadFunctions = new Set<ButtonPadButton>([
+    ButtonPadButton.OmniBackward,
+    ButtonPadButton.StrafeRight,
     ButtonPadButton.BaseReverse,
     ButtonPadButton.BaseRotateRight,
     ButtonPadButton.ArmLower,
@@ -318,13 +326,21 @@ export class ButtonFunctionProvider extends FunctionProvider {
             case ActionMode.PressAndHold:
             case ActionMode.ClickClick:
                 switch (buttonPadFunction) {
+                    case ButtonPadButton.OmniForward:
+                    case ButtonPadButton.OmniBackward:
+                        action = () => this.continuousBaseDrive(velocity, 0.0, 0.0);
+                        break;
+                    case ButtonPadButton.StrafeLeft:
+                    case ButtonPadButton.StrafeRight:
+                        action = () => this.continuousBaseDrive(0.0, velocity, 0.0);
+                        break;
                     case ButtonPadButton.BaseForward:
                     case ButtonPadButton.BaseReverse:
-                        action = () => this.continuousBaseDrive(velocity, 0.0);
+                        action = () => this.continuousBaseDrive(velocity, 0.0, 0.0);
                         break;
                     case ButtonPadButton.BaseRotateLeft:
                     case ButtonPadButton.BaseRotateRight:
-                        action = () => this.continuousBaseDrive(0.0, velocity);
+                        action = () => this.continuousBaseDrive(0.0, 0.0, velocity);
                         break;
 
                     case ButtonPadButton.ArmLower:
@@ -452,6 +468,12 @@ function getJointNameFromButtonFunction(
     buttonType: ButtonPadButton,
 ): ValidJoints {
     switch (buttonType) {
+        case ButtonPadButton.OmniForward:
+        case ButtonPadButton.OmniBackward:
+        case ButtonPadButton.StrafeLeft:
+        case ButtonPadButton.StrafeRight:
+            return "translate_mobile_base";
+
         case ButtonPadButton.BaseReverse:
         case ButtonPadButton.BaseForward:
             return "translate_mobile_base";

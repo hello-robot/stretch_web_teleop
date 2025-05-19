@@ -54,6 +54,7 @@ export enum ButtonPadIdMobile {
     Arm = "Arm Mobile",
     Gripper = "Gripper Mobile",
     Drive = "Drive Mobile",
+    OmniDrive = "Omni Drive Mobile"
 }
 
 /**

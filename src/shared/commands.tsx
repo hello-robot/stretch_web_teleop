@@ -34,7 +34,8 @@ export interface VelocityCommand {
 export interface DriveCommand {
     type: "driveBase";
     modifier: {
-        linVel: number;
+        linVelX: number;
+        linVelY: number;
         angVel: number;
     };
 }
