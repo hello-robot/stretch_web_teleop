@@ -119,11 +119,11 @@ export const MobileOperator = (props: {
     /** State passed from the operator and shared by all components */
     const sharedState: SharedState = {
         customizing: false,
-        onSelect: () => {},
+        onSelect: () => { },
         remoteStreams: remoteStreams,
         selectedPath: "deselected",
         dropZoneState: {
-            onDrop: () => {},
+            onDrop: () => { },
             selectedDefinition: undefined,
         },
         buttonStateMap: buttonStateMap.current,
@@ -219,7 +219,7 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-                <div className="slider-container">
+                {/* <div className="slider-container">
                     <span className="label">Slow</span>
                     <input
                         type="range"
@@ -238,10 +238,12 @@ export const MobileOperator = (props: {
                         }}
                     />
                     <span className="label">Fast</span>
-                </div>
+                </div> */}
                 <TabGroup
-                    tabLabels={["Drive", "Arm", "Gripper"]}
-                    tabContent={[driveMode, armMode, gripperMode]}
+                    // tabLabels={["Drive", "Arm", "Gripper"]}
+                    // tabContent={[driveMode, armMode, gripperMode]}
+                    tabLabels={["Drive"]}
+                    tabContent={[driveMode]}
                     startIdx={activeControlTab}
                     onChange={(index: number) => setActiveControlTab(index)}
                     pill={true}
@@ -277,7 +279,7 @@ export const MobileOperator = (props: {
                     <></>
                 )}
                 <div className={className("controls", { hideControls })}>
-                    <div className={"switch-camera"}>
+                    {/* <div className={"switch-camera"}>
                         <button
                             onPointerDown={() => {
                                 if (cameraID == CameraViewId.realsense)
@@ -298,8 +300,8 @@ export const MobileOperator = (props: {
                         >
                             <span className="material-icons">map</span>
                         </button>
-                    </div>
-                    {cameraID == CameraViewId.realsense && (
+                    </div> */}
+                    {/* {cameraID == CameraViewId.realsense && (
                         <div className="depth-sensing">
                             <CheckToggleButton
                                 checked={depthSensing}
@@ -312,8 +314,8 @@ export const MobileOperator = (props: {
                                 label="Depth Sensing"
                             />
                         </div>
-                    )}
-                    <button
+                    )} */}
+                    {/* <button
                         className="record"
                         onPointerDown={() => {
                             setIsRecording(!isRecording);
@@ -333,9 +335,18 @@ export const MobileOperator = (props: {
                                 <i>Stop Recording</i>
                             </>
                         )}
-                    </button>
+                    </button> */}
                     {/* <div {...swipeHandlers}> */}
-                    <div>
+                    <div onPointerDown={() => {
+                        if (cameraID == CameraViewId.realsense)
+                            setCameraID(CameraViewId.overhead);
+                        else if (cameraID == CameraViewId.overhead)
+                            setCameraID(CameraViewId.gripper);
+                        else if (cameraID == CameraViewId.gripper)
+                            setCameraID(CameraViewId.realsense);
+                    }}
+                        className="simple-camera-view-wrapper_XP"
+                    >
                         <SimpleCameraView
                             id={cameraID}
                             remoteStreams={remoteStreams}
@@ -354,7 +365,7 @@ export const MobileOperator = (props: {
                 </div>
                 {/* <div className={className('map', {hideMap})} {...swipeHandlers}> */}
                 <div className={className("map", { hideMap })}>
-                    <div className={"switch-camera"}>
+                    {/* <div className={"switch-camera"}>
                         <button
                             onPointerDown={() => {
                                 setHideMap(true);
@@ -363,7 +374,7 @@ export const MobileOperator = (props: {
                         >
                             <span className="material-icons">photo_camera</span>
                         </button>
-                    </div>
+                    </div> */}
                     <Map
                         {...{
                             path: "",
@@ -374,6 +385,11 @@ export const MobileOperator = (props: {
                             sharedState: sharedState,
                         }}
                     />
+                </div>
+                <div className="footer-controls_XP">
+                    <div />
+                    <div />
+                    <div />
                 </div>
             </div>
         </div>
