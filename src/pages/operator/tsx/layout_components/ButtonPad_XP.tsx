@@ -114,7 +114,7 @@ export const ButtonPad_XP = (props: ButtonPadProps) => {
     return <SingleButton_XP {...buttonProps} key={i} />;
   };
 
-  if (isMobile && definition.id === ButtonPadIdMobile.Drive) {
+  if (isMobile && (definition.id === ButtonPadIdMobile.Drive || definition.id === ButtonPadIdMobile.OmniDrive)) {
     const buttons = ['north', 'south', 'west', 'east'];
     return (
       <div className="base-movement-controls_XP">
