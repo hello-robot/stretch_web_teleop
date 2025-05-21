@@ -2,7 +2,7 @@ import React from 'react'
 
 import { SpeedControl } from '../static_components/SpeedControl';
 import { FunctionProvider } from "../function_providers/FunctionProvider";
-import { BatteryGuage } from '../static_components/BatteryGauge';
+import { BatteryGauge } from '../static_components/BatteryGauge';
 
 const FooterControls = (props: {
   actionModeCurrent?: string;
@@ -22,7 +22,7 @@ const FooterControls = (props: {
         }}
       />
       <button>{props.actionModeCurrent}</button>
-      <BatteryGuage />
+      <BatteryGauge />
     </div>
   )
 }
