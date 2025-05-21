@@ -6,6 +6,7 @@ import {
     ComponentDefinition,
     ComponentType,
     MapDefinition,
+    LayoutDefinition
 } from "./utils/component_definitions";
 import {
     className,
@@ -31,6 +32,7 @@ import "operator/css/MobileOperator.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
+import FooterControls from "./layout_components/FooterControls";
 import { ButtonPad } from "./layout_components/ButtonPad";
 import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
@@ -47,6 +49,7 @@ import { Alert } from "./basic_components/Alert";
 /** Operator interface webpage */
 export const MobileOperator = (props: {
     remoteStreams: Map<string, RemoteStream>;
+    layout: LayoutDefinition;
     storageHandler: StorageHandler;
 }) => {
     const [buttonCollision, setButtonCollision] = React.useState<
@@ -72,8 +75,6 @@ export const MobileOperator = (props: {
         }, 5000);
     }, []);
 
-    FunctionProvider.actionMode = ActionMode.PressAndHold;
-
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
     const [buttonStateMapRerender, setButtonStateMapRerender] =
@@ -91,6 +92,37 @@ export const MobileOperator = (props: {
         }
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
+
+
+
+
+    FunctionProvider.actionMode = ActionMode.PressAndHold;
+    const layout = React.useRef<LayoutDefinition>(props.layout);
+    const actionModes = Object.values(ActionMode);
+    const actionModesIdx = actionModes.indexOf(
+        layout.current.actionMode
+    )
+    /** Rerenders the operator */
+    function updateLayout() {
+        console.log("update layout");
+        setButtonStateMapRerender(!buttonStateMapRerender);
+        setTabletOrientationRerender(!tabletOrientationRerender);
+    }
+    /**
+     * Updates the action mode in the layout (visually) and in the function
+     * provider (functionally).
+     */
+    function setActionMode(actionMode: ActionMode) {
+        layout.current.actionMode = actionMode;
+        FunctionProvider.actionMode = actionMode;
+        props.storageHandler.saveCurrentLayout(layout.current);
+        updateLayout();
+    }
+    // onChange={(idx) => setActionMode(actionModes[idx])}
+
+
+
+
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
@@ -386,11 +418,9 @@ export const MobileOperator = (props: {
                         }}
                     />
                 </div>
-                <div className="footer-controls_XP">
-                    <div />
-                    <div />
-                    <div />
-                </div>
+                <FooterControls
+                    actionModeCurrent={actionModes[actionModesIdx]}
+                />
             </div>
         </div>
     );

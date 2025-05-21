@@ -20,17 +20,18 @@ type SpeedControlProps = {
     onChange: (newScale: number) => void;
 };
 
-/**The different velocity settings to display. */
+/**
+ * The different velocity settings to display.
+ * Scale: 0 -> 1.6
+ */
 export const VELOCITY_SCALE: VelocityDetails[] = [
-    { label: "Slowest", scale: 0.2 },
-    { label: "Slow", scale: 0.4 },
-    { label: "Medium", scale: 0.8 },
-    { label: "Fast", scale: 1.2 },
-    { label: "Fastest", scale: 1.6 },
+    { label: "Slow", scale: 0.5 },
+    { label: "Normal", scale: 1 },
+    { label: "Fast", scale: 1.6 },
 ];
 
 /**The speed the interface should initialize with */
-export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[2].scale;
+export const DEFAULT_VELOCITY_SCALE: number = VELOCITY_SCALE[1].scale;
 
 /**
  * Set of buttons so the user can control the scaling of the speed for all controls.

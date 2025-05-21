@@ -11,6 +11,7 @@ export class BatteryVoltageFunctionProvider extends FunctionProvider {
     constructor() {
         super();
         this.updateVoltage = this.updateVoltage.bind(this);
+        this.getColor = this.getColor.bind(this);
     }
 
     public updateVoltage(voltage: number): void {
@@ -19,7 +20,7 @@ export class BatteryVoltageFunctionProvider extends FunctionProvider {
             this.voltageChangeCallback(this.getColor());
     }
 
-    private getColor() {
+    public getColor() {
         let vbat_min = 10.0;
         let vbat_max = 12.0;
         let dv = (vbat_max - vbat_min) / 4.0;
