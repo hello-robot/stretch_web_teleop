@@ -40,7 +40,7 @@ export const ComponentList = (props: ComponentListProps) => {
                 return (
                     <React.Fragment key={`${index}`}>
                         {type !== ComponentType.RunStopButton &&
-                        type !== ComponentType.BatteryGuage ? (
+                            type !== ComponentType.BatteryGauge ? (
                             <DropZone
                                 path={curPath}
                                 sharedState={props.sharedState}
@@ -55,8 +55,8 @@ export const ComponentList = (props: ComponentListProps) => {
             })}
             {(components.length > 0 &&
                 components[components.length - 1].type !==
-                    ComponentType.BatteryGuage) ||
-            components.length === 0 ? (
+                ComponentType.BatteryGauge) ||
+                components.length === 0 ? (
                 <DropZone
                     path={(path ? path + "-" : "") + components.length}
                     sharedState={props.sharedState}

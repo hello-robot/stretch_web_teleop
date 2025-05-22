@@ -323,6 +323,7 @@ function renderOperator(storageHandler: StorageHandler) {
         : root.render(
             <MobileOperator
                 remoteStreams={allRemoteStreams}
+                layout={layout}
                 storageHandler={storageHandler}
             />,
         );

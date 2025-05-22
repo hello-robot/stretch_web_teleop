@@ -99,7 +99,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                                     type: ComponentType.RunStopButton,
                                 },
                                 {
-                                    type: ComponentType.BatteryGuage,
+                                    type: ComponentType.BatteryGauge,
                                 },
                             ],
                         },
