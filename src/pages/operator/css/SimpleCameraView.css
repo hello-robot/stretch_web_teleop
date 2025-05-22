@@ -136,7 +136,7 @@
     z-index: 1;
     position: absolute;
     left: 0;
-    width: 100%;
+    width: calc(100% + 0.5px);
     height: 15px;
     background-size: cover;
     background-repeat: no-repeat;
