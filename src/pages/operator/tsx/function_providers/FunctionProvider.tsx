@@ -50,15 +50,17 @@ export abstract class FunctionProvider {
             FunctionProvider.remoteRobot?.incrementalMove(jointName, increment);
     }
 
-    public continuousBaseDrive(linVel: number, angVel: number) {
+    public continuousBaseDrive(linVelX: number, linVelY: number, angVel: number) {
         this.stopCurrentAction();
         this.activeVelocityAction = FunctionProvider.remoteRobot?.driveBase(
-            linVel,
+            linVelX,
+            linVelY,
             angVel,
         );
         this.velocityExecutionHeartbeat = window.setInterval(() => {
             this.activeVelocityAction = FunctionProvider.remoteRobot?.driveBase(
-                linVel,
+                linVelX,
+                linVelY,
                 angVel,
             );
         }, 150);

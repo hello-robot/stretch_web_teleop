@@ -6,6 +6,7 @@ import {
     ComponentDefinition,
     ComponentType,
     MapDefinition,
+    LayoutDefinition
 } from "./utils/component_definitions";
 import {
     className,
@@ -31,6 +32,7 @@ import "operator/css/MobileOperator.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
+import FooterControls from "./layout_components/FooterControls";
 import { ButtonPad } from "./layout_components/ButtonPad";
 import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
@@ -47,6 +49,7 @@ import { Alert } from "./basic_components/Alert";
 /** Operator interface webpage */
 export const MobileOperator = (props: {
     remoteStreams: Map<string, RemoteStream>;
+    layout: LayoutDefinition;
     storageHandler: StorageHandler;
 }) => {
     const [buttonCollision, setButtonCollision] = React.useState<
@@ -65,14 +68,13 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    const [isCameraVeilVisible, isCameraVeilVisibleSet] = useState(false);
 
     React.useEffect(() => {
         setTimeout(function () {
             setShowAlert(false);
         }, 5000);
     }, []);
-
-    FunctionProvider.actionMode = ActionMode.PressAndHold;
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
@@ -91,6 +93,37 @@ export const MobileOperator = (props: {
         }
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
+
+
+
+
+    FunctionProvider.actionMode = ActionMode.PressAndHold;
+    const layout = React.useRef<LayoutDefinition>(props.layout);
+    const actionModes = Object.values(ActionMode);
+    const actionModesIdx = actionModes.indexOf(
+        layout.current.actionMode
+    )
+    /** Rerenders the operator */
+    function updateLayout() {
+        console.log("update layout");
+        setButtonStateMapRerender(!buttonStateMapRerender);
+        setTabletOrientationRerender(!tabletOrientationRerender);
+    }
+    /**
+     * Updates the action mode in the layout (visually) and in the function
+     * provider (functionally).
+     */
+    function setActionMode(actionMode: ActionMode) {
+        layout.current.actionMode = actionMode;
+        FunctionProvider.actionMode = actionMode;
+        props.storageHandler.saveCurrentLayout(layout.current);
+        updateLayout();
+    }
+    // onChange={(idx) => setActionMode(actionModes[idx])}
+
+
+
+
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
@@ -119,11 +152,11 @@ export const MobileOperator = (props: {
     /** State passed from the operator and shared by all components */
     const sharedState: SharedState = {
         customizing: false,
-        onSelect: () => {},
+        onSelect: () => { },
         remoteStreams: remoteStreams,
         selectedPath: "deselected",
         dropZoneState: {
-            onDrop: () => {},
+            onDrop: () => { },
             selectedDefinition: undefined,
         },
         buttonStateMap: buttonStateMap.current,
@@ -219,29 +252,12 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-                <div className="slider-container">
-                    <span className="label">Slow</span>
-                    <input
-                        type="range"
-                        className="slider"
-                        min="0.2"
-                        max="1.6"
-                        defaultValue={velocityScale}
-                        step="0.01"
-                        onPointerUp={(event) => {
-                            setVelocityScale(FunctionProvider.velocityScale);
-                        }}
-                        onChange={(event) => {
-                            FunctionProvider.velocityScale = Number(
-                                event.target.value,
-                            );
-                        }}
-                    />
-                    <span className="label">Fast</span>
-                </div>
+
                 <TabGroup
-                    tabLabels={["Drive", "Arm", "Gripper"]}
-                    tabContent={[driveMode, armMode, gripperMode]}
+                    // tabLabels={["Drive", "Arm", "Gripper"]}
+                    // tabContent={[driveMode, armMode, gripperMode]}
+                    tabLabels={["Drive"]}
+                    tabContent={[driveMode]}
                     startIdx={activeControlTab}
                     onChange={(index: number) => setActiveControlTab(index)}
                     pill={true}
@@ -277,68 +293,20 @@ export const MobileOperator = (props: {
                     <></>
                 )}
                 <div className={className("controls", { hideControls })}>
-                    <div className={"switch-camera"}>
-                        <button
-                            onPointerDown={() => {
-                                if (cameraID == CameraViewId.realsense)
-                                    setCameraID(CameraViewId.overhead);
-                                else if (cameraID == CameraViewId.overhead)
-                                    setCameraID(CameraViewId.gripper);
-                                else if (cameraID == CameraViewId.gripper)
-                                    setCameraID(CameraViewId.realsense);
-                            }}
-                        >
-                            <span className="material-icons">photo_camera</span>
-                        </button>
-                        <button
-                            onPointerDown={() => {
-                                setHideMap(false);
-                                setHideControls(true);
-                            }}
-                        >
-                            <span className="material-icons">map</span>
-                        </button>
-                    </div>
-                    {cameraID == CameraViewId.realsense && (
-                        <div className="depth-sensing">
-                            <CheckToggleButton
-                                checked={depthSensing}
-                                onClick={() => {
-                                    setDepthSensing(!depthSensing);
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.DepthSensing,
-                                    ).onCheck!(!depthSensing);
-                                }}
-                                label="Depth Sensing"
-                            />
-                        </div>
-                    )}
-                    <button
-                        className="record"
-                        onPointerDown={() => {
-                            setIsRecording(!isRecording);
-                        }}
+                    <div onPointerDown={() => {
+                        if (cameraID == CameraViewId.realsense)
+                            setCameraID(CameraViewId.overhead);
+                        else if (cameraID == CameraViewId.overhead)
+                            setCameraID(CameraViewId.gripper);
+                        else if (cameraID == CameraViewId.gripper)
+                            setCameraID(CameraViewId.realsense);
+                    }}
+                        className="simple-camera-view-wrapper_XP"
                     >
-                        {!isRecording ? (
-                            <>
-                                <span className="material-icons">
-                                    radio_button_checked
-                                </span>
-                                <i>Record</i>
-                            </>
-                        ) : (
-                            <>
-                                <div className="recording"></div>
-                                <div className="record-circle"></div>
-                                <i>Stop Recording</i>
-                            </>
-                        )}
-                    </button>
-                    {/* <div {...swipeHandlers}> */}
-                    <div>
                         <SimpleCameraView
                             id={cameraID}
                             remoteStreams={remoteStreams}
+                            isCameraVeilVisible={isCameraVeilVisible}
                         />
                     </div>
                     <TabGroup
@@ -352,18 +320,7 @@ export const MobileOperator = (props: {
                         key={"main-group"}
                     />
                 </div>
-                {/* <div className={className('map', {hideMap})} {...swipeHandlers}> */}
                 <div className={className("map", { hideMap })}>
-                    <div className={"switch-camera"}>
-                        <button
-                            onPointerDown={() => {
-                                setHideMap(true);
-                                setHideControls(false);
-                            }}
-                        >
-                            <span className="material-icons">photo_camera</span>
-                        </button>
-                    </div>
                     <Map
                         {...{
                             path: "",
@@ -375,6 +332,11 @@ export const MobileOperator = (props: {
                         }}
                     />
                 </div>
+                <FooterControls
+                    actionModes={actionModes}
+                    actionModeCurrent={actionModes[actionModesIdx]}
+                    isCameraVeilVisibleSet={isCameraVeilVisibleSet}
+                />
             </div>
         </div>
     );

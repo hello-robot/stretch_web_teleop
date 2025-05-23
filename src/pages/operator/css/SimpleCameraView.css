@@ -1,25 +1,20 @@
 .simple-video-container {
     position: relative;
-    /* flex: 1 1 0; */
-    /* display: grid; */
     justify-items: center;
-    /* padding: 0.4rem; */
-    /* height: 100%; */
-    /* grid-template-columns: auto; */
-    /* grid-template-rows: 1fr auto minmax(9rem, 1fr); */
     object-fit: cover;
     justify-content: center;
-    /* align-items: center;
-    flex-direction: column; */
     text-align: -webkit-center;
+    height: 100%;
+    padding: 10px 0px;
+    background-color: #000000;
 }
 
 .simple-video-area {
     position: relative;
     grid-row: 2/2;
     width: 100%;
-    max-height: 100%;
-    max-width: 100%;
+    height: 100%;
+    width: 100%;
     object-fit: cover;
     display: inline-block;
     text-align: center;
@@ -28,7 +23,7 @@
 .simple-video-canvas {
     display: inline-block;
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -40,14 +35,10 @@
 }
 
 .simple-realsense {
-    /* margin-top: -75%; */
+    position: relative;
+    height: 100%;
 }
 
-/* @media screen and (max-height: 800px) {
-    .simple-realsense {
-        width: 75%;
-    }
-} */
 .icon {
     border-radius: 60px;
     background-color: aliceblue;
@@ -134,3 +125,32 @@
         font-size: smaller;
     }
 }
+
+
+/**********************************
+ * CSS below targets "_XP" classes 
+ **********************************/
+
+/* START cat ears */
+.cat-ear_XP {
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    width: calc(100% + 0.5px);
+    height: 15px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.cat-ear_XP.cat-ear-top_XP {
+    top: 0;
+    background-image: url('data:image/svg+xml,<svg width="393" height="17" viewBox="0 0 393 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 0C6.71573 0 0 6.71573 0 15V0H15ZM393 15C393 6.71573 386.284 3.09244e-06 378 0H393V15Z" fill="black"/></svg>');
+}
+
+.cat-ear_XP.cat-ear-bottom_XP {
+    bottom: 0;
+    background-image: url('data:image/svg+xml,<svg width="393" height="17" viewBox="0 0 393 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 15C6.71573 15 0 8.28427 0 0V15H15ZM393 0C393 8.28427 386.284 15 378 15H393V0Z" fill="black"/></svg>');
+}
+
+/* END cat ears */

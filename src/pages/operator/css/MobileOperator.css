@@ -4,7 +4,6 @@
     /* display: grid; */
     grid-template-rows: auto auto 1fr;
     grid-template-columns: 1fr auto;
-    background-color: #7f7f7f;
 }
 
 .switch-camera {
@@ -124,7 +123,7 @@
         width: var(--header-btn-width-med);
     }
 
-    #operator-header > *,
+    #operator-header>*,
     #operator-header button {
         height: 3rem;
     }
@@ -153,6 +152,7 @@
 
 .slider {
     -webkit-appearance: none;
+    appearance: none;
     width: 70%;
     /* height: 30px; */
     border-radius: 19px;
@@ -178,8 +178,7 @@
     padding-bottom: 10px;
 }
 
-.map,
-.controls {
+.map {
     display: contents;
 }
 
@@ -200,25 +199,77 @@
 .recording {
     border: 3px solid #bd1919;
     -webkit-border-radius: 30px;
+    border-radius: 30px;
     height: 30px;
     width: 30px;
     position: absolute;
     left: 11px;
     top: 11px;
     -webkit-animation: pulsate 1s ease-out;
+    animation: pulsate 1s ease-out;
     -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
     opacity: 0;
 }
+
 @-webkit-keyframes pulsate {
     0% {
         -webkit-transform: scale(0.1, 0.1);
         opacity: 0;
     }
+
     50% {
         opacity: 1;
     }
+
     100% {
         -webkit-transform: scale(1.2, 1.2);
         opacity: 0;
     }
+}
+
+@keyframes pulsate {
+    0% {
+        transform: scale(0.1, 0.1);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.2, 1.2);
+        opacity: 0;
+    }
+}
+
+/**********************************
+ * CSS below targets "_XP" classes 
+ **********************************/
+.simple-camera-view-wrapper_XP {
+    height: 100%;
+}
+
+.controls {
+    position: relative;
+    height: 100%;
+}
+
+.footer-controls_XP {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 40px;
+    background-color: #000000;
+}
+
+.footer-controls_XP>div {
+    display: inline-flex;
+    width: 75px;
+    height: 50px;
+    border-radius: 5px;
+    border: 1px solid #272727;
+    justify-content: center;
+    text-align: center;
 }

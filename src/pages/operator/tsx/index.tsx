@@ -314,18 +314,19 @@ function renderOperator(storageHandler: StorageHandler) {
 
     !isMobile
         ? root.render(
-              <Operator
-                  remoteStreams={allRemoteStreams}
-                  layout={layout}
-                  storageHandler={storageHandler}
-              />,
-          )
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                storageHandler={storageHandler}
+            />,
+        )
         : root.render(
-              <MobileOperator
-                  remoteStreams={allRemoteStreams}
-                  storageHandler={storageHandler}
-              />,
-          );
+            <MobileOperator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                storageHandler={storageHandler}
+            />,
+        );
 
     if (!isMobile) {
         var loader = document.createElement("div");

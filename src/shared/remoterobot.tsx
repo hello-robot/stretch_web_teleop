@@ -66,10 +66,10 @@ export class RemoteRobot extends React.Component<{}, any> {
         return this.moveBaseGoalReached;
     }
 
-    driveBase(linVel: number, angVel: number): VelocityCommand {
+    driveBase(linVelX: number, linVelY: number, angVel: number): VelocityCommand {
         let cmd: DriveCommand = {
             type: "driveBase",
-            modifier: { linVel: linVel, angVel: angVel },
+            modifier: { linVelX: linVelX, linVelY: linVelY, angVel: angVel },
         };
         this.robotChannel(cmd);
 
@@ -77,14 +77,14 @@ export class RemoteRobot extends React.Component<{}, any> {
             stop: () => {
                 let stopEvent: DriveCommand = {
                     type: "driveBase",
-                    modifier: { linVel: 0, angVel: 0 },
+                    modifier: { linVelX: 0, linVelY: 0, angVel: 0 },
                 };
                 this.robotChannel(stopEvent);
             },
             affirm: () => {
                 let affirmEvent: DriveCommand = {
                     type: "driveBase",
-                    modifier: { linVel: linVel, angVel: angVel },
+                    modifier: { linVelX: linVelX, linVelY: linVelY, angVel: angVel },
                 };
                 this.robotChannel(affirmEvent);
             },
