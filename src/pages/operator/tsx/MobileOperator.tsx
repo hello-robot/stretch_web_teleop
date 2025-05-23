@@ -68,6 +68,7 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    const [isCameraVeilVisible, isCameraVeilVisibleSet] = useState(false);
 
     React.useEffect(() => {
         setTimeout(function () {
@@ -251,26 +252,7 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-                {/* <div className="slider-container">
-                    <span className="label">Slow</span>
-                    <input
-                        type="range"
-                        className="slider"
-                        min="0.2"
-                        max="1.6"
-                        defaultValue={velocityScale}
-                        step="0.01"
-                        onPointerUp={(event) => {
-                            setVelocityScale(FunctionProvider.velocityScale);
-                        }}
-                        onChange={(event) => {
-                            FunctionProvider.velocityScale = Number(
-                                event.target.value,
-                            );
-                        }}
-                    />
-                    <span className="label">Fast</span>
-                </div> */}
+
                 <TabGroup
                     // tabLabels={["Drive", "Arm", "Gripper"]}
                     // tabContent={[driveMode, armMode, gripperMode]}
@@ -311,64 +293,6 @@ export const MobileOperator = (props: {
                     <></>
                 )}
                 <div className={className("controls", { hideControls })}>
-                    {/* <div className={"switch-camera"}>
-                        <button
-                            onPointerDown={() => {
-                                if (cameraID == CameraViewId.realsense)
-                                    setCameraID(CameraViewId.overhead);
-                                else if (cameraID == CameraViewId.overhead)
-                                    setCameraID(CameraViewId.gripper);
-                                else if (cameraID == CameraViewId.gripper)
-                                    setCameraID(CameraViewId.realsense);
-                            }}
-                        >
-                            <span className="material-icons">photo_camera</span>
-                        </button>
-                        <button
-                            onPointerDown={() => {
-                                setHideMap(false);
-                                setHideControls(true);
-                            }}
-                        >
-                            <span className="material-icons">map</span>
-                        </button>
-                    </div> */}
-                    {/* {cameraID == CameraViewId.realsense && (
-                        <div className="depth-sensing">
-                            <CheckToggleButton
-                                checked={depthSensing}
-                                onClick={() => {
-                                    setDepthSensing(!depthSensing);
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.DepthSensing,
-                                    ).onCheck!(!depthSensing);
-                                }}
-                                label="Depth Sensing"
-                            />
-                        </div>
-                    )} */}
-                    {/* <button
-                        className="record"
-                        onPointerDown={() => {
-                            setIsRecording(!isRecording);
-                        }}
-                    >
-                        {!isRecording ? (
-                            <>
-                                <span className="material-icons">
-                                    radio_button_checked
-                                </span>
-                                <i>Record</i>
-                            </>
-                        ) : (
-                            <>
-                                <div className="recording"></div>
-                                <div className="record-circle"></div>
-                                <i>Stop Recording</i>
-                            </>
-                        )}
-                    </button> */}
-                    {/* <div {...swipeHandlers}> */}
                     <div onPointerDown={() => {
                         if (cameraID == CameraViewId.realsense)
                             setCameraID(CameraViewId.overhead);
@@ -382,6 +306,7 @@ export const MobileOperator = (props: {
                         <SimpleCameraView
                             id={cameraID}
                             remoteStreams={remoteStreams}
+                            isCameraVeilVisible={isCameraVeilVisible}
                         />
                     </div>
                     <TabGroup
@@ -395,18 +320,7 @@ export const MobileOperator = (props: {
                         key={"main-group"}
                     />
                 </div>
-                {/* <div className={className('map', {hideMap})} {...swipeHandlers}> */}
                 <div className={className("map", { hideMap })}>
-                    {/* <div className={"switch-camera"}>
-                        <button
-                            onPointerDown={() => {
-                                setHideMap(true);
-                                setHideControls(false);
-                            }}
-                        >
-                            <span className="material-icons">photo_camera</span>
-                        </button>
-                    </div> */}
                     <Map
                         {...{
                             path: "",
@@ -419,7 +333,9 @@ export const MobileOperator = (props: {
                     />
                 </div>
                 <FooterControls
+                    actionModes={actionModes}
                     actionModeCurrent={actionModes[actionModesIdx]}
+                    isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 />
             </div>
         </div>
