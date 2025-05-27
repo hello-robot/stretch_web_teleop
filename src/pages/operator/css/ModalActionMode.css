@@ -1,0 +1,170 @@
+/* Styles specific to the content of ModalActionMode */
+/* The generic modal styles (overlay, base modal structure, animations) are now in components/css/Modal.css */
+
+/* Retain keyframes if they are only used here, or ensure they are globally available if used by generic modal too */
+/* For this example, spin is kept here as it's tied to the button's loading state */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+}
+
+/* Styling for the radio button options within ModalActionMode */
+.action-mode-options {
+  display: flex;
+  flex-direction: column;
+  /* Container for radio groups if needed */
+  gap: 0.5rem;
+  ;
+}
+
+.radio-group {
+  display: block;
+  padding: 15px 15px 15px 5px;
+  /* Original padding */
+  cursor: pointer;
+  border-radius: 10px;
+  /* Added for better hover indication */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.radio-group.selected,
+.radio-group:hover {
+  background: #091c28;
+  /* Original hover */
+}
+
+.radio-label {
+  position: relative;
+  top: -6px;
+  font-size: 18px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.radio-desc {
+
+  /* Original background */
+  border-radius: 8px;
+  margin: 2px 0 0 41px;
+  /* Adjusted margin to align with radio + margin-right */
+  font-size: 14px;
+  opacity: 0.8;
+  /* Slightly increased opacity for readability */
+}
+
+/* Button styles used within ModalActionMode's footer */
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  /* Assuming buttons are borderless by default here */
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #0077FF;
+  /* Original primary color */
+  color: #fff;
+  width: 100%;
+  /* Make button full width in footer */
+  padding: 15px 20px;
+  /* Larger padding for primary action */
+  font-size: 16px;
+}
+
+.btn-primary:disabled {
+  background-color: #0077FF !important;
+  /* Ensure color stays on disable */
+  opacity: 1;
+  /* Original opacity */
+  cursor: not-allowed;
+}
+
+/* If you have other button types like btn-outline or btn-icon, keep their styles here if specific to this modal's content */
+.btn-outline {
+  background: transparent;
+  border: 1px solid #666;
+  color: #fff;
+}
+
+/* Example of using the optional className for very specific overrides if needed */
+.action-mode-specific-modal .modal-footer {
+  /* Custom footer style for only this modal type if generic isn't enough */
+  /* For example, if this modal always needs its button full width */
+  padding: 0;
+  /* Remove generic footer padding if button has its own */
+}
+
+.action-mode-specific-modal .modal-body {
+  margin: 10px 0px;
+  /* Slightly reduce vertical margin for body */
+}
+
+
+
+
+
+
+/* Hide the default radio input */
+input[type="radio"] {
+  margin: 0px 10px;
+  padding: 0;
+  width: 21px;
+  height: 21px;
+}
+
+/* Style the label or a wrapper to act as the custom radio button */
+input[type="radio"] {
+  position: relative;
+  padding-left: 30px;
+  /* Space for the custom radio */
+  cursor: pointer;
+  display: inline-block;
+  line-height: 20px;
+  /* Align with radio size */
+}
+
+/* Create a custom radio button using ::before */
+input[type="radio"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #0077FF;
+  background-color: #122837;
+  border-radius: 50%;
+}
+
+/* Style for the checked state */
+input[type="radio"]:checked::before {
+  background-color: #122837;
+  border-color: #0077FF;
+}
+
+/* Optional: Add a dot in the center for the checked state */
+input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  background-color: #0077FF;
+  border-radius: 50%;
+}

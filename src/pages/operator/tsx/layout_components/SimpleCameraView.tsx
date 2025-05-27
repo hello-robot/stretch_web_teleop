@@ -3,7 +3,7 @@ import { className, RemoteStream } from "shared/util";
 import { CameraViewId } from "../utils/component_definitions";
 import "operator/css/SimpleCameraView.css";
 import { getIcon } from "../utils/svg";
-
+import CameraBlurringVeil from "../basic_components/CameraBlurringVeil"; // 
 /**
  * Displays a video stream with an optional button pad overlay
  *
@@ -12,6 +12,7 @@ import { getIcon } from "../utils/svg";
 export const SimpleCameraView = (props: {
     id: CameraViewId;
     remoteStreams: Map<string, RemoteStream>;
+    isCameraVeilVisible: boolean;
 }) => {
     // Reference to the video element
     const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -85,6 +86,7 @@ export const SimpleCameraView = (props: {
                 <div
                     className="simple-realsense"
                 >
+                    <CameraBlurringVeil isVisible={props.isCameraVeilVisible} />
                     <div className="cat-ear_XP cat-ear-top_XP" />
                     <div className="cat-ear_XP cat-ear-bottom_XP" />
                     <div
