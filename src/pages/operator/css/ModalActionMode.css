@@ -1,44 +1,8 @@
-/* Keyframes */
-@keyframes fade-in {
-  from {
-    opacity: 0
-  }
+/* Styles specific to the content of ModalActionMode */
+/* The generic modal styles (overlay, base modal structure, animations) are now in components/css/Modal.css */
 
-  to {
-    opacity: 1
-  }
-}
-
-@keyframes fade-out {
-  from {
-    opacity: 1
-  }
-
-  to {
-    opacity: 1
-  }
-}
-
-@keyframes slide-up {
-  from {
-    transform: translateY(100%)
-  }
-
-  to {
-    transform: translateY(0)
-  }
-}
-
-@keyframes slide-down {
-  from {
-    transform: translateY(0)
-  }
-
-  to {
-    transform: translateY(100%)
-  }
-}
-
+/* Retain keyframes if they are only used here, or ensure they are globally available if used by generic modal too */
+/* For this example, spin is kept here as it's tied to the button's loading state */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -56,162 +20,101 @@
   vertical-align: middle;
 }
 
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
-.modal-overlay.enter {
-  animation: fade-in 300ms forwards;
-}
-
-.modal-overlay.exit {
-  animation: fade-out 300ms forwards;
-}
-
-.modal {
-  transform: translateY(100%);
-}
-
-.modal.enter {
-  animation: slide-up 300ms var(--animation-timing-function) forwards;
-}
-
-.modal.exit {
-  animation: slide-down 300ms var(--animation-timing-function) forwards;
-}
-
-.modal-overlay {
-  z-index: 1;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Styling for the radio button options within ModalActionMode */
+.action-mode-options {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  text-align: left;
-  /* keep it at bottom */
-  opacity: 0;
-  transition: opacity 300ms var(--animation-timing-function);
-  --animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1.0);
-}
-
-.modal {
-  background: #000000;
-  backdrop-filter: blur(50px);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  width: 100%;
-  padding: 40px 20px;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  /* start off-screen below */
-  transform: translateY(100%);
-  transition: transform 300ms var(--animation-timing-function);
-}
-
-.modal-header {
-  margin-bottom: 20px;
-  font-weight: 800;
-}
-
-.modal-subtitle {
-  color: #e50aff;
-  font-size: 12px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-  font-weight: 800;
-  letter-spacing: 1px;
-}
-
-.modal-title {
-  font-size: 20px;
-  margin: 0;
-}
-
-.modal-body {
-  margin: 20px 0px;
+  /* Container for radio groups if needed */
+  gap: 0.5rem;
+  ;
 }
 
 .radio-group {
   display: block;
   padding: 15px 15px 15px 5px;
+  /* Original padding */
   cursor: pointer;
-}
-
-
-/* .radio-group:hover,
-.radio-group:focus {
-  background: hsl(0deg 0% 100% / 7%);
   border-radius: 10px;
+  /* Added for better hover indication */
+  transition: background-color 0.2s ease-in-out;
 }
 
-.radio-group:hover .radio-desc,
-.radio-group:focus .radio-desc {
-  background: unset;
-  box-shadow: 0px 0px 0px 1px hsl(0deg 0% 100% / 10%);
-} */
+.radio-group.selected,
+.radio-group:hover {
+  background: #333333;
+  /* Original hover */
+}
 
-
-.radio-group input {
+.radio-group input[type="radio"] {
   margin-right: 12px;
   accent-color: #e50aff;
+  /* Original accent color */
+  vertical-align: middle;
 }
 
 .radio-label {
   font-size: 18px;
   font-weight: 600;
+  vertical-align: middle;
 }
 
 .radio-desc {
-  background: hsla(0, 0%, 35%, 0.3);
+  background: #333333;
+  /* Original background */
   border-radius: 8px;
-  padding: 12px;
-  margin: 10px 0 0 20px;
+  margin: 10px 0 0 28px;
+  /* Adjusted margin to align with radio + margin-right */
   font-size: 14px;
-  opacity: 0.6;
+  opacity: 0.8;
+  /* Slightly increased opacity for readability */
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: space-between;
-}
-
+/* Button styles used within ModalActionMode's footer */
 .btn {
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
+  border: none;
+  /* Assuming buttons are borderless by default here */
+  font-weight: 600;
 }
 
+.btn-primary {
+  background: #e50aff;
+  /* Original primary color */
+  color: #fff;
+  width: 100%;
+  /* Make button full width in footer */
+  padding: 15px 20px;
+  /* Larger padding for primary action */
+  font-size: 16px;
+}
+
+.btn-primary:disabled {
+  background-color: #e50aff !important;
+  /* Ensure color stays on disable */
+  opacity: 0.5;
+  /* Original opacity */
+  cursor: not-allowed;
+}
+
+/* If you have other button types like btn-outline or btn-icon, keep their styles here if specific to this modal's content */
 .btn-outline {
   background: transparent;
   border: 1px solid #666;
   color: #fff;
 }
 
-.btn-primary {
-  background: #e50aff;
-  border: none;
-  color: #fff;
-  width: 100%;
-  padding: 20px;
-  font-size: 16px;
-  font-weight: 600;
+/* Example of using the optional className for very specific overrides if needed */
+.action-mode-specific-modal .modal-footer {
+  /* Custom footer style for only this modal type if generic isn't enough */
+  /* For example, if this modal always needs its button full width */
+  padding: 0;
+  /* Remove generic footer padding if button has its own */
 }
 
-.btn-primary:disabled {
-  background-color: #e50aff !important;
-  opacity: 0.6;
-}
-
-.btn-icon {
-  margin-left: 4px;
-  background: #333;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 14px;
+.action-mode-specific-modal .modal-body {
+  margin: 10px 0px;
+  /* Slightly reduce vertical margin for body */
 }

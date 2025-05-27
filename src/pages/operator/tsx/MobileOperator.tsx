@@ -68,6 +68,7 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    // Manage the blurring+darkening of the camera feed
     const [isCameraVeilVisible, isCameraVeilVisibleSet] = useState(false);
 
     React.useEffect(() => {

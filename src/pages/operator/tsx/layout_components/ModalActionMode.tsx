@@ -1,109 +1,82 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import "operator/css/ModalActionMode.css"
+import React, { useState } from 'react';
+import Modal from '../basic_components/ModalMobile'; // Adjusted import path
+import "operator/css/ModalActionMode.css";
 
 interface ModalActionModeProps {
   isOpen: boolean;
   handleClose: () => void;
 }
 
-type ActionMode = 'press' | 'tap' | 'step';
-type AnimationState = '' | 'enter' | 'exit';
+type ActionModeValue = 'press' | 'tap' | 'step';
+
+interface OptionItem {
+  value: ActionModeValue;
+  label: string;
+  desc: string;
+}
 
 const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }) => {
-  const [mode, setMode] = useState<ActionMode>('tap')
-  const [visible, setVisible] = useState<boolean>(isOpen)
-  const [animState, setAnimState] = useState<AnimationState>('')
-  const [loading, setLoading] = useState<boolean>(false)
-
-  // handle open/close anims
-  useEffect(() => {
-    if (isOpen) {
-      setVisible(true)
-      requestAnimationFrame(() => setAnimState('enter'))
-    } else if (visible) {
-      setAnimState('exit')
-    }
-  }, [isOpen, visible])
-
-  // unmount after exit anim
-  const onAnimEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).classList.contains('modal') && animState === 'exit') {
-      setVisible(false)
-      setAnimState('')
-    }
-  }, [animState])
-
-  if (!visible) return null
-
-  interface OptionItem {
-    value: ActionMode;
-    label: string;
-    desc: string;
-  }
+  const [selectedMode, setSelectedMode] = useState<ActionModeValue>('press'); // Default mode
+  const [loading, setLoading] = useState<boolean>(false);
 
   const options: OptionItem[] = [
     { value: 'press', label: 'Press-Hold', desc: 'Stretch moves while you press and hold a button and stops when you release.' },
     { value: 'tap', label: 'Tap Tap', desc: 'Stretch moves when you tap a button and stops when you tap again.' },
     { value: 'step', label: 'Step Action', desc: 'Stretch moves a fixed distance based on the selected speed with each click.' },
-  ]
+  ];
 
   const handleConfirm = (): void => {
-    if (loading) return
-    setLoading(true)
-    // This is a synthetic delay
+    if (loading) return;
+    setLoading(true);
+    // This is a synthetic delay, replace with actual logic
+    console.log("Selected Action Mode:", selectedMode);
     setTimeout(() => {
-      setLoading(false)
-      handleClose()
-    }, 1000)
-  }
+      setLoading(false);
+      handleClose(); // Close the modal
+      // Potentially call a prop to update the action mode in the parent component
+      // e.g., props.onModeChange(selectedMode);
+    }, 1000);
+  };
+
+  const modalFooterContent = (
+    <button
+      className="btn btn-primary" // Style from ModalActionMode.css
+      onClick={handleConfirm}
+      disabled={loading}
+    >
+      {loading ? <span className="spinner" /> : 'Confirm'}
+    </button>
+  );
 
   return (
-    <div
-      className={`modal-overlay ${animState}`}
-      onAnimationEnd={onAnimEnd}
-      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
-      }
-      }>
-      <div className={`modal ${animState}`} onAnimationEnd={onAnimEnd}>
-        <div className="modal-header">
-          <div className="modal-subtitle">SELECT</div>
-          <h2 className="modal-title">Action Mode</h2>
-        </div>
-        <div className="modal-body">
-          {options.map(opt => (
-            <label key={opt.value} className="radio-group">
-              <input
-                type="radio"
-                name="actionMode"
-                value={opt.value}
-                checked={mode === opt.value}
-                onChange={() => setMode(opt.value)}
-                disabled={loading}
-              />
-              <span className="radio-label">{opt.label}</span>
-              {mode === opt.value && (
-                <p className="radio-desc">{opt.desc}</p>
-              )}
-            </label>
-          ))}
-        </div>
-        <div className="modal-footer">
-          <button
-            className="btn btn-primary"
-            onClick={handleConfirm}
-            disabled={loading}
-          >
-            {loading
-              ? <span className="spinner" />
-              : 'Confirm'}
-          </button>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Action Mode"
+      subtitle="SELECT"
+      footer={modalFooterContent}
+      modalClassName="action-mode-specific-modal" // Optional: for very specific overrides
+    >
+      <div className="action-mode-options">
+        {options.map(opt => (
+          <label key={opt.value} className={`radio-group ${selectedMode === opt.value ? 'selected' : ''}`}>
+            <input
+              type="radio"
+              name="actionMode"
+              value={opt.value}
+              checked={selectedMode === opt.value}
+              onChange={() => setSelectedMode(opt.value)}
+              disabled={loading}
+            />
+            <span className="radio-label">{opt.label}</span>
+            {selectedMode === opt.value && (
+              <p className="radio-desc">{opt.desc}</p>
+            )}
+          </label>
+        ))}
       </div>
-    </div>
-  )
-}
+    </Modal>
+  );
+};
 
-export default ModalActionMode
+export default ModalActionMode;
