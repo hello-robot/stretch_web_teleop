@@ -57,7 +57,7 @@ export const MobileOperator = (props: {
     >([]);
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>();
     const [cameraID, setCameraID] = React.useState<CameraViewId>(
-        CameraViewId.realsense,
+        CameraViewId.overhead,
     );
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [hideMap, setHideMap] = React.useState<boolean>(true);
@@ -193,7 +193,7 @@ export const MobileOperator = (props: {
                         path: "",
                         definition: {
                             type: ComponentType.ButtonPad,
-                            id: ButtonPadIdMobile.Drive,
+                            id: ButtonPadIdMobile.OmniDrive,
                         },
                         sharedState: sharedState,
                         overlay: false,
