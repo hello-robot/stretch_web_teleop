@@ -36,7 +36,7 @@
 
 .modal-content-wrapper {
   text-align: left;
-  background: #1c1c1e;
+  background: #122837;
   /* Dark background similar to original */
   color: #fff;
   /* Light text color */
@@ -89,7 +89,7 @@
 }
 
 .modal-subtitle {
-  color: #e50aff;
+  color: #0077FF;
   /* From original */
   font-size: 12px;
   text-transform: uppercase;

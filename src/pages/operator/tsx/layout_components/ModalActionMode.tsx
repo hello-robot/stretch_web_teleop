@@ -59,7 +59,11 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }
     >
       <div className="action-mode-options">
         {options.map(opt => (
-          <label key={opt.value} className={`radio-group ${selectedMode === opt.value ? 'selected' : ''}`}>
+          <label
+            key={opt.value}
+            className={`radio-group ${selectedMode === opt.value ? 'selected' : ''}`}
+            aria-label={`Use "${opt.label}" action mode`}
+          >
             <input
               type="radio"
               name="actionMode"
@@ -67,10 +71,11 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }
               checked={selectedMode === opt.value}
               onChange={() => setSelectedMode(opt.value)}
               disabled={loading}
+              aria-checked={selectedMode === opt.value}
             />
             <span className="radio-label">{opt.label}</span>
             {selectedMode === opt.value && (
-              <p className="radio-desc">{opt.desc}</p>
+              <p className="radio-desc" id={`desc-${opt.value}`}>{opt.desc}</p>
             )}
           </label>
         ))}

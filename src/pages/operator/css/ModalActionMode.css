@@ -41,28 +41,23 @@
 
 .radio-group.selected,
 .radio-group:hover {
-  background: #333333;
+  background: #091c28;
   /* Original hover */
 }
 
-.radio-group input[type="radio"] {
-  margin-right: 12px;
-  accent-color: #e50aff;
-  /* Original accent color */
-  vertical-align: middle;
-}
-
 .radio-label {
+  position: relative;
+  top: -6px;
   font-size: 18px;
   font-weight: 600;
   vertical-align: middle;
 }
 
 .radio-desc {
-  background: #333333;
+
   /* Original background */
   border-radius: 8px;
-  margin: 10px 0 0 28px;
+  margin: 2px 0 0 41px;
   /* Adjusted margin to align with radio + margin-right */
   font-size: 14px;
   opacity: 0.8;
@@ -81,7 +76,7 @@
 }
 
 .btn-primary {
-  background: #e50aff;
+  background: #0077FF;
   /* Original primary color */
   color: #fff;
   width: 100%;
@@ -92,9 +87,9 @@
 }
 
 .btn-primary:disabled {
-  background-color: #e50aff !important;
+  background-color: #0077FF !important;
   /* Ensure color stays on disable */
-  opacity: 0.5;
+  opacity: 1;
   /* Original opacity */
   cursor: not-allowed;
 }
@@ -117,4 +112,59 @@
 .action-mode-specific-modal .modal-body {
   margin: 10px 0px;
   /* Slightly reduce vertical margin for body */
+}
+
+
+
+
+
+
+/* Hide the default radio input */
+input[type="radio"] {
+  margin: 0px 10px;
+  padding: 0;
+  width: 21px;
+  height: 21px;
+}
+
+/* Style the label or a wrapper to act as the custom radio button */
+input[type="radio"] {
+  position: relative;
+  padding-left: 30px;
+  /* Space for the custom radio */
+  cursor: pointer;
+  display: inline-block;
+  line-height: 20px;
+  /* Align with radio size */
+}
+
+/* Create a custom radio button using ::before */
+input[type="radio"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #0077FF;
+  background-color: #122837;
+  border-radius: 50%;
+}
+
+/* Style for the checked state */
+input[type="radio"]:checked::before {
+  background-color: #122837;
+  border-color: #0077FF;
+}
+
+/* Optional: Add a dot in the center for the checked state */
+input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  background-color: #0077FF;
+  border-radius: 50%;
 }
