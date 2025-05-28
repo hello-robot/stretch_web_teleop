@@ -24,6 +24,7 @@ import {
 } from "../function_providers/ButtonFunctionProvider";
 import { isMobile } from "react-device-detect";
 import "operator/css/ButtonPad.css";
+import DirectionalPad from "../static_components/DirectionalPad";
 
 /** Properties for {@link ButtonPad} */
 type ButtonPadProps = CustomizableComponentProps & {
@@ -104,39 +105,20 @@ export const ButtonPad = (props: ButtonPadProps) => {
       }
       : {};
 
-  const mapButtons_XP = (direction: string, i: number) => {
+  const mapButtons = (direction: string, i: number) => {
     const buttonProps = {
       direction,
       funct: functions[i],
       sharedState: props.sharedState,
     };
-    // Buttons will not function during customization mode
     return <SingleButton_XP {...buttonProps} key={i} />;
   };
 
   if (isMobile && (definition.id === ButtonPadIdMobile.Drive || definition.id === ButtonPadIdMobile.OmniDrive)) {
-    const buttons = ['north', 'south', 'west', 'east'];
     return (
-      <div className="base-movement-controls_XP">
-        {/* START Masking SVG isn't visible on the webpage */}
-        <svg className="mask_XP">
-          <clipPath id="clip-path_XP" clipPathUnits="objectBoundingBox"><path d="M1,1 H0 V0.5 C0.276,0.5,0.5,0.276,0.5,0 H1 V1"></path></clipPath>
-        </svg>
-        {/* END */}
-        {/* START Turn left button */}
-        <button className="button-turn left" aria-label="Turn left">
-        </button>
-        {/* END */}
-        {/* START Directional button pad */}
-        <div className="dbutton-pad_XP">
-          {buttons.map(mapButtons_XP)}
-        </div>
-        {/* END */}
-        {/* START Turn right button */}
-        <button className="button-turn right" aria-label="Turn right">
-        </button>
-        {/* END */}
-      </div>
+      <DirectionalPad
+        mapButtons={mapButtons}
+      />
     )
   } else return (
     <div className="button-pad">
@@ -271,11 +253,11 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
   const ariaLabel = getAriaLabel(props.direction);
 
   return (
-    <div className={`button-wrapper_XP ${props.direction}`} key={props.direction}>
+    <div className={`button-wrapper ${props.direction}`} key={props.direction}>
       <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel}>
-        <span className="synthetic-bottom-border_XP"></span>
+        <span className="synthetic-bottom-border"></span>
       </button>
-      <span className="chevron-wrapper_XP"><span className="chevron_XP"></span></span>
+      <span className="chevron-wrapper"><span className="chevron"></span></span>
     </div>
   );
 };

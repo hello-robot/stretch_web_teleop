@@ -1,30 +1,29 @@
+// Base movement
+import driveLeft from "operator/icons/Drive_Left.svg";
+import driveRight from "operator/icons/Drive_Right.svg";
+import driveForward from "operator/icons/Drive_Forward.svg";
+import driveReverse from "operator/icons/Drive_Backward.svg";
+// Arm movement
 import armDown from "operator/icons/Arm_Down.svg";
 import armExtend from "operator/icons/Arm_Out.svg";
 import armRetract from "operator/icons/Arm_In.svg";
 import armUp from "operator/icons/Arm_Up.svg";
-import driveLeft from "operator/icons/Drive_Left.svg";
-import driveRight from "operator/icons/Drive_Right.svg";
+// Gripper movement
 import gripClose from "operator/icons/Grip_Grasp.svg";
-import gripLeft from "operator/icons/Grip_Left.svg";
 import gripOpen from "operator/icons/Grip_Open.svg";
-import gripRight from "operator/icons/Grip_Right.svg";
-import driveForward from "operator/icons/Drive_Forward.svg";
-import driveReverse from "operator/icons/Drive_Backward.svg";
-import panLeft from "operator/icons/Pan_Left.svg";
-import panRight from "operator/icons/Pan_Right.svg";
-import tiltUp from "operator/icons/Tilt_Up.svg";
-import tiltDown from "operator/icons/Tilt_Down.svg";
-import armIn from "operator/icons/Arm_In.svg";
-import armOut from "operator/icons/Arm_Out.svg";
 import rollLeft from "operator/icons/Roll_Left.svg";
 import rollRight from "operator/icons/Roll_Right.svg";
 import pitchDown from "operator/icons/Pitch_Down.svg";
 import pitchUp from "operator/icons/Pitch_Up.svg";
 import yawLeft from "operator/icons/Yaw_Left.svg";
 import yawRight from "operator/icons/Yaw_Right.svg";
+// Headcam movement
+import panLeft from "operator/icons/Pan_Left.svg";
+import panRight from "operator/icons/Pan_Right.svg";
+import tiltUp from "operator/icons/Tilt_Up.svg";
+import tiltDown from "operator/icons/Tilt_Down.svg";
 
 import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider";
-import { isMobile } from "react-device-detect";
 
 /** The pixel width of SVG components. */
 export const SVG_RESOLUTION = 500;
@@ -274,8 +273,8 @@ function getGripperLiftPaths(
         ${width - xMargin} ${height - yMargin}
         ${xMargin} ${height - yMargin}
         Z` +
-            // Inside (counterclockwise)
-            `M
+        // Inside (counterclockwise)
+        `M
         ${xMargin * 2} ${yMargin * 2}
         ${xMargin * 2} ${height - yMargin * 2}
         ${width - xMargin * 2} ${height - yMargin * 2}

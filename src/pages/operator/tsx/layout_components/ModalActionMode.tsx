@@ -35,7 +35,7 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }
       handleClose(); // Close the modal
       // Potentially call a prop to update the action mode in the parent component
       // e.g., props.onModeChange(selectedMode);
-    }, 1000);
+    }, 0);
   };
 
   const modalFooterContent = (
