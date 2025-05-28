@@ -46,7 +46,7 @@
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-  padding: 20px;
+  padding: 20px 20px 40px;
   /* General padding */
   box-sizing: border-box;
   transform: translateY(100%);
@@ -89,7 +89,7 @@
 }
 
 .modal-subtitle {
-  color: #0077FF;
+  color: #FBCCDB;
   /* From original */
   font-size: 12px;
   text-transform: uppercase;
