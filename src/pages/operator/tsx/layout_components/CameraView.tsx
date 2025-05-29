@@ -165,7 +165,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             clientX = event.clientX
             clientY = event.clientY
         }
-        
+
         const x = clientX - left;
         const y = clientY - top;
 

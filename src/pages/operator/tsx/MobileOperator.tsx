@@ -75,7 +75,7 @@ export const MobileOperator = (props: {
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
     const controlTabLabels = ["Drive", "Arm", "Gripper"];
     const headingTabLabels = ["Controls", "Recordings"];
-    
+
     React.useEffect(() => {
         setTimeout(function () {
             setShowAlert(false);

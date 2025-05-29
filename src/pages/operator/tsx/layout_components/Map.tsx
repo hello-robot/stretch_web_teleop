@@ -110,7 +110,7 @@ export const Map = (props: CustomizableComponentProps) => {
             return selectGoal;
         };
     }, []);
-    
+
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
             MapFunction.GetMap,

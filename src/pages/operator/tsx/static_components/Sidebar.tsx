@@ -560,7 +560,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     function clickExpand() {
         console.log("click", props.type);
         if (props.ids) {
-            props.onExpand(); 
+            props.onExpand();
             props.sidebarRef!.current.scrollTop =
                 componentRef.current!.clientHeight * props.index;
         } else {

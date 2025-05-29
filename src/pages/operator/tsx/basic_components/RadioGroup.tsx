@@ -49,7 +49,7 @@ export interface RadioFunctions {
     // Cancel?: () => void
 }
 
-export const RadioGroup = (props: { 
+export const RadioGroup = (props: {
     functs: RadioFunctions,
     onChange? (label: string): void}
 ) => {
@@ -73,7 +73,7 @@ export const RadioGroup = (props: {
                             setSelected(label);
                             props.functs.SelectedLabel(label);
                         }
-                        
+
                         if (props.onChange) props.onChange(label)
                     }}
                     functs={props.functs}

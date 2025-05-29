@@ -7,7 +7,7 @@ export const BatteryBar = () => {
     const [numBars, setNumBars] = useState(5);
 
     batteryVoltageFunctionProvider.setVoltageBarChangeCallback(setNumBars);
-    
+
     return (
         <div className="batteryBarContainer">
             <img src={batteryBar} className="batteryBar"/>

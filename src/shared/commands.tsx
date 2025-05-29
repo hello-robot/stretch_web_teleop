@@ -25,7 +25,7 @@ export type cmd =
     | ShowTabletCommand
     | StopShowTabletCommand
     | HomeTheRobotCommand;
- 
+
 export interface VelocityCommand {
     stop: () => void;
     affirm?: () => void;

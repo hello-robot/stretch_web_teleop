@@ -379,8 +379,8 @@ export const MovementRecorder = (props: {
         </React.Fragment>
     ) : (
         <React.Fragment>
-            <RadioGroup 
-                functs={radioFuncts} 
+            <RadioGroup
+                functs={radioFuncts}
             />
             <div className="global-btns">
                 {/* <div className="mobile-movement-save-btn" onClick={() => {
