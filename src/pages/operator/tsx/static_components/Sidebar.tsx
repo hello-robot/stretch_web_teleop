@@ -336,6 +336,8 @@ const SidebarOptions = (props: OptionsProps) => {
     let contents: JSX.Element | null = null;
     switch (props.selectedDefinition.type) {
         case ComponentType.CameraView:
+            // Display the buttons under the camera views by default
+            (props.selectedDefinition as CameraViewDefinition).displayButtons = true;
             switch ((props.selectedDefinition as CameraViewDefinition).id!) {
                 case CameraViewId.overhead:
                     contents = <OverheadVideoStreamOptions {...props} />;
@@ -360,7 +362,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const [showButtons, setShowButtons] = React.useState<boolean>(true);
 
     function toggleButtons() {
-        setShowButtons(!showButtons);
+        setShowButtons(showButtons);
         definition.displayButtons = showButtons;
         props.updateLayout();
     }
@@ -368,7 +370,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
     return (
         <React.Fragment>
             <OnOffToggleButton
-                on={!definition.displayButtons}
+                on={definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
             />
@@ -382,7 +384,7 @@ const VideoStreamOptions = (props: OptionsProps) => {
     const [showButtons, setShowButtons] = React.useState<boolean>(true);
 
     function toggleButtons() {
-        setShowButtons(!showButtons);
+        setShowButtons(showButtons);
         definition.displayButtons = showButtons;
         props.updateLayout();
     }
@@ -390,7 +392,7 @@ const VideoStreamOptions = (props: OptionsProps) => {
     return (
         <React.Fragment>
             <OnOffToggleButton
-                on={!definition.displayButtons}
+                on={definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
             />
