@@ -67,8 +67,8 @@ const Modal: React.FC<ModalProps> = ({
       >
         {(title || subtitle) && (
           <div className="modal-header">
-            {subtitle && <div className="modal-subtitle">{subtitle}</div>}
-            {title && <h2 className="modal-title">{title}</h2>}
+            {subtitle && <div className="modal-subtitle" aria-disabled="true">{subtitle}</div>}
+            {title && <h2 className="modal-title" aria-disabled="true">{title}</h2>}
           </div>
         )}
         <div className="modal-body">

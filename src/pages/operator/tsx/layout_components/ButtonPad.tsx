@@ -32,6 +32,7 @@ type ButtonPadProps = CustomizableComponentProps & {
   overlay?: boolean;
   /* Aspect ratio of the button pad */
   aspectRatio?: number;
+  isCameraVeilVisible: boolean;
 };
 
 /** Set of buttons which are disabled when the robot is not homed. */
@@ -110,6 +111,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
       direction,
       funct: functions[i],
       sharedState: props.sharedState,
+      isCameraVeilVisible: props.isCameraVeilVisible,
     };
     return <SingleButton_XP {...buttonProps} key={i} />;
   };
@@ -118,6 +120,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     return (
       <DirectionalPad
         mapButtons={mapButtons}
+        isCameraVeilVisible={props.isCameraVeilVisible}
       />
     )
   } else return (
@@ -211,6 +214,7 @@ export type SingleButtonProps_XP = {
   direction: string;
   funct: ButtonPadButton;
   sharedState: SharedState;
+  isCameraVeilVisible?: boolean;
 };
 
 /**
@@ -254,7 +258,7 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
 
   return (
     <div className={`button-wrapper ${props.direction}`} key={props.direction}>
-      <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel}>
+      <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel} aria-disabled={props.isCameraVeilVisible}>
         <span className="synthetic-bottom-border"></span>
       </button>
       <span className="chevron-wrapper"><span className="chevron"></span></span>

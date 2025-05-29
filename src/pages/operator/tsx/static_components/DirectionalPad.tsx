@@ -1,7 +1,7 @@
 import React from 'react'
 import 'operator/css/DirectionalPad.css'
 
-export default function DirectionalPad({ mapButtons }) {
+export default function DirectionalPad({ mapButtons, isCameraVeilVisible }) {
   const buttons = ['north', 'south', 'west', 'east'];
   return (
     <div className="base-movement-controls">
@@ -12,10 +12,10 @@ export default function DirectionalPad({ mapButtons }) {
         {buttons.map(mapButtons)}
       </div>
       <div className="button-turn-wrapper">
-        <button className="button-turn left" aria-label="Turn left" onClick={() => console.log('Turn left!')}>
+        <button className="button-turn left" aria-label="Turn left" aria-disabled={isCameraVeilVisible} onClick={() => console.log('Turn left!')}>
         </button>
         <div className='line' />
-        <button className="button-turn right" aria-label="Turn right" onClick={() => console.log('Turn right!')}>
+        <button className="button-turn right" aria-label="Turn right" aria-disabled={isCameraVeilVisible} onClick={() => console.log('Turn right!')}>
         </button>
       </div>
     </div>
