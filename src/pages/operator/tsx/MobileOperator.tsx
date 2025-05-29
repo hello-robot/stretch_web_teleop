@@ -199,6 +199,7 @@ export const MobileOperator = (props: {
                         sharedState: sharedState,
                         overlay: false,
                         aspectRatio: 3.35,
+                        isCameraVeilVisible: isCameraVeilVisible,
                     }}
                 />
             </React.Fragment>
