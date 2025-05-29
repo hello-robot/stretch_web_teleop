@@ -52,9 +52,9 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                     onMove: (length: number, angle: number) =>
                         this.activeVelocityAction
                             ? this.continuousBaseDrive(
-                                  baseLinVel * length,
-                                  baseAngVel * angle,
-                              )
+                                baseLinVel * length,
+                                baseAngVel * angle,
+                            )
                             : null,
                     onRelease: () => {
                         this.stopCurrentAction();

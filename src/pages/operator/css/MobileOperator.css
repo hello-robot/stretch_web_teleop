@@ -255,22 +255,3 @@
     position: relative;
     height: 100%;
 }
-
-.footer-controls_XP {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 20px 40px;
-    background-color: #000000;
-}
-
-.footer-controls_XP>div {
-    display: inline-flex;
-    width: 75px;
-    max-width: 75px;
-    overflow: visible;
-    max-height: 50px;
-    border-radius: 5px;
-    justify-content: center;
-    text-align: center;
-}
