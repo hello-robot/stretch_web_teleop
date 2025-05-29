@@ -246,6 +246,10 @@ const SingleButton_XP = (props: SingleButtonProps_XP) => {
         return 'Strafe left';
       case 'east':
         return 'Strafe right';
+      case 'left':
+        return 'Turn left';
+      case 'right':
+        return 'Turn right';
       default:
         return '';
     }
@@ -386,10 +390,12 @@ function getShapeAndFunctionsFromId(
       functions = [
         B.OmniForward, // B.BaseForward,
         B.OmniBackward,// B.BaseReverse,
+        B.BaseRotateLeft,
+        B.BaseRotateRight,
         B.StrafeLeft,  // B.BaseRotateLeft,
         B.StrafeRight, // B.BaseRotateRight,
       ];
-      shape = ButtonPadShape.RowButtonPad;
+      shape = ButtonPadShape.GripperLift; // To Do: temp to remove error
       break;
     default:
       throw new Error(`unknow button pad id: ${id}`);

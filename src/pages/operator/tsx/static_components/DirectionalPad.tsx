@@ -2,7 +2,7 @@ import React from 'react'
 import 'operator/css/DirectionalPad.css'
 
 export default function DirectionalPad({ mapButtons }) {
-  const buttons = ['north', 'south', 'west', 'east'];
+  const buttons = ['north', 'south', 'west', 'east', 'left', 'right'];
   return (
     <div className="base-movement-controls">
       <svg className="mask">

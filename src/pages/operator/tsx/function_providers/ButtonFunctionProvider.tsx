@@ -472,8 +472,6 @@ function getJointNameFromButtonFunction(
         case ButtonPadButton.OmniBackward:
         case ButtonPadButton.StrafeLeft:
         case ButtonPadButton.StrafeRight:
-            return "translate_mobile_base";
-
         case ButtonPadButton.BaseReverse:
         case ButtonPadButton.BaseForward:
             return "translate_mobile_base";
