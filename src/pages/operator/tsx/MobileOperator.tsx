@@ -34,7 +34,7 @@ import { SharedState } from "./layout_components/CustomizableComponent";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
 import FooterControls from "./layout_components/FooterControls";
 import { ButtonPad } from "./layout_components/ButtonPad";
-import Swipe from "./static_components/Swipe";
+// import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
 import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
@@ -59,7 +59,9 @@ export const MobileOperator = (props: {
     const [cameraID, setCameraID] = React.useState<CameraViewId>(
         CameraViewId.overhead,
     );
-    const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
+    const [velocityScale, setVelocityScale] = React.useState<number>(
+        FunctionProvider.velocityScale
+    );
     const [hideMap, setHideMap] = React.useState<boolean>(true);
     const [hideControls, setHideControls] = React.useState<boolean>(false);
     const [activeMainGroupTab, setActiveMainGroupTab] =
@@ -94,9 +96,6 @@ export const MobileOperator = (props: {
         }
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
-
-
-
 
     FunctionProvider.actionMode = ActionMode.PressAndHold;
     const layout = React.useRef<LayoutDefinition>(props.layout);
@@ -166,19 +165,19 @@ export const MobileOperator = (props: {
         stretchTool: stretchTool,
     };
 
-    function updateScreens() {
-        if (hideMap) {
-            setHideMap(false);
-            setHideControls(true);
-        } else {
-            setHideControls(false);
-            setHideMap(true);
-        }
-    }
-    const swipeHandlers = Swipe({
-        onSwipedLeft: () => updateScreens(),
-        onSwipedRight: () => updateScreens(),
-    });
+    // function updateScreens() {
+    //     if (hideMap) {
+    //         setHideMap(false);
+    //         setHideControls(true);
+    //     } else {
+    //         setHideControls(false);
+    //         setHideMap(true);
+    //     }
+    // }
+    // const swipeHandlers = Swipe({
+    //     onSwipedLeft: () => updateScreens(),
+    //     onSwipedRight: () => updateScreens(),
+    // });
 
     const driveMode = (show: boolean) => {
         return show ? (
@@ -281,25 +280,17 @@ export const MobileOperator = (props: {
         );
     };
 
-    console.log('layout', layout)
-    console.log('layout.current', layout.current)
-    console.log('layout.current.actionMode', layout.current.actionMode)
-    console.log('actionModes', actionModes)
-    console.log('actionModesIdx', actionModesIdx)
-    console.log('actionModes[actionModesIdx]', actionModes[actionModesIdx])
+    // console.log('layout', layout)
+    // console.log('layout.current', layout.current)
+    // console.log('layout.current.actionMode', layout.current.actionMode)
+    // console.log('actionModes', actionModes)
+    // console.log('actionModesIdx', actionModesIdx)
+    // console.log('actionModes[actionModesIdx]', actionModes[actionModesIdx])
+    console.log('speed', FunctionProvider.velocityScale)
 
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
-                {showAlert ? (
-                    <div className="mobile-alert">
-                        <Alert type="error">
-                            <span>Beta feature, use at your own risk</span>
-                        </Alert>
-                    </div>
-                ) : (
-                    <></>
-                )}
                 <div className={className("controls", { hideControls })}>
                     <div onPointerDown={() => {
                         if (cameraID == CameraViewId.realsense)
@@ -342,7 +333,11 @@ export const MobileOperator = (props: {
                 </div>
                 <FooterControls
                     actionModes={actionModes}
-                    actionSpeedCurrent={"medium"}
+                    actionSpeedCurrent={FunctionProvider.velocityScale}
+                    onActionSpeedChange={(newSpeed: number) => {
+                        setVelocityScale(newSpeed);
+                        FunctionProvider.velocityScale = newSpeed;
+                    }}
                     actionModeCurrent={actionModes[actionModesIdx]}
                     isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 />
