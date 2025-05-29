@@ -149,7 +149,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     return (
         <React.Fragment>
             <div id="global-settings">
-                {/* <p>Global settings:</p> 
+                {/* <p>Global settings:</p>
                 <OnOffToggleButton
                     on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
@@ -173,14 +173,14 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                         label="Display text-to-speech"
                     />
                 }
-                {isTablet ? 
+                {isTablet ?
                     <div className="inline-buttons">
-                        <button 
+                        <button
                             className="inline-button-max-width"
                             onClick={() => setShowLoadLayoutModal(true)}>
                             Load layout
                         </button>
-                        <button 
+                        <button
                             className="inline-button-max-width"
                             onClick={() => setShowSaveLayoutModal(true)}>
                             Save layout
@@ -188,11 +188,11 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     </div>
                     :
                     <>
-                        <button 
+                        <button
                             onClick={() => setShowLoadLayoutModal(true)}>
                             Load layout
                         </button>
-                        <button 
+                        <button
                             onClick={() => setShowSaveLayoutModal(true)}>
                             Save layout
                         </button>
