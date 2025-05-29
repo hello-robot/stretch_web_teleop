@@ -10,7 +10,7 @@
 .error {
     font-weight: 800;
     color: #ffffff;
-    background-color: hsla(204, 100%, 50%, 0.5);
+    background-color: hsla(204, 100%, 50%, 0.8);
     backdrop-filter: blur(10px);
 }
 

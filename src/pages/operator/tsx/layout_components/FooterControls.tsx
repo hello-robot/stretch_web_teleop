@@ -1,9 +1,8 @@
 import React from 'react'
 
-import { SpeedControl } from '../static_components/SpeedControl';
-import { FunctionProvider } from "../function_providers/FunctionProvider";
 import { BatteryGauge } from '../static_components/BatteryGauge';
 import ModalActionMode from './ModalActionMode';
+import ModalActionSpeed from './ModalActionSpeed';
 
 interface FooterControlsProps {
   actionModes: string[];
@@ -12,30 +11,37 @@ interface FooterControlsProps {
 }
 
 const FooterControls: React.FC<FooterControlsProps> = ({ actionModeCurrent, isCameraVeilVisibleSet }) => {
-  const [velocityScale, setVelocityScale] = React.useState<number>(
-    FunctionProvider.velocityScale
-  );
-  // START –> <ButtonActionModeSelection/>
-  const [isOpen, isOpenSet] = React.useState<boolean>(false);
-  // END –> <ButtonActionModeSelection/>
+  const [isOpenModalActionSpeed, isOpenModalActionSpeedSet] = React.useState<boolean>(false);
+  const [isOpenModalActionMode, isOpenModalActionModeSet] = React.useState<boolean>(false);
 
   return (
     <div className="footer-controls_XP">
-      <SpeedControl
-        scale={velocityScale}
-        onChange={(newScale: number) => {
-          setVelocityScale(newScale);
-          FunctionProvider.velocityScale = newScale;
-        }}
-      />
+      {/* START Action Speed */}
       <div>
-        <ModalActionMode isOpen={isOpen} handleClose={() => {
-          isOpenSet(false);
+        <ModalActionSpeed isOpen={isOpenModalActionSpeed} handleClose={() => {
+          isOpenModalActionSpeedSet(false);
           isCameraVeilVisibleSet(false);
         }} />
         <button
           onClick={() => {
-            isOpenSet(!isOpen);
+            isOpenModalActionSpeedSet(!isOpenModalActionSpeed);
+            isCameraVeilVisibleSet(prev => !prev)
+          }}
+          className="camera-blur-toggle"
+        >
+          😹
+        </button>
+      </div>
+      {/* END Action Speed */}
+      {/* START Action Mode */}
+      <div>
+        <ModalActionMode isOpen={isOpenModalActionMode} handleClose={() => {
+          isOpenModalActionModeSet(false);
+          isCameraVeilVisibleSet(false);
+        }} />
+        <button
+          onClick={() => {
+            isOpenModalActionModeSet(!isOpenModalActionMode);
             isCameraVeilVisibleSet(prev => !prev)
           }}
           className="camera-blur-toggle"
@@ -43,7 +49,10 @@ const FooterControls: React.FC<FooterControlsProps> = ({ actionModeCurrent, isCa
           {actionModeCurrent}
         </button>
       </div>
+      {/* END Action Mode */}
+      {/* START Battery Gauge */}
       <BatteryGauge />
+      {/* END Battery Gauge */}
     </div>
   )
 }
