@@ -149,12 +149,12 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     return (
         <React.Fragment>
             <div id="global-settings">
-                {/* <p>Global settings:</p> */}
+                {/* <p>Global settings:</p> 
                 <OnOffToggleButton
                     on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
-                />
+                />*/}
                 <OnOffToggleButton
                     on={!props.displayMovementRecorder}
                     onClick={() =>
@@ -173,12 +173,31 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                         label="Display text-to-speech"
                     />
                 }
-                <button onClick={() => setShowLoadLayoutModal(true)}>
-                    Load layout
-                </button>
-                <button onClick={() => setShowSaveLayoutModal(true)}>
-                    Save layout
-                </button>
+                {isTablet ? 
+                    <div className="inline-buttons">
+                        <button 
+                            className="inline-button-max-width"
+                            onClick={() => setShowLoadLayoutModal(true)}>
+                            Load layout
+                        </button>
+                        <button 
+                            className="inline-button-max-width"
+                            onClick={() => setShowSaveLayoutModal(true)}>
+                            Save layout
+                        </button>
+                    </div>
+                    :
+                    <>
+                        <button 
+                            onClick={() => setShowLoadLayoutModal(true)}>
+                            Load layout
+                        </button>
+                        <button 
+                            onClick={() => setShowSaveLayoutModal(true)}>
+                            Save layout
+                        </button>
+                    </>
+            }
             </div>
             <LoadLayoutModal
                 defaultLayouts={props.defaultLayouts}

@@ -38,6 +38,10 @@
     justify-content: space-between;
 }
 
+.inline-button-max-width {
+    width: 100%;
+}
+
 /* Footer *********************************************************************/
 
 #sidebar-footer {
