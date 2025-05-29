@@ -356,7 +356,7 @@ input[type="checkbox"] {
 /* Style the accordion content title */
 .accordion_title {
     font-family: "Open Sans", sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
 }
 

@@ -22,7 +22,7 @@ export const BatteryGuage = (props: CustomizableComponentProps) => {
                 <div className="bar"></div>
                 <div className="bar"></div>
             </div> */}
-            <span>Battery Gauge</span>
+            <span className="text-battery-gauge">Battery Gauge</span>
         </div>
     );
 };

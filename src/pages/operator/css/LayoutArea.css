@@ -1,7 +1,4 @@
 #layout-area {
-    /* padding: var(--screen-padding);
-    flex: 1 1 0; */
-    padding: var(--screen-padding);
     flex-direction: column;
     height: auto;
 }
@@ -33,7 +30,7 @@
 @media screen and (orientation: landscape) and (max-device-width: 1200px) {
     #layout-area,
     .tabs-content {
-        overflow: scroll;
+        overflow: hidden;
         min-width: min-content;
     }
 }
