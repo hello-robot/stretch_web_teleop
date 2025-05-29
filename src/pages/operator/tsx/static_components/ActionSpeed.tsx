@@ -114,6 +114,8 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
                         <button
                             key={opt.value}
                             className={`${opt.value} ${selectedSpeed === opt.value ? 'selected' : ''}`}
+                            aria-label={`Select ${opt.value} speed`}
+                            aria-hidden={!isOpen}
                             onClick={() => handleSpeedSelection(opt.value)}
                         >
                         </button>
