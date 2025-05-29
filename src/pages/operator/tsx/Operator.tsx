@@ -60,13 +60,13 @@ export const Operator = (props: {
 }) => {
     const [customizing, setCustomizing] = React.useState(false);
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(
-        undefined,
+        undefined
     );
     const [selectedDefinition, setSelectedDef] = React.useState<
         ComponentDefinition | undefined
     >(undefined);
     const [velocityScale, setVelocityScale] = React.useState<number>(
-        FunctionProvider.velocityScale,
+        FunctionProvider.velocityScale
     );
     const [buttonCollision, setButtonCollision] = React.useState<
         ButtonPadButton[]
@@ -82,7 +82,7 @@ export const Operator = (props: {
         setRobotNotHomed(!isHomed);
     }
     homeTheRobotFunctionProvider.setIsHomedCallback(
-        showHomeTheRobotGlobalControl,
+        showHomeTheRobotGlobalControl
     );
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
@@ -133,7 +133,7 @@ export const Operator = (props: {
         setMoveToPregraspState(state);
     }
     underVideoFunctionProvider.setMoveToPregraspOperatorCallback(
-        moveToPregraspStateCallback,
+        moveToPregraspStateCallback
     );
     let moveToPregraspAlertTimeout: NodeJS.Timeout;
     React.useEffect(() => {
@@ -152,7 +152,7 @@ export const Operator = (props: {
         setShowTabletState(state);
     }
     underVideoFunctionProvider.setShowTabletOperatorCallback(
-        showTabletStateCallback,
+        showTabletStateCallback
     );
     let showTabletAlertTimeout: NodeJS.Timeout;
     React.useEffect(() => {
@@ -307,6 +307,7 @@ export const Operator = (props: {
         hideLabels: !layout.current.displayLabels,
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
+        robotNotHomed: robotNotHomed,
     };
 
     /** Properties for the global options area of the sidebar */
@@ -322,7 +323,7 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName,
+                      layoutName as DefaultLayoutName
                   )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
@@ -341,7 +342,7 @@ export const Operator = (props: {
                 <Dropdown
                     onChange={(idx) => setActionMode(actionModes[idx])}
                     selectedIndex={actionModes.indexOf(
-                        layout.current.actionMode,
+                        layout.current.actionMode
                     )}
                     possibleOptions={actionModes}
                     showActive
