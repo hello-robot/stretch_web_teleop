@@ -111,9 +111,9 @@
  }
 
  .button-wrapper button:active {
-   mix-blend-mode: hard-light;
+   mix-blend-mode: screen;
    box-shadow: 0px 0px 10px 0px hsl(204deg 70% 60% / 100%);
-   background-image: radial-gradient(circle, hsla(0, 0%, 100%, 0.4) 1px, transparent 1px);
+   background-image: radial-gradient(circle, hsla(204deg, 100%, 50%, 1) 1px, transparent 1px);
    background-size: 6px 6px;
  }
 

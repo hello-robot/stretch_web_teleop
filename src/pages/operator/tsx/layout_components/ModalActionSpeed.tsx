@@ -36,14 +36,28 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
       modalClassName="action-speed-modal"
     >
       <div className="action-speed-options">
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            className={`${opt.value} ${selectedSpeed === opt.value ? 'selected' : ''}`}
-            onClick={() => handleSpeedSelection(opt.value)}
-          >
-          </button>
-        ))}
+        {options.map(opt => {
+          return (
+            <button
+              key={opt.value}
+              className={`${opt.value} ${selectedSpeed === opt.value ? 'selected' : ''}`}
+              onClick={() => handleSpeedSelection(opt.value)}
+            >
+            </button>
+          )
+        })}
+      </div>
+      <div>
+        <div className="action-speed-labels">
+          {options.map(opt => (
+            <div
+              key={`label-${opt.value}`}
+              className={`speed-label ${selectedSpeed === opt.value ? 'selected' : ''}`}
+            >
+              {opt.value.charAt(0).toUpperCase() + opt.value.slice(1)}
+            </div>
+          ))}
+        </div>
       </div>
     </Modal>
   );
