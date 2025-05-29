@@ -203,15 +203,14 @@
  /* START Button turn */
 
  .base-movement-controls .button-turn-wrapper {
+   position: static;
    /* position: relative; */
    /* z-index: 1; */
-   /* top: calc(var(--width-turn-button) * -1); */
  }
 
  .base-movement-controls .button-turn-wrapper .button-turn {
    position: absolute;
    top: calc(var(--width-turn-button) * -1);
-   /* margin: -138px 0 0; */
    width: var(--width-turn-button);
    height: var(--height-turn-button);
    background-color: transparent;
@@ -223,12 +222,12 @@
    cursor: pointer;
    background-repeat: no-repeat;
    background-position: center center;
+   transition: background-color 200ms ease-out;
  }
 
  .base-movement-controls .button-turn-wrapper .button-turn:active {
-   background-color: hsl(0deg 0% 100% / 10%);
+   background-color: hsl(204deg 100% 50% / 50%);
    backdrop-filter: blur(5px);
-   mix-blend-mode: luminosity;
  }
 
  .base-movement-controls .button-turn-wrapper .button-turn.left {
@@ -246,7 +245,7 @@
 
  .base-movement-controls .button-turn-wrapper .line {
    position: absolute;
-   top: -50%;
+   top: calc(var(--width-turn-button) * -1);
    left: 50%;
    width: 1px;
    height: var(--height-turn-button);

@@ -8,13 +8,13 @@ function CameraBlurringVeil({ isVisible }: CameraBlurringVeilProps) {
   return (
     <div
       style={{
+        zIndex: 2,
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
         backgroundColor: 'hsla(0, 0.00%, 0.00%, 0.40)',
-        zIndex: 1,
         backdropFilter: isVisible ? 'blur(10px)' : 'blur(0px)',
         opacity: isVisible ? 1 : 0,
         pointerEvents: isVisible ? 'auto' : 'none',
