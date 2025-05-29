@@ -1,51 +1,63 @@
 import React from 'react'
 
-import { SpeedControl } from '../static_components/SpeedControl';
-import { FunctionProvider } from "../function_providers/FunctionProvider";
 import { BatteryGauge } from '../static_components/BatteryGauge';
 import ModalActionMode from './ModalActionMode';
+import ModalActionSpeed from './ModalActionSpeed';
+import "operator/css/FooterControls.css";
 
 interface FooterControlsProps {
   actionModes: string[];
+  actionSpeedCurrent?: string;
   actionModeCurrent?: string;
   isCameraVeilVisibleSet: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const FooterControls: React.FC<FooterControlsProps> = ({ actionModeCurrent, isCameraVeilVisibleSet }) => {
-  const [velocityScale, setVelocityScale] = React.useState<number>(
-    FunctionProvider.velocityScale
-  );
-  // START –> <ButtonActionModeSelection/>
-  const [isOpen, isOpenSet] = React.useState<boolean>(false);
-  // END –> <ButtonActionModeSelection/>
+const FooterControls: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, actionModeCurrent, isCameraVeilVisibleSet }) => {
+  const [isOpenModalActionSpeed, isOpenModalActionSpeedSet] = React.useState<boolean>(false);
+  const [isOpenModalActionMode, isOpenModalActionModeSet] = React.useState<boolean>(false);
 
   return (
     <div className="footer-controls_XP">
-      <SpeedControl
-        scale={velocityScale}
-        onChange={(newScale: number) => {
-          setVelocityScale(newScale);
-          FunctionProvider.velocityScale = newScale;
-        }}
-      />
-      <div>
-        <ModalActionMode isOpen={isOpen} handleClose={() => {
-          isOpenSet(false);
+      {/* START Action Speed */}
+      <div className="action-speed">
+        <ModalActionSpeed isOpen={isOpenModalActionSpeed} handleClose={() => {
+          isOpenModalActionSpeedSet(false);
           isCameraVeilVisibleSet(false);
         }} />
         <button
           onClick={() => {
-            isOpenSet(!isOpen);
+            isOpenModalActionSpeedSet(!isOpenModalActionSpeed);
             isCameraVeilVisibleSet(prev => !prev)
           }}
-          className="camera-blur-toggle"
         >
-          {actionModeCurrent}
+          <span className={`action-speed-icon ${actionSpeedCurrent}`}></span>
         </button>
       </div>
-      <BatteryGauge />
+      {/* END Action Speed */}
+      {/* START Action Mode */}
+      <div className="action-mode">
+        <ModalActionMode isOpen={isOpenModalActionMode} handleClose={() => {
+          isOpenModalActionModeSet(false);
+          isCameraVeilVisibleSet(false);
+        }} />
+        <button
+          onClick={() => {
+            isOpenModalActionModeSet(!isOpenModalActionMode);
+            isCameraVeilVisibleSet(prev => !prev)
+          }}
+        >
+          <span className="action-mode-icon"></span>
+          <div>{actionModeCurrent}</div>
+        </button>
+      </div>
+      {/* END Action Mode */}
+      {/* START Battery Gauge */}
+      <div className="battery-gauge">
+        <BatteryGauge />
+      </div>
+      {/* END Battery Gauge */}
     </div>
   )
 }
 
-export default FooterControls
+export default FooterControls;

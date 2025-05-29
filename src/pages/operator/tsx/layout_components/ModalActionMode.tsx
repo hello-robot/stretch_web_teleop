@@ -55,7 +55,7 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }
       title="Action Mode"
       subtitle="SELECT"
       footer={modalFooterContent}
-      modalClassName="action-mode-specific-modal" // Optional: for very specific overrides
+      modalClassName="action-mode-modal"
     >
       <div className="action-mode-options">
         {options.map(opt => (

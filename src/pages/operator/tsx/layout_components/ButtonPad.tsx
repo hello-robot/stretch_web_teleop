@@ -53,7 +53,7 @@ const notHomedDisabledFunctions = new Set<ButtonPadButton>([
  * to dedicated React component for moving
  * the robot base
  * 
- * <ButtonPad> 👉 <DirectionalButtonPad>
+ * <ButtonPad> 👉 <DirectionalPad>
  * @param props {@link ButtonPadProps}
  */
 export const ButtonPad = (props: ButtonPadProps) => {

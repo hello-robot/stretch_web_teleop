@@ -1,8 +1,3 @@
-/* Styles specific to the content of ModalActionMode */
-/* The generic modal styles (overlay, base modal structure, animations) are now in components/css/Modal.css */
-
-/* Retain keyframes if they are only used here, or ensure they are globally available if used by generic modal too */
-/* For this example, spin is kept here as it's tied to the button's loading state */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -35,14 +30,12 @@
   /* Original padding */
   cursor: pointer;
   border-radius: 10px;
-  /* Added for better hover indication */
   transition: background-color 0.2s ease-in-out;
 }
 
 .radio-group.selected,
 .radio-group:hover {
   background: #091c28;
-  /* Original hover */
 }
 
 .radio-label {
