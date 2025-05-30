@@ -27,11 +27,9 @@ const FooterControls: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onA
                 onChange={onActionModeChange}
                 setCameraVeilCallback={isCameraVeilVisibleSet}
             />
-            {/* START Battery Gauge */}
             <div className="battery-gauge">
                 <BatteryGauge />
             </div>
-            {/* END Battery Gauge */}
         </div>
     )
 }

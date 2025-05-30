@@ -38,7 +38,7 @@ export const ActionMode = (props: ActionModeProps) => {
 
     return (
         <div className="action-mode">
-            <ModalActionMode isOpen={isModalOpen} handleClose={(newActionMode: ActionModeType) => {
+            <ModalActionMode isOpen={isModalOpen} mode={props.mode} handleClose={(newActionMode: ActionModeType) => {
                 setIsModalOpen(false);
                 props.setCameraVeilCallback(false);
                 props.onChange(newActionMode)
@@ -57,6 +57,7 @@ export const ActionMode = (props: ActionModeProps) => {
 };
 
 interface ModalActionModeProps {
+    mode: ActionModeType;
     isOpen: boolean;
     /**
      * Function callback for execution on modal close
@@ -65,8 +66,8 @@ interface ModalActionModeProps {
     handleClose: (newActionMode: ActionModeType) => void;
 }
 
-const ModalActionMode: React.FC<ModalActionModeProps> = ({ isOpen, handleClose }) => {
-    const [selectedMode, setSelectedMode] = useState<ActionModeType>(ActionModeType.PressAndHold); // Default mode
+const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleClose }) => {
+    const [selectedMode, setSelectedMode] = useState<ActionModeType>(mode);
     const [loading, setLoading] = useState<boolean>(false);
 
     const options: ActionModeDetails[] = [
