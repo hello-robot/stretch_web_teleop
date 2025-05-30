@@ -211,7 +211,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
     if (isCardinal) {
         return (
             <div className={`button-wrapper ${props.direction} ${buttonState}`} key={props.direction}>
-                <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel} aria-disabled={props.isCameraVeilVisible}>
+                <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel} aria-disabled={props.isCameraVeilVisible} className={buttonState}>
                     <span className="synthetic-bottom-border"></span>
                 </button>
                 <span className="chevron-wrapper"><span className="chevron"></span></span>
