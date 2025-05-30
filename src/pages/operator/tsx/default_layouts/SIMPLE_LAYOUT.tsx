@@ -7,7 +7,7 @@ import {
     PanelDefinition,
     TabDefinition,
     LayoutDefinition,
-    ActionMode,
+    ActionModeType,
     LayoutGridDefinition,
 } from "../utils/component_definitions";
 
@@ -19,7 +19,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     displayMovementRecorder: false,
     displayTextToSpeech: false,
     displayLabels: true,
-    actionMode: ActionMode.PressAndHold,
+    actionMode: ActionModeType.PressAndHold,
     children: [
         {
             type: ComponentType.LayoutGrid,

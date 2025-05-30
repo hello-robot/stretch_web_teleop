@@ -8,7 +8,7 @@ The `layout` is passed into `Operator` as a property. The `layout` defines which
 import {
   LayoutDefinition,
   ComponentType,
-  ActionMode,
+  ActionModeType,
   CameraViewId,
   ButtonPadId,
   OverheadVideoStreamDef,
@@ -22,7 +22,7 @@ export const SIMPLE_LAYOUT: LayoutDefinition = {
   // If voice control should be displayed on the operator page
   displayVoiceControl: false,
   // The state of the action mode dropdown
-  actionMode: ActionMode.StepActions,
+  actionMode: ActionModeType.StepActions,
 
   // The customizable components in the layout
   children: [

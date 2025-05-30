@@ -4,7 +4,7 @@ import {
     ValidJoints,
     ValidJointStateDict,
 } from "shared/util";
-import { ActionMode } from "../utils/component_definitions";
+import { ActionModeType } from "../utils/component_definitions";
 import { FunctionProvider } from "./FunctionProvider";
 
 /**
@@ -16,8 +16,6 @@ export enum ButtonPadButton {
     OmniBackward = "Omni Backward",
     StrafeLeft = "Strafe Left",
     StrafeRight = "Strafe Right",
-    OmniRotateLeft = "Omni Rotate Left",
-    OmniRotateRight = "Omni Rotate Right",
     BaseForward = "Base Forward",
     BaseReverse = "Base Reverse",
     BaseRotateRight = "Base rotate right",
@@ -272,15 +270,21 @@ export class ButtonFunctionProvider extends FunctionProvider {
             FunctionProvider.velocityScale;
 
         switch (FunctionProvider.actionMode) {
-            case ActionMode.StepActions:
+            case ActionModeType.StepActions:
                 switch (buttonPadFunction) {
+                    case ButtonPadButton.OmniForward:
+                    case ButtonPadButton.OmniBackward:
                     case ButtonPadButton.BaseForward:
                     case ButtonPadButton.BaseReverse:
-                        action = () => this.incrementalBaseDrive(velocity, 0.0);
+                        action = () => this.incrementalBaseDrive(velocity, 0.0, 0.0);
+                        break;
+                    case ButtonPadButton.StrafeLeft:
+                    case ButtonPadButton.StrafeRight:
+                        action = () => this.incrementalBaseDrive(0.0, velocity, 0.0);
                         break;
                     case ButtonPadButton.BaseRotateLeft:
                     case ButtonPadButton.BaseRotateRight:
-                        action = () => this.incrementalBaseDrive(0.0, velocity);
+                        action = () => this.incrementalBaseDrive(0.0, 0.0, velocity);
                         break;
                     case ButtonPadButton.ArmLower:
                     case ButtonPadButton.ArmLift:
@@ -323,20 +327,18 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     },
                     onLeave: onLeave,
                 };
-            case ActionMode.PressAndHold:
-            case ActionMode.ClickClick:
+            case ActionModeType.PressAndHold:
+            case ActionModeType.ClickClick:
                 switch (buttonPadFunction) {
                     case ButtonPadButton.OmniForward:
                     case ButtonPadButton.OmniBackward:
+                    case ButtonPadButton.BaseForward:
+                    case ButtonPadButton.BaseReverse:
                         action = () => this.continuousBaseDrive(velocity, 0.0, 0.0);
                         break;
                     case ButtonPadButton.StrafeLeft:
                     case ButtonPadButton.StrafeRight:
                         action = () => this.continuousBaseDrive(0.0, velocity, 0.0);
-                        break;
-                    case ButtonPadButton.BaseForward:
-                    case ButtonPadButton.BaseReverse:
-                        action = () => this.continuousBaseDrive(velocity, 0.0, 0.0);
                         break;
                     case ButtonPadButton.BaseRotateLeft:
                     case ButtonPadButton.BaseRotateRight:
@@ -372,7 +374,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         break;
                 }
 
-                return FunctionProvider.actionMode === ActionMode.PressAndHold
+                return FunctionProvider.actionMode === ActionModeType.PressAndHold
                     ? {
                         onClick: () => {
                             action();
@@ -398,7 +400,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                                 this.setButtonActiveState(buttonPadFunction);
                             }
                         },
-                        onLeave: onLeave,
+                        // onLeave: onLeave,
                     };
         }
     }

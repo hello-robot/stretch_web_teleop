@@ -1,7 +1,7 @@
 import { FunctionProvider } from "./FunctionProvider";
 import { PredictiveDisplayFunctions } from "../layout_components/PredictiveDisplay";
 import { JOINT_VELOCITIES, JOINT_INCREMENTS, ValidJoints } from "shared/util";
-import { ActionMode } from "../utils/component_definitions";
+import { ActionModeType } from "../utils/component_definitions";
 
 export class PredictiveDisplayFunctionProvider extends FunctionProvider {
     constructor() {
@@ -25,7 +25,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
             JOINT_VELOCITIES["rotate_mobile_base"]! *
             FunctionProvider.velocityScale;
         switch (FunctionProvider.actionMode) {
-            case ActionMode.StepActions:
+            case ActionModeType.StepActions:
                 return {
                     onClick: (length: number, angle: number) => {
                         this.incrementalBaseDrive(
@@ -40,7 +40,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                         setActiveCallback(false);
                     },
                 };
-            case ActionMode.PressAndHold:
+            case ActionModeType.PressAndHold:
                 return {
                     onClick: (length: number, angle: number) => {
                         this.continuousBaseDrive(
@@ -65,7 +65,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                         setActiveCallback(false);
                     },
                 };
-            case ActionMode.ClickClick:
+            case ActionModeType.ClickClick:
                 return {
                     onClick: (length: number, angle: number) => {
                         if (this.activeVelocityAction) {

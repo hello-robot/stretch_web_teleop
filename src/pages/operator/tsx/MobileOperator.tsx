@@ -1,6 +1,6 @@
 import React, { PointerEventHandler, useState } from "react";
 import {
-    ActionMode,
+    ActionModeType,
     ButtonPadIdMobile,
     CameraViewId,
     ComponentDefinition,
@@ -97,9 +97,9 @@ export const MobileOperator = (props: {
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
 
-    FunctionProvider.actionMode = ActionMode.PressAndHold;
     const layout = React.useRef<LayoutDefinition>(props.layout);
-    const actionModes = Object.values(ActionMode);
+    FunctionProvider.actionMode = layout.current.actionMode;
+    const actionModes = Object.values(ActionModeType);
     const actionModesIdx = actionModes.indexOf(
         layout.current.actionMode
     )
@@ -113,17 +113,13 @@ export const MobileOperator = (props: {
      * Updates the action mode in the layout (visually) and in the function
      * provider (functionally).
      */
-    function setActionMode(actionMode: ActionMode) {
+    function setActionMode(actionMode: ActionModeType) {
         layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
         props.storageHandler.saveCurrentLayout(layout.current);
-        updateLayout();
+        // updateLayout();
     }
     // onChange={(idx) => setActionMode(actionModes[idx])}
-
-
-
-
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
@@ -333,13 +329,13 @@ export const MobileOperator = (props: {
                     />
                 </div>
                 <FooterControls
-                    actionModes={actionModes}
                     actionSpeedCurrent={FunctionProvider.velocityScale}
                     onActionSpeedChange={(newSpeed: number) => {
                         setVelocityScale(newSpeed);
                         FunctionProvider.velocityScale = newSpeed;
                     }}
-                    actionModeCurrent={actionModes[actionModesIdx]}
+                    actionModeCurrent={FunctionProvider.actionMode}
+                    onActionModeChange={setActionMode}
                     isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 />
             </div>

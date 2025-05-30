@@ -6,7 +6,7 @@ import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import {
-    ActionMode,
+    ActionModeType,
     ComponentDefinition,
     LayoutDefinition,
 } from "./utils/component_definitions";
@@ -167,7 +167,7 @@ export const Operator = (props: {
      * Updates the action mode in the layout (visually) and in the function
      * provider (functionally).
      */
-    function setActionMode(actionMode: ActionMode) {
+    function setActionMode(actionMode: ActionModeType) {
         layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
         props.storageHandler.saveCurrentLayout(layout.current);
@@ -313,8 +313,8 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName
-                  )
+                    layoutName as DefaultLayoutName
+                )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
         },
@@ -323,7 +323,7 @@ export const Operator = (props: {
         },
     };
 
-    const actionModes = Object.values(ActionMode);
+    const actionModes = Object.values(ActionModeType);
 
     return (
         <div id="operator">
@@ -377,7 +377,7 @@ export const Operator = (props: {
                             <span>
                                 {buttonCollision.length > 0
                                     ? buttonCollision.join(", ") +
-                                      " in collision!"
+                                    " in collision!"
                                     : ""}
                             </span>
                         </Alert>

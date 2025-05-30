@@ -1,7 +1,7 @@
 import { RemoteRobot } from "shared/remoterobot";
 import { VelocityCommand } from "shared/commands";
 import { ValidJoints } from "shared/util";
-import { ActionMode } from "../utils/component_definitions";
+import { ActionModeType } from "../utils/component_definitions";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the
@@ -10,7 +10,7 @@ import { ActionMode } from "../utils/component_definitions";
 export abstract class FunctionProvider {
     protected static remoteRobot?: RemoteRobot;
     public static velocityScale: number;
-    public static actionMode: ActionMode;
+    public static actionMode: ActionModeType;
     public activeVelocityAction?: VelocityCommand;
     public velocityExecutionHeartbeat?: number; // ReturnType<typeof setInterval>
 
@@ -31,15 +31,16 @@ export abstract class FunctionProvider {
      * @param velocityScale initial velocity scale
      * @param actionMode initial action mode
      */
-    static initialize(velocityScale: number, actionMode: ActionMode) {
+    static initialize(velocityScale: number, actionMode: ActionModeType) {
         this.velocityScale = velocityScale;
         this.actionMode = actionMode;
     }
 
-    public incrementalBaseDrive(linVel: number, angVel: number) {
+    public incrementalBaseDrive(linVelX: number, linVelY: number, angVel: number) {
         this.stopCurrentAction();
         this.activeVelocityAction = FunctionProvider.remoteRobot?.driveBase(
-            linVel,
+            linVelX,
+            linVelY,
             angVel,
         );
     }

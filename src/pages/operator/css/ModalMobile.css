@@ -20,7 +20,7 @@
   z-index: 1000;
   /* Ensure it's on top */
   opacity: 0;
-  /* --animation-timing-function is defined in ModalActionMode.css, ensure it's accessible or redefine here */
+  /* --animation-timing-function is defined in ActionMode.css, ensure it's accessible or redefine here */
   /* transition: opacity 300ms 200ms var(--animation-timing-function-modal); */
 }
 

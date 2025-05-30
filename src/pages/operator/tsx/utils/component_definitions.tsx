@@ -3,10 +3,10 @@
  */
 
 /** Enumerator for the possible action modes */
-export enum ActionMode {
-    StepActions = "Step Actions",
+export enum ActionModeType {
+    StepActions = "Step Action",
     PressAndHold = "Press-And-Hold",
-    ClickClick = "Click-Click",
+    ClickClick = "Tap-Tap",
 }
 
 /**
@@ -91,7 +91,7 @@ export type LayoutDefinition = ComponentDefinition & {
     displayMovementRecorder: boolean;
     displayTextToSpeech: boolean;
     displayLabels: boolean;
-    actionMode: ActionMode;
+    actionMode: ActionModeType;
     children: LayoutGridDefinition[];
 };
 
