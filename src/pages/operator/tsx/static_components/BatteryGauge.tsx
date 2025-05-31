@@ -17,7 +17,7 @@ export const BatteryGauge = memo(() => {
 
     return (
         <div className="battery-gauge-container">
-            <img src={batteryGauge} className={"battery-gauge-image " + fakeBatteryColor} />
+            <img src={batteryGauge} className={"battery-gauge-image " + fakeBatteryColor} aria-disabled="true" />
         </div>
     );
 });

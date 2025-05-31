@@ -41,16 +41,15 @@
 .radio-label {
   position: relative;
   top: -6px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   vertical-align: middle;
 }
 
 .radio-desc {
-
   /* Original background */
   border-radius: 8px;
-  margin: 2px 0 0 41px;
+  margin: 0px 0px 0px 41px;
   /* Adjusted margin to align with radio + margin-right */
   font-size: 14px;
   opacity: 0.8;
@@ -114,7 +113,7 @@
 
 /* Hide the default radio input */
 input[type="radio"] {
-  margin: 0px 10px;
+  margin: 0px 0px 0px 10px;
   padding: 0;
   width: 21px;
   height: 21px;
@@ -128,7 +127,8 @@ input[type="radio"] {
   cursor: pointer;
   display: inline-block;
   line-height: 20px;
-  /* Align with radio size */
+  box-shadow: none;
+  outline: none;
 }
 
 /* Create a custom radio button using ::before */

@@ -22,8 +22,13 @@ type ActionSpeedProps = {
     onChange: (newScale: number) => void;
 
     /**
+     * Whether or not the camera veil is currently displayed.
+     */
+    isCameraVeilVisible?: boolean;
+
+    /**
      * Callback function to display the camera veil when the action speed modal is open.
-     * @param enalbe whether or not to display the camera veil
+     * @param enable whether or not to display the camera veil
      */
     setCameraVeilCallback: (enable: boolean) => void;
 };
@@ -68,6 +73,8 @@ export const ActionSpeed = (props: ActionSpeedProps) => {
                     setIsModalOpen(!isModalOpen);
                     props.setCameraVeilCallback(!isModalOpen)
                 }}
+                aria-label="Change action speed"
+                aria-hidden={props.isCameraVeilVisible}
             >
                 <span className={`action-speed-icon ${getLabelBySpeed(props.speed)}`}></span>
             </button>
@@ -110,14 +117,17 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
         >
             <div className="action-speed-options">
                 {options.map(opt => {
+                    const ariaLabel = `Select \"${opt.value}\" speed`;
+
                     return (
                         <button
                             key={opt.value}
                             className={`${opt.value} ${selectedSpeed === opt.value ? 'selected' : ''}`}
-                            aria-label={`Select ${opt.value} speed`}
+                            aria-label={ariaLabel}
                             aria-hidden={!isOpen}
                             onClick={() => handleSpeedSelection(opt.value)}
                         >
+                            <span className="aria-inviz"></span>
                         </button>
                     )
                 })}
@@ -128,6 +138,7 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
                         <div
                             key={`label-${opt.value}`}
                             className={`speed-label ${selectedSpeed === opt.value ? 'selected' : ''}`}
+                            aria-hidden="true"
                         >
                             {opt.value.charAt(0).toUpperCase() + opt.value.slice(1)}
                         </div>

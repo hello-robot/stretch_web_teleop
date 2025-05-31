@@ -23,10 +23,16 @@ export type ActionModeProps = {
     onChange: (newMode: ActionModeType) => void;
 
     /**
+     * Whether or not the camera veil is currently displayed.
+     */
+    isCameraVeilVisible?: boolean;
+
+    /**
      * Callback function to display the camera veil when the action speed modal is open.
-     * @param enalbe whether or not to display the camera veil
+     * @param enable whether or not to display the camera veil
      */
     setCameraVeilCallback: (enable: boolean) => void;
+
 };
 
 /**
@@ -48,6 +54,8 @@ export const ActionMode = (props: ActionModeProps) => {
                     setIsModalOpen(!isModalOpen);
                     props.setCameraVeilCallback(!isModalOpen)
                 }}
+                aria-label="Change action mode"
+                aria-hidden={props.isCameraVeilVisible}
             >
                 <span className="action-mode-icon"></span>
                 <div>{props.mode}</div>
@@ -113,8 +121,6 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
                     <label
                         key={opt.mode}
                         className={`radio-group ${selectedMode === opt.mode ? 'selected' : ''}`}
-                        aria-label={`Use "${opt.mode}" action mode`}
-                        aria-hidden={!isOpen}
                     >
                         <input
                             type="radio"
@@ -123,12 +129,13 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
                             checked={selectedMode === opt.mode}
                             onChange={() => setSelectedMode(opt.mode)}
                             disabled={loading}
-                            aria-hidden="true"
+                            aria-label={`Use \"${opt.mode}\" `}
                             aria-checked={selectedMode === opt.mode}
                         />
-                        <span className="radio-label">{opt.mode}</span>
+                        <span className="radio-label" aria-hidden="true"
+                        >{opt.mode}</span>
                         {selectedMode === opt.mode && (
-                            <p className="radio-desc" id={`desc-${opt.mode}`}>{opt.desc}</p>
+                            <p className="radio-desc" id={`desc-${opt.mode}`} aria-hidden="true">{opt.desc}</p>
                         )}
                     </label>
                 ))}

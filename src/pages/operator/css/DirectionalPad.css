@@ -29,13 +29,15 @@
      margin: 0 auto;
  }
 
- .button-wrapper button {
+ .button-wrapper div.button-cardinal {
+     display: inline-block;
      width: var(--size) !important;
      height: var(--size) !important;
      background-color: transparent;
      border: none;
      outline: none;
      cursor: pointer;
+     box-shadow: none;
      padding: 0px;
      transform-origin: 0 0;
      mix-blend-mode: soft-light;
@@ -49,7 +51,6 @@
      transition-duration: 500ms;
      transition-timing-function: ease-out;
      rotate: -45deg;
-     box-shadow: none;
      /* START Create a quarter-circle shape for each button */
      border-radius: 0 0 var(--size) 0;
      /* END Create a quarter-circle shape for each button */
@@ -69,19 +70,19 @@
  }
 
  /* Position each button by rotating it around the center */
- .button-wrapper.east button {
+ .button-wrapper.east div.button-cardinal {
      transform: rotate(0deg);
  }
 
- .button-wrapper.south button {
+ .button-wrapper.south div.button-cardinal {
      transform: rotate(90deg);
  }
 
- .button-wrapper.west button {
+ .button-wrapper.west div.button-cardinal {
      transform: rotate(180deg);
  }
 
- .button-wrapper.north button {
+ .button-wrapper.north div.button-cardinal {
      transform: rotate(270deg);
  }
 
@@ -89,8 +90,8 @@
  /* :hover styles only applied to desktop devices with a "fine" pointer */
  @media (hover: hover) and (pointer: fine) {
 
-     .button-wrapper button:hover,
-     .button-wrapper button:hover span.synthetic-bottom-border {
+     .button-wrapper div.button-cardinal:hover,
+     .button-wrapper div.button-cardinal:hover span.synthetic-bottom-border {
          z-index: 1;
          border-color: hsl(204deg 100% 90% / 70%);
          background-color: hsl(204deg 100% 90% / 20%);
@@ -103,12 +104,12 @@
  /* END <button> hover */
 
  /* START <button> active */
- .button-wrapper button.active {
+ .button-wrapper div.button-cardinal.active {
      box-shadow: 0px 0px 10px 0px hsl(204deg 100% 50%);
  }
 
- .button-wrapper button.active,
- .button-wrapper button.active span.synthetic-bottom-border {
+ .button-wrapper div.button-cardinal.active,
+ .button-wrapper div.button-cardinal.active span.synthetic-bottom-border {
      mix-blend-mode: color-dodge;
      border-color: hsl(204deg 100% 50%);
      border-top-width: 1px;
@@ -117,7 +118,7 @@
 
  /* END <button> active */
 
- .button-wrapper button span.synthetic-bottom-border {
+ .button-wrapper div.button-cardinal span.synthetic-bottom-border {
      position: absolute;
      top: 0;
      left: 0;
@@ -146,20 +147,20 @@
  /* START Chevron icon */
 
  .button-wrapper .chevron-wrapper {
-     display: inline-block;
-     width: 0px;
-     height: 0px;
+     /* display: inline-block; */
+     /* width: 0px; */
+     /* height: 0px; */
      overflow: hidden;
-     pointer-events: none;
-     touch-action: none;
-     user-select: none;
-     -webkit-user-select: none;
+     /* pointer-events: none; */
+     /* touch-action: none; */
+     /* user-select: none; */
+     /* -webkit-user-select: none; */
      /* For Safari */
-     -webkit-touch-callout: none;
+     /* -webkit-touch-callout: none; */
      /* Disable long-press callout */
  }
 
- .button-wrapper .chevron-wrapper .chevron {
+ .button-wrapper button.button-chevron {
      position: absolute;
      transform: translate(-50%, -50%);
      display: inline-block;
@@ -170,31 +171,37 @@
      background-image: url('data:image/svg+xml,<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(%23clip0_841_6202)"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.0923 17.9631C12.9297 18.1255 12.7092 18.2168 12.4793 18.2168C12.2494 18.2168 12.0289 18.1255 11.8663 17.9631L3.19142 9.28824C3.10619 9.20883 3.03783 9.11306 2.99042 9.00664C2.943 8.90023 2.91751 8.78536 2.91545 8.66888C2.9134 8.55241 2.93482 8.43671 2.97845 8.32869C3.02208 8.22068 3.08702 8.12255 3.1694 8.04018C3.25177 7.9578 3.3499 7.89286 3.45791 7.84923C3.56593 7.8056 3.68163 7.78418 3.79811 7.78623C3.91459 7.78829 4.02946 7.81378 4.13587 7.86119C4.24228 7.90861 4.33805 7.97697 4.41747 8.0622L12.4793 16.124L20.5411 8.0622C20.7056 7.90896 20.9231 7.82554 21.1478 7.82951C21.3726 7.83348 21.587 7.92452 21.7459 8.08346C21.9049 8.24239 21.9959 8.45682 21.9999 8.68156C22.0038 8.90629 21.9204 9.1238 21.7672 9.28824L13.0923 17.9631Z" fill="%2353BAFF"/><path d="M12.2949 19.208C11.9289 19.1717 11.5816 19.0278 11.2969 18.7949L11.1592 18.6709V18.6699L2.48438 9.99512H2.48535C2.35863 9.87256 2.24942 9.73362 2.16211 9.58106L2.07715 9.41406L2.00977 9.23828C1.9707 9.11983 1.94344 8.99788 1.92871 8.87402L1.91602 8.68652L1.92188 8.49902C1.93738 8.31233 1.98036 8.12848 2.05078 7.9541C2.14468 7.72164 2.28466 7.51031 2.46192 7.33301C2.63918 7.15575 2.85059 7.0158 3.08301 6.92188C3.31545 6.82799 3.5648 6.78176 3.81543 6.78613C4.06617 6.79056 4.31389 6.84617 4.54297 6.94824C4.76158 7.04569 4.95882 7.18449 5.125 7.35645V7.35547L12.4795 14.71L19.8467 7.34277L19.8594 7.33106C20.2133 7.00127 20.6814 6.82165 21.165 6.83008C21.6488 6.83861 22.111 7.03391 22.4531 7.37598C22.7953 7.71813 22.9915 8.18026 23 8.66406C23.0085 9.1477 22.8287 9.61578 22.499 9.96973L22.4863 9.98242L22.4746 9.99512L13.7988 18.6709L13.6621 18.7949C13.33 19.0667 12.9124 19.2168 12.4795 19.2168L12.2949 19.208Z" stroke="%2300426F" stroke-opacity="0.2" stroke-width="2"/></g><defs><clipPath id="clip0_841_6202"><rect width="25" height="25" fill="white" transform="matrix(-1 0 0 -1 25 25)"/></clipPath></defs></svg>');
      background-repeat: no-repeat;
      background-position: center center;
+     background-color: transparent;
+     box-shadow: none;
+     border: none;
+     outline: none;
+     cursor: pointer;
+     touch-action: none;
  }
 
- .button-wrapper.active .chevron-wrapper .chevron {
+ .button-wrapper.active button.button-chevron {
      filter: saturate(1) brightness(1);
  }
 
- .button-wrapper.east .chevron-wrapper .chevron {
+ .button-wrapper.east button.button-chevron {
      top: calc(var(--size-icon) * -1);
      left: calc(var(--size) * 0.9 - var(--size-icon));
      rotate: -90deg;
  }
 
- .button-wrapper.south .chevron-wrapper .chevron {
+ .button-wrapper.south button.button-chevron {
      top: calc(var(--size) * 0.75);
      left: 0px;
      rotate: 0deg;
  }
 
- .button-wrapper.west .chevron-wrapper .chevron {
+ .button-wrapper.west button.button-chevron {
      top: 0px;
      left: calc(var(--size) * -0.9);
      rotate: 90deg;
  }
 
- .button-wrapper.north .chevron-wrapper .chevron {
+ .button-wrapper.north button.button-chevron {
      top: calc(var(--size) * -0.9);
      left: calc(var(--size-icon) * -1);
      rotate: -180deg;
@@ -206,14 +213,12 @@
  /* START Button turn */
 
  .base-movement-controls .button-turn-wrapper {
-     position: static;
-     /* position: relative; */
-     /* z-index: 1; */
+     position: absolute;
+     left: calc(50% - var(--width-turn-button));
+     top: calc(var(--width-turn-button) * -1);
  }
 
  .base-movement-controls .button-turn-wrapper .button-turn {
-     position: absolute;
-     top: calc(var(--width-turn-button) * -1);
      width: var(--width-turn-button);
      height: var(--height-turn-button);
      background-color: transparent;
@@ -225,7 +230,9 @@
      cursor: pointer;
      background-repeat: no-repeat;
      background-position: center center;
-     transition: background-color 200ms ease-out;
+     transition: background-color 200ms ease-out, backdrop-filter 200ms ease-out;
+     background-color: hsl(204deg 100% 50% / 0%);
+     backdrop-filter: blur(0px);
  }
 
  .base-movement-controls .button-turn-wrapper .button-turn.active {
@@ -248,7 +255,7 @@
 
  .base-movement-controls .button-turn-wrapper .line {
      position: absolute;
-     top: calc(var(--width-turn-button) * -1);
+     top: 0;
      left: 50%;
      width: 1px;
      height: var(--height-turn-button);

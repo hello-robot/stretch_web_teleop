@@ -158,3 +158,10 @@ button .material-icons {
         gap: 10px;
     }
 }
+
+/* Hack that is necessary to make sure iOS screen readers pick up the aria-labels */
+.aria-inviz {
+    visibility: hidden;
+    display: block;
+    text-align: center;
+}

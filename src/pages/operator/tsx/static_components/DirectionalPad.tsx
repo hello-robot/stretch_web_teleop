@@ -27,7 +27,10 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
     const rotate = useMemo(() => buttons.slice(4), [buttons])
 
     return (
-        <div className="base-movement-controls">
+        <div
+            className="base-movement-controls"
+            aria-hidden={isCameraVeilVisible}
+        >
             <svg className="mask">
                 <clipPath
                     id="clip-path"
@@ -37,23 +40,19 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
                 </clipPath>
             </svg>
 
-            <div className="dbutton-pad">
-                {cardinal.map((btn, i) => (
-                    <React.Fragment key={i}>{btn}</React.Fragment>
-                ))}
-            </div>
-
             <div className="button-turn-wrapper">
                 {rotate.map((btn, i) => (
                     <React.Fragment key={i}>{btn}</React.Fragment>
                 ))}
                 <div className="line" />
             </div>
-
-            {isCameraVeilVisible && <div className="camera-veil" />}
+            <div className="dbutton-pad">
+                {cardinal.map((btn, i) => (
+                    <React.Fragment key={i}>{btn}</React.Fragment>
+                ))}
+            </div>
         </div>
     )
 }
 
-// wrap whole thing in memo to avoid re‐render when props are shallow‐equal
 export default memo(DirectionalPad)

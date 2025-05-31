@@ -165,8 +165,8 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
     const clickProps = props.sharedState.customizing
         ? {}
         : {
-            onTouchStart: functs.onClick,
-            onTouchEnd: functs.onRelease,
+            onPointerDown: functs.onClick,
+            onPointerUp: functs.onRelease,
             onPointerLeave: functs.onLeave,
         };
     const buttonState: ButtonState =
@@ -175,6 +175,9 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);
+    // Handle the case where the button
+    // is disabled due to not being homed
+    // but remember: it's distinct from aria-hidden!
     const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
     const cardinalDirections = [
         'north',
@@ -197,11 +200,12 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
             case 'east':
                 return 'Strafe right';
             case 'rotate-left':
-                return 'Turn left';
+                return 'Turn left';
             case 'rotate-right':
-                return 'Turn right';
+                return 'Turn right';
             default:
-                return '';
+                console.warn(`Unknown direction: ${direction}`);
+                return "Unknown action"; // Fallback label
         }
     };
     const ariaLabel = getAriaLabel(props.direction);
@@ -210,11 +214,24 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
 
     if (isCardinal) {
         return (
-            <div className={`button-wrapper ${props.direction} ${buttonState}`} key={props.direction}>
-                <button disabled={isDisabled} {...clickProps} aria-label={ariaLabel} aria-disabled={props.isCameraVeilVisible} className={buttonState}>
+            <div
+                className={`button-wrapper ${props.direction} ${buttonState}`}
+                key={props.direction}
+            >
+                <div
+                    className={`button-cardinal ${buttonState}`}                >
                     <span className="synthetic-bottom-border"></span>
+                </div>
+                <button
+                    type="button"
+                    className={`button-chevron ${buttonState}`}
+                    aria-label={ariaLabel}
+                    tabIndex={0}
+                    disabled={isDisabled}
+                    {...clickProps}
+                >
+                    <span className="aria-inviz"></span>
                 </button>
-                <span className="chevron-wrapper"><span className="chevron"></span></span>
             </div>
         );
     } else if (isRotate) {
@@ -223,9 +240,12 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                 className={`button-turn ${props.direction} ${buttonState}`}
                 disabled={isDisabled}
                 aria-label={ariaLabel}
-                aria-disabled={props.isCameraVeilVisible}
+                type="button"
+                tabIndex={0}
                 {...clickProps}
-            ></button>
+            >
+                <span className="aria-inviz"></span>
+            </button>
         )
     }
 };

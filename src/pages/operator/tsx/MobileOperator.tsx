@@ -217,6 +217,7 @@ export const MobileOperator = (props: {
                         sharedState: sharedState,
                         overlay: false,
                         aspectRatio: 3.35,
+                        isCameraVeilVisible: isCameraVeilVisible,
                     }}
                 />
             </React.Fragment>
@@ -238,6 +239,7 @@ export const MobileOperator = (props: {
                         sharedState: sharedState,
                         overlay: false,
                         aspectRatio: 3.35,
+                        isCameraVeilVisible: isCameraVeilVisible,
                     }}
                 />
             </React.Fragment>
@@ -277,12 +279,6 @@ export const MobileOperator = (props: {
         );
     };
 
-    // console.log('layout', layout)
-    // console.log('layout.current', layout.current)
-    // console.log('layout.current.actionMode', layout.current.actionMode)
-    // console.log('actionModes', actionModes)
-    // console.log('actionModesIdx', actionModesIdx)
-    // console.log('actionModes[actionModesIdx]', actionModes[actionModesIdx])
     console.log('speed', FunctionProvider.velocityScale)
 
     return (
@@ -336,6 +332,7 @@ export const MobileOperator = (props: {
                     }}
                     actionModeCurrent={FunctionProvider.actionMode}
                     onActionModeChange={setActionMode}
+                    isCameraVeilVisible={isCameraVeilVisible}
                     isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 />
             </div>
