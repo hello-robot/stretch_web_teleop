@@ -284,14 +284,15 @@ export const MobileOperator = (props: {
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
                 <div className={className("controls", { hideControls })}>
-                    <div onPointerDown={() => {
-                        if (cameraID == CameraViewId.realsense)
-                            setCameraID(CameraViewId.overhead);
-                        else if (cameraID == CameraViewId.overhead)
-                            setCameraID(CameraViewId.gripper);
-                        else if (cameraID == CameraViewId.gripper)
-                            setCameraID(CameraViewId.realsense);
-                    }}
+                    <div
+                        // onPointerDown={() => {
+                        //     if (cameraID == CameraViewId.realsense)
+                        //         setCameraID(CameraViewId.overhead);
+                        //     else if (cameraID == CameraViewId.overhead)
+                        //         setCameraID(CameraViewId.gripper);
+                        //     else if (cameraID == CameraViewId.gripper)
+                        //         setCameraID(CameraViewId.realsense);
+                        // }}
                         className="simple-camera-view-wrapper_XP"
                     >
                         <SimpleCameraView
