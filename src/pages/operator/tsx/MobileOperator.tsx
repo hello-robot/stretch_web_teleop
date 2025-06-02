@@ -251,7 +251,6 @@ export const MobileOperator = (props: {
     const ControlModes = () => {
         return (
             <>
-
                 <TabGroup
                     // tabLabels={["Drive", "Arm", "Gripper"]}
                     // tabContent={[driveMode, armMode, gripperMode]}

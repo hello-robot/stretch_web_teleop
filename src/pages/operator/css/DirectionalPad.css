@@ -20,6 +20,14 @@
      --height-turn-button: calc(var(--size) - (var(--border-width) * 2));
  }
 
+ .base-movement-controls.display-none {
+     display: none;
+ }
+
+ .base-movement-controls.display-block {
+     display: block;
+ }
+
  .base-movement-controls .dbutton-pad {
      position: relative;
      left: calc(var(--size) * 0.5);
@@ -110,7 +118,7 @@
 
  .button-wrapper div.button-cardinal.active,
  .button-wrapper div.button-cardinal.active span.synthetic-bottom-border {
-     mix-blend-mode: color-dodge;
+     mix-blend-mode: screen;
      border-color: hsl(204deg 100% 50%);
      border-top-width: 1px;
      border-left-width: 1px;

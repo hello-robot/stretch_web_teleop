@@ -121,6 +121,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
             <DirectionalPad
                 mapButtons={mapButtons}
                 isCameraVeilVisible={props.isCameraVeilVisible}
+
             />
         )
     } else return (
@@ -217,6 +218,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
             <div
                 className={`button-wrapper ${props.direction} ${buttonState}`}
                 key={props.direction}
+
             >
                 <div
                     className={`button-cardinal ${buttonState}`}                >

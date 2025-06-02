@@ -143,20 +143,20 @@
 
 @keyframes modal-slide-up {
   from {
-    top: 100%;
+    transform: translateY(100%);
   }
 
   to {
-    top: 0;
+    transform: translateY(0);
   }
 }
 
 @keyframes modal-slide-down {
   from {
-    top: 0;
+    transform: translateY(0);
   }
 
   to {
-    top: 100%;
+    transform: translateY(100%);
   }
 }

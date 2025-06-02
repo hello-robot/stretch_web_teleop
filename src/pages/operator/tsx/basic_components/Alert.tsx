@@ -25,6 +25,8 @@ export const Alert = (props: {
         <div
             className={className("alert " + props.type, { hide: !isShow })}
             style={props.style}
+            role="alert"
+            aria-live="assertive"
         >
             <span
                 className={className("closebtn", {

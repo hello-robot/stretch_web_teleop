@@ -43,7 +43,8 @@ export const TabGroup = (props: {
     );
 
     return (
-        <div className="tab-group" onContextMenu={(e) => e.preventDefault()}>
+        <div className="tab-group" aria-live="assertive" tabIndex={0}
+            onContextMenu={(e) => e.preventDefault()}>
             {/* <div className={props.pill ? "pill-tab" : "tab"}>
                 {tabLabels.map((label, index) => (
                     <Tab

@@ -1,4 +1,4 @@
-import React, { ReactNode, memo, useMemo } from 'react'
+import React, { ReactNode, memo, useMemo, } from 'react'
 import 'operator/css/DirectionalPad.css'
 
 interface DirectionalPadProps {
@@ -19,6 +19,7 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
     mapButtons,
     isCameraVeilVisible,
 }) => {
+
     // only re‐map when mapButtons fn changes
     const buttons = useMemo(() => DIRECTIONS.map(mapButtons), [mapButtons])
 
@@ -26,10 +27,12 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
     const cardinal = useMemo(() => buttons.slice(0, 4), [buttons])
     const rotate = useMemo(() => buttons.slice(4), [buttons])
 
-    return (
+    if (isCameraVeilVisible) return null
+
+    else return (
         <div
-            className="base-movement-controls"
-            aria-hidden={isCameraVeilVisible}
+            className={`base-movement-controls ${isCameraVeilVisible ? 'display-none' : 'display-block'}`}
+            tabIndex={0}
         >
             <svg className="mask">
                 <clipPath
@@ -40,16 +43,16 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
                 </clipPath>
             </svg>
 
+            <div className="dbutton-pad">
+                {cardinal.map((btn, i) => (
+                    <React.Fragment key={i}>{btn}</React.Fragment>
+                ))}
+            </div>
             <div className="button-turn-wrapper">
                 {rotate.map((btn, i) => (
                     <React.Fragment key={i}>{btn}</React.Fragment>
                 ))}
                 <div className="line" />
-            </div>
-            <div className="dbutton-pad">
-                {cardinal.map((btn, i) => (
-                    <React.Fragment key={i}>{btn}</React.Fragment>
-                ))}
             </div>
         </div>
     )

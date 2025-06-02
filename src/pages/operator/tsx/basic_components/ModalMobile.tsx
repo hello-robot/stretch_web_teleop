@@ -63,6 +63,7 @@ const Modal: React.FC<ModalProps> = ({
             role="dialog"
             aria-modal="true"
             aria-hidden={!visible}
+            tabIndex={0}
         >
             <div
                 className={`modal-content-wrapper ${animState} ${modalClassName}`}
