@@ -48,7 +48,7 @@ const DirectionalPad: React.FC<DirectionalPadProps> = ({
                     <React.Fragment key={i}>{btn}</React.Fragment>
                 ))}
             </div>
-            <div className="button-turn-wrapper">
+            <div className="rbutton-pad">
                 {rotate.map((btn, i) => (
                     <React.Fragment key={i}>{btn}</React.Fragment>
                 ))}

@@ -218,7 +218,6 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
             <div
                 className={`button-wrapper ${props.direction} ${buttonState}`}
                 key={props.direction}
-
             >
                 <div
                     className={`button-cardinal ${buttonState}`}                >
@@ -232,22 +231,28 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     disabled={isDisabled}
                     {...clickProps}
                 >
-                    <span className="aria-inviz"></span>
+                    {/* adding arbitrary text inside <span/> changes the position of a11y voice control labels */}
+                    <span className="aria-inviz">••</span>
                 </button>
             </div>
         );
     } else if (isRotate) {
         return (
-            <button
-                className={`button-turn ${props.direction} ${buttonState}`}
-                disabled={isDisabled}
-                aria-label={ariaLabel}
-                type="button"
-                tabIndex={0}
-                {...clickProps}
+            <div
+                className={`button-turn-wrapper ${props.direction} ${buttonState}`}
+                key={props.direction}
             >
-                <span className="aria-inviz"></span>
-            </button>
+                <button
+                    className={`button-turn ${props.direction} ${buttonState}`}
+                    disabled={isDisabled}
+                    aria-label={ariaLabel}
+                    type="button"
+                    tabIndex={0}
+                    {...clickProps}
+                >
+                    <span className="aria-inviz"></span>
+                </button>
+            </div>
         )
     }
 };
