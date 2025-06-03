@@ -87,8 +87,6 @@ export const SimpleCameraView = (props: {
                     className="simple-realsense"
                 >
                     <CameraBlurringVeil isVisible={props.isCameraVeilVisible} />
-                    <div className="cat-ear_XP cat-ear-top_XP" />
-                    <div className="cat-ear_XP cat-ear-bottom_XP" />
                     <div
                         className="simple-video-area"
                         style={{ gridRow: 2, gridColumn: 1 }}
