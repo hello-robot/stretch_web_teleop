@@ -2,6 +2,7 @@ import { RemoteRobot } from "shared/remoterobot";
 import { VelocityCommand } from "shared/commands";
 import { ValidJoints } from "shared/util";
 import { ActionModeType } from "../utils/component_definitions";
+import { ButtonPadButton } from "./ButtonFunctionProvider";
 
 /**
  * Provides logic to connect the {@link RemoteRobot} and the components in the
@@ -11,6 +12,7 @@ export abstract class FunctionProvider {
     protected static remoteRobot?: RemoteRobot;
     public static velocityScale: number;
     public static actionMode: ActionModeType;
+    public activeButtonPadFunction: ButtonPadButton;
     public activeVelocityAction?: VelocityCommand;
     public velocityExecutionHeartbeat?: number; // ReturnType<typeof setInterval>
 

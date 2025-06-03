@@ -38,9 +38,9 @@ type ActionSpeedProps = {
  * Scale: 0 -> 1.6
  */
 export const VELOCITY_SCALE: ActionSpeedDetails[] = [
-    { label: "slow", speed: 0.5 },
-    { label: "medium", speed: 1.5 },
-    { label: "fast", speed: 3.0 },
+    { label: "slow", speed: 0.75 },
+    { label: "medium", speed: 1.25 },
+    { label: "fast", speed: 2.0 },
 ];
 
 const getSpeedByLabel = (label: string): number | undefined => {

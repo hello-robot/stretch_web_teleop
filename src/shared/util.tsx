@@ -323,7 +323,7 @@ export const JOINT_VELOCITIES: { [key in ValidJoints]?: number } = {
     joint_wrist_pitch: 0.1,
     joint_wrist_yaw: 0.4,
     translate_mobile_base: 0.1,
-    rotate_mobile_base: 0.3,
+    rotate_mobile_base: 0.1,
 };
 
 export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
