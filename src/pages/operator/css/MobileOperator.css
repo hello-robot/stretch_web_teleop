@@ -246,6 +246,7 @@
  * CSS below targets "_XP" classes 
  **********************************/
 .simple-camera-view-wrapper_XP {
+    width: 100%;
     height: 100%;
 }
 
