@@ -390,17 +390,33 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     : {
                         // For click-click, stop if button already active
                         onClick: () => {
-                            // If the robot is moving, stop and set the button to inactive
-                            if (this.activeVelocityAction) {
-                                this.stopCurrentAction();
+                            // If the robot is not moving, start moving and set button to active
+                            if (!this.activeVelocityAction) {
+                                action();
+                                this.activeButtonPadFunction = buttonPadFunction
+                                this.setButtonActiveState(this.activeButtonPadFunction);
+                            }
+
+                            // If the robot is moving, and same button pressed 
+                            // stop and set the button to inactive
+                            else if (this.activeButtonPadFunction == buttonPadFunction &&
+                                this.activeVelocityAction) {
+                                this.stopCurrentAction(true);
                                 this.setButtonInactiveState(
                                     this.activeButtonPadFunction,
                                 );
+                                this.activeButtonPadFunction = undefined
                             }
 
-                            // The button pressed is not the active button, execute the new
-                            // function
-                            if (this.activeButtonPadFunction !== buttonPadFunction) {
+                            // The button pressed is not the active button, stop current action
+                            //  and execute the new function
+                            else if (this.activeButtonPadFunction !== buttonPadFunction &&
+                                this.activeVelocityAction) {
+                                this.stopCurrentAction(true);
+                                this.setButtonInactiveState(
+                                    this.activeButtonPadFunction,
+                                );
+
                                 action();
                                 this.activeButtonPadFunction = buttonPadFunction
                                 this.setButtonActiveState(this.activeButtonPadFunction);
