@@ -168,7 +168,10 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
         : {
             onPointerDown: functs.onClick,
             onPointerUp: functs.onRelease,
+            onPointerCancel: functs.onRelease,
             onPointerLeave: functs.onLeave,
+            // onTouchStart: functs.onClick,
+            // onTouchEnd: functs.onRelease,
         };
     const buttonState: ButtonState =
         props.sharedState.buttonStateMap?.get(props.funct) ||
@@ -278,9 +281,11 @@ const SingleButton = (props: SingleButtonProps) => {
     const clickProps = props.sharedState.customizing
         ? {}
         : {
-            onPointerDown: functs.onClick,
-            onPointerUp: functs.onRelease,
-            onPointerLeave: functs.onLeave,
+            onMouseDown: functs.onClick,
+            onMouseUp: functs.onRelease,
+            onMouseLeave: functs.onLeave,
+            // onTouchStart: functs.onClick,
+            // onTouchEnd: functs.onRelease,
         };
     const buttonState: ButtonState =
         props.sharedState.buttonStateMap?.get(props.funct) ||

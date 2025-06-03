@@ -86,7 +86,7 @@ export abstract class FunctionProvider {
     // trajectory client) we also need to undo it in robot.jsx
     // `stopExecution()`.
     public stopCurrentAction(send_stop_command: boolean = false) {
-        if (send_stop_command) FunctionProvider.remoteRobot?.stopTrajectory();
+        // if (send_stop_command) FunctionProvider.remoteRobot?.stopTrajectory();
         if (this.activeVelocityAction) {
             // TODO: this.activeVelocityAction.stop sometimes (always?) executes the
             // exact same cancellation command(s) as FunctionProvider.remoteRobot?.stopTrajectory,
