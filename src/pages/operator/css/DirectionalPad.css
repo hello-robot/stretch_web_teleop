@@ -172,6 +172,7 @@
      position: absolute;
      transform: translate(-50%, -50%);
      display: inline-block;
+     padding: 0px;
      height: var(--size-icon);
      width: var(--size-icon);
      filter: saturate(0) brightness(3);
