@@ -382,7 +382,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         },
                         // For press-release, stop when button released
                         onRelease: () => {
-                            this.stopCurrentAction();
+                            this.stopCurrentAction(true);
                             this.setButtonInactiveState(buttonPadFunction);
                         },
                         onLeave: onLeave,
@@ -390,14 +390,20 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     : {
                         // For click-click, stop if button already active
                         onClick: () => {
+                            // If the robot is moving, stop and set the button to inactive
                             if (this.activeVelocityAction) {
                                 this.stopCurrentAction();
                                 this.setButtonInactiveState(
-                                    buttonPadFunction,
+                                    this.activeButtonPadFunction,
                                 );
-                            } else {
+                            }
+
+                            // The button pressed is not the active button, execute the new
+                            // function
+                            if (this.activeButtonPadFunction !== buttonPadFunction) {
                                 action();
-                                this.setButtonActiveState(buttonPadFunction);
+                                this.activeButtonPadFunction = buttonPadFunction
+                                this.setButtonActiveState(this.activeButtonPadFunction);
                             }
                         },
                         // onLeave: onLeave,
