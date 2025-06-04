@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Modal from '../basic_components/ModalMobile';
+import MagneticWrapper from "../static_components/MagneticWrapper";
 import "operator/css/ActionSpeed.css";
 
 /**Details of a velocity setting */
@@ -68,16 +69,19 @@ export const ActionSpeed = (props: ActionSpeedProps) => {
                 props.setCameraVeilCallback(false);
                 props.onChange(getSpeedByLabel(newSpeedLabel))
             }} />
-            <button
-                onClick={() => {
-                    setIsModalOpen(!isModalOpen);
-                    props.setCameraVeilCallback(!isModalOpen)
-                }}
-                aria-label="Change action speed"
-                aria-hidden={props.isCameraVeilVisible}
-            >
-                <span className={`action-speed-icon ${getLabelBySpeed(props.speed)}`}></span>
-            </button>
+            <MagneticWrapper>
+                <button
+                    className="button-action-speed"
+                    onClick={() => {
+                        setIsModalOpen(!isModalOpen);
+                        props.setCameraVeilCallback(!isModalOpen)
+                    }}
+                    aria-label="Change action speed"
+                    aria-hidden={props.isCameraVeilVisible}
+                >
+                    <span className={`action-speed-icon ${getLabelBySpeed(props.speed)}`}></span>
+                </button>
+            </MagneticWrapper>
         </div>
     );
 };
