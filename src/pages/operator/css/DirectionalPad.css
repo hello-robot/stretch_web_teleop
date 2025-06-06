@@ -11,6 +11,7 @@
  */
 
  .base-movement-controls {
+     /* z-index: 1; */
      position: relative;
      bottom: 35px;
      --size: 140px;
