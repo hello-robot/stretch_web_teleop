@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, ReactNode } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { primaryInput } from 'detect-it';
 
 const SPRING_CONFIG = { damping: 30, stiffness: 150, mass: 0.2 }
 const MAX_DISTANCE_FACTOR = 0.1;
@@ -72,7 +73,11 @@ const MagneticWrapper: React.FC<MagneticWrapperProps> = ({ children }) => {
         scale.set(1)
     }
 
-    return (
+    // Disable magnetic effect for
+    // devices where "touch" is the primary input...
+    if (primaryInput === 'touch') return children;
+    // ...for non-touch devices, apply the magnetic effect
+    else return (
         <motion.div
             ref={ref}
             onMouseEnter={() => setIsHovered(true)}
