@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from '../basic_components/ModalMobile';
 import MagneticWrapper from "../static_components/MagneticWrapper";
 import "operator/css/ActionSpeed.css";
+import { buttonFunctionProvider } from "..";
 
 /**Details of a velocity setting */
 type ActionSpeedDetails = {
@@ -75,7 +76,8 @@ export const ActionSpeed = (props: ActionSpeedProps) => {
                     onClick={() => {
                         setIsModalOpen(!isModalOpen);
                         props.setCameraVeilCallback(!isModalOpen)
-                    }}
+                        buttonFunctionProvider.disableActiveButton()
+                }}
                     aria-label="Change action speed"
                     aria-hidden={props.isCameraVeilVisible}
                 >
