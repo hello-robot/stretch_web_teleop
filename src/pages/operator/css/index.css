@@ -165,3 +165,8 @@ button .material-icons {
     display: block;
     text-align: center;
 }
+
+dialog {
+    padding: 0;
+    border: 0;
+}

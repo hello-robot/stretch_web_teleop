@@ -1,6 +1,4 @@
-'use client'
-
-import { useState, useEffect, useRef, ReactNode } from 'react'
+import React, { useState, useEffect, useRef, ReactNode } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
 const SPRING_CONFIG = { damping: 30, stiffness: 150, mass: 0.2 }
