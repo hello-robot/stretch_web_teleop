@@ -56,7 +56,7 @@ const Modal: React.FC<ModalProps> = ({
     if (!visible) return null
 
     return (
-        <div
+        <dialog
             className={`modal-overlay ${animState} ${overlayClassName}`}
             onClick={handleOverlayClick}
             onAnimationEnd={animState === 'exit' ? onAnimationEnd : undefined}
@@ -84,7 +84,7 @@ const Modal: React.FC<ModalProps> = ({
                     </div>
                 )}
             </div>
-        </div>
+        </dialog>
     );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Modal from '../basic_components/ModalMobile';
+import MagneticWrapper from "../static_components/MagneticWrapper";
 import "operator/css/ActionMode.css";
 import { ActionModeType } from "../utils/component_definitions";
 import { buttonFunctionProvider } from "operator/tsx/index";
@@ -50,18 +51,21 @@ export const ActionMode = (props: ActionModeProps) => {
                 props.setCameraVeilCallback(false);
                 props.onChange(newActionMode)
             }} />
-            <button
-                onClick={() => {
-                    setIsModalOpen(!isModalOpen);
-                    props.setCameraVeilCallback(!isModalOpen)
-                    buttonFunctionProvider.disableActiveButton()
+            <MagneticWrapper>
+                <button
+                    className="button-action-mode"
+                    onClick={() => {
+                        setIsModalOpen(!isModalOpen);
+                        props.setCameraVeilCallback(!isModalOpen)
+                        buttonFunctionProvider.disableActiveButton()
                 }}
-                aria-label="Change action mode"
-                aria-hidden={props.isCameraVeilVisible}
-            >
-                <span className="action-mode-icon"></span>
-                <div>{props.mode}</div>
-            </button>
+                    aria-label="Change action mode"
+                    aria-hidden={props.isCameraVeilVisible}
+                >
+                    <span className="action-mode-icon"></span>
+                    <div>{props.mode}</div>
+                </button>
+            </MagneticWrapper>
         </div>
     );
 };
@@ -100,13 +104,15 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
     };
 
     const modalFooterContent = (
-        <button
-            className="btn btn-primary" // Style from ModalActionMode.css
-            onClick={handleConfirm}
-            disabled={loading}
-        >
-            {loading ? <span className="spinner" /> : 'Confirm'}
-        </button>
+        <MagneticWrapper>
+            <button
+                className="btn btn-primary" // Style from ModalActionMode.css
+                onClick={handleConfirm}
+                disabled={loading}
+            >
+                {loading ? <span className="spinner" /> : 'Confirm'}
+            </button>
+        </MagneticWrapper>
     );
 
     return (

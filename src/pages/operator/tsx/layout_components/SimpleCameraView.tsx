@@ -2,8 +2,9 @@ import React from "react";
 import { className, RemoteStream } from "shared/util";
 import { CameraViewId } from "../utils/component_definitions";
 import "operator/css/SimpleCameraView.css";
-import { getIcon } from "../utils/svg";
 import CameraBlurringVeil from "../basic_components/CameraBlurringVeil"; // 
+import Stretch4DeviceOverlay from "../static_components/Stretch4DeviceOverlay";
+
 /**
  * Displays a video stream with an optional button pad overlay
  *
@@ -87,6 +88,7 @@ export const SimpleCameraView = (props: {
                     className="simple-realsense"
                 >
                     <CameraBlurringVeil isVisible={props.isCameraVeilVisible} />
+                    <Stretch4DeviceOverlay />
                     <div
                         className="simple-video-area"
                         style={{ gridRow: 2, gridColumn: 1 }}

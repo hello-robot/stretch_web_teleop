@@ -1,0 +1,14 @@
+.safety-overlay {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-image: url('data:image/svg+xml,<svg width="1076" height="1908" viewBox="0 0 1076 1908" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(%23clip0_1233_2552)"><g style="mix-blend-mode:soft-light"><path d="M542 1262C594.467 1262 637 1304.76 637 1357.5C637 1381.19 628.42 1402.86 614.216 1419.55C637.579 1457.2 722.077 1592.19 786 1678.75C857.1 1775.03 980 1916 980 1916L770.5 1918C770.5 1918 718.26 1793.08 686.75 1712.25C651.181 1621.01 603.113 1486.13 587.29 1441.47C573.827 1448.82 558.399 1453 542 1453C489.533 1453 447 1410.24 447 1357.5C447 1304.76 489.533 1262 542 1262Z" fill="%23CE9DAD"/></g></g><defs><clipPath id="clip0_1233_2552"><rect width="1076" height="1908" fill="white"/></clipPath></defs></svg>');
+}
