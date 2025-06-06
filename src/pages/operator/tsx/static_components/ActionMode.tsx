@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from '../basic_components/ModalMobile';
 import "operator/css/ActionMode.css";
 import { ActionModeType } from "../utils/component_definitions";
+import { buttonFunctionProvider } from "operator/tsx/index";
 
 /**Details of the action modes */
 type ActionModeDetails = {
@@ -53,6 +54,7 @@ export const ActionMode = (props: ActionModeProps) => {
                 onClick={() => {
                     setIsModalOpen(!isModalOpen);
                     props.setCameraVeilCallback(!isModalOpen)
+                    buttonFunctionProvider.disableActiveButton()
                 }}
                 aria-label="Change action mode"
                 aria-hidden={props.isCameraVeilVisible}

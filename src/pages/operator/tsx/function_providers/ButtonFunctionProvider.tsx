@@ -236,6 +236,12 @@ export class ButtonFunctionProvider extends FunctionProvider {
         if (this.operatorCallback) this.operatorCallback(this.buttonStateMap);
     }
 
+    //  TEMP FOR ACTION MODAL DISABILING
+    public disableActiveButton() {
+        this.stopCurrentAction(true)
+        this.setButtonInactiveState(this.activeButtonPadFunction);
+    }
+
     /**
      * Takes a ButtonPadFunction which indicates the type of button (e.g. drive
      * base forward, lift arm), and returns a set of functions to execute when
