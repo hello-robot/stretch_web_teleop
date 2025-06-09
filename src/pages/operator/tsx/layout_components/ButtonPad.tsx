@@ -221,6 +221,8 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
             <div
                 className={`button-wrapper ${props.direction} ${buttonState}`}
                 key={props.direction}
+                role="none"
+                {...clickProps}
             >
                 <div
                     className={`button-cardinal ${buttonState}`}                >
@@ -234,7 +236,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     disabled={isDisabled}
                     {...clickProps}
                 >
-                    {/* adding arbitrary text inside <span/> changes the position of a11y voice control labels */}
+                    {/* Adding arbitrary text inside <span/> changes the position of iOS voice control labels */}
                     <span className="aria-inviz">••</span>
                 </button>
             </div>
@@ -244,7 +246,11 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
             <div
                 className={`button-turn-wrapper ${props.direction} ${buttonState}`}
                 key={props.direction}
+                role="none"
+                {...clickProps}
             >
+                {/* Used to prevent clicking with cursor device */}
+                <div className="click-block" />
                 <button
                     className={`button-turn ${props.direction} ${buttonState}`}
                     disabled={isDisabled}
@@ -253,6 +259,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     tabIndex={0}
                     {...clickProps}
                 >
+                    {/* Adding arbitrary text inside <span/> changes the position of iOS voice control labels */}
                     <span className="aria-inviz"></span>
                 </button>
             </div>

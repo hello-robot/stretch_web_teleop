@@ -39,6 +39,8 @@
  }
 
  .button-wrapper div.button-cardinal {
+     z-index: 1;
+     position: relative;
      display: inline-block;
      width: var(--size) !important;
      height: var(--size) !important;
@@ -170,6 +172,7 @@
  }
 
  .button-wrapper button.button-chevron {
+     z-index: 0;
      position: absolute;
      transform: translate(-50%, -50%);
      display: inline-block;
@@ -230,6 +233,7 @@
  }
 
  .base-movement-controls .rbutton-pad .button-turn-wrapper {
+     position: relative;
      display: flex;
      justify-content: center;
      align-items: center;
@@ -259,10 +263,26 @@
      border-radius: 0px 100px 100px 0px;
  }
 
+ /* START used to prevent clicking with cursor device */
+ .base-movement-controls .rbutton-pad .button-turn-wrapper .click-block {
+     z-index: 1;
+     position: absolute;
+     display: inline-block;
+     top: 0;
+     left: 0;
+     width: var(--width-turn-button);
+     height: var(--height-turn-button);
+ }
+
+ /* END used to prevent clicking with cursor device */
+
+
  .base-movement-controls .rbutton-pad .button-turn-wrapper button.button-turn {
      width: 40px;
      height: 40px;
      padding: 0;
+     border: none;
+     border-radius: 0px;
      background-repeat: no-repeat;
      background-position: center center;
      background-color: transparent;

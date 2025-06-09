@@ -77,7 +77,7 @@ export const ActionSpeed = (props: ActionSpeedProps) => {
                         setIsModalOpen(!isModalOpen);
                         props.setCameraVeilCallback(!isModalOpen)
                         buttonFunctionProvider.disableActiveButton()
-                }}
+                    }}
                     aria-label="Change action speed"
                     aria-hidden={props.isCameraVeilVisible}
                 >
@@ -133,6 +133,7 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
                             aria-hidden={!isOpen}
                             onClick={() => handleSpeedSelection(opt.value)}
                         >
+                            {/* Adding arbitrary text inside <span/> changes the position of iOS voice control labels */}
                             <span className="aria-inviz"></span>
                         </button>
                     )
