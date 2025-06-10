@@ -113,8 +113,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const overlayDefinition = predictiveDisplay
         ? { type: ComponentType.PredictiveDisplay }
         : definition.children && definition.children.length > 0
-          ? definition.children[0]
-          : undefined;
+            ? definition.children[0]
+            : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
     const overlay = createOverlay(
         overlayDefinition,
@@ -157,7 +157,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
 
         let clientX, clientY;
         if (event.nativeEvent instanceof TouchEvent) {
-        event = event as React.TouchEvent<HTMLDivElement>
+            event = event as React.TouchEvent<HTMLDivElement>
             clientX = event.touches[0].clientX
             clientY = event.touches[0].clientY
         } else {
@@ -295,7 +295,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         videoOverlay = (
             <>
                 {overlayDefinition?.type !== ComponentType.PredictiveDisplay &&
-                !props.sharedState.hasBetaTeleopKit ? (
+                    !props.sharedState.hasBetaTeleopKit ? (
                     <div
                         className={className("realsense-pan-tilt-grid", {
                             constrainedHeight,
@@ -332,7 +332,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
                         position: "absolute",
                         left: (selectObjectScaledXY[0] * 100).toString() + "%",
                         top: (selectObjectScaledXY[1] * 100).toString() + "%",
-                        color: "red",
+                        width: '2rem',
+                        height: '2rem',
+                        color: '#00ff00',
+                        borderRadius: '2rem',
+                        backgroundColor: 'hsl(200deg 100% 20% / 45%)',
                         transform: "translateX(-50%) translateY(-50%)",
                     }}
                 />
@@ -597,9 +601,9 @@ function createOverlay(
         default:
             throw Error(
                 "Video stream at path " +
-                    path +
-                    " cannot overlay child of type" +
-                    overlayDefinition.type,
+                path +
+                " cannot overlay child of type" +
+                overlayDefinition.type,
             );
     }
 }
@@ -1198,19 +1202,19 @@ const UnderGripperButtons = (props: {
                         />
                         {(props.stretchTool === StretchTool.GRIPPER ||
                             props.stretchTool === StretchTool.DEX_GRIPPER) && (
-                            <CheckToggleButton
-                                checked={props.definition.depthSensing || false}
-                                onClick={() => {
-                                    props.definition.depthSensing =
-                                        !props.definition.depthSensing;
-                                    setRerender(!rerender);
-                                    underVideoFunctionProvider.provideFunctions(
-                                        UnderVideoButton.GripperDepthSensing,
-                                    ).onCheck!(props.definition.depthSensing);
-                                }}
-                                label="Gripper Depth Sensing"
-                            />
-                        )}
+                                <CheckToggleButton
+                                    checked={props.definition.depthSensing || false}
+                                    onClick={() => {
+                                        props.definition.depthSensing =
+                                            !props.definition.depthSensing;
+                                        setRerender(!rerender);
+                                        underVideoFunctionProvider.provideFunctions(
+                                            UnderVideoButton.GripperDepthSensing,
+                                        ).onCheck!(props.definition.depthSensing);
+                                    }}
+                                    label="Gripper Depth Sensing"
+                                />
+                            )}
                     </div>
                 </React.Fragment>
             )}
