@@ -197,7 +197,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                             Save layout
                         </button>
                     </>
-            }
+                }
             </div>
             <LoadLayoutModal
                 defaultLayouts={props.defaultLayouts}
@@ -369,11 +369,12 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
 
     return (
         <React.Fragment>
-            <OnOffToggleButton
+            {/* Deprecating this feature due to non-use */}
+            {/* <OnOffToggleButton
                 on={definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
-            />
+            /> */}
         </React.Fragment>
     );
 };
@@ -391,11 +392,12 @@ const VideoStreamOptions = (props: OptionsProps) => {
 
     return (
         <React.Fragment>
-            <OnOffToggleButton
+            {/* Deprecating this feature due to non-use */}
+            {/* <OnOffToggleButton
                 on={definition.displayButtons}
                 onClick={toggleButtons}
                 label="Display Buttons"
-            />
+            /> */}
         </React.Fragment>
     );
 };
@@ -597,8 +599,8 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
                     tabActive && !props.ids
                         ? "active"
                         : props.expanded
-                          ? "expanded"
-                          : ""
+                            ? "expanded"
+                            : ""
                 }
                 ref={componentRef}
             >
