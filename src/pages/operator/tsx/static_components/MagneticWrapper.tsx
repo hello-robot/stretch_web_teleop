@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, ReactNode } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { primaryInput } from 'detect-it';
 
-const SPRING_CONFIG = { damping: 30, stiffness: 150, mass: 0.2 }
+const SPRING_CONFIG = { damping: 10, stiffness: 100, mass: 0.5 }
 const MAX_DISTANCE_FACTOR = 0.1;
 const MAX_SCALE_VALUE = 1.05;
 

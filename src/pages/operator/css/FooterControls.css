@@ -6,6 +6,14 @@
   background-color: #000000;
 }
 
+@media (min-width: 900px) {
+  .footer-controls_XP {
+    width: 54%;
+    margin: 0 auto;
+  }
+}
+
+
 .action-speed,
 .action-mode,
 .battery-gauge {
