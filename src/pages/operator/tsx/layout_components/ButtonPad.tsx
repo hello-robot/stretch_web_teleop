@@ -116,7 +116,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
         return <DirectionalButton {...buttonProps} key={i} />;
     };
 
-    if (isMobile && (definition.id === ButtonPadIdMobile.Drive || definition.id === ButtonPadIdMobile.OmniDrive)) {
+    if (definition.id === ButtonPadIdMobile.Drive || definition.id === ButtonPadIdMobile.OmniDrive) {
         return (
             <DirectionalPad
                 mapButtons={mapButtons}

@@ -314,7 +314,7 @@ function renderOperator(storageHandler: StorageHandler) {
 
     !isMobile
         ? root.render(
-            <Operator
+            <MobileOperator
                 remoteStreams={allRemoteStreams}
                 layout={layout}
                 storageHandler={storageHandler}
