@@ -95,7 +95,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
     const selectProp =
         customizing && !overlay
             ? {
-                onClick: onSelect,
+                onPointerDown: onSelect,
             }
             : {};
 

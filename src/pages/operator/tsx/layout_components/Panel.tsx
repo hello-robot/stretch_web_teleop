@@ -112,10 +112,10 @@ export const Panel = (props: CustomizableComponentProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     }
 
-    // Add onClick listener to tab content in customization mode
+    // Add onPointerDown listener to tab content in customization mode
     const selectProp = props.sharedState.customizing
         ? {
-              onClick: selectContent,
+              onPointerDown: selectContent,
           }
         : {};
 
@@ -164,7 +164,7 @@ export const Panel = (props: CustomizableComponentProps) => {
                 <button
                     key={`${tabDef.label}-${idx}`}
                     className={className("tab-button", { active, selected })}
-                    onClick={() => clickTab(idx)}
+                    onPointerDown={() => clickTab(idx)}
                 >
                     {tabDef.label}
                 </button>
@@ -194,7 +194,7 @@ export const Panel = (props: CustomizableComponentProps) => {
                     props.sharedState.customizing ? (
                         <button
                             className="tab-button add-tab"
-                            onClick={() => setShowTabModal(true)}
+                            onPointerDown={() => setShowTabModal(true)}
                         >
                             <AddCircleIcon />
                         </button>

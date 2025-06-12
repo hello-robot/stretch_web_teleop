@@ -246,8 +246,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
                 predictiveDisplay,
             })}
             // style={overlayDimensions}
-            onClick={handleClick}
-            onTouchStart={handleClick}
+            onPointerDown={handleClick}
         >
             {
                 // Display overlay on top of video stream
@@ -405,9 +404,9 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
         <button
             style={gridPosition}
             className={props.direction}
-            onMouseDown={functs.onClick}
-            onMouseUp={functs.onRelease}
-            onMouseLeave={functs.onLeave}
+            onPointerDown={functs.onClick}
+            onPointerUp={functs.onRelease}
+            onPointerLeave={functs.onLeave}
             aria-label={props.direction}
         >
             <PlayCircleFilledIcon
@@ -502,9 +501,9 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
                 console.log("clicked");
             }
         };
-        window.addEventListener("click", handler, true);
+        window.addEventListener("pointerdown", handler, true);
         return () => {
-            window.removeEventListener("click", handler);
+            window.removeEventListener("pointerdown", handler);
         };
     }, []);
 
@@ -528,8 +527,8 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
             className="video-context-menu"
             style={{ top: `${y}px`, left: `${x}px` }}
         >
-            <li onClick={(e) => handleClick(e, false)}>Button Pad</li>
-            <li onClick={(e) => handleClick(e, true)}>Video Stream</li>
+            <li onPointerDown={(e) => handleClick(e, false)}>Button Pad</li>
+            <li onPointerDown={(e) => handleClick(e, true)}>Video Stream</li>
         </ul>
     );
 };
@@ -1220,7 +1219,7 @@ const UnderGripperButtons = (props: {
             )}
             {props.stretchTool === StretchTool.TABLET && (
                 <button
-                    onClick={() => {
+                    onPointerDown={() => {
                         let isPortait =
                             tabletOrientation === TabletOrientation.PORTRAIT;
                         underVideoFunctionProvider.provideFunctions(
@@ -1253,7 +1252,7 @@ const CameraPerspectiveButton = (props: {
     const onClick = underVideoFunctionProvider.provideFunctions(
         props.perspective,
     ).onClick;
-    return <button onClick={onClick}>{props.perspective}</button>;
+    return <button onPointerDown={onClick}>{props.perspective}</button>;
 };
 
 function getGripperLabel(stretchTool: StretchTool) {
