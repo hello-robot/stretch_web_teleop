@@ -96,7 +96,7 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
     }
 
     const controlProps = customizing
-        ? { onClick: handleSelect }
+        ? { onPointerDown: handleSelect }
         : {
               onPointerMove: active ? handleMove : undefined,
               onPointerLeave: handleLeave,
