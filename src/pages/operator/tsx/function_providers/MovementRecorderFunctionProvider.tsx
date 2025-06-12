@@ -142,7 +142,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                         let recordingNames =
                             this.storageHandler.getRecordingNames();
                         let recording = this.storageHandler.getRecording(
-                            recordingNames[recordingID],
+                            recordingNames[recordingID - this.quickActionNames.length],
                         );
                         FunctionProvider.remoteRobot?.playbackPoses(recording);
                     }
