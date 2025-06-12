@@ -127,7 +127,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                     let recordingNames =
                         this.storageHandler.getRecordingNames();
                     this.storageHandler.deleteRecording(
-                        recordingNames[recordingID],
+                        recordingNames[recordingID - this.quickActionNames.length],
                     );
                 };
             case MovementRecorderFunction.DeleteRecordingName:
