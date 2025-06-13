@@ -1,16 +1,9 @@
 .video-container {
-    position: relative;
-    flex: 1 1 0;
-    display: grid;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 0.4rem;
     height: 100%;
-    grid-template-columns: auto;
-    grid-template-rows: 1fr auto minmax(15rem, 2fr);
-    object-fit: cover;
-    justify-content: center;
-    /* align-items: center;
-    flex-direction: column; */
 }
 
 /* Overlays the button pad on top of the camera view*/
@@ -65,13 +58,7 @@
 
 .video-area {
     position: relative;
-    grid-row: 2/2;
-    width: 100%;
-    max-height: 100%;
-    max-width: fit-content; /* 100% */
-    object-fit: cover;
-    display: inline-block;
-    /* aspect-ratio: 9 / 16; */
+    max-width: 100%;
 }
 
 .video-canvas {
@@ -104,16 +91,11 @@
 /* Under video buttons ********************************************************/
 
 .under-video-area {
-    grid-row: 3;
-    grid-column: 1;
-    /* background: blue; */
-    /* display: grid; */
-    /* flex-wrap: wrap; */
+    flex: 0 0 auto; /* Don’t shrink, auto height */
     align-content: flex-start;
     padding-top: 0.5rem;
     width: 100%;
     object-fit: cover;
-    /* justify-content: center; */
     align-items: center;
     overflow-y: auto;
     overflow-x: hidden;

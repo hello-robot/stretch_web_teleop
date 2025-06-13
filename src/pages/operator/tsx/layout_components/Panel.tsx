@@ -115,8 +115,8 @@ export const Panel = (props: CustomizableComponentProps) => {
     // Add onPointerDown listener to tab content in customization mode
     const selectProp = props.sharedState.customizing
         ? {
-              onPointerDown: selectContent,
-          }
+            onPointerDown: selectContent,
+        }
         : {};
 
     /**
@@ -180,7 +180,9 @@ export const Panel = (props: CustomizableComponentProps) => {
                 customizing: props.sharedState.customizing,
                 selected: thisSelected,
             })}
-            style={{ flex: `${flex} ${flex} 0` }}
+            style={{
+                flex: `${flex} ${flex} 0`,
+            }}
         >
             <div className="tabs-header">
                 {definition.children.map(mapTabLabels)}

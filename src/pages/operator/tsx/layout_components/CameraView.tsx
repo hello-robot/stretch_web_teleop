@@ -123,6 +123,9 @@ export const CameraView = (props: CustomizableComponentProps) => {
         videoAspectRatio,
     );
 
+    console.log('definition', definition)
+    console.log('getVideoAspectRatio(definition)', getVideoAspectRatio(definition))
+
     // Update the source of the video stream
     React.useEffect(() => {
         if (!videoRef?.current) return;
@@ -314,7 +317,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const videoComponent = (
         <div
             className="video-area"
-            style={{ gridRow: 2, gridColumn: 1 }}
+            style={{
+                gridRow: 2,
+                gridColumn: 1,
+                aspectRatio: getVideoAspectRatioString(definition),
+            }}
             ref={videoAreaRef}
         >
             {videoOverlay}
@@ -553,6 +560,19 @@ function getVideoAspectRatio(definition: CameraViewDefinition): number {
             return realsenseProps.width / realsenseProps.height;
         default:
             throw Error(`undefined aspect ratio for ${definition.type}`);
+    }
+}
+
+function getVideoAspectRatioString(definition: CameraViewDefinition): string {
+    switch (definition.id) {
+        case CameraViewId.gripper:
+            return `${gripperProps.width} / ${gripperProps.height}`;
+        case CameraViewId.overhead:
+            return `${navigationProps.width} / ${navigationProps.height}`;
+        case CameraViewId.realsense:
+            return `${realsenseProps.width} / ${realsenseProps.height}`;
+        default:
+            return '1 / 1'; // Default to square aspect ratio
     }
 }
 

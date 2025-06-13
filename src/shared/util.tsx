@@ -353,8 +353,8 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
 };
 
 export const navigationProps = {
-    width: 768, // 800,
-    height: 768, // 1280,
+    width: 600,
+    height: 800,
     scale: 1,
     fps: 6.0,
     streamName: "navigation",
