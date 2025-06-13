@@ -13,7 +13,7 @@ export const Tab = (props: {
     return props.pill ? (
         <li
             className={className("pill-tab-btn", { active })}
-            onClick={props.onClick}
+            onPointerDown={props.onClick}
             key={props.label}
         >
             {props.label}
@@ -21,7 +21,7 @@ export const Tab = (props: {
     ) : (
         <button
             className={className("tab-btn", { active })}
-            onClick={props.onClick}
+            onPointerDown={props.onClick}
             key={props.label}
         >
             {props.label}
