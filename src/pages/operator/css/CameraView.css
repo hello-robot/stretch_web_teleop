@@ -270,3 +270,12 @@
         font-size: smaller;
     }
 }
+
+.icon-crosshair {
+    position: absolute;
+    display: inline-block;
+    width: 31px;
+    height: 31px;
+    transform: translateX(-50%) translateY(-50%);
+    background-image: url('data:image/svg+xml,<svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg"><g style="mix-blend-mode:hard-light"><circle cx="15.4735" cy="15.4733" r="2.82166" fill="%230098FE"/></g><g style="mix-blend-mode:hard-light"><circle cx="15.3353" cy="15.3346" r="13.7615" fill="%23CB8B9F" fill-opacity="0.2"/></g><path d="M3.5542 18.2246C4.60146 22.6386 8.05112 26.1212 12.4458 27.2178V30.335C6.32769 29.1632 1.50702 24.3428 0.335449 18.2246H3.5542ZM30.3364 18.2246C29.1648 24.3431 24.3436 29.1635 18.2251 30.335V27.251C22.6846 26.193 26.1944 22.6841 27.2524 18.2246H30.3364ZM12.4458 3.58594C8.09601 4.67118 4.67258 8.09549 3.5874 12.4453H0.335449C1.50702 6.32713 6.32769 1.50671 12.4458 0.334961V3.58594ZM18.2251 0.334961C24.3436 1.50646 29.1648 6.32686 30.3364 12.4453H27.2192C26.1227 8.05025 22.6395 4.5999 18.2251 3.55273V0.334961Z" fill="%230098FE"/></svg>');
+}

@@ -46,7 +46,6 @@ import {
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import { AccordionSelect } from "../basic_components/AccordionSelect";
 import "operator/css/CameraView.css";
-import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import TextField from '@mui/material/TextField';
@@ -333,19 +332,10 @@ export const CameraView = (props: CustomizableComponentProps) => {
             />
             {overlayContainer}
             {selectObjectScaledXY ? (
-                <AddIcon
-                    style={{
-                        position: "absolute",
-                        left: (selectObjectScaledXY[0] * 100).toString() + "%",
-                        top: (selectObjectScaledXY[1] * 100).toString() + "%",
-                        width: '2rem',
-                        height: '2rem',
-                        color: '#00ff00',
-                        borderRadius: '2rem',
-                        backgroundColor: 'hsl(200deg 100% 20% / 45%)',
-                        transform: "translateX(-50%) translateY(-50%)",
-                    }}
-                />
+                <div className="icon-crosshair" style={{
+                    left: (selectObjectScaledXY[0] * 100).toString() + "%",
+                    top: (selectObjectScaledXY[1] * 100).toString() + "%",
+                }} />
             ) : undefined}
         </div>
     );
