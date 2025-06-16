@@ -4,12 +4,8 @@
     flex-direction: column;
     flex: 1 1 0;
     margin-top: 0.5rem;
-    /* new */
     width: 100%;
-    /* new */
-    box-shadow: var(--shadow);
     position: relative;
-
     --radius: 0.3rem;
     border-radius: var(--radius) var(--radius) 0px 0px;
 }
@@ -22,6 +18,7 @@
     border: 3px solid var(--btn-blue);
     flex: 1 1 0;
     background-color: var(--background-color);
+    border-radius: 0px 0px var(--radius) var(--radius);
 }
 
 /* Header *********************************************************************/
@@ -34,14 +31,14 @@
 }
 
 /* Apply to all the tabs in the header */
-.tabs-header>* {
+.tabs-header > * {
     flex: 1 0 auto;
     background-color: var(--tab-inactive);
     border-radius: var(--radius) var(--radius) 0px 0px;
 }
 
 /* Format tabs with icons */
-.tabs-header>.material-icons {
+.tabs-header > .material-icons {
     vertical-align: bottom;
     padding-top: 3px;
     padding-bottom: 3px;

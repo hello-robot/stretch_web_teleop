@@ -122,9 +122,6 @@ export const CameraView = (props: CustomizableComponentProps) => {
         videoAspectRatio,
     );
 
-    console.log('definition', definition)
-    console.log('getVideoAspectRatio(definition)', getVideoAspectRatio(definition))
-
     // Update the source of the video stream
     React.useEffect(() => {
         if (!videoRef?.current) return;

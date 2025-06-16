@@ -46,9 +46,12 @@ import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { BatteryBar } from "./static_components/BatteryBar";
+import { RunStop } from "./static_components/RunStop";
+
+// Unused imports kept for reference
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
-import { BatteryBar } from "./static_components/BatteryBar";
 import { isBrowser, isTablet } from "react-device-detect";
 import { PopupModal } from "./basic_components/PopupModal";
 
@@ -323,8 +326,8 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName
-                  )
+                    layoutName as DefaultLayoutName
+                )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
         },
@@ -356,7 +359,9 @@ export const Operator = (props: {
                         FunctionProvider.velocityScale = newScale;
                     }}
                 />
-                <BatteryBar/>
+                {/* runs top */}
+                <RunStop />
+                <BatteryBar />
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleToggleCustomize}
@@ -388,7 +393,7 @@ export const Operator = (props: {
                             <span>
                                 {buttonCollision.length > 0
                                     ? buttonCollision.join(", ") +
-                                      " in collision!"
+                                    " in collision!"
                                     : ""}
                             </span>
                         </Alert>

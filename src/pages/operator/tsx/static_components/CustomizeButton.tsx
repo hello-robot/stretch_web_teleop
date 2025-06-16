@@ -12,7 +12,8 @@ type CustomizeButtonProps = {
 /** Button to toggle customization mode. */
 export const CustomizeButton = (props: CustomizeButtonProps) => {
     const icon = props.customizing ? <CheckIcon /> : <BuildIcon />;
-    const text = props.customizing ? "Done" : "Customize";
+    const nbspUnicode = '\u00A0';
+    const text = props.customizing ? `${nbspUnicode}Done` : "";
     return (
         <button
             onClick={props.onClick}
