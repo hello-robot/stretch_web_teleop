@@ -313,8 +313,8 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName
-                  )
+                    layoutName as DefaultLayoutName
+                )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
         },
@@ -377,7 +377,7 @@ export const Operator = (props: {
                             <span>
                                 {buttonCollision.length > 0
                                     ? buttonCollision.join(", ") +
-                                      " in collision!"
+                                    " in collision!"
                                     : ""}
                             </span>
                         </Alert>

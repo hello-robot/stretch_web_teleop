@@ -112,8 +112,8 @@ export const Panel = (props: CustomizableComponentProps) => {
     // Add onClick listener to tab content in customization mode
     const selectProp = props.sharedState.customizing
         ? {
-              onClick: selectContent,
-          }
+            onClick: selectContent,
+        }
         : {};
 
     /**

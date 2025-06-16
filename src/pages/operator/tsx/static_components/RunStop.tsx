@@ -1,4 +1,4 @@
-import "operator/css/RunStopButton.css";
+import "operator/css/RunStop.css";
 import { className } from "shared/util";
 import { runStopFunctionProvider } from "..";
 import { RunStopFunctions } from "../function_providers/RunStopFunctionProvider";
@@ -6,7 +6,7 @@ import { CustomizableComponentProps } from "../layout_components/CustomizableCom
 import runStopButton from "operator/icons/button.svg";
 import React, { useState } from "react";
 
-export const RunStopButton = (props: CustomizableComponentProps) => {
+export const RunStop = () => {
     const functs: RunStopFunctions = runStopFunctionProvider.provideFunctions();
     const [enabled, setEnabled] = useState<boolean>(false);
 
