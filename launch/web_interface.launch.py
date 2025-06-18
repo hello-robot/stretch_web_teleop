@@ -487,20 +487,20 @@ def generate_launch_description():
     )
     ld.add_action(navigation_bringup_launch)
 
-    ld.add_action(
-        ExecuteProcess(
-            cmd=[
-                [
-                    FindExecutable(name="ros2"),
-                    " service call ",
-                    "/reinitialize_global_localization ",
-                    "std_srvs/srv/Empty ",
-                    '"{}"',
-                ]
-            ],
-            shell=True,
-        ),
-    )
+    # ld.add_action(
+    #     ExecuteProcess(
+    #         cmd=[
+    #             [
+    #                 FindExecutable(name="ros2"),
+    #                 " service call ",
+    #                 "/reinitialize_global_localization ",
+    #                 "std_srvs/srv/Empty ",
+    #                 '"{}"',
+    #             ]
+    #         ],
+    #         shell=True,
+    #     ),
+    # )
 
     ld.add_action(
         ExecuteProcess(

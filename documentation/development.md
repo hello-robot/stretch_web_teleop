@@ -372,7 +372,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
         <React.Fragment>
             <div id="home-the-robot-container">
                 <p>Robot is not homed. Please drive the robot to a safe position and press the home button.</p>
-                <button onClick={() => { functions.Home(); }}>
+                <button onPointerDown={() => { functions.Home(); }}>
                     <span hidden={props.hideLabels}>Home</span>
                     <HomeIcon />
                 </button>
@@ -382,7 +382,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
 };
 ```
 
-Notice that we import the instance of `homeTheRobotFunctionProvider` that was created in [`index.tsx`](#indextsx-1). Further notice that we define the set of functions required for the component in an enum called `HomeTheRobotFunction`. This enables us to map the button's `onClick` callback to the `HomeTheRobotFunction.Home` method. The function provider uses the same enum to map a method that gets called when the button is clicked. The function provider is defined in [`HomeTheRobotFunctionProvider`](#function_providers).
+Notice that we import the instance of `homeTheRobotFunctionProvider` that was created in [`index.tsx`](#indextsx-1). Further notice that we define the set of functions required for the component in an enum called `HomeTheRobotFunction`. This enables us to map the button's `onPointerDown` callback to the `HomeTheRobotFunction.Home` method. The function provider uses the same enum to map a method that gets called when the button is clicked. The function provider is defined in [`HomeTheRobotFunctionProvider`](#function_providers).
 
 We dress up the HTML in this component with a stylesheet defined in `src/pages/operator/css/HomeTheRobot.css`.
 

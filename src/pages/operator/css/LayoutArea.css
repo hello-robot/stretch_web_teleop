@@ -1,20 +1,19 @@
-#layout-area {
-    /* padding: var(--screen-padding);
-    flex: 1 1 0; */
-    padding: var(--screen-padding);
+.layout-area {
     flex-direction: column;
     height: auto;
+    width: fit-content;
 }
 
 /* Remove margin for elements at edges of the layout area */
-#layout-area > *:first-of-type {
+.layout-area>*:first-of-type {
     margin-left: 0;
 }
-#layout-area > *:last-of-type {
+
+.layout-area>*:last-of-type {
     margin-right: 0;
 }
 
-#layout-area,
+.layout-area,
 .tabs-content {
     display: flex;
     justify-content: space-evenly;
@@ -22,7 +21,8 @@
 }
 
 @media screen and (orientation: portrait) and (max-device-width: 900px) {
-    #layout-area,
+
+    .layout-area,
     .tabs-content {
         flex-direction: column;
         padding: 1rem;
@@ -30,9 +30,11 @@
     }
 }
 
-@media screen and (orientation: landscape) and (max-device-width: 900px) {
-    #layout-area,
+@media screen and (orientation: landscape) and (max-device-width: 1200px) {
+
+    .layout-area,
     .tabs-content {
-        overflow: scroll;
+        overflow: hidden;
+        min-width: min-content;
     }
 }

@@ -36,7 +36,7 @@ export const SideBySideView = (props) => {
                     >
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit" onClick={handleLogout}>
+                    <Button color="inherit" onPointerDown={handleLogout}>
                         Logout
                     </Button>
                 </Toolbar>
@@ -80,7 +80,7 @@ export const SideBySideView = (props) => {
                     >
                         Stretch Web Teleop
                     </Typography>
-                    <Button color="inherit" onClick={handleLogout}>
+                    <Button color="inherit" onPointerDown={handleLogout}>
                         Logout
                     </Button>
                 </Toolbar>

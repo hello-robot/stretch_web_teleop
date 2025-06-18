@@ -144,7 +144,7 @@ export const AllVideoStreamComponent = (props: { streams: VideoStream[] }) => {
     // let buttonPads = Bp.ExampleButtonPads;
     // let buttonPads = [undefined, undefined, undefined];
     // Replace the overhead button pad with predictive display
-    // buttonPads[0] = <PredictiveDisplay onClick={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
+    // buttonPads[0] = <PredictiveDisplay onPointerDown={(len, ang) => console.log(`Length: ${len}, Angle: ${ang}`)} />;
     const widths = ["30%", "22.5%", "45%"];
     return (
         <div id="video-stream-container">

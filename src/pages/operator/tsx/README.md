@@ -48,7 +48,7 @@ This diagram shows the flow of logic between classes and components while the Op
 : a single component in the layout, the customizable component renders a different subcomponent based on the `type` in the `ComponentDefinition`.
 
 **`FunctionProvider`**
-: takes the action mode and speed control from `ActionMode` and `SpeedControl` respectively. Returns a set of functions for how different controls should behave, for example `onClick` and `onRelease` for a button on a `ButtonPad`.
+: takes the action mode and speed control from `ActionMode` and `SpeedControl` respectively. Returns a set of functions for how different controls should behave, for example `onPointerDown` and `onRelease` for a button on a `ButtonPad`.
 
 **`ButtonPad` and other controls**
 : when `ButtonPad` or another control renders, it gets the set of functions from the `FunctionProvider`.

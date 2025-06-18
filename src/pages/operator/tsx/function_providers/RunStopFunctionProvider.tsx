@@ -1,7 +1,7 @@
 import { FunctionProvider } from "./FunctionProvider";
 
 export type RunStopFunctions = {
-    onClick: () => void;
+    onPointerDown: () => void;
 };
 
 export class RunStopFunctionProvider extends FunctionProvider {
@@ -32,7 +32,7 @@ export class RunStopFunctionProvider extends FunctionProvider {
 
     public provideFunctions(): RunStopFunctions {
         return {
-            onClick: () => {
+            onPointerDown: () => {
                 FunctionProvider.remoteRobot?.setToggle(
                     "setRunStop",
                     !this.enabled,

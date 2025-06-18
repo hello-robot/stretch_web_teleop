@@ -93,14 +93,14 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                     children: [
                         {
                             type: ComponentType.SingleTab,
-                            label: "Safety",
+                            label: "Movement Recorder",
                             children: [
-                                {
-                                    type: ComponentType.RunStopButton,
-                                },
-                                {
-                                    type: ComponentType.BatteryGuage,
-                                },
+                                // {
+                                //     type: ComponentType.RunStopButton,
+                                // },
+                                // {
+                                //     type: ComponentType.BatteryGuage,
+                                // },
                             ],
                         },
                     ],

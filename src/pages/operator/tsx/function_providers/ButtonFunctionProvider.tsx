@@ -6,6 +6,7 @@ import {
 } from "shared/util";
 import { ActionMode } from "../utils/component_definitions";
 import { FunctionProvider } from "./FunctionProvider";
+import { isMobile } from "react-device-detect";
 
 /**
  * Each of the possible buttons which could be on a button pad. The string is
@@ -28,10 +29,10 @@ export enum ButtonPadButton {
     WristPitchDown = "Wrist pitch down",
     WristRollLeft = "Wrist roll left",
     WristRollRight = "Wrist roll right",
-    CameraTiltUp = "Camera tilt up",
-    CameraTiltDown = "Camera tilt down",
-    CameraPanLeft = "Camera pan left",
-    CameraPanRight = "Camera pan right",
+    CameraTiltUp = "Look up",
+    CameraTiltDown = "Look down",
+    CameraPanLeft = "Look left",
+    CameraPanRight = "Look right",
 }
 
 /** Array of the pan tilt buttons */
@@ -58,7 +59,7 @@ const negativeButtonPadFunctions = new Set<ButtonPadButton>([
 
 /** Functions called when the user interacts with a button. */
 export type ButtonFunctions = {
-    onClick: () => void;
+    onPointerDown: () => void;
     onRelease?: () => void;
     onLeave?: () => void;
 };
@@ -158,6 +159,17 @@ export class ButtonFunctionProvider extends FunctionProvider {
             const prevButtonStatePos = this.buttonStateMap.get(buttonPos);
             const prevInLimitNeg = prevButtonStateNeg !== ButtonState.Limit;
             const prevInLimitPos = prevButtonStatePos !== ButtonState.Limit;
+            // If the joint associated with the active button is at the joint limit then
+            // stop the current action. This will stop the robot from constantly sending
+            // move commands when in click-click mode.
+            if (prevButtonStateNeg === ButtonState.Active && !inLimitNeg) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonNeg, ButtonState.Limit);
+            } else if (prevButtonStatePos === ButtonState.Active && !inLimitPos) {
+                this.stopCurrentAction()
+                this.buttonStateMap.set(buttonPos, ButtonState.Limit);
+            }
+
             if (
                 prevButtonStateNeg == undefined ||
                 inLimitNeg !== prevInLimitNeg
@@ -189,6 +201,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
         callback: (buttonStateMap: ButtonStateMap) => void,
     ) {
         this.operatorCallback = callback;
+    }
+
+    public getActiveButton() {
+        return [...this.buttonStateMap].find(([key, value]) => value === ButtonState.Active)
     }
 
     /**
@@ -303,7 +319,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         break;
                 }
                 return {
-                    onClick: () => {
+                    onPointerDown: () => {
                         action();
                         this.setButtonActiveState(buttonPadFunction);
                         // Set button state inactive after 1 second
@@ -358,7 +374,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
 
                 return FunctionProvider.actionMode === ActionMode.PressAndHold
                     ? {
-                          onClick: () => {
+                          onPointerDown: () => {
                               action();
                               this.setButtonActiveState(buttonPadFunction);
                           },
@@ -371,7 +387,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                       }
                     : {
                           // For click-click, stop if button already active
-                          onClick: () => {
+                          onPointerDown: () => {
                               if (this.activeVelocityAction) {
                                   this.stopCurrentAction();
                                   this.setButtonInactiveState(
@@ -382,7 +398,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                                   this.setButtonActiveState(buttonPadFunction);
                               }
                           },
-                          onLeave: onLeave,
+                          onLeave: !isMobile ? onLeave : () => {},
                       };
         }
     }

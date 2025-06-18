@@ -23,6 +23,7 @@ export enum UnderVideoButton {
     LookAtBase = "Look At Base",
     LookAhead = "Look Ahead",
     FollowGripper = "Follow Gripper",
+    PredictiveDisplay = "Predictive Display",
     RealsenseDepthSensing = "Realsense Depth Sensing",
     GripperDepthSensing = "Gripper Depth Sensing",
     ExpandedGripperView = "Expanded Gripper View",
@@ -70,9 +71,10 @@ export const wristButtons: UnderVideoButton[] = [
 export type RealsenseButtons = (typeof realsenseButtons)[number];
 
 export type UnderVideoButtonFunctions = {
-    onClick?: (...args: any[]) => void;
+    onPointerDown?: (...args: any[]) => void;
     onCheck?: (toggle: boolean) => void;
     get?: () => any;
+    set?: (value: any) => void;
     send?: (name: string) => void;
     getFuture?: () => Promise<any>;
 };
@@ -140,7 +142,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
         switch (button) {
             case UnderVideoButton.DriveView:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.setCameraPerspective(
                             "overhead",
                             "nav",
@@ -148,7 +150,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.GripperView:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.setCameraPerspective(
                             "overhead",
                             "manip",
@@ -156,21 +158,21 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.LookAtBase:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.setRobotPose(
                             REALSENSE_BASE_POSE,
                         ),
                 };
             case UnderVideoButton.LookAhead:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.setRobotPose(
                             REALSENSE_FORWARD_POSE,
                         ),
                 };
             case UnderVideoButton.LookAtGripper:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.lookAtGripper(
                             "lookAtGripper",
                         ), //setRobotPose(REALSENSE_GRIPPER_POSE)
@@ -211,7 +213,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 horizontal = true;
             case UnderVideoButton.StartMoveToPregraspVertical:
                 return {
-                    onClick: (scaledXY: [number, number] | null) => {
+                    onPointerDown: (scaledXY: [number, number] | null) => {
                         if (!scaledXY) {
                             console.log("No scaledXY");
                             return;
@@ -245,7 +247,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.CancelMoveToPregrasp:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.stopMoveToPregrasp(),
                 };
             case UnderVideoButton.ToggleArucoMarkers:
@@ -258,7 +260,7 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.CenterWrist:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.setRobotPose(
                             CENTER_WRIST,
                         ),
@@ -266,14 +268,14 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
             case UnderVideoButton.StowWrist:
                 if (stretchTool === StretchTool.TABLET) {
                     return {
-                        onClick: () =>
+                        onPointerDown: () =>
                             FunctionProvider.remoteRobot?.setRobotPose(
                                 STOW_WRIST_TABLET,
                             ),
                     };
                 } else {
                     return {
-                        onClick: () =>
+                        onPointerDown: () =>
                             FunctionProvider.remoteRobot?.setRobotPose(
                                 STOW_WRIST_GRIPPER,
                             ),
@@ -304,11 +306,11 @@ export class UnderVideoFunctionProvider extends FunctionProvider {
                 };
             case UnderVideoButton.RealsenseShowTablet:
                 return {
-                    onClick: () => FunctionProvider.remoteRobot?.showTablet(),
+                    onPointerDown: () => FunctionProvider.remoteRobot?.showTablet(),
                 };
             case UnderVideoButton.RealsenseStopShowTablet:
                 return {
-                    onClick: () =>
+                    onPointerDown: () =>
                         FunctionProvider.remoteRobot?.stopShowTablet(),
                 };
             case UnderVideoButton.RealsenseShowTabletGoalReached:

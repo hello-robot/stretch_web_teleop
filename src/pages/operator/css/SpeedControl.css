@@ -1,3 +1,8 @@
+#velocity-control-container {
+    display: flex;
+    gap: 0.5px;
+}
+
 #velocity-control-container button:first-of-type {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }
@@ -9,7 +14,19 @@
 #velocity-control-container button {
     border-radius: 0;
     /* Make buttons wider than default */
-    width: 8rem;
+    width: 7rem;
+}
+
+#velocity-control-container button:hover {
+    box-shadow: var(--shadow);
+}
+
+.velocity-radio-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    vertical-align: middle;
+    align-items: center;
 }
 
 @media (max-width: 1000px) {

@@ -260,6 +260,13 @@ export interface ROSOccupancyGrid {
     data: number[];
 }
 
+export const STOW_ARM_WRIST_GRIPPER: RobotPose = {
+    wrist_extension: 0.0,
+    joint_wrist_roll: 0.0,
+    joint_wrist_pitch: -0.497,
+    joint_wrist_yaw: 3.19579,
+};
+
 export const STOW_WRIST_GRIPPER: RobotPose = {
     joint_wrist_roll: 0.0,
     joint_wrist_pitch: -0.497,
@@ -275,6 +282,12 @@ export const STOW_WRIST_TABLET: RobotPose = {
 export const CENTER_WRIST: RobotPose = {
     joint_wrist_roll: 0.0,
     joint_wrist_pitch: 0.0,
+    joint_wrist_yaw: 0.0,
+};
+
+export const POINT_WRIST_DOWN: RobotPose = {
+    joint_wrist_roll: 0.0,
+    joint_wrist_pitch: -Math.PI / 2.0,
     joint_wrist_yaw: 0.0,
 };
 
@@ -340,8 +353,8 @@ export const JOINT_INCREMENTS: { [key in ValidJoints]?: number } = {
 };
 
 export const navigationProps = {
-    width: 768, // 800,
-    height: 768, // 1280,
+    width: 600,
+    height: 800,
     scale: 1,
     fps: 6.0,
     streamName: "navigation",
@@ -486,4 +499,19 @@ export function className(baseName: string, flags: {}): string {
         }
     }
     return className;
+}
+
+export function getFormattedDateTime(): string {
+    const now = new Date();
+
+    // Extract individual components
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2); // Get last two digits of the year
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    // Format as MM-DD-YY:HH:MM:SS
+    return `${month}-${day}-${year}:${hours}:${minutes}:${seconds}`;
 }
