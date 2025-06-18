@@ -84,7 +84,7 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
     return (
         <div
             className={className("button-grid", { selected, customizing })}
-            onClick={handleSelect}
+            onPointerDown={handleSelect}
         >
             {/* {BACKGROUND_COLORS} */}
             {/* {HEADER_NAMES.map((headerName, idx) => (
@@ -104,7 +104,7 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
                 const clickProps = props.sharedState.customizing
                     ? {}
                     : {
-                          onPointerDown: functs.onClick,
+                          onPointerDown: functs.onPointerDown,
                           onPointerUp: functs.onRelease,
                           onPointerLeave: functs.onLeave,
                       };

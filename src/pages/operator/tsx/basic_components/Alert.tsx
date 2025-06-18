@@ -31,7 +31,7 @@ export const Alert = (props: {
                 className={className("closebtn", {
                     hide: props.hide_close_button,
                 })}
-                onClick={() => setIsShow(false)}
+                onPointerDown={() => setIsShow(false)}
             >
                 &times;
             </span>

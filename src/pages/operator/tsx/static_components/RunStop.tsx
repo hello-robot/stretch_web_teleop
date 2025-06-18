@@ -13,7 +13,7 @@ export const RunStop = () => {
     return (
         <div className="run-stop-container">
             <button
-                onPointerDown={functs.onClick}
+                onPointerDown={functs.onPointerDown}
                 className={className("run-stop-button", { enabled })}
                 aria-label={`${!enabled ? 'Enable' : "Disable"} Run Stop`}
             >Run Stop</button>

@@ -6,7 +6,7 @@ type CustomizeButtonProps = {
     /** If the interface is in customization mode */
     customizing: boolean;
     /** Callback for clicking the button */
-    onClick: () => void;
+    onPointerDown: () => void;
 };
 
 /** Button to toggle customization mode. */
@@ -16,7 +16,7 @@ export const CustomizeButton = (props: CustomizeButtonProps) => {
     const text = props.customizing ? `${nbspUnicode}Done` : "";
     return (
         <button
-            onClick={props.onClick}
+            onPointerDown={props.onPointerDown}
             id="customize-button"
             className={
                 props.customizing ? "btn-turquoise font-white" : undefined

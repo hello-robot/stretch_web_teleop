@@ -41,7 +41,7 @@ const distanceRatioForMaxSpeed = 0.9;
 /** Functions required for predictive display */
 export type PredictiveDisplayFunctions = {
     /** Callback function when mouse is clicked in predicitive display area */
-    onClick: (length: number, angle: number) => void;
+    onPointerDown: (length: number, angle: number) => void;
     /** Callback function when cursor is moved in predictive display area */
     onMove?: (length: number, angle: number) => void;
     /** Callback function for release */
@@ -84,8 +84,8 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
 
     function handleClick() {
         holding.current = true;
-        if (functions.onClick) {
-            functions.onClick(length.current, angle.current);
+        if (functions.onPointerDown) {
+            functions.onPointerDown(length.current, angle.current);
         }
     }
 

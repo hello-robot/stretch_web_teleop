@@ -8,13 +8,13 @@ import { isBrowser, isTablet } from "react-device-detect";
 export const RadioButton = (props: {
     label: string;
     selected: boolean;
-    onClick: () => void;
+    onPointerDown: () => void;
     functs: RadioFunctions;
 }) => {
     return (
         <div
             className={!isBrowser && !isTablet  ? "radio-btn-mobile" : "radio-btn"}
-            onPointerDown={props.onClick}
+            onPointerDown={props.onPointerDown}
         >
             <label key={props.label}>
                 <input
@@ -23,7 +23,7 @@ export const RadioButton = (props: {
                     value={props.label}
                     key={props.label}
                     checked={props.selected}
-                    onChange={props.onClick}
+                    onChange={props.onPointerDown}
                 />
                 {props.label}
             </label>
@@ -65,7 +65,7 @@ export const RadioGroup = (props: {
                     key={label}
                     label={label}
                     selected={selected === label}
-                    onClick={() => {
+                    onPointerDown={() => {
                         if (selected === label) {
                             setSelected("");
                             props.functs.SelectedLabel("");

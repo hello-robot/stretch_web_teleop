@@ -202,7 +202,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             console.log("scaled x", scaled_x, "scaled y", scaled_y);
             // underVideoFunctionProvider.provideFunctions(
             //   UnderVideoButton.MoveToPregrasp,
-            // ).onClick!(scaled_x, scaled_y);add
+            // ).onPointerDown!(scaled_x, scaled_y);add
         }
     }
 
@@ -398,7 +398,7 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
         <button
             style={gridPosition}
             className={props.direction}
-            onPointerDown={functs.onClick}
+            onPointerDown={functs.onPointerDown}
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
             aria-label={props.direction}
@@ -442,7 +442,7 @@ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
     return (
         <button
             className={"overlay btn-" + dir}
-            onPointerDown={functs.onClick}
+            onPointerDown={functs.onPointerDown}
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
         >
@@ -677,7 +677,7 @@ function executeFixedOverheadSettings(definition: FixedOverheadVideoStreamDef) {
     const overheadViewButton = definition.gripperView
         ? UnderVideoButton.GripperView
         : UnderVideoButton.DriveView;
-    underVideoFunctionProvider.provideFunctions(overheadViewButton).onClick!();
+    underVideoFunctionProvider.provideFunctions(overheadViewButton).onPointerDown!();
 }
 
 /**
@@ -802,7 +802,7 @@ const UnderOverheadButtons = (props: {
         <React.Fragment>
             <CheckToggleButton
                 checked={props.definition.predictiveDisplay || false}
-                onClick={() => {
+                onPointerDown={() => {
                     if (!props.definition.predictiveDisplay) {
                         props.definition.predictiveDisplay = true;
                         props.setPredictiveDisplay(true);
@@ -834,7 +834,7 @@ const UnderAdjustableOverheadButtons = (props: {
         if (props.definition.predictiveDisplay) {
             underVideoFunctionProvider.provideFunctions(
                 UnderVideoButton.LookAtBase,
-            ).onClick!();
+            ).onPointerDown!();
             props.setPredictiveDisplay(true);
         } else {
             props.setPredictiveDisplay(false);
@@ -849,7 +849,7 @@ const UnderAdjustableOverheadButtons = (props: {
                 onPointerDown={() => {
                     underVideoFunctionProvider.provideFunctions(
                         realsenseButtons[0],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             >
                 Look Ahead
@@ -859,7 +859,7 @@ const UnderAdjustableOverheadButtons = (props: {
                 onPointerDown={() => {
                     underVideoFunctionProvider.provideFunctions(
                         realsenseButtons[1],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             >
                 Look At Base
@@ -869,7 +869,7 @@ const UnderAdjustableOverheadButtons = (props: {
                 onPointerDown={() => {
                     underVideoFunctionProvider.provideFunctions(
                         realsenseButtons[2],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             >
                 Look At Gripper
@@ -891,12 +891,12 @@ const UnderAdjustableOverheadButtons = (props: {
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
                         realsenseButtons[idx],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             />
             {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.followGripper =
                         !props.definition.followGripper;
                     setRerender(!rerender);
@@ -908,11 +908,11 @@ const UnderAdjustableOverheadButtons = (props: {
             /> */}
             <CheckToggleButton
                 checked={props.definition.predictiveDisplay || false}
-                onClick={() => {
+                onPointerDown={() => {
                     if (!props.definition.predictiveDisplay) {
                         underVideoFunctionProvider.provideFunctions(
                             UnderVideoButton.LookAtBase,
-                        ).onClick!();
+                        ).onPointerDown!();
                         props.setPredictiveDisplay(true);
                         props.definition.predictiveDisplay = true;
                     } else {
@@ -960,7 +960,7 @@ const UnderRealsenseButtons = (props: {
                     checked={
                         props.definition.selectObjectForMoveToPregrasp || false
                     }
-                    onClick={() => {
+                    onPointerDown={() => {
                         props.definition.selectObjectForMoveToPregrasp =
                             !props.definition.selectObjectForMoveToPregrasp;
                         props.setSelectObjectScaledXY(null);
@@ -974,7 +974,7 @@ const UnderRealsenseButtons = (props: {
                         onPointerDown={() => {
                             underVideoFunctionProvider.provideFunctions(
                                 UnderVideoButton.CancelMoveToPregrasp,
-                            ).onClick!();
+                            ).onPointerDown!();
                             props.setIsMovingToPregrasp(false);
                         }}
                     >
@@ -1000,7 +1000,7 @@ const UnderRealsenseButtons = (props: {
                             }
                             underVideoFunctionProvider.provideFunctions(
                                 realsenseMoveToPregraspButtons[idx],
-                            ).onClick!(props.selectObjectScaledXY);
+                            ).onPointerDown!(props.selectObjectScaledXY);
                             props.setSelectObjectScaledXY(null);
                             props.setIsMovingToPregrasp(true);
                             props.definition.selectObjectForMoveToPregrasp =
@@ -1043,7 +1043,7 @@ const UnderRealsenseButtons = (props: {
             <React.Fragment>
                 <CheckToggleButton
                     checked={props.definition.bodyPoseAR || false}
-                    onClick={() => {
+                    onPointerDown={() => {
                         props.definition.bodyPoseAR =
                             !props.definition.bodyPoseAR;
                         setRerender(!rerender);
@@ -1060,7 +1060,7 @@ const UnderRealsenseButtons = (props: {
                             onPointerDown={() => {
                                 underVideoFunctionProvider.provideFunctions(
                                     UnderVideoButton.RealsenseStopShowTablet,
-                                ).onClick!();
+                                ).onPointerDown!();
                                 props.setIsShowingTablet(false);
                             }}
                         >
@@ -1073,7 +1073,7 @@ const UnderRealsenseButtons = (props: {
                             onPointerDown={() => {
                                 underVideoFunctionProvider.provideFunctions(
                                     UnderVideoButton.RealsenseShowTablet,
-                                ).onClick!();
+                                ).onPointerDown!();
                                 props.setIsShowingTablet(true);
                                 underVideoFunctionProvider.provideFunctions(
                                     UnderVideoButton.RealsenseShowTabletGoalReached,
@@ -1103,12 +1103,12 @@ const UnderRealsenseButtons = (props: {
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
                         realsenseButtons[idx],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             />
             {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.followGripper =
                         !props.definition.followGripper;
                     setRerender(!rerender);
@@ -1120,7 +1120,7 @@ const UnderRealsenseButtons = (props: {
             /> */}
             <CheckToggleButton
                 checked={props.definition.depthSensing || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.depthSensing =
                         !props.definition.depthSensing;
                     setRerender(!rerender);
@@ -1134,7 +1134,7 @@ const UnderRealsenseButtons = (props: {
             {showTabletButtons}
             {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.arucoMarkers = !props.definition.arucoMarkers;
                     setRerender(!rerender);
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.ToggleArucoMarkers).onCheck!(props.definition.arucoMarkers)
@@ -1148,7 +1148,7 @@ const UnderRealsenseButtons = (props: {
                 placeholderText="Select a marker..."
                 top={true}
             />
-            <button className="play-btn" onClick={
+            <button className="play-btn" onPointerDown={
                 () => {
                     if (selectedIdx != undefined) {
                         let marker_name = markers[selectedIdx]
@@ -1186,7 +1186,7 @@ const UnderGripperButtons = (props: {
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
                         wristButtons[idx],
-                    ).onClick!();
+                    ).onPointerDown!();
                 }}
             />
             {props.betaTeleopKit ? (
@@ -1196,7 +1196,7 @@ const UnderGripperButtons = (props: {
                     <div className="inline-buttons">
                         <CheckToggleButton
                             checked={props.definition.expandedGripperView || false}
-                            onClick={() => {
+                            onPointerDown={() => {
                                 props.definition.expandedGripperView =
                                     !props.definition.expandedGripperView;
                                 setRerender(!rerender);
@@ -1210,7 +1210,7 @@ const UnderGripperButtons = (props: {
                             props.stretchTool === StretchTool.DEX_GRIPPER) && (
                                 <CheckToggleButton
                                     checked={props.definition.depthSensing || false}
-                                    onClick={() => {
+                                    onPointerDown={() => {
                                         props.definition.depthSensing =
                                             !props.definition.depthSensing;
                                         setRerender(!rerender);
@@ -1256,10 +1256,10 @@ const CameraPerspectiveButton = (props: {
      */
     perspective: OverheadButtons | RealsenseButtons;
 }) => {
-    const onClick = underVideoFunctionProvider.provideFunctions(
+    const onPointerDown = underVideoFunctionProvider.provideFunctions(
         props.perspective,
-    ).onClick;
-    return <button onPointerDown={onClick}>{props.perspective}</button>;
+    ).onPointerDown;
+    return <button onPointerDown={onPointerDown}>{props.perspective}</button>;
 };
 
 function getGripperLabel(stretchTool: StretchTool) {

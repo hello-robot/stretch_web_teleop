@@ -5,7 +5,7 @@ import "operator/css/TabGroup.css";
 export const Tab = (props: {
     label: string;
     active: boolean;
-    onClick: () => void;
+    onPointerDown: () => void;
     pill: boolean;
 }) => {
     const active = props.active;
@@ -13,7 +13,7 @@ export const Tab = (props: {
     return props.pill ? (
         <li
             className={className("pill-tab-btn", { active })}
-            onPointerDown={props.onClick}
+            onPointerDown={props.onPointerDown}
             key={props.label}
         >
             {props.label}
@@ -21,7 +21,7 @@ export const Tab = (props: {
     ) : (
         <button
             className={className("tab-btn", { active })}
-            onPointerDown={props.onClick}
+            onPointerDown={props.onPointerDown}
             key={props.label}
         >
             {props.label}
@@ -50,7 +50,7 @@ export const TabGroup = (props: {
                         key={label}
                         label={label}
                         active={activeIndex === index}
-                        onClick={() => {
+                        onPointerDown={() => {
                             props.onChange(index);
                             setActiveIndex(index);
                         }}

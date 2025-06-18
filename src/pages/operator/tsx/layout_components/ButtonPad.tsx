@@ -90,7 +90,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     };
 
-    // In customizing state add onClick callback to button pad SVG element
+    // In customizing state add onPointerDown callback to button pad SVG element
     // note: if overlaid on a video stream, let the parent video stream handle the click
     const selectProp =
         customizing && !overlay
@@ -142,7 +142,7 @@ const SingleButton = (props: SingleButtonProps) => {
     const clickProps = props.sharedState.customizing
         ? {}
         : {
-            onPointerDown: functs.onClick,
+            onPointerDown: functs.onPointerDown,
             onPointerUp: functs.onRelease,
             onPointerLeave: functs.onLeave,
         };

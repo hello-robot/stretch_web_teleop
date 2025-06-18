@@ -67,7 +67,7 @@ export const SpeedControl = (props: SpeedControlProps) => {
         <button
           key={label}
           className={active ? "btn-blue font-white" : ""}
-          onClick={() => props.onChange(scale, label)}
+          onPointerDown={() => props.onChange(scale, label)}
         >
           {label}
         </button>

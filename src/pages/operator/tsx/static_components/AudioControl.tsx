@@ -50,7 +50,7 @@ export const AudioControl = (props: AudioControlProps) => {
             >
                 Robot audio playback is not supported on this browser
             </audio>
-            <button className="button audioControlButton" onClick={toggleMute}>
+            <button className="button audioControlButton" onPointerDown={toggleMute}>
                 {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
             </button>
         </div>

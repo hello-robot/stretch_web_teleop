@@ -340,7 +340,7 @@ export const Operator = (props: {
 
     return (
         <div id="operator">
-            <div id="operator-header" onClick={handleClickHeader}>
+            <div id="operator-header" onPointerDown={handleClickHeader}>
                 {/* Action mode button */}
                 <Dropdown
                     onChange={(idx) => setActionMode(actionModes[idx])}
@@ -364,7 +364,7 @@ export const Operator = (props: {
                 <BatteryBar />
                 <CustomizeButton
                     customizing={customizing}
-                    onClick={handleToggleCustomize}
+                    onPointerDown={handleToggleCustomize}
                 />
             </div>
             {robotNotHomed && (

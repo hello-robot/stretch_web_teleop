@@ -334,7 +334,7 @@ const UnderMapButtons = (props: {
                 <div className="inline-buttons">
                 <CheckToggleButton
                         checked={selectGoal}
-                        onClick={() => {
+                        onPointerDown={() => {
                             props.handleSelectGoal(!selectGoal);
                             setSelectGoal(!selectGoal);
                             if (selectGoal) props.functs.RemoveGoalMarker();
@@ -465,7 +465,7 @@ const UnderMapButtons = (props: {
                 )}
                 <CheckToggleButton
                     checked={selectGoal}
-                    onClick={() => {
+                    onPointerDown={() => {
                         props.handleSelectGoal(!selectGoal);
                         setSelectGoal(!selectGoal);
                     }}

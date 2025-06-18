@@ -72,7 +72,7 @@ export const HomeTheRobot = (props: { hideLabels: boolean }) => {
                         <></>
                     ) : (
                         <button
-                            onClick={() => {
+                            onPointerDown={() => {
                                 functions.Home();
                             }}
                             className="home-btn-container"

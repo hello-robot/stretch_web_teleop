@@ -313,7 +313,7 @@ export const MovementRecorder = (props: {
                 <Tooltip text="Play movement" position="top">
                     <button
                         className="play-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (selectedIdx != undefined) {
                                 functions.LoadRecording(selectedIdx);
                             }
@@ -329,7 +329,7 @@ export const MovementRecorder = (props: {
                 >
                     <button
                         className="save-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (!isRecording) {
                                 setIsRecording(true);
                                 setShowJointSelectionModal(true);
@@ -354,7 +354,7 @@ export const MovementRecorder = (props: {
                 <Tooltip text="Delete recording" position="top">
                     <button
                         className="delete-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (selectedIdx != undefined) {
                                 functions.DeleteRecording(selectedIdx);
                             }
@@ -383,7 +383,7 @@ export const MovementRecorder = (props: {
                 functs={radioFuncts}
             />
             <div className="global-btns">
-                {/* <div className="mobile-movement-save-btn" onClick={() => {
+                {/* <div className="mobile-movement-save-btn" onPointerDown={() => {
                         if (!isRecording) {
                             setIsRecording(true)
                             functions.Record()
@@ -403,7 +403,7 @@ export const MovementRecorder = (props: {
                 </div> */}
                 <div
                     className="mobile-movement-play-btn"
-                    onClick={() => {
+                    onPointerDown={() => {
                         if (selectedIdx != undefined && selectedIdx > -1) {
                             functions.LoadRecording(selectedIdx);
                         }

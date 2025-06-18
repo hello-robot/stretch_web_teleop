@@ -347,7 +347,7 @@ export const MobileOperator = (props: {
                         <div className="depth-sensing">
                             <CheckToggleButton
                                 checked={depthSensing}
-                                onClick={() => {
+                                onPointerDown={() => {
                                     setDepthSensing(!depthSensing);
                                     underVideoFunctionProvider.provideFunctions(
                                         UnderVideoButton.DepthSensing,

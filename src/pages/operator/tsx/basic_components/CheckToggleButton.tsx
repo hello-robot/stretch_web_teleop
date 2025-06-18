@@ -15,7 +15,7 @@ type CheckToggleButtonProps = {
      * Function when button is clicked, this should probably toggle the state
      * of `checked`
      */
-    onClick: () => void;
+    onPointerDown: () => void;
     /**
      * Text to display on the button to the right of the checkbox.
      */
@@ -39,7 +39,7 @@ export const CheckToggleButton = (props: CheckToggleButtonProps) => {
                 !isBrowser && !isTablet  ? "check-toggle-button-mobile" : "check-toggle-button",
                 { checked },
             )}
-            onPointerDown={props.onClick}
+            onPointerDown={props.onPointerDown}
         >
             <span className={"material-icons"}>{icon}</span>
             {props.label}

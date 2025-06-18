@@ -59,7 +59,7 @@ const negativeButtonPadFunctions = new Set<ButtonPadButton>([
 
 /** Functions called when the user interacts with a button. */
 export type ButtonFunctions = {
-    onClick: () => void;
+    onPointerDown: () => void;
     onRelease?: () => void;
     onLeave?: () => void;
 };
@@ -319,7 +319,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         break;
                 }
                 return {
-                    onClick: () => {
+                    onPointerDown: () => {
                         action();
                         this.setButtonActiveState(buttonPadFunction);
                         // Set button state inactive after 1 second
@@ -374,7 +374,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
 
                 return FunctionProvider.actionMode === ActionMode.PressAndHold
                     ? {
-                          onClick: () => {
+                          onPointerDown: () => {
                               action();
                               this.setButtonActiveState(buttonPadFunction);
                           },
@@ -387,7 +387,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                       }
                     : {
                           // For click-click, stop if button already active
-                          onClick: () => {
+                          onPointerDown: () => {
                               if (this.activeVelocityAction) {
                                   this.stopCurrentAction();
                                   this.setButtonInactiveState(

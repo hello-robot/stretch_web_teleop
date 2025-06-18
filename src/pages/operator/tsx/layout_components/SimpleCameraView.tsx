@@ -176,7 +176,7 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     return (
         <button
             className={"simple-overlay btn-" + dir}
-            onPointerDown={functs.onClick}
+            onPointerDown={functs.onPointerDown}
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
         >

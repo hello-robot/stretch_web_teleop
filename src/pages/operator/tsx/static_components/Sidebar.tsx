@@ -69,7 +69,7 @@ export const Sidebar = (props: SidebarProps) => {
                     disabled={deleteDisabled}
                     title={deleteTooltip}
                     className={className("btn-red", {})}
-                    onClick={
+                    onPointerDown={
                         deleteDisabled ? undefined : () => props.onDelete()
                     }
                 >
@@ -152,12 +152,12 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                 {/* <p>Global settings:</p>
                 <OnOffToggleButton
                     on={!props.displayLabels}
-                    onClick={() => props.setDisplayLabels(!props.displayLabels)}
+                    onPointerDown={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
                 />*/}
                 <OnOffToggleButton
                     on={!props.displayMovementRecorder}
-                    onClick={() =>
+                    onPointerDown={() =>
                         props.setDisplayMovementRecorder(
                             !props.displayMovementRecorder,
                         )
@@ -167,7 +167,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                 {isTablet ? <></> :
                     <OnOffToggleButton
                         on={!props.displayTextToSpeech}
-                        onClick={() =>
+                        onPointerDown={() =>
                             props.setDisplayTextToSpeech(!props.displayTextToSpeech)
                         }
                         label="Display text-to-speech"
@@ -177,23 +177,23 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     <div className="inline-buttons">
                         <button
                             className="inline-button-max-width"
-                            onClick={() => setShowLoadLayoutModal(true)}>
+                            onPointerDown={() => setShowLoadLayoutModal(true)}>
                             Load layout
                         </button>
                         <button
                             className="inline-button-max-width"
-                            onClick={() => setShowSaveLayoutModal(true)}>
+                            onPointerDown={() => setShowSaveLayoutModal(true)}>
                             Save layout
                         </button>
                     </div>
                     :
                     <>
                         <button
-                            onClick={() => setShowLoadLayoutModal(true)}>
+                            onPointerDown={() => setShowLoadLayoutModal(true)}>
                             Load layout
                         </button>
                         <button
-                            onClick={() => setShowSaveLayoutModal(true)}>
+                            onPointerDown={() => setShowSaveLayoutModal(true)}>
                             Save layout
                         </button>
                     </>
@@ -372,7 +372,7 @@ const OverheadVideoStreamOptions = (props: OptionsProps) => {
             {/* Deprecating this feature due to non-use */}
             {/* <OnOffToggleButton
                 on={definition.displayButtons}
-                onClick={toggleButtons}
+                onPointerDown={toggleButtons}
                 label="Display Buttons"
             /> */}
         </React.Fragment>
@@ -395,7 +395,7 @@ const VideoStreamOptions = (props: OptionsProps) => {
             {/* Deprecating this feature due to non-use */}
             {/* <OnOffToggleButton
                 on={definition.displayButtons}
-                onClick={toggleButtons}
+                onPointerDown={toggleButtons}
                 label="Display Buttons"
             /> */}
         </React.Fragment>
@@ -417,7 +417,7 @@ const TabOptions = (props: OptionsProps) => {
     }
     return (
         <React.Fragment>
-            <button onClick={() => setShowRenameModal(true)}>Rename Tab</button>
+            <button onPointerDown={() => setShowRenameModal(true)}>Rename Tab</button>
             <PopupModal
                 show={showRenameModal}
                 setShow={setShowRenameModal}
@@ -447,7 +447,7 @@ const TabOptions = (props: OptionsProps) => {
 type OnOffToggleButtonProps = {
     on: boolean;
     /** Callback when the button is clicked */
-    onClick: () => void;
+    onPointerDown: () => void;
     /** Text label to display to the right of the on/off button. */
     label: string;
 };
@@ -460,7 +460,7 @@ const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
         <div className="toggle-button-div">
             <button
                 className={"toggle-button " + colorClass}
-                onClick={props.onClick}
+                onPointerDown={props.onPointerDown}
             >
                 {text}
             </button>
@@ -572,7 +572,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
         return (
             <button
                 key={id}
-                onClick={() => props.onSelect(id)}
+                onPointerDown={() => props.onSelect(id)}
                 className={className("id-button", { active })}
             >
                 {id}
@@ -594,7 +594,7 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     return (
         <div className="provider-tab" key={props.type}>
             <button
-                onClick={clickExpand}
+                onPointerDown={clickExpand}
                 className={
                     tabActive && !props.ids
                         ? "active"
