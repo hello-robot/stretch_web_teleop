@@ -25,7 +25,7 @@
     border-radius: 0px 0px var(--radius) var(--radius);
 }
 
-.tabs-content > div {
+.tabs-content>div {
     flex: 1;
 }
 
@@ -40,52 +40,50 @@
 
 /* Apply to all the tabs in the header */
 .tabs-header>* {
-    .tabs-header>* {
-        flex: 1 0 auto;
-        background-color: var(--tab-inactive);
-        border-radius: var(--radius) var(--radius) 0px 0px;
+    flex: 1 0 auto;
+    background-color: var(--tab-inactive);
+    border-radius: var(--radius) var(--radius) 0px 0px;
+}
+
+/* Format tabs with icons */
+.tabs-header>.material-icons {
+    vertical-align: bottom;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.tab-button {
+    border: none;
+    font-size: 1.5rem;
+    z-index: 0;
+}
+
+.tab-button.active {
+    background-color: var(--btn-blue);
+    color: var(--font-white);
+    /* z-index: 2; */
+    box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
+}
+
+.tab-button.selected {
+    box-shadow: 0 0 0.2rem 0.2rem var(--selected-color);
+}
+
+.add-tab:hover {
+    background-color: var(--btn-turquoise);
+    color: white;
+}
+
+/* Popup for adding a new tab *************************************************/
+
+@media (max-width: 900px) {
+    .tab-button {
+        font-size: medium;
     }
+}
 
-    /* Format tabs with icons */
-    .tabs-header>.material-icons {
-        .tabs-header>.material-icons {
-            vertical-align: bottom;
-            padding-top: 3px;
-            padding-bottom: 3px;
-        }
-
-        .tab-button {
-            border: none;
-            font-size: 1.5rem;
-            z-index: 0;
-        }
-
-        .tab-button.active {
-            background-color: var(--btn-blue);
-            color: var(--font-white);
-            /* z-index: 2; */
-            box-shadow: 0px 2px 2px 2px rgb(112 112 112 / 47%);
-        }
-
-        .tab-button.selected {
-            box-shadow: 0 0 0.2rem 0.2rem var(--selected-color);
-        }
-
-        .add-tab:hover {
-            background-color: var(--btn-turquoise);
-            color: white;
-        }
-
-        /* Popup for adding a new tab *************************************************/
-
-        @media (max-width: 900px) {
-            .tab-button {
-                font-size: medium;
-            }
-        }
-
-        @media screen and (orientation: portrait) and (max-device-width: 900px) {
-            .tabs-component {
-                width: 100%;
-            }
-        }
+@media screen and (orientation: portrait) and (max-device-width: 900px) {
+    .tabs-component {
+        width: 100%;
+    }
+}
