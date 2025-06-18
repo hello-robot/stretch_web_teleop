@@ -6,6 +6,7 @@ import {
 } from "shared/util";
 import { ActionMode } from "../utils/component_definitions";
 import { FunctionProvider } from "./FunctionProvider";
+import { isMobile } from "react-device-detect";
 
 /**
  * Each of the possible buttons which could be on a button pad. The string is
@@ -397,7 +398,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                                   this.setButtonActiveState(buttonPadFunction);
                               }
                           },
-                          // onLeave: onLeave,
+                          onLeave: !isMobile ? onLeave : () => {},
                       };
         }
     }
