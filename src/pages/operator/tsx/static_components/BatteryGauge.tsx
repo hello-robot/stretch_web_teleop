@@ -7,7 +7,7 @@ import { batteryVoltageFunctionProvider } from "..";
 import React from "react";
 import { BatteryVoltageFunctions } from "../function_providers/BatteryVoltageFunctionProvider";
 
-export const BatteryGuage = (props: CustomizableComponentProps) => {
+export default (props: CustomizableComponentProps) => {
     const [color, setColor] = useState("green");
 
     batteryVoltageFunctionProvider.setVoltageChangeCallback(setColor);

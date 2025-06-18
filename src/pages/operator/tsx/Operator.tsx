@@ -1,16 +1,21 @@
 import React from "react";
 import { AudioControl } from "./static_components/AudioControl";
-import { SpeedControl } from "./static_components/SpeedControl";
+import { SpeedControl, VELOCITY_SCALE } from "./static_components/SpeedControl";
 import { LayoutArea } from "./static_components/LayoutArea";
 import { CustomizeButton } from "./static_components/CustomizeButton";
 import { GlobalOptionsProps, Sidebar } from "./static_components/Sidebar";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import {
     ActionMode,
+    AdjustableOverheadVideoStreamDef,
+    CameraViewId,
     ComponentDefinition,
+    ComponentType,
     LayoutDefinition,
+    LayoutGridDefinition,
+    RealsenseVideoStreamDef,
 } from "./utils/component_definitions";
-import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
+import { className, ActionState, RemoteStream, RobotPose, ButtonAction } from "shared/util";
 import {
     buttonFunctionProvider,
     underMapFunctionProvider,
@@ -41,6 +46,14 @@ import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { BatteryBar } from "./static_components/BatteryBar";
+import { RunStop } from "./static_components/RunStop";
+
+// Unused imports kept for reference
+import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
+import { CheckToggleButton } from "./basic_components/CheckToggleButton";
+import { isBrowser, isTablet } from "react-device-detect";
+import { PopupModal } from "./basic_components/PopupModal";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -346,6 +359,9 @@ export const Operator = (props: {
                         FunctionProvider.velocityScale = newScale;
                     }}
                 />
+                {/* runs top */}
+                <RunStop />
+                <BatteryBar />
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleToggleCustomize}

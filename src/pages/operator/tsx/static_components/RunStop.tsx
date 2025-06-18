@@ -2,8 +2,6 @@ import "operator/css/RunStop.css";
 import { className } from "shared/util";
 import { runStopFunctionProvider } from "..";
 import { RunStopFunctions } from "../function_providers/RunStopFunctionProvider";
-import { CustomizableComponentProps } from "../layout_components/CustomizableComponent";
-import runStopButton from "operator/icons/button.svg";
 import React, { useState } from "react";
 
 export const RunStop = () => {
@@ -13,17 +11,13 @@ export const RunStop = () => {
     runStopFunctionProvider.setRunStopStateChangeCallback(setEnabled);
 
     return (
-        <div className="runStopContainer">
-            <img
-                src={runStopButton}
-                onClick={functs.onClick}
+        <div className="run-stop-container">
+            <button
+                onPointerDown={functs.onClick}
                 className={className("run-stop-button", { enabled })}
-            />
-            {enabled ? (
-                <span>Run Stop: Enabled</span>
-            ) : (
-                <span>Run Stop: Disabled</span>
-            )}
+                aria-label={`${!enabled ? 'Enable' : "Disable"} Run Stop`}
+            >Run Stop</button>
+            {/* <span className="text-run-stop">{enabled ? 'Enabled' : "Disabled"}</span> */}
         </div>
     );
 };
