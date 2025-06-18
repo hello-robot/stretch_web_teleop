@@ -137,7 +137,7 @@ function removeChildFromParent(
 ) {
     // Remove the child from the parent
     parent.children.splice(childIdx, 1);
-    
+
     // If it was the last child, also remove the parent. Continue iteratively.
     let i = -2;
     let parentIdx: number;
