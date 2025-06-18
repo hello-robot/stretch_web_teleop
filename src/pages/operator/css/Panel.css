@@ -19,10 +19,14 @@
 }
 
 .tabs-content {
-    border: 3px solid var(--btn-blue);
     flex: 1 1 0;
+    border: 3px solid var(--btn-blue);
     background-color: var(--background-color);
     border-radius: 0px 0px var(--radius) var(--radius);
+}
+
+.tabs-content > div {
+    flex: 1;
 }
 
 /* Header *********************************************************************/

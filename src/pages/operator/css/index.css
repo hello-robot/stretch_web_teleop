@@ -63,6 +63,7 @@ body,
 }
 
 @media screen and (orientation: landscape) and (max-device-width: 900px) {
+
     html,
     body,
     #root {

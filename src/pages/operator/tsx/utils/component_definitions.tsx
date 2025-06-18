@@ -4,7 +4,7 @@
 
 /** Enumerator for the possible action modes */
 export enum ActionMode {
-    StepActions = "Step-Actions",
+    StepActions = "Step Action",
     PressAndHold = "Press-And-Hold",
     ClickClick = "Click-Click",
 }
@@ -23,8 +23,9 @@ export enum ComponentType {
     ButtonGrid = "Button Grid",
     VirtualJoystick = "Joystick",
     Map = "Map",
-    RunStopButton = "Run Stop Button",
+    RunStop = "Run Stop Button",
     BatteryGuage = "Battery Gauge",
+    MovementRecorder = "Movement Recorder",
 }
 
 /**

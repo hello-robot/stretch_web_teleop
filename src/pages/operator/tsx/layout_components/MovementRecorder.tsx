@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useRef } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
+import Flex from "../basic_components/Flex";
 import { movementRecorderFunctionProvider } from "operator/tsx/index";
 import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
@@ -40,6 +41,81 @@ export interface MovementRecorderFunctions {
     SavedRecordingNames: () => string[];
     DeleteRecording: (recordingID: number) => void;
     LoadRecording: (recordingID: number) => void;
+}
+
+const ButtonRecord = (props: {
+    showRecordingStartButton: boolean;
+    showRecordingStartButtonSet: React.Dispatch<React.SetStateAction<boolean>>;
+    isRecording: boolean;
+    setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+    if (!props.showRecordingStartButton && !props.isRecording) {
+        return (
+            <button
+                onPointerDown={() => props.showRecordingStartButtonSet(true)}>
+                Record 🔴
+            </button>
+        );
+    }
+    else if (props.showRecordingStartButton && !props.isRecording) {
+        return (
+            <button
+                onPointerDown={() => props.showRecordingStartButtonSet(false)}
+            >
+                Start 🔴
+            </button>
+        );
+    }
+    else if (props.isRecording) {
+        return (
+            <button
+                onPointerDown={() => alert('hiiii')}
+            >
+                Stop 🔴
+            </button>
+        );
+    }
+}
+
+const ButtonFilter = (props: {
+    isFilterActivated: boolean;
+    isFilterActivatedSet: React.Dispatch<React.SetStateAction<boolean>>;
+    filterQuery: string;
+    filterQuerySet: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+
+    // Reference to focus the input when filter is activated
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Effect to focus the input when filter is activated
+    useEffect(() => {
+        if (props.isFilterActivated && inputRef.current) {
+            requestAnimationFrame(() => {
+                inputRef.current?.focus();
+            });
+        }
+    }, [props.isFilterActivated]);
+
+    if (!props.isFilterActivated) {
+        return (
+            <button
+                onPointerDown={() => {
+                    props.isFilterActivatedSet(!props.isFilterActivated)
+                }}>
+                🔎
+            </button>
+        );
+    } else return (
+        <div className="button-filter">
+            <input
+                ref={inputRef}
+                type="text"
+                placeholder="Type to filter..."
+                value={props.filterQuery}
+                onChange={(e) => props.filterQuerySet(e.target.value)}
+            />
+        </div>
+    );
 }
 
 export const MovementRecorder = (props: {
@@ -96,6 +172,57 @@ export const MovementRecorder = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>(
         props.isRecording ? props.isRecording : false,
     );
+    const [isFilterActivated, isFilterActivatedSet] =
+        useState<boolean>(false);
+    const [showRecordingStartButton, showRecordingStartButtonSet] =
+        useState<boolean>(false);
+    const [filterQuery, filterQuerySet] = useState<string>('');
+    const dumpToInitialState = () => {
+        filterQuerySet('');
+        isFilterActivatedSet(false);
+        setIsRecording(false);
+        setShowJointSelectionModal(false);
+        setShowSaveRecordingModal(false);
+        showRecordingStartButtonSet(false);
+    }
+
+    const recordingsListRef = useRef(null);
+
+    // track whether we can scroll up / down
+    const [canScrollUp, setCanScrollUp] = useState(false);
+    const [canScrollDown, setCanScrollDown] = useState(false);
+
+    useEffect(() => {
+        const node = recordingsListRef.current;
+        if (!node) return;
+        const handleScroll = () => {
+            setCanScrollUp(node.scrollTop > 0);
+            setCanScrollDown(node.scrollTop + node.clientHeight < node.scrollHeight - 1);
+        };
+        handleScroll();
+        node.addEventListener("scroll", handleScroll);
+        return () => node.removeEventListener("scroll", handleScroll);
+    }, [filterQuery]);
+
+    const scrollUp = () => {
+        if (recordingsListRef.current) {
+            const scrollDistance = recordingsListRef.current.clientHeight * 0.9;
+            recordingsListRef.current.scrollBy({
+                top: -scrollDistance,
+                behavior: "smooth",
+            });
+        }
+    };
+
+    const scrollDown = () => {
+        if (recordingsListRef.current) {
+            const scrollDistance = recordingsListRef.current.clientHeight * 0.9;
+            recordingsListRef.current.scrollBy({
+                top: scrollDistance,
+                behavior: "smooth",
+            });
+        }
+    };
 
     const JointSelectionModal = (props: {
         setShow: (show: boolean) => void;
@@ -297,29 +424,40 @@ export const MovementRecorder = (props: {
 
     return !isMobile ? (
         <React.Fragment>
-            <div id="movement-recorder-container">Movement Recorder</div>
             <div id="movement-recorder-container">
-                <Dropdown
-                    onChange={setSelectedIdx}
-                    selectedIndex={selectedIdx}
-                    possibleOptions={recordings}
-                    placeholderText="Select a recording..."
-                    placement="bottom"
-                />
-                <Tooltip text="Play movement" position="top">
-                    <button
-                        className="play-btn btn-label"
-                        onClick={() => {
-                            if (selectedIdx != undefined) {
-                                functions.LoadRecording(selectedIdx);
-                            }
-                        }}
-                    >
-                        <span hidden={props.hideLabels}>Play</span>
-                        <PlayCircle />
-                    </button>
-                </Tooltip>
-                <Tooltip
+                <div ref={recordingsListRef} className="recordings-list">
+                    {
+                        Array(5)
+                            .fill(0)
+                            .flatMap(() => recordingsFiltered)
+                            .map((recording, idx) => {
+                                return (
+                                    <div
+                                        key={recording + idx}
+                                        className="recording-item"
+                                    >
+                                        <div>{recording}</div>
+                                        <Flex gap={5}>
+                                            <button onPointerDown={() => {
+                                                // We need the actual index in "recordings" array, not the filtered one
+                                                const idxTrue = recordings.indexOf(recording);
+                                                functions.LoadRecording(idxTrue)
+                                            }}>
+                                                ▸
+                                            </button>
+                                            <button>✐</button>
+                                            <button>␡</button>
+                                        </Flex>
+                                    </div>
+                                )
+                            })
+                    }
+
+                </div>
+                <div className="articulation-points-list">
+
+                </div>
+                {/* <Tooltip
                     text={!isRecording ? "Record movement" : "Save movement"}
                     position="top"
                 >
@@ -346,8 +484,8 @@ export const MovementRecorder = (props: {
                             <SaveIcon />
                         )}
                     </button>
-                </Tooltip>
-                <Tooltip text="Delete recording" position="top">
+                </Tooltip> */}
+                {/* <Tooltip text="Delete recording" position="top">
                     <button
                         className="delete-btn btn-label"
                         onClick={() => {
@@ -361,7 +499,37 @@ export const MovementRecorder = (props: {
                         <span hidden={props.hideLabels}>Delete</span>
                         <DeleteForeverIcon />
                     </button>
-                </Tooltip>
+                </Tooltip> */}
+                {/* Footer */}
+                <div className="footer">
+                    <Flex gap={5} align="center">
+                        {isFilterActivated || showRecordingStartButton
+                            ? <button onPointerDown={dumpToInitialState}>◂</button>
+                            : null
+                        }
+                        {!isFilterActivated
+                            ? <ButtonRecord
+                                showRecordingStartButton={showRecordingStartButton}
+                                showRecordingStartButtonSet={showRecordingStartButtonSet}
+                                isRecording={isRecording}
+                                setIsRecording={setIsRecording}
+                            />
+                            : null
+                        }
+                        {!showRecordingStartButton
+                            ? <ButtonFilter
+                                isFilterActivated={isFilterActivated}
+                                isFilterActivatedSet={isFilterActivatedSet}
+                                filterQuery={filterQuery}
+                                filterQuerySet={filterQuerySet}
+                            />
+                            : null}
+                    </Flex>
+                    <Flex gap={5} align="center">
+                        <button onPointerDown={scrollUp} disabled={!canScrollUp}>▲</button>
+                        <button onPointerDown={scrollDown} disabled={!canScrollDown}>▼</button>
+                    </Flex>
+                </div>
             </div>
             <JointSelectionModal
                 setShow={setShowJointSelectionModal}

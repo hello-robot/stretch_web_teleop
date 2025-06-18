@@ -358,32 +358,32 @@ export class ButtonFunctionProvider extends FunctionProvider {
 
                 return FunctionProvider.actionMode === ActionMode.PressAndHold
                     ? {
-                          onClick: () => {
-                              action();
-                              this.setButtonActiveState(buttonPadFunction);
-                          },
-                          // For press-release, stop when button released
-                          onRelease: () => {
-                              this.stopCurrentAction();
-                              this.setButtonInactiveState(buttonPadFunction);
-                          },
-                          onLeave: onLeave,
-                      }
+                        onClick: () => {
+                            action();
+                            this.setButtonActiveState(buttonPadFunction);
+                        },
+                        // For press-release, stop when button released
+                        onRelease: () => {
+                            this.stopCurrentAction();
+                            this.setButtonInactiveState(buttonPadFunction);
+                        },
+                        onLeave: onLeave,
+                    }
                     : {
-                          // For click-click, stop if button already active
-                          onClick: () => {
-                              if (this.activeVelocityAction) {
-                                  this.stopCurrentAction();
-                                  this.setButtonInactiveState(
-                                      buttonPadFunction,
-                                  );
-                              } else {
-                                  action();
-                                  this.setButtonActiveState(buttonPadFunction);
-                              }
-                          },
-                          onLeave: onLeave,
-                      };
+                        // For click-click, stop if button already active
+                        onClick: () => {
+                            if (this.activeVelocityAction) {
+                                this.stopCurrentAction();
+                                this.setButtonInactiveState(
+                                    buttonPadFunction,
+                                );
+                            } else {
+                                action();
+                                this.setButtonActiveState(buttonPadFunction);
+                            }
+                        },
+                        onLeave: onLeave,
+                    };
         }
     }
 }

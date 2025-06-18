@@ -1,8 +1,8 @@
 #movement-recorder-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    align-self: flex-start;
+    height: 100%;
+    --footer-height: 50px;
 }
 
 /* The below buttons' CSS likely gets overridden by the TextToSpeech CSS
@@ -56,4 +56,39 @@
     vertical-align: middle;
     display: flex;
     justify-content: center;
+}
+
+.recordings-list {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: calc(100% - var(--footer-height));
+}
+
+.recording-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+#movement-recorder-container .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    width: 100%;
+    height: var(--footer-height);
+    background: #ffffff;
+    border-top: 1px solid #000000;
+}
+
+.articulation-points-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - var(--footer-height));
+    overflow-y: scroll;
+    overflow-x: hidden;
 }

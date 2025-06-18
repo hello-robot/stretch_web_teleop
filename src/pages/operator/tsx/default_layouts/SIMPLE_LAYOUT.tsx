@@ -95,12 +95,9 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             type: ComponentType.SingleTab,
                             label: "Movement Recorder",
                             children: [
-                                // {
-                                //     type: ComponentType.RunStopButton,
-                                // },
-                                // {
-                                //     type: ComponentType.BatteryGuage,
-                                // },
+                                {
+                                    type: ComponentType.MovementRecorder,
+                                },
                             ],
                         },
                     ],
