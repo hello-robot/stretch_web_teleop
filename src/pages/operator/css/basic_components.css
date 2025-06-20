@@ -154,7 +154,8 @@
     border-radius: 0 0 var(--btn-brdr-radius) var(--btn-brdr-radius);
     top: 100%;
     bottom: auto;
-    overflow-y: auto; /* Make it scrollable */
+    overflow-y: auto;
+    /* Make it scrollable */
 }
 
 .dropdown-popup.top,
@@ -250,12 +251,14 @@
 
 .check-toggle-button,
 .check-toggle-button-mobile {
-    border-radius: 13px;
+    border-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 4px;
     text-align: center;
-    background: transparent;
+    background: #ffffff;
+    line-height: 40%;
 }
 
 .check-toggle-button-mobile {

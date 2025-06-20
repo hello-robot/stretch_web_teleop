@@ -2,7 +2,7 @@
     position: relative;
     align-self: flex-start;
     height: 100%;
-    --footer-height: 50px;
+    --footer-height: 60px;
 }
 
 /* The below buttons' CSS likely gets overridden by the TextToSpeech CSS
@@ -83,12 +83,52 @@
     border-top: 1px solid #000000;
 }
 
-.articulation-points-list {
+.joints-list {
     position: absolute;
     top: 0;
     left: 0;
+    padding: 20px;
     width: 100%;
     height: calc(100% - var(--footer-height));
     overflow-y: scroll;
     overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+.naming-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+}
+
+.recording-name-text-area {
+    padding: 0px 5px;
+    width: fit-content;
+    height: 31px;
+    line-height: 150%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    resize: none;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.recording-name-text-area:disabled {
+    color: #000000;
+}
+
+.recording-name-text-area:focus {
+    background-color: var(--btn-turquoise-ultra-light);
+    border: 1px solid var(--btn-turquoise);
+    outline: none;
+}
+
+.recording-name-text-area::selection {
+    background-color: var(--btn-turquoise-light);
 }

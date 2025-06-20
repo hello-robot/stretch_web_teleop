@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from "react";
+import React, { useMemo, useEffect, useCallback, useState, useRef } from "react";
 import { PopupModal } from "../basic_components/PopupModal";
 import Flex from "../basic_components/Flex";
 import { movementRecorderFunctionProvider } from "operator/tsx/index";
@@ -24,6 +24,7 @@ export enum MovementRecorderFunction {
     Cancel,
     DeleteRecordingName,
     LoadRecordingName,
+    RenameRecording,
 }
 
 export interface MovementRecorderFunctions {
@@ -41,15 +42,36 @@ export interface MovementRecorderFunctions {
     SavedRecordingNames: () => string[];
     DeleteRecording: (recordingID: number) => void;
     LoadRecording: (recordingID: number) => void;
+    RenameRecording: (recordingID: number, recordingNameNew: string) => void;
 }
+
+
+
+/****************************
+ * Record/Start/Stop <button> *
+ ****************************/
 
 const ButtonRecord = (props: {
     showRecordingStartButton: boolean;
     showRecordingStartButtonSet: React.Dispatch<React.SetStateAction<boolean>>;
     isRecording: boolean;
-    setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
+    isRecordingSet: React.Dispatch<React.SetStateAction<boolean>>;
+    isOneJointSelected: boolean;
+    startRecording: () => void;
+    stopRecording: () => void;
+    saveRecording: (name: string) => void;
+    setRecordings: React.Dispatch<React.SetStateAction<string[]>>;
+    deselectAllJoints: () => void;
+    isNamingModalVisibleSet: (arg0: boolean) => void;
+    recordingNameSet: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-    if (!props.showRecordingStartButton && !props.isRecording) {
+    /////////////////////////
+    //// "Record" button ////
+    /////////////////////////
+    if (
+        !props.showRecordingStartButton
+        && !props.isRecording
+    ) {
         return (
             <button
                 onPointerDown={() => props.showRecordingStartButtonSet(true)}>
@@ -57,19 +79,39 @@ const ButtonRecord = (props: {
             </button>
         );
     }
-    else if (props.showRecordingStartButton && !props.isRecording) {
+    //////////////////////// 
+    //// "Start" button ////
+    ////////////////////////
+    else if (
+        props.showRecordingStartButton
+        && !props.isRecording
+    ) {
         return (
             <button
-                onPointerDown={() => props.showRecordingStartButtonSet(false)}
+                onPointerDown={props.startRecording}
+                disabled={!props.isOneJointSelected}
             >
                 Start 🔴
             </button>
         );
     }
+    /////////////////////// 
+    //// "Stop" button ////
+    ///////////////////////
     else if (props.isRecording) {
         return (
             <button
-                onPointerDown={() => alert('hiiii')}
+                onPointerDown={() => {
+                    const tempName = new Date().toLocaleString('en-US', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    props.recordingNameSet(tempName);
+                    props.isNamingModalVisibleSet(true)
+                }}
             >
                 Stop 🔴
             </button>
@@ -85,13 +127,13 @@ const ButtonFilter = (props: {
 }) => {
 
     // Reference to focus the input when filter is activated
-    const inputRef = useRef<HTMLInputElement>(null);
+    const refInput = useRef<HTMLInputElement>(null);
 
     // Effect to focus the input when filter is activated
     useEffect(() => {
-        if (props.isFilterActivated && inputRef.current) {
+        if (props.isFilterActivated && refInput.current) {
             requestAnimationFrame(() => {
-                inputRef.current?.focus();
+                refInput.current?.focus();
             });
         }
     }, [props.isFilterActivated]);
@@ -108,15 +150,105 @@ const ButtonFilter = (props: {
     } else return (
         <div className="button-filter">
             <input
-                ref={inputRef}
+                ref={refInput}
                 type="text"
                 placeholder="Type to filter..."
                 value={props.filterQuery}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => props.filterQuerySet(e.target.value)}
             />
         </div>
     );
 }
+
+interface RecordingItemProps {
+    recordingName: string;
+    idxFixed: number;
+    functions: {
+        LoadRecording: (idx: number) => void;
+        RenameRecording: (idx: number, newName: string) => void;
+        DeleteRecording: (idx: number) => void;
+        SavedRecordingNames: () => string[];
+    };
+    setRecordings: React.Dispatch<React.SetStateAction<string[]>>;
+    scrollToTop?: () => void;
+}
+
+const RecordingItem: React.FC<RecordingItemProps> = ({
+    recordingName,
+    idxFixed,
+    functions,
+    setRecordings,
+    scrollToTop,
+}: RecordingItemProps) => {
+    const [valueTextArea, valueTextAreaSet] = useState<string>(recordingName);
+    const refTextArea = useRef<HTMLTextAreaElement>(null);
+    const recordingsRefresh = useCallback(() => {
+        setRecordings(functions.SavedRecordingNames());
+    }, []);
+    const [isEditing, isEditingSet] = useState<boolean>(false);
+    useEffect(() => {
+        if (isEditing) {
+            requestAnimationFrame(() => {
+                refTextArea.current?.focus();
+                refTextArea.current?.select();
+            });
+        }
+    }, [isEditing]);
+    useEffect(() => {
+        const domNode = refTextArea.current;
+        if (domNode) {
+            domNode.style.height = '30px';
+            domNode.style.height = domNode.scrollHeight + 'px';
+        }
+    }, [valueTextArea]);
+
+    return (
+        <div
+            className="recording-item"
+            key={recordingName}
+        >
+            <textarea
+                // type="text"
+                ref={refTextArea}
+                className="recording-name-text-area"
+                value={valueTextArea || recordingName}
+                placeholder={recordingName}
+                onChange={(e) => {
+                    valueTextAreaSet(e.target.value)
+                }}
+                disabled={!isEditing}
+                onBlur={(e) => {
+
+                    const recordingNameNew = e.target.value.trim() || recordingName;
+
+                    functions.RenameRecording(idxFixed, recordingNameNew)
+                    recordingsRefresh();
+                    isEditingSet(false);
+                    scrollToTop();
+                }}
+            />
+            <Flex gap={5}>
+                <button onPointerDown={() => {
+                    functions.LoadRecording(idxFixed)
+                }}>
+                    ▸
+                </button>
+                <button
+                    onPointerDown={() => {
+                        isEditingSet(true);
+                    }}
+                >✐</button>
+                <button
+                    onPointerDown={() => {
+                        functions.DeleteRecording(idxFixed);
+                        recordingsRefresh();
+                    }}
+                >␡</button>
+            </Flex>
+        </div>
+    );
+};
 
 export const MovementRecorder = (props: {
     hideLabels: boolean;
@@ -150,6 +282,9 @@ export const MovementRecorder = (props: {
         LoadRecording: movementRecorderFunctionProvider.provideFunctions(
             MovementRecorderFunction.LoadRecording,
         ) as (recordingID: number) => void,
+        RenameRecording: movementRecorderFunctionProvider.provideFunctions(
+            MovementRecorderFunction.RenameRecording,
+        ) as (recordingID: number, recordingNameNew: string) => void,
     };
 
     let radioFuncts: RadioFunctions = {
@@ -161,73 +296,220 @@ export const MovementRecorder = (props: {
             setSelectedIdx(functions.SavedRecordingNames().indexOf(label)),
     };
 
-    const [recordings, setRecordings] = useState<string[]>(
-        functions.SavedRecordingNames(),
-    );
+
+
+    // TODO: previous abstraction
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
     const [showJointSelectionModal, setShowJointSelectionModal] =
         useState<boolean>(false);
     const [showSaveRecordingModal, setShowSaveRecordingModal] =
         useState<boolean>(false);
-    const [isRecording, setIsRecording] = React.useState<boolean>(
-        props.isRecording ? props.isRecording : false,
+    // TODO: previous abstraction
+
+
+
+
+
+
+    /*******************
+     * Joint selection *
+     *******************/
+
+    const [head, setHead] = React.useState<boolean>(false);
+    const [arm, setArm] = React.useState<boolean>(false);
+    const [lift, setLift] = React.useState<boolean>(false);
+    const [wristRoll, setWristRoll] = React.useState<boolean>(false);
+    const [wristPitch, setWristPitch] = React.useState<boolean>(false);
+    const [wristYaw, setWristYaw] = React.useState<boolean>(false);
+    const [gripper, setGripper] = React.useState<boolean>(false);
+    const [isOneJointSelected, isOneJointSelectedSet] = React.useState<boolean>(false);
+    const selectAllJoints = useCallback(() => {
+        setHead(true);
+        setArm(true);
+        setLift(true);
+        setWristRoll(true);
+        setWristPitch(true);
+        setWristYaw(true);
+        setGripper(true);
+    }, []);
+
+    const deselectAllJoints = useCallback(() => {
+        setHead(false);
+        setArm(false);
+        setLift(false);
+        setWristRoll(false);
+        setWristPitch(false);
+        setWristYaw(false);
+        setGripper(false);
+    }, []);
+    // Effect to check if at least one joint is selected
+    useEffect(() => {
+        isOneJointSelectedSet(
+            head
+            || arm
+            || lift
+            || wristRoll
+            || wristPitch
+            || wristYaw
+            || gripper
+        );
+    }, [head, arm, lift, wristRoll, wristPitch, wristYaw, gripper]);
+
+
+
+    /*************
+     * Recording *
+     *************/
+
+    const [recordings, setRecordings] = useState<string[]>(
+        functions.SavedRecordingNames(),
     );
-    const [isFilterActivated, isFilterActivatedSet] =
-        useState<boolean>(false);
+    const [isRecording, isRecordingSet] = React.useState<boolean>(false);
     const [showRecordingStartButton, showRecordingStartButtonSet] =
         useState<boolean>(false);
+    const [isNamingModalVisible, isNamingModalVisibleSet] = React.useState<boolean>(false);
+    const [recordingName, recordingNameSet] = React.useState<string>('');
+
+    const startRecording = useCallback(() => {
+        showRecordingStartButtonSet(false)
+        isRecordingSet(true);
+        functions.Record(
+            head,
+            arm,
+            lift,
+            wristRoll,
+            wristPitch,
+            wristYaw,
+            gripper,
+        );
+    }, [head, arm, lift, wristRoll, wristPitch, wristYaw, gripper,]);
+
+
+    /*******************************
+     * Filter state & side-effects *
+     *******************************/
+
+    const [isFilterActivated, isFilterActivatedSet] =
+        useState<boolean>(false);
     const [filterQuery, filterQuerySet] = useState<string>('');
-    const dumpToInitialState = () => {
+    const recordingsFiltered = useMemo(() => {
+        if (!filterQuery) return recordings;
+        const filterQueryLower = filterQuery.toLowerCase().trim();
+        return recordings.filter(recording =>
+            recording.toLowerCase().includes(filterQueryLower)
+        );
+    }, [filterQuery, recordings]);
+
+
+
+    /********************************************
+     * Callback to go back to the drawing board *
+     ********************************************/
+
+    const dumpToInitialState = useCallback(() => {
         filterQuerySet('');
         isFilterActivatedSet(false);
-        setIsRecording(false);
-        setShowJointSelectionModal(false);
-        setShowSaveRecordingModal(false);
         showRecordingStartButtonSet(false);
-    }
+        deselectAllJoints();
+        isRecordingSet(false);
+        functions.StopRecording();
+        isNamingModalVisibleSet(false);
+    }, []);
 
-    const recordingsListRef = useRef(null);
 
-    // track whether we can scroll up / down
+
+    /****************************
+     * Step-scrolling <buttons> *
+     ****************************/
+
+    // Refs
+    const refRecordingsList = useRef(null);
+    const refJointsList = useRef(null);
+
+    // Track whether we can scroll up/down
     const [canScrollUp, setCanScrollUp] = useState(false);
     const [canScrollDown, setCanScrollDown] = useState(false);
 
+    // Current DOM node to scroll
+    const [domNodeScroll, domNodeScrollSet] = useState<HTMLElement | null>(null);
     useEffect(() => {
-        const node = recordingsListRef.current;
-        if (!node) return;
-        const handleScroll = () => {
-            setCanScrollUp(node.scrollTop > 0);
-            setCanScrollDown(node.scrollTop + node.clientHeight < node.scrollHeight - 1);
-        };
-        handleScroll();
-        node.addEventListener("scroll", handleScroll);
-        return () => node.removeEventListener("scroll", handleScroll);
-    }, [filterQuery]);
+        const domNodeScroll = !showRecordingStartButton && !isRecording
+            ? refRecordingsList.current
+            : refJointsList.current;
+        domNodeScrollSet(domNodeScroll);
+    }, [showRecordingStartButton, isRecording]);
 
-    const scrollUp = () => {
-        if (recordingsListRef.current) {
-            const scrollDistance = recordingsListRef.current.clientHeight * 0.9;
-            recordingsListRef.current.scrollBy({
+    // Event listeners when scroll and resize
+    useEffect(() => {
+        if (!domNodeScroll) return;
+
+        const handleScroll = () => {
+            setCanScrollUp(domNodeScroll.scrollTop > 0);
+            setCanScrollDown(
+                domNodeScroll.scrollTop + domNodeScroll.clientHeight <
+                domNodeScroll.scrollHeight - 1
+            );
+        };
+
+        // run once on mount
+        handleScroll();
+
+        // listen to both scroll and resize
+        domNodeScroll.addEventListener("scroll", handleScroll);
+        window.addEventListener("resize", handleScroll);
+
+        return () => {
+            domNodeScroll.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleScroll);
+        };
+    }, [domNodeScroll, filterQuery, isRecording, showRecordingStartButton, isNamingModalVisible]);
+    const scrollUp = useCallback(() => {
+        if (domNodeScroll) {
+            const scrollDistance = domNodeScroll.clientHeight * 0.9;
+            domNodeScroll.scrollBy({
                 top: -scrollDistance,
                 behavior: "smooth",
             });
         }
-    };
-
-    const scrollDown = () => {
-        if (recordingsListRef.current) {
-            const scrollDistance = recordingsListRef.current.clientHeight * 0.9;
-            recordingsListRef.current.scrollBy({
+    }, [domNodeScroll]);
+    const scrollDown = useCallback(() => {
+        if (domNodeScroll) {
+            const scrollDistance = domNodeScroll.clientHeight * 0.9;
+            domNodeScroll.scrollBy({
                 top: scrollDistance,
                 behavior: "smooth",
             });
         }
-    };
+    }, [domNodeScroll]);
+    const scrollToTop = useCallback(() => {
+        domNodeScroll.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }, [domNodeScroll]);
 
+
+
+    /****************
+     * Naming Modal *
+     ****************/
+
+    // ref for <input>
+    const refInputRecordingName = useRef<HTMLInputElement>(null);
+
+    // Auto-select text inside of <input>
+    // when naming modal is visible
+    useEffect(() => {
+        if (isNamingModalVisible) {
+            requestAnimationFrame(() => { refInputRecordingName.current.select() });
+        }
+    }, [isNamingModalVisible]);
+
+    // TODO: previous abstraction
     const JointSelectionModal = (props: {
         setShow: (show: boolean) => void;
         show: boolean;
-        setIsRecording: (isRecording: boolean) => void;
+        isRecordingSet: (isRecording: boolean) => void;
     }) => {
         const [head, setHead] = React.useState<boolean>(false);
         const [arm, setArm] = React.useState<boolean>(false);
@@ -262,7 +544,7 @@ export const MovementRecorder = (props: {
                 show={props.show}
                 onAccept={handleAccept}
                 onCancel={() => {
-                    props.setIsRecording(false);
+                    props.isRecordingSet(false);
                     props.setShow(false);
                     functions.StopRecording();
                 }}
@@ -358,7 +640,6 @@ export const MovementRecorder = (props: {
             </PopupModal>
         );
     };
-
     const SaveRecordingModal = (props: {
         setShow: (show: boolean) => void;
         show: boolean;
@@ -403,31 +684,19 @@ export const MovementRecorder = (props: {
             </PopupModal>
         );
     };
-
-
-    // Strict filter results based on query
-    const recordingsFiltered = useMemo(() => {
-        if (!filterQuery) return recordings;
-        const filterQueryLower = filterQuery.toLowerCase().trim();
-        return recordings.filter(recording =>
-            recording.toLowerCase().includes(filterQueryLower)
-        );
-    }, [filterQuery, recordings]);
-
     useEffect(() => {
         if (!isBrowser && !isTablet) {
             if (props.isRecording == undefined) {
                 return;
             } else if (props.isRecording) {
-                setIsRecording(true);
+                isRecordingSet(true);
                 setShowJointSelectionModal(true);
             } else {
-                setIsRecording(false);
+                isRecordingSet(false);
                 setShowSaveRecordingModal(true);
             }
         }
     }, [props.isRecording]);
-
     if (props.globalRecord !== undefined && !props.globalRecord)
         return (
             <SaveRecordingModal
@@ -435,70 +704,169 @@ export const MovementRecorder = (props: {
                 show={showSaveRecordingModal}
             />
         );
+    // TODO: previous abstraction
+
+
 
     return isBrowser || isTablet ? (
         <React.Fragment>
             <div id="movement-recorder-container">
-                <div ref={recordingsListRef} className="recordings-list">
+                <div ref={refRecordingsList} className="recordings-list">
                     {
-                        Array(5)
-                            .fill(0)
-                            .flatMap(() => recordingsFiltered)
-                            .map((recording, idx) => {
-                                return (
-                                    <div
-                                        key={recording + idx}
-                                        className="recording-item"
-                                    >
-                                        <div>{recording}</div>
-                                        <Flex gap={5}>
-                                            <button onPointerDown={() => {
-                                                // We need the actual index in "recordings" array, not the filtered one
-                                                const idxTrue = recordings.indexOf(recording);
-                                                functions.LoadRecording(idxTrue)
-                                            }}>
-                                                ▸
-                                            </button>
-                                            <button>✐</button>
-                                            <button>␡</button>
-                                        </Flex>
-                                    </div>
-                                )
-                            })
+                        // sort by newest recordings...
+                        [...recordingsFiltered].reverse().map((recordingName, idx) => {
+                            const idxFixed = recordings.indexOf(recordingName);
+                            return (
+                                <RecordingItem
+                                    key={recordingName + idx}
+                                    recordingName={recordingName}
+                                    idxFixed={idxFixed}
+                                    functions={functions}
+                                    setRecordings={setRecordings}
+                                    scrollToTop={scrollToTop}
+                                />
+                            );
+                        })
                     }
 
                 </div>
-                <div className="articulation-points-list">
+                {showRecordingStartButton || isRecording
+                    ? (
+                        <div className="joints-list" ref={refJointsList}>
+                            <Flex>
+                                <button
+                                    onPointerDown={!isOneJointSelected ? selectAllJoints : deselectAllJoints}
+                                    disabled={isRecording}
+                                >
+                                    {!isOneJointSelected ? "Select All" : "Deselect All"}
+                                </button>
+                            </Flex>
+                            <ul className="checkbox">
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="head"
+                                        name="save-head-pose"
+                                        value="Head"
+                                        checked={head}
+                                        onChange={(e) => setHead(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Head</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="arm"
+                                        name="save-arm-pose"
+                                        value="Arm"
+                                        checked={arm}
+                                        onChange={(e) => setArm(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Arm</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="lift"
+                                        name="save-lift-pose"
+                                        value="Lift"
+                                        checked={lift}
+                                        onChange={(e) => setLift(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Lift</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="wristRoll"
+                                        name="save-wrist-roll-pose"
+                                        value="Wrist Roll"
+                                        checked={wristRoll}
+                                        onChange={(e) => setWristRoll(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Wrist Twist</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="wristPitch"
+                                        name="save-wrist-pitch-pose"
+                                        value="Wrist Pitch"
+                                        checked={wristPitch}
+                                        onChange={(e) => setWristPitch(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Wrist Bend</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="wristYaw"
+                                        name="save-wrist-yaw-pose"
+                                        value="Wrist Yaw"
+                                        checked={wristYaw}
+                                        onChange={(e) => setWristYaw(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Wrist Rotate</label>
+                                </li>
+                                <li>
+                                    <input
+                                        type="checkbox"
+                                        id="gripper"
+                                        name="save-gripper-pose"
+                                        value="Gripper"
+                                        checked={gripper}
+                                        onChange={(e) => setGripper(e.target.checked)}
+                                        disabled={isRecording}
+                                    />
+                                    <label>Gripper</label>
+                                </li>
+                            </ul>
+                        </div>
+                    )
+                    : null}
 
-                </div>
-                {/* <Tooltip
-                    text={!isRecording ? "Record movement" : "Save movement"}
-                    position="top"
-                >
-                    <button
-                        className="save-btn btn-label"
-                        onClick={() => {
-                            if (!isRecording) {
-                                setIsRecording(true);
-                                setShowJointSelectionModal(true);
-                            } else {
-                                setIsRecording(false);
-                                setShowSaveRecordingModal(true);
-                            }
-                        }}
-                    >
-                        {!isRecording ? (
-                            <i hidden={props.hideLabels}>Record</i>
-                        ) : (
-                            <i hidden={props.hideLabels}>Save</i>
-                        )}
-                        {!isRecording ? (
-                            <RadioButtonCheckedIcon />
-                        ) : (
-                            <SaveIcon />
-                        )}
-                    </button>
-                </Tooltip> */}
+                {isNamingModalVisible
+                    ? (
+                        <Flex className="naming-modal" direction="column" gap={10}>
+                            <div>Recording name:</div>
+                            <Flex>
+                                <input
+                                    type="text"
+                                    ref={refInputRecordingName}
+                                    value={recordingName}
+                                    onFocus={(e) => e.target.select()}
+                                    onChange={(e) => recordingNameSet(e.target.value)}
+                                />
+                            </Flex>
+                            <Flex gap={5}>
+                                <button
+                                    onPointerDown={() => {
+                                        setRecordings((recordings) => [...recordings, recordingName]);
+                                        functions.SaveRecording(recordingName);
+                                        showRecordingStartButtonSet(false)
+                                        isRecordingSet(false);
+                                        deselectAllJoints();
+                                        isNamingModalVisibleSet(false);
+                                    }}
+                                    disabled={recordingName.length < 1 || recordings.includes(recordingName)}
+                                >
+                                    ✐ Save
+                                </button>
+                                <button
+                                    onPointerDown={dumpToInitialState}
+                                >
+                                    Cancel
+                                </button>
+                            </Flex>
+                        </Flex>
+                    )
+                    : null}
                 {/* <Tooltip text="Delete recording" position="top">
                     <button
                         className="delete-btn btn-label"
@@ -515,40 +883,51 @@ export const MovementRecorder = (props: {
                     </button>
                 </Tooltip> */}
                 {/* Footer */}
-                <div className="footer">
-                    <Flex gap={5} align="center">
-                        {isFilterActivated || showRecordingStartButton
-                            ? <button onPointerDown={dumpToInitialState}>◂</button>
-                            : null
-                        }
-                        {!isFilterActivated
-                            ? <ButtonRecord
-                                showRecordingStartButton={showRecordingStartButton}
-                                showRecordingStartButtonSet={showRecordingStartButtonSet}
-                                isRecording={isRecording}
-                                setIsRecording={setIsRecording}
-                            />
-                            : null
-                        }
-                        {!showRecordingStartButton
-                            ? <ButtonFilter
-                                isFilterActivated={isFilterActivated}
-                                isFilterActivatedSet={isFilterActivatedSet}
-                                filterQuery={filterQuery}
-                                filterQuerySet={filterQuerySet}
-                            />
-                            : null}
-                    </Flex>
-                    <Flex gap={5} align="center">
-                        <button onPointerDown={scrollUp} disabled={!canScrollUp}>▲</button>
-                        <button onPointerDown={scrollDown} disabled={!canScrollDown}>▼</button>
-                    </Flex>
-                </div>
+                {!isNamingModalVisible
+                    ? (<div className="footer">
+                        <Flex gap={5} align="center">
+                            {isFilterActivated || showRecordingStartButton || (isRecording && showRecordingStartButton)
+                                ? <button onPointerDown={dumpToInitialState}>◂</button>
+                                : null
+                            }
+                            {!isFilterActivated
+                                ? <ButtonRecord
+                                    showRecordingStartButton={showRecordingStartButton}
+                                    showRecordingStartButtonSet={showRecordingStartButtonSet}
+                                    isRecording={isRecording}
+                                    isRecordingSet={isRecordingSet}
+                                    isOneJointSelected={isOneJointSelected}
+                                    startRecording={startRecording}
+                                    stopRecording={functions.StopRecording}
+                                    saveRecording={functions.SaveRecording}
+                                    setRecordings={setRecordings}
+                                    deselectAllJoints={deselectAllJoints}
+                                    isNamingModalVisibleSet={isNamingModalVisibleSet}
+                                    recordingNameSet={recordingNameSet}
+                                />
+                                : null
+                            }
+                            {!showRecordingStartButton && !isRecording
+                                ? <ButtonFilter
+                                    isFilterActivated={isFilterActivated}
+                                    isFilterActivatedSet={isFilterActivatedSet}
+                                    filterQuery={filterQuery}
+                                    filterQuerySet={filterQuerySet}
+                                />
+                                : null}
+                        </Flex>
+                        <Flex gap={5} align="center">
+                            <button onPointerDown={scrollUp} disabled={!canScrollUp}>▲</button>
+                            <button onPointerDown={scrollDown} disabled={!canScrollDown}>▼</button>
+                        </Flex>
+                    </div>
+                    )
+                    : null}
             </div>
             <JointSelectionModal
                 setShow={setShowJointSelectionModal}
                 show={showJointSelectionModal}
-                setIsRecording={setIsRecording}
+                isRecordingSet={isRecordingSet}
             />
             <SaveRecordingModal
                 setShow={setShowSaveRecordingModal}
@@ -563,11 +942,11 @@ export const MovementRecorder = (props: {
             <div className="global-btns">
                 {/* <div className="mobile-movement-save-btn" onClick={() => {
                         if (!isRecording) {
-                            setIsRecording(true)
+                            isRecordingSet(true)
                             functions.Record()
                             if (props.onRecordingChange) props.onRecordingChange(true)
                         } else {
-                            setIsRecording(false)
+                            isRecordingSet(false)
                             setShowSaveRecordingModal(true)
                             if (props.onRecordingChange) props.onRecordingChange(false)
                         }
@@ -594,7 +973,7 @@ export const MovementRecorder = (props: {
             <JointSelectionModal
                 setShow={setShowJointSelectionModal}
                 show={showJointSelectionModal}
-                setIsRecording={setIsRecording}
+                isRecordingSet={isRecordingSet}
             />
             <SaveRecordingModal
                 setShow={setShowSaveRecordingModal}

@@ -10,6 +10,8 @@
     --btn-green: rgb(129, 218, 129);
     --btn-red: hsl(0, 70%, 70%);
     --btn-turquoise: hsl(171, 32%, 46%);
+    --btn-turquoise-light: hsl(170, 68%, 78%);
+    --btn-turquoise-ultra-light: hsl(170, 33%, 93%);
 
     --shadow-color: hsla(0, 0%, 44%, 0.1);
 
@@ -96,7 +98,7 @@ the element is selected */
 
 button {
     background-color: var(--btn-gray);
-    border: 2px solid transparent !important;
+    border: 4px solid transparent !important;
     border-radius: var(--btn-brdr-radius);
     padding: var(--btn-padding);
     box-shadow: var(--shadow);
@@ -105,8 +107,8 @@ button {
 }
 
 button:hover {
-    filter: brightness(95%);
-    border: 2px solid var(--btn-turquoise) !important;
+    filter: brightness(98.5%);
+    border: 4px solid var(--btn-turquoise) !important;
 }
 
 button:disabled {

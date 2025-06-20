@@ -62,7 +62,7 @@ export const MobileOperator = (props: {
     const [activeMainGroupTab, setActiveMainGroupTab] =
         React.useState<number>(0);
     const [activeControlTab, setActiveControlTab] = React.useState<number>(0);
-    const [isRecording, setIsRecording] = React.useState<boolean>();
+    const [isRecording, isRecordingSet] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
 
@@ -316,7 +316,7 @@ export const MobileOperator = (props: {
                     <button
                         className="record"
                         onPointerDown={() => {
-                            setIsRecording(!isRecording);
+                            isRecordingSet(!isRecording);
                         }}
                     >
                         {!isRecording ? (
