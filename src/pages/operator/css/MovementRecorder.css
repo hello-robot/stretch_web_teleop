@@ -59,6 +59,7 @@
 }
 
 .recordings-list {
+    position: relative;
     overflow-y: scroll;
     overflow-x: hidden;
     height: calc(100% - var(--footer-height));
@@ -106,6 +107,7 @@
 }
 
 .recording-name-text-area {
+    margin: 0 5px 0 0;
     padding: 0px 5px;
     width: fit-content;
     height: 31px;
@@ -131,4 +133,59 @@
 
 .recording-name-text-area::selection {
     background-color: var(--btn-turquoise-light);
+}
+
+
+.recording-item-buttons {
+    --button-width: 40px;
+}
+
+.recording-item-buttons button {
+    padding: 0px;
+    aspect-ratio: 1 / 1;
+    width: var(--button-width);
+    transition: all 200ms ease-out;
+}
+
+.recording-item-buttons .button-delete-recording-wrapper {
+    z-index: 0;
+    position: relative;
+}
+
+.recording-item-buttons button.button-playback,
+.recording-item-buttons button.button-edit {
+    transition: opacity 250ms ease-out;
+}
+
+.recording-item-buttons button.button-playback.visible,
+.recording-item-buttons button.button-edit.visible {
+    opacity: 1;
+}
+
+.recording-item-buttons button.button-playback.hidden,
+.recording-item-buttons button.button-edit.hidden {
+    opacity: 0;
+}
+
+.button-delete-recording-wrapper button.button-delete {
+    z-index: 1;
+    position: relative;
+}
+
+.button-delete-recording-wrapper button.button-cancel-deletion {
+    z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.recording-item-buttons button.button-cancel-deletion.hidden {
+    transform: translateX(0%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.recording-item-buttons button.button-cancel-deletion.visible {
+    transform: translateX(calc(-100% - 5px));
+    opacity: 1;
 }

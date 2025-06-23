@@ -187,6 +187,8 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
         setRecordings(functions.SavedRecordingNames());
     }, []);
     const [isEditing, isEditingSet] = useState<boolean>(false);
+    const [isAskingConfirmationBeforeDelete, isAskingConfirmationBeforeDeleteSet] = useState<boolean>(false);
+    // Focus <textarea>, and select value inside <textarea> when focused
     useEffect(() => {
         if (isEditing) {
             requestAnimationFrame(() => {
@@ -204,12 +206,12 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                 domNode.style.height = domNode.scrollHeight + 'px';
             }
         };
-        
+
         adjustHeight();
-        
+
         // Also adjust when window resizes
         window.addEventListener('resize', adjustHeight);
-        
+
         return () => {
             window.removeEventListener('resize', adjustHeight);
         };
@@ -240,23 +242,41 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                     scrollToTop();
                 }}
             />
-            <Flex gap={5}>
-                <button onPointerDown={() => {
-                    functions.LoadRecording(idxFixed)
-                }}>
-                    ▸
-                </button>
-                <button
-                    onPointerDown={() => {
-                        isEditingSet(true);
-                    }}
-                >✐</button>
-                <button
-                    onPointerDown={() => {
-                        functions.DeleteRecording(idxFixed);
-                        recordingsRefresh();
-                    }}
-                >␡</button>
+            <Flex gap={5} className="recording-item-buttons">
+                    <button
+                        onPointerDown={() => {
+                            functions.LoadRecording(idxFixed)
+                        }}
+                        className={`button-playback ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
+                    >
+                        ▸
+                    </button>
+                    <button
+                        onPointerDown={() => {
+                            isEditingSet(true);
+                        }}
+                        className={`button-edit ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
+                    >✐</button>
+                <Flex className="button-delete-recording-wrapper">
+                    <button
+                        onPointerDown={() => { isAskingConfirmationBeforeDeleteSet(false) }}
+                        disabled={!isAskingConfirmationBeforeDelete}
+                        className={`button-cancel-deletion ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}>
+                        ◂
+                    </button>
+                    <button
+                        onPointerDown={() => {
+                            if (isAskingConfirmationBeforeDelete) {
+                                functions.DeleteRecording(idxFixed);
+                                recordingsRefresh();
+                            }
+                            else if (!isAskingConfirmationBeforeDelete) {
+                                isAskingConfirmationBeforeDeleteSet(true)
+                            }
+                        }}
+                        className="button-delete"
+                    >🗑️</button>
+                </Flex>
             </Flex>
         </div>
     );
