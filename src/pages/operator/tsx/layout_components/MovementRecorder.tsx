@@ -195,12 +195,24 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
             });
         }
     }, [isEditing]);
+    // Adjust height of the textarea based on its content
     useEffect(() => {
-        const domNode = refTextArea.current;
-        if (domNode) {
-            domNode.style.height = '30px';
-            domNode.style.height = domNode.scrollHeight + 'px';
-        }
+        const adjustHeight = () => {
+            const domNode = refTextArea.current;
+            if (domNode) {
+                domNode.style.height = '30px';
+                domNode.style.height = domNode.scrollHeight + 'px';
+            }
+        };
+        
+        adjustHeight();
+        
+        // Also adjust when window resizes
+        window.addEventListener('resize', adjustHeight);
+        
+        return () => {
+            window.removeEventListener('resize', adjustHeight);
+        };
     }, [valueTextArea]);
 
     return (
