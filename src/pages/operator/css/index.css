@@ -97,13 +97,17 @@ the element is selected */
 /* Button colors **************************************************************/
 
 button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: var(--btn-padding);
+    cursor: pointer;
+    transition: border 150ms ease-out;
+    box-shadow: var(--shadow);
     background-color: var(--btn-gray);
     border: 4px solid transparent !important;
     border-radius: var(--btn-brdr-radius);
-    padding: var(--btn-padding);
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: border 150ms ease-out;
 }
 
 button:hover {

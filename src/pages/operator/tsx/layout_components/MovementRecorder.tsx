@@ -2,16 +2,22 @@ import React, { useMemo, useEffect, useCallback, useState, useRef } from "react"
 import { PopupModal } from "../basic_components/PopupModal";
 import Flex from "../basic_components/Flex";
 import { movementRecorderFunctionProvider } from "operator/tsx/index";
-import { Dropdown } from "../basic_components/Dropdown";
-import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
 import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import SaveIcon from "@mui/icons-material/Save";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import NotStartedIcon from '@mui/icons-material/NotStarted';
+import SearchIcon from '@mui/icons-material/Search';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import LocalFloristIcon from '@mui/icons-material/LocalFlorist';
+
 
 /** All the possible button functions */
 export enum MovementRecorderFunction {
@@ -74,8 +80,10 @@ const ButtonRecord = (props: {
     ) {
         return (
             <button
-                onPointerDown={() => props.showRecordingStartButtonSet(true)}>
-                Record 🔴
+                onPointerDown={() => props.showRecordingStartButtonSet(true)}
+                className="button-record button-record-record"
+            >
+                Record <RadioButtonCheckedIcon />
             </button>
         );
     }
@@ -90,8 +98,9 @@ const ButtonRecord = (props: {
             <button
                 onPointerDown={props.startRecording}
                 disabled={!props.isOneJointSelected}
+                className="button-record button-record-start"
             >
-                Start 🔴
+                Start <NotStartedIcon />
             </button>
         );
     }
@@ -112,8 +121,9 @@ const ButtonRecord = (props: {
                     props.recordingNameSet(tempName);
                     props.isNamingModalVisibleSet(true)
                 }}
+                className="button-record button-record-stop"
             >
-                Stop 🔴
+                Stop <StopCircleIcon />
             </button>
         );
     }
@@ -143,12 +153,14 @@ const ButtonFilter = (props: {
             <button
                 onPointerDown={() => {
                     props.isFilterActivatedSet(!props.isFilterActivated)
-                }}>
-                🔎
+                }}
+                className="button-filter"
+            >
+                <SearchIcon />
             </button>
         );
     } else return (
-        <div className="button-filter">
+        <div>
             <input
                 ref={refInput}
                 type="text"
@@ -216,6 +228,20 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
             window.removeEventListener('resize', adjustHeight);
         };
     }, [valueTextArea]);
+    const updateRecordingName = useCallback(() => {
+
+        if (refTextArea?.current?.value.trim() === recordingName) {
+            isEditingSet(false)
+        } else {
+            const recordingNameNew = refTextArea?.current?.value.trim() || recordingName;
+
+            functions.RenameRecording(idxFixed, recordingNameNew)
+            recordingsRefresh();
+            isEditingSet(false);
+            scrollToTop();
+        }
+    }, [valueTextArea, idxFixed, recordingName])
+
 
     return (
         <div
@@ -232,38 +258,36 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                     valueTextAreaSet(e.target.value)
                 }}
                 disabled={!isEditing}
-                onBlur={(e) => {
-
-                    const recordingNameNew = e.target.value.trim() || recordingName;
-
-                    functions.RenameRecording(idxFixed, recordingNameNew)
-                    recordingsRefresh();
-                    isEditingSet(false);
-                    scrollToTop();
-                }}
+                onBlur={updateRecordingName}
             />
             <Flex gap={5} className="recording-item-buttons">
-                    <button
-                        onPointerDown={() => {
-                            functions.LoadRecording(idxFixed)
-                        }}
-                        className={`button-playback ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
-                    >
-                        ▸
-                    </button>
-                    <button
-                        onPointerDown={() => {
-                            isEditingSet(true);
-                        }}
-                        className={`button-edit ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
-                    >✐</button>
+                <button
+                    onPointerDown={() => {
+                        functions.LoadRecording(idxFixed)
+                    }}
+                    className={`button-playback ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
+                >
+                    <PlayCircle />
+                </button>
+                <button
+                    onPointerDown={() => {
+                        isEditingSet(true);
+                    }}
+                    className={`
+                        button-edit
+                        ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}
+                        ${isEditing ? 'editing' : ''}
+                    `}
+                ><EditIcon className="button-edit-icon" /></button>
                 <Flex className="button-delete-recording-wrapper">
                     <button
                         onPointerDown={() => { isAskingConfirmationBeforeDeleteSet(false) }}
                         disabled={!isAskingConfirmationBeforeDelete}
-                        className={`button-cancel-deletion ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}>
-                        ◂
+                        className={`button-cancel-deletion ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
+                    >
+                        <KeyboardArrowLeftIcon />
                     </button>
+                    <div className={`helper-text ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}>Are you sure?</div>
                     <button
                         onPointerDown={() => {
                             if (isAskingConfirmationBeforeDelete) {
@@ -274,8 +298,12 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                                 isAskingConfirmationBeforeDeleteSet(true)
                             }
                         }}
-                        className="button-delete"
-                    >🗑️</button>
+                        className={`button-delete ${isAskingConfirmationBeforeDelete ? " pulse" : " "}`}
+                    >
+                        <DeleteIcon
+                            className="button-delete-icon"
+                        />
+                    </button>
                 </Flex>
             </Flex>
         </div>
@@ -386,6 +414,44 @@ export const MovementRecorder = (props: {
             || gripper
         );
     }, [head, arm, lift, wristRoll, wristPitch, wristYaw, gripper]);
+
+    // For Arm & Lift
+    const armLiftChildren = [arm, lift];
+    const armLiftAllChecked = arm && lift;
+    const armLiftNoneChecked = !arm && !lift;
+    const armLiftIndeterminate = !armLiftAllChecked && !armLiftNoneChecked;
+
+    const armLiftRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (armLiftRef.current) {
+            armLiftRef.current.indeterminate = armLiftIndeterminate;
+        }
+    }, [armLiftIndeterminate]);
+
+    const handleArmLiftParentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setArm(e.target.checked);
+        setLift(e.target.checked);
+    };
+
+    // For Wrist & Gripper
+    const wristGripperChildren = [wristRoll, wristPitch, wristYaw, gripper];
+    const wristGripperAllChecked = wristRoll && wristPitch && wristYaw && gripper;
+    const wristGripperNoneChecked = !wristRoll && !wristPitch && !wristYaw && !gripper;
+    const wristGripperIndeterminate = !wristGripperAllChecked && !wristGripperNoneChecked;
+
+    const wristGripperRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (wristGripperRef.current) {
+            wristGripperRef.current.indeterminate = wristGripperIndeterminate;
+        }
+    }, [wristGripperIndeterminate]);
+
+    const handleWristGripperParentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setWristRoll(e.target.checked);
+        setWristPitch(e.target.checked);
+        setWristYaw(e.target.checked);
+        setGripper(e.target.checked);
+    };
 
 
 
@@ -585,8 +651,6 @@ export const MovementRecorder = (props: {
                 size={!isBrowser && !isTablet ? "small" : "large"}
                 mobile={!isBrowser && !isTablet}
             >
-                {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
-                <hr/> */}
                 <div className="joint-checkbox">
                     <label>Select the joints to record:</label>
                 </div>
@@ -597,76 +661,108 @@ export const MovementRecorder = (props: {
                             id="head"
                             name="save-head-pose"
                             value="Head"
-                            defaultChecked={head}
+                            checked={head}
                             onChange={(e) => setHead(e.target.checked)}
                         />
-                        <label>Head</label>
+                        <label htmlFor="head">Head</label>
+                    </li>
+                    <li>
+                        <input
+                            id="arm-lift"
+                            type="checkbox"
+                            ref={armLiftRef}
+                            checked={armLiftAllChecked}
+                            onChange={handleArmLiftParentChange}
+                            disabled={isRecording}
+                        />
+                        <label htmlFor="arm-lift">Arm & Lift</label>
+                        <ul className="checkbox nested">
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="arm"
+                                    name="save-arm-pose"
+                                    value="Arm"
+                                    checked={arm}
+                                    onChange={(e) => setArm(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="arm">Arm</label>
+                            </li>
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="lift"
+                                    name="save-lift-pose"
+                                    value="Lift"
+                                    checked={lift}
+                                    onChange={(e) => setLift(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="lift">Lift</label>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <input
                             type="checkbox"
-                            id="arm"
-                            name="save-arm-pose"
-                            value="Arm"
-                            defaultChecked={arm}
-                            onChange={(e) => setArm(e.target.checked)}
+                            id="wrist-gripper"
+                            ref={wristGripperRef}
+                            checked={wristGripperAllChecked}
+                            onChange={handleWristGripperParentChange}
+                            disabled={isRecording}
                         />
-                        <label>Arm</label>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="lift"
-                            name="save-lift-pose"
-                            value="Lift"
-                            defaultChecked={lift}
-                            onChange={(e) => setLift(e.target.checked)}
-                        />
-                        <label>Lift</label>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="wristRoll"
-                            name="save-wrist-roll-pose"
-                            value="Wrist Roll"
-                            defaultChecked={wristRoll}
-                            onChange={(e) => setWristRoll(e.target.checked)}
-                        />
-                        <label>Wrist Twist</label>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="wristPitch"
-                            name="save-wrist-pitch-pose"
-                            value="Wrist Pitch"
-                            defaultChecked={wristPitch}
-                            onChange={(e) => setWristPitch(e.target.checked)}
-                        />
-                        <label>Wrist Bend</label>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="wristYaw"
-                            name="save-wrist-yaw-pose"
-                            value="Wrist Yaw"
-                            defaultChecked={wristYaw}
-                            onChange={(e) => setWristYaw(e.target.checked)}
-                        />
-                        <label>Wrist Rotate</label>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="gripper"
-                            name="save-gripper-pose"
-                            value="Gripper"
-                            defaultChecked={gripper}
-                            onChange={(e) => setGripper(e.target.checked)}
-                        />
-                        <label>Gripper</label>
+                        <label htmlFor="wrist-gripper">Wrist & Gripper</label>
+                        <ul className="checkbox nested">
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="wristRoll"
+                                    name="save-wrist-roll-pose"
+                                    value="Wrist Roll"
+                                    checked={wristRoll}
+                                    onChange={(e) => setWristRoll(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="wristRoll">Wrist Twist</label>
+                            </li>
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="wristPitch"
+                                    name="save-wrist-pitch-pose"
+                                    value="Wrist Pitch"
+                                    checked={wristPitch}
+                                    onChange={(e) => setWristPitch(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="wristPitch">Wrist Bend</label>
+                            </li>
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="wristYaw"
+                                    name="save-wrist-yaw-pose"
+                                    value="Wrist Yaw"
+                                    checked={wristYaw}
+                                    onChange={(e) => setWristYaw(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="wristYaw">Wrist Rotate</label>
+                            </li>
+                            <li>
+                                <input
+                                    type="checkbox"
+                                    id="gripper"
+                                    name="save-gripper-pose"
+                                    value="Gripper"
+                                    checked={gripper}
+                                    onChange={(e) => setGripper(e.target.checked)}
+                                    disabled={isRecording}
+                                />
+                                <label htmlFor="gripper">Gripper</label>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </PopupModal>
@@ -744,31 +840,47 @@ export const MovementRecorder = (props: {
         <React.Fragment>
             <div id="movement-recorder-container">
                 <div ref={refRecordingsList} className="recordings-list">
-                    {
-                        // sort by newest recordings...
-                        [...recordingsFiltered].reverse().map((recordingName, idx) => {
-                            const idxFixed = recordings.indexOf(recordingName);
-                            return (
-                                <RecordingItem
-                                    key={recordingName + idx}
-                                    recordingName={recordingName}
-                                    idxFixed={idxFixed}
-                                    functions={functions}
-                                    setRecordings={setRecordings}
-                                    scrollToTop={scrollToTop}
-                                />
-                            );
-                        })
+                    {recordings.length === 0
+                        ? (
+                            <div className="helper-text-empty-state">
+                                <div><LocalFloristIcon fontSize="large"/></div>
+                                <div>You haven't made any recordings yet.</div>
+                            </div>
+                        )
+                        : recordingsFiltered.length
+                            // sort by newest recordings...
+                            ? [...recordingsFiltered].reverse().map((recordingName, idx) => {
+                                const idxFixed = recordings.indexOf(recordingName);
+                                return (
+                                    <RecordingItem
+                                        key={recordingName + idx}
+                                        recordingName={recordingName}
+                                        idxFixed={idxFixed}
+                                        functions={functions}
+                                        setRecordings={setRecordings}
+                                        scrollToTop={scrollToTop}
+                                    />
+                                );
+                            })
+                            : (
+                                <div className="helper-text-empty-state">
+                                    <div><SearchIcon fontSize="large"/></div>
+                                    <div>No recordings</div>
+                                </div>
+                            )
                     }
 
                 </div>
                 {showRecordingStartButton || isRecording
                     ? (
                         <div className="joints-list" ref={refJointsList}>
+                            <div className="heading">Select Joints to Record</div>
+                            <div className="subheading">At least 1 joint needs to be selected to begin recording</div>
                             <Flex>
                                 <button
                                     onPointerDown={!isOneJointSelected ? selectAllJoints : deselectAllJoints}
                                     disabled={isRecording}
+                                    className="button-select-all"
                                 >
                                     {!isOneJointSelected ? "Select All" : "Deselect All"}
                                 </button>
@@ -784,79 +896,105 @@ export const MovementRecorder = (props: {
                                         onChange={(e) => setHead(e.target.checked)}
                                         disabled={isRecording}
                                     />
-                                    <label>Head</label>
+                                    <label htmlFor="head">Head</label>
                                 </li>
                                 <li>
                                     <input
                                         type="checkbox"
-                                        id="arm"
-                                        name="save-arm-pose"
-                                        value="Arm"
-                                        checked={arm}
-                                        onChange={(e) => setArm(e.target.checked)}
+                                        id="arm-lift"
+                                        ref={armLiftRef}
+                                        checked={armLiftAllChecked}
+                                        onChange={handleArmLiftParentChange}
                                         disabled={isRecording}
                                     />
-                                    <label>Arm</label>
+                                    <label htmlFor="arm-lift">Arm & Lift</label>
+                                    <ul className="checkbox nested">
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="arm"
+                                                name="save-arm-pose"
+                                                value="Arm"
+                                                checked={arm}
+                                                onChange={(e) => setArm(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="arm">Arm</label>
+                                        </li>
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="lift"
+                                                name="save-lift-pose"
+                                                value="Lift"
+                                                checked={lift}
+                                                onChange={(e) => setLift(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="lift">Lift</label>
+                                        </li>
+                                    </ul>
                                 </li>
                                 <li>
                                     <input
                                         type="checkbox"
-                                        id="lift"
-                                        name="save-lift-pose"
-                                        value="Lift"
-                                        checked={lift}
-                                        onChange={(e) => setLift(e.target.checked)}
+                                        id="wrist-gripper"
+                                        ref={wristGripperRef}
+                                        checked={wristGripperAllChecked}
+                                        onChange={handleWristGripperParentChange}
                                         disabled={isRecording}
                                     />
-                                    <label>Lift</label>
-                                </li>
-                                <li>
-                                    <input
-                                        type="checkbox"
-                                        id="wristRoll"
-                                        name="save-wrist-roll-pose"
-                                        value="Wrist Roll"
-                                        checked={wristRoll}
-                                        onChange={(e) => setWristRoll(e.target.checked)}
-                                        disabled={isRecording}
-                                    />
-                                    <label>Wrist Twist</label>
-                                </li>
-                                <li>
-                                    <input
-                                        type="checkbox"
-                                        id="wristPitch"
-                                        name="save-wrist-pitch-pose"
-                                        value="Wrist Pitch"
-                                        checked={wristPitch}
-                                        onChange={(e) => setWristPitch(e.target.checked)}
-                                        disabled={isRecording}
-                                    />
-                                    <label>Wrist Bend</label>
-                                </li>
-                                <li>
-                                    <input
-                                        type="checkbox"
-                                        id="wristYaw"
-                                        name="save-wrist-yaw-pose"
-                                        value="Wrist Yaw"
-                                        checked={wristYaw}
-                                        onChange={(e) => setWristYaw(e.target.checked)}
-                                        disabled={isRecording}
-                                    />
-                                    <label>Wrist Rotate</label>
-                                </li>
-                                <li>
-                                    <input
-                                        type="checkbox"
-                                        id="gripper"
-                                        name="save-gripper-pose"
-                                        value="Gripper"
-                                        checked={gripper}
-                                        onChange={(e) => setGripper(e.target.checked)}
-                                        disabled={isRecording}
-                                    />
-                                    <label>Gripper</label>
+                                    <label htmlFor="wrist-gripper">Wrist & Gripper</label>
+                                    <ul className="checkbox nested">
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="wristRoll"
+                                                name="save-wrist-roll-pose"
+                                                value="Wrist Roll"
+                                                checked={wristRoll}
+                                                onChange={(e) => setWristRoll(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="wristRoll">Wrist Twist</label>
+                                        </li>
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="wristPitch"
+                                                name="save-wrist-pitch-pose"
+                                                value="Wrist Pitch"
+                                                checked={wristPitch}
+                                                onChange={(e) => setWristPitch(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="wristPitch">Wrist Bend</label>
+                                        </li>
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="wristYaw"
+                                                name="save-wrist-yaw-pose"
+                                                value="Wrist Yaw"
+                                                checked={wristYaw}
+                                                onChange={(e) => setWristYaw(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="wristYaw">Wrist Rotate</label>
+                                        </li>
+                                        <li>
+                                            <input
+                                                type="checkbox"
+                                                id="gripper"
+                                                name="save-gripper-pose"
+                                                value="Gripper"
+                                                checked={gripper}
+                                                onChange={(e) => setGripper(e.target.checked)}
+                                                disabled={isRecording}
+                                            />
+                                            <label htmlFor="gripper">Gripper</label>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </div>
@@ -866,8 +1004,8 @@ export const MovementRecorder = (props: {
                 {isNamingModalVisible
                     ? (
                         <Flex className="naming-modal" direction="column" gap={10}>
-                            <div>Recording name:</div>
-                            <Flex>
+                            <div className="heading">Recording Name</div>
+                            <Flex style={{ width: '100%' }}>
                                 <input
                                     type="text"
                                     ref={refInputRecordingName}
@@ -888,7 +1026,7 @@ export const MovementRecorder = (props: {
                                     }}
                                     disabled={recordingName.length < 1 || recordings.includes(recordingName)}
                                 >
-                                    ✐ Save
+                                    <NotStartedIcon /> Save Recording
                                 </button>
                                 <button
                                     onPointerDown={dumpToInitialState}
@@ -918,10 +1056,6 @@ export const MovementRecorder = (props: {
                 {!isNamingModalVisible
                     ? (<div className="footer">
                         <Flex gap={5} align="center">
-                            {isFilterActivated || showRecordingStartButton || (isRecording && showRecordingStartButton)
-                                ? <button onPointerDown={dumpToInitialState}>◂</button>
-                                : null
-                            }
                             {!isFilterActivated
                                 ? <ButtonRecord
                                     showRecordingStartButton={showRecordingStartButton}
@@ -939,7 +1073,11 @@ export const MovementRecorder = (props: {
                                 />
                                 : null
                             }
-                            {!showRecordingStartButton && !isRecording
+                            {isFilterActivated || showRecordingStartButton || (isRecording && showRecordingStartButton)
+                                ? <button className="button-cancel" onPointerDown={dumpToInitialState}><KeyboardArrowLeftIcon /></button>
+                                : null
+                            }
+                            {recordings.length && !showRecordingStartButton && !isRecording
                                 ? <ButtonFilter
                                     isFilterActivated={isFilterActivated}
                                     isFilterActivatedSet={isFilterActivatedSet}
@@ -948,9 +1086,9 @@ export const MovementRecorder = (props: {
                                 />
                                 : null}
                         </Flex>
-                        <Flex gap={5} align="center">
-                            <button onPointerDown={scrollUp} disabled={!canScrollUp}>▲</button>
-                            <button onPointerDown={scrollDown} disabled={!canScrollDown}>▼</button>
+                        <Flex gap={5} align="center" className="button-scroll-wrapper">
+                            <button className="button-scroll" onPointerDown={scrollUp} disabled={!canScrollUp}><KeyboardArrowUpIcon /></button>
+                            <button className="button-scroll" onPointerDown={scrollDown} disabled={!canScrollDown}><KeyboardArrowDownIcon /></button>
                         </Flex>
                     </div>
                     )
