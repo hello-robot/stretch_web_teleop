@@ -115,6 +115,10 @@ button:hover {
     border: 4px solid var(--btn-turquoise) !important;
 }
 
+button:active {
+    filter: invert(0.1);
+}
+
 button:disabled {
     background-color: lightgray;
     pointer-events: none;

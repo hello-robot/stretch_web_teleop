@@ -203,16 +203,17 @@
 }
 
 .joints-list .subheading {
-    margin: 5px 0 0;
+    margin: 7px 0 0;
     max-width: 227px;
     font-size: 14px;
     font-weight: 400;
-    line-height: 121%;
+    line-height: 133%;
 }
 
 .joints-list button.button-select-all {
-    margin: 20px 0 5px;
+    margin: 15px 0 5px;
     width: 100%;
+    font-weight: 600;
 }
 
 .naming-modal button {
@@ -236,10 +237,12 @@
 
 .recording-name-text-area:disabled {
     color: #000000;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    pointer-events: none !important;
+    -webkit-touch-callout: none !important;
 }
 
 .recording-name-text-area:focus {
@@ -269,6 +272,7 @@
     max-width: var(--button-width) !important;
     transition: var(--transition);
     color: var(--btn-blue);
+    border-radius: 4px;
 }
 
 .recording-item-buttons .button-delete-recording-wrapper {

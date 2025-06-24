@@ -1,11 +1,8 @@
 import React, { useMemo, useEffect, useCallback, useState, useRef } from "react";
-import { PopupModal } from "../basic_components/PopupModal";
 import Flex from "../basic_components/Flex";
 import { movementRecorderFunctionProvider } from "operator/tsx/index";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
-import { isBrowser, isTablet } from "react-device-detect";
-import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -210,6 +207,8 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
         }
     }, [isEditing]);
     // Adjust height of the textarea based on its content
+    // This is to account for recording names that are really
+    // long and need to be able to wrap
     useEffect(() => {
         const adjustHeight = () => {
             const domNode = refTextArea.current;
@@ -229,7 +228,6 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
         };
     }, [valueTextArea]);
     const updateRecordingName = useCallback(() => {
-
         if (refTextArea?.current?.value.trim() === recordingName) {
             isEditingSet(false)
         } else {
@@ -241,15 +239,12 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
             scrollToTop();
         }
     }, [valueTextArea, idxFixed, recordingName])
-
-
     return (
         <div
             className="recording-item"
             key={recordingName}
         >
             <textarea
-                // type="text"
                 ref={refTextArea}
                 className="recording-name-text-area"
                 value={valueTextArea || recordingName}
@@ -260,12 +255,15 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                 disabled={!isEditing}
                 onBlur={updateRecordingName}
             />
-            <Flex gap={5} className="recording-item-buttons">
+            <Flex gap={4} className="recording-item-buttons">
                 <button
                     onPointerDown={() => {
                         functions.LoadRecording(idxFixed)
                     }}
-                    className={`button-playback ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
+                    className={
+                        `button-playback
+                        ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`
+                    }
                 >
                     <PlayCircle />
                 </button>
@@ -347,34 +345,11 @@ export const MovementRecorder = (props: {
         ) as (recordingID: number, recordingNameNew: string) => void,
     };
 
-    let radioFuncts: RadioFunctions = {
-        Delete: movementRecorderFunctionProvider.provideFunctions(
-            MovementRecorderFunction.DeleteRecordingName,
-        ) as (name: string) => void,
-        GetLabels: functions.SavedRecordingNames,
-        SelectedLabel: (label: string) =>
-            setSelectedIdx(functions.SavedRecordingNames().indexOf(label)),
-    };
-
-
-
-    // TODO: previous abstraction
-    const [selectedIdx, setSelectedIdx] = React.useState<number>();
-    const [showJointSelectionModal, setShowJointSelectionModal] =
-        useState<boolean>(false);
-    const [showSaveRecordingModal, setShowSaveRecordingModal] =
-        useState<boolean>(false);
-    // TODO: previous abstraction
-
-
-
-
 
 
     /*******************
      * Joint selection *
      *******************/
-
     const [head, setHead] = React.useState<boolean>(false);
     const [arm, setArm] = React.useState<boolean>(false);
     const [lift, setLift] = React.useState<boolean>(false);
@@ -392,7 +367,6 @@ export const MovementRecorder = (props: {
         setWristYaw(true);
         setGripper(true);
     }, []);
-
     const deselectAllJoints = useCallback(() => {
         setHead(false);
         setArm(false);
@@ -416,7 +390,6 @@ export const MovementRecorder = (props: {
     }, [head, arm, lift, wristRoll, wristPitch, wristYaw, gripper]);
 
     // For Arm & Lift
-    const armLiftChildren = [arm, lift];
     const armLiftAllChecked = arm && lift;
     const armLiftNoneChecked = !arm && !lift;
     const armLiftIndeterminate = !armLiftAllChecked && !armLiftNoneChecked;
@@ -434,7 +407,6 @@ export const MovementRecorder = (props: {
     };
 
     // For Wrist & Gripper
-    const wristGripperChildren = [wristRoll, wristPitch, wristYaw, gripper];
     const wristGripperAllChecked = wristRoll && wristPitch && wristYaw && gripper;
     const wristGripperNoneChecked = !wristRoll && !wristPitch && !wristYaw && !gripper;
     const wristGripperIndeterminate = !wristGripperAllChecked && !wristGripperNoneChecked;
@@ -458,7 +430,6 @@ export const MovementRecorder = (props: {
     /*************
      * Recording *
      *************/
-
     const [recordings, setRecordings] = useState<string[]>(
         functions.SavedRecordingNames(),
     );
@@ -483,10 +454,10 @@ export const MovementRecorder = (props: {
     }, [head, arm, lift, wristRoll, wristPitch, wristYaw, gripper,]);
 
 
+
     /*******************************
      * Filter state & side-effects *
      *******************************/
-
     const [isFilterActivated, isFilterActivatedSet] =
         useState<boolean>(false);
     const [filterQuery, filterQuerySet] = useState<string>('');
@@ -503,7 +474,6 @@ export const MovementRecorder = (props: {
     /********************************************
      * Callback to go back to the drawing board *
      ********************************************/
-
     const dumpToInitialState = useCallback(() => {
         filterQuerySet('');
         isFilterActivatedSet(false);
@@ -519,7 +489,6 @@ export const MovementRecorder = (props: {
     /****************************
      * Step-scrolling <buttons> *
      ****************************/
-
     // Refs
     const refRecordingsList = useRef(null);
     const refJointsList = useRef(null);
@@ -591,7 +560,6 @@ export const MovementRecorder = (props: {
     /****************
      * Naming Modal *
      ****************/
-
     // ref for <input>
     const refInputRecordingName = useRef<HTMLInputElement>(null);
 
@@ -603,247 +571,15 @@ export const MovementRecorder = (props: {
         }
     }, [isNamingModalVisible]);
 
-    // TODO: previous abstraction
-    const JointSelectionModal = (props: {
-        setShow: (show: boolean) => void;
-        show: boolean;
-        isRecordingSet: (isRecording: boolean) => void;
-    }) => {
-        const [head, setHead] = React.useState<boolean>(false);
-        const [arm, setArm] = React.useState<boolean>(false);
-        const [lift, setLift] = React.useState<boolean>(false);
-        const [wristRoll, setWristRoll] = React.useState<boolean>(false);
-        const [wristPitch, setWristPitch] = React.useState<boolean>(false);
-        const [wristYaw, setWristYaw] = React.useState<boolean>(false);
-        const [gripper, setGripper] = React.useState<boolean>(false);
 
-        function handleAccept() {
-            functions.Record(
-                head,
-                arm,
-                lift,
-                wristRoll,
-                wristPitch,
-                wristYaw,
-                gripper,
-            );
-            setHead(false);
-            setArm(false);
-            setLift(false);
-            setWristRoll(false);
-            setWristPitch(false);
-            setWristYaw(false);
-            setGripper(false);
-        }
-
-        return (
-            <PopupModal
-                setShow={props.setShow}
-                show={props.show}
-                onAccept={handleAccept}
-                onCancel={() => {
-                    props.isRecordingSet(false);
-                    props.setShow(false);
-                    functions.StopRecording();
-                }}
-                id="save-recording-modal"
-                acceptButtonText="Save"
-                size={!isBrowser && !isTablet ? "small" : "large"}
-                mobile={!isBrowser && !isTablet}
-            >
-                <div className="joint-checkbox">
-                    <label>Select the joints to record:</label>
-                </div>
-                <ul className="checkbox">
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="head"
-                            name="save-head-pose"
-                            value="Head"
-                            checked={head}
-                            onChange={(e) => setHead(e.target.checked)}
-                        />
-                        <label htmlFor="head">Head</label>
-                    </li>
-                    <li>
-                        <input
-                            id="arm-lift"
-                            type="checkbox"
-                            ref={armLiftRef}
-                            checked={armLiftAllChecked}
-                            onChange={handleArmLiftParentChange}
-                            disabled={isRecording}
-                        />
-                        <label htmlFor="arm-lift">Arm & Lift</label>
-                        <ul className="checkbox nested">
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="arm"
-                                    name="save-arm-pose"
-                                    value="Arm"
-                                    checked={arm}
-                                    onChange={(e) => setArm(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="arm">Arm</label>
-                            </li>
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="lift"
-                                    name="save-lift-pose"
-                                    value="Lift"
-                                    checked={lift}
-                                    onChange={(e) => setLift(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="lift">Lift</label>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <input
-                            type="checkbox"
-                            id="wrist-gripper"
-                            ref={wristGripperRef}
-                            checked={wristGripperAllChecked}
-                            onChange={handleWristGripperParentChange}
-                            disabled={isRecording}
-                        />
-                        <label htmlFor="wrist-gripper">Wrist & Gripper</label>
-                        <ul className="checkbox nested">
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="wristRoll"
-                                    name="save-wrist-roll-pose"
-                                    value="Wrist Roll"
-                                    checked={wristRoll}
-                                    onChange={(e) => setWristRoll(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="wristRoll">Wrist Twist</label>
-                            </li>
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="wristPitch"
-                                    name="save-wrist-pitch-pose"
-                                    value="Wrist Pitch"
-                                    checked={wristPitch}
-                                    onChange={(e) => setWristPitch(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="wristPitch">Wrist Bend</label>
-                            </li>
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="wristYaw"
-                                    name="save-wrist-yaw-pose"
-                                    value="Wrist Yaw"
-                                    checked={wristYaw}
-                                    onChange={(e) => setWristYaw(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="wristYaw">Wrist Rotate</label>
-                            </li>
-                            <li>
-                                <input
-                                    type="checkbox"
-                                    id="gripper"
-                                    name="save-gripper-pose"
-                                    value="Gripper"
-                                    checked={gripper}
-                                    onChange={(e) => setGripper(e.target.checked)}
-                                    disabled={isRecording}
-                                />
-                                <label htmlFor="gripper">Gripper</label>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </PopupModal>
-        );
-    };
-    const SaveRecordingModal = (props: {
-        setShow: (show: boolean) => void;
-        show: boolean;
-    }) => {
-        const [name, setName] = React.useState<string>("");
-        function handleAccept() {
-            if (name.length > 0) {
-                if (!recordings.includes(name)) {
-                    setRecordings((recordings) => [...recordings, name]);
-                }
-                functions.SaveRecording(name);
-            }
-            setName("");
-        }
-
-        return (
-            <PopupModal
-                setShow={props.setShow}
-                show={props.show}
-                onAccept={handleAccept}
-                onCancel={() => functions.StopRecording()}
-                id="save-recording-modal"
-                acceptButtonText="Save"
-                acceptDisabled={name.length < 1}
-                size={!isBrowser && !isTablet ? "small" : "large"}
-                mobile={!isBrowser && !isTablet}
-            >
-                {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
-                <hr/> */}
-                <div className="recording-name">
-                    {/* <label>Recording Name</label> */}
-                    <input
-                        autoFocus
-                        type="text"
-                        id="new-recording-name"
-                        name="new-option-name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter name of movement"
-                    />
-                </div>
-            </PopupModal>
-        );
-    };
-    useEffect(() => {
-        if (!isBrowser && !isTablet) {
-            if (props.isRecording == undefined) {
-                return;
-            } else if (props.isRecording) {
-                isRecordingSet(true);
-                setShowJointSelectionModal(true);
-            } else {
-                isRecordingSet(false);
-                setShowSaveRecordingModal(true);
-            }
-        }
-    }, [props.isRecording]);
-    if (props.globalRecord !== undefined && !props.globalRecord)
-        return (
-            <SaveRecordingModal
-                setShow={setShowSaveRecordingModal}
-                show={showSaveRecordingModal}
-            />
-        );
-    // TODO: previous abstraction
-
-
-
-    return isBrowser || isTablet ? (
+    return (
         <React.Fragment>
             <div id="movement-recorder-container">
                 <div ref={refRecordingsList} className="recordings-list">
                     {recordings.length === 0
                         ? (
                             <div className="helper-text-empty-state">
-                                <div><LocalFloristIcon fontSize="large"/></div>
+                                <div><LocalFloristIcon fontSize="large" /></div>
                                 <div>You haven't made any recordings yet.</div>
                             </div>
                         )
@@ -864,7 +600,7 @@ export const MovementRecorder = (props: {
                             })
                             : (
                                 <div className="helper-text-empty-state">
-                                    <div><SearchIcon fontSize="large"/></div>
+                                    <div><SearchIcon fontSize="large" /></div>
                                     <div>No recordings</div>
                                 </div>
                             )
@@ -1037,21 +773,7 @@ export const MovementRecorder = (props: {
                         </Flex>
                     )
                     : null}
-                {/* <Tooltip text="Delete recording" position="top">
-                    <button
-                        className="delete-btn btn-label"
-                        onClick={() => {
-                            if (selectedIdx != undefined) {
-                                functions.DeleteRecording(selectedIdx);
-                            }
-                            setRecordings(functions.SavedRecordingNames());
-                            setSelectedIdx(undefined);
-                        }}
-                    >
-                        <span hidden={props.hideLabels}>Delete</span>
-                        <DeleteForeverIcon />
-                    </button>
-                </Tooltip> */}
+
                 {/* Footer */}
                 {!isNamingModalVisible
                     ? (<div className="footer">
@@ -1094,61 +816,6 @@ export const MovementRecorder = (props: {
                     )
                     : null}
             </div>
-            <JointSelectionModal
-                setShow={setShowJointSelectionModal}
-                show={showJointSelectionModal}
-                isRecordingSet={isRecordingSet}
-            />
-            <SaveRecordingModal
-                setShow={setShowSaveRecordingModal}
-                show={showSaveRecordingModal}
-            />
-        </React.Fragment>
-    ) : (
-        <React.Fragment>
-            <RadioGroup
-                functs={radioFuncts}
-            />
-            <div className="global-btns">
-                {/* <div className="mobile-movement-save-btn" onClick={() => {
-                        if (!isRecording) {
-                            isRecordingSet(true)
-                            functions.Record()
-                            if (props.onRecordingChange) props.onRecordingChange(true)
-                        } else {
-                            isRecordingSet(false)
-                            setShowSaveRecordingModal(true)
-                            if (props.onRecordingChange) props.onRecordingChange(false)
-                        }
-                    }
-                }>
-                    {!isRecording
-                        ? <span className="material-icons">radio_button_checked</span>
-                        : <span className="material-icons">save</span>
-                    }
-                    {!isRecording ? <i>Record</i> : <i>Save</i> }
-                </div> */}
-                <div
-                    className="mobile-movement-play-btn"
-                    onClick={() => {
-                        if (selectedIdx != undefined && selectedIdx > -1) {
-                            functions.LoadRecording(selectedIdx);
-                        }
-                    }}
-                >
-                    <PlayCircle />
-                    <i>Play</i>
-                </div>
-            </div>
-            <JointSelectionModal
-                setShow={setShowJointSelectionModal}
-                show={showJointSelectionModal}
-                isRecordingSet={isRecordingSet}
-            />
-            <SaveRecordingModal
-                setShow={setShowSaveRecordingModal}
-                show={showSaveRecordingModal}
-            />
         </React.Fragment>
     );
 };
