@@ -32,9 +32,14 @@ echo "-m $MAP_ARG" &>> $REDIRECT_LOGFILE
 echo "-t $TTS_ARG" &>> $REDIRECT_LOGFILE
 
 if [[ -z `nmcli -t -f DEVICE c show --active | grep wlo1` ]]; then
-    echo "Not connected to Wifi. Starting Wifi-Connect..."
-    echo "Please connect to $HOSTNAME wifi and provide your home network's credentials"
-    sudo wifi-connect -s $HOSTNAME &>> $REDIRECT_LOGFILE
+    if ! command -v wifi-connect 2>&1 >/dev/null
+    then
+        echo "Not connected to Wifi, but Wifi-Connect CLI is missing. Doing nothing..."
+    else
+        echo "Not connected to Wifi. Starting Wifi-Connect..."
+        echo "Please connect to $HOSTNAME wifi and provide your home network's credentials"
+        sudo wifi-connect -s $HOSTNAME &>> $REDIRECT_LOGFILE
+    fi
 fi
 
 echo "Setup environment..."
