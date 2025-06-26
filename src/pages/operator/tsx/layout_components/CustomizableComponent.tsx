@@ -13,8 +13,7 @@ import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
-import { RunStopButton } from "../static_components/RunStop";
-import { BatteryGuage } from "../static_components/BatteryGauge";
+import { MovementRecorder } from "../layout_components/MovementRecorder";
 
 /** State required for all elements */
 export type SharedState = {
@@ -84,10 +83,8 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <VirtualJoystick {...props} />;
         case ComponentType.Map:
             return <Map {...props} />;
-        case ComponentType.RunStopButton:
-            return <RunStopButton {...props} />;
-        case ComponentType.BatteryGuage:
-            return <BatteryGuage {...props} />;
+        case ComponentType.MovementRecorder:
+            return <MovementRecorder {...props} hideLabels={false} />;
         default:
             throw Error(
                 `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`
