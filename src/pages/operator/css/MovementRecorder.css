@@ -1,10 +1,3 @@
-#movement-recorder-container {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    justify-content: center;
-}
-
 /* The below buttons' CSS likely gets overridden by the TextToSpeech CSS
  * for the same class names. It is not an issue now because they use the
  * same styles, but may be an issue in the future if we change styles for
@@ -56,4 +49,304 @@
     vertical-align: middle;
     display: flex;
     justify-content: center;
+}
+
+
+
+/**********
+ * New UX *
+ **********/
+
+#movement-recorder-container {
+    position: relative;
+    align-self: flex-start;
+    height: 100%;
+    --footer-height: 60px;
+}
+
+
+.pulse {
+    animation: pulse-red-bg 2s infinite;
+}
+
+@keyframes pulse-red-bg {
+    0% {
+        background-color: #fa7878;
+    }
+
+    50% {
+        background-color: #ff0000;
+    }
+
+    100% {
+        background-color: #fa7878;
+    }
+}
+
+.recordings-list {
+    position: relative;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 8px 0;
+    height: calc(100% - var(--footer-height));
+}
+
+.recordings-list .recording-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 10px;
+}
+
+.recordings-list .helper-text-empty-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+    max-width: 200px;
+    height: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 130%;
+    opacity: 0.5;
+}
+
+#movement-recorder-container .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    width: 100%;
+    height: var(--footer-height);
+    background: #ffffff;
+    border-top: 1px solid #000000;
+}
+
+#movement-recorder-container .footer button.button-record {
+    font-weight: 600;
+}
+
+#movement-recorder-container .footer button.button-record.button-record-record svg {
+    color: #ff0000;
+}
+
+#movement-recorder-container .footer button.button-record.button-record-start:disabled svg {
+    color: rgba(16, 16, 16, 0.3);
+}
+
+#movement-recorder-container .footer button.button-record.button-record-start svg {
+    color: #ff0000;
+}
+
+#movement-recorder-container .footer button.button-record.button-record-stop svg {
+    color: #ff0000;
+}
+
+.naming-modal input,
+.footer input {
+    display: flex;
+    width: calc(100% - 20px);
+    padding: 12px 9px;
+}
+
+.footer button.button-cancel,
+.footer button.button-filter,
+.footer .button-scroll-wrapper button.button-scroll {
+    width: 50px;
+}
+
+.joints-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    width: 100%;
+    height: calc(100% - var(--footer-height));
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+.joints-list ul.checkbox {
+    margin: 10px 0 0 0;
+}
+
+.joints-list ul.checkbox.nested {
+    padding: 0 0 0 29px;
+    margin: 0px;
+}
+
+.joints-list ul.checkbox label {
+    top: -6px;
+    position: relative;
+    padding: 10px 0;
+}
+
+.naming-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+}
+
+.joints-list .heading,
+.naming-modal .heading {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.joints-list .subheading {
+    margin: 7px 0 0;
+    max-width: 227px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 133%;
+}
+
+.joints-list button.button-select-all {
+    margin: 15px 0 5px;
+    width: 100%;
+    font-weight: 600;
+}
+
+.naming-modal button {
+    height: 100%;
+}
+
+.recording-name-text-area {
+    margin: 0 5px 0 0;
+    padding: 0px 5px;
+    width: fit-content;
+    height: 31px;
+    line-height: 150%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    resize: none;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.recording-name-text-area:disabled {
+    color: #000000;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    pointer-events: none !important;
+    -webkit-touch-callout: none !important;
+}
+
+.recording-name-text-area:focus {
+    background-color: var(--btn-turquoise-ultra-light);
+    border: 1px solid var(--btn-turquoise);
+    outline: none;
+}
+
+.recording-name-text-area::selection {
+    background-color: var(--btn-turquoise-light);
+}
+
+
+.recording-item-buttons {
+    --button-width: 41px;
+    --transition: all 300ms ease-out;
+}
+
+.recording-item-buttons button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    aspect-ratio: 1 / 1;
+    width: var(--button-width) !important;
+    min-width: var(--button-width) !important;
+    max-width: var(--button-width) !important;
+    transition: var(--transition);
+    color: var(--btn-blue);
+    border-radius: 4px;
+}
+
+.recording-item-buttons .button-delete-recording-wrapper {
+    z-index: 0;
+    position: relative;
+}
+
+.recording-item-buttons button.button-playback,
+.recording-item-buttons button.button-edit {
+    transition: var(--transition);
+}
+
+.recording-item-buttons button.button-playback.visible,
+.recording-item-buttons button.button-edit.visible {
+    opacity: 1;
+}
+
+.recording-item-buttons button.button-playback.hidden,
+.recording-item-buttons button.button-edit.hidden {
+    opacity: 0;
+}
+
+.recording-item-buttons button.button-edit.editing {
+    color: #ffffff;
+    background-color: var(--btn-turquoise);
+    border: 4px solid var(--btn-turquoise);
+}
+
+.button-delete-recording-wrapper button.button-cancel-deletion {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-shadow: none;
+}
+
+.recording-item-buttons button.button-cancel-deletion.hidden {
+    transform: translateX(0%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.recording-item-buttons button.button-cancel-deletion.visible {
+    transform: translateX(calc(-100% - 5px));
+    opacity: 1;
+}
+
+.button-delete-recording-wrapper .helper-text {
+    z-index: 0;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    transition: var(--transition);
+    color: var(--btn-blue);
+    font-weight: 600;
+    transform: translate(-65px, calc(var(--button-width)));
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.button-delete-recording-wrapper .helper-text.hidden {
+    opacity: 0;
+}
+
+.button-delete-recording-wrapper .helper-text.visible {
+    transform: translate(-65px, calc(var(--button-width) + 2px));
+    opacity: 1;
+}
+
+.button-delete-recording-wrapper button.button-delete {
+    z-index: 2;
+    position: relative;
+}
+
+.recording-item-buttons button.button-delete.pulse .button-delete-icon {
+    color: #ffffff;
 }

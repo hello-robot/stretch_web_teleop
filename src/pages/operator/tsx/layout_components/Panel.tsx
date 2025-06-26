@@ -55,8 +55,8 @@ export const Panel = (props: CustomizableComponentProps) => {
 
     // Should take up screen size proportional to number of children
     const flex =
-        activeTabDef.label === "Safety"
-            ? 1
+        activeTabDef.label === "Movement Recorder"
+            ? 1.5
             : Math.max(activeTabDef.children.length + 1, 1);
 
     /** Props for rendering the children elements inside the active tab */

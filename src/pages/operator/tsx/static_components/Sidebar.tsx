@@ -109,10 +109,6 @@ function componentDescription(definition: ComponentDefinition): string {
 
 /** Properties for {@link SidebarGlobalOptions} */
 export type GlobalOptionsProps = {
-    /** If the save/load poses should be displayed. */
-    displayMovementRecorder: boolean;
-    setDisplayMovementRecorder: (displayMovementRecorder: boolean) => void;
-
     /** If the text-to-speech component should be displayed */
     displayTextToSpeech: boolean;
     setDisplayTextToSpeech: (displayTextToSpeech: boolean) => void;
@@ -153,15 +149,6 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                     on={!props.displayLabels}
                     onClick={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
-                />
-                <OnOffToggleButton
-                    on={!props.displayMovementRecorder}
-                    onClick={() =>
-                        props.setDisplayMovementRecorder(
-                            !props.displayMovementRecorder,
-                        )
-                    }
-                    label="Display movement recorder"
                 />
                 <OnOffToggleButton
                     on={!props.displayTextToSpeech}
