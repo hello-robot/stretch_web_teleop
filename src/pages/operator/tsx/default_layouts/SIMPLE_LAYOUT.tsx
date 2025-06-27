@@ -96,9 +96,6 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             label: "Safety",
                             children: [
                                 {
-                                    type: ComponentType.RunStopButton,
-                                },
-                                {
                                     type: ComponentType.BatteryGuage,
                                 },
                             ],

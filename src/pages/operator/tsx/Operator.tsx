@@ -41,6 +41,7 @@ import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { RunStop } from "./static_components/RunStop";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -313,8 +314,8 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName
-                  )
+                    layoutName as DefaultLayoutName
+                )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
         },
@@ -346,6 +347,7 @@ export const Operator = (props: {
                         FunctionProvider.velocityScale = newScale;
                     }}
                 />
+                <RunStop />
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleToggleCustomize}
@@ -377,7 +379,7 @@ export const Operator = (props: {
                             <span>
                                 {buttonCollision.length > 0
                                     ? buttonCollision.join(", ") +
-                                      " in collision!"
+                                    " in collision!"
                                     : ""}
                             </span>
                         </Alert>
