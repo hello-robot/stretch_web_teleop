@@ -95,12 +95,6 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                             type: ComponentType.SingleTab,
                             label: "Safety",
                             children: [
-                                {
-                                    type: ComponentType.RunStopButton,
-                                },
-                                {
-                                    type: ComponentType.BatteryGuage,
-                                },
                             ],
                         },
                     ],
