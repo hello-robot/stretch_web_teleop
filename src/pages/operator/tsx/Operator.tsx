@@ -42,6 +42,7 @@ import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
 import { RunStop } from "./static_components/RunStop";
+import { BatteryBar } from "./static_components/BatteryBar";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -348,6 +349,7 @@ export const Operator = (props: {
                     }}
                 />
                 <RunStop />
+                <BatteryBar />
                 <CustomizeButton
                     customizing={customizing}
                     onClick={handleToggleCustomize}
