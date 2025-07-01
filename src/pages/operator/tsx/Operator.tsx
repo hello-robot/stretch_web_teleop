@@ -18,6 +18,7 @@ import {
     homeTheRobotFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
+    movementRecorderFunctionProvider,
 } from ".";
 import {
     ButtonPadButton,
@@ -62,6 +63,7 @@ export const Operator = (props: {
         ButtonPadButton[]
     >([]);
     const [moveBaseState, setMoveBaseState] = React.useState<ActionState>();
+    const [playbackPosesState, setPlaybackPosesState] = React.useState<ActionState>();
     const [moveToPregraspState, setMoveToPregraspState] =
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
@@ -116,6 +118,22 @@ export const Operator = (props: {
             }, 5000);
         }
     }, [moveBaseState]);
+
+    // Callback for when the move base state is updated (e.g., the ROS2 action returns)
+    // Used to render alerts to the operator.
+    function playbackPosesCallback(state: ActionState) {
+        setPlaybackPosesState(state);
+    }
+    movementRecorderFunctionProvider.setOperatorCallback(playbackPosesCallback);
+    let playbackPosesAlertTimeout: NodeJS.Timeout;
+    React.useEffect(() => {
+        if (playbackPosesState && playbackPosesState.alert_type != "info") {
+            if (playbackPosesAlertTimeout) clearTimeout(playbackPosesAlertTimeout);
+            playbackPosesAlertTimeout = setTimeout(() => {
+                setPlaybackPosesState(undefined);
+            }, 5000);
+        }
+    }, [playbackPosesState]);
 
     // Callback for when the move to pregrasp state is updated (e.g., the ROS2 action returns)
     // Used to render alerts to the operator.
@@ -384,6 +402,21 @@ export const Operator = (props: {
                     </div>
                 </div>
             }
+            {playbackPosesState && (
+                <div className="operator-collision-alerts">
+                    <div
+                        className={className("operator-alert", {
+                            fadeIn: playbackPosesState !== undefined,
+                            fadeOut: playbackPosesState == undefined,
+                        })}
+                    >
+                        <Alert
+                            type={playbackPosesState.alert_type}
+                            message={playbackPosesState.state}
+                        />
+                    </div>
+                </div>
+            )}
             {moveBaseState && (
                 <div className="operator-collision-alerts">
                     <div

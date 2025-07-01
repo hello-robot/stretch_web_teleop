@@ -25,6 +25,7 @@ export var rosConnected = false;
 const moveBaseActionName = "/navigate_to_pose";
 const moveToPregraspActionName = "/move_to_pregrasp";
 const showTabletActionName = "/show_tablet";
+const followJointTrajectoryActionName = "/stretch_controller/follow_joint_trajectory";
 
 export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
@@ -34,7 +35,7 @@ export class Robot extends React.Component {
     private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.ActionGoal;
-    private poseGoalComplete?: boolean;
+    private poseGoalComplete?: boolean = true;
     private isRunStopped?: boolean;
     private moveBaseGoal?: ROSLIB.ActionGoal;
     private trajectoryClient?: ROSLIB.ActionClient;
@@ -69,6 +70,7 @@ export class Robot extends React.Component {
     private moveBaseResultCallback: (goalState: ActionState) => void;
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
     private showTabletResultCallback: (goalState: ActionState) => void;
+    private playbackPosesResultCallback: (goalState: ActionState) => void;
     private amclPoseCallback: (pose: ROSLIB.Transform) => void;
     private modeCallback: (mode: string) => void;
     private isHomedCallback: (isHomed: boolean) => void;
@@ -93,6 +95,7 @@ export class Robot extends React.Component {
         moveBaseResultCallback: (goalState: ActionState) => void;
         moveToPregraspResultCallback: (goalState: ActionState) => void;
         showTabletResultCallback: (goalState: ActionState) => void;
+        playbackPosesResultCallback: (goalState: ActionState) => void;
         amclPoseCallback: (pose: ROSLIB.Transform) => void;
         modeCallback: (mode: string) => void;
         isHomedCallback: (isHomed: boolean) => void;
@@ -107,6 +110,7 @@ export class Robot extends React.Component {
         this.moveBaseResultCallback = props.moveBaseResultCallback;
         this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
         this.showTabletResultCallback = props.showTabletResultCallback;
+        this.playbackPosesResultCallback = props.playbackPosesResultCallback;
         this.amclPoseCallback = props.amclPoseCallback;
         this.modeCallback = props.modeCallback;
         this.isHomedCallback = props.isHomedCallback;
@@ -282,6 +286,13 @@ export class Robot extends React.Component {
             "Show Tablet succeeded!",
             "Show Tablet failed!",
         );
+        this.subscribeToPlaybackActionResult(
+            followJointTrajectoryActionName,
+            this.playbackPosesResultCallback,
+            "Movement canceled!",
+            "Movement suceeded!",
+            "Movement failed!",
+        )
         this.createTrajectoryClient();
         this.createMoveBaseClient();
         this.createMoveToPregraspClient();
@@ -557,10 +568,52 @@ export class Robot extends React.Component {
         });
     }
 
+    subscribeToPlaybackActionResult(
+        actionName: string,
+        callback?: (goalState: ActionState) => void,
+        cancelMsg?: string,
+        successMsg?: string,
+        failureMsg?: string,
+    ) {
+        // Get the messages
+        if (!cancelMsg) {
+            cancelMsg = "Action " + actionName + "canceled!";
+        }
+        if (!successMsg) {
+            successMsg = "Action " + actionName + "succeeded!";
+        }
+        if (!failureMsg) {
+            failureMsg = "Action " + actionName + "failed!";
+        }
+
+        // Create the topic
+        let topic: ROSLIB.Topic<ActionStatusList> = new ROSLIB.Topic({
+            ros: this.ros,
+            name: actionName + "/_action/status",
+            messageType: "action_msgs/msg/GoalStatusArray",
+        });
+        this.subscriptions.push(topic);
+
+        // Subscribe to the topic
+        topic.subscribe((msg: ActionStatusList) => {
+            console.log("Got action status msg", msg);
+            // let status = msg.status_list.pop()?.status;
+            if (!this.poseGoalComplete) {
+                this.poseGoalComplete = true
+            } else {
+                this.poseGoalComplete = false
+                callback({
+                    state: successMsg,
+                    alert_type: "success",
+                });
+            }
+        });
+    }
+
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionHandle({
             ros: this.ros,
-            name: "/stretch_controller/follow_joint_trajectory",
+            name: followJointTrajectoryActionName,
             actionType: "control_msgs/action/FollowJointTrajectory",
         });
     }
@@ -1055,7 +1108,7 @@ export class Robot extends React.Component {
 
     async executePoseGoals(poses: RobotPose[], index: number) {
         this.switchToNavigationMode();
-        this.stopExecution();
+        // this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses);
         this.trajectoryClient.createClient(this.poseGoal);
     }
