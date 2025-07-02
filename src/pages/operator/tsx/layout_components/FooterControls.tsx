@@ -12,9 +12,10 @@ interface FooterControlsProps {
     onActionModeChange?: (newMode: ActionModeType) => void;
     isCameraVeilVisible: boolean;
     isCameraVeilVisibleSet: React.Dispatch<React.SetStateAction<boolean>>;
+    setHideMap?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const FooterControls: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible }) => {
+const FooterControls: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible, setHideMap }) => {
 
     return (
         <div className="footer-controls_XP">
@@ -30,9 +31,11 @@ const FooterControls: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onA
                 isCameraVeilVisible={isCameraVeilVisible}
                 setCameraVeilCallback={isCameraVeilVisibleSet}
             />
-            <div className="battery-gauge">
-                <BatteryGauge />
-            </div>
+            <button onPointerDown={
+                () => setHideMap((hideMap) => (!hideMap))
+            }>
+                Map
+            </button>
         </div>
     )
 }

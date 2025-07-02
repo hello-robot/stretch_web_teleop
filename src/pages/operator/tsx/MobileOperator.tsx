@@ -278,52 +278,46 @@ export const MobileOperator = (props: {
         );
     };
 
-    console.log('speed', FunctionProvider.velocityScale)
-
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
-                <div className={className("controls", { hideControls })}>
-                    <div
-                        // onPointerDown={() => {
-                        //     if (cameraID == CameraViewId.realsense)
-                        //         setCameraID(CameraViewId.overhead);
-                        //     else if (cameraID == CameraViewId.overhead)
-                        //         setCameraID(CameraViewId.gripper);
-                        //     else if (cameraID == CameraViewId.gripper)
-                        //         setCameraID(CameraViewId.realsense);
-                        // }}
-                        className="simple-camera-view-wrapper_XP"
-                    >
-                        <SimpleCameraView
-                            id={cameraID}
-                            remoteStreams={remoteStreams}
-                            isCameraVeilVisible={isCameraVeilVisible}
+
+                {/* Main display area */}
+                {hideMap
+                    ? (<div className={className("controls", { hideControls })}>
+                        <div
+                            className="simple-camera-view-wrapper_XP"
+                        >
+                            <SimpleCameraView
+                                id={cameraID}
+                                remoteStreams={remoteStreams}
+                                isCameraVeilVisible={isCameraVeilVisible}
+                            />
+                        </div>
+                        <TabGroup
+                            tabLabels={["Controls", "Recordings"]}
+                            tabContent={[controlModes, recordingList]}
+                            startIdx={activeMainGroupTab}
+                            onChange={(index: number) =>
+                                setActiveMainGroupTab(index)
+                            }
+                            pill={false}
+                            key={"main-group"}
                         />
-                    </div>
-                    <TabGroup
-                        tabLabels={["Controls", "Recordings"]}
-                        tabContent={[controlModes, recordingList]}
-                        startIdx={activeMainGroupTab}
-                        onChange={(index: number) =>
-                            setActiveMainGroupTab(index)
-                        }
-                        pill={false}
-                        key={"main-group"}
-                    />
-                </div>
-                <div className={className("map", { hideMap })}>
-                    <Map
-                        {...{
-                            path: "",
-                            definition: {
-                                type: ComponentType.Map,
-                                selectGoal: false,
-                            } as MapDefinition,
-                            sharedState: sharedState,
-                        }}
-                    />
-                </div>
+                    </div>)
+                    : (<div className={className("map", { hideMap })}>
+                        <Map
+                            {...{
+                                path: "",
+                                definition: {
+                                    type: ComponentType.Map,
+                                    selectGoal: false,
+                                } as MapDefinition,
+                                sharedState: sharedState,
+                            }}
+                        />
+                    </div>)}
+
                 <FooterControls
                     actionSpeedCurrent={FunctionProvider.velocityScale}
                     onActionSpeedChange={(newSpeed: number) => {
@@ -334,6 +328,7 @@ export const MobileOperator = (props: {
                     onActionModeChange={setActionMode}
                     isCameraVeilVisible={isCameraVeilVisible}
                     isCameraVeilVisibleSet={isCameraVeilVisibleSet}
+                    setHideMap={setHideMap}
                 />
             </div>
         </div>
