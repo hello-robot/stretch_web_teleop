@@ -36,6 +36,7 @@
         "react-native-keyboard-aware-scrollview": "^2.1.0",
         "react-native-web": "^0.19.7",
         "react-path-tooltip": "^1.0.25",
+        "react-swipeable-views": "^0.14.0",
         "roslib": "github:hello-vinitha/roslibjs#ros2actionclient",
         "socket.io": "^4.6.1",
         "socket.io-client": "^4.6.1",

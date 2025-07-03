@@ -1,13 +1,14 @@
-.footer-controls_XP {
+.footer-head-cam_XP {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px 40px;
   background-color: #000000;
+  --button-width: 80px;
 }
 
 @media (min-width: 900px) {
-  .footer-controls_XP {
+  .footer-head-cam_XP {
     width: 54%;
     margin: 0 auto;
   }
@@ -15,16 +16,16 @@
 
 
 .action-speed,
-.action-mode,
-.battery-gauge {
+.auto-nav-toggle-wrapper {
   max-height: 50px;
   border-radius: 5px;
+  width: var(--button-width);
 }
 
 /* START ActionSpeed */
 .action-speed {
-  margin-right: auto;
-  width: 80px;
+  display: flex;
+  flex-direction: row;
 }
 
 .action-speed button.button-action-speed {
@@ -108,9 +109,7 @@
 
 /* END ActionMode */
 
-/* START BatteryGauge */
-.battery-gauge {
-  margin-left: auto;
+.auto-nav-toggle-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
 }
-
-/* END BatteryGauge */

@@ -31,13 +31,13 @@ import { FunctionProvider } from "./function_providers/FunctionProvider";
 import "operator/css/MobileOperator.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
-import { VirtualJoystick } from "./layout_components/VirtualJoystick";
-import FooterControls from "./layout_components/FooterControls";
+import FooterHeadCam from "./layout_components/FooterHeadCam";
+import FooterAutoNav from "./layout_components/FooterAutoNav";
 import { ButtonPad } from "./layout_components/ButtonPad";
 // import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
-import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
+import SwipeableViews from 'react-swipeable-views';
 import {
     MovementRecorder,
     MovementRecorderFunction,
@@ -45,6 +45,8 @@ import {
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { Alert } from "./basic_components/Alert";
+import { VirtualJoystick } from "./layout_components/VirtualJoystick";
+import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -62,7 +64,7 @@ export const MobileOperator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(
         FunctionProvider.velocityScale
     );
-    const [hideMap, setHideMap] = React.useState<boolean>(true);
+    const [hideMap, setHideMap] = React.useState<boolean>(false);
     const [hideControls, setHideControls] = React.useState<boolean>(false);
     const [activeMainGroupTab, setActiveMainGroupTab] =
         React.useState<number>(0);
@@ -281,55 +283,77 @@ export const MobileOperator = (props: {
     return (
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
-
-                {/* Main display area */}
-                {hideMap
-                    ? (<div className={className("controls", { hideControls })}>
-                        <div
-                            className="simple-camera-view-wrapper_XP"
-                        >
-                            <SimpleCameraView
-                                id={cameraID}
-                                remoteStreams={remoteStreams}
-                                isCameraVeilVisible={isCameraVeilVisible}
+                <SwipeableViews
+                    index={hideMap ? 0 : 1}
+                    slideStyle={{ overflow: 'hidden' }}
+                    resistance={true}
+                    disabled
+                >
+                    {/* Headcam */}
+                    <div>
+                        <div className={className("controls", { hideControls })}>
+                            <div
+                                className="simple-camera-view-wrapper_XP"
+                            >
+                                <SimpleCameraView
+                                    id={cameraID}
+                                    remoteStreams={remoteStreams}
+                                    isCameraVeilVisible={isCameraVeilVisible}
+                                />
+                            </div>
+                            <TabGroup
+                                tabLabels={["Controls", "Recordings"]}
+                                tabContent={[controlModes, recordingList]}
+                                startIdx={activeMainGroupTab}
+                                onChange={(index: number) =>
+                                    setActiveMainGroupTab(index)
+                                }
+                                pill={false}
+                                key={"main-group"}
                             />
                         </div>
-                        <TabGroup
-                            tabLabels={["Controls", "Recordings"]}
-                            tabContent={[controlModes, recordingList]}
-                            startIdx={activeMainGroupTab}
-                            onChange={(index: number) =>
-                                setActiveMainGroupTab(index)
-                            }
-                            pill={false}
-                            key={"main-group"}
-                        />
-                    </div>)
-                    : (<div className={className("map", { hideMap })}>
-                        <Map
-                            {...{
-                                path: "",
-                                definition: {
-                                    type: ComponentType.Map,
-                                    selectGoal: false,
-                                } as MapDefinition,
-                                sharedState: sharedState,
+                        <FooterHeadCam
+                            actionSpeedCurrent={FunctionProvider.velocityScale}
+                            onActionSpeedChange={(newSpeed: number) => {
+                                setVelocityScale(newSpeed);
+                                FunctionProvider.velocityScale = newSpeed;
                             }}
+                            actionModeCurrent={FunctionProvider.actionMode}
+                            onActionModeChange={setActionMode}
+                            isCameraVeilVisible={isCameraVeilVisible}
+                            isCameraVeilVisibleSet={isCameraVeilVisibleSet}
+                            setHideMap={setHideMap}
                         />
-                    </div>)}
+                    </div>
+                    {/* Map */}
+                    <div>
+                        <div className={className("map", { hideMap })}>
+                            <Map
+                                {...{
+                                    path: "",
+                                    definition: {
+                                        type: ComponentType.Map,
+                                        selectGoal: false,
+                                    } as MapDefinition,
+                                    sharedState: sharedState,
+                                }}
+                            />
+                        </div>
+                        <FooterAutoNav
+                            actionSpeedCurrent={FunctionProvider.velocityScale}
+                            onActionSpeedChange={(newSpeed: number) => {
+                                setVelocityScale(newSpeed);
+                                FunctionProvider.velocityScale = newSpeed;
+                            }}
+                            actionModeCurrent={FunctionProvider.actionMode}
+                            onActionModeChange={setActionMode}
+                            isCameraVeilVisible={isCameraVeilVisible}
+                            isCameraVeilVisibleSet={isCameraVeilVisibleSet}
+                            setHideMap={setHideMap}
+                        />
+                    </div>
+                </SwipeableViews>
 
-                <FooterControls
-                    actionSpeedCurrent={FunctionProvider.velocityScale}
-                    onActionSpeedChange={(newSpeed: number) => {
-                        setVelocityScale(newSpeed);
-                        FunctionProvider.velocityScale = newSpeed;
-                    }}
-                    actionModeCurrent={FunctionProvider.actionMode}
-                    onActionModeChange={setActionMode}
-                    isCameraVeilVisible={isCameraVeilVisible}
-                    isCameraVeilVisibleSet={isCameraVeilVisibleSet}
-                    setHideMap={setHideMap}
-                />
             </div>
         </div>
     );

@@ -1,0 +1,31 @@
+.footer-auto-nav_XP {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px 40px;
+  background-color: #000000;
+  --button-width: 80px;
+}
+
+@media (min-width: 900px) {
+  .footer-auto-nav_XP {
+    width: 54%;
+    margin: 0 auto;
+  }
+}
+
+
+.select-location-modal-wrapper,
+.add-location-modal-wrapper {
+  width: var(--button-width);
+}
+
+.select-location-modal-wrapper {
+  display: flex;
+  flex-direction: row;
+}
+
+.add-location-modal-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+}
