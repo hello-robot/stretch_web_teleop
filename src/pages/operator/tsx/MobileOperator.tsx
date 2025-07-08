@@ -32,7 +32,6 @@ import "operator/css/MobileOperator.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
 import FooterHeadCam from "./layout_components/FooterHeadCam";
-import FooterAutoNav from "./layout_components/FooterAutoNav";
 import { ButtonPad } from "./layout_components/ButtonPad";
 // import Swipe from "./static_components/Swipe";
 import { Map } from "./layout_components/Map";
@@ -42,6 +41,7 @@ import {
     MovementRecorder,
     MovementRecorderFunction,
 } from "./layout_components/MovementRecorder";
+import AutoNav from "./layout_components/AutoNav";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { Alert } from "./basic_components/Alert";
@@ -64,7 +64,7 @@ export const MobileOperator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(
         FunctionProvider.velocityScale
     );
-    const [hideMap, setHideMap] = React.useState<boolean>(false);
+    const [isAutoNavHidden, isAutoNavHiddenSet] = React.useState<boolean>(false);
     const [hideControls, setHideControls] = React.useState<boolean>(false);
     const [activeMainGroupTab, setActiveMainGroupTab] =
         React.useState<number>(0);
@@ -164,12 +164,12 @@ export const MobileOperator = (props: {
     };
 
     // function updateScreens() {
-    //     if (hideMap) {
-    //         setHideMap(false);
+    //     if (isAutoNavHidden) {
+    //         isAutoNavHiddenSet(false);
     //         setHideControls(true);
     //     } else {
     //         setHideControls(false);
-    //         setHideMap(true);
+    //         isAutoNavHiddenSet(true);
     //     }
     // }
     // const swipeHandlers = Swipe({
@@ -284,12 +284,14 @@ export const MobileOperator = (props: {
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
                 <SwipeableViews
-                    index={hideMap ? 0 : 1}
-                    slideStyle={{ overflow: 'hidden' }}
-                    resistance={true}
+                    index={isAutoNavHidden ? 0 : 1}
+                    style={{ overflowX: 'visible', height: '100%' }}
+                    containerStyle={{ height: '100%' }}
+                    slideStyle={{ overflowX: 'hidden', position: 'relative' }}
                     disabled
+                    enableMouseEvents={true}
                 >
-                    {/* Headcam */}
+                    {/* HeadCam */}
                     <div>
                         <div className={className("controls", { hideControls })}>
                             <div
@@ -322,36 +324,15 @@ export const MobileOperator = (props: {
                             onActionModeChange={setActionMode}
                             isCameraVeilVisible={isCameraVeilVisible}
                             isCameraVeilVisibleSet={isCameraVeilVisibleSet}
-                            setHideMap={setHideMap}
+                            isAutoNavHiddenSet={isAutoNavHiddenSet}
                         />
                     </div>
-                    {/* Map */}
-                    <div>
-                        <div className={className("map", { hideMap })}>
-                            <Map
-                                {...{
-                                    path: "",
-                                    definition: {
-                                        type: ComponentType.Map,
-                                        selectGoal: false,
-                                    } as MapDefinition,
-                                    sharedState: sharedState,
-                                }}
-                            />
-                        </div>
-                        <FooterAutoNav
-                            actionSpeedCurrent={FunctionProvider.velocityScale}
-                            onActionSpeedChange={(newSpeed: number) => {
-                                setVelocityScale(newSpeed);
-                                FunctionProvider.velocityScale = newSpeed;
-                            }}
-                            actionModeCurrent={FunctionProvider.actionMode}
-                            onActionModeChange={setActionMode}
-                            isCameraVeilVisible={isCameraVeilVisible}
-                            isCameraVeilVisibleSet={isCameraVeilVisibleSet}
-                            setHideMap={setHideMap}
-                        />
-                    </div>
+                    {/* AutoNav */}
+                    <AutoNav
+                        isAutoNavHidden={isAutoNavHidden}
+                        isAutoNavHiddenSet={isAutoNavHiddenSet}
+                        sharedState={sharedState}
+                    />
                 </SwipeableViews>
 
             </div>

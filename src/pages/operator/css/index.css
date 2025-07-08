@@ -170,3 +170,17 @@ dialog {
     padding: 0;
     border: 0;
 }
+
+input {
+    padding: 15px 12px;
+    border-radius: 4px;
+    background-color: hsl(204deg 100% 4%);
+    color: #ffffff;
+    border: none;
+}
+
+input:focus {
+    background-color: hsl(204deg 100% 4%);
+    border: none;
+    outline: 2px solid hsl(204deg 100% 50%);
+}

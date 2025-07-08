@@ -36,23 +36,27 @@ const Modal: React.FC<ModalProps> = ({
         }
     }, [isOpen, visible]);
 
-    const onAnimationEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
+    const onAnimationEnd = useCallback((e: React.AnimationEvent<HTMLDialogElement | HTMLDivElement>) => {
         // Ensure the animation event is from the modal itself and not a child
-        if ((e.target as HTMLElement).classList.contains('modal-content-wrapper') && animState === 'exit') {
+        if (
+            (e.target as HTMLElement).classList.contains('modal-content-wrapper') &&
+            animState === 'exit'
+        ) {
             setVisible(false);
             setAnimState('');
             // Call onClose here if the modal is fully closed and not just hidden by animation
             // However, onClose is typically tied to user action or isOpen prop change.
             // If onClose needs to be called after animation, it should be handled carefully.
+
+            onClose();
         }
     }, [animState]);
 
-    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleOverlayClick = (e: React.MouseEvent<HTMLDialogElement>) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
     };
-
     if (!visible) return null
 
     return (

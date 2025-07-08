@@ -33,7 +33,7 @@ export class Canvas extends React.Component {
         this.scene = new createjs.Stage(canvas);
 
         // add the renderer to the page
-        document.getElementById(this.divID)!.appendChild(canvas);
+        document.getElementById(this.divID)!.replaceChildren(canvas);
 
         // update at 30fps
         createjs.Ticker.framerate = 30;

@@ -73,9 +73,10 @@ export const Map = (props: CustomizableComponentProps) => {
     const definition = props.definition as MapDefinition;
     const [active, setActive] = React.useState<boolean>(false);
     const [occupancyGrid, setOccupanyGrid] = React.useState<OccupancyGrid>();
-    const [selectGoal, setSelectGoal] = React.useState<boolean>(false);
     const { customizing, hideLabels } = props.sharedState;
     const selected = isSelected(props);
+
+    const [selectGoal, setSelectGoal] = React.useState<boolean>(false);
 
     // Constrain the width or height when the stream gets too large
     React.useEffect(() => {
@@ -110,6 +111,7 @@ export const Map = (props: CustomizableComponentProps) => {
             return selectGoal;
         };
     }, []);
+
 
     let mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
@@ -185,40 +187,23 @@ export const Map = (props: CustomizableComponentProps) => {
         ) as () => Promise<boolean>,
     };
 
+
+
     return (
         <React.Fragment>
             <div
-                className={isMobile ? "mobile-map-container" : "map-container"}
+                className="mobile-map-container"
             >
-                {!isMobile ? <h4 className="map-title">Map</h4> : <></>}
                 <div
                     id="map"
-                    className={className("map", {
-                        customizing,
-                        selected,
-                        active,
-                    })}
                     onClick={handleSelect}
-                ></div>
-                {
-                    !isMobile && (
-                        // <div className={"under-video-area"}>
-                        <UnderMapButtons
-                            handleSelectGoal={handleSelectGoal}
-                            functs={underMapFn}
-                            hideLabels={hideLabels}
-                        />
-                    )
-                    // </div>
-                }
-            </div>
-            {isMobile && (
-                <UnderMapButtons
-                    handleSelectGoal={handleSelectGoal}
-                    functs={underMapFn}
-                    hideLabels={hideLabels}
                 />
-            )}
+            </div>
+            <UnderMapButtons
+                handleSelectGoal={handleSelectGoal}
+                functs={underMapFn}
+                hideLabels={hideLabels}
+            />
         </React.Fragment>
     );
 };
@@ -235,10 +220,12 @@ const UnderMapButtons = (props: {
         props.functs.GetSavedPoseNames(),
     );
     const [selectedIdx, setSelectedIdx] = React.useState<number>();
-    const [selectGoal, setSelectGoal] = React.useState<boolean>(false);
     const [displayGoals, setDisplayGoals] = React.useState<boolean>(false);
-    const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
     const [play, setPlay] = useState<boolean>(false);
+
+
+    const [selectGoal, setSelectGoal] = React.useState<boolean>(false);
+    const [showSavePoseModal, setShowSavePoseModal] = useState<boolean>(false);
 
     let radioFuncts: RadioFunctions = {
         Delete: (label: string) =>
@@ -318,6 +305,9 @@ const UnderMapButtons = (props: {
         return elements;
     }
 
+    const [areButtonsVisible, areButtonsVisibleSet] = React.useState<boolean>(false);
+
+
     return !isMobile ? (
         <React.Fragment>
             <div className="map-fn-btns">
@@ -395,70 +385,79 @@ const UnderMapButtons = (props: {
         </React.Fragment>
     ) : (
         <React.Fragment>
-            <RadioGroup functs={radioFuncts} />
-            <div className="map-fn-btns-mobile">
-                <div
-                    className="mobile-map-save-btn"
-                    onPointerDown={() => {
-                        setShowSavePoseModal(true);
-                        // Disable select goal to stop accidental navigation
-                        if (selectGoal) {
-                            props.handleSelectGoal(false);
-                            setSelectGoal(false);
-                        }
-                    }}
-                >
-                    <span hidden={props.hideLabels}>Save new destination</span>
-                    <span className="material-icons">save</span>
-                </div>
-                {!play && (
+            <div
+                onPointerDown={() => areButtonsVisibleSet(!areButtonsVisible)}
+                style={{
+                    height: !areButtonsVisible ? '20px' : 'auto',
+                    opacity: !areButtonsVisible ? 0 : 1,
+                    overflow: 'hidden',
+                }}
+            >
+                <RadioGroup functs={radioFuncts} />
+                <div className="map-fn-btns-mobile">
                     <div
-                        className="mobile-map-play-btn"
+                        className="mobile-map-save-btn"
                         onPointerDown={() => {
-                            if (!play && selectGoal) {
-                                props.functs.Play();
-                                setPlay(true);
+                            setShowSavePoseModal(true);
+                            // Disable select goal to stop accidental navigation
+                            if (selectGoal) {
+                                props.handleSelectGoal(false);
                                 setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
-                            } else if (!play && selectedIdx != undefined) {
-                                let pose: ROSLIB.Vector3 =
-                                    props.functs.LoadGoal(selectedIdx)!;
-                                props.functs.DisplayGoalMarker(pose);
-                                props.functs.NavigateToAruco(selectedIdx);
-                                setPlay(true);
-                                setSelectGoal(false);
-                                props.functs
-                                    .GoalReached()
-                                    .then((goalReached) => setPlay(false));
                             }
                         }}
                     >
-                        <span>Play</span>
-                        <span className="material-icons">play_circle</span>
+                        <span hidden={props.hideLabels}>Save new destination</span>
+                        <span className="material-icons">save</span>
                     </div>
-                )}
-                {play && (
-                    <div
-                        className="mobile-map-cancel-btn"
-                        onPointerDown={() => {
-                            props.functs.CancelGoal();
-                            setPlay(!play);
+                    {!play && (
+                        <div
+                            className="mobile-map-play-btn"
+                            onPointerDown={() => {
+                                if (!play && selectGoal) {
+                                    props.functs.Play();
+                                    setPlay(true);
+                                    setSelectGoal(false);
+                                    props.functs
+                                        .GoalReached()
+                                        .then((goalReached) => setPlay(false));
+                                } else if (!play && selectedIdx != undefined) {
+                                    let pose: ROSLIB.Vector3 =
+                                        props.functs.LoadGoal(selectedIdx)!;
+                                    props.functs.DisplayGoalMarker(pose);
+                                    props.functs.NavigateToAruco(selectedIdx);
+                                    setPlay(true);
+                                    setSelectGoal(false);
+                                    props.functs
+                                        .GoalReached()
+                                        .then((goalReached) => setPlay(false));
+                                }
+                            }}
+                        >
+                            <span>Play</span>
+                            <span className="material-icons">play_circle</span>
+                        </div>
+                    )}
+                    {play && (
+                        <div
+                            className="mobile-map-cancel-btn"
+                            onPointerDown={() => {
+                                props.functs.CancelGoal();
+                                setPlay(!play);
+                            }}
+                        >
+                            <span>Cancel</span>
+                            <span className="material-icons">cancel</span>
+                        </div>
+                    )}
+                    <CheckToggleButton
+                        checked={selectGoal}
+                        onClick={() => {
+                            props.handleSelectGoal(!selectGoal);
+                            setSelectGoal(!selectGoal);
                         }}
-                    >
-                        <span>Cancel</span>
-                        <span className="material-icons">cancel</span>
-                    </div>
-                )}
-                <CheckToggleButton
-                    checked={selectGoal}
-                    onClick={() => {
-                        props.handleSelectGoal(!selectGoal);
-                        setSelectGoal(!selectGoal);
-                    }}
-                    label="Select Goal"
-                />
+                        label="Select Goal"
+                    />
+                </div>
             </div>
             <SavePoseModal
                 functs={props.functs}

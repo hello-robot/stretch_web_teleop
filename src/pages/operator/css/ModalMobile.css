@@ -4,7 +4,7 @@
 }
 
 .modal-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -95,7 +95,7 @@
 }
 
 .modal-subtitle {
-  color: #FBCCDB;
+  color: hsl(204, 86%, 47%);
   /* From original */
   font-size: 12px;
   text-transform: uppercase;

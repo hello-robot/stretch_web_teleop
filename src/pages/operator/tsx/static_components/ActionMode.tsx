@@ -46,11 +46,15 @@ export const ActionMode = (props: ActionModeProps) => {
 
     return (
         <div className="action-mode">
-            <ModalActionMode isOpen={isModalOpen} mode={props.mode} handleClose={(newActionMode: ActionModeType) => {
-                setIsModalOpen(false);
-                props.setCameraVeilCallback(false);
-                props.onChange(newActionMode)
-            }} />
+            <ModalActionMode
+                isOpen={isModalOpen}
+                mode={props.mode}
+                handleClose={(newActionMode: ActionModeType) => {
+                    setIsModalOpen(false);
+                    props.setCameraVeilCallback(false);
+                    props.onChange(newActionMode)
+                }}
+            />
             <MagneticWrapper>
                 <button
                     className="button-action-mode"
@@ -58,7 +62,7 @@ export const ActionMode = (props: ActionModeProps) => {
                         setIsModalOpen(!isModalOpen);
                         props.setCameraVeilCallback(!isModalOpen)
                         buttonFunctionProvider.disableActiveButton()
-                }}
+                    }}
                     aria-label="Change action mode"
                     aria-hidden={props.isCameraVeilVisible}
                 >
@@ -107,7 +111,7 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
         <MagneticWrapper>
             <button
                 className="btn btn-primary" // Style from ModalActionMode.css
-                onClick={handleConfirm}
+                onPointerDown={handleConfirm}
                 disabled={loading}
             >
                 {loading ? <span className="spinner" /> : 'Confirm'}
@@ -120,7 +124,7 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
             isOpen={isOpen}
             onClose={() => handleClose}
             title="Action Mode"
-            subtitle="SELECT"
+            subtitle="NAVIGATE"
             footer={modalFooterContent}
             modalClassName="action-mode-modal"
         >

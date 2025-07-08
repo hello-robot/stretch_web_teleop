@@ -1,4 +1,4 @@
-.footer-auto-nav_XP {
+.footer-auto-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,24 +8,56 @@
 }
 
 @media (min-width: 900px) {
-  .footer-auto-nav_XP {
+  .footer-auto-nav {
     width: 54%;
     margin: 0 auto;
   }
 }
 
 
-.select-location-modal-wrapper,
-.add-location-modal-wrapper {
+.locations-menu,
+.add-location {
   width: var(--button-width);
 }
 
-.select-location-modal-wrapper {
+.locations-menu {
   display: flex;
   flex-direction: row;
 }
 
-.add-location-modal-wrapper {
+.add-location {
   display: flex;
   flex-direction: row-reverse;
+}
+
+
+.auto-nav button.button-auto-nav-add-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid hsl(0deg 0% 100% / 10%);
+  box-shadow: none;
+  white-space: nowrap;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 10px 18px 10px 15px;
+  border-radius: 10px;
+}
+
+@media (hover: hover) {
+  .auto-nav button.button-auto-nav-add-location:hover {
+    border: 1px solid hsl(0deg 0% 100% / 20%);
+    background-color: hsl(204deg 75.37% 28.38%);
+  }
+}
+
+.auto-nav button.button-auto-nav-add-location:active {
+  background-color: hsl(204deg 75.37% 28.38%);
+}
+
+.auto-nav input {
+  width: 100%;
 }

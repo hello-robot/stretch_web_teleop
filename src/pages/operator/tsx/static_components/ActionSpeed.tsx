@@ -73,7 +73,7 @@ export const ActionSpeed = (props: ActionSpeedProps) => {
             <MagneticWrapper>
                 <button
                     className="button-action-speed"
-                    onClick={() => {
+                    onPointerDown={() => {
                         setIsModalOpen(!isModalOpen);
                         props.setCameraVeilCallback(!isModalOpen)
                         buttonFunctionProvider.disableActiveButton()
@@ -118,7 +118,7 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
             isOpen={isOpen}
             onClose={() => handleClose}
             title="Action Speed"
-            subtitle="SELECT"
+            subtitle="NAVIGATE"
             modalClassName="action-speed-modal"
         >
             <div className="action-speed-options">
@@ -131,7 +131,7 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
                             className={`${opt.value} ${selectedSpeed === opt.value ? 'selected' : ''}`}
                             aria-label={ariaLabel}
                             aria-hidden={!isOpen}
-                            onClick={() => handleSpeedSelection(opt.value)}
+                            onPointerDown={() => handleSpeedSelection(opt.value)}
                         >
                             {/* Adding arbitrary text inside <span/> changes the position of iOS voice control labels */}
                             <span className="aria-inviz"></span>
