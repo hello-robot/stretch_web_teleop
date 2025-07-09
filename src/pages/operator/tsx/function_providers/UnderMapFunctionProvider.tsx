@@ -29,7 +29,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
     constructor(storageHandler: StorageHandler) {
         super();
         this.provideFunctions = this.provideFunctions.bind(this);
-        this.selectGoal = false;
+        this.selectGoal = true;
         this.storageHandler = storageHandler;
     }
 

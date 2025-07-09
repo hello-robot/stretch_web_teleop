@@ -6,24 +6,46 @@ import { ROSOccupancyGrid, ROSPoint, ROSPose } from "shared/util";
 import ROSLIB from "roslib";
 import { MapFunctions } from "../layout_components/Map";
 
+/**
+ * OccupancyGrid is a React component that manages the display and interaction
+ * with a ROS occupancy grid map using createjs for rendering. It provides
+ * methods for drawing pose markers, navigation arrows, and handling user
+ * interactions for navigation goals.
+ */
 export class OccupancyGrid extends React.Component {
+    // The createjs stage (canvas root)
     private rootObject: createjs.Stage;
+    // The origin of the map in ROS coordinates
     private origin?: ROSLIB.Pose;
+    // The bitmap image of the occupancy grid
     private bitmap?: createjs.Bitmap;
+    // Map dimensions in cells
     public width: number;
     public height: number;
+    // Scaling factors for the map
     private scaleX?: number;
     private scaleY?: number;
+    // The ROS occupancy grid data
     private map: ROSOccupancyGrid;
-    private goal_position?: ROSPoint;
+    // The createjs shape for the goal marker
     private goalMarker?: createjs.Shape;
-    private getGoalReached?: NodeJS.Timer;
+    // Interval for checking if the goal is reached
+    private getGoalReached?: NodeJS.Timeout;
+    // List of saved pose markers (shapes and labels)
     private savedPoseMarkers: {
         circle: createjs.Shape;
         label: createjs.Text;
     }[];
+    // List of saved pose marker labels
     private savedPoseMarkersLabels: string[];
+    // Map functions for interacting with the robot and map
     private functs: MapFunctions;
+    // The current goal position in ROS coordinates
+    public goal_position?: ROSPoint;
+
+    /**
+     * Constructor initializes the occupancy grid, sets up the canvas, and enables mouse/touch events.
+     */
     constructor(props: { functs: MapFunctions; rootObject: createjs.Stage }) {
         super(props);
         this.rootObject = props.rootObject;
@@ -38,6 +60,13 @@ export class OccupancyGrid extends React.Component {
         this.createOccupancyGridClient();
     }
 
+    /**
+     * Draws a saved pose marker (circle and label) at the given coordinates.
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param color RGB color array
+     * @param text Label text
+     */
     drawSavedPoseMarker(x: number, y: number, color: number[], text: string) {
         var circle = new createjs.Shape();
         var radius = 30;
@@ -72,6 +101,11 @@ export class OccupancyGrid extends React.Component {
         return { circle, label };
     }
 
+    /**
+     * Draws a navigation arrow at the given location, optionally pulsing.
+     * @param pulse Whether the arrow should pulse
+     * @param color RGB color array
+     */
     drawNavigationArrow(pulse: boolean, color: number[]) {
         var arrow = new createjs.Shape();
         var size = 40;
@@ -127,6 +161,9 @@ export class OccupancyGrid extends React.Component {
         return arrow;
     }
 
+    /**
+     * Creates the occupancy grid bitmap from the ROS map data and adds it to the stage.
+     */
     createOccupancyGrid() {
         // internal drawing canvas
         var canvas = document.createElement("canvas");
@@ -196,6 +233,9 @@ export class OccupancyGrid extends React.Component {
         this.scaleY = this.map.info.resolution;
     }
 
+    /**
+     * Converts a ROS translation (Vector3) to global canvas coordinates.
+     */
     rosToGlobal(translation: ROSLIB.Vector3) {
         var x =
             (this.width * this.scaleX! -
@@ -214,8 +254,10 @@ export class OccupancyGrid extends React.Component {
         };
     }
 
-    // https://github.com/RobotWebTools/ros2djs/blob/develop/src/Ros2D.js#L34C1-L44C3
-    // convert a ROS quaternion to theta in degrees
+    /**
+     * Converts a ROS quaternion to a global theta (angle in degrees).
+     * See: https://github.com/RobotWebTools/ros2djs/blob/develop/src/Ros2D.js#L34C1-L44C3
+     */
     rosQuaternionToGlobalTheta(orientation: ROSLIB.Quaternion) {
         // See https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Rotation_matrices
         // here we use [x y z] = R * [1 0 0]
@@ -231,11 +273,14 @@ export class OccupancyGrid extends React.Component {
         );
     }
 
+    /**
+     * Converts global canvas coordinates to ROS coordinates.
+     */
     globalToRos(x: number, y: number) {
         var rosX = (x / 5) * this.scaleX! + this.origin!.position.x;
         var rosY =
             (this.height - y / 5) * this.scaleY! + this.origin!.position.y;
-        console.log(rosX, rosY);
+        console.log('coords', rosX, rosY);
         return {
             x: rosX,
             y: rosY,
@@ -243,7 +288,10 @@ export class OccupancyGrid extends React.Component {
         } as ROSPoint;
     }
 
-    addCurrenPoseMarker() {
+    /**
+     * Adds a marker for the robot's current pose and updates it periodically.
+     */
+    addCurrentPoseMarker() {
         var robotMarker = this.drawNavigationArrow(false, [255, 128, 0]);
         this.rootObject.addChild(robotMarker);
 
@@ -261,6 +309,13 @@ export class OccupancyGrid extends React.Component {
         }, 1000);
     }
 
+    /**
+     * Displays or hides pose markers for saved navigation goals.
+     * @param display Whether to display the markers
+     * @param poses Array of ROS transforms for each pose
+     * @param poseNames Array of pose names
+     * @param poseTypes Array of pose types
+     */
     public displayPoseMarkers(
         display: boolean,
         poses: ROSLIB.Transform[],
@@ -310,6 +365,12 @@ export class OccupancyGrid extends React.Component {
         this.rootObject.update();
     }
 
+    /**
+     * Creates a goal marker at the given coordinates (in ROS or global space).
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param ros Whether the coordinates are in ROS space
+     */
     public createGoalMarker(x: number, y: number, ros: boolean) {
         let globalCoord = { x: x, y: y };
         if (ros)
@@ -320,6 +381,7 @@ export class OccupancyGrid extends React.Component {
             } as ROSLIB.Vector3);
         if (this.getGoalReached) clearInterval(this.getGoalReached);
         if (this.goalMarker) this.rootObject.removeChild(this.goalMarker);
+        console.log(globalCoord, ros, this.getGoalReached, this.goalMarker);
         this.goalMarker = this.drawNavigationArrow(true, [255, 0, 0]);
         this.goalMarker.x = globalCoord.x;
         this.goalMarker.y = globalCoord.y;
@@ -336,6 +398,9 @@ export class OccupancyGrid extends React.Component {
         }, 1000);
     }
 
+    /**
+     * Sends the robot to the current goal position, if set.
+     */
     play() {
         if (this.goal_position) {
             this.functs.MoveBase({
@@ -344,31 +409,34 @@ export class OccupancyGrid extends React.Component {
             } as ROSPose);
         }
         this.goal_position = undefined;
-        // if (isMobile) this.functs.SetSelectGoal(false)
         this.functs.SetSelectGoal(false);
     }
 
+    /**
+     * Removes the current goal marker from the map.
+     */
     removeGoalMarker() {
         console.log("removing");
         this.goal_position = undefined;
         if (this.goalMarker) this.rootObject.removeChild(this.goalMarker);
     }
 
+    /**
+     * Initializes the occupancy grid, adds the robot pose marker, and sets up mouse event handlers.
+     */
     createOccupancyGridClient() {
         this.createOccupancyGrid();
 
         if (!this.map) return;
 
-        this.addCurrenPoseMarker();
+        this.addCurrentPoseMarker();
 
         this.rootObject.on("mousedown", (event) => {
-            let evt = event as createjs.MouseEvent;
-            // convert to ROS coordinates
-            this.goal_position = this.globalToRos(evt.stageX, evt.stageY);
-
-            if (this.functs.SelectGoal()) {
+            if (!this.functs.SelectGoal()) return
+            else {
+                let evt = event as createjs.MouseEvent;
+                this.goal_position = this.globalToRos(evt.stageX, evt.stageY);
                 this.createGoalMarker(evt.stageX / 5, evt.stageY / 5, false);
-                this.functs.SetSelectGoal(false);
             }
         });
     }

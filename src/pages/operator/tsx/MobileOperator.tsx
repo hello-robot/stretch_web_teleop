@@ -288,7 +288,7 @@ export const MobileOperator = (props: {
                     style={{ overflowX: 'visible', height: '100%' }}
                     containerStyle={{ height: '100%' }}
                     slideStyle={{ overflowX: 'hidden', position: 'relative' }}
-                    disabled
+                    // disabled
                     enableMouseEvents={true}
                 >
                     {/* HeadCam */}

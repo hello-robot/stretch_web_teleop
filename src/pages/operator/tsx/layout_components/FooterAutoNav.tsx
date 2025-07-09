@@ -1,14 +1,12 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import Modal from '../basic_components/ModalMobile';
 import { AutoNavFunctions } from "./AutoNav";
 import MagneticWrapper from '../static_components/MagneticWrapper';
 import "operator/css/FooterAutoNav.css";
 
-interface FooterControlsProps {
+interface FooterAutoNavProps {
     isAutoNavHiddenSet: Dispatch<SetStateAction<boolean>>;
-    selectGoal2: boolean;
     handleSelectGoal: (selectGoal: boolean) => void;
-    selectGoal2Set: Dispatch<SetStateAction<boolean>>;
     functs: AutoNavFunctions;
     poses: string[];
     posesSet: Dispatch<SetStateAction<string[]>>;
@@ -17,6 +15,10 @@ interface FooterControlsProps {
     isModalAddLocationVisibleSet: Dispatch<SetStateAction<boolean>>;
     isModalLocationsMenuVisible: boolean;
     isModalLocationsMenuVisibleSet: Dispatch<SetStateAction<boolean>>;
+    isCurrentlyMoving: boolean;
+    isCurrentlyMovingSet: Dispatch<SetStateAction<boolean>>;
+    isSelectingGoal: boolean;
+    isSelectingGoalSet: Dispatch<SetStateAction<boolean>>;
 }
 
 interface ModalAddLocationProps {
@@ -137,11 +139,9 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     );
 };
 
-const FooterAutoNav: React.FC<FooterControlsProps> = ({
+const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     isAutoNavHiddenSet,
     handleSelectGoal,
-    selectGoal2,
-    selectGoal2Set,
     functs,
     poses,
     posesSet,
@@ -150,7 +150,14 @@ const FooterAutoNav: React.FC<FooterControlsProps> = ({
     isModalAddLocationVisibleSet,
     isModalLocationsMenuVisible,
     isModalLocationsMenuVisibleSet,
+    isCurrentlyMoving,
+    isCurrentlyMovingSet,
+    isSelectingGoal,
+    isSelectingGoalSet,
 }) => {
+
+    const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = React.useState<number | -1>(-1);
+
     return (
         <div className="footer-auto-nav">
 
@@ -171,7 +178,51 @@ const FooterAutoNav: React.FC<FooterControlsProps> = ({
             </div>
             {/* </LocationsMenu> */}
 
-            <button>Move</button>
+            {/* <AutoNavMainButton> */}
+            {!isCurrentlyMoving
+                ? (
+                    <button
+                        onPointerDown={() => {
+                            // When selecting manually on map...
+                            if (!isCurrentlyMoving && isSelectingGoal) {
+                                console.log(1)
+                                functs.Play();
+                                isCurrentlyMovingSet(true);
+                                isSelectingGoalSet(false);
+                                functs
+                                    .GoalReached()
+                                    .then((goalReached) => isCurrentlyMovingSet(false));
+                                // ...when selecting from Locations Menu
+                            } else if (!isCurrentlyMoving && selectedLocationMenuItemIdx !== -1) {
+                                console.log(2)
+                                let pose: ROSLIB.Vector3 = functs.LoadGoal(selectedLocationMenuItemIdx)!;
+                                functs.DisplayGoalMarker(pose);
+                                functs.NavigateToAruco(selectedLocationMenuItemIdx);
+                                isCurrentlyMovingSet(true);
+                                isSelectingGoalSet(false);
+                                functs
+                                    .GoalReached()
+                                    .then((goalReached) => isCurrentlyMovingSet(false));
+                            }
+                        }}
+                        disabled={typeof functs.GetGoalPosition() === "number"}
+                    >
+                        <span>Play</span>
+                    </button>
+                )
+                : (<div
+                    className="mobile-map-cancel-btn"
+                    onPointerDown={() => {
+                        functs.CancelGoal();
+                        isCurrentlyMovingSet(!isCurrentlyMoving);
+                        isSelectingGoalSet(true);
+
+                    }}
+                >
+                    <span>Cancel</span>
+                    <span className="material-icons">cancel</span>
+                </div>)}
+            {/* </AutoNavMainButton> */}
 
             {/* <AddLocationButton> */}
             <div className="add-location">
@@ -192,7 +243,7 @@ const FooterAutoNav: React.FC<FooterControlsProps> = ({
                 </button>
             </div>
             {/* </AddLocationButton> */}
-        </div>
+        </div >
     );
 };
 

@@ -12,6 +12,7 @@ import { UnderMapButton } from '../function_providers/UnderMapFunctionProvider';
 import {
     ROSOccupancyGrid,
     ROSPose,
+    ROSPoint,
     className,
 } from 'shared/util';
 
@@ -38,6 +39,7 @@ export interface AutoNavFunctions {
     GetSavedPoseNames: () => string[];
     GetSavedPoseTypes: () => string[];
     GetSavedPoses: () => ROSLIB.Transform[];
+    GetGoalPosition: () => ROSPoint | undefined;
     DisplayPoseMarkers: (
         toggle: boolean,
         poses: ROSLIB.Transform[],
@@ -60,13 +62,28 @@ interface MapFunctions {
     SetSelectGoal: (selectGoal: boolean) => void;
 }
 
-
+/**
+ * AutoNav component provides the autonomous navigation interface for the operator.
+ * It manages map display, pose/goal management, and footer controls for navigation.
+ *
+ * Props:
+ *  - sharedState: SharedState object for global operator state
+ *  - isAutoNavHidden: Whether the AutoNav UI is hidden
+ *  - isAutoNavHiddenSet: Setter for hiding/showing AutoNav
+ */
 const AutoNav: React.FC<AutoNavProps> = ({
     sharedState,
     isAutoNavHidden,
     isAutoNavHiddenSet,
 }) => {
+    // OccupancyGrid instance for map and marker operations
     const [occupancyGrid, occupancyGridSet] = useState<OccupancyGrid | undefined>();
+
+    /**
+     * All navigation-related functions, provided by underMapFunctionProvider.
+     * Many of these are ROS actions or service calls.
+     * Some functions require occupancyGrid to be set.
+     */
     const functs: AutoNavFunctions = {
         SelectGoal: underMapFunctionProvider.provideFunctions(
             UnderMapButton.SelectGoal,
@@ -95,6 +112,13 @@ const AutoNav: React.FC<AutoNavProps> = ({
         GetSavedPoses: underMapFunctionProvider.provideFunctions(
             UnderMapButton.GetSavedPoses,
         ) as () => ROSLIB.Transform[],
+        GetGoalPosition: () => {
+            console.log('occupancyGrid?.goal_position', occupancyGrid?.goal_position)
+            return occupancyGrid?.goal_position
+        },
+        /**
+         * Display pose markers on the map. Requires occupancyGrid to be set.
+         */
         DisplayPoseMarkers: (
             toggle: boolean,
             poses: ROSLIB.Transform[],
@@ -108,11 +132,17 @@ const AutoNav: React.FC<AutoNavProps> = ({
                 poseTypes,
             );
         },
+        /**
+         * Display a goal marker on the map at the given pose.
+         */
         DisplayGoalMarker: (pose: ROSLIB.Vector3) =>
             occupancyGrid!.createGoalMarker(pose.x, pose.y, true),
         NavigateToAruco: underMapFunctionProvider.provideFunctions(
             UnderMapButton.NavigateToAruco,
         ) as (goalID: number) => void,
+        /**
+         * Play the current navigation sequence (if supported by occupancyGrid).
+         */
         Play: () => occupancyGrid!.play(),
         RemoveGoalMarker: () => occupancyGrid!.removeGoalMarker(),
         GoalReached: underMapFunctionProvider.provideFunctions(
@@ -120,15 +150,25 @@ const AutoNav: React.FC<AutoNavProps> = ({
         ) as () => Promise<boolean>,
     };
 
+    // List of saved pose names for navigation goals
     const [poses, posesSet] = useState<string[]>(
         functs.GetSavedPoseNames(),
     );
-    const handleSelectGoal = useCallback((selectGoal1: boolean) => {
-        selectGoal1Set(selectGoal1);
+
+    /**
+     * Callback to update the goal selection state and update mapFn.SelectGoal.
+     */
+    const handleSelectGoal = (isSelectingGoal: boolean) => {
+        isSelectingGoalSet(isSelectingGoal);
         mapFn.SelectGoal = (): boolean => {
-            return selectGoal1;
+            return isSelectingGoal;
         };
-    }, []);
+    };
+
+    /**
+     * Map-related functions for interacting with the map and robot pose.
+     * These are provided by mapFunctionProvider.
+     */
     const mapFn: MapFunctions = {
         GetMap: mapFunctionProvider.provideFunctions(
             MapFunction.GetMap,
@@ -142,23 +182,35 @@ const AutoNav: React.FC<AutoNavProps> = ({
         GoalReached: mapFunctionProvider.provideFunctions(
             MapFunction.GoalReached,
         ) as () => boolean,
+        /**
+         * Returns whether a goal is currently being selected.
+         */
         SelectGoal: (): boolean => {
-            return selectGoal1;
+            return isSelectingGoal;
         },
-        SetSelectGoal: (selectGoal1: boolean) => {
-            handleSelectGoal(selectGoal1);
+        /**
+         * Sets the goal selection state.
+         */
+        SetSelectGoal: (isSelectingGoal: boolean) => {
+            handleSelectGoal(isSelectingGoal);
         },
     };
+
+    // Modal visibility state for adding a location
     const [isModalAddLocationVisible, isModalAddLocationVisibleSet] = useState<boolean>(false);
+    // Modal visibility state for locations menu
     const [isModalLocationsMenuVisible, isModalLocationsMenuVisibleSet] = useState<boolean>(false);
-
-    // Navigation goal selection state
-    const [selectGoal1, selectGoal1Set] = useState<boolean>(false);
-
-    // For the second goal selection, we use a different state variable
-    const [selectGoal2, selectGoal2Set] = useState<boolean>(false);
+    // Whether to display all goal markers on the map
     const [displayGoals, displayGoalsSet] = useState<boolean>(false);
+    // Navigation goal selection state (true if selecting a goal).
+    const [isSelectingGoal, isSelectingGoalSet] = useState<boolean>(true);
+    // Whether the robot is currently auto-navigating
+    const [isCurrentlyMoving, isCurrentlyMovingSet] = useState<boolean>(false);
 
+    /**
+     * On mount, create the canvas and OccupancyGrid for the map.
+     * This sets up the map rendering and interaction logic.
+     */
     useEffect(() => {
         let map = mapFn.GetMap;
         let width = map ? map.info.width : 60;
@@ -182,6 +234,7 @@ const AutoNav: React.FC<AutoNavProps> = ({
 
     return (
         <div className='auto-nav'>
+            {/* Map display for navigation */}
             <Map
                 {...{
                     path: "",
@@ -192,11 +245,10 @@ const AutoNav: React.FC<AutoNavProps> = ({
                     sharedState: sharedState,
                 }}
             />
+            {/* Footer controls for navigation and pose management */}
             <FooterAutoNav
                 isAutoNavHiddenSet={isAutoNavHiddenSet}
                 handleSelectGoal={handleSelectGoal}
-                selectGoal2={selectGoal2}
-                selectGoal2Set={selectGoal2Set}
                 functs={functs}
                 poses={poses}
                 posesSet={posesSet}
@@ -205,9 +257,13 @@ const AutoNav: React.FC<AutoNavProps> = ({
                 isModalAddLocationVisibleSet={isModalAddLocationVisibleSet}
                 isModalLocationsMenuVisible={isModalLocationsMenuVisible}
                 isModalLocationsMenuVisibleSet={isModalLocationsMenuVisibleSet}
+                isCurrentlyMoving={isCurrentlyMoving}
+                isCurrentlyMovingSet={isCurrentlyMovingSet}
+                isSelectingGoal={isSelectingGoal}
+                isSelectingGoalSet={isSelectingGoalSet}
             />
         </div>
-    )
-}
+    );
+};
 
-export default AutoNav
+export default AutoNav;
