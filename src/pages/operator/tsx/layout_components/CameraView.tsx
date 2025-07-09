@@ -17,6 +17,7 @@ import {
     RealsenseVideoStreamDef,
     AdjustableOverheadVideoStreamDef,
     GripperVideoStreamDef,
+    ActionMode,
 } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import {
@@ -53,6 +54,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Popper } from "@mui/material";
 import { FunctionProvider } from "../function_providers/FunctionProvider";
+import { isTablet } from "react-device-detect";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -797,9 +799,12 @@ const UnderOverheadButtons = (props: {
     setPredictiveDisplay: (enabled: boolean) => void;
 }) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
-
+    
     return (
         <React.Fragment>
+        {isTablet ? 
+            <></>
+        :
             <CheckToggleButton
                 checked={props.definition.predictiveDisplay || false}
                 onPointerDown={() => {
@@ -814,6 +819,7 @@ const UnderOverheadButtons = (props: {
                 }}
                 label="Predictive Display"
             />
+        }
         </React.Fragment>
     );
 };
@@ -828,9 +834,16 @@ const UnderAdjustableOverheadButtons = (props: {
 }) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
 
+    // Only allow predictive display as an option in Press-And-Hold when using
+    // a tablet
+    if (isTablet && FunctionProvider.actionMode != ActionMode.PressAndHold) {
+        props.setPredictiveDisplay(false);
+    } else if (props.definition.predictiveDisplay) {
+        props.setPredictiveDisplay(true);
+    }
+
     // Toggle Predictive Display when initiated via voice control
     React.useEffect(() => {
-        console.log(props.definition.predictiveDisplay)
         if (props.definition.predictiveDisplay) {
             underVideoFunctionProvider.provideFunctions(
                 UnderVideoButton.LookAtBase,
@@ -906,23 +919,22 @@ const UnderAdjustableOverheadButtons = (props: {
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
             /> */}
-            <CheckToggleButton
-                checked={props.definition.predictiveDisplay || false}
-                onPointerDown={() => {
-                    if (!props.definition.predictiveDisplay) {
-                        underVideoFunctionProvider.provideFunctions(
-                            UnderVideoButton.LookAtBase,
-                        ).onPointerDown!();
-                        props.setPredictiveDisplay(true);
-                        props.definition.predictiveDisplay = true;
-                    } else {
-                        props.setPredictiveDisplay(false);
-                        props.definition.predictiveDisplay = false;
-                    }
-                    setRerender(!rerender);
-                }}
-                label="Predictive Display"
-            />
+            {(!isTablet || isTablet && FunctionProvider.actionMode == ActionMode.PressAndHold) && 
+                <CheckToggleButton
+                    checked={props.definition.predictiveDisplay || false}
+                    onPointerDown={() => {
+                        if (!props.definition.predictiveDisplay) {
+                            props.definition.predictiveDisplay = true;
+                            props.setPredictiveDisplay(true);
+                        } else {
+                            props.definition.predictiveDisplay = false;
+                            props.setPredictiveDisplay(false);
+                        }
+                        setRerender(!rerender);
+                    }}
+                    label="Predictive Display"
+                />
+            }
         </React.Fragment>
     );
 };
