@@ -3,19 +3,30 @@ import {
     MovementRecorderFunctions,
     MovementRecorderFunction,
 } from "../layout_components/MovementRecorder";
-import { RobotPose, ValidJoints } from "shared/util";
+import { ActionState, RobotPose, ValidJoints } from "shared/util";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 
 export class MovementRecorderFunctionProvider extends FunctionProvider {
     private recordPosesHeartbeat?: number; // ReturnType<typeof setInterval>
     private poses: RobotPose[];
     private storageHandler: StorageHandler;
+    private playbackComplete?: boolean;
+
+    /**
+     * Callback function to update the move base state in the operator
+     */
+    private operatorCallback?: (state: ActionState) => void = undefined;
 
     constructor(storageHandler: StorageHandler) {
         super();
         this.provideFunctions = this.provideFunctions.bind(this);
         this.poses = [];
         this.storageHandler = storageHandler;
+    }
+
+    public setPlaybackPosesState(state: ActionState) {
+        if (state.alert_type == "success") this.playbackComplete = true;
+        if (this.operatorCallback) this.operatorCallback(state);
     }
 
     public provideFunctions(poseRecordFunction: MovementRecorderFunction) {
@@ -158,5 +169,15 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
             case MovementRecorderFunction.Cancel:
                 return () => FunctionProvider.remoteRobot?.stopTrajectory();
         }
+    }
+
+    /**
+     * Sets the local pointer to the operator's callback function, to be called
+     * whenever the playback poses state changes.
+     *
+     * @param callback operator's callback function to playback poses state
+     */
+    public setOperatorCallback(callback: (state: ActionState) => void) {
+        this.operatorCallback = callback;
     }
 }
