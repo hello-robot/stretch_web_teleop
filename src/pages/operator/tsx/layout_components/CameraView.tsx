@@ -799,10 +799,10 @@ const UnderOverheadButtons = (props: {
     setPredictiveDisplay: (enabled: boolean) => void;
 }) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
-    
+
     return (
         <React.Fragment>
-        {isTablet ? 
+        {isTablet ?
             <></>
         :
             <CheckToggleButton
@@ -919,7 +919,7 @@ const UnderAdjustableOverheadButtons = (props: {
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
             /> */}
-            {(!isTablet || isTablet && FunctionProvider.actionMode == ActionMode.PressAndHold) && 
+            {(!isTablet || isTablet && FunctionProvider.actionMode == ActionMode.PressAndHold) &&
                 <CheckToggleButton
                     checked={props.definition.predictiveDisplay || false}
                     onPointerDown={() => {
