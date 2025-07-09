@@ -205,6 +205,10 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             console.log("moveBaseState", message.message);
             underMapFunctionProvider.setMoveBaseState(message.message);
             break;
+        case "playbackPosesState":
+            console.log("playbackPosesState", message.message);
+            movementRecorderFunctionProvider.setPlaybackPosesState(message.message);
+            break;
         case "moveToPregraspState":
             console.log("moveToPregraspState", message.message);
             underVideoFunctionProvider.setMoveToPregraspState(message.message);
