@@ -21,9 +21,7 @@ export class UnderMapFunctionProvider extends FunctionProvider {
     private selectGoal: boolean;
     private storageHandler: StorageHandler;
     private navigationSuccess?: boolean;
-    /**
-     * Callback function to update the move base state in the operator
-     */
+    private mapPoseCallback?: (pose: ROSLIB.Vector3) => void = undefined;
     private operatorCallback?: (state: ActionState) => void = undefined;
 
     constructor(storageHandler: StorageHandler) {
@@ -168,5 +166,14 @@ export class UnderMapFunctionProvider extends FunctionProvider {
      */
     public setOperatorCallback(callback: (state: ActionState) => void) {
         this.operatorCallback = callback;
+    }
+
+    /**
+     * Registers a callback function to be invoked when a map pose is set.
+     *
+     * @param callback - A function that receives a `ROSLIB.Vector3` object representing the pose on the map.
+     */
+    public setMapPoseCallback(callback: (pose: ROSLIB.Vector3) => void) {
+        this.mapPoseCallback = callback;
     }
 }

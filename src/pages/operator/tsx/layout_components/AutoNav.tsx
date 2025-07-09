@@ -53,7 +53,7 @@ export interface AutoNavFunctions {
     GoalReached: () => Promise<boolean>;
 }
 
-interface MapFunctions {
+export interface MapFunctions {
     GetMap: ROSOccupancyGrid;
     GetPose: () => ROSLIB.Transform;
     MoveBase: (pose: ROSPose) => void;
@@ -76,6 +76,9 @@ const AutoNav: React.FC<AutoNavProps> = ({
     isAutoNavHidden,
     isAutoNavHiddenSet,
 }) => {
+
+    const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = useState<number | -1>(-1);
+
     // OccupancyGrid instance for map and marker operations
     const [occupancyGrid, occupancyGridSet] = useState<OccupancyGrid | undefined>();
 
@@ -149,6 +152,16 @@ const AutoNav: React.FC<AutoNavProps> = ({
             UnderMapButton.GoalReached,
         ) as () => Promise<boolean>,
     };
+
+    underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
+        functs.DisplayGoalMarker(pose);
+        functs.NavigateToAruco(selectedLocationMenuItemIdx);
+        isCurrentlyMovingSet(true);
+        isSelectingGoalSet(false);
+        functs
+            .GoalReached()
+            .then((goalReached) => isCurrentlyMovingSet(false));
+    })
 
     // List of saved pose names for navigation goals
     const [poses, posesSet] = useState<string[]>(
@@ -261,6 +274,7 @@ const AutoNav: React.FC<AutoNavProps> = ({
                 isCurrentlyMovingSet={isCurrentlyMovingSet}
                 isSelectingGoal={isSelectingGoal}
                 isSelectingGoalSet={isSelectingGoalSet}
+                selectedLocationMenuItemIdx={selectedLocationMenuItemIdx}
             />
         </div>
     );

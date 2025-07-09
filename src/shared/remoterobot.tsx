@@ -146,11 +146,14 @@ export class RemoteRobot extends React.Component<{}, any> {
     }
 
     moveBase(pose: ROSPose) {
+        console.log(1)
         let cmd: MoveBaseCommand = {
             type: "moveBase",
             pose: pose,
         };
+        console.log(2)
         this.robotChannel(cmd);
+        console.log(3)
     }
 
     moveToPregrasp(scaled_x: number, scaled_y: number, horizontal: boolean) {
@@ -297,11 +300,11 @@ class RobotSensors extends React.Component {
 
     constructor(props: {}) {
         super(props);
-        this.functionProviderCallback = () => {};
-        this.batteryFunctionProviderCallback = () => {};
-        this.modeFunctionProviderCallback = () => {};
-        this.isHomedFunctionProviderCallback = () => {};
-        this.runStopFunctionProviderCallback = () => {};
+        this.functionProviderCallback = () => { };
+        this.batteryFunctionProviderCallback = () => { };
+        this.modeFunctionProviderCallback = () => { };
+        this.isHomedFunctionProviderCallback = () => { };
+        this.runStopFunctionProviderCallback = () => { };
         this.setFunctionProviderCallback =
             this.setFunctionProviderCallback.bind(this);
         this.setBatteryFunctionProviderCallback =
@@ -343,7 +346,7 @@ class RobotSensors extends React.Component {
             const same =
                 key in this.inJointLimits
                     ? jointValues[key]![0] == this.inJointLimits[key]![0] &&
-                      jointValues[key]![1] == this.inJointLimits[key]![1]
+                    jointValues[key]![1] == this.inJointLimits[key]![1]
                     : false;
             // If same value, remove from dict so not passed to callback
             if (same) delete jointValues[key];
@@ -357,7 +360,7 @@ class RobotSensors extends React.Component {
             const same =
                 key in this.inCollision
                     ? effortValues[key]![0] == this.inCollision[key]![0] &&
-                      effortValues[key]![1] == this.inCollision[key]![1]
+                    effortValues[key]![1] == this.inCollision[key]![1]
                     : false;
             // If same value, remove from dict so not passed to callback
             if (same) delete effortValues[key];

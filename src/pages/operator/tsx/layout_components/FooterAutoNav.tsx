@@ -19,6 +19,7 @@ interface FooterAutoNavProps {
     isCurrentlyMovingSet: Dispatch<SetStateAction<boolean>>;
     isSelectingGoal: boolean;
     isSelectingGoalSet: Dispatch<SetStateAction<boolean>>;
+    selectedLocationMenuItemIdx: number | -1;
 }
 
 interface ModalAddLocationProps {
@@ -154,9 +155,8 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     isCurrentlyMovingSet,
     isSelectingGoal,
     isSelectingGoalSet,
+    selectedLocationMenuItemIdx,
 }) => {
-
-    const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = React.useState<number | -1>(-1);
 
     return (
         <div className="footer-auto-nav">
@@ -185,16 +185,16 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                         onPointerDown={() => {
                             // When selecting manually on map...
                             if (!isCurrentlyMoving && isSelectingGoal) {
-                                console.log(1)
                                 functs.Play();
                                 isCurrentlyMovingSet(true);
                                 isSelectingGoalSet(false);
                                 functs
                                     .GoalReached()
-                                    .then((goalReached) => isCurrentlyMovingSet(false));
+                                    .then((goalReached) => {
+                                        isCurrentlyMovingSet(false)
+                                    });
                                 // ...when selecting from Locations Menu
                             } else if (!isCurrentlyMoving && selectedLocationMenuItemIdx !== -1) {
-                                console.log(2)
                                 let pose: ROSLIB.Vector3 = functs.LoadGoal(selectedLocationMenuItemIdx)!;
                                 functs.DisplayGoalMarker(pose);
                                 functs.NavigateToAruco(selectedLocationMenuItemIdx);

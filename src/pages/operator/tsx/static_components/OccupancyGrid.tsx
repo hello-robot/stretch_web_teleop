@@ -4,7 +4,7 @@ import React from "react";
 import createjs from "createjs-module";
 import { ROSOccupancyGrid, ROSPoint, ROSPose } from "shared/util";
 import ROSLIB from "roslib";
-import { MapFunctions } from "../layout_components/Map";
+import { MapFunctions } from "../layout_components/AutoNav";
 
 /**
  * OccupancyGrid is a React component that manages the display and interaction
@@ -402,14 +402,19 @@ export class OccupancyGrid extends React.Component {
      * Sends the robot to the current goal position, if set.
      */
     play() {
+        console.log('this.goal_position, 1', this.goal_position, 1)
         if (this.goal_position) {
+            console.log('this.goal_position, 2', this.goal_position, 2)
             this.functs.MoveBase({
                 position: this.goal_position,
                 orientation: { x: 0, y: 0, z: -0.45, w: 0.893 },
             } as ROSPose);
         }
+        console.log('this.goal_position, 3', this.goal_position, 3)
         this.goal_position = undefined;
+        console.log('this.goal_position, 4', this.goal_position, 4)
         this.functs.SetSelectGoal(false);
+        console.log('this.goal_position, 5', this.goal_position, 5)
     }
 
     /**
