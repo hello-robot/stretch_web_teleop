@@ -286,9 +286,10 @@ export class Robot extends React.Component {
             "Show Tablet succeeded!",
             "Show Tablet failed!",
         );
-        this.subscribeToPlaybackActionResult(
+        this.subscribeToActionResult(
             followJointTrajectoryActionName,
             this.playbackPosesResultCallback,
+            "Movement executing!",
             "Movement canceled!",
             "Movement suceeded!",
             "Movement failed!",
@@ -520,19 +521,23 @@ export class Robot extends React.Component {
     subscribeToActionResult(
         actionName: string,
         callback?: (goalState: ActionState) => void,
+        executingMsg?: string,
         cancelMsg?: string,
         successMsg?: string,
         failureMsg?: string,
     ) {
         // Get the messages
+        if (!executingMsg) {
+            executingMsg = "Action " + actionName + " is executing!";
+        }
         if (!cancelMsg) {
-            cancelMsg = "Action " + actionName + "canceled!";
+            cancelMsg = "Action " + actionName + " canceled!";
         }
         if (!successMsg) {
-            successMsg = "Action " + actionName + "succeeded!";
+            successMsg = "Action " + actionName + " succeeded!";
         }
         if (!failureMsg) {
-            failureMsg = "Action " + actionName + "failed!";
+            failureMsg = "Action " + actionName + " failed!";
         }
 
         // Create the topic
@@ -549,63 +554,26 @@ export class Robot extends React.Component {
             let status = msg.status_list.pop()?.status;
             console.log("For action ", actionName, "got status ", status);
             if (callback) {
-                if (status == 5)
+                if (status == 2)
                     callback({
-                        state: cancelMsg,
-                        alert_type: "error",
+                        state: executingMsg,
+                        alert_type: "info",
                     });
                 else if (status == 4)
                     callback({
                         state: successMsg,
                         alert_type: "success",
                     });
+                else if (status == 5)
+                    callback({
+                        state: cancelMsg,
+                        alert_type: "error",
+                    });
                 else if (status == 6)
                     callback({
                         state: failureMsg,
                         alert_type: "error",
                     });
-            }
-        });
-    }
-
-    subscribeToPlaybackActionResult(
-        actionName: string,
-        callback?: (goalState: ActionState) => void,
-        cancelMsg?: string,
-        successMsg?: string,
-        failureMsg?: string,
-    ) {
-        // Get the messages
-        if (!cancelMsg) {
-            cancelMsg = "Action " + actionName + "canceled!";
-        }
-        if (!successMsg) {
-            successMsg = "Action " + actionName + "succeeded!";
-        }
-        if (!failureMsg) {
-            failureMsg = "Action " + actionName + "failed!";
-        }
-
-        // Create the topic
-        let topic: ROSLIB.Topic<ActionStatusList> = new ROSLIB.Topic({
-            ros: this.ros,
-            name: actionName + "/_action/status",
-            messageType: "action_msgs/msg/GoalStatusArray",
-        });
-        this.subscriptions.push(topic);
-
-        // Subscribe to the topic
-        topic.subscribe((msg: ActionStatusList) => {
-            console.log("Got action status msg", msg);
-            // let status = msg.status_list.pop()?.status;
-            if (!this.poseGoalComplete) {
-                this.poseGoalComplete = true
-            } else {
-                this.poseGoalComplete = false
-                callback({
-                    state: successMsg,
-                    alert_type: "success",
-                });
             }
         });
     }
