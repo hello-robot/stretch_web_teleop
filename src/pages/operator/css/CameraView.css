@@ -4,6 +4,7 @@
     align-items: center;
     padding: 0.4rem;
     height: 100%;
+    justify-content: center;
 }
 
 /* Overlays the button pad on top of the camera view*/

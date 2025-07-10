@@ -185,12 +185,11 @@ export const Map = (props: CustomizableComponentProps) => {
         ) as () => Promise<boolean>,
     };
 
+    console.log(isBrowser || isTablet)
     return (
         <React.Fragment>
-            <div
-                className={!isBrowser && !isTablet  ? "mobile-map-container" : "map-container"}
-            >
-                {/* {isBrowser || isTablet ? <h4 className="map-title">Map</h4> : <></>} */}
+            {isBrowser || isTablet ?
+            <div className={"map-container"}>
                 <div
                     id="map"
                     className={className("map", {
@@ -200,25 +199,32 @@ export const Map = (props: CustomizableComponentProps) => {
                     })}
                     onTouchStart={handleSelect}
                 ></div>
-                {
-                    isBrowser || isTablet && (
-                        // <div className={"under-video-area"}>
+                    <div className={"under-video-area"}>
                         <UnderMapButtons
                             handleSelectGoal={handleSelectGoal}
                             functs={underMapFn}
                             hideLabels={hideLabels}
                         />
-                    )
-                    // </div>
-                }
+                    </div>
             </div>
-            {!isBrowser && !isTablet  && (
+            :
+            <div className={"mobile-map-container"}>
+                <div
+                    id="map"
+                    className={className("map", {
+                        customizing,
+                        selected,
+                        active,
+                    })}
+                    onTouchStart={handleSelect}
+                ></div>
                 <UnderMapButtons
                     handleSelectGoal={handleSelectGoal}
                     functs={underMapFn}
                     hideLabels={hideLabels}
                 />
-            )}
+            </div>
+            }
         </React.Fragment>
     );
 };
