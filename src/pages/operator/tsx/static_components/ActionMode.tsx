@@ -66,8 +66,8 @@ export const ActionMode = (props: ActionModeProps) => {
                     aria-label="Change action mode"
                     aria-hidden={props.isCameraVeilVisible}
                 >
-                    <span className="action-mode-icon"></span>
                     <div>{props.mode}</div>
+                    <span className="action-mode-icon"></span>
                 </button>
             </MagneticWrapper>
         </div>

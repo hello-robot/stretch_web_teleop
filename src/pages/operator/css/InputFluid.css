@@ -1,0 +1,30 @@
+.input-fluid-container {
+    position: relative;
+    display: inline-block;
+}
+
+.input-fluid-measure {
+    visibility: hidden;
+    position: absolute;
+    /* Preserve spaces and prevent wrapping */
+    white-space: pre;
+    /* Match input font size */
+    font-size: 16px;
+    /* Match input font family */
+    font-family: inherit;
+    /* Match input padding */
+    padding: 0.5rem;
+}
+
+.input-fluid {
+    font-size: 16px;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    outline: none;
+    background-color: transparent;
+    border: none;
+}
+
+.input-fluid:focus {}
+
+.input-fluid:disabled {}

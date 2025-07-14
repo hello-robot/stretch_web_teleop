@@ -5,6 +5,7 @@ import createjs from "createjs-module";
 import { ROSOccupancyGrid, ROSPoint, ROSPose } from "shared/util";
 import ROSLIB from "roslib";
 import { MapFunctions } from "../layout_components/AutoNav";
+import hexToRgbArray from "../utils/hex-to-rgb-array";
 
 /**
  * OccupancyGrid is a React component that manages the display and interaction
@@ -41,7 +42,10 @@ export class OccupancyGrid extends React.Component {
     // Map functions for interacting with the robot and map
     private functs: MapFunctions;
     // The current goal position in ROS coordinates
-    public goal_position?: ROSPoint;
+    private goal_position?: ROSPoint;
+
+    // Listeners for goal_position changes
+    private goalPositionListeners: ((pos: ROSPoint | undefined) => void)[] = [];
 
     /**
      * Constructor initializes the occupancy grid, sets up the canvas, and enables mouse/touch events.
@@ -114,13 +118,13 @@ export class OccupancyGrid extends React.Component {
             color[0],
             color[1],
             color[2],
-            0.7,
+            0.85,
         );
         var fillColor = createjs.Graphics.getRGB(
             color[0],
             color[1],
             color[2],
-            0.7,
+            0.85,
         );
 
         // draw the arrow
@@ -165,10 +169,12 @@ export class OccupancyGrid extends React.Component {
      * Creates the occupancy grid bitmap from the ROS map data and adds it to the stage.
      */
     createOccupancyGrid() {
-        // internal drawing canvas
+        // Create an internal drawing canvas for the occupancy grid image
         var canvas = document.createElement("canvas");
+        // Get the 2D drawing context, with willReadFrequently for performance
         var context = canvas!.getContext("2d", { willReadFrequently: true });
 
+        // If the map is not available, display a placeholder rectangle and error text
         if (!this.map) {
             var rect = new createjs.Shape();
             rect.graphics.beginStroke("#000000");
@@ -183,52 +189,55 @@ export class OccupancyGrid extends React.Component {
             return;
         }
 
-        // save the metadata we need
+        // Save the map origin (position and orientation) from ROS map metadata
         this.origin = new ROSLIB.Pose({
             position: this.map.info.origin.position,
             orientation: this.map.info.origin.orientation,
         });
-        // set the size
+
+        // Set the canvas size to match the map dimensions (in cells)
         this.width = this.map.info.width;
         this.height = this.map.info.height;
         canvas.width = this.width;
         canvas.height = this.height;
 
+        // Create an ImageData object to hold the pixel data for the map
         var imageData = context!.createImageData(this.width, this.height);
+
+        // Loop through each cell in the occupancy grid and set the corresponding pixel color
         for (var row = 0; row < this.height; row++) {
             for (var col = 0; col < this.width; col++) {
-                // determine the index into the map data
+                // Calculate the index into the map data array (ROS maps are bottom-left origin)
                 var mapI = col + (this.height - row - 1) * this.width;
-                // determine the value
+                // Get the occupancy value for this cell
                 var data = this.map.data[mapI];
-                var val;
+                var r, g, b;
+                // Set pixel color: 100 = occupied (#879AA7), 0 = free (#A6B1B8), else = unknown (#9CC5BF)
                 if (data === 100) {
-                    val = 0;
+                    r = 71; g = 95; b = 111; //rgb(71, 95, 111)
                 } else if (data === 0) {
-                    val = 255;
+                    r = 241; g = 248; b = 253; //rgb(241, 248, 253)
                 } else {
-                    val = 127;
+                    r = 157; g = 197; b = 191; //rgb(157, 197, 191)
                 }
-                // determine the index into the image data array
+                // Calculate the index into the image data array (RGBA)
                 var i = (col + row * this.width) * 4;
-                // r
-                imageData.data[i] = val;
-                // g
-                imageData.data[++i] = val;
-                // b
-                imageData.data[++i] = val;
-                // a
+                // Set R, G, B channels to respective values, and alpha to 255 (opaque)
+                imageData.data[i] = r;
+                imageData.data[++i] = g;
+                imageData.data[++i] = b;
                 imageData.data[++i] = 255;
             }
         }
 
+        // Draw the generated image data onto the canvas
         context!.putImageData(imageData, 0, 0);
 
-        // create the bitmap
+        // Create a createjs.Bitmap from the canvas and add it to the stage
         this.bitmap = new createjs.Bitmap(canvas);
         this.rootObject.addChild(this.bitmap);
 
-        // scale the image
+        // Set the scaling factors for converting between map and world coordinates
         this.scaleX = this.map.info.resolution;
         this.scaleY = this.map.info.resolution;
     }
@@ -280,7 +289,6 @@ export class OccupancyGrid extends React.Component {
         var rosX = (x / 5) * this.scaleX! + this.origin!.position.x;
         var rosY =
             (this.height - y / 5) * this.scaleY! + this.origin!.position.y;
-        console.log('coords', rosX, rosY);
         return {
             x: rosX,
             y: rosY,
@@ -292,7 +300,8 @@ export class OccupancyGrid extends React.Component {
      * Adds a marker for the robot's current pose and updates it periodically.
      */
     addCurrentPoseMarker() {
-        var robotMarker = this.drawNavigationArrow(false, [255, 128, 0]);
+        const color = hexToRgbArray('#008AE5');
+        var robotMarker = this.drawNavigationArrow(false, color);
         this.rootObject.addChild(robotMarker);
 
         const setPoseInterval = setInterval(() => {
@@ -372,6 +381,7 @@ export class OccupancyGrid extends React.Component {
      * @param ros Whether the coordinates are in ROS space
      */
     public createGoalMarker(x: number, y: number, ros: boolean) {
+        const color = hexToRgbArray('#2EE4C8'); // Orange color for goal marker
         let globalCoord = { x: x, y: y };
         if (ros)
             globalCoord = this.rosToGlobal({
@@ -381,15 +391,13 @@ export class OccupancyGrid extends React.Component {
             } as ROSLIB.Vector3);
         if (this.getGoalReached) clearInterval(this.getGoalReached);
         if (this.goalMarker) this.rootObject.removeChild(this.goalMarker);
-        console.log(globalCoord, ros, this.getGoalReached, this.goalMarker);
-        this.goalMarker = this.drawNavigationArrow(true, [255, 0, 0]);
+        this.goalMarker = this.drawNavigationArrow(true, color);
         this.goalMarker.x = globalCoord.x;
         this.goalMarker.y = globalCoord.y;
         this.goalMarker.scaleX = 1.0 / this.rootObject.scaleX;
         this.goalMarker.scaleY = 1.0 / this.rootObject.scaleY;
         this.goalMarker.visible = true;
         this.rootObject.addChild(this.goalMarker);
-
         this.getGoalReached = setInterval(() => {
             if (this.functs.GoalReached()) {
                 this.rootObject.removeChild(this.goalMarker!);
@@ -399,30 +407,52 @@ export class OccupancyGrid extends React.Component {
     }
 
     /**
+     * Getter for the current goal_position.
+     */
+    goalPositionGet(): ROSPoint | undefined {
+        return this.goal_position;
+    }
+
+    /**
+     * Subscribe to changes in goal_position.
+     * @param callback Function to call when goal_position changes
+     */
+    goalPositionSubscribe(callback: (pos: ROSPoint | undefined) => void): () => void {
+        this.goalPositionListeners.push(callback);
+        // Return an unsubscribe function
+        // that's used in useEffect cleanup
+        return () => {
+            this.goalPositionListeners = this.goalPositionListeners.filter(cb => cb !== callback);
+        };
+    }
+
+    /**
+     * Setter for the current goal position.
+     */
+    goalPositionSet(pos: ROSPoint | undefined): void {
+        this.goal_position = pos;
+        this.goalPositionListeners.forEach(cb => cb(pos));
+    }
+
+    /**
      * Sends the robot to the current goal position, if set.
      */
     play() {
-        console.log('this.goal_position, 1', this.goal_position, 1)
         if (this.goal_position) {
-            console.log('this.goal_position, 2', this.goal_position, 2)
             this.functs.MoveBase({
                 position: this.goal_position,
                 orientation: { x: 0, y: 0, z: -0.45, w: 0.893 },
             } as ROSPose);
         }
-        console.log('this.goal_position, 3', this.goal_position, 3)
-        this.goal_position = undefined;
-        console.log('this.goal_position, 4', this.goal_position, 4)
+        this.goalPositionSet(undefined);
         this.functs.SetSelectGoal(false);
-        console.log('this.goal_position, 5', this.goal_position, 5)
     }
 
     /**
      * Removes the current goal marker from the map.
      */
     removeGoalMarker() {
-        console.log("removing");
-        this.goal_position = undefined;
+        this.goalPositionSet(undefined);
         if (this.goalMarker) this.rootObject.removeChild(this.goalMarker);
     }
 
@@ -440,7 +470,7 @@ export class OccupancyGrid extends React.Component {
             if (!this.functs.SelectGoal()) return
             else {
                 let evt = event as createjs.MouseEvent;
-                this.goal_position = this.globalToRos(evt.stageX, evt.stageY);
+                this.goalPositionSet(this.globalToRos(evt.stageX, evt.stageY));
                 this.createGoalMarker(evt.stageX / 5, evt.stageY / 5, false);
             }
         });

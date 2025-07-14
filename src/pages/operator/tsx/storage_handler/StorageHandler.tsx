@@ -9,9 +9,9 @@ export type DefaultLayoutName = "Basic Layout";
 
 /** Object with all the default layouts. */
 export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } =
-    {
-        "Basic Layout": BASIC_LAYOUT,
-    };
+{
+    "Basic Layout": BASIC_LAYOUT,
+};
 
 /**
  * Handles logic to store data, specifically maintain state between browser
@@ -180,4 +180,9 @@ export abstract class StorageHandler {
     public loadDefaultLayout(layoutName: DefaultLayoutName): LayoutDefinition {
         return JSON.parse(JSON.stringify(DEFAULT_LAYOUTS[layoutName]));
     }
+
+    public abstract renamePose(
+        poseNameOld: string,
+        poseNameNew: string,
+    ): void
 }

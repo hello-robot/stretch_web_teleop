@@ -146,14 +146,11 @@ export class RemoteRobot extends React.Component<{}, any> {
     }
 
     moveBase(pose: ROSPose) {
-        console.log(1)
         let cmd: MoveBaseCommand = {
             type: "moveBase",
             pose: pose,
         };
-        console.log(2)
         this.robotChannel(cmd);
-        console.log(3)
     }
 
     moveToPregrasp(scaled_x: number, scaled_y: number, horizontal: boolean) {

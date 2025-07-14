@@ -5,7 +5,7 @@
 /** Enumerator for the possible action modes */
 export enum ActionModeType {
     StepActions = "Step Action",
-    PressAndHold = "Press-And-Hold",
+    PressAndHold = "Press-Hold",
     ClickClick = "Tap-Tap",
 }
 

@@ -3,8 +3,10 @@ import React, { useEffect, useState, useCallback, Dispatch, SetStateAction } fro
 import { Canvas } from "../static_components/Canvas";
 import { Map } from './Map';
 import { ComponentType, MapDefinition } from '../utils/component_definitions';
+import genUUID from '../utils/genUUID';
 import { SharedState } from './CustomizableComponent';
 import FooterAutoNav from './FooterAutoNav';
+import Toasts, { Toast } from './Toasts';
 import { mapFunctionProvider } from 'operator/tsx/index';
 import { OccupancyGrid } from '../static_components/OccupancyGrid';
 import { underMapFunctionProvider } from 'operator/tsx/index';
@@ -18,8 +20,8 @@ import {
 
 interface AutoNavProps {
     sharedState: SharedState;
-    isAutoNavHidden: boolean;
-    isAutoNavHiddenSet: Dispatch<SetStateAction<boolean>>;
+    swipeableViewsIdx: number;
+    swipeableViewsIdxSet: Dispatch<SetStateAction<number>>;
 }
 
 enum MapFunction {
@@ -33,13 +35,13 @@ export interface AutoNavFunctions {
     SelectGoal: (toggle: boolean) => void;
     CancelGoal: () => void;
     DeleteGoal: (goalId: number) => void;
+    DeleteMapPose: (poseName: string) => void;
     SaveGoal: (locationName: string) => void;
     LoadGoal: (goalID: number) => void;
     GetPose: () => ROSLIB.Transform;
     GetSavedPoseNames: () => string[];
     GetSavedPoseTypes: () => string[];
     GetSavedPoses: () => ROSLIB.Transform[];
-    GetGoalPosition: () => ROSPoint | undefined;
     DisplayPoseMarkers: (
         toggle: boolean,
         poses: ROSLIB.Transform[],
@@ -51,6 +53,7 @@ export interface AutoNavFunctions {
     Play: () => void;
     RemoveGoalMarker: () => void;
     GoalReached: () => Promise<boolean>;
+    RenamePose: (poseNameOld: string, poseNameNew: string) => void;
 }
 
 export interface MapFunctions {
@@ -68,19 +71,45 @@ export interface MapFunctions {
  *
  * Props:
  *  - sharedState: SharedState object for global operator state
- *  - isAutoNavHidden: Whether the AutoNav UI is hidden
- *  - isAutoNavHiddenSet: Setter for hiding/showing AutoNav
  */
 const AutoNav: React.FC<AutoNavProps> = ({
     sharedState,
-    isAutoNavHidden,
-    isAutoNavHiddenSet,
+    swipeableViewsIdx,
+    swipeableViewsIdxSet,
 }) => {
 
     const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = useState<number | -1>(-1);
+    const [goalPosition, goalPositionSet] = useState<ROSPoint | undefined>(undefined);
+
+    // Toast notifications
+    const [toasts, toastsSet] = useState<Toast[]>([]);
 
     // OccupancyGrid instance for map and marker operations
-    const [occupancyGrid, occupancyGridSet] = useState<OccupancyGrid | undefined>();
+    const [occupancyGrid, occupancyGridSet] = useState<OccupancyGrid>();
+
+    // Subscribe to goal position updates from the OccupancyGrid
+    useEffect(() => {
+        const callback = (pos: ROSPoint | undefined) => {
+            goalPositionSet(pos);
+        };
+        const unsubscribeOnUnmount = occupancyGrid?.goalPositionSubscribe(callback);
+        return () => {
+            // Make sure to unsubscribe when <AutoNav> component unmounts
+            if (unsubscribeOnUnmount) unsubscribeOnUnmount();
+        };
+    }, [occupancyGrid]);
+
+    // Function to add a toast notification
+    const addToast = (
+        type: 'success' | 'error' | 'info',
+        message: string,
+        duration?: number
+    ) => {
+        const id = genUUID();
+        toastsSet((prevToasts) => (
+            [...prevToasts, { id, type, message, duration }]
+        ));
+    };
 
     /**
      * All navigation-related functions, provided by underMapFunctionProvider.
@@ -97,6 +126,9 @@ const AutoNav: React.FC<AutoNavProps> = ({
         DeleteGoal: underMapFunctionProvider.provideFunctions(
             UnderMapButton.DeleteGoal,
         ) as (goalId: number) => void,
+        DeleteMapPose: underMapFunctionProvider.provideFunctions(
+            UnderMapButton.DeleteMapPose,
+        ) as (poseName: string) => void,
         SaveGoal: underMapFunctionProvider.provideFunctions(
             UnderMapButton.SaveGoal,
         ) as (locationName: string) => void,
@@ -115,10 +147,7 @@ const AutoNav: React.FC<AutoNavProps> = ({
         GetSavedPoses: underMapFunctionProvider.provideFunctions(
             UnderMapButton.GetSavedPoses,
         ) as () => ROSLIB.Transform[],
-        GetGoalPosition: () => {
-            console.log('occupancyGrid?.goal_position', occupancyGrid?.goal_position)
-            return occupancyGrid?.goal_position
-        },
+
         /**
          * Display pose markers on the map. Requires occupancyGrid to be set.
          */
@@ -151,6 +180,9 @@ const AutoNav: React.FC<AutoNavProps> = ({
         GoalReached: underMapFunctionProvider.provideFunctions(
             UnderMapButton.GoalReached,
         ) as () => Promise<boolean>,
+        RenamePose: underMapFunctionProvider.provideFunctions(
+            UnderMapButton.RenamePose,
+        ) as (poseNameOld: string, poseNameNew: string) => void,
     };
 
     underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
@@ -162,11 +194,6 @@ const AutoNav: React.FC<AutoNavProps> = ({
             .GoalReached()
             .then((goalReached) => isCurrentlyMovingSet(false));
     })
-
-    // List of saved pose names for navigation goals
-    const [poses, posesSet] = useState<string[]>(
-        functs.GetSavedPoseNames(),
-    );
 
     /**
      * Callback to update the goal selection state and update mapFn.SelectGoal.
@@ -234,38 +261,47 @@ const AutoNav: React.FC<AutoNavProps> = ({
             width: width * 5, // Scale width to avoid blurriness when making map larger
             height: height * 5, // Scale height to avoid blurriness when making map larger
         });
-        var occupancyGridMap = new OccupancyGrid({
+        var occupancyGrid = new OccupancyGrid({
             functs: mapFn,
             rootObject: canvas.scene!,
         });
         canvas.scaleToDimensions(
-            occupancyGridMap.width,
-            occupancyGridMap.height,
+            occupancyGrid.width,
+            occupancyGrid.height,
         );
-        occupancyGridSet(occupancyGridMap);
+        occupancyGridSet(occupancyGrid);
     }, []);
+
+    useEffect(() => {
+        console.log('occupancyGrid', occupancyGrid)
+    }, [occupancyGrid]);
+
+    // Show toast when user navigates to AutoNav
+    useEffect(() => {
+        if (swipeableViewsIdx === 1) addToast('info', 'Click on the map to navigate');
+    }, [swipeableViewsIdx])
 
     return (
         <div className='auto-nav'>
             {/* Map display for navigation */}
-            <Map
-                {...{
-                    path: "",
-                    definition: {
-                        type: ComponentType.Map,
-                        selectGoal: false,
-                    } as MapDefinition,
-                    sharedState: sharedState,
-                }}
-            />
+            <div
+                style={{ padding: '10px 0px' }}
+            >
+                <Map
+                    {...{
+                        path: "",
+                        definition: {
+                            type: ComponentType.Map,
+                            selectGoal: false,
+                        } as MapDefinition,
+                        sharedState: sharedState,
+                    }}
+                />
+            </div>
             {/* Footer controls for navigation and pose management */}
             <FooterAutoNav
-                isAutoNavHiddenSet={isAutoNavHiddenSet}
                 handleSelectGoal={handleSelectGoal}
                 functs={functs}
-                poses={poses}
-                posesSet={posesSet}
-                displayGoals={displayGoals}
                 isModalAddLocationVisible={isModalAddLocationVisible}
                 isModalAddLocationVisibleSet={isModalAddLocationVisibleSet}
                 isModalLocationsMenuVisible={isModalLocationsMenuVisible}
@@ -275,7 +311,11 @@ const AutoNav: React.FC<AutoNavProps> = ({
                 isSelectingGoal={isSelectingGoal}
                 isSelectingGoalSet={isSelectingGoalSet}
                 selectedLocationMenuItemIdx={selectedLocationMenuItemIdx}
+                swipeableViewsIdxSet={swipeableViewsIdxSet}
+                goalPosition={goalPosition}
+                addToast={addToast}
             />
+            <Toasts toasts={toasts} toastsSet={toastsSet} />
         </div>
     );
 };

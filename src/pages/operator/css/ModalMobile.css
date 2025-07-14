@@ -7,21 +7,22 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   /* Aligns modal to the bottom */
-  align-items: center;
+  justify-content: flex-end;
   /* Centers modal horizontally */
-  background-color: rgba(0, 0, 0, 0.6);
+  align-items: center;
   /* Semi-transparent background */
-  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.6);
   /* Ensure it's on top */
+  z-index: 1000;
   opacity: 0;
   /* --animation-timing-function is defined in ActionMode.css, ensure it's accessible or redefine here */
-  /* transition: opacity 300ms 200ms var(--animation-timing-function-modal); */
+  transition: opacity 300ms 200ms var(--animation-timing-function-modal);
+  backdrop-filter: blur(5px);
 }
 
 .modal-overlay.enter {

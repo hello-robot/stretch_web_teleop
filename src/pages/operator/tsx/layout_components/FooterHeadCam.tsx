@@ -12,10 +12,10 @@ interface FooterControlsProps {
     onActionModeChange?: (newMode: ActionModeType) => void;
     isCameraVeilVisible: boolean;
     isCameraVeilVisibleSet: React.Dispatch<React.SetStateAction<boolean>>;
-    isAutoNavHiddenSet?: React.Dispatch<React.SetStateAction<boolean>>;
+    swipeableViewsIdxSet: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible, isAutoNavHiddenSet }) => {
+const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible, swipeableViewsIdxSet }) => {
 
     return (
         <div className="footer-head-cam_XP">
@@ -32,8 +32,11 @@ const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onAc
                 setCameraVeilCallback={isCameraVeilVisibleSet}
             />
             <div className="auto-nav-toggle-wrapper">
-                <button onPointerDown={() => isAutoNavHiddenSet(false)}>
-                    🗺️
+                <button
+                    onClick={() => swipeableViewsIdxSet(1)}
+                    className="auto-nav-toggle"
+                >
+                    <span className="auto-nav-toggle-icon" />
                 </button>
             </div>
         </div>

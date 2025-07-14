@@ -1,16 +1,17 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useState, useCallback } from 'react';
 import Modal from '../basic_components/ModalMobile';
 import { AutoNavFunctions } from "./AutoNav";
 import MagneticWrapper from '../static_components/MagneticWrapper';
+import {
+    ROSPoint,
+} from 'shared/util';
 import "operator/css/FooterAutoNav.css";
+import { motion } from 'framer-motion';
+import InputFluid from '../basic_components/InputFluid';
 
 interface FooterAutoNavProps {
-    isAutoNavHiddenSet: Dispatch<SetStateAction<boolean>>;
     handleSelectGoal: (selectGoal: boolean) => void;
     functs: AutoNavFunctions;
-    poses: string[];
-    posesSet: Dispatch<SetStateAction<string[]>>;
-    displayGoals: boolean;
     isModalAddLocationVisible: boolean;
     isModalAddLocationVisibleSet: Dispatch<SetStateAction<boolean>>;
     isModalLocationsMenuVisible: boolean;
@@ -20,33 +21,39 @@ interface FooterAutoNavProps {
     isSelectingGoal: boolean;
     isSelectingGoalSet: Dispatch<SetStateAction<boolean>>;
     selectedLocationMenuItemIdx: number | -1;
+    swipeableViewsIdxSet: Dispatch<SetStateAction<number>>;
+    goalPosition: ROSPoint | undefined; // Assuming goalPosition is a Vector3
+    addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
 }
 
 interface ModalAddLocationProps {
     functs: AutoNavFunctions;
     poses: string[];
     posesSet: Dispatch<SetStateAction<string[]>>;
-    displayGoals: boolean;
     isModalAddLocationVisible: boolean;
     isModalAddLocationVisibleSet: Dispatch<SetStateAction<boolean>>;
+    getPosesLatest: () => void;
+    addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
 }
 
 interface ModalLocationsMenuProps {
-    // functs: AutoNavFunctions;
     poses: string[];
-    // posesSet: Dispatch<SetStateAction<string[]>>;
-    // displayGoals: boolean;
+    posesSet: Dispatch<SetStateAction<string[]>>;
     isModalLocationsMenuVisible: boolean;
     isModalLocationsMenuVisibleSet: Dispatch<SetStateAction<boolean>>;
+    functs: AutoNavFunctions;
+    getPosesLatest: () => void;
+    addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
 }
 
 const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
     functs,
     poses,
     posesSet,
-    displayGoals,
     isModalAddLocationVisibleSet,
     isModalAddLocationVisible,
+    getPosesLatest,
+    addToast,
 }) => {
     const [locationName, locationNameSet] = React.useState<string>("");
 
@@ -56,15 +63,12 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 posesSet((prevPoses) => [...prevPoses, locationName]);
             }
             functs.SaveGoal(locationName);
-            functs.DisplayPoseMarkers(
-                displayGoals,
-                functs.GetSavedPoses(),
-                functs.GetSavedPoseNames(),
-                functs.GetSavedPoseTypes(),
-            );
+            addToast('info', `Location "${locationName}" added`);
+            getPosesLatest();
         }
         locationNameSet("");
         isModalAddLocationVisibleSet(false);
+
     }
 
     return (
@@ -93,19 +97,98 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 className="input"
                 value={locationName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationNameSet(e.target.value)}
-                placeholder="Enter name of destination"
+                placeholder="Use a helpful name for this location"
             />
         </Modal>
     );
 };
 
+const LocationsMenuListItem: React.FC<{
+    pose: string;
+    poses: string[];
+    posesSet: Dispatch<SetStateAction<string[]>>;
+    functs: AutoNavFunctions;
+    getPosesLatest: () => void;
+    addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
+}> = ({ pose, poses, posesSet, functs, getPosesLatest, addToast }) => {
+
+    const [poseNew, poseNewSet] = useState<string>("");
+    const [isEditing, isEditingSet] = useState<boolean>(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    // Manage focus/blur for <InputFluid>
+    React.useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
+        } else if (!isEditing) {
+            inputRef.current.blur();
+        }
+    }, [isEditing]);
+
+    const activateEditMode = () => {
+        poseNewSet(pose);
+        isEditingSet(true);
+    };
+
+    const handleSave = () => {
+        if (poses.includes(poseNew)) return null;
+        else {
+            functs.RenamePose(pose, poseNew);
+            addToast('info', `Location "${pose}" renamed to "${poseNew}"`);
+        }
+        isEditingSet(false);
+        getPosesLatest();
+    }
+
+    const handleDelete = () => {
+        functs.DeleteMapPose(pose);
+        addToast('info', `Location "${pose}" deleted`);
+        getPosesLatest();
+    };
+
+    const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        poseNewSet(e.target.value);
+    }, []);
+
+
+    return (
+        <li className="locations-menu-list-item">
+            <div>
+                <InputFluid
+                    inputRef={inputRef}
+                    value={poseNew || pose}
+                    onChange={onChange}
+                    disabled={!isEditing}
+                    onBlur={handleSave}
+                />
+                <button onClick={activateEditMode}>Edit</button>
+            </div>
+            <div>
+                {!isEditing
+                    ? (
+                        <button onClick={handleDelete}>Delete</button>
+                    )
+                    : (
+                        <button
+                            onClick={handleSave}
+                        >
+                            Save
+                        </button>
+                    )}
+            </div>
+        </li>
+    );
+}
+
 const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     poses,
+    posesSet,
+    functs,
     isModalLocationsMenuVisible,
     isModalLocationsMenuVisibleSet,
+    getPosesLatest,
+    addToast,
 }) => {
-
-    function handleAccept(): void { }
 
     return (
         <Modal
@@ -116,24 +199,17 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
         >
             <ul
                 className="locations-menu-list"
-                style={{
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
-                }}
             >
-                {poses.map(pose => (
-                    <li
-                        className="locations-menu-list-item"
+                {poses.map((pose, idx) => (
+                    <LocationsMenuListItem
                         key={pose}
-                        style={{
-                            all: "unset",
-                            display: "block",
-                            cursor: "pointer",
-                        }}
-                    >
-                        {pose}
-                    </li>
+                        pose={pose}
+                        poses={poses}
+                        posesSet={posesSet}
+                        functs={functs}
+                        getPosesLatest={getPosesLatest}
+                        addToast={addToast}
+                    />
                 ))}
             </ul>
         </Modal>
@@ -141,12 +217,8 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
 };
 
 const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
-    isAutoNavHiddenSet,
     handleSelectGoal,
     functs,
-    poses,
-    posesSet,
-    displayGoals,
     isModalAddLocationVisible,
     isModalAddLocationVisibleSet,
     isModalLocationsMenuVisible,
@@ -156,90 +228,157 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     isSelectingGoal,
     isSelectingGoalSet,
     selectedLocationMenuItemIdx,
+    goalPosition,
+    addToast,
 }) => {
+
+    const handleStartAutoNav = useCallback(() => {
+        // When selecting manually on map...
+        if (!isCurrentlyMoving && isSelectingGoal) {
+            functs.Play();
+            isCurrentlyMovingSet(true);
+            isSelectingGoalSet(false);
+            functs
+                .GoalReached()
+                .then((goalReached) => {
+                    isCurrentlyMovingSet(false)
+                });
+            // ...when selecting from Locations Menu
+        } else if (!isCurrentlyMoving && selectedLocationMenuItemIdx !== -1) {
+            let pose: ROSLIB.Vector3 = functs.LoadGoal(selectedLocationMenuItemIdx)!;
+            functs.DisplayGoalMarker(pose);
+            functs.NavigateToAruco(selectedLocationMenuItemIdx);
+            isCurrentlyMovingSet(true);
+            isSelectingGoalSet(false);
+            functs
+                .GoalReached()
+                .then((goalReached) => isCurrentlyMovingSet(false));
+        }
+    }, [functs, isCurrentlyMoving, isSelectingGoalSet, isSelectingGoal, selectedLocationMenuItemIdx, isCurrentlyMovingSet]);
+
+    // List of saved pose names for navigation goals
+    const [poses, posesSet] = useState<string[]>(
+        functs.GetSavedPoseNames(),
+    );
+
+    const getPosesLatest = useCallback(() => {
+
+        // Fetch the latest pose names from the function provider...
+        const poses = functs.GetSavedPoseNames();
+
+        // Update local state with latest poses...
+        posesSet(poses);
+
+    }, []);
 
     return (
         <div className="footer-auto-nav">
 
             {/* <LocationsMenu> */}
-            <div className="locations-menu">
+            <div className="locations-menu-wrapper">
                 <ModalLocationsMenu
                     poses={poses}
+                    posesSet={posesSet}
+                    functs={functs}
                     isModalLocationsMenuVisible={isModalLocationsMenuVisible}
                     isModalLocationsMenuVisibleSet={isModalLocationsMenuVisibleSet}
+                    getPosesLatest={getPosesLatest}
+                    addToast={addToast}
                 />
                 <button
                     onClick={() => {
                         isModalLocationsMenuVisibleSet(true);
                     }}
+                    className="locations-menu"
                 >
-                    📋
+                    <span className="locations-menu-icon" />
                 </button>
             </div>
             {/* </LocationsMenu> */}
 
-            {/* <AutoNavMainButton> */}
+            {/* <StartNavButton> */}
             {!isCurrentlyMoving
                 ? (
-                    <button
-                        onPointerDown={() => {
-                            // When selecting manually on map...
-                            if (!isCurrentlyMoving && isSelectingGoal) {
-                                functs.Play();
-                                isCurrentlyMovingSet(true);
-                                isSelectingGoalSet(false);
-                                functs
-                                    .GoalReached()
-                                    .then((goalReached) => {
-                                        isCurrentlyMovingSet(false)
-                                    });
-                                // ...when selecting from Locations Menu
-                            } else if (!isCurrentlyMoving && selectedLocationMenuItemIdx !== -1) {
-                                let pose: ROSLIB.Vector3 = functs.LoadGoal(selectedLocationMenuItemIdx)!;
-                                functs.DisplayGoalMarker(pose);
-                                functs.NavigateToAruco(selectedLocationMenuItemIdx);
-                                isCurrentlyMovingSet(true);
-                                isSelectingGoalSet(false);
-                                functs
-                                    .GoalReached()
-                                    .then((goalReached) => isCurrentlyMovingSet(false));
-                            }
+                    <motion.button
+                        onClick={handleStartAutoNav}
+                        disabled={!goalPosition}
+                        className="auto-nav-button"
+                        initial={false}
+                        animate={goalPosition ? { width: 100 } : { width: 70 }}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 20,
+                            mass: 0.7,
+                            bounce: 0.6,
                         }}
-                        disabled={typeof functs.GetGoalPosition() === "number"}
+                        style={{ overflow: 'hidden', display: 'inline-flex', alignItems: 'center' }}
                     >
-                        <span>Play</span>
-                    </button>
+                        <span>Start</span>
+                        <motion.span
+                            className="auto-nav-button-icon"
+                            initial={{ x: -40, opacity: 0, filter: 'brightness(1)' }}
+                            animate={goalPosition
+                                ? { x: 0, opacity: 1, filter: ['brightness(1)', 'brightness(1.7)', 'brightness(1)'] }
+                                : { x: 20, opacity: 0, filter: 'brightness(1)' }
+                            }
+                            transition={goalPosition
+                                ? {
+                                    type: 'spring',
+                                    stiffness: 400,
+                                    damping: 12,
+                                    mass: 0.6,
+                                    bounce: 0.7,
+                                    filter: {
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        repeatType: 'loop',
+                                        ease: 'easeInOut',
+                                    },
+                                }
+                                : {
+                                    type: 'spring',
+                                    stiffness: 400,
+                                    damping: 12,
+                                    mass: 0.6,
+                                    bounce: 0.7,
+                                }
+                            }
+                            style={{ display: 'inline-block', marginLeft: 8 }}
+                        />
+                    </motion.button>
                 )
-                : (<div
-                    className="mobile-map-cancel-btn"
-                    onPointerDown={() => {
+                : (<button
+                    className="cancel-auto-nav-button"
+                    onClick={() => {
                         functs.CancelGoal();
                         isCurrentlyMovingSet(!isCurrentlyMoving);
                         isSelectingGoalSet(true);
 
                     }}
                 >
-                    <span>Cancel</span>
-                    <span className="material-icons">cancel</span>
-                </div>)}
+                    <span>AutoNav Cancel</span>
+                </button>)}
             {/* </AutoNavMainButton> */}
 
             {/* <AddLocationButton> */}
-            <div className="add-location">
+            <div className="add-location-wrapper">
                 <ModalAddLocation
                     functs={functs}
                     poses={poses}
                     posesSet={posesSet}
-                    displayGoals={displayGoals}
                     isModalAddLocationVisible={isModalAddLocationVisible}
                     isModalAddLocationVisibleSet={isModalAddLocationVisibleSet}
+                    getPosesLatest={getPosesLatest}
+                    addToast={addToast}
                 />
                 <button
                     onClick={() => {
                         isModalAddLocationVisibleSet(true);
                     }}
+                    className="add-location"
                 >
-                    Add
+                    <span className="add-location-icon" />
                 </button>
             </div>
             {/* </AddLocationButton> */}

@@ -29,25 +29,27 @@
 }
 
 .action-speed button.button-action-speed {
-  width: 64px;
-  height: 46px;
+  width: 44px;
+  height: 21px;
   border-radius: 10px;
   padding: 0;
   background-color: transparent;
   box-shadow: none;
 }
 
-.action-speed button.button-action-speed:active {
-  background-color: hsl(204deg 75.37% 28.38%);
-}
-
-.action-speed span.action-speed-icon {
+.action-speed button.button-action-speed span.action-speed-icon {
   display: inline-block;
   width: 48px;
   height: 24px;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center 3px;
+  background-position: -2px center;
+  filter: brightness(1);
+  transition: filter 200ms ease-out;
+}
+
+.action-speed button.button-action-speed:active span.action-speed-icon {
+  filter: brightness(1.5);
 }
 
 .action-speed span.action-speed-icon.slow {
@@ -74,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 5px;
   border-radius: 4px;
   background: transparent;
   border: 1px solid hsl(0deg 0% 100% / 10%);
@@ -82,7 +84,7 @@
   white-space: nowrap;
   color: #ffffff;
   font-weight: 700;
-  padding: 10px 18px 10px 15px;
+  padding: 10px 9px 10px 14px;
   border-radius: 10px;
 }
 
@@ -112,4 +114,25 @@
 .auto-nav-toggle-wrapper {
   display: flex;
   flex-direction: row-reverse;
+}
+
+.auto-nav-toggle-wrapper button.auto-nav-toggle {
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.auto-nav-toggle-wrapper button.auto-nav-toggle span.auto-nav-toggle-icon {
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  background: url('data:image/svg+xml,<svg width="46" height="40" viewBox="0 0 46 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(%23filter0_d_2177_1215)"><g clip-path="url(%23clip0_2177_1215)"><path d="M27.167 7.7666L34.4004 4.9668C34.9188 4.75953 35.3982 4.81805 35.8389 5.14258C36.2795 5.46715 36.5 5.901 36.5 6.44434V28.2227C36.4999 28.5594 36.4027 28.8571 36.209 29.1162C36.0151 29.3755 35.7492 29.5706 35.4111 29.7002L27.167 32.5L27.1504 32.4941V7.7998L17.8154 4.50488L17.833 4.5L27.167 7.7666ZM17.7998 29.2002L25.167 31.7998L17.833 29.2334L10.5996 32.0332C10.0813 32.2405 9.60175 32.1828 9.16113 31.8594C8.72042 31.5358 8.50003 31.1011 8.5 30.5557V8.77734C8.50008 8.44071 8.59737 8.14282 8.79199 7.88379C8.98696 7.62453 9.25287 7.42943 9.58887 7.2998L17.7998 4.51074V29.2002Z" fill="url(%23paint0_radial_2177_1215)"/><path d="M17.8 4.5L27.15 7.8V32.5L17.8 29.2V4.5Z" fill="url(%23paint1_linear_2177_1215)"/><path d="M22.7496 21L17.397 24.4372C17.2172 24.4995 17.048 24.5152 16.8892 24.4843C16.7304 24.4534 16.5954 24.3878 16.4842 24.2876C16.373 24.1874 16.3005 24.0628 16.2668 23.9137C16.233 23.7646 16.2502 23.6089 16.3182 23.4463L21.982 11.9487C22.0512 11.7991 22.1585 11.687 22.304 11.6122C22.4495 11.5374 22.598 11.5 22.7496 11.5C22.9012 11.5 23.0498 11.5374 23.1953 11.6122C23.3408 11.687 23.4481 11.7991 23.5172 11.9487L29.181 23.4463C29.2502 23.6084 29.2673 23.7642 29.2325 23.9137C29.1976 24.0633 29.1252 24.1879 29.0151 24.2876C28.905 24.3873 28.77 24.4529 28.6101 24.4843C28.4502 24.5157 28.2809 24.5 28.1022 24.4372L22.7496 21Z" fill="black"/></g></g><defs><filter id="filter0_d_2177_1215" x="-3.125" y="0.125" width="52.25" height="39.25" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset dy="1.25"/><feGaussianBlur stdDeviation="1.5625"/><feColorMatrix type="matrix" values="0 0 0 0 0.0430111 0 0 0 0 0.410403 0 0 0 0 0.655331 0 0 0 0.7 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2177_1215"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2177_1215" result="shape"/></filter><radialGradient id="paint0_radial_2177_1215" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22.5 18.5) scale(14)"><stop stop-color="%230077C6"/><stop offset="1" stop-color="%230097FC"/></radialGradient><linearGradient id="paint1_linear_2177_1215" x1="18" y1="16.5" x2="27" y2="21" gradientUnits="userSpaceOnUse"><stop stop-color="%230083DA"/><stop offset="1" stop-color="%230072BE"/></linearGradient><clipPath id="clip0_2177_1215"><rect y="2" width="46" height="33" rx="13" fill="white"/></clipPath></defs></svg>') no-repeat -6px center;
+  background-size: 39px;
+  filter: brightness(1);
+  transition: filter 200ms ease-out;
+}
+
+.auto-nav-toggle-wrapper button.auto-nav-toggle:active span.auto-nav-toggle-icon {
+  filter: brightness(1.5);
 }

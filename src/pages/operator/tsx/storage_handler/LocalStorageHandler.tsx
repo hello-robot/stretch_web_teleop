@@ -101,9 +101,9 @@ export class LocalStorageHandler extends StorageHandler {
     }
 
     public getMapPose(poseName: string): ROSLIB.Transform {
-        const storedJson = localStorage.getItem("map_" + poseName);
-        if (!storedJson) throw Error(`Could not load pose ${poseName}`);
-        return JSON.parse(storedJson);
+        const storedJson = localStorage.getItem(`map_${poseName}`);
+        if (!storedJson) throw new Error(`Could not load pose ${poseName}`);
+        return JSON.parse(storedJson) as ROSLIB.Transform;
     }
 
     public getMapPoses(): ROSLIB.Transform[] {
@@ -140,6 +140,36 @@ export class LocalStorageHandler extends StorageHandler {
             LocalStorageHandler.MAP_POSE_TYPES_KEY,
             JSON.stringify(poseTypes),
         );
+    }
+
+
+    /**
+     * Renames a map pose from
+     * "poseNameOld" to "poseNameNew"
+     */
+    public renamePose(poseNameOld: string, poseNameNew: string): void {
+        if (poseNameOld === poseNameNew) return;
+        let poseNames = this.getMapPoseNames();
+        let poseTypes = this.getMapPoseTypes();
+        const idx = poseNames.indexOf(poseNameOld);
+        if (idx === -1) return;
+        // Get pose and type
+        const pose = this.getMapPose(poseNameOld);
+        const type = poseTypes[idx];
+        // Remove old pose from storage
+        localStorage.removeItem("map_" + poseNameOld);
+        // Replace name and keep position
+        poseNames[idx] = poseNameNew;
+        poseTypes[idx] = type;
+        localStorage.setItem(
+            LocalStorageHandler.MAP_POSE_NAMES_KEY,
+            JSON.stringify(poseNames),
+        );
+        localStorage.setItem(
+            LocalStorageHandler.MAP_POSE_TYPES_KEY,
+            JSON.stringify(poseTypes),
+        );
+        localStorage.setItem("map_" + poseNameNew, JSON.stringify(pose));
     }
 
     public getRecordingNames(): string[] {

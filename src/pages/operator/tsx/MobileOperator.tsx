@@ -28,6 +28,7 @@ import {
 } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
+import HeadCam from "./layout_components/HeadCam";
 import "operator/css/MobileOperator.css";
 import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
@@ -64,8 +65,6 @@ export const MobileOperator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(
         FunctionProvider.velocityScale
     );
-    const [isAutoNavHidden, isAutoNavHiddenSet] = React.useState<boolean>(false);
-    const [hideControls, setHideControls] = React.useState<boolean>(false);
     const [activeMainGroupTab, setActiveMainGroupTab] =
         React.useState<number>(0);
     const [activeControlTab, setActiveControlTab] = React.useState<number>(0);
@@ -74,6 +73,11 @@ export const MobileOperator = (props: {
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
     // Manage the blurring+darkening of the camera feed
     const [isCameraVeilVisible, isCameraVeilVisibleSet] = useState(false);
+    const [swipeableViewsIdx, swipeableViewsIdxSet] = useState<number>(0);
+    const [swipeableViewsStyles, swipeableViewsStylesSet] = useState([
+        { filter: 'brightness(1) blur(0px)' },
+        { filter: 'brightness(1) blur(0px)' },
+    ]);
 
     React.useEffect(() => {
         setTimeout(function () {
@@ -162,20 +166,6 @@ export const MobileOperator = (props: {
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
     };
-
-    // function updateScreens() {
-    //     if (isAutoNavHidden) {
-    //         isAutoNavHiddenSet(false);
-    //         setHideControls(true);
-    //     } else {
-    //         setHideControls(false);
-    //         isAutoNavHiddenSet(true);
-    //     }
-    // }
-    // const swipeHandlers = Swipe({
-    //     onSwipedLeft: () => updateScreens(),
-    //     onSwipedRight: () => updateScreens(),
-    // });
 
     const driveMode = (show: boolean) => {
         return show ? (
@@ -284,58 +274,70 @@ export const MobileOperator = (props: {
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
                 <SwipeableViews
-                    index={isAutoNavHidden ? 0 : 1}
-                    style={{ overflowX: 'visible', height: '100%' }}
+                    index={swipeableViewsIdx}
+                    onChangeIndex={(idx: number) => (swipeableViewsIdxSet(idx))}
+                    enableMouseEvents={true}
                     containerStyle={{ height: '100%' }}
                     slideStyle={{ overflowX: 'hidden', position: 'relative' }}
-                    // disabled
-                    enableMouseEvents={true}
+                    style={{ overflowX: 'visible', height: '100%' }}
+                    // Handler for animation brightness/blur fx
+                    // as user is swiping between views
+                    onSwitching={(slideOffset, type) => {
+                        console.log('type', type)
+                        if (type === 'move') {
+                            // Calculate filter values based on slide offset
+                            const newStyles = swipeableViewsStyles.map((style, index) => {
+                                // Determine the position of each slide relative to the active slide
+                                const relativePosition = index - slideOffset;
+                                const absPosition = Math.abs(relativePosition);
+
+                                // Apply brightness and blur: reduce brightness and increase blur as slides move away
+                                const brightness = Math.max(0.2, 1 - absPosition * 0.7); // Min brightness 0.5
+                                const blur = Math.min(10, absPosition * 5); // Max blur 5px
+
+                                return {
+                                    filter: `brightness(${brightness}) blur(${blur}px)`,
+                                };
+                            });
+                            swipeableViewsStylesSet(newStyles);
+                        } else if (type === 'end') {
+                            // Reset styles when transition ends
+                            const newStyles = swipeableViewsStyles.map(() => ({
+                                filter: 'brightness(1) blur(0px)',
+                            }));
+                            swipeableViewsStylesSet(newStyles);
+                        }
+                    }}
                 >
-                    {/* HeadCam */}
-                    <div>
-                        <div className={className("controls", { hideControls })}>
-                            <div
-                                className="simple-camera-view-wrapper_XP"
-                            >
-                                <SimpleCameraView
-                                    id={cameraID}
-                                    remoteStreams={remoteStreams}
-                                    isCameraVeilVisible={isCameraVeilVisible}
-                                />
-                            </div>
-                            <TabGroup
-                                tabLabels={["Controls", "Recordings"]}
-                                tabContent={[controlModes, recordingList]}
-                                startIdx={activeMainGroupTab}
-                                onChange={(index: number) =>
-                                    setActiveMainGroupTab(index)
-                                }
-                                pill={false}
-                                key={"main-group"}
-                            />
-                        </div>
-                        <FooterHeadCam
-                            actionSpeedCurrent={FunctionProvider.velocityScale}
-                            onActionSpeedChange={(newSpeed: number) => {
-                                setVelocityScale(newSpeed);
-                                FunctionProvider.velocityScale = newSpeed;
-                            }}
-                            actionModeCurrent={FunctionProvider.actionMode}
-                            onActionModeChange={setActionMode}
+                    <div
+                        style={swipeableViewsStyles[0]}
+                        className="head-cam-wrapper"
+                    >
+                        <HeadCam
+                            cameraID={cameraID}
                             isCameraVeilVisible={isCameraVeilVisible}
+                            remoteStreams={remoteStreams}
+                            tabContent={[controlModes, recordingList]}
+                            activeMainGroupTab={activeMainGroupTab}
+                            setActiveMainGroupTab={setActiveMainGroupTab}
+                            setVelocityScale={setVelocityScale}
+                            setActionMode={setActionMode}
                             isCameraVeilVisibleSet={isCameraVeilVisibleSet}
-                            isAutoNavHiddenSet={isAutoNavHiddenSet}
+                            swipeableViewsIdxSet={swipeableViewsIdxSet}
                         />
                     </div>
-                    {/* AutoNav */}
-                    <AutoNav
-                        isAutoNavHidden={isAutoNavHidden}
-                        isAutoNavHiddenSet={isAutoNavHiddenSet}
-                        sharedState={sharedState}
-                    />
+                    <div
+                        style={swipeableViewsStyles[1]}
+                        className="auto-nav-wrapper"
+                    >
+                        <AutoNav
+                            sharedState={sharedState}
+                            swipeableViewsIdx={swipeableViewsIdx}
+                            swipeableViewsIdxSet={swipeableViewsIdxSet}
+                        />
+                    </div>
                 </SwipeableViews>
-
             </div>
-        </div>
+        </div >
     );
 };

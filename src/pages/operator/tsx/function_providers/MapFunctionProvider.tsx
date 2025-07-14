@@ -21,9 +21,7 @@ export class MapFunctionProvider extends FunctionProvider {
             case MapFunction.MoveBase:
                 return (pose: ROSPose) => {
                     // FunctionProvider.remoteRobot?.stopExecution()
-                    console.log('a')
                     FunctionProvider.remoteRobot?.moveBase(pose);
-                    console.log('b')
                 };
             case MapFunction.GoalReached:
                 return () => {

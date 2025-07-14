@@ -253,3 +253,6 @@
 .controls {
     position: relative;
 }
+
+.head-cam-wrapper,
+.auto-nav-wrapper {}

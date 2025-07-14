@@ -6,6 +6,7 @@ import { resolve } from "path";
 export enum UnderMapButton {
     SelectGoal,
     DeleteGoal,
+    DeleteMapPose,
     CancelGoal,
     SaveGoal,
     LoadGoal,
@@ -15,6 +16,7 @@ export enum UnderMapButton {
     GetSavedPoses,
     NavigateToAruco,
     GoalReached,
+    RenamePose,
 }
 
 export class UnderMapFunctionProvider extends FunctionProvider {
@@ -44,11 +46,18 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                 };
             case UnderMapButton.CancelGoal:
                 return () => FunctionProvider.remoteRobot?.stopMoveBase();
+
             case UnderMapButton.DeleteGoal:
                 return (idx: number) => {
                     let poses = this.storageHandler.getMapPoseNames();
                     this.storageHandler.deleteMapPose(poses[idx]);
                 };
+            case UnderMapButton.DeleteMapPose:
+                return (poseName: string) => {
+                    let poses = this.storageHandler.getMapPoseNames();
+                    this.storageHandler.deleteMapPose(poseName);
+                };
+
             case UnderMapButton.SaveGoal:
                 return (name: string) => {
                     let pose = FunctionProvider.remoteRobot?.getMapPose();
@@ -150,6 +159,10 @@ export class UnderMapFunctionProvider extends FunctionProvider {
                         });
                     });
                     return promise;
+                };
+            case UnderMapButton.RenamePose:
+                return (poseNameOld: string, poseNameNew: string) => {
+                    return this.storageHandler.renamePose(poseNameOld, poseNameNew);
                 };
             default:
                 throw Error(

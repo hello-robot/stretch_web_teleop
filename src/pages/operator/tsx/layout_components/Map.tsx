@@ -199,11 +199,11 @@ export const Map = (props: CustomizableComponentProps) => {
                     onClick={handleSelect}
                 />
             </div>
-            <UnderMapButtons
+            {/* <UnderMapButtons
                 handleSelectGoal={handleSelectGoal}
                 functs={underMapFn}
                 hideLabels={hideLabels}
-            />
+            /> */}
         </React.Fragment>
     );
 };
