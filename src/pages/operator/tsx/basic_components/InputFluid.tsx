@@ -11,6 +11,7 @@ interface InputFluidProps {
     placeholder?: string;
     onFocus?: () => void;
     onBlur?: () => void;
+    autoComplete?: string; // Optional autocomplete attribute
 }
 
 /**
@@ -29,6 +30,7 @@ const InputFluid: React.FC<InputFluidProps> = ({
     maxWidth = 300,
     disabled = false,
     onBlur,
+    autoComplete = 'off',
 }) => {
     const [inputWidth, setInputWidth] = useState<number>(minWidth);
     const spanRef = useRef<HTMLSpanElement>(null);
@@ -62,6 +64,7 @@ const InputFluid: React.FC<InputFluidProps> = ({
                 style={{ width: `${inputWidth}px` }}
                 disabled={disabled}
                 ref={inputRef}
+                autoComplete={autoComplete}
                 onBlur={onBlur} // Call the onBlur prop if provided
             />
         </div>

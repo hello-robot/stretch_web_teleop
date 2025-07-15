@@ -57,37 +57,6 @@
   /* Slightly increased opacity for readability */
 }
 
-/* Button styles used within ModalActionMode's footer */
-.btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  /* Assuming buttons are borderless by default here */
-  font-weight: 600;
-}
-
-.btn-primary {
-  background: hsl(212 100% 50% / 1);
-  /* Original primary color */
-  color: #fff;
-  width: 100%;
-  /* Make button full width in footer */
-  padding: 15px 20px;
-  /* Larger padding for primary action */
-  font-size: 16px;
-  transition: background 250ms ease-out;
-}
-
-.btn-primary:disabled {
-  background: hsl(212 50% 10% / 1) !important;
-  /* Ensure color stays on disable */
-  opacity: 1;
-  /* Original opacity */
-  cursor: not-allowed;
-}
-
 /* If you have other button types like btn-outline or btn-icon, keep their styles here if specific to this modal's content */
 .btn-outline {
   background: transparent;
@@ -107,11 +76,6 @@
   margin: 10px 0px;
   /* Slightly reduce vertical margin for body */
 }
-
-
-
-
-
 
 /* Hide the default radio input */
 input[type="radio"] {

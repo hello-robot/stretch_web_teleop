@@ -135,3 +135,10 @@ button.auto-nav-button span.auto-nav-button-icon {
   align-items: center;
   margin: 5px 0 0;
 }
+
+.footer-modal-add-location {
+  width: 100%;
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+}

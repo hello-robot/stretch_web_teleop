@@ -68,8 +68,12 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
     getPosesLatest,
     addToast,
 }) => {
-    const [locationName, locationNameSet] = React.useState<string>("");
 
+    const [locationName, locationNameSet] = React.useState<string>("");
+    const closeModal = useCallback(() => isModalAddLocationVisibleSet(false), []);
+
+    // Update poses in localStorage, and
+    // update local state, "poses"
     function handleAccept(): void {
         if (locationName.length > 0) {
             if (!poses.includes(locationName)) {
@@ -81,16 +85,11 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
         }
         locationNameSet("");
         isModalAddLocationVisibleSet(false);
-
     }
 
-    return (
-        <ModalMobile
-            isOpen={isModalAddLocationVisible}
-            onClose={() => isModalAddLocationVisibleSet(false)}
-            title="Add Location"
-            subtitle="AUTONAV"
-            footer={
+    const Footer = () => {
+        return (
+            <div className="footer-modal-add-location">
                 <MagneticWrapper>
                     <button
                         disabled={locationName.length === 0}
@@ -100,7 +99,29 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                         Add Location
                     </button>
                 </MagneticWrapper>
-            }
+                <MagneticWrapper>
+                    <button
+                        className="btn btn-tertiary"
+                        onPointerDown={closeModal}
+                    >
+                        Close
+                    </button>
+                </MagneticWrapper>
+            </div>
+        )
+    }
+
+
+
+
+
+    return (
+        <ModalMobile
+            isOpen={isModalAddLocationVisible}
+            onClose={() => isModalAddLocationVisibleSet(false)}
+            title="Add Location"
+            subtitle="AUTONAV"
+            footer={<Footer />}
         >
             <input
                 autoFocus
@@ -111,6 +132,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 value={locationName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationNameSet(e.target.value)}
                 placeholder="Use a helpful name for this location"
+                autoComplete="off"
             />
         </ModalMobile>
     );
@@ -185,6 +207,7 @@ const LocationsMenuListItem: React.FC<{
                     onChange={onChange}
                     disabled={!isEditing}
                     onBlur={handleSave}
+                    autoComplete="off"
                 />
                 <button onClick={activateEditMode}>Edit</button>
             </div>
@@ -228,12 +251,28 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     addToast,
 }) => {
 
+    const closeModal = useCallback(() => isModalLocationsMenuVisibleSet(false), []);
+    const Footer = () => {
+        return (
+            <MagneticWrapper>
+                <button
+                    className="btn btn-tertiary"
+                    onPointerDown={closeModal}
+                >
+                    Close
+                </button>
+            </MagneticWrapper>
+        )
+    };
+
+
     return (
         <ModalMobile
             isOpen={isModalLocationsMenuVisible}
-            onClose={() => isModalLocationsMenuVisibleSet(false)}
+            onClose={closeModal}
             title="Select Location"
             subtitle="AUTONAV"
+            footer={<Footer />}
         >
             <ul
                 className="locations-menu-list"

@@ -1,32 +1,27 @@
 :root {
+    /* Button style variables */
     --btn-brdr-radius: 0.4rem;
     --btn-padding: 0.5em 1em;
     --btn-padding-med: 0.4rem 0.5rem;
 
+    /* Color variables */
     --selected-color: hsl(33, 95%, 63%);
-
     --btn-gray: #f0f0f0;
     --btn-blue: hsl(200deg 83.23% 22.29%);
     --btn-green: rgb(129, 218, 129);
     --btn-red: hsl(0, 70%, 70%);
     --btn-turquoise: hsl(171, 32%, 46%);
-
     --shadow-color: rgba(112, 112, 112, 0.196);
-
     --background-color: hsl(0, 0%, 98%);
     --gray-bg: hsl(0, 0%, 88%);
-
     --shadow: 3px 3px 2px var(--shadow-color);
-
     --tab-inactive: hsl(200, 20%, 85%);
-
     --font-white: hsl(0, 0%, 100%);
-
     --path-blue: hsl(170, 37%, 53%);
-
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
 }
 
+/* Reset box model and font inheritance for all elements */
 * {
     box-sizing: border-box;
     min-width: 0;
@@ -34,6 +29,7 @@
     font: inherit;
 }
 
+/* Body base styles and font smoothing for better rendering */
 body {
     font-family:
         -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -44,6 +40,7 @@ body {
     background-color: var(--background-color);
 }
 
+/* Prevent text selection and highlight on mobile */
 html {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
@@ -53,6 +50,7 @@ html {
     user-select: none;
 }
 
+/* Ensure full height and prevent scrollbars by default */
 html,
 body,
 #root {
@@ -62,6 +60,7 @@ body,
     user-select: none;
 }
 
+/* Allow scrolling on landscape mobile devices */
 @media screen and (orientation: landscape) and (max-device-width: 900px) {
 
     html,
@@ -71,29 +70,28 @@ body,
     }
 }
 
-/* In customization mode add hidden shadow after each element, to be shown when
-the element is selected */
+/* Customization mode: add a shadow highlight when selected */
 .customizing::after {
     content: "";
     position: absolute;
-
     z-index: -1;
     width: 100%;
     height: 100%;
     opacity: 0;
     left: 0;
     top: 0;
-
     box-shadow: 0 0 1rem 0.5rem var(--selected-color);
     transition: opacity 0.25s ease-in-out;
 }
 
+/* Show shadow when element is selected in customization mode */
 .customizing.selected::after {
     opacity: 1;
 }
 
-/* Button colors **************************************************************/
+/* ================= Button Styles ================= */
 
+/* Base button styles */
 button {
     background-color: var(--btn-gray);
     border: none;
@@ -103,21 +101,25 @@ button {
     cursor: pointer;
 }
 
+/* Button hover effect */
 button:hover {
     filter: brightness(90%);
     box-shadow: none;
 }
 
+/* Disabled button styles */
 button:disabled {
     background-color: lightgray;
     pointer-events: none;
     box-shadow: none;
 }
 
+/* Adjust icon spacing inside buttons */
 button .material-icons {
     margin: -0.25rem;
 }
 
+/* Button color modifiers */
 .btn-green {
     background-color: var(--btn-green);
 }
@@ -142,6 +144,7 @@ button .material-icons {
     background-color: var(--selected-color);
 }
 
+/* Responsive adjustments for smaller screens */
 @media (max-width: 1300px) {
     button {
         padding: var(--btn-padding-med);
@@ -159,18 +162,22 @@ button .material-icons {
     }
 }
 
-/* Hack that is necessary to make sure iOS screen readers pick up the aria-labels */
+/* Accessibility: Hide text but keep it for screen readers */
 .aria-inviz {
     visibility: hidden;
     display: block;
     text-align: center;
 }
 
+/* Remove default dialog padding and border */
 dialog {
     padding: 0;
     border: 0;
 }
 
+/* ================= Input Styles ================= */
+
+/* Input field base styles */
 input {
     padding: 15px 12px;
     border-radius: 4px;
@@ -179,8 +186,56 @@ input {
     border: none;
 }
 
+/* Input focus state */
 input:focus {
     background-color: hsl(204deg 100% 4%);
     border: none;
     outline: 2px solid hsl(204deg 100% 50%);
+}
+
+/* ================= XP Button Styles ================= */
+
+/* Generic button class for modal actions */
+.btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    filter: brightness(100%);
+}
+
+.btn:active {
+    filter: brightness(90%);
+}
+
+/* Primary action button in modal footer */
+.btn-primary {
+    background: hsl(212 100% 50% / 1);
+    color: #fff;
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 16px;
+    transition: background 250ms ease-out;
+}
+
+/* Disabled state for primary button */
+.btn-primary:disabled {
+    background: hsl(212 50% 10% / 1) !important;
+    opacity: 0.95;
+    cursor: not-allowed;
+}
+
+/* Tertiary action button in modal footer */
+.btn-tertiary {
+    background: hsl(212 30% 20% / 1);
+    color: #ffffff;
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 16px;
+    transition: background 250ms ease-out;
+    box-shadow: none;
+    transition: filter 150ms ease-out;
+
 }
