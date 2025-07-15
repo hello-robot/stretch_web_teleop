@@ -166,10 +166,10 @@ export class OccupancyGrid extends React.Component {
     }
 
     /**
-     * Creates the occupancy grid by drawing the map data onto a canvas.
-     * It sets the origin, dimensions, and scaling factors for the map.
+     * Creates the occupancy grid bitmap from
+     * the ROS map data and adds it to the stage.
      */
-    createOccupancyGrid() {
+    createOccupancyGridBitmap() {
 
         // Create an internal drawing canvas for the occupancy grid image
         var canvas = document.createElement("canvas");
@@ -260,6 +260,57 @@ export class OccupancyGrid extends React.Component {
         this.rootObject.addChild(this.bitmap);
 
         // Set the scaling factors for converting between map and world coordinates
+        this.scaleX = this.map.info.resolution;
+        this.scaleY = this.map.info.resolution;
+    }
+
+    /**
+     * Creates the occupancy grid by drawing the map data as vector rectangles using createjs.Shape.
+     * It sets the origin, dimensions, and scaling factors for the map.
+     */
+    createOccupancyGridVector() {
+        if (!this.map) {
+            var rect = new createjs.Shape();
+            rect.graphics.beginStroke("#000000");
+            rect.graphics.setStrokeStyle(3);
+            rect.graphics.drawRect(0, 0, 300, 500);
+            rect.graphics.endStroke();
+            var text = new createjs.Text("Could not load map", "30px Arial");
+            text.x = 20;
+            text.y = 250;
+            this.rootObject.addChild(rect);
+            this.rootObject.addChild(text);
+            return;
+        }
+
+        this.origin = new ROSLIB.Pose({
+            position: this.map.info.origin.position,
+            orientation: this.map.info.origin.orientation,
+        });
+
+        this.width = this.map.info.width;
+        this.height = this.map.info.height;
+
+        // Draw each cell as a vector rectangle
+        for (let row = 0; row < this.height; row++) {
+            for (let col = 0; col < this.width; col++) {
+                let mapI = col + (this.height - row - 1) * this.width;
+                let data = this.map.data[mapI];
+                let color: string;
+                if (data === 100) {
+                    color = "#475F6F"; // occupied
+                } else if (data === 0) {
+                    color = "#F1F8FD"; // free
+                } else {
+                    color = "#9DC5BF"; // unknown
+                }
+                let cell = new createjs.Shape();
+                cell.graphics.beginFill(color).drawRect(col, row, 1, 1);
+                cell.graphics.endFill();
+                this.rootObject.addChild(cell);
+            }
+        }
+
         this.scaleX = this.map.info.resolution;
         this.scaleY = this.map.info.resolution;
     }
@@ -481,7 +532,9 @@ export class OccupancyGrid extends React.Component {
      * Initializes the occupancy grid, adds the robot pose marker, and sets up mouse event handlers.
      */
     createOccupancyGridClient() {
-        this.createOccupancyGrid();
+
+        // this.createOccupancyGridBitmap();
+        this.createOccupancyGridVector();
 
         if (!this.map) return;
 
