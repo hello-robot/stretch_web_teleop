@@ -21,9 +21,9 @@ interface FooterAutoNavProps {
     isSelectingGoal: boolean;
     isSelectingGoalSet: Dispatch<SetStateAction<boolean>>;
     selectedLocationMenuItemIdx: number | -1;
-    swipeableViewsIdxSet: Dispatch<SetStateAction<number>>;
     goalPosition: ROSPoint | undefined; // Assuming goalPosition is a Vector3
     addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
+    swipeableViewsIdxSet?: Dispatch<SetStateAction<number>>;
 }
 
 interface ModalAddLocationProps {
@@ -309,6 +309,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
  * @param isSelectingGoal - State indicating if a goal is currently being selected.
  * @param isSelectingGoalSet - Function to set the goal selection state.
  * @param selectedLocationMenuItemIdx - Index of the selected location menu item.
+ * @param swipeableViewsIdxSet - Function to set the index of the swipeable views.
  * @param goalPosition - Current goal position for navigation.
  * @param addToast - Function to display toast notifications.
  */
@@ -325,6 +326,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     isSelectingGoal,
     isSelectingGoalSet,
     selectedLocationMenuItemIdx,
+    swipeableViewsIdxSet,
     goalPosition,
     addToast,
 }) => {
@@ -374,7 +376,6 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
 
     return (
         <div className="footer-auto-nav">
-
             {/* <LocationsMenu> */}
             <div className="locations-menu-wrapper">
                 <ModalLocationsMenu

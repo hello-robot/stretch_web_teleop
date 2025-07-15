@@ -153,3 +153,20 @@
     display: flex;
     /* font-size: 45px; */
 }
+
+
+.mobile-map-container .back-button-wrapper {
+    position: absolute;
+    bottom: 15px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0px 10px;
+    width: 100%;
+}
+
+.mobile-map-container .back-button-wrapper button.back-button {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
