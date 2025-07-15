@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from '../basic_components/ModalMobile';
+import ModalMobile from '../basic_components/ModalMobile';
 import MagneticWrapper from "../static_components/MagneticWrapper";
 import "operator/css/ActionSpeed.css";
 import { buttonFunctionProvider } from "..";
@@ -114,9 +114,8 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
     };
 
     return (
-        <Modal
+        <ModalMobile
             isOpen={isOpen}
-            onClose={() => handleClose}
             title="Action Speed"
             subtitle="NAVIGATE"
             modalClassName="action-speed-modal"
@@ -152,6 +151,6 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
                     ))}
                 </div>
             </div>
-        </Modal>
+        </ModalMobile>
     );
 };

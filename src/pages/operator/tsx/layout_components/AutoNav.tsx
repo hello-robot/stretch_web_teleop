@@ -297,7 +297,11 @@ const AutoNav: React.FC<AutoNavProps> = ({
     // user dives into the AutoNav UX
     useEffect(() => {
         // Synthetic lag
-        setTimeout(() => { if (swipeableViewsIdx === 1) addToast('info', 'Click on the map to navigate'); }, 500)
+        setTimeout(() => {
+            if (swipeableViewsIdx === 1) {
+                addToast('info', 'Click on the map to navigate');
+            }
+        }, 500)
     }, [swipeableViewsIdx])
 
     return (

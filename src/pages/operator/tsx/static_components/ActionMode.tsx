@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from '../basic_components/ModalMobile';
+import ModalMobile from '../basic_components/ModalMobile';
 import MagneticWrapper from "../static_components/MagneticWrapper";
 import "operator/css/ActionMode.css";
 import { ActionModeType } from "../utils/component_definitions";
@@ -119,9 +119,8 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
     );
 
     return (
-        <Modal
+        <ModalMobile
             isOpen={isOpen}
-            onClose={() => handleClose}
             title="Action Mode"
             subtitle="NAVIGATE"
             footer={modalFooterContent}
@@ -151,6 +150,6 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
                     </label>
                 ))}
             </div>
-        </Modal>
+        </ModalMobile>
     );
 };

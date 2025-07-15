@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState, useCallback } from 'react';
-import Modal from '../basic_components/ModalMobile';
+import ModalMobile from '../basic_components/ModalMobile';
 import { AutoNavFunctions } from "./AutoNav";
 import MagneticWrapper from '../static_components/MagneticWrapper';
 import {
@@ -85,7 +85,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
     }
 
     return (
-        <Modal
+        <ModalMobile
             isOpen={isModalAddLocationVisible}
             onClose={() => isModalAddLocationVisibleSet(false)}
             title="Add Location"
@@ -112,7 +112,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationNameSet(e.target.value)}
                 placeholder="Use a helpful name for this location"
             />
-        </Modal>
+        </ModalMobile>
     );
 };
 
@@ -229,7 +229,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
 }) => {
 
     return (
-        <Modal
+        <ModalMobile
             isOpen={isModalLocationsMenuVisible}
             onClose={() => isModalLocationsMenuVisibleSet(false)}
             title="Select Location"
@@ -250,7 +250,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
                     />
                 ))}
             </ul>
-        </Modal>
+        </ModalMobile>
     );
 };
 

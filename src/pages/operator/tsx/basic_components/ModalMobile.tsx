@@ -5,8 +5,8 @@ export type AnimationState = '' | 'enter' | 'exit';
 
 interface ModalProps {
     isOpen: boolean;
-    onClose: () => void;
     title: string;
+    onClose?: () => void;
     subtitle?: string;
     children: ReactNode;
     footer?: ReactNode;
@@ -14,10 +14,26 @@ interface ModalProps {
     overlayClassName?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({
+/**
+ * ModalMobile is a reusable modal component
+ * that can be used to display content in a dialog format.
+ * It supports animations for entering and exiting,
+ * and can be customized with titles, subtitles, and footers.
+ * 
+ * @param isOpen - Controls the visibility of the modal.
+ * @param title - Title of the modal.
+ * @param onClose - Callback when the modal is closed.
+ * @param subtitle - Optional subtitle for the modal.
+ * @param children - Content to be displayed inside the modal.
+ * @param footer - Optional footer content for the modal.
+ * @param modalClassName - Additional CSS class for the modal content.
+ * @param overlayClassName - Additional CSS class for the modal overlay.
+ */
+
+const ModalMobile: React.FC<ModalProps> = ({
     isOpen,
-    onClose,
     title,
+    onClose,
     subtitle,
     children,
     footer,
@@ -92,4 +108,4 @@ const Modal: React.FC<ModalProps> = ({
     );
 };
 
-export default Modal;
+export default ModalMobile;

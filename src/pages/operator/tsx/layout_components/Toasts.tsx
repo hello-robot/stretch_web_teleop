@@ -19,7 +19,7 @@ const Toast: React.FC<Toast> = ({
     id,
     type = 'info',
     message,
-    duration = 2000,
+    duration = 3000,
     closeButton = false
 }) => {
     const [isVisible, setIsVisible] = useState<boolean>(true);
@@ -42,10 +42,10 @@ const Toast: React.FC<Toast> = ({
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0, y: -50 }}
+                    initial={{ opacity: 0, y: -3 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    transition={{ duration: 0.3 }}
                     layout
                     className={`toast-notification toast-${type}`}
                 >
