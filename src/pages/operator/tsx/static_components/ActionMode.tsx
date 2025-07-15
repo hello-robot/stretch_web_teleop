@@ -98,7 +98,6 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
         if (loading) return;
         setLoading(true);
         // This is a synthetic delay, replace with actual logic
-        console.log("Selected Action Mode:", selectedMode);
         setTimeout(() => {
             setLoading(false);
             handleClose(selectedMode); // Close the modal

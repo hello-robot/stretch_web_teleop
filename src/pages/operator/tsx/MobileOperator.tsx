@@ -279,11 +279,12 @@ export const MobileOperator = (props: {
                     enableMouseEvents={true}
                     containerStyle={{ height: '100%' }}
                     slideStyle={{ overflowX: 'hidden', position: 'relative' }}
+                    // This "style" prop is required...
+                    // CSS via "className" won't be applied.
                     style={{ overflowX: 'visible', height: '100%' }}
                     // Handler for animation brightness/blur fx
                     // as user is swiping between views
                     onSwitching={(slideOffset, type) => {
-                        console.log('type', type)
                         if (type === 'move') {
                             // Calculate filter values based on slide offset
                             const newStyles = swipeableViewsStyles.map((style, index) => {

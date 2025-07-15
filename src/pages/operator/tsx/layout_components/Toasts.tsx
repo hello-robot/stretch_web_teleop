@@ -10,11 +10,12 @@ export interface Toast {
     closeButton?: boolean;
 }
 
-interface ToastProps extends Toast {
-    // Removed onRemove prop
-}
-
-const Toast: React.FC<ToastProps> = ({
+/**
+ * Toast component that displays a notification message.
+ * @param {ToastProps} props - The properties for the toast.
+ * @returns {JSX.Element} The rendered toast component.
+ */
+const Toast: React.FC<Toast> = ({
     id,
     type = 'info',
     message,
@@ -24,10 +25,10 @@ const Toast: React.FC<ToastProps> = ({
     const [isVisible, setIsVisible] = useState<boolean>(true);
 
     useEffect(() => {
-        // If duration is -1 do not
-        // auto-dismiss the toast
+        // If duration is -1 don't
+        // auto-dismiss the toast...
         if (duration === -1) return;
-        // Else setTimeout() to auto-dismiss toast
+        // ..else setTimeout() to auto-dismiss toast
         if (duration > 0) {
             const timer = setTimeout(() => {
                 setIsVisible(false);
@@ -66,6 +67,11 @@ interface ToastsProps {
     toastsSet: React.Dispatch<React.SetStateAction<Toast[]>>;
 }
 
+/**
+ * Toasts component that manages and displays a list of toast notifications.
+ * @param {ToastsProps} props - The properties for the toasts component.
+ * @returns {JSX.Element} The rendered toasts component.
+ */
 const Toasts: React.FC<ToastsProps> = ({ toasts, toastsSet }) => {
     const removeToast = (id: string) => {
         toastsSet((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
@@ -78,10 +84,7 @@ const Toasts: React.FC<ToastsProps> = ({ toasts, toastsSet }) => {
                     <motion.div
                         key={toast.id}
                         onAnimationComplete={(definition) => {
-                            console.log('definition', definition)
                             removeToast(toast.id);
-                            //     if (definition.opacity === 0) {
-                            //   }
                         }}
                     >
                         <Toast

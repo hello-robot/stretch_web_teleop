@@ -2,22 +2,30 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../../css/InputFluid.css';
 
 interface InputFluidProps {
-    inputRef?: React.RefObject<HTMLInputElement>; // Optional ref for parent focus control
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    placeholder?: string;
+    inputRef?: React.RefObject<HTMLInputElement>; // Optional ref for parent focus control
     minWidth?: number; // Minimum width in pixels
     maxWidth?: number; // Maximum width in pixels
-    disabled?: boolean; // Optional prop to disable the input
-    onBlur?: () => void; // Optional prop for blur event <handling></handling>
+    disabled?: boolean;
+    placeholder?: string;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }
 
+/**
+ * InputFluid is a flexible input component that
+ * adjusts its width based on its content/placeholder.
+ *
+ * @param {InputFluidProps} props - The properties for the input component.
+ * @returns {JSX.Element} The rendered input component.
+ */
 const InputFluid: React.FC<InputFluidProps> = ({
     inputRef,
     value,
     onChange,
     placeholder = '',
-    minWidth = 10,
+    minWidth = 0,
     maxWidth = 300,
     disabled = false,
     onBlur,

@@ -1,8 +1,12 @@
-// Example usage:
-// genUUID() => "41g2c3y"
+/**
+ * This function generates a random 7-character alphanumeric string. 
+ * 
+ * Example usage:
+ * genUUID() => "41g2c3y"
+ * 
+ **/
 
 const genUUID = (): string => {
-    // Generates a random 7-character alphanumeric string.
     return Math.random().toString(36).substring(2, 9);
 };
 

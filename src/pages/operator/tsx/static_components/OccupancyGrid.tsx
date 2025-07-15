@@ -166,9 +166,11 @@ export class OccupancyGrid extends React.Component {
     }
 
     /**
-     * Creates the occupancy grid bitmap from the ROS map data and adds it to the stage.
+     * Creates the occupancy grid by drawing the map data onto a canvas.
+     * It sets the origin, dimensions, and scaling factors for the map.
      */
     createOccupancyGrid() {
+
         // Create an internal drawing canvas for the occupancy grid image
         var canvas = document.createElement("canvas");
         // Get the 2D drawing context, with willReadFrequently for performance
@@ -204,24 +206,44 @@ export class OccupancyGrid extends React.Component {
         // Create an ImageData object to hold the pixel data for the map
         var imageData = context!.createImageData(this.width, this.height);
 
-        // Loop through each cell in the occupancy grid and set the corresponding pixel color
+        // Loop through each row of the map...
         for (var row = 0; row < this.height; row++) {
+            // ...and for each column in the row
             for (var col = 0; col < this.width; col++) {
-                // Calculate the index into the map data array (ROS maps are bottom-left origin)
+
+                // Calc index into the map data array.
+                // NOTE: ROS maps are bottom-left origin.
                 var mapI = col + (this.height - row - 1) * this.width;
+
                 // Get the occupancy value for this cell
                 var data = this.map.data[mapI];
-                var r, g, b;
-                // Set pixel color: 100 = occupied (#879AA7), 0 = free (#A6B1B8), else = unknown (#9CC5BF)
+
+                // Init RGB vars...
+                var r: number;
+                var g: number;
+                var b: number;
+
+                // Calc pixel color based on...
                 if (data === 100) {
-                    r = 71; g = 95; b = 111; //rgb(71, 95, 111)
+                    // ...occupied cells: rgb(71, 95, 111)
+                    r = 71;
+                    g = 95;
+                    b = 111;
                 } else if (data === 0) {
-                    r = 241; g = 248; b = 253; //rgb(241, 248, 253)
+                    // ...free cells: rgb(241, 248, 253)
+                    r = 241;
+                    g = 248;
+                    b = 253;
                 } else {
-                    r = 157; g = 197; b = 191; //rgb(157, 197, 191)
+                    // ...unknown cells: rgb(157, 197, 191)
+                    r = 157;
+                    g = 197;
+                    b = 191;
                 }
+
                 // Calculate the index into the image data array (RGBA)
                 var i = (col + row * this.width) * 4;
+
                 // Set R, G, B channels to respective values, and alpha to 255 (opaque)
                 imageData.data[i] = r;
                 imageData.data[++i] = g;
@@ -341,8 +363,7 @@ export class OccupancyGrid extends React.Component {
             poses.forEach((pose, index) => {
                 // Recreate marker
                 let globalCoord = this.rosToGlobal(pose.translation);
-                let color =
-                    poseTypes[index] == "MAP" ? [0, 0, 255] : [255, 0, 0];
+                let color = poseTypes[index] == "MAP" ? [0, 0, 255] : [255, 0, 0];
                 var poseMarker = this.drawSavedPoseMarker(
                     globalCoord.x,
                     globalCoord.y,

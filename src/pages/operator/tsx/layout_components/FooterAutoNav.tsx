@@ -46,6 +46,19 @@ interface ModalLocationsMenuProps {
     addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
 }
 
+/**
+ * ModalAddLocation component allows users to add a new location 
+ * by entering a name for the location.
+ * 
+ * @param functs - Functions for handling auto navigation.
+ * @param poses - Current list of saved poses.
+ * @param posesSet - Function to update the list of saved poses.
+ * @param isModalAddLocationVisible - State to control visibility of the modal.
+ * @param isModalAddLocationVisibleSet - Function to set visibility of the modal.
+ * @param getPosesLatest - Function to fetch the latest poses.
+ * @param addToast - Function to display toast notifications.
+ */
+
 const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
     functs,
     poses,
@@ -102,6 +115,18 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
         </Modal>
     );
 };
+
+/**
+ * LocationsMenuListItem component represents a single item in the Locations Menu.
+ * It allows users to edit or delete a saved location.
+ * 
+ * @param pose - The name of the location.
+ * @param poses - Current list of saved poses.
+ * @param posesSet - Function to update the list of saved poses.
+ * @param functs - Functions for handling auto navigation.
+ * @param getPosesLatest - Function to fetch the latest poses.
+ * @param addToast - Function to display toast notifications.
+ */
 
 const LocationsMenuListItem: React.FC<{
     pose: string;
@@ -180,6 +205,19 @@ const LocationsMenuListItem: React.FC<{
     );
 }
 
+/**
+ * ModalLocationsMenu component displays a list of saved locations
+ * for auto navigation. Users can select a location to navigate to.
+ * 
+ * @param poses - List of saved poses for navigation goals.
+ * @param posesSet - Function to update the list of saved poses.
+ * @param functs - Functions for handling auto navigation.
+ * @param isModalLocationsMenuVisible - State to control visibility of the modal.
+ * @param isModalLocationsMenuVisibleSet - Function to set visibility of the modal.
+ * @param getPosesLatest - Function to fetch the latest poses.
+ * @param addToast - Function to display toast notifications.
+ */
+
 const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     poses,
     posesSet,
@@ -216,6 +254,26 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     );
 };
 
+/**
+ * FooterAutoNav component provides a footer for auto navigation controls.
+ * It includes buttons for starting navigation, adding locations,
+ * and accessing the locations menu.
+ * 
+ * @param handleSelectGoal - Function to handle goal selection.
+ * @param functs - Functions for handling auto navigation.
+ * @param isModalAddLocationVisible - State to control visibility of the Add Location modal.
+ * @param isModalAddLocationVisibleSet - Function to set visibility of the Add Location modal
+ * @param isModalLocationsMenuVisible - State to control visibility of the Locations Menu modal.
+ * @param isModalLocationsMenuVisibleSet - Function to set visibility of the Locations Menu modal
+ * @param isCurrentlyMoving - State indicating if the robot is currently moving.
+ * @param isCurrentlyMovingSet - Function to set the current moving state.
+ * @param isSelectingGoal - State indicating if a goal is currently being selected.
+ * @param isSelectingGoalSet - Function to set the goal selection state.
+ * @param selectedLocationMenuItemIdx - Index of the selected location menu item.
+ * @param goalPosition - Current goal position for navigation.
+ * @param addToast - Function to display toast notifications.
+ */
+
 const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     handleSelectGoal,
     functs,
@@ -232,7 +290,11 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     addToast,
 }) => {
 
+    // This function is called when the user
+    // selects a goal on the map or from the
+    // locations menu.
     const handleStartAutoNav = useCallback(() => {
+
         // When selecting manually on map...
         if (!isCurrentlyMoving && isSelectingGoal) {
             functs.Play();
@@ -261,14 +323,14 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
         functs.GetSavedPoseNames(),
     );
 
+    // Function to fetch the latest
+    // pose names from localStorage
+    // and update the local state, "poses".
     const getPosesLatest = useCallback(() => {
-
         // Fetch the latest pose names from the function provider...
         const poses = functs.GetSavedPoseNames();
-
         // Update local state with latest poses...
         posesSet(poses);
-
     }, []);
 
     return (

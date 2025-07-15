@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, Dispatch, SetStateAction } from 'react'
+import React, { useEffect, useState, Dispatch, SetStateAction } from 'react'
 
 import { Canvas } from "../static_components/Canvas";
 import { Map } from './Map';
@@ -15,8 +15,9 @@ import {
     ROSOccupancyGrid,
     ROSPose,
     ROSPoint,
-    className,
 } from 'shared/util';
+import ROSLIB from "roslib";
+import '../../css/AutoNav.css';
 
 interface AutoNavProps {
     sharedState: SharedState;
@@ -24,12 +25,17 @@ interface AutoNavProps {
     swipeableViewsIdxSet: Dispatch<SetStateAction<number>>;
 }
 
-enum MapFunction {
+export enum MapFunction {
     GetMap,
     GetPose,
     MoveBase,
     GoalReached,
 }
+
+/**
+ * TODO: AutoNavFunctions and MapFunctions should be merged
+ * into a single interface.
+ */
 
 export interface AutoNavFunctions {
     SelectGoal: (toggle: boolean) => void;
@@ -66,22 +72,27 @@ export interface MapFunctions {
 }
 
 /**
- * AutoNav component provides the autonomous navigation interface for the operator.
- * It manages map display, pose/goal management, and footer controls for navigation.
- *
- * Props:
- *  - sharedState: SharedState object for global operator state
+ * AutoNav component for handling autonomous navigation features.
+ * It provides a map interface, goal selection, and navigation controls.
+ * 
+ * @param sharedState - Shared state for the application
+ * @param swipeableViewsIdx - Current index of the swipeable views
+ * @param swipeableViewsIdxSet - Function to set the swipeable views index
  */
+
 const AutoNav: React.FC<AutoNavProps> = ({
     sharedState,
     swipeableViewsIdx,
     swipeableViewsIdxSet,
 }) => {
 
+    // Index of the selected .locations-menu-list-item
     const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = useState<number | -1>(-1);
+
+    // Manage goal position
     const [goalPosition, goalPositionSet] = useState<ROSPoint | undefined>(undefined);
 
-    // Toast notifications
+    // Manage toast notifications for <Toasts>
     const [toasts, toastsSet] = useState<Toast[]>([]);
 
     // OccupancyGrid instance for map and marker operations
@@ -94,7 +105,8 @@ const AutoNav: React.FC<AutoNavProps> = ({
         };
         const unsubscribeOnUnmount = occupancyGrid?.goalPositionSubscribe(callback);
         return () => {
-            // Make sure to unsubscribe when <AutoNav> component unmounts
+            // Return callback to unsubscribe
+            // when <AutoNav> component unmounts
             if (unsubscribeOnUnmount) unsubscribeOnUnmount();
         };
     }, [occupancyGrid]);
@@ -105,7 +117,9 @@ const AutoNav: React.FC<AutoNavProps> = ({
         message: string,
         duration?: number
     ) => {
+        // Generate a unique ID for toast
         const id = genUUID();
+        // Add the toast to the state!
         toastsSet((prevToasts) => (
             [...prevToasts, { id, type, message, duration }]
         ));
@@ -184,6 +198,13 @@ const AutoNav: React.FC<AutoNavProps> = ({
             UnderMapButton.RenamePose,
         ) as (poseNameOld: string, poseNameNew: string) => void,
     };
+
+    /**
+     * Callback to set the map pose and navigate to the selected goal
+     * Sets goal marker & initiates navigation to selected location.
+     * 
+     * @param pose - Pose to navigate to 
+    */
 
     underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
         functs.DisplayGoalMarker(pose);
@@ -272,33 +293,18 @@ const AutoNav: React.FC<AutoNavProps> = ({
         occupancyGridSet(occupancyGrid);
     }, []);
 
+    // Show friendly, helpful toast when 
+    // user dives into the AutoNav UX
     useEffect(() => {
-        console.log('occupancyGrid', occupancyGrid)
-    }, [occupancyGrid]);
-
-    // Show toast when user navigates to AutoNav
-    useEffect(() => {
-        if (swipeableViewsIdx === 1) addToast('info', 'Click on the map to navigate');
+        // Synthetic lag
+        setTimeout(() => { if (swipeableViewsIdx === 1) addToast('info', 'Click on the map to navigate'); }, 500)
     }, [swipeableViewsIdx])
 
     return (
         <div className='auto-nav'>
-            {/* Map display for navigation */}
-            <div
-                style={{ padding: '10px 0px' }}
-            >
-                <Map
-                    {...{
-                        path: "",
-                        definition: {
-                            type: ComponentType.Map,
-                            selectGoal: false,
-                        } as MapDefinition,
-                        sharedState: sharedState,
-                    }}
-                />
+            <div className="map-wrapper">
+                <Map />
             </div>
-            {/* Footer controls for navigation and pose management */}
             <FooterAutoNav
                 handleSelectGoal={handleSelectGoal}
                 functs={functs}

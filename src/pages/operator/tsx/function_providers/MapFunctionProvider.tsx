@@ -1,5 +1,5 @@
 import { ROSPose } from "shared/util";
-import { MapFunction } from "../layout_components/Map";
+import { MapFunction } from "../layout_components/AutoNav";
 import { FunctionProvider } from "./FunctionProvider";
 import { occupancyGrid } from "operator/tsx/index";
 
