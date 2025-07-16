@@ -1,5 +1,5 @@
 import React, { useCallback, Dispatch, SetStateAction } from "react";
-import VideocamIcon from '@mui/icons-material/Videocam';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import "latest-createjs";
 import "operator/css/Map.css";
 
@@ -32,7 +32,7 @@ export const Map: React.FC<MapProps> = ({
                         onClick={goBack}
                         className="btn btn-oval-ghost back-button"
                     >
-                        <VideocamIcon /> Back
+                        <CameraAltIcon />
                     </button>
                 </div>
             </div>
