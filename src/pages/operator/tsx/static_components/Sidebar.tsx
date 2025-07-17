@@ -96,6 +96,8 @@ function componentDescription(definition: ComponentDefinition): string {
         case ComponentType.ButtonGrid:
         case ComponentType.Map:
             return definition.type;
+        case ComponentType.RosbagRecorder:
+            return "Rosbag Recorder";
         default:
             throw Error(
                 `Cannot get description for component type ${definition.type}\nYou may need to add a case for this component in the switch statement.`,
@@ -488,6 +490,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.ButtonGrid },
         { type: ComponentType.VirtualJoystick },
         { type: ComponentType.Map },
+        { type: ComponentType.RosbagRecorder },
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
