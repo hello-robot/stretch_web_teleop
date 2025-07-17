@@ -45,6 +45,20 @@ export const Sidebar = (props: SidebarProps) => {
         <div id="sidebar" hidden={props.hidden}>
             <div id="sidebar-header">
                 <b>Selected: {selectedDescription}</b>
+                //testing
+                <div style={{ 
+                    backgroundColor: '#ff4444', 
+                    color: 'white', 
+                    padding: '4px 8px', 
+                    borderRadius: '4px', 
+                    fontSize: '12px', 
+                    fontWeight: 'bold',
+                    marginTop: '8px',
+                    textAlign: 'center'
+                }}>
+                    DEV VERSION
+                </div>
+                //end testing
             </div>
             <div id="sidebar-body">
                 {props.selectedPath ? (
@@ -163,7 +177,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                             !props.displayMovementRecorder,
                         )
                     }
-                    label="Display movement recorder TESTING 123 lala"
+                    label="Display movement recorder"
                 />
                 <OnOffToggleButton
                     on={!props.displayTextToSpeech}
