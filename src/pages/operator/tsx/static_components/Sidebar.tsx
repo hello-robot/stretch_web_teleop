@@ -163,7 +163,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                             !props.displayMovementRecorder,
                         )
                     }
-                    label="Display movement recorder TESTING 123"
+                    label="Display movement recorder TESTING 123 lala"
                 />
                 <OnOffToggleButton
                     on={!props.displayTextToSpeech}
