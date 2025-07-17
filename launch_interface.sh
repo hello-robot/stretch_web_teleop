@@ -42,14 +42,14 @@ echo "#############################################"
 echo "LAUNCHING WEB TELEOP"
 echo "#############################################"
 
-cd $HOME/dev_ws/src/stretch_web_teleop
+cd $HOME/ament_ws/src/stretch_web_teleop
 ./start_ros2.sh -l $logdir $MAP $TTS |& tee $logfile_ros
 if [ $? -ne 0 ]; then
     echo_failure_help
 fi
 
 # echo ""
-cd $HOME/dev_ws/src/stretch_web_teleop
+cd $HOME/ament_ws/src/stretch_web_teleop
 ./start_web_server_and_robot_browser.sh -l $logdir $FIREBASE |& tee $logfile_node
 if [ $? -ne 0 ]; then
     echo_failure_help
