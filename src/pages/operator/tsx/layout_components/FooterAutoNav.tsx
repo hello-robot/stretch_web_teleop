@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, useCallback } from 'react';
+import React, { Dispatch, useRef, SetStateAction, useState, useCallback, useEffect } from 'react';
 import ModalMobile from '../basic_components/ModalMobile';
 import { AutoNavFunctions } from "./AutoNav";
 import MagneticWrapper from '../static_components/MagneticWrapper';
@@ -8,6 +8,10 @@ import {
 import "operator/css/FooterAutoNav.css";
 import { motion } from 'framer-motion';
 import InputFluid from '../basic_components/InputFluid';
+import SearchIcon from '@mui/icons-material/Search';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 interface FooterAutoNavProps {
     handleSelectGoal: (selectGoal: boolean) => void;
@@ -178,8 +182,9 @@ const LocationsMenuListItem: React.FC<{
     };
 
     const handleSave = () => {
-        if (poses.includes(poseNew)) return null;
-        else {
+
+        // Update "pose" name if not already taken
+        if (poseNew.length && !poses.includes(poseNew)) {
             functs.RenamePose(pose, poseNew);
             addToast('info', `Location "${pose}" renamed to "${poseNew}"`);
         }
@@ -200,7 +205,7 @@ const LocationsMenuListItem: React.FC<{
 
     return (
         <li className="locations-menu-list-item">
-            <div>
+            <div className="locations-menu-list-item-left-column">
                 <InputFluid
                     inputRef={inputRef}
                     value={poseNew || pose}
@@ -209,22 +214,34 @@ const LocationsMenuListItem: React.FC<{
                     onBlur={handleSave}
                     autoComplete="off"
                 />
-                <button onClick={activateEditMode}>Edit</button>
+                <button
+                    className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
+                    onClick={activateEditMode}
+                >
+                    Edit
+                </button>
             </div>
-            <div>
+            <div className="locations-menu-list-item-right-column">
                 {!isEditing
                     ? (
-                        <button onClick={handleDelete}>Delete</button>
+                        <button
+                            onClick={handleDelete}
+                            className="locations-menu-list-item-delete-button"
+                        >
+                            -
+                        </button>
                     )
                     : (
                         <button
                             onClick={handleSave}
+                            className="btn btn-primary btn-sm"
+                            disabled={!poseNew || poseNew.trim() === pose}
                         >
                             Save
                         </button>
                     )}
             </div>
-        </li>
+        </li >
     );
 }
 
@@ -251,20 +268,80 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     addToast,
 }) => {
 
+    const [searchActive, setSearchActive] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const refLocationsMenuList = useRef(null)
     const closeModal = useCallback(() => isModalLocationsMenuVisibleSet(false), []);
-    const Footer = () => {
-        return (
-            <MagneticWrapper>
-                <button
-                    className="btn btn-tertiary"
-                    onPointerDown={closeModal}
-                >
-                    Close
-                </button>
-            </MagneticWrapper>
-        )
-    };
 
+    useEffect(() => {
+        if (!searchActive) {
+            setSearchTerm("");
+        }
+    }, [searchActive]);
+
+    const Footer = () => (
+        <MagneticWrapper>
+            <button
+                className="btn btn-tertiary"
+                onPointerDown={closeModal}
+            >
+                Close
+            </button>
+        </MagneticWrapper>
+    );
+
+    const controlsInHeaderRender = () => (
+        <div className={`locations-menu-search-controls ${searchActive ? 'active' : ''}`}>
+            {!searchActive
+                ? <button
+                    className="locations-menu-search-btn"
+                    onClick={() => setSearchActive(true)}
+                    aria-label="Search locations"
+                >
+                    <SearchIcon />
+                </button>
+                : (
+                    <div className="locations-menu-search-input-wrapper">
+                        <button
+                            className={`locations-menu-search-close-btn ${searchTerm.trim().length ? 'active' : ''}`}
+                            onClick={() => setSearchActive(false)}
+                            aria-label="Close search"
+                        >
+                            <ChevronLeftIcon />
+                        </button>
+                        <input
+                            type="text"
+                            className="locations-menu-search-input"
+                            placeholder="Type to filter..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                )
+            }
+            <div className="locations-menu-scroll-btn-wrapper">
+                <button
+                    className="locations-menu-scroll-btn up"
+                    onClick={() => {
+                        const ul = refLocationsMenuList.current;
+                        if (ul) ul.scrollBy({ top: -100, behavior: 'smooth' });
+                    }}
+                >
+                    <ExpandLessIcon />
+                </button>
+                <button
+                    className="locations-menu-scroll-btn down"
+                    onClick={() => {
+                        const ul = refLocationsMenuList.current;
+                        if (ul) ul.scrollBy({ top: 100, behavior: 'smooth' });
+                    }}
+                >
+                    <ExpandMoreIcon />
+                </button>
+            </div>
+        </div>
+    );
 
     return (
         <ModalMobile
@@ -272,22 +349,30 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
             onClose={closeModal}
             title="Select Location"
             subtitle="AUTONAV"
+            controlsInHeaderRender={controlsInHeaderRender}
             footer={<Footer />}
         >
             <ul
                 className="locations-menu-list"
+                ref={refLocationsMenuList}
             >
-                {poses.map((pose, idx) => (
-                    <LocationsMenuListItem
-                        key={pose}
-                        pose={pose}
-                        poses={poses}
-                        posesSet={posesSet}
-                        functs={functs}
-                        getPosesLatest={getPosesLatest}
-                        addToast={addToast}
-                    />
-                ))}
+                {poses
+                    // Filter poses based on "searchTerm"...
+                    .filter((pose) => {
+                        return pose.toLowerCase().includes(searchTerm.toLowerCase());
+                    })
+                    // ...Map
+                    .map((pose, idx) => (
+                        <LocationsMenuListItem
+                            key={pose}
+                            pose={pose}
+                            poses={poses}
+                            posesSet={posesSet}
+                            functs={functs}
+                            getPosesLatest={getPosesLatest}
+                            addToast={addToast}
+                        />
+                    ))}
             </ul>
         </ModalMobile>
     );

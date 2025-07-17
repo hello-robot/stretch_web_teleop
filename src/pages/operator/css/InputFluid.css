@@ -25,6 +25,9 @@
     border: none;
 }
 
-.input-fluid:focus {}
+.input-fluid:focus {
+    border: none;
+    outline: none;
+}
 
 .input-fluid:disabled {}

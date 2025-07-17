@@ -3,7 +3,7 @@ import "operator/css/ModalMobile.css"
 
 export type AnimationState = '' | 'enter' | 'exit';
 
-interface ModalProps {
+interface ModalMobileProps {
     isOpen: boolean;
     title: string;
     onClose?: () => void;
@@ -12,6 +12,7 @@ interface ModalProps {
     footer?: ReactNode;
     modalClassName?: string;
     overlayClassName?: string;
+    controlsInHeaderRender?: () => React.JSX.Element;
 }
 
 /**
@@ -30,15 +31,16 @@ interface ModalProps {
  * @param overlayClassName - Additional CSS class for the modal overlay.
  */
 
-const ModalMobile: React.FC<ModalProps> = ({
+const ModalMobile: React.FC<ModalMobileProps> = ({
     isOpen,
     title,
-    onClose,
+    onClose = () => { },
     subtitle,
     children,
     footer,
     modalClassName = '',
     overlayClassName = '',
+    controlsInHeaderRender,
 }) => {
     const [visible, setVisible] = useState<boolean>(isOpen);
     const [animState, setAnimState] = useState<AnimationState>('');
@@ -91,8 +93,13 @@ const ModalMobile: React.FC<ModalProps> = ({
             >
                 {(title || subtitle) && (
                     <div className="modal-header">
-                        {subtitle && <div className="modal-subtitle" aria-hidden="true">{subtitle}</div>}
-                        {title && <h2 className="modal-title" aria-hidden="true">{title}</h2>}
+                        <div>
+                            {subtitle && <div className="modal-subtitle" aria-hidden="true">{subtitle}</div>}
+                            {title && <h2 className="modal-title" aria-hidden="true">{title}</h2>}
+                        </div>
+                        <div>
+                            {controlsInHeaderRender && controlsInHeaderRender()}
+                        </div>
                     </div>
                 )}
                 <div className="modal-body">

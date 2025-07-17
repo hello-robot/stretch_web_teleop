@@ -111,6 +111,9 @@ button.auto-nav-button span.auto-nav-button-icon {
 
 .locations-menu-list {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   list-style: none;
   margin: 0px;
   padding: 0px;
@@ -133,7 +136,8 @@ button.auto-nav-button span.auto-nav-button-icon {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 5px 0 0;
+  min-height: 30px;
+  --animation-ms: 250ms;
 }
 
 .footer-modal-add-location {
@@ -142,3 +146,131 @@ button.auto-nav-button span.auto-nav-button-icon {
   gap: 5px;
   flex-direction: column;
 }
+
+
+.locations-menu-list-item-left-column {
+  display: flex;
+  gap: 0px;
+}
+
+button.locations-menu-list-item-edit-button {
+  background-color: transparent;
+  box-shadow: none;
+  color: #ffffff;
+  font-size: 15px;
+  opacity: 0.4;
+  font-weight: 600;
+  letter-spacing: 0.15px;
+  transform: translateX(-0px);
+  transition: transform calc(var(--animation-ms) * 1.35) ease-out, opacity var(--animation-ms) ease-out;
+}
+
+/* Animate exit the "Edit" button when editing...*/
+button.locations-menu-list-item-edit-button.editing {
+  transform: translateX(-3px);
+  opacity: 0;
+}
+
+.locations-menu-list-item-right-column {}
+
+button.locations-menu-list-item-delete-button {
+  background-color: #2c4662;
+  font-weight: 800;
+  box-shadow: none;
+  color: hsl(0deg 0% 100% / 80%);
+  padding: 2px 8px;
+  font-size: 18px;
+  line-height: 100%;
+}
+
+.locations-menu-search-controls {
+  display: flex;
+  gap: 5px;
+  transition: transform var(--animation-ms) ease-out;
+  max-width: var(--max-width);
+  --max-width: 150px;
+  --animation-ms: 250ms;
+  --locations-menu-scroll-btn-wrapper-width: 81px;
+  /* transform: translateX(0px); */
+}
+
+.locations-menu-search-controls.active {
+  /* transform: translateX(81px); */
+}
+
+.locations-menu-search-controls .locations-menu-scroll-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 1px;
+  opacity: 1;
+  width: var(--locations-menu-scroll-btn-wrapper-width);
+  transition: opacity var(--animation-ms) ease-out, width var(--animation-ms) ease-out;
+}
+
+.locations-menu-search-controls.active .locations-menu-scroll-btn-wrapper {
+  width: 0px;
+  opacity: 0;
+}
+
+button.locations-menu-search-btn {
+  background-color: transparent;
+  box-shadow: none;
+  color: hsl(204 100% 50% / 1);
+  padding: 0;
+}
+
+.locations-menu-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes brightnessPulse {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(1.5);
+  }
+}
+
+.locations-menu-search-input-wrapper input.locations-menu-search-input {
+  max-width: var(--max-width);
+  font-size: 16px;
+  font-weight: 400;
+  padding: 8px 10px;
+  color: hsl(204 100% 50% / 1);
+  border-radius: 10px;
+  animation: brightnessPulse 2s infinite alternate;
+}
+
+
+.locations-menu-search-input-wrapper button.locations-menu-search-close-btn {
+  padding: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.locations-menu-search-input-wrapper button.locations-menu-search-close-btn svg {
+  fill: hsl(204 100% 50% / 1);
+}
+
+.locations-menu-search-input-wrapper button.locations-menu-search-close-btn.active svg {
+  fill: hsl(204 100% 50% / 1);
+}
+
+button.locations-menu-scroll-btn {
+  background-color: hsl(204 100% 50% / 1);
+  color: #ffffff;
+  border-radius: 0px;
+  font-size: 14px;
+  padding: 5px 8px 2px;
+}
+
+button.locations-menu-scroll-btn.up {}
+
+button.locations-menu-scroll-btn.down {}

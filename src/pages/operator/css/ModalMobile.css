@@ -92,6 +92,8 @@
   margin-bottom: 20px;
   font-weight: 800;
   padding: 0 5px;
+  display: flex;
+  justify-content: space-between;
   /* Align with radio group padding */
 }
 

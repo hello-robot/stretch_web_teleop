@@ -21,6 +21,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     font-weight: 600;
     backdrop-filter: blur(10px);
+    line-height: 140%;
 }
 
 .toast-success {

@@ -212,7 +212,7 @@ input:focus {
 
 /* Primary action button in modal footer */
 .btn-primary {
-    background: hsl(212 100% 50% / 1);
+    background: hsl(204 100% 50% / 1);
     color: #fff;
     width: 100%;
     padding: 15px 20px;
@@ -222,14 +222,14 @@ input:focus {
 
 /* Disabled state for primary button */
 .btn-primary:disabled {
-    background: hsl(212 50% 10% / 1) !important;
+    background: hsl(204 50% 10% / 1) !important;
     opacity: 0.95;
     cursor: not-allowed;
 }
 
 /* Tertiary action button in modal footer */
 .btn-tertiary {
-    background: hsl(212 30% 20% / 1);
+    background: hsl(204 30% 20% / 1);
     color: #ffffff;
     width: 100%;
     padding: 15px 20px;
@@ -240,9 +240,18 @@ input:focus {
 
 }
 
+/* Ghost-y translucent oval button */
 .btn-oval-ghost {
     background-color: hsl(0deg 0% 0% / 30%);
     color: #fff;
     border-radius: 100px;
     box-shadow: none;
+}
+
+.btn-sm {
+    padding: 8px 14px;
+    /* font-size: 16px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: -0.3px; */
 }
