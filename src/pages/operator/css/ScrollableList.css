@@ -1,0 +1,98 @@
+.scrollable-container {
+    position: relative;
+    --background-color: hsl(204 30% 20% / 1);
+    --shadow-bg-color: hsl(204 33% 22% / 1);
+}
+
+.shadow-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to bottom, var(--shadow-bg-color, #ffffff) 0%, transparent 100%);
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity 200ms ease-in-out;
+    opacity: 0;
+}
+
+.shadow-top.visible {
+    opacity: 1;
+}
+
+.shadow-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, var(--shadow-bg-color, #ffffff) 0%, transparent 100%);
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity 200ms ease-in-out;
+    opacity: 0;
+}
+
+.shadow-bottom.visible {
+    opacity: 1;
+}
+
+.scrollable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 0;
+    padding: 13px 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+    background-color: var(--background-color);
+}
+
+.scrollable-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 4px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
+
+.scrollable-list li {}
+
+.scrollable-list li:last-child {}
+
+.scrollable-list li:hover {}
+
+.scrollable-container>button.scrollable-list-scroll-btn {
+    position: absolute;
+    width: 100%;
+    background-color: hsl(204 30% 20% / 1);
+    color: #ffffff;
+    font-size: 14px;
+    padding: 5px 8px 2px;
+    border-radius: unset;
+    box-shadow: none;
+}
+
+.scrollable-container>button.scrollable-list-scroll-btn:disabled {
+    background-color: hsl(204 30% 22% / 1);
+    color: hsl(203 53% 16% / 1);
+}
+
+.scrollable-container>button.scrollable-list-scroll-btn.up {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.scrollable-container>button.scrollable-list-scroll-btn.down {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}

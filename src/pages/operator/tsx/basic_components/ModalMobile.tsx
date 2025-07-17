@@ -12,7 +12,7 @@ interface ModalMobileProps {
     footer?: ReactNode;
     modalClassName?: string;
     overlayClassName?: string;
-    controlsInHeaderRender?: () => React.JSX.Element;
+    HeaderControls?: React.ReactNode; // Optional node for header controls
 }
 
 /**
@@ -40,7 +40,7 @@ const ModalMobile: React.FC<ModalMobileProps> = ({
     footer,
     modalClassName = '',
     overlayClassName = '',
-    controlsInHeaderRender,
+    HeaderControls,
 }) => {
     const [visible, setVisible] = useState<boolean>(isOpen);
     const [animState, setAnimState] = useState<AnimationState>('');
@@ -98,7 +98,7 @@ const ModalMobile: React.FC<ModalMobileProps> = ({
                             {title && <h2 className="modal-title" aria-hidden="true">{title}</h2>}
                         </div>
                         <div>
-                            {controlsInHeaderRender && controlsInHeaderRender()}
+                            {HeaderControls}
                         </div>
                     </div>
                 )}

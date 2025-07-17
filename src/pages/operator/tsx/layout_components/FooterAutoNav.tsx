@@ -9,9 +9,8 @@ import "operator/css/FooterAutoNav.css";
 import { motion } from 'framer-motion';
 import InputFluid from '../basic_components/InputFluid';
 import SearchIcon from '@mui/icons-material/Search';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ScrollableList from '../static_components/ScrollableList';
 
 interface FooterAutoNavProps {
     handleSelectGoal: (selectGoal: boolean) => void;
@@ -270,8 +269,25 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
 
     const [searchActive, setSearchActive] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const refLocationsMenuList = useRef(null)
     const closeModal = useCallback(() => isModalLocationsMenuVisibleSet(false), []);
+
+    const items = poses
+        // Filter poses based on "searchTerm"...
+        .filter((pose) => {
+            return pose.toLowerCase().includes(searchTerm.toLowerCase());
+        })
+        // ...Map
+        .map((pose, idx) => (
+            <LocationsMenuListItem
+                key={pose}
+                pose={pose}
+                poses={poses}
+                posesSet={posesSet}
+                functs={functs}
+                getPosesLatest={getPosesLatest}
+                addToast={addToast}
+            />
+        ))
 
     useEffect(() => {
         if (!searchActive) {
@@ -290,7 +306,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
         </MagneticWrapper>
     );
 
-    const controlsInHeaderRender = () => (
+    const HeaderControls = () => (
         <div className={`locations-menu-search-controls ${searchActive ? 'active' : ''}`}>
             {!searchActive
                 ? <button
@@ -320,26 +336,6 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
                     </div>
                 )
             }
-            <div className="locations-menu-scroll-btn-wrapper">
-                <button
-                    className="locations-menu-scroll-btn up"
-                    onClick={() => {
-                        const ul = refLocationsMenuList.current;
-                        if (ul) ul.scrollBy({ top: -100, behavior: 'smooth' });
-                    }}
-                >
-                    <ExpandLessIcon />
-                </button>
-                <button
-                    className="locations-menu-scroll-btn down"
-                    onClick={() => {
-                        const ul = refLocationsMenuList.current;
-                        if (ul) ul.scrollBy({ top: 100, behavior: 'smooth' });
-                    }}
-                >
-                    <ExpandMoreIcon />
-                </button>
-            </div>
         </div>
     );
 
@@ -349,31 +345,14 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
             onClose={closeModal}
             title="Select Location"
             subtitle="AUTONAV"
-            controlsInHeaderRender={controlsInHeaderRender}
+            HeaderControls={<HeaderControls />}
             footer={<Footer />}
         >
-            <ul
+            <ScrollableList
+                items={items}
+                height={250}
                 className="locations-menu-list"
-                ref={refLocationsMenuList}
-            >
-                {poses
-                    // Filter poses based on "searchTerm"...
-                    .filter((pose) => {
-                        return pose.toLowerCase().includes(searchTerm.toLowerCase());
-                    })
-                    // ...Map
-                    .map((pose, idx) => (
-                        <LocationsMenuListItem
-                            key={pose}
-                            pose={pose}
-                            poses={poses}
-                            posesSet={posesSet}
-                            functs={functs}
-                            getPosesLatest={getPosesLatest}
-                            addToast={addToast}
-                        />
-                    ))}
-            </ul>
+            />
         </ModalMobile>
     );
 };

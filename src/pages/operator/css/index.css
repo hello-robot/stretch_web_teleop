@@ -102,9 +102,11 @@ button {
 }
 
 /* Button hover effect */
-button:hover {
-    filter: brightness(90%);
-    box-shadow: none;
+@media (hover: hover) and (pointer: fine) {
+    button:hover {
+        filter: brightness(90%);
+        box-shadow: none;
+    }
 }
 
 /* Disabled button styles */
@@ -142,24 +144,6 @@ button .material-icons {
 
 .btn-yellow {
     background-color: var(--selected-color);
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 1300px) {
-    button {
-        padding: var(--btn-padding-med);
-        /* font-size: 90px; */
-    }
-
-    .material-icons {
-        font-size: larger;
-    }
-
-    .under-video-area button {
-        /* font-size: 30px; */
-        padding: var(--btn-padding);
-        gap: 10px;
-    }
 }
 
 /* Accessibility: Hide text but keep it for screen readers */
