@@ -13,6 +13,8 @@ interface InputFluidProps {
     onBlur?: () => void;
     autoComplete?: string; // Optional autocomplete attribute
     classNameInput?: string; // Optional class name for styling
+    onClick: (e: React.MouseEvent<HTMLInputElement>) => void;
+    onPointerDown?: (e: React.PointerEvent<HTMLInputElement>) => void;
 }
 
 /**
@@ -33,6 +35,8 @@ const InputFluid: React.FC<InputFluidProps> = ({
     onBlur,
     autoComplete = 'off',
     classNameInput = '',
+    onClick = () => { }, // Default to no-op
+    onPointerDown = () => { }, // Default to no-op
 }) => {
     const [inputWidth, setInputWidth] = useState<number>(minWidth);
     const spanRef = useRef<HTMLSpanElement>(null);
@@ -68,7 +72,8 @@ const InputFluid: React.FC<InputFluidProps> = ({
                 ref={inputRef}
                 autoComplete={autoComplete}
                 onBlur={onBlur} // Call the onBlur prop if provided
-
+                onClick={onClick}
+                onPointerDown={onPointerDown}
             />
         </div>
     );
