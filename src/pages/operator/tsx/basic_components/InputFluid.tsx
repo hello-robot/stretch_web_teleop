@@ -13,7 +13,7 @@ interface InputFluidProps {
     onBlur?: () => void;
     autoComplete?: string; // Optional autocomplete attribute
     classNameInput?: string; // Optional class name for styling
-    onClick: (e: React.MouseEvent<HTMLInputElement>) => void;
+    onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
     onPointerDown?: (e: React.PointerEvent<HTMLInputElement>) => void;
 }
 
