@@ -4,6 +4,7 @@ import { TabGroup } from "../basic_components/TabGroup";
 import FooterHeadCam from './FooterHeadCam';
 import { FunctionProvider } from "../function_providers/FunctionProvider";
 import { CameraViewId } from "../utils/component_definitions";
+import "../../css/HeadCam.css";
 
 interface HeadCamProps {
     cameraID: CameraViewId;
@@ -31,7 +32,7 @@ const HeadCam: React.FC<HeadCamProps> = ({
     swipeableViewsIdxSet,
 }) => {
     return (
-        <div>
+        <div className="head-cam-wrapper">
             <div className="controls">
                 <div className="simple-camera-view-wrapper_XP">
                     <SimpleCameraView

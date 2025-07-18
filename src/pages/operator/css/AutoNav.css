@@ -1,3 +1,11 @@
+.auto-nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .map-wrapper {
+    display: flex;
+    justify-content: center;
     padding: 10px 0px;
 }

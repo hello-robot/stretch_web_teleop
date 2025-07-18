@@ -4,7 +4,7 @@
 }
 
 .modal-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -26,13 +26,13 @@
 }
 
 .modal-overlay.enter {
-  animation: modal-fade-in 300ms var(--animation-timing-function-modal) forwards;
+  animation: modal-fade-in 150ms var(--animation-timing-function-modal) forwards;
   animation-delay: 200ms;
   /* Delay fade-in of overlay slightly less or same as modal */
 }
 
 .modal-overlay.exit {
-  animation: modal-fade-out 300ms var(--animation-timing-function-modal) forwards;
+  animation: modal-fade-out 150ms var(--animation-timing-function-modal) forwards;
 }
 
 .modal-content-wrapper {
@@ -80,12 +80,12 @@
 
 
 .modal-content-wrapper.enter {
-  animation: modal-slide-up 300ms var(--animation-timing-function-modal) forwards;
+  animation: modal-slide-up 400ms var(--animation-timing-function-modal) forwards;
   animation-delay: 200ms;
 }
 
 .modal-content-wrapper.exit {
-  animation: modal-slide-down 300ms var(--animation-timing-function-modal) forwards;
+  animation: modal-slide-down 250ms var(--animation-timing-function-modal) forwards;
 }
 
 .modal-header {

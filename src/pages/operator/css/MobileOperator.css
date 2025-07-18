@@ -255,4 +255,6 @@
 }
 
 .head-cam-wrapper,
-.auto-nav-wrapper {}
+.auto-nav-wrapper {
+    height: 100%;
+}
