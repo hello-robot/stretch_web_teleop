@@ -11,11 +11,16 @@ interface ScrollableListProps {
     className?: string;
 }
 
-export default function ScrollableList({ items, height, scrollButtonHeight = 34, scrollDistance = 150, className = "" }: ScrollableListProps) {
+export default function ScrollableList({ items,
+    height = 300,
+    scrollButtonHeight = 40,
+    scrollDistance = 150,
+    className = "" }: ScrollableListProps) {
+
     const [showTopShadow, setShowTopShadow] = useState(false)
     const [showBottomShadow, setShowBottomShadow] = useState(false)
     const scrollRef = useRef<HTMLUListElement>(null)
-    const shadowHeight = height * 0.2;
+    const shadowHeight = height * 0.1;
 
     const handleScroll = () => {
         if (!scrollRef.current) return
@@ -79,7 +84,8 @@ export default function ScrollableList({ items, height, scrollButtonHeight = 34,
                 onClick={handleScrollUp}
                 disabled={!showTopShadow}
                 style={{
-                    top: `-${scrollButtonHeight}px`
+                    top: `-${scrollButtonHeight}px`,
+                    height: `${scrollButtonHeight}px`,
                 }}
             >
                 <ExpandLessIcon />
@@ -99,6 +105,9 @@ export default function ScrollableList({ items, height, scrollButtonHeight = 34,
                 className="scrollable-list-scroll-btn down"
                 onClick={handleScrollDown}
                 disabled={!showBottomShadow}
+                style={{
+                    height: `${scrollButtonHeight}px`,
+                }}
             >
                 <ExpandMoreIcon />
             </button>

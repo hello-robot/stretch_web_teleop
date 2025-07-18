@@ -11,6 +11,7 @@ import InputFluid from '../basic_components/InputFluid';
 import SearchIcon from '@mui/icons-material/Search';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ScrollableList from '../static_components/ScrollableList';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface FooterAutoNavProps {
     handleSelectGoal: (selectGoal: boolean) => void;
@@ -212,6 +213,7 @@ const LocationsMenuListItem: React.FC<{
                     disabled={!isEditing}
                     onBlur={handleSave}
                     autoComplete="off"
+                    classNameInput="locations-menu-list-item-input"
                 />
                 <button
                     className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
@@ -227,7 +229,7 @@ const LocationsMenuListItem: React.FC<{
                             onClick={handleDelete}
                             className="locations-menu-list-item-delete-button"
                         >
-                            -
+                            <DeleteIcon fontSize="small" />
                         </button>
                     )
                     : (
@@ -289,11 +291,18 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
             />
         ))
 
+    // Reset search when activate/deactivated
     useEffect(() => {
-        if (!searchActive) {
+        setSearchTerm("");
+    }, [searchActive]);
+
+    // Reset search when modal is closed
+    useEffect(() => {
+        if (!isModalLocationsMenuVisible) {
+            setSearchActive(false);
             setSearchTerm("");
         }
-    }, [searchActive]);
+    }, [isModalLocationsMenuVisible]);
 
     const Footer = () => (
         <MagneticWrapper>

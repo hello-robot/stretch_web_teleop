@@ -12,6 +12,7 @@ interface InputFluidProps {
     onFocus?: () => void;
     onBlur?: () => void;
     autoComplete?: string; // Optional autocomplete attribute
+    classNameInput?: string; // Optional class name for styling
 }
 
 /**
@@ -31,6 +32,7 @@ const InputFluid: React.FC<InputFluidProps> = ({
     disabled = false,
     onBlur,
     autoComplete = 'off',
+    classNameInput = '',
 }) => {
     const [inputWidth, setInputWidth] = useState<number>(minWidth);
     const spanRef = useRef<HTMLSpanElement>(null);
@@ -41,7 +43,7 @@ const InputFluid: React.FC<InputFluidProps> = ({
             // Measure the width of the hidden span containing the input value or placeholder
             const text = value || placeholder;
             spanRef.current.textContent = text || ' '; // Ensure span has content to measure
-            let newWidth = spanRef.current.offsetWidth; // Add padding for comfort
+            let newWidth = spanRef.current.offsetWidth + 3; // Add padding for comfort
             newWidth = Math.max(minWidth, newWidth); // Enforce minimum width
             if (maxWidth) {
                 newWidth = Math.min(newWidth, maxWidth); // Enforce maximum width if provided
@@ -60,12 +62,13 @@ const InputFluid: React.FC<InputFluidProps> = ({
                     onChange(e);
                 }}
                 placeholder={placeholder}
-                className="input-fluid"
+                className={`input-fluid ${classNameInput}`}
                 style={{ width: `${inputWidth}px` }}
                 disabled={disabled}
                 ref={inputRef}
                 autoComplete={autoComplete}
                 onBlur={onBlur} // Call the onBlur prop if provided
+
             />
         </div>
     );

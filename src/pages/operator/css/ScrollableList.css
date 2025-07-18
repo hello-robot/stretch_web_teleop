@@ -1,7 +1,7 @@
 .scrollable-container {
     position: relative;
-    --background-color: hsl(204 30% 20% / 1);
-    --shadow-bg-color: hsl(204 33% 22% / 1);
+    --background-color: hsl(204.71deg 30.36% 21.96%);
+    --shadow-bg-color: hsl(204 35% 23% / 1);
 }
 
 .shadow-top {
@@ -80,11 +80,14 @@
     padding: 5px 8px 2px;
     border-radius: unset;
     box-shadow: none;
+    transition: all 200ms ease-in-out;
 }
 
 .scrollable-container>button.scrollable-list-scroll-btn:disabled {
-    background-color: hsl(204 30% 22% / 1);
-    color: hsl(203 53% 16% / 1);
+    background-color: hsl(204.32deg 50.68% 14.31%);
+    color: hsl(203 30% 27% / 1);
+    background-image: repeating-radial-gradient(circle, hsl(204 25% 15% / 1) 0px, hsl(204 35% 25% / 1) 1px, transparent 1px, transparent 6px);
+    background-size: 4px 4px;
 }
 
 .scrollable-container>button.scrollable-list-scroll-btn.up {

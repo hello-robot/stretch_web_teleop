@@ -151,7 +151,7 @@ button.locations-menu-list-item-edit-button {
   color: #ffffff;
   font-size: 15px;
   opacity: 0.4;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.15px;
   transform: translateX(-0px);
   transition: transform calc(var(--animation-ms) * 1.35) ease-out, opacity var(--animation-ms) ease-out;
@@ -166,10 +166,10 @@ button.locations-menu-list-item-edit-button.editing {
 .locations-menu-list-item-right-column {}
 
 button.locations-menu-list-item-delete-button {
-  background-color: #2c4662;
+  background-color: transparent;
   font-weight: 800;
   box-shadow: none;
-  color: hsl(0deg 0% 100% / 80%);
+  color: hsl(204 35% 35% / 1);
   padding: 2px 8px;
   font-size: 18px;
   line-height: 100%;
@@ -200,7 +200,7 @@ button.locations-menu-search-btn {
 .locations-menu-search-input-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 13px;
 }
 
 @keyframes brightnessPulse {
@@ -219,12 +219,14 @@ button.locations-menu-search-btn {
   font-weight: 400;
   padding: 8px 10px;
   color: hsl(204 100% 50% / 1);
-  border-radius: 10px;
+  border-radius: 7px;
+  line-height: 140%;
   animation: brightnessPulse 1s infinite alternate;
 }
 
 
 .locations-menu-search-input-wrapper button.locations-menu-search-close-btn {
+  display: flex;
   padding: 0;
   background-color: transparent;
   box-shadow: none;
@@ -236,4 +238,9 @@ button.locations-menu-search-btn {
 
 .locations-menu-search-input-wrapper button.locations-menu-search-close-btn.active svg {
   fill: hsl(204 100% 50% / 1);
+}
+
+
+input.locations-menu-list-item-input {
+  font-weight: 500;
 }
