@@ -43,7 +43,8 @@ export interface AutoNavFunctions {
     DeleteGoal: (goalId: number) => void;
     DeleteMapPose: (poseName: string) => void;
     SaveGoal: (locationName: string) => void;
-    LoadGoal: (goalID: number) => void;
+    LoadGoal: (poseName: string) => ROSLIB.Transform;
+    NavigateToPose: (pose: ROSLIB.Transform) => void;
     GetPose: () => ROSLIB.Transform;
     GetSavedPoseNames: () => string[];
     GetSavedPoseTypes: () => string[];
@@ -55,7 +56,6 @@ export interface AutoNavFunctions {
         poseTypes: string[],
     ) => void;
     DisplayGoalMarker: (pose: ROSLIB.Vector3) => void;
-    NavigateToAruco: (goalID: number) => void;
     Play: () => void;
     RemoveGoalMarker: () => void;
     GoalReached: () => Promise<boolean>;
@@ -87,7 +87,7 @@ const AutoNav: React.FC<AutoNavProps> = ({
 }) => {
 
     // Index of the selected .locations-menu-list-item
-    const [selectedLocationMenuItemIdx, selectedLocationMenuItemIdxSet] = useState<number | -1>(-1);
+    const [selectedLocationMenuItem, selectedLocationMenuItemSet] = useState<string | undefined>();
 
     // Manage goal position
     const [goalPosition, goalPositionSet] = useState<ROSPoint | undefined>(undefined);
@@ -148,7 +148,10 @@ const AutoNav: React.FC<AutoNavProps> = ({
         ) as (locationName: string) => void,
         LoadGoal: underMapFunctionProvider.provideFunctions(
             UnderMapButton.LoadGoal,
-        ) as (goalID: number) => void,
+        ) as (poseName: string) => ROSLIB.Transform,
+        NavigateToPose: underMapFunctionProvider.provideFunctions(
+            UnderMapButton.NavigateToPose,
+        ) as (pose: ROSLIB.Transform) => void,
         GetPose: underMapFunctionProvider.provideFunctions(
             UnderMapButton.GetPose,
         ) as () => ROSLIB.Transform,
@@ -183,9 +186,7 @@ const AutoNav: React.FC<AutoNavProps> = ({
          */
         DisplayGoalMarker: (pose: ROSLIB.Vector3) =>
             occupancyGrid!.createGoalMarker(pose.x, pose.y, true),
-        NavigateToAruco: underMapFunctionProvider.provideFunctions(
-            UnderMapButton.NavigateToAruco,
-        ) as (goalID: number) => void,
+        
         /**
          * Play the current navigation sequence (if supported by occupancyGrid).
          */
@@ -208,12 +209,13 @@ const AutoNav: React.FC<AutoNavProps> = ({
 
     underMapFunctionProvider.setMapPoseCallback((pose: ROSLIB.Vector3) => {
         functs.DisplayGoalMarker(pose);
-        functs.NavigateToAruco(selectedLocationMenuItemIdx);
         isCurrentlyMovingSet(true);
         isSelectingGoalSet(false);
         functs
             .GoalReached()
-            .then((goalReached) => isCurrentlyMovingSet(false));
+            .then((goalReached) => {
+                isCurrentlyMovingSet(false)
+            });
     })
 
     /**
@@ -322,7 +324,8 @@ const AutoNav: React.FC<AutoNavProps> = ({
                 isCurrentlyMovingSet={isCurrentlyMovingSet}
                 isSelectingGoal={isSelectingGoal}
                 isSelectingGoalSet={isSelectingGoalSet}
-                selectedLocationMenuItemIdx={selectedLocationMenuItemIdx}
+                selectedLocationMenuItem={selectedLocationMenuItem}
+                selectedLocationMenuItemSet={selectedLocationMenuItemSet}
                 goalPosition={goalPosition}
                 addToast={addToast}
             />

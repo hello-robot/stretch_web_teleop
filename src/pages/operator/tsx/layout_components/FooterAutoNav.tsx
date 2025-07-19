@@ -24,7 +24,8 @@ interface FooterAutoNavProps {
     isCurrentlyMovingSet: Dispatch<SetStateAction<boolean>>;
     isSelectingGoal: boolean;
     isSelectingGoalSet: Dispatch<SetStateAction<boolean>>;
-    selectedLocationMenuItemIdx: number | -1;
+    selectedLocationMenuItem?: string;
+    selectedLocationMenuItemSet: Dispatch<SetStateAction<string | undefined>>;
     goalPosition: ROSPoint | undefined; // Assuming goalPosition is a Vector3
     addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
     swipeableViewsIdxSet?: Dispatch<SetStateAction<number>>;
@@ -43,6 +44,7 @@ interface ModalAddLocationProps {
 interface ModalLocationsMenuProps {
     poses: string[];
     posesSet: Dispatch<SetStateAction<string[]>>;
+    selectedLocationMenuItemSet: Dispatch<SetStateAction<string | undefined>>;
     isModalLocationsMenuVisible: boolean;
     isModalLocationsMenuVisibleSet: Dispatch<SetStateAction<boolean>>;
     functs: AutoNavFunctions;
@@ -158,10 +160,11 @@ const LocationsMenuListItem: React.FC<{
     pose: string;
     poses: string[];
     posesSet: Dispatch<SetStateAction<string[]>>;
+    selectedLocationMenuItemSet: Dispatch<SetStateAction<string | undefined>>;
     functs: AutoNavFunctions;
     getPosesLatest: () => void;
     addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
-}> = ({ pose, poses, posesSet, functs, getPosesLatest, addToast }) => {
+}> = ({ pose, poses, posesSet, selectedLocationMenuItemSet, functs, getPosesLatest, addToast }) => {
 
     const [poseNew, poseNewSet] = useState<string>("");
     const [isEditing, isEditingSet] = useState<boolean>(false);
@@ -202,6 +205,9 @@ const LocationsMenuListItem: React.FC<{
         poseNewSet(e.target.value);
     }, []);
 
+    const handleSelect = (poseName: string) => {
+        selectedLocationMenuItemSet(poseName)
+    }
 
     return (
         <li className="locations-menu-list-item">
@@ -214,6 +220,7 @@ const LocationsMenuListItem: React.FC<{
                     onBlur={handleSave}
                     autoComplete="off"
                     classNameInput="locations-menu-list-item-input"
+                    onPointerDown={() => handleSelect(inputRef.current.value)}
                 />
                 <button
                     className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
@@ -262,6 +269,7 @@ const LocationsMenuListItem: React.FC<{
 const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
     poses,
     posesSet,
+    selectedLocationMenuItemSet,
     functs,
     isModalLocationsMenuVisible,
     isModalLocationsMenuVisibleSet,
@@ -285,6 +293,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
                 pose={pose}
                 poses={poses}
                 posesSet={posesSet}
+                selectedLocationMenuItemSet={selectedLocationMenuItemSet}
                 functs={functs}
                 getPosesLatest={getPosesLatest}
                 addToast={addToast}
@@ -381,7 +390,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
  * @param isCurrentlyMovingSet - Function to set the current moving state.
  * @param isSelectingGoal - State indicating if a goal is currently being selected.
  * @param isSelectingGoalSet - Function to set the goal selection state.
- * @param selectedLocationMenuItemIdx - Index of the selected location menu item.
+ * @param selectedLocationMenuItem - The name of the selected location menu item.
  * @param swipeableViewsIdxSet - Function to set the index of the swipeable views.
  * @param goalPosition - Current goal position for navigation.
  * @param addToast - Function to display toast notifications.
@@ -398,19 +407,42 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     isCurrentlyMovingSet,
     isSelectingGoal,
     isSelectingGoalSet,
-    selectedLocationMenuItemIdx,
+    selectedLocationMenuItem,
+    selectedLocationMenuItemSet,
     swipeableViewsIdxSet,
     goalPosition,
     addToast,
 }) => {
 
+    React.useEffect(() => {
+        console.log(selectedLocationMenuItem)
+        if (selectedLocationMenuItem) {
+            let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
+            functs.DisplayGoalMarker(pose.translation);
+        }
+    }, [selectedLocationMenuItem]);
+
     // This function is called when the user
     // selects a goal on the map or from the
     // locations menu.
     const handleStartAutoNav = useCallback(() => {
-
+        // ...when selecting from Locations Menu
+        console.log(selectedLocationMenuItem, !isCurrentlyMoving, isSelectingGoal)
+        if (!isCurrentlyMoving && selectedLocationMenuItem !== undefined) {
+            let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
+            functs.NavigateToPose(pose)
+            // functs.DisplayGoalMarker(pose.translation);
+            isCurrentlyMovingSet(true);
+            isSelectingGoalSet(false);
+            selectedLocationMenuItemSet(undefined);
+            functs
+                .GoalReached()
+                .then((goalReached) => {
+                    isCurrentlyMovingSet(false)
+                    isSelectingGoalSet(true);
+                });
         // When selecting manually on map...
-        if (!isCurrentlyMoving && isSelectingGoal) {
+        } else if (!isCurrentlyMoving && isSelectingGoal) {
             functs.Play();
             isCurrentlyMovingSet(true);
             isSelectingGoalSet(false);
@@ -418,19 +450,10 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                 .GoalReached()
                 .then((goalReached) => {
                     isCurrentlyMovingSet(false)
+                    isSelectingGoalSet(true);
                 });
-            // ...when selecting from Locations Menu
-        } else if (!isCurrentlyMoving && selectedLocationMenuItemIdx !== -1) {
-            let pose: ROSLIB.Vector3 = functs.LoadGoal(selectedLocationMenuItemIdx)!;
-            functs.DisplayGoalMarker(pose);
-            functs.NavigateToAruco(selectedLocationMenuItemIdx);
-            isCurrentlyMovingSet(true);
-            isSelectingGoalSet(false);
-            functs
-                .GoalReached()
-                .then((goalReached) => isCurrentlyMovingSet(false));
         }
-    }, [functs, isCurrentlyMoving, isSelectingGoalSet, isSelectingGoal, selectedLocationMenuItemIdx, isCurrentlyMovingSet]);
+    }, [functs, isCurrentlyMoving, isSelectingGoalSet, isSelectingGoal, selectedLocationMenuItem, isCurrentlyMovingSet]);
 
     // List of saved pose names for navigation goals
     const [poses, posesSet] = useState<string[]>(
@@ -454,6 +477,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                 <ModalLocationsMenu
                     poses={poses}
                     posesSet={posesSet}
+                    selectedLocationMenuItemSet={selectedLocationMenuItemSet}
                     functs={functs}
                     isModalLocationsMenuVisible={isModalLocationsMenuVisible}
                     isModalLocationsMenuVisibleSet={isModalLocationsMenuVisibleSet}
@@ -476,7 +500,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                 ? (
                     <motion.button
                         onClick={handleStartAutoNav}
-                        disabled={!goalPosition}
+                        disabled={!goalPosition && !selectedLocationMenuItem}
                         className="auto-nav-button"
                         initial={false}
                         animate={goalPosition ? { width: 100 } : { width: 70 }}
