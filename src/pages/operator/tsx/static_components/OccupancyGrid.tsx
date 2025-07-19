@@ -517,7 +517,6 @@ export class OccupancyGrid extends React.Component {
             } as ROSPose);
         }
         this.goalPositionSet(undefined);
-        this.functs.SetSelectGoal(false);
     }
 
     /**
