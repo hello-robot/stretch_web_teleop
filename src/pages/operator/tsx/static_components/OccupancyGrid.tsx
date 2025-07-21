@@ -453,7 +453,7 @@ export class OccupancyGrid extends React.Component {
      * @param ros Whether the coordinates are in ROS space
      */
     public createGoalMarker(x: number, y: number, ros: boolean) {
-        const color = hexToRgbArray('#2EE4C8'); // Orange color for goal marker
+        const color = hexToRgbArray('#2EE4C8');
         let globalCoord = { x: x, y: y };
         if (ros)
             globalCoord = this.rosToGlobal({

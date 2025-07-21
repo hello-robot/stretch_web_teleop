@@ -7,8 +7,8 @@
     /* Color variables */
     --selected-color: hsl(33, 95%, 63%);
     --btn-gray: #f0f0f0;
-    --btn-blue: hsl(200deg 83.23% 22.29%);
-    --btn-green: rgb(129, 218, 129);
+    --btn-blue: hsl(204deg 83.23% 22.29%);
+    --btn-green: hsl(171, 55%, 68%);
     --btn-red: hsl(0, 70%, 70%);
     --btn-turquoise: hsl(171, 32%, 46%);
     --shadow-color: rgba(112, 112, 112, 0.196);
@@ -17,8 +17,12 @@
     --shadow: 3px 3px 2px var(--shadow-color);
     --tab-inactive: hsl(200, 20%, 85%);
     --font-white: hsl(0, 0%, 100%);
-    --path-blue: hsl(170, 37%, 53%);
+    --path-blue: hsl(171, 37%, 53%);
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
+
+    /* Color variables XP */
+    --blue: hsl(204 100% 50% / 1);
+    --green: hsl(171 77% 54% / 1);
 }
 
 /* Reset box model and font inheritance for all elements */

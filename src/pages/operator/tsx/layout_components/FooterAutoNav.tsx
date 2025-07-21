@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ScrollableList from '../static_components/ScrollableList';
 import DeleteIcon from '@mui/icons-material/Delete';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { set } from 'firebase/database';
 
 interface FooterAutoNavProps {
@@ -599,7 +600,8 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
 
                     }}
                 >
-                    <span>AutoNav Cancel</span>
+                    <span>Stop</span>
+                    <StopCircleIcon className="cancel-auto-nav-icon" />
                 </button>)}
             {/* </AutoNavMainButton> */}
 
