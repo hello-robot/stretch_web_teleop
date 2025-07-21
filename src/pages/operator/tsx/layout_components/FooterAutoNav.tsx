@@ -529,7 +529,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     addToast={addToast}
                 />
                 <button
-                    onClick={() => {
+                    onPointerDown={() => {
                         isModalLocationsMenuVisibleSet(true);
                     }}
                     className="locations-menu"
@@ -593,7 +593,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                 )
                 : (<button
                     className="cancel-auto-nav-button"
-                    onClick={() => {
+                    onPointerDown={() => {
                         functs.CancelGoal();
                         isCurrentlyMovingSet(!isCurrentlyMoving);
                         isSelectingGoalSet(true);
@@ -617,7 +617,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     addToast={addToast}
                 />
                 <button
-                    onClick={() => {
+                    onPointerDown={() => {
                         isModalAddLocationVisibleSet(true);
                     }}
                     className="add-location"

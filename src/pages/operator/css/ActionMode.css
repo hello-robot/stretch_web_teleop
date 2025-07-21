@@ -87,8 +87,9 @@ input[type="radio"] {
 /* Style the label or a wrapper to act as the custom radio button */
 input[type="radio"] {
   position: relative;
-  padding-left: 30px;
-  /* Space for the custom radio */
+  padding: 11px;
+  width: 0px;
+  height: 0px;
   cursor: pointer;
   display: inline-block;
   line-height: 20px;
