@@ -128,8 +128,38 @@ button.auto-nav-button span.auto-nav-button-icon {
   justify-content: space-between;
   align-items: center;
   min-height: 30px;
-  padding: 0 10px 0 5px;
+  padding: 25px 10px 25px 5px;
+  cursor: pointer;
   --animation-ms: 250ms;
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .locations-menu-list-item:hover {
+    background-color: hsl(204 30% 15% / 1);
+  }
+}
+
+/* Alter bgcolor when selected */
+.locations-menu-list-item.selected {
+  background-color: hsl(204 100% 50% / 1);
+}
+
+/* Bold text when selected  */
+.locations-menu-list-item.selected input.locations-menu-list-item-input {
+  /* Using !important is necessary to
+  override inline style from <InputFluid/> */
+  width: unset !important;
+}
+
+/* Hide "Edit" when selected */
+.locations-menu-list-item.selected button.locations-menu-list-item-edit-button {
+  display: none;
+}
+
+/* Hide "Delete" when selected */
+.locations-menu-list-item.selected button.locations-menu-list-item-delete-button {
+  display: none;
 }
 
 .footer-modal-add-location {

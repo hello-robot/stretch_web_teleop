@@ -39,9 +39,9 @@
 .scrollable-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 0;
     margin: 0;
-    padding: 13px 0;
+    padding: 0;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #d1d5db transparent;

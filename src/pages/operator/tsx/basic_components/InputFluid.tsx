@@ -9,12 +9,12 @@ interface InputFluidProps {
     maxWidth?: number; // Maximum width in pixels
     disabled?: boolean;
     placeholder?: string;
-    onFocus?: () => void;
-    onBlur?: () => void;
+    onFocus?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.PointerEvent<HTMLButtonElement>) => void; // Optional onBlur handler
     autoComplete?: string; // Optional autocomplete attribute
     classNameInput?: string; // Optional class name for styling
-    onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
-    onPointerDown?: (e: React.PointerEvent<HTMLInputElement>) => void;
+    onClick?: (e: React.PointerEvent<HTMLInputElement>) => void;
+    onPointerDown?: (e: React.PointerEvent<HTMLButtonElement>) => void;
 }
 
 /**

@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ScrollableList from '../static_components/ScrollableList';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { set } from 'firebase/database';
 
 interface FooterAutoNavProps {
     handleSelectGoal: (selectGoal: boolean) => void;
@@ -86,7 +87,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 posesSet((prevPoses) => [...prevPoses, locationName]);
             }
             functs.SaveGoal(locationName);
-            addToast('info', `Location "${locationName}" added`);
+            addToast('info', `Location "${locationName}" added.`);
             getPosesLatest();
         }
         locationNameSet("");
@@ -164,94 +165,131 @@ const LocationsMenuListItem: React.FC<{
     functs: AutoNavFunctions;
     getPosesLatest: () => void;
     addToast: (type: "success" | "error" | "info", message: string, duration?: number) => void;
-}> = ({ pose, poses, posesSet, selectedLocationMenuItemSet, functs, getPosesLatest, addToast }) => {
+    isModalLocationsMenuVisible: boolean;
+    isModalLocationsMenuVisibleSet: Dispatch<SetStateAction<boolean>>;
+}> = ({
+    pose,
+    poses,
+    posesSet,
+    selectedLocationMenuItemSet,
+    functs,
+    getPosesLatest,
+    addToast,
+    isModalLocationsMenuVisible,
+    isModalLocationsMenuVisibleSet
+}) => {
 
-    const [poseNew, poseNewSet] = useState<string>("");
-    const [isEditing, isEditingSet] = useState<boolean>(false);
-    const inputRef = React.useRef<HTMLInputElement>(null);
+        const [poseNew, poseNewSet] = useState<string>("");
+        const [isEditing, isEditingSet] = useState<boolean>(false);
+        const [isSelected, isSelectedSet] = useState<boolean>(false);
+        const inputRef = React.useRef<HTMLInputElement>(null);
 
-    // Manage focus/blur for <InputFluid>
-    React.useEffect(() => {
-        if (isEditing && inputRef.current) {
-            inputRef.current.focus();
-        } else if (!isEditing) {
-            inputRef.current.blur();
+        // Manage focus/blur for <InputFluid>
+        useEffect(() => {
+            if (isEditing && inputRef.current) {
+                inputRef.current.focus();
+            } else if (!isEditing) {
+                inputRef.current.blur();
+            }
+        }, [isEditing]);
+
+        // Reset to initial state
+        // after closing modal
+        useEffect(() => {
+            if (!isModalLocationsMenuVisible) {
+                poseNewSet("");
+                isEditingSet(false);
+                isSelectedSet(false);
+                selectedLocationMenuItemSet(undefined);
+            }
+        }, [isModalLocationsMenuVisible]);
+
+        const activateEditMode = (e: React.PointerEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            console.log('hi')
+            poseNewSet(pose);
+            isEditingSet(true);
+        };
+
+        const handleSave = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+            console.log('ho')
+            e.stopPropagation();
+            // Update "pose" name if not already taken
+            if (poseNew.length && !poses.includes(poseNew)) {
+                functs.RenamePose(pose, poseNew);
+                addToast('info', `Location "${pose}" renamed to "${poseNew}"`);
+            }
+            isEditingSet(false);
+            getPosesLatest();
+        }, [poseNew, poses, pose]);
+
+        const handleDelete = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            functs.DeleteMapPose(pose);
+            addToast('info', `Location "${pose}" deleted`);
+            getPosesLatest();
+        }, [functs, pose, addToast, getPosesLatest]);
+
+        const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+            poseNewSet(e.target.value);
+        }, []);
+
+        // Handle when item
+        // is selected
+        const handleSelect = (poseName: string) => {
+            isSelectedSet(true)
+            addToast('info', `Selected "${poseName}"`);
+            setTimeout(() => {
+                selectedLocationMenuItemSet(poseName)
+                isModalLocationsMenuVisibleSet(false);
+            }, 1000);
         }
-    }, [isEditing]);
 
-    const activateEditMode = () => {
-        poseNewSet(pose);
-        isEditingSet(true);
-    };
-
-    const handleSave = () => {
-
-        // Update "pose" name if not already taken
-        if (poseNew.length && !poses.includes(poseNew)) {
-            functs.RenamePose(pose, poseNew);
-            addToast('info', `Location "${pose}" renamed to "${poseNew}"`);
-        }
-        isEditingSet(false);
-        getPosesLatest();
+        return (
+            <li
+                className={`locations-menu-list-item ${isSelected ? 'selected' : ''}`}
+                onClick={() => handleSelect(inputRef.current.value)}
+            >
+                <div className="locations-menu-list-item-left-column">
+                    <InputFluid
+                        inputRef={inputRef}
+                        value={poseNew || pose}
+                        onChange={onChange}
+                        disabled={!isEditing}
+                        onBlur={handleSave}
+                        autoComplete="off"
+                        classNameInput="locations-menu-list-item-input"
+                    />
+                    <button
+                        className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
+                        onClick={activateEditMode}
+                    >
+                        Edit
+                    </button>
+                </div>
+                <div className="locations-menu-list-item-right-column">
+                    {!isEditing
+                        ? (
+                            <button
+                                onClick={handleDelete}
+                                className="locations-menu-list-item-delete-button"
+                            >
+                                <DeleteIcon fontSize="small" />
+                            </button>
+                        )
+                        : (
+                            <button
+                                onClick={handleSave}
+                                className="btn btn-primary btn-sm"
+                                disabled={!poseNew || poseNew.trim() === pose}
+                            >
+                                Save
+                            </button>
+                        )}
+                </div>
+            </li >
+        );
     }
-
-    const handleDelete = () => {
-        functs.DeleteMapPose(pose);
-        addToast('info', `Location "${pose}" deleted`);
-        getPosesLatest();
-    };
-
-    const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        poseNewSet(e.target.value);
-    }, []);
-
-    const handleSelect = (poseName: string) => {
-        selectedLocationMenuItemSet(poseName)
-    }
-
-    return (
-        <li className="locations-menu-list-item">
-            <div className="locations-menu-list-item-left-column">
-                <InputFluid
-                    inputRef={inputRef}
-                    value={poseNew || pose}
-                    onChange={onChange}
-                    disabled={!isEditing}
-                    onBlur={handleSave}
-                    autoComplete="off"
-                    classNameInput="locations-menu-list-item-input"
-                    onPointerDown={() => handleSelect(inputRef.current.value)}
-                />
-                <button
-                    className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
-                    onClick={activateEditMode}
-                >
-                    Edit
-                </button>
-            </div>
-            <div className="locations-menu-list-item-right-column">
-                {!isEditing
-                    ? (
-                        <button
-                            onClick={handleDelete}
-                            className="locations-menu-list-item-delete-button"
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </button>
-                    )
-                    : (
-                        <button
-                            onClick={handleSave}
-                            className="btn btn-primary btn-sm"
-                            disabled={!poseNew || poseNew.trim() === pose}
-                        >
-                            Save
-                        </button>
-                    )}
-            </div>
-        </li >
-    );
-}
 
 /**
  * ModalLocationsMenu component displays a list of saved locations
@@ -286,8 +324,11 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
         .filter((pose) => {
             return pose.toLowerCase().includes(searchTerm.toLowerCase());
         })
+        // Reverse order to show
+        // latest poses first...
+        .reverse()
         // ...Map
-        .map((pose, idx) => (
+        .map((pose) => (
             <LocationsMenuListItem
                 key={pose}
                 pose={pose}
@@ -297,6 +338,8 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
                 functs={functs}
                 getPosesLatest={getPosesLatest}
                 addToast={addToast}
+                isModalLocationsMenuVisible={isModalLocationsMenuVisible}
+                isModalLocationsMenuVisibleSet={isModalLocationsMenuVisibleSet}
             />
         ))
 
@@ -441,7 +484,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     isCurrentlyMovingSet(false)
                     isSelectingGoalSet(true);
                 });
-        // When selecting manually on map...
+            // When selecting manually on map...
         } else if (!isCurrentlyMoving && isSelectingGoal) {
             functs.Play();
             isCurrentlyMovingSet(true);
