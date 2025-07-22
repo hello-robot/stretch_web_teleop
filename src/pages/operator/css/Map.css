@@ -1,6 +1,7 @@
 .map-container,
 .mobile-map-container {
     z-index: 1;
+    flex: 1;
     position: relative;
     display: grid;
     align-items: center;
