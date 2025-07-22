@@ -533,8 +533,8 @@ export class OccupancyGrid extends React.Component {
      */
     createOccupancyGridClient() {
 
-        // this.createOccupancyGridBitmap();
-        this.createOccupancyGridVector();
+        this.createOccupancyGridBitmap();
+        // this.createOccupancyGridVector();
 
         if (!this.map) return;
 
