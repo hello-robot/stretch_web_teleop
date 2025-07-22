@@ -219,7 +219,6 @@ const LocationsMenuListItem: React.FC<{
                 poseNewSet("");
                 isEditingSet(false);
                 isSelectedSet(false);
-                selectedLocationMenuItemSet(undefined);
             }
         }, [isModalLocationsMenuVisible]);
 
@@ -273,9 +272,9 @@ const LocationsMenuListItem: React.FC<{
                 e.preventDefault();
                 handleSelect(refInput.current.value);
             },
-            tabIndex: 0,
+            'tab-index': 0,
             role: "button",
-            ariaLabel: `Select: ${pose}`,
+            'aria-label': `Select: ${pose}`,
         }
 
         return (
@@ -500,6 +499,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
 }) => {
 
     React.useEffect(() => {
+        console.log('selectedLocationMenuItem', selectedLocationMenuItem);
         if (selectedLocationMenuItem) {
             let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
             functs.DisplayGoalMarker(pose.translation);
@@ -513,6 +513,8 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
         // ...when selecting from Locations Menu
         console.log(selectedLocationMenuItem, !isCurrentlyMoving, isSelectingGoal)
         if (!isCurrentlyMoving && selectedLocationMenuItem !== undefined) {
+
+            console.log('selectedLocationMenuItem', selectedLocationMenuItem);
             let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
             functs.NavigateToPose(pose)
             // functs.DisplayGoalMarker(pose.translation);
@@ -537,7 +539,14 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     isSelectingGoalSet(true);
                 });
         }
-    }, [functs, isCurrentlyMoving, isSelectingGoalSet, isSelectingGoal, selectedLocationMenuItem, isCurrentlyMovingSet]);
+    }, [
+        functs,
+        isCurrentlyMoving,
+        isSelectingGoalSet,
+        isSelectingGoal,
+        selectedLocationMenuItem,
+        isCurrentlyMovingSet
+    ]);
 
     // List of saved pose names for navigation goals
     const [poses, posesSet] = useState<string[]>(
@@ -587,7 +596,11 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                         disabled={!goalPosition && !selectedLocationMenuItem}
                         className="auto-nav-button"
                         initial={false}
-                        animate={goalPosition ? { width: 100 } : { width: 70 }}
+                        animate={
+                            goalPosition || selectedLocationMenuItem
+                                ? { width: 100 }
+                                : { width: 70 }
+                        }
                         transition={{
                             type: 'spring',
                             stiffness: 300,
@@ -601,11 +614,11 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                         <motion.span
                             className="auto-nav-button-icon"
                             initial={{ x: -40, opacity: 0, filter: 'brightness(1)' }}
-                            animate={goalPosition
+                            animate={goalPosition || selectedLocationMenuItem
                                 ? { x: 0, opacity: 1, filter: ['brightness(1)', 'brightness(1.7)', 'brightness(1)'] }
                                 : { x: 20, opacity: 0, filter: 'brightness(1)' }
                             }
-                            transition={goalPosition
+                            transition={goalPosition || selectedLocationMenuItem
                                 ? {
                                     type: 'spring',
                                     stiffness: 400,
@@ -637,7 +650,6 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                         functs.CancelGoal();
                         isCurrentlyMovingSet(!isCurrentlyMoving);
                         isSelectingGoalSet(true);
-
                     }}
                 >
                     <span>Stop</span>
