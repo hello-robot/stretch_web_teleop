@@ -4,7 +4,8 @@
   align-items: center;
   padding: 10px 20px 40px;
   background-color: #000000;
-  --button-width: 80px;
+  --button-wrapper-width: 80px;
+  --button-width: 35px;
 }
 
 @media (min-width: 900px) {
@@ -48,7 +49,7 @@ button.auto-nav-button span.auto-nav-button-icon {
 
 .locations-menu-wrapper,
 .add-location-wrapper {
-  width: var(--button-width);
+  width: var(--button-wrapper-width);
 }
 
 /* START Location Menu */
@@ -60,17 +61,19 @@ button.auto-nav-button span.auto-nav-button-icon {
 .locations-menu-wrapper button.locations-menu {
   margin: 0;
   padding: 0;
+  width: var(--button-width);
+  height: var(--button-width);
   box-shadow: none;
   background-color: transparent;
 }
 
 .locations-menu-wrapper button.locations-menu span.locations-menu-icon {
   display: inline-block;
-  width: 35px;
-  height: 35px;
+  width: var(--button-width);
+  height: var(--button-width);
   background-size: cover;
   background: url('data:image/svg+xml,<svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.23364 25.333C8.93293 25.3332 9.50003 25.9003 9.50024 26.5996V29.1338C9.5 29.833 8.93291 30.4002 8.23364 30.4004H4.43286C3.73367 30.4001 3.1665 29.833 3.16626 29.1338V26.5996C3.16647 25.9004 3.73365 25.3333 4.43286 25.333H8.23364ZM21.2395 25.333C21.0615 26.0463 20.9651 26.7922 20.9651 27.5605C20.9651 28.552 21.1253 29.506 21.4163 30.4004H12.6663V25.333H21.2395ZM8.23364 15.833C8.93293 15.8332 9.50003 16.4003 9.50024 17.0996V19.6338C9.5 20.333 8.93291 20.9002 8.23364 20.9004H4.43286C3.73367 20.9001 3.16651 20.333 3.16626 19.6338V17.0996C3.16647 16.4004 3.73365 15.8333 4.43286 15.833H8.23364ZM34.8333 19.6807C33.4596 18.8604 31.8541 18.3887 30.1379 18.3887C27.696 18.3887 25.4788 19.3445 23.8352 20.9004H12.6663V15.833H34.8333V19.6807ZM8.23364 6.33301C8.93293 6.33318 9.50003 6.90033 9.50024 7.59961V10.1338C9.5 10.833 8.93291 11.4002 8.23364 11.4004H4.43286C3.73367 11.4001 3.16651 10.833 3.16626 10.1338V7.59961C3.16647 6.90039 3.73365 6.33326 4.43286 6.33301H8.23364ZM34.8333 11.4004H12.6663V6.33301H34.8333V11.4004Z" fill="%230098FF"/><path d="M30.4997 29.6075L26.3823 32.2515C26.244 32.2994 26.1138 32.3115 25.9917 32.2877C25.8695 32.2639 25.7657 32.2135 25.6802 32.1364C25.5946 32.0594 25.5389 31.9635 25.5129 31.8488C25.4869 31.7342 25.5001 31.6143 25.5525 31.4893L29.9092 22.6449C29.9624 22.5299 30.045 22.4436 30.1569 22.3861C30.2688 22.3286 30.3831 22.2998 30.4997 22.2998C30.6163 22.2998 30.7306 22.3286 30.8425 22.3861C30.9544 22.4436 31.037 22.5299 31.0902 22.6449L35.4469 31.4893C35.5001 31.6139 35.5133 31.7338 35.4865 31.8488C35.4597 31.9639 35.404 32.0597 35.3193 32.1364C35.2346 32.2131 35.1307 32.2636 35.0078 32.2877C34.8848 32.3119 34.7545 32.2998 34.6171 32.2515L30.4997 29.6075Z" fill="%2388CFFF"/></svg>') no-repeat center center;
-  background-size: 35px 35px;
+  background-size: var(--button-width) var(--button-width);
 }
 
 .locations-menu-wrapper button.locations-menu:active span.locations-menu-icon {}
@@ -87,6 +90,8 @@ button.auto-nav-button span.auto-nav-button-icon {
 .add-location-wrapper button.add-location {
   margin: 0;
   padding: 0;
+  width: var(--button-width);
+  height: var(--button-width);
   box-shadow: none;
   background-color: transparent;
 }
@@ -171,16 +176,15 @@ button.auto-nav-button span.auto-nav-button-icon {
 
 .locations-menu-list-item-left-column {
   display: flex;
-  gap: 0px;
+  flex: 1;
 }
 
 button.locations-menu-list-item-edit-button {
   padding: 0 3px;
   background-color: transparent;
   box-shadow: none;
-  color: #ffffff;
+  color: hsl(204 35% 35% / 1);
   font-size: 15px;
-  opacity: 0.4;
   font-weight: 400;
   letter-spacing: 0.15px;
   transform: translateX(-0px);
@@ -193,7 +197,12 @@ button.locations-menu-list-item-edit-button.editing {
   opacity: 0;
 }
 
-.locations-menu-list-item-right-column {}
+.locations-menu-list-item-right-column {
+  display: flex;
+  align-items: center;
+  ;
+  gap: 5px;
+}
 
 button.locations-menu-list-item-delete-button {
   background-color: transparent;
@@ -276,22 +285,26 @@ input.locations-menu-list-item-input {
   font-weight: 500;
 }
 
+input.locations-menu-list-item-input:disabled {
+  opacity: 1;
+}
+
 button.cancel-auto-nav-button {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   height: 42px;
-  background: hsl(171 30% 17% / 1);
+  background: hsl(0 30% 17% / 1);
   border: none;
-  box-shadow: 0px 2px 5px -2px hsl(171 100% 30% / 1);
+  box-shadow: 0px 2px 5px -2px hsl(0 100% 30% / 1);
   white-space: nowrap;
-  color: hsl(171 100% 50%);
+  color: hsl(0 100% 50%);
   font-weight: 700;
   padding: 10px 9px 10px 14px;
   border-radius: 10px;
 }
 
 svg.cancel-auto-nav-icon {
-  fill: hsl(171 70% 40% / 1);
+  fill: hsl(0 70% 40% / 1);
 }

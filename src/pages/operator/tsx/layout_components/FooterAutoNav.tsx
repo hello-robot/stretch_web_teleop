@@ -13,6 +13,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ScrollableList from '../static_components/ScrollableList';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { set } from 'firebase/database';
 
 interface FooterAutoNavProps {
@@ -79,6 +80,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
 
     const [locationName, locationNameSet] = React.useState<string>("");
     const closeModal = useCallback(() => isModalAddLocationVisibleSet(false), []);
+    const refInput = React.useRef<HTMLInputElement>(null);;
 
     // Update poses in localStorage, and
     // update local state, "poses"
@@ -95,6 +97,24 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
         isModalAddLocationVisibleSet(false);
     }
 
+    // Automatically focus the input field
+    // when the modal is opened
+    useEffect(() => {
+        // Timeout is a workaround to ensure 
+        // modal is fully rendered
+        //
+        // Note: iOS forbids scripted focus() on
+        //       <input> elements, so focus() won't
+        //       work no matter what.
+        const timer = setTimeout(() => {
+            if (isModalAddLocationVisible && refInput.current) {
+                refInput.current?.focus();
+            }
+        }, 1);
+        // Cleanup the timer on unmount
+        return () => clearTimeout(timer);
+    }, [isModalAddLocationVisible]);
+
     const Footer = () => {
         return (
             <div className="footer-modal-add-location">
@@ -110,7 +130,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
                 <MagneticWrapper>
                     <button
                         className="btn btn-tertiary"
-                        onPointerDown={closeModal}
+                        onClick={closeModal}
                     >
                         Close
                     </button>
@@ -118,10 +138,6 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
             </div>
         )
     }
-
-
-
-
 
     return (
         <ModalMobile
@@ -132,7 +148,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
             footer={<Footer />}
         >
             <input
-                autoFocus
+                ref={refInput}
                 type="text"
                 id="new-pose-name"
                 name="new-option-name"
@@ -159,6 +175,7 @@ const ModalAddLocation: React.FC<ModalAddLocationProps> = ({
  */
 
 const LocationsMenuListItem: React.FC<{
+    idx: number;
     pose: string;
     poses: string[];
     posesSet: Dispatch<SetStateAction<string[]>>;
@@ -169,6 +186,7 @@ const LocationsMenuListItem: React.FC<{
     isModalLocationsMenuVisible: boolean;
     isModalLocationsMenuVisibleSet: Dispatch<SetStateAction<boolean>>;
 }> = ({
+    idx,
     pose,
     poses,
     posesSet,
@@ -183,14 +201,14 @@ const LocationsMenuListItem: React.FC<{
         const [poseNew, poseNewSet] = useState<string>("");
         const [isEditing, isEditingSet] = useState<boolean>(false);
         const [isSelected, isSelectedSet] = useState<boolean>(false);
-        const inputRef = React.useRef<HTMLInputElement>(null);
+        const refInput = React.useRef<HTMLInputElement>(null);
 
         // Manage focus/blur for <InputFluid>
         useEffect(() => {
-            if (isEditing && inputRef.current) {
-                inputRef.current.focus();
+            if (isEditing && refInput.current) {
+                refInput.current.focus();
             } else if (!isEditing) {
-                inputRef.current.blur();
+                refInput.current.blur();
             }
         }, [isEditing]);
 
@@ -207,14 +225,14 @@ const LocationsMenuListItem: React.FC<{
 
         const activateEditMode = (e: React.PointerEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            console.log('hi')
+            e.preventDefault();
             poseNewSet(pose);
             isEditingSet(true);
         };
 
         const handleSave = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
-            console.log('ho')
             e.stopPropagation();
+            e.preventDefault();
             // Update "pose" name if not already taken
             if (poseNew.length && !poses.includes(poseNew)) {
                 functs.RenamePose(pose, poseNew);
@@ -226,6 +244,7 @@ const LocationsMenuListItem: React.FC<{
 
         const handleDelete = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
             e.stopPropagation();
+            e.preventDefault();
             functs.DeleteMapPose(pose);
             addToast('info', `Location "${pose}" deleted`);
             getPosesLatest();
@@ -246,14 +265,29 @@ const LocationsMenuListItem: React.FC<{
             }, 1000);
         }
 
+        // These are ARIA props that's only passed
+        // when the item is not being edited.
+        const ARIAProps = {
+            onClick: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleSelect(refInput.current.value);
+            },
+            tabIndex: 0,
+            role: "button",
+            ariaLabel: `Select: ${pose}`,
+        }
+
         return (
             <li
                 className={`locations-menu-list-item ${isSelected ? 'selected' : ''}`}
-                onClick={() => handleSelect(inputRef.current.value)}
             >
-                <div className="locations-menu-list-item-left-column">
+                <div
+                    className="locations-menu-list-item-left-column"
+                    {...(!isEditing && ARIAProps)}
+                >
                     <InputFluid
-                        inputRef={inputRef}
+                        refInput={refInput}
                         value={poseNew || pose}
                         onChange={onChange}
                         disabled={!isEditing}
@@ -261,28 +295,34 @@ const LocationsMenuListItem: React.FC<{
                         autoComplete="off"
                         classNameInput="locations-menu-list-item-input"
                     />
-                    <button
-                        className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
-                        onClick={activateEditMode}
-                    >
-                        Edit
-                    </button>
                 </div>
                 <div className="locations-menu-list-item-right-column">
                     {!isEditing
                         ? (
-                            <button
-                                onClick={handleDelete}
-                                className="locations-menu-list-item-delete-button"
-                            >
-                                <DeleteIcon fontSize="small" />
-                            </button>
+                            <>
+                                <button
+                                    className={`locations-menu-list-item-edit-button ${isEditing ? 'editing' : ''}`}
+                                    aria-label={`Edit: ${pose}`}
+                                    onClick={activateEditMode}
+                                >
+                                    <ModeEditIcon fontSize="small" />
+                                </button>
+
+                                <button
+                                    onClick={handleDelete}
+                                    className="locations-menu-list-item-delete-button"
+                                    aria-label={`Delete: ${pose}`}
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </button>
+                            </>
                         )
                         : (
                             <button
                                 onClick={handleSave}
                                 className="btn btn-primary btn-sm"
                                 disabled={!poseNew || poseNew.trim() === pose}
+                                aria-label={`Save as: ${poseNew}`}
                             >
                                 Save
                             </button>
@@ -329,8 +369,9 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
         // latest poses first...
         .reverse()
         // ...Map
-        .map((pose) => (
+        .map((pose, idx) => (
             <LocationsMenuListItem
+                idx={idx}
                 key={pose}
                 pose={pose}
                 poses={poses}
@@ -361,7 +402,7 @@ const ModalLocationsMenu: React.FC<ModalLocationsMenuProps> = ({
         <MagneticWrapper>
             <button
                 className="btn btn-tertiary"
-                onPointerDown={closeModal}
+                onClick={closeModal}
             >
                 Close
             </button>
@@ -459,7 +500,6 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
 }) => {
 
     React.useEffect(() => {
-        console.log(selectedLocationMenuItem)
         if (selectedLocationMenuItem) {
             let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
             functs.DisplayGoalMarker(pose.translation);
@@ -529,7 +569,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     addToast={addToast}
                 />
                 <button
-                    onPointerDown={() => {
+                    onClick={() => {
                         isModalLocationsMenuVisibleSet(true);
                     }}
                     className="locations-menu"
@@ -593,7 +633,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                 )
                 : (<button
                     className="cancel-auto-nav-button"
-                    onPointerDown={() => {
+                    onClick={() => {
                         functs.CancelGoal();
                         isCurrentlyMovingSet(!isCurrentlyMoving);
                         isSelectingGoalSet(true);
@@ -617,7 +657,7 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
                     addToast={addToast}
                 />
                 <button
-                    onPointerDown={() => {
+                    onClick={() => {
                         isModalAddLocationVisibleSet(true);
                     }}
                     className="add-location"

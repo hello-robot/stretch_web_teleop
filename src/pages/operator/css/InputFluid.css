@@ -30,4 +30,6 @@
     outline: none;
 }
 
-.input-fluid:disabled {}
+.input-fluid:disabled {
+    opacity: 1;
+}

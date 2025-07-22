@@ -4,7 +4,7 @@ import '../../css/InputFluid.css';
 interface InputFluidProps {
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    inputRef?: React.RefObject<HTMLInputElement>; // Optional ref for parent focus control
+    refInput?: React.RefObject<HTMLInputElement>; // Optional ref for parent focus control
     minWidth?: number; // Minimum width in pixels
     maxWidth?: number; // Maximum width in pixels
     disabled?: boolean;
@@ -25,7 +25,7 @@ interface InputFluidProps {
  * @returns {JSX.Element} The rendered input component.
  */
 const InputFluid: React.FC<InputFluidProps> = ({
-    inputRef,
+    refInput,
     value,
     onChange,
     placeholder = '',
@@ -69,7 +69,7 @@ const InputFluid: React.FC<InputFluidProps> = ({
                 className={`input-fluid ${classNameInput}`}
                 style={{ width: `${inputWidth}px` }}
                 disabled={disabled}
-                ref={inputRef}
+                ref={refInput}
                 autoComplete={autoComplete}
                 onBlur={onBlur} // Call the onBlur prop if provided
                 onClick={onClick}

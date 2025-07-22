@@ -84,18 +84,48 @@ input[type="radio"] {
   height: 21px;
 }
 
-/* Style the label or a wrapper to act as the custom radio button */
-input[type="radio"] {
-  position: relative;
-  padding: 11px;
-  width: 0px;
-  height: 0px;
-  cursor: pointer;
-  display: inline-block;
-  line-height: 20px;
-  box-shadow: none;
+input[type="radio"]:focus {
   outline: none;
 }
+
+/**
+ * START: Conditional custom input[type="radio"] button styles
+ *        for both iOS and non-iOS devices.
+ **/
+
+/* Target iOS devices */
+@supports (-webkit-touch-callout: none) {
+  input[type="radio"] {
+    position: relative;
+    padding: 11px;
+    width: 0px;
+    height: 0px;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 20px;
+    box-shadow: none;
+    outline: none;
+  }
+}
+
+/* Target non-iOS devices */
+@supports not (-webkit-touch-callout: none) {
+  input[type="radio"] {
+    position: relative;
+    padding-left: 30px;
+    /* Space for the custom radio */
+    cursor: pointer;
+    display: inline-block;
+    line-height: 20px;
+    box-shadow: none;
+    outline: none;
+  }
+}
+
+/**
+ * END: Conditional custom input[type="radio"] button styles
+ *        for both iOS and non-iOS devices.
+ **/
 
 /* Create a custom radio button using ::before */
 input[type="radio"]::before {
