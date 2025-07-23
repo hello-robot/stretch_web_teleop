@@ -14,6 +14,7 @@
         "createjs-module": "^0.8.3",
         "css-loader": "^6.7.3",
         "dotenv": "^16.0.3",
+        "eslint-config-react-app": "^7.0.1",
         "express": "^4.18.2",
         "file-loader": "^6.2.0",
         "firebase": "^9.22.1",
@@ -25,9 +26,9 @@
         "playwright": "^1.33.0",
         "pm2": "^5.3.0",
         "process": "^0.11.10",
-        "react": "^19.1.0",
+        "react": "^18.3.1",
         "react-device-detect": "^2.2.3",
-        "react-dom": "^19.1.0",
+        "react-dom": "^18.3.1",
         "react-native-keyboard-aware-scrollview": "^2.1.0",
         "react-native-web": "^0.19.7",
         "react-path-tooltip": "^1.0.25",
@@ -42,6 +43,12 @@
         "localstorage": "webpack --mode development --progress --env storage='localstorage'",
         "styleguide": "styleguidist server",
         "build": "webpack --mode production --progress --env storage='firebase'"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
     },
     "browserslist": {
         "production": [
@@ -59,13 +66,21 @@
         "@babel/plugin-transform-runtime": "^7.21.4",
         "@babel/preset-env": "^7.22.6",
         "@babel/preset-react": "^7.18.6",
-        "@babel/preset-typescript": "^7.21.4",       
+        "@babel/preset-typescript": "^7.21.4",
+        "@eslint/compat": "^1.2.8",
+        "@eslint/eslintrc": "^3.3.1",
+        "@eslint/js": "^9.25.1",
         "@types/node": "^20.6.0",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "@types/three": "^0.157.0",
         "babel-loader": "^9.1.2",
-        "babel-polyfill": "^6.26.0",       
+        "babel-polyfill": "^6.26.0",
+        "eslint": "^9.25.1",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.1.3",
+        "eslint-plugin-react": "^7.34.1",
+        "eslint-plugin-react-hooks": "^4.6.2",
         "globals": "^16.0.0",
         "prettier": "3.2.5",
         "react-docgen-typescript": "^2.2.2",
