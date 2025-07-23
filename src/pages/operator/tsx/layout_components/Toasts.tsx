@@ -48,6 +48,7 @@ const Toast: React.FC<Toast> = ({
                     transition={{ duration: 0.3 }}
                     layout
                     className={`toast-notification toast-${type}`}
+                    aria-hidden
                 >
                     <span className="toast-message">{message}</span>
                     {closeButton && <button

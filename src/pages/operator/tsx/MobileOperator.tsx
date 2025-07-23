@@ -274,11 +274,17 @@ export const MobileOperator = (props: {
         <div id="mobile-operator" onContextMenu={(e) => e.preventDefault()}>
             <div id="mobile-operator-body">
                 <SwipeableViews
+                    className="swipeable-views"
                     index={swipeableViewsIdx}
                     onChangeIndex={(idx: number) => (swipeableViewsIdxSet(idx))}
                     enableMouseEvents={true}
                     containerStyle={{ height: '100%' }}
                     slideStyle={{ overflowX: 'hidden', position: 'relative' }}
+                    springConfig={{
+                        duration: '0.2s',
+                        easeFunction: 'cubic-bezier(0.15, 0.3, 0.25, 1)',
+                        delay: '0s'
+                    }}
                     // This "style" prop is required...
                     // CSS via "className" won't be applied.
                     style={{ overflowX: 'visible', height: '100%' }}

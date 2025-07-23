@@ -304,7 +304,7 @@ const LocationsMenuListItem: React.FC<{
                                     aria-label={`Edit: ${pose}`}
                                     onClick={activateEditMode}
                                 >
-                                    <ModeEditIcon fontSize="small" />
+                                    <ModeEditIcon role="img" aria-hidden="true" fontSize="small" />
                                 </button>
 
                                 <button
@@ -312,7 +312,7 @@ const LocationsMenuListItem: React.FC<{
                                     className="locations-menu-list-item-delete-button"
                                     aria-label={`Delete: ${pose}`}
                                 >
-                                    <DeleteIcon fontSize="small" />
+                                    <DeleteIcon role="img" aria-hidden="true" fontSize="small" />
                                 </button>
                             </>
                         )
@@ -499,7 +499,6 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
 }) => {
 
     React.useEffect(() => {
-        console.log('selectedLocationMenuItem', selectedLocationMenuItem);
         if (selectedLocationMenuItem) {
             let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
             functs.DisplayGoalMarker(pose.translation);
@@ -511,10 +510,8 @@ const FooterAutoNav: React.FC<FooterAutoNavProps> = ({
     // locations menu.
     const handleStartAutoNav = useCallback(() => {
         // ...when selecting from Locations Menu
-        console.log(selectedLocationMenuItem, !isCurrentlyMoving, isSelectingGoal)
         if (!isCurrentlyMoving && selectedLocationMenuItem !== undefined) {
 
-            console.log('selectedLocationMenuItem', selectedLocationMenuItem);
             let pose: ROSLIB.Transform = functs.LoadGoal(selectedLocationMenuItem)!;
             functs.NavigateToPose(pose)
             // functs.DisplayGoalMarker(pose.translation);
