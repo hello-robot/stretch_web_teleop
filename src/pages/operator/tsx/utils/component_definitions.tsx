@@ -24,8 +24,7 @@ export enum ComponentType {
     VirtualJoystick = "Joystick",
     Map = "Map",
     RunStopButton = "Run Stop Button",
-    BatteryGuage = "Battery Gauge",
-    RosbagRecorder = "Rosbag Recorder", // <-- Added for rosbag recording
+    BatteryGuage = "Battery Gauge"
 }
 
 /**

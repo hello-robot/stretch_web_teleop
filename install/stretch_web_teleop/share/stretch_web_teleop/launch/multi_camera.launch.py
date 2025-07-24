@@ -30,7 +30,6 @@ base_configurable_parameters = [
     {'name': 'json_file_path',               'default': "''", 'description': 'allows advanced configuration'},
     {'name': 'initial_reset',                'default': 'false', 'description': "''"},
     {'name': 'accelerate_gpu_with_glsl',     'default': "false", 'description': 'enable GPU acceleration with GLSL'},
-    {'name': 'rosbag_filename',              'default': "''", 'description': 'A realsense bagfile to run from as a device'},  # noqa: E501
     {'name': 'log_level',                    'default': 'info', 'description': 'debug log level [DEBUG|INFO|WARN|ERROR|FATAL]'},  # noqa: E501
     {'name': 'output',                       'default': 'screen', 'description': 'pipe node output [screen|log]'},
     {'name': 'enable_color',                 'default': 'true', 'description': 'enable color stream'},
