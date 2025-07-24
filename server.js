@@ -148,3 +148,32 @@ io.on('connection', function (socket) {
         updateRooms();
     });
 });
+
+const { spawn } = require('child_process');
+let rosbagProcess = null;
+
+app.post('/start_rosbag', (req, res) => {
+    if (rosbagProcess) {
+        return res.status(400).json({ error: 'Rosbag recording already in progress.' });
+    }
+    const outputDir = 'rosbags/latest_' + Date.now();
+    rosbagProcess = spawn('ros2', ['bag', 'record', '-a', '-o', outputDir], {
+        detached: true,
+        stdio: 'ignore'
+    });
+    rosbagProcess.unref();
+    res.json({ status: 'started', dir: outputDir });
+});
+
+app.post('/stop_rosbag', (req, res) => {
+    if (!rosbagProcess) {
+        return res.status(400).json({ error: 'No rosbag recording in progress.' });
+    }
+    try {
+        process.kill(-rosbagProcess.pid, 'SIGINT');
+    } catch (e) {
+        return res.status(500).json({ error: 'Failed to stop rosbag process.' });
+    }
+    rosbagProcess = null;
+    res.json({ status: 'stopped' });
+});
