@@ -121,6 +121,10 @@ export type GlobalOptionsProps = {
     displayLabels: boolean;
     setDisplayLabels: (displayLabels: boolean) => void;
 
+    /** If the rosbag recorder should be displayed */
+    displayRosbagRecorder: boolean;
+    setDisplayRosbagRecorder: (displayRosbagRecorder: boolean) => void;
+
     /** List of names of the default layouts. */
     defaultLayouts: string[];
     /** List of names of the user's custom layouts. */
@@ -169,6 +173,15 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                         props.setDisplayTextToSpeech(!props.displayTextToSpeech)
                     }
                     label="Display text-to-speech"
+                />
+                <OnOffToggleButton
+                    on={!props.displayRosbagRecorder}
+                    onClick={() =>
+                        props.setDisplayRosbagRecorder(
+                            !props.displayRosbagRecorder,
+                        )
+                    }
+                    label="Display rosbag recorder"
                 />
                 <button onClick={() => setShowLoadLayoutModal(true)}>
                     Load layout

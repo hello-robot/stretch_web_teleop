@@ -41,6 +41,7 @@ import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { RosbagRecorder } from "./layout_components/RosbagRecorder";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -207,6 +208,17 @@ export const Operator = (props: {
     }
 
     /**
+     * Sets the RosbagRecorder component to display or hidden.
+     *
+     * @param displayRosbagRecorder whether the RosbagRecorder component should
+     *    be displayed.
+     */
+    function setDisplayRosbagRecorder(displayRosbagRecorder: boolean) {
+        layout.current.displayRosbagRecorder = displayRosbagRecorder;
+        updateLayout();
+    }
+
+    /**
      * Callback when the user clicks on a drop zone, moves the active component
      * into the drop zone
      * @param path path to the clicked drop zone
@@ -304,10 +316,10 @@ export const Operator = (props: {
     const globalOptionsProps: GlobalOptionsProps = {
         displayMovementRecorder: layout.current.displayMovementRecorder,
         displayTextToSpeech: layout.current.displayTextToSpeech,
-        displayLabels: layout.current.displayLabels,
+        displayRosbagRecorder: layout.current.displayRosbagRecorder,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
         setDisplayTextToSpeech: setDisplayTextToSpeech,
-        setDisplayLabels: setDisplayLabels,
+        setDisplayRosbagRecorder: setDisplayRosbagRecorder,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {
@@ -447,6 +459,14 @@ export const Operator = (props: {
                     hidden={!layout.current.displayTextToSpeech}
                 >
                     <TextToSpeech hideLabels={!layout.current.displayLabels} />
+                </div>
+                <div
+                    className={className("operator-rosbag-recorder", {
+                        hideLabels: !layout.current.displayLabels,
+                    })}
+                    hidden={!layout.current.displayRosbagRecorder}
+                >
+                    <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
             <div id="operator-body">

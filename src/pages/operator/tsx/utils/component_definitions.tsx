@@ -24,8 +24,7 @@ export enum ComponentType {
     VirtualJoystick = "Joystick",
     Map = "Map",
     RunStopButton = "Run Stop Button",
-    BatteryGuage = "Battery Gauge",
-    RosbagRecorder = "Rosbag Recorder"
+    BatteryGuage = "Battery Gauge"
 }
 
 /**
@@ -88,8 +87,9 @@ export type ParentComponentDefinition = ComponentDefinition & {
 };
 
 export type LayoutDefinition = ComponentDefinition & {
-    displayMovementRecorder: boolean;
-    displayTextToSpeech: boolean;
+    displayMovementRecorder?: boolean;
+    displayTextToSpeech?: boolean;
+    displayRosbagRecorder?: boolean;
     displayLabels: boolean;
     actionMode: ActionMode;
     children: LayoutGridDefinition[];
