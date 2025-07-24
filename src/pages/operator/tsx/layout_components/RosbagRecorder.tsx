@@ -4,8 +4,10 @@ import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import SaveIcon from "@mui/icons-material/Save";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
+import { CustomizableComponentProps } from "./CustomizableComponent";
 
-export const RosbagRecorder = (props: { hideLabels: boolean }) => {
+export const RosbagRecorder = (props: CustomizableComponentProps) => {
+    const hideLabels = props.hideLabels ?? false;
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -51,12 +53,12 @@ export const RosbagRecorder = (props: { hideLabels: boolean }) => {
                 >
                     {!isRecording ? (
                         <>
-                            <i hidden={props.hideLabels}>Record</i>
+                            <i hidden={hideLabels}>Record</i>
                             <RadioButtonCheckedIcon />
                         </>
                     ) : (
                         <>
-                            <i hidden={props.hideLabels}>Save</i>
+                            <i hidden={hideLabels}>Save</i>
                             <SaveIcon />
                         </>
                     )}
