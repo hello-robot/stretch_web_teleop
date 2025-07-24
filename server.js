@@ -159,14 +159,7 @@ app.post('/start_rosbag', (req, res) => {
     const outputDir = 'rosbags/latest_' + Date.now();
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
-        '/tf',
-        '/tf_static',
-        '/stretch/joint_states',
-        '/robot_description',
-        '/camera/color/image_raw',
-        '/camera/depth/image_rect_raw',
-        '/gripper_camera/image_raw',
-        '/rosout',
+        '-a',
         '-o', outputDir
     ], {
         detached: true,
