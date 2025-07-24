@@ -157,7 +157,7 @@ app.post('/start_rosbag', (req, res) => {
         return res.status(400).json({ error: 'Rosbag recording already in progress.' });
     }
     const outputDir = 'rosbags/latest_' + Date.now();
-    rosbagProcess = spawn('ros2', [
+    const rosbagProcess = spawn('ros2', [
         'bag', 'record',
         '/tf',
         '/tf_static',
@@ -171,9 +171,18 @@ app.post('/start_rosbag', (req, res) => {
         '-o', outputDir
     ], {
         detached: true,
-        stdio: 'ignore'
+        stdio: ['ignore', 'pipe', 'pipe']
     });
-    rosbagProcess.unref();
+
+    rosbagProcess.stdout.on('data', (data) => {
+        console.log(`[rosbag stdout]: ${data}`);
+    });
+    rosbagProcess.stderr.on('data', (data) => {
+        console.error(`[rosbag stderr]: ${data}`);
+    });
+    rosbagProcess.on('exit', (code, signal) => {
+        console.log(`ros2 bag record exited with code ${code}, signal ${signal}`);
+    });
     res.json({ status: 'started', dir: outputDir });
 });
 
