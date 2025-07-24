@@ -98,3 +98,11 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             );
     }
 };
+
+/**
+ * Checks if the component is currently selected
+ * @returns true if selected, otherwise false
+ */
+export function isSelected(props: CustomizableComponentProps): boolean {
+    return props.path === props.sharedState.selectedPath;
+}
