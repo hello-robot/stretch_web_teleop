@@ -157,12 +157,11 @@ app.post('/start_rosbag', (req, res) => {
         return res.status(400).json({ error: 'Rosbag recording already in progress.' });
     }
     const outputDir = 'rosbags/latest_' + Date.now();
-    const rosbagProcess = spawn('ros2', [
+    rosbagProcess = spawn('ros2', [
         'bag', 'record',
         '/tf',
         '/tf_static',
         '/stretch/joint_states',
-        '/odom',
         '/robot_description',
         '/camera/color/image_raw',
         '/camera/depth/image_rect_raw',
