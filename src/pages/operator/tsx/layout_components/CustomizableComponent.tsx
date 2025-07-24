@@ -15,6 +15,7 @@ import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
 import { RunStopButton } from "../static_components/RunStop";
 import { BatteryGuage } from "../static_components/BatteryGauge";
+import { RosbagRecorder } from "./RosbagRecorder";
 
 /** State required for all elements */
 export type SharedState = {
@@ -55,6 +56,7 @@ export type CustomizableComponentProps = {
     definition: ComponentDefinition;
     /** see {@link SharedState} */
     sharedState: SharedState;
+    hideLabels?: boolean;
 };
 
 /**
@@ -88,17 +90,11 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <RunStopButton {...props} />;
         case ComponentType.BatteryGuage:
             return <BatteryGuage {...props} />;
+        case ComponentType.RosbagRecorder:
+            return <RosbagRecorder {...props} hideLabels={props.hideLabels ?? props.sharedState.hideLabels ?? false} />;
         default:
             throw Error(
                 `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`
             );
     }
 };
-
-/**
- * Checks if the component is currently selected
- * @returns true if selected, otherwise false
- */
-export function isSelected(props: CustomizableComponentProps): boolean {
-    return props.path === props.sharedState.selectedPath;
-}

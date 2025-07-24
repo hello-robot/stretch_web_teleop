@@ -489,6 +489,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.VirtualJoystick },
         { type: ComponentType.Map },
         { type: ComponentType.BatteryGuage },
+        { type: ComponentType.RosbagRecorder },
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
