@@ -414,7 +414,10 @@ export const Operator = (props: {
                     >
                         {isHumanMode ? "Human" : "Robot"} Mode
                     </button>
-                    {!isHumanMode && (
+                    {/* Reserve space for the Pop-up button so the row doesn't shift */}
+                    {isHumanMode ? (
+                        <span style={{ display: "inline-block", width: 90, marginLeft: 8 }}></span>
+                    ) : (
                         <button
                             style={{
                                 marginLeft: 8,
@@ -424,7 +427,8 @@ export const Operator = (props: {
                                 borderRadius: 4,
                                 padding: "4px 12px",
                                 fontWeight: "bold",
-                                cursor: "pointer"
+                                cursor: "pointer",
+                                width: 90
                             }}
                             onClick={e => {
                                 e.stopPropagation();
