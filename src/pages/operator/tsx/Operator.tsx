@@ -399,6 +399,7 @@ export const Operator = (props: {
                             padding: "4px 12px",
                             fontWeight: "bold",
                             cursor: "pointer",
+                            width: 110,
                         }}
                         onClick={e => {
                             e.stopPropagation();

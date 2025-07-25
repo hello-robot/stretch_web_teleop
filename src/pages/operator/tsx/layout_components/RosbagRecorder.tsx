@@ -49,7 +49,14 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                 <button
                     className="save-btn btn-label"
                     onClick={handleClick}
-                    style={{ minWidth: 120, minHeight: 40, fontWeight: "bold" }}
+                    style={{
+                        minWidth: 120,
+                        minHeight: 40,
+                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}
                 >
                     {!isRecording ? (
                         <>
