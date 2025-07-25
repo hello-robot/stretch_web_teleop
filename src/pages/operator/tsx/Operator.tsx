@@ -577,7 +577,10 @@ export const Operator = (props: {
                                     fontSize: "1em",
                                     cursor: "pointer"
                                 }}
-                                onClick={() => setShowPopup(false)}
+                                onClick={() => {
+                                    setIsHumanMode(true);
+                                    setShowPopup(false);
+                                }}
                             >
                                 Take control
                             </button>
