@@ -38,6 +38,7 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
+    isHumanMode: boolean;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

@@ -99,8 +99,13 @@ export const ButtonPad = (props: ButtonPadProps) => {
             }
             : {};
 
+    const isDisabled = !props.sharedState.isHumanMode;
+
     return (
-        <div className="button-pad">
+        <div
+            className={className("button-pad-root", { disabled: isDisabled })}
+            style={isDisabled ? { pointerEvents: "none", opacity: 0.5, filter: "grayscale(1)" } : {}}
+        >
             {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}

@@ -313,6 +313,7 @@ export const Operator = (props: {
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
         robotNotHomed: robotNotHomed,
+        isHumanMode: isHumanMode,
     };
 
     /** Properties for the global options area of the sidebar */

@@ -179,6 +179,13 @@
     }
 }
 
+.button-pad-root.disabled,
+.button-grid-root.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(1);
+}
+
 @media (max-width: 900px) {
     #operator-header .dropdown {
         width: var(--header-btn-width-med);

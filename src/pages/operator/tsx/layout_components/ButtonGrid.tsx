@@ -76,13 +76,15 @@ for (let i = 0; i < 4; i++) {
 export const ButtonGrid = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
+    const isDisabled = !props.sharedState.isHumanMode;
     function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
         event.stopPropagation();
         props.sharedState.onSelect(props.definition, props.path);
     }
     return (
         <div
-            className={className("button-grid", { selected, customizing })}
+            className={className("button-grid-root", { selected, customizing, disabled: isDisabled })}
+            style={isDisabled ? { pointerEvents: "none", opacity: 0.5, filter: "grayscale(1)" } : {}}
             onClick={handleSelect}
         >
             {BACKGROUND_COLORS}
