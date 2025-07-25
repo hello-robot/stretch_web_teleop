@@ -568,13 +568,11 @@ export const Operator = (props: {
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
-                                    background: "#1976d2",
+                                    backgroundColor: "orange",
                                     color: "white",
                                     border: "none",
-                                    borderRadius: 4,
-                                    padding: "8px 20px",
-                                    fontWeight: "bold",
-                                    fontSize: "1em",
+                                    padding: "10px 20px",
+                                    borderRadius: "5px",
                                     cursor: "pointer"
                                 }}
                                 onClick={() => {
@@ -582,7 +580,7 @@ export const Operator = (props: {
                                     setShowPopup(false);
                                 }}
                             >
-                                Take control
+                                Reset
                             </button>
                             <button
                                 style={{
