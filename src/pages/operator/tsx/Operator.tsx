@@ -358,6 +358,35 @@ export const Operator = (props: {
             >
                 {isHumanMode ? "You are in control" : "Robot in control"}
             </div>
+            {/* Global controls (Demonstration Recorder, etc.) */}
+            <div id="operator-global-controls">
+                <div
+                    className={className("operator-pose-recorder", {
+                        hideLabels: !layout.current.displayLabels,
+                    })}
+                    hidden={!layout.current.displayMovementRecorder}
+                >
+                    <MovementRecorder
+                        hideLabels={!layout.current.displayLabels}
+                    />
+                </div>
+                <div
+                    className={className("operator-text-to-speech", {
+                        hideLabels: !layout.current.displayLabels,
+                    })}
+                    hidden={!layout.current.displayTextToSpeech}
+                >
+                    <TextToSpeech hideLabels={!layout.current.displayLabels} />
+                </div>
+                <div
+                    className={className("operator-rosbag-recorder", {
+                        hideLabels: !layout.current.displayLabels,
+                    })}
+                    hidden={!layout.current.displayRosbagRecorder}
+                >
+                    <RosbagRecorder hideLabels={!layout.current.displayLabels} />
+                </div>
+            </div>
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
                 {/* Human/Robot mode toggle */}
                 <div style={{ marginRight: 16 }}>
@@ -480,34 +509,6 @@ export const Operator = (props: {
                     </div>
                 </div>
             )}
-            <div id="operator-global-controls">
-                <div
-                    className={className("operator-pose-recorder", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayMovementRecorder}
-                >
-                    <MovementRecorder
-                        hideLabels={!layout.current.displayLabels}
-                    />
-                </div>
-                <div
-                    className={className("operator-text-to-speech", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayTextToSpeech}
-                >
-                    <TextToSpeech hideLabels={!layout.current.displayLabels} />
-                </div>
-                <div
-                    className={className("operator-rosbag-recorder", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayRosbagRecorder}
-                >
-                    <RosbagRecorder hideLabels={!layout.current.displayLabels} />
-                </div>
-            </div>
             <div id="operator-body">
                 <LayoutArea layout={layout.current} sharedState={sharedState} />
             </div>
