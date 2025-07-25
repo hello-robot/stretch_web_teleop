@@ -161,8 +161,9 @@ app.post('/start_rosbag', (req, res) => {
     const outputDir = 'rosbags/latest_' + Date.now();
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
+        '-a',
         '-s', 'mcap',
-        '--all', outputDir
+        '-o', outputDir
     ], {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe']
@@ -176,6 +177,7 @@ app.post('/start_rosbag', (req, res) => {
     });
     rosbagProcess.on('exit', (code, signal) => {
         console.log(`ros2 bag record exited with code ${code}, signal ${signal}`);
+        rosbagProcess = null; // Clear the process variable on exit
     });
     res.json({ status: 'started', dir: outputDir });
 });
@@ -186,9 +188,10 @@ app.post('/stop_rosbag', (req, res) => {
     }
     try {
         process.kill(-rosbagProcess.pid, 'SIGINT');
+        // Don't set rosbagProcess to null here - let the exit event handler do it
+        res.json({ status: 'stopped' });
     } catch (e) {
+        console.error('Error stopping rosbag process:', e);
         return res.status(500).json({ error: 'Failed to stop rosbag process.' });
     }
-    rosbagProcess = null;
-    res.json({ status: 'stopped' });
 });
