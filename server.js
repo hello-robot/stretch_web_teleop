@@ -156,11 +156,13 @@ app.post('/start_rosbag', (req, res) => {
     if (rosbagProcess) {
         return res.status(400).json({ error: 'Rosbag recording already in progress.' });
     }
+
+     
     const outputDir = 'rosbags/latest_' + Date.now();
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
-        '-a',
-        '-o', outputDir
+        '-s', 'mcap',
+        '--all', outputDir
     ], {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe']
