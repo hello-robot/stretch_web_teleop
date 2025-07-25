@@ -572,6 +572,7 @@ export const Operator = (props: {
                                     color: "white",
                                     border: "none",
                                     padding: "10px 20px",
+                                    fontWeight: "bold",
                                     borderRadius: "5px",
                                     cursor: "pointer"
                                 }}
