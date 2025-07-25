@@ -79,6 +79,7 @@ export const Operator = (props: {
 
     // Add state for human/robot mode
     const [isHumanMode, setIsHumanMode] = React.useState(true);
+    const [showPopup, setShowPopup] = React.useState(false);
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -394,7 +395,7 @@ export const Operator = (props: {
             </div>
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
                 {/* Human/Robot mode toggle */}
-                <div style={{ marginRight: 16 }}>
+                <div style={{ marginRight: 16, display: "flex", alignItems: "center" }}>
                     <button
                         style={{
                             background: isHumanMode ? "#4caf50" : "#ff9800",
@@ -413,6 +414,26 @@ export const Operator = (props: {
                     >
                         {isHumanMode ? "Human" : "Robot"} Mode
                     </button>
+                    {!isHumanMode && (
+                        <button
+                            style={{
+                                marginLeft: 8,
+                                background: "#fff",
+                                color: "#ff9800",
+                                border: "1px solid #ff9800",
+                                borderRadius: 4,
+                                padding: "4px 12px",
+                                fontWeight: "bold",
+                                cursor: "pointer"
+                            }}
+                            onClick={e => {
+                                e.stopPropagation();
+                                setShowPopup(true);
+                            }}
+                        >
+                            Pop-up
+                        </button>
+                    )}
                 </div>
                 {/* Action mode button */}
                 <Dropdown
@@ -512,6 +533,66 @@ export const Operator = (props: {
                             type={showTabletState.alert_type}
                             message={showTabletState.state}
                         />
+                    </div>
+                </div>
+            )}
+            {/* Pop-up Modal */}
+            {showPopup && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    background: "rgba(0,0,0,0.4)",
+                    zIndex: 1000,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}>
+                    <div style={{
+                        background: "white",
+                        borderRadius: 8,
+                        padding: 32,
+                        minWidth: 320,
+                        boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+                        textAlign: "center"
+                    }}>
+                        <div style={{ fontSize: "1.2em", marginBottom: 24 }}>
+                            Insert text specified by the user
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+                            <button
+                                style={{
+                                    background: "#1976d2",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: "8px 20px",
+                                    fontWeight: "bold",
+                                    fontSize: "1em",
+                                    cursor: "pointer"
+                                }}
+                                onClick={() => setShowPopup(false)}
+                            >
+                                Take control
+                            </button>
+                            <button
+                                style={{
+                                    background: "#4caf50",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: "8px 20px",
+                                    fontWeight: "bold",
+                                    fontSize: "1em",
+                                    cursor: "pointer"
+                                }}
+                                onClick={() => setShowPopup(false)}
+                            >
+                                Confirm and proceed
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
