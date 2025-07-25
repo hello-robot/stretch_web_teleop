@@ -48,6 +48,7 @@ export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>;
     layout: LayoutDefinition;
     storageHandler: StorageHandler;
+    isReconnecting?: boolean;
 }) => {
     const [customizing, setCustomizing] = React.useState(false);
     const [selectedPath, setSelectedPath] = React.useState<string | undefined>(
@@ -355,6 +356,9 @@ export const Operator = (props: {
                     padding: "8px 0",
                     position: "relative",
                     zIndex: 10,
+                    opacity: props.isReconnecting ? 0.5 : 1,
+                    filter: props.isReconnecting ? "grayscale(1)" : "none",
+                    pointerEvents: props.isReconnecting ? "none" : "auto"
                 }}
             >
                 {isHumanMode ? "You are in control" : "Robot in control"}
