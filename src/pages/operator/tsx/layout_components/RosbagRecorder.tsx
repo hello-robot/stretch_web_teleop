@@ -44,7 +44,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
 
     return (
         <div id="movement-recorder-container">
-            <span>Rosbag Recorder</span>
+            <span>Demonstration Recorder</span>
             <Tooltip text={!isRecording ? "Record rosbag" : "Save rosbag"} position="top">
                 <button
                     className="save-btn btn-label"

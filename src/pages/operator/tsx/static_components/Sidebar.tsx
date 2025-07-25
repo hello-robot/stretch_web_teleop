@@ -165,7 +165,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                             !props.displayMovementRecorder,
                         )
                     }
-                    label="Display movement recorder testing"
+                    label="Display movement recorder"
                 />
                 <OnOffToggleButton
                     on={!props.displayTextToSpeech}
@@ -181,7 +181,7 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                             !props.displayRosbagRecorder,
                         )
                     }
-                    label="Display rosbag recorder"
+                    label="Display demonstration recorder"
                 />
                 <button onClick={() => setShowLoadLayoutModal(true)}>
                     Load layout

@@ -76,6 +76,9 @@ export const Operator = (props: {
         showHomeTheRobotGlobalControl
     );
 
+    // Add state for human/robot mode
+    const [isHumanMode, setIsHumanMode] = React.useState(true);
+
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
@@ -339,7 +342,43 @@ export const Operator = (props: {
 
     return (
         <div id="operator">
-            <div id="operator-header" onClick={handleClickHeader}>
+            {/* Persistent banner for control mode */}
+            <div
+                style={{
+                    width: "100%",
+                    background: isHumanMode ? "#4caf50" : "#ff9800",
+                    color: "white",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    padding: "8px 0",
+                    position: "relative",
+                    zIndex: 10,
+                }}
+            >
+                {isHumanMode ? "You are in control" : "Robot in control"}
+            </div>
+            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
+                {/* Human/Robot mode toggle */}
+                <div style={{ marginRight: 16 }}>
+                    <button
+                        style={{
+                            background: isHumanMode ? "#4caf50" : "#ff9800",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 4,
+                            padding: "4px 12px",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                        }}
+                        onClick={e => {
+                            e.stopPropagation();
+                            setIsHumanMode(mode => !mode);
+                        }}
+                    >
+                        {isHumanMode ? "Human" : "Robot"} Mode
+                    </button>
+                </div>
                 {/* Action mode button */}
                 <Dropdown
                     onChange={(idx) => setActionMode(actionModes[idx])}
