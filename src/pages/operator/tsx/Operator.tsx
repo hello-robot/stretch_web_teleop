@@ -239,6 +239,8 @@ export const Operator = (props: {
      * @param path the path of the component that was selected
      */
     function handleSelect(def: ComponentDefinition, path?: string) {
+        if (!customizing) return;
+
         const pathsMatch = path === selectedPath;
         const defsMatch =
             def.type === selectedDefinition?.type &&
