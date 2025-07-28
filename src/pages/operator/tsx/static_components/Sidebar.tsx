@@ -502,6 +502,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.VirtualJoystick },
         { type: ComponentType.Map },
         { type: ComponentType.BatteryGuage },
+        { type: ComponentType.ProgramEditor },
         // Removed RosbagRecorder from addable components
     ];
 

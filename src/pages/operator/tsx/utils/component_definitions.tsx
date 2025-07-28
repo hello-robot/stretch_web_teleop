@@ -24,7 +24,9 @@ export enum ComponentType {
     VirtualJoystick = "Joystick",
     Map = "Map",
     RunStopButton = "Run Stop Button",
-    BatteryGuage = "Battery Gauge"
+    BatteryGuage = "Battery Gauge",
+    RosbagRecorder = "Rosbag Recorder",
+    ProgramEditor = "Program Editor"
 }
 
 /**
@@ -223,3 +225,8 @@ export type MapDefinition = ComponentDefinition & {
  * Definition for the run stop button
  */
 export type RunStopDefinition = ComponentDefinition;
+
+/**
+ * Definition for the program editor component
+ */
+export type ProgramEditorDefinition = ComponentDefinition;

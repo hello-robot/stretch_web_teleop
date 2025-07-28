@@ -89,8 +89,7 @@ export const DropZone = (props: DropZoneProps) => {
 
     /** Calls onDrop function from Operator with the path of this dropzone */
     function handleClick(e: React.MouseEvent<HTMLSpanElement>) {
-        // Allow dropping if customizing OR if component is from sidebar (selectedPath is undefined)
-        if (!props.sharedState.customizing && props.sharedState.selectedPath !== undefined) return;
+        if (!props.sharedState.customizing) return;
         e.stopPropagation();
         // If adding a new tabs component from the sidebar
         if (
