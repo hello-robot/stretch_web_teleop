@@ -158,7 +158,7 @@ app.post('/start_rosbag', (req, res) => {
     }
 
      
-    const outputDir = 'rosbags/latest_' + Date.now();
+    const outputDir = '/media/hello-robot/HCRLAB/rosbags/latest_' + Date.now();
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
         '-a',
