@@ -157,13 +157,43 @@ app.post('/start_rosbag', (req, res) => {
         return res.status(400).json({ error: 'Rosbag recording already in progress.' });
     }
 
-     
-    const outputDir = 'rosbags/latest_' + Date.now();
+    // Check for flash drive
+    const fs = require('fs');
+    const path = require('path');
+    
+    let outputDir;
+    let flashDrivePath = '/media/HCRLAB';
+    
+    // Check if flash drive is mounted
+    if (fs.existsSync(flashDrivePath)) {
+        console.log('Flash drive found at /media/HCRLAB');
+        outputDir = path.join(flashDrivePath, 'rosbags');
+    } else {
+        console.log('Flash drive not found, using local storage');
+        outputDir = 'rosbags';
+    }
+    
+    // Create rosbags directory if it doesn't exist
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
+    // Generate descriptive filename
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 19).replace(/:/g, '-');
+    const userLabel = req.body.label || 'recording';
+    const safeLabel = userLabel.replace(/[^a-zA-Z0-9_-]/g, '_');
+    
+    const bagName = `${safeLabel}_${dateStr}`;
+    const fullOutputDir = path.join(outputDir, bagName);
+    
+    console.log(`Starting rosbag recording to: ${fullOutputDir}`);
+    
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
         '-a',
         '-s', 'mcap',
-        '-o', outputDir
+        '-o', fullOutputDir
     ], {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe']
@@ -177,9 +207,15 @@ app.post('/start_rosbag', (req, res) => {
     });
     rosbagProcess.on('exit', (code, signal) => {
         console.log(`ros2 bag record exited with code ${code}, signal ${signal}`);
-        rosbagProcess = null; // Clear the process variable on exit
+        rosbagProcess = null; 
     });
-    res.json({ status: 'started', dir: outputDir });
+    
+    res.json({ 
+        status: 'started', 
+        dir: fullOutputDir,
+        bagName: bagName,
+        flashDrive: fs.existsSync(flashDrivePath)
+    });
 });
 
 app.post('/stop_rosbag', (req, res) => {
@@ -188,10 +224,84 @@ app.post('/stop_rosbag', (req, res) => {
     }
     try {
         process.kill(-rosbagProcess.pid, 'SIGINT');
-        // Don't set rosbagProcess to null here - let the exit event handler do it
         res.json({ status: 'stopped' });
     } catch (e) {
         console.error('Error stopping rosbag process:', e);
         return res.status(500).json({ error: 'Failed to stop rosbag process.' });
     }
 });
+
+app.get('/list_rosbags', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    
+    let rosbagDirs = [];
+    
+    // Check local rosbags
+    const localRosbagsPath = 'rosbags';
+    if (fs.existsSync(localRosbagsPath)) {
+        try {
+            const localBags = fs.readdirSync(localRosbagsPath)
+                .filter(item => fs.statSync(path.join(localRosbagsPath, item)).isDirectory())
+                .map(bag => ({
+                    name: bag,
+                    path: path.join(localRosbagsPath, bag),
+                    location: 'Local Storage',
+                    size: getDirectorySize(path.join(localRosbagsPath, bag)),
+                    modified: fs.statSync(path.join(localRosbagsPath, bag)).mtime
+                }));
+            rosbagDirs.push(...localBags);
+        } catch (e) {
+            console.error('Error reading local rosbags:', e);
+        }
+    }
+    
+    // Check flash drive rosbags
+    const flashDrivePath = '/media/HCRLAB/rosbags';
+    if (fs.existsSync(flashDrivePath)) {
+        try {
+            const flashBags = fs.readdirSync(flashDrivePath)
+                .filter(item => fs.statSync(path.join(flashDrivePath, item)).isDirectory())
+                .map(bag => ({
+                    name: bag,
+                    path: path.join(flashDrivePath, bag),
+                    location: 'Flash Drive',
+                    size: getDirectorySize(path.join(flashDrivePath, bag)),
+                    modified: fs.statSync(path.join(flashDrivePath, bag)).mtime
+                }));
+            rosbagDirs.push(...flashBags);
+        } catch (e) {
+            console.error('Error reading flash drive rosbags:', e);
+        }
+    }
+    
+    // Sort by modification time (newest first)
+    rosbagDirs.sort((a, b) => b.modified.getTime() - a.modified.getTime());
+    
+    res.json({ rosbags: rosbagDirs });
+});
+
+function getDirectorySize(dirPath) {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        
+        let totalSize = 0;
+        const files = fs.readdirSync(dirPath);
+        
+        for (const file of files) {
+            const filePath = path.join(dirPath, file);
+            const stats = fs.statSync(filePath);
+            
+            if (stats.isDirectory()) {
+                totalSize += getDirectorySize(filePath);
+            } else {
+                totalSize += stats.size;
+            }
+        }
+        
+        return totalSize;
+    } catch (e) {
+        return 0;
+    }
+}
