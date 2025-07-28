@@ -80,6 +80,7 @@ export const Operator = (props: {
     // Add state for human/robot mode
     const [isHumanMode, setIsHumanMode] = React.useState(true);
     const [showPopup, setShowPopup] = React.useState(false);
+    const [programMode, setProgramMode] = React.useState<string>("demonstrate");
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
@@ -342,6 +343,7 @@ export const Operator = (props: {
     };
 
     const actionModes = Object.values(ActionMode);
+    const programModes = ["demonstrate", "create program", "run program"];
 
     return (
         <div id="operator">
@@ -394,52 +396,7 @@ export const Operator = (props: {
                 </div>
             </div>
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
-                {/* Human/Robot mode toggle */}
-                <div style={{ marginRight: 16, display: "flex", alignItems: "center" }}>
-                    <button
-                        style={{
-                            background: isHumanMode ? "#4caf50" : "#ff9800",
-                            color: "white",
-                            border: "none",
-                            borderRadius: 4,
-                            padding: "4px 12px",
-                            fontWeight: "bold",
-                            cursor: "pointer",
-                            width: 110,
-                        }}
-                        onClick={e => {
-                            e.stopPropagation();
-                            setIsHumanMode(mode => !mode);
-                        }}
-                    >
-                        {isHumanMode ? "Human" : "Robot"} Mode
-                    </button>
-                    {/* Reserve space for the Pop-up button so the row doesn't shift */}
-                    {isHumanMode ? (
-                        <span style={{ display: "inline-block", width: 90, marginLeft: 8 }}></span>
-                    ) : (
-                        <button
-                            style={{
-                                marginLeft: 8,
-                                background: "#fff",
-                                color: "#ff9800",
-                                border: "1px solid #ff9800",
-                                borderRadius: 4,
-                                padding: "4px 12px",
-                                fontWeight: "bold",
-                                cursor: "pointer",
-                                width: 90
-                            }}
-                            onClick={e => {
-                                e.stopPropagation();
-                                setShowPopup(true);
-                            }}
-                        >
-                            Pop-up
-                        </button>
-                    )}
-                </div>
-                {/* Action mode button */}
+                {/* Action mode dropdown */}
                 <Dropdown
                     onChange={(idx) => setActionMode(actionModes[idx])}
                     selectedIndex={actionModes.indexOf(
@@ -449,6 +406,16 @@ export const Operator = (props: {
                     showActive
                     placement="bottom"
                 />
+                {/* Program mode dropdown */}
+                <div style={{ marginLeft: 16 }}>
+                    <Dropdown
+                        onChange={(idx) => setProgramMode(programModes[idx])}
+                        selectedIndex={programModes.indexOf(programMode)}
+                        possibleOptions={programModes}
+                        showActive
+                        placement="bottom"
+                    />
+                </div>
                 <AudioControl remoteStreams={remoteStreams} />
                 <SpeedControl
                     scale={velocityScale}
@@ -604,6 +571,59 @@ export const Operator = (props: {
             )}
             <div id="operator-body">
                 <LayoutArea layout={layout.current} sharedState={sharedState} />
+            </div>
+            {/* Bottom left controls */}
+            <div style={{
+                position: "fixed",
+                bottom: 20,
+                left: 20,
+                zIndex: 100,
+                display: "flex",
+                alignItems: "center",
+                gap: 12
+            }}>
+                {/* Human/Robot mode toggle */}
+                <button
+                    style={{
+                        background: isHumanMode ? "#4caf50" : "#ff9800",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 4,
+                        padding: "8px 16px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        fontSize: "0.9em",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+                    }}
+                    onClick={e => {
+                        e.stopPropagation();
+                        setIsHumanMode(mode => !mode);
+                    }}
+                >
+                    {isHumanMode ? "Human" : "Robot"} Mode
+                </button>
+                {/* Pop-up button */}
+                {!isHumanMode && (
+                    <button
+                        style={{
+                            background: "#fff",
+                            color: "#ff9800",
+                            border: "1px solid #ff9800",
+                            borderRadius: 4,
+                            padding: "8px 16px",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            fontSize: "0.9em",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+                        }}
+                        onClick={e => {
+                            e.stopPropagation();
+                            setShowPopup(true);
+                        }}
+                    >
+                        Pop-up
+                    </button>
+                )}
             </div>
             <Sidebar
                 hidden={!customizing}
