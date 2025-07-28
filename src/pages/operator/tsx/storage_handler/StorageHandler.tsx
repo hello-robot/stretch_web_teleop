@@ -48,13 +48,15 @@ export abstract class StorageHandler {
     /**
      * Saves the current layout to preserve state between reloading the browser.
      * @param layout the current layout
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      */
-    public abstract saveCurrentLayout(layout: LayoutDefinition): void;
+    public abstract saveCurrentLayout(layout: LayoutDefinition, mode?: string): void;
 
     /**
      * Loads the last used layout to preserve state between reloading the browser.
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      */
-    public abstract loadCurrentLayout(): LayoutDefinition | null;
+    public abstract loadCurrentLayout(mode?: string): LayoutDefinition | null;
 
     /**
      * Gets the list of all the user's saved layouts
@@ -154,13 +156,14 @@ export abstract class StorageHandler {
     /**
      * Gets the last saved state from the user's layout, or gets the default
      * layout if the user has no saved state.
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      * @returns layout definition for the layout that should be loaded into the
      *          operator page.
      */
-    public loadCurrentLayoutOrDefault(): LayoutDefinition {
-        const currentLayout = this.loadCurrentLayout();
+    public loadCurrentLayoutOrDefault(mode?: string): LayoutDefinition {
+        const currentLayout = this.loadCurrentLayout(mode);
         if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
-        console.log("loading saved layout");
+        console.log("loading saved layout for mode:", mode);
         return currentLayout;
     }
 

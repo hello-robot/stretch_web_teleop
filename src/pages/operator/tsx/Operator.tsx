@@ -69,17 +69,24 @@ export const Operator = (props: {
     const [moveToPregraspState, setMoveToPregraspState] =
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
-        React.useState<ActionState>(false);
+        React.useState<ActionState>();
     const [robotNotHomed, setRobotNotHomed] =
-        React.useState<ActionState>(false);
-    function showHomeTheRobotGlobalControl(isHomed: ActionState) {
-        setRobotNotHomed(!isHomed);
+        React.useState<ActionState>();
+    function showHomeTheRobotGlobalControl(isHomed: boolean) {
+        setRobotNotHomed(isHomed ? undefined : { state: "not_homed", alert_type: "warning" });
     }
     homeTheRobotFunctionProvider.setIsHomedCallback(
         showHomeTheRobotGlobalControl
     );
 
     const layout = React.useRef<LayoutDefinition>(props.layout);
+    
+    // Mode-specific layouts
+    const [modeLayouts, setModeLayouts] = React.useState<{ [mode: string]: LayoutDefinition }>({
+        "Demonstrate": props.layout,
+        "Create Program": props.layout,
+        "Run Program": props.layout,
+    });
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
@@ -338,6 +345,28 @@ export const Operator = (props: {
     const actionModes = Object.values(ActionMode);
     const programModes = ["Demonstrate", "Create Program", "Run Program"];
 
+    // Function to switch layouts when program mode changes
+    const switchToModeLayout = (newMode: string) => {
+        // Save current layout for current mode
+        if (modeLayouts[programMode]) {
+            const updatedLayouts = { ...modeLayouts };
+            updatedLayouts[programMode] = layout.current;
+            setModeLayouts(updatedLayouts);
+            props.storageHandler.saveCurrentLayout(layout.current, programMode);
+        }
+        
+        // Load layout for new mode
+        const newModeLayout = props.storageHandler.loadCurrentLayout(newMode);
+        if (newModeLayout) {
+            layout.current = newModeLayout;
+        } else {
+            // If no saved layout for this mode, use the current layout as template
+            layout.current = JSON.parse(JSON.stringify(layout.current));
+        }
+        
+        updateLayout();
+    };
+
     return (
         <div id="operator">
             {/* Persistent banner for control mode */}
@@ -391,7 +420,11 @@ export const Operator = (props: {
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
                 {/* Program mode dropdown */}
                 <Dropdown
-                    onChange={(idx) => setProgramMode(programModes[idx])}
+                    onChange={(idx) => {
+                        const newMode = programModes[idx];
+                        setProgramMode(newMode);
+                        switchToModeLayout(newMode);
+                    }}
                     selectedIndex={programModes.indexOf(programMode)}
                     possibleOptions={programModes}
                     showActive
