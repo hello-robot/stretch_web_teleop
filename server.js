@@ -157,43 +157,13 @@ app.post('/start_rosbag', (req, res) => {
         return res.status(400).json({ error: 'Rosbag recording already in progress.' });
     }
 
-    // Check for flash drive
-    const fs = require('fs');
-    const path = require('path');
-    
-    let outputDir;
-    let flashDrivePath = '/media/HCRLAB';
-    
-    // Check if flash drive is mounted
-    if (fs.existsSync(flashDrivePath)) {
-        console.log('Flash drive found at /media/HCRLAB');
-        outputDir = path.join(flashDrivePath, 'rosbags');
-    } else {
-        console.log('Flash drive not found, using local storage');
-        outputDir = 'rosbags';
-    }
-    
-    // Create rosbags directory if it doesn't exist
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-    }
-    
-    // Generate descriptive filename
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 19).replace(/:/g, '-');
-    const userLabel = req.body.label || 'recording';
-    const safeLabel = userLabel.replace(/[^a-zA-Z0-9_-]/g, '_');
-    
-    const bagName = `${safeLabel}_${dateStr}`;
-    const fullOutputDir = path.join(outputDir, bagName);
-    
-    console.log(`Starting rosbag recording to: ${fullOutputDir}`);
-    
+     
+    const outputDir = 'rosbags/latest_' + Date.now();
     rosbagProcess = spawn('ros2', [
         'bag', 'record',
         '-a',
         '-s', 'mcap',
-        '-o', fullOutputDir
+        '-o', outputDir
     ], {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe']
@@ -209,13 +179,7 @@ app.post('/start_rosbag', (req, res) => {
         console.log(`ros2 bag record exited with code ${code}, signal ${signal}`);
         rosbagProcess = null; 
     });
-    
-    res.json({ 
-        status: 'started', 
-        dir: fullOutputDir,
-        bagName: bagName,
-        flashDrive: fs.existsSync(flashDrivePath)
-    });
+    res.json({ status: 'started', dir: outputDir });
 });
 
 app.post('/stop_rosbag', (req, res) => {
@@ -230,5 +194,3 @@ app.post('/stop_rosbag', (req, res) => {
         return res.status(500).json({ error: 'Failed to stop rosbag process.' });
     }
 });
-
-
