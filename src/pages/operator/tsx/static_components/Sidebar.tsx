@@ -95,6 +95,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case ComponentType.VirtualJoystick:
         case ComponentType.ButtonGrid:
         case ComponentType.Map:
+        case ComponentType.ProgramEditor:
             return definition.type;
         default:
             throw Error(
@@ -503,7 +504,6 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Map },
         { type: ComponentType.BatteryGuage },
         { type: ComponentType.ProgramEditor },
-        // Removed RosbagRecorder from addable components
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
