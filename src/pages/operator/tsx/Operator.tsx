@@ -340,7 +340,8 @@ export const Operator = (props: {
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
         robotNotHomed: robotNotHomed,
-        isHumanMode: isHumanMode,
+        // Only pass human mode information in Run Program mode
+        isHumanMode: programMode === "Run Program" ? isHumanMode : true,
     };
 
     /** Properties for the global options area of the sidebar */
@@ -393,25 +394,27 @@ export const Operator = (props: {
 
     return (
         <div id="operator">
-            {/* Persistent banner for control mode */}
-            <div
-                style={{
-                    width: "100%",
-                    background: isHumanMode ? "#4caf50" : "#ff9800",
-                    color: "white",
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    fontSize: "1.2em",
-                    padding: "8px 0",
-                    position: "relative",
-                    zIndex: 1,
-                    opacity: props.isReconnecting ? 0.5 : 1,
-                    filter: props.isReconnecting ? "grayscale(1)" : "none",
-                    pointerEvents: props.isReconnecting ? "none" : "auto"
-                }}
-            >
-                {isHumanMode ? "You are in control" : "Robot in control"}
-            </div>
+            {/* Persistent banner for control mode - only show in Run Program mode */}
+            {programMode === "Run Program" && (
+                <div
+                    style={{
+                        width: "100%",
+                        background: isHumanMode ? "#4caf50" : "#ff9800",
+                        color: "white",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.2em",
+                        padding: "8px 0",
+                        position: "relative",
+                        zIndex: 1,
+                        opacity: props.isReconnecting ? 0.5 : 1,
+                        filter: props.isReconnecting ? "grayscale(1)" : "none",
+                        pointerEvents: props.isReconnecting ? "none" : "auto"
+                    }}
+                >
+                    {isHumanMode ? "You are in control" : "Robot in control"}
+                </div>
+            )}
             {/* Global controls (Demonstration Recorder, etc.) */}
             <div id="operator-global-controls">
                 <div
@@ -558,7 +561,7 @@ export const Operator = (props: {
                 </div>
             )}
             {/* Pop-up Modal */}
-            {showPopup && (
+            {showPopup && programMode === "Run Program" && (
                 <div style={{
                     position: "fixed",
                     top: 0,
@@ -622,43 +625,23 @@ export const Operator = (props: {
             <div id="operator-body">
                 <LayoutArea layout={layout.current} sharedState={sharedState} />
             </div>
-            {/* Bottom left controls */}
-            <div style={{
-                position: "fixed",
-                bottom: 20,
-                left: 20,
-                zIndex: 100,
-                display: "flex",
-                alignItems: "center",
-                gap: 12
-            }}>
-                {/* Human/Robot mode toggle */}
-                <button
-                    style={{
-                        background: isHumanMode ? "#4caf50" : "#ff9800",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 4,
-                        padding: "8px 16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        fontSize: "0.9em",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-                    }}
-                    onClick={e => {
-                        e.stopPropagation();
-                        setIsHumanMode(mode => !mode);
-                    }}
-                >
-                    {isHumanMode ? "Human" : "Robot"} Mode
-                </button>
-                {/* Pop-up button */}
-                {!isHumanMode && (
+            {/* Bottom left controls - only show in Run Program mode */}
+            {programMode === "Run Program" && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 20,
+                    left: 20,
+                    zIndex: 100,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12
+                }}>
+                    {/* Human/Robot mode toggle */}
                     <button
                         style={{
-                            background: "#fff",
-                            color: "#ff9800",
-                            border: "1px solid #ff9800",
+                            background: isHumanMode ? "#4caf50" : "#ff9800",
+                            color: "white",
+                            border: "none",
                             borderRadius: 4,
                             padding: "8px 16px",
                             fontWeight: "bold",
@@ -668,13 +651,35 @@ export const Operator = (props: {
                         }}
                         onClick={e => {
                             e.stopPropagation();
-                            setShowPopup(true);
+                            setIsHumanMode(mode => !mode);
                         }}
                     >
-                        Pop-up
+                        {isHumanMode ? "Human" : "Robot"} Mode
                     </button>
-                )}
-            </div>
+                    {/* Pop-up button */}
+                    {!isHumanMode && (
+                        <button
+                            style={{
+                                background: "#fff",
+                                color: "#ff9800",
+                                border: "1px solid #ff9800",
+                                borderRadius: 4,
+                                padding: "8px 16px",
+                                fontWeight: "bold",
+                                cursor: "pointer",
+                                fontSize: "0.9em",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+                            }}
+                            onClick={e => {
+                                e.stopPropagation();
+                                setShowPopup(true);
+                            }}
+                        >
+                            Pop-up
+                        </button>
+                    )}
+                </div>
+            )}
             <Sidebar
                 hidden={!customizing}
                 onDelete={handleDelete}
