@@ -672,7 +672,7 @@ export const Operator = (props: {
             )}
 
             <Sidebar
-                hidden={!customizing}
+                hidden={false}
                 onDelete={handleDelete}
                 updateLayout={updateLayout}
                 onSelect={handleSelect}
