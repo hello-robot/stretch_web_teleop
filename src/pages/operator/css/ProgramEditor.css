@@ -5,6 +5,8 @@
     flex-direction: column;
     height: 100%;
     min-height: 300px;
+    min-width: 400px;
+    flex: 1 1 0;
     background: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
