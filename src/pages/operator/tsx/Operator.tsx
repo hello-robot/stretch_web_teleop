@@ -88,6 +88,30 @@ export const Operator = (props: {
         "Run Program": props.layout,
     });
 
+    // Initialize mode-specific layouts on first load
+    React.useEffect(() => {
+        const initializeModeLayouts = () => {
+            const programModes = ["Demonstrate", "Create Program", "Run Program"];
+            const initialLayouts: { [mode: string]: LayoutDefinition } = {};
+            
+            programModes.forEach(mode => {
+                const savedLayout = props.storageHandler.loadCurrentLayout(mode);
+                if (savedLayout) {
+                    initialLayouts[mode] = savedLayout;
+                } else {
+                    // Use a fresh default layout for each mode
+                    initialLayouts[mode] = props.storageHandler.loadCurrentLayoutOrDefault(mode);
+                }
+            });
+            
+            setModeLayouts(initialLayouts);
+            // Set current layout to the current mode
+            layout.current = initialLayouts[programMode];
+        };
+        
+        initializeModeLayouts();
+    }, []);
+
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
     const buttonStateMap = React.useRef<ButtonStateMap>();
@@ -360,8 +384,8 @@ export const Operator = (props: {
         if (newModeLayout) {
             layout.current = newModeLayout;
         } else {
-            // If no saved layout for this mode, use the current layout as template
-            layout.current = JSON.parse(JSON.stringify(layout.current));
+            // If no saved layout for this mode, start with a clean default layout
+            layout.current = props.storageHandler.loadCurrentLayoutOrDefault(newMode);
         }
         
         updateLayout();
