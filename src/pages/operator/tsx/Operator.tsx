@@ -239,10 +239,6 @@ export const Operator = (props: {
      * @param path the path of the component that was selected
      */
     function handleSelect(def: ComponentDefinition, path?: string) {
-        // Allow selection from sidebar even when not customizing
-        // Only prevent selection from layout when not customizing
-        if (!customizing && path !== undefined) return;
-
         const pathsMatch = path === selectedPath;
         const defsMatch =
             def.type === selectedDefinition?.type &&
