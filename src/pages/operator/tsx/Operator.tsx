@@ -50,16 +50,18 @@ export const Operator = (props: {
     storageHandler: StorageHandler;
     isReconnecting?: boolean;
 }) => {
-    const [customizing, setCustomizing] = React.useState(false);
-    const [selectedPath, setSelectedPath] = React.useState<string | undefined>(
-        undefined
-    );
-    const [selectedDefinition, setSelectedDef] = React.useState<
-        ComponentDefinition | undefined
-    >(undefined);
-    const [velocityScale, setVelocityScale] = React.useState<number>(
-        FunctionProvider.velocityScale
-    );
+    const [customizing, setCustomizing] = React.useState<boolean>(false);
+    const [selectedDefinition, setSelectedDefinition] =
+        React.useState<ComponentDefinition>();
+    const [selectedPath, setSelectedPath] = React.useState<string>();
+    const [buttonStateMapRerender, setButtonStateMapRerender] =
+        React.useState<boolean>(false);
+    const [tabletOrientationRerender, setTabletOrientationRerender] =
+        React.useState<boolean>(false);
+    const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
+    const [isHumanMode, setIsHumanMode] = React.useState<boolean>(true);
+    const [showPopup, setShowPopup] = React.useState<boolean>(false);
+    const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
     const [buttonCollision, setButtonCollision] = React.useState<
         ButtonPadButton[]
     >([]);
@@ -77,17 +79,10 @@ export const Operator = (props: {
         showHomeTheRobotGlobalControl
     );
 
-    // Add state for human/robot mode
-    const [isHumanMode, setIsHumanMode] = React.useState(true);
-    const [showPopup, setShowPopup] = React.useState(false);
-    const [programMode, setProgramMode] = React.useState<string>("demonstrate");
-
     const layout = React.useRef<LayoutDefinition>(props.layout);
 
     // Just used as a flag to force the operator to rerender when the button state map
     // has been updated
-    const [buttonStateMapRerender, setButtonStateMapRerender] =
-        React.useState<boolean>(false);
     const buttonStateMap = React.useRef<ButtonStateMap>();
     function operatorCallback(bsm: ButtonStateMap) {
         let collisionButtons: ButtonPadButton[] = [];
@@ -102,8 +97,6 @@ export const Operator = (props: {
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
-    const [tabletOrientationRerender, setTabletOrientationRerender] =
-        React.useState<boolean>(false);
     underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
         setTabletOrientationRerender(!tabletOrientationRerender);
     });
@@ -262,13 +255,13 @@ export const Operator = (props: {
             def.type === selectedDefinition?.type &&
             def.id === selectedDefinition?.id;
         if (pathsMatch || defsMatch) {
-            setSelectedDef(undefined);
+            setSelectedDefinition(undefined);
             setSelectedPath(undefined);
             return;
         }
 
         // Activate the selected component
-        setSelectedDef(def);
+        setSelectedDefinition(def);
         setSelectedPath(path);
     }
 
@@ -279,7 +272,7 @@ export const Operator = (props: {
         removeFromLayout(selectedPath, layout.current);
         updateLayout();
         setSelectedPath(undefined);
-        setSelectedDef(undefined);
+        setSelectedDefinition(undefined);
     }
 
     /**
@@ -291,13 +284,13 @@ export const Operator = (props: {
             props.storageHandler.saveCurrentLayout(layout.current);
         }
         setCustomizing(!customizing);
-        setSelectedDef(undefined);
+        setSelectedDefinition(undefined);
         setSelectedPath(undefined);
     };
 
     /** Un-select current component when click inside of header */
     function handleClickHeader() {
-        setSelectedDef(undefined);
+        setSelectedDefinition(undefined);
         setSelectedPath(undefined);
     }
 
@@ -343,7 +336,7 @@ export const Operator = (props: {
     };
 
     const actionModes = Object.values(ActionMode);
-    const programModes = ["demonstrate", "create program", "run program"];
+    const programModes = ["Demonstrate", "Create Program", "Run Program"];
 
     return (
         <div id="operator">
@@ -358,7 +351,7 @@ export const Operator = (props: {
                     fontSize: "1.2em",
                     padding: "8px 0",
                     position: "relative",
-                    zIndex: 10,
+                    zIndex: 1,
                     opacity: props.isReconnecting ? 0.5 : 1,
                     filter: props.isReconnecting ? "grayscale(1)" : "none",
                     pointerEvents: props.isReconnecting ? "none" : "auto"
@@ -396,22 +389,22 @@ export const Operator = (props: {
                 </div>
             </div>
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
-                {/* Action mode dropdown */}
+                {/* Program mode dropdown */}
                 <Dropdown
-                    onChange={(idx) => setActionMode(actionModes[idx])}
-                    selectedIndex={actionModes.indexOf(
-                        layout.current.actionMode
-                    )}
-                    possibleOptions={actionModes}
+                    onChange={(idx) => setProgramMode(programModes[idx])}
+                    selectedIndex={programModes.indexOf(programMode)}
+                    possibleOptions={programModes}
                     showActive
                     placement="bottom"
                 />
-                {/* Program mode dropdown */}
+                {/* Action mode dropdown */}
                 <div style={{ marginLeft: 16 }}>
                     <Dropdown
-                        onChange={(idx) => setProgramMode(programModes[idx])}
-                        selectedIndex={programModes.indexOf(programMode)}
-                        possibleOptions={programModes}
+                        onChange={(idx) => setActionMode(actionModes[idx])}
+                        selectedIndex={actionModes.indexOf(
+                            layout.current.actionMode
+                        )}
+                        possibleOptions={actionModes}
                         showActive
                         placement="bottom"
                     />
