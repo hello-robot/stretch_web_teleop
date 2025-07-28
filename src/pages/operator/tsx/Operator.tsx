@@ -197,9 +197,9 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the display labels property to display or hidden.
+     * Sets the labels to display or hidden.
      *
-     * @param displayLabels if the button text labels should be displayed
+     * @param displayLabels whether the labels should be displayed.
      */
     function setDisplayLabels(displayLabels: boolean) {
         layout.current.displayLabels = displayLabels;
@@ -207,10 +207,10 @@ export const Operator = (props: {
     }
 
     /**
-     * Sets the RosbagRecorder component to display or hidden.
+     * Sets the rosbag recorder component to display or hidden.
      *
-     * @param displayRosbagRecorder whether the RosbagRecorder component should
-     *    be displayed.
+     * @param displayRosbagRecorder if the rosbag recorder component at the
+     *                             top of the operator body should be displayed
      */
     function setDisplayRosbagRecorder(displayRosbagRecorder: boolean) {
         layout.current.displayRosbagRecorder = displayRosbagRecorder;
@@ -218,40 +218,29 @@ export const Operator = (props: {
     }
 
     /**
-     * Callback when the user clicks on a drop zone, moves the active component
-     * into the drop zone
-     * @param path path to the clicked drop zone
+     * Callback when a component is dropped into the layout.
+     *
+     * @param path the path where the component was dropped
      */
     function handleDrop(path: string) {
-        console.log("handleDrop", path);
-        if (!selectedDefinition)
-            throw Error("Active definition undefined on drop event");
-        let newPath: string = path;
-        if (!selectedPath) {
-            // New element not already in the layout
-            newPath = addToLayout(selectedDefinition, path, layout.current);
-        } else {
-            newPath = moveInLayout(selectedPath, path, layout.current);
-        }
-        setSelectedPath(newPath);
-        console.log("new active path", newPath);
+        setSelectedDefinition(undefined);
+        setSelectedPath(undefined);
+        if (!selectedDefinition) return;
+        
+        // Add the component to the layout using the proper structure
+        addToLayout(selectedDefinition, path, layout.current);
         updateLayout();
     }
 
     /**
-     * Callback when a component is selected during customization
-     * @param path path to the selected component
-     * @param def definition of the selected component
+     * Callback when a component is selected from the layout.
+     *
+     * @param def the component definition that was selected
+     * @param path the path of the component that was selected
      */
     function handleSelect(def: ComponentDefinition, path?: string) {
-        console.log("selected", path);
-        if (!customizing) return;
-
-        // If reselected the same component at the same path, or the same component
-        // without a path from the sidebar, then unactivate it
-        const pathsMatch = selectedPath && selectedPath == path;
+        const pathsMatch = path === selectedPath;
         const defsMatch =
-            !selectedPath &&
             def.type === selectedDefinition?.type &&
             def.id === selectedDefinition?.id;
         if (pathsMatch || defsMatch) {
@@ -338,56 +327,103 @@ export const Operator = (props: {
     const actionModes = Object.values(ActionMode);
     const programModes = ["Demonstrate", "Create Program", "Run Program"];
 
+    // Determine which components to show based on program mode
+    const isDemonstrateMode = programMode === "Demonstrate";
+    const isCreateProgramMode = programMode === "Create Program";
+    const isRunProgramMode = programMode === "Run Program";
+
     return (
         <div id="operator">
-            {/* Persistent banner for control mode */}
-            <div
-                style={{
-                    width: "100%",
-                    background: isHumanMode ? "#4caf50" : "#ff9800",
-                    color: "white",
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    fontSize: "1.2em",
-                    padding: "8px 0",
-                    position: "relative",
-                    zIndex: 1,
-                    opacity: props.isReconnecting ? 0.5 : 1,
-                    filter: props.isReconnecting ? "grayscale(1)" : "none",
-                    pointerEvents: props.isReconnecting ? "none" : "auto"
-                }}
-            >
-                {isHumanMode ? "You are in control" : "Robot in control"}
-            </div>
-            {/* Global controls (Demonstration Recorder, etc.) */}
-            <div id="operator-global-controls">
+            {/* Persistent banner for control mode - only show in Run Program mode */}
+            {isRunProgramMode && (
                 <div
-                    className={className("operator-pose-recorder", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayMovementRecorder}
+                    style={{
+                        width: "100%",
+                        background: isHumanMode ? "#4caf50" : "#ff9800",
+                        color: "white",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.2em",
+                        padding: "8px 0",
+                        position: "relative",
+                        zIndex: 1,
+                        opacity: props.isReconnecting ? 0.5 : 1,
+                        filter: props.isReconnecting ? "grayscale(1)" : "none",
+                        pointerEvents: props.isReconnecting ? "none" : "auto"
+                    }}
                 >
-                    <MovementRecorder
-                        hideLabels={!layout.current.displayLabels}
-                    />
+                    {isHumanMode ? "You are in control" : "Robot in control"}
                 </div>
-                <div
-                    className={className("operator-text-to-speech", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayTextToSpeech}
-                >
-                    <TextToSpeech hideLabels={!layout.current.displayLabels} />
+            )}
+            
+            {/* Global controls - only show MovementRecorder in Demonstrate mode */}
+            {isDemonstrateMode && (
+                <div id="operator-global-controls">
+                    <div
+                        className={className("operator-pose-recorder", {
+                            hideLabels: !layout.current.displayLabels,
+                        })}
+                        hidden={!layout.current.displayMovementRecorder}
+                    >
+                        <MovementRecorder
+                            hideLabels={!layout.current.displayLabels}
+                        />
+                    </div>
+                    <div
+                        className={className("operator-text-to-speech", {
+                            hideLabels: !layout.current.displayLabels,
+                        })}
+                        hidden={!layout.current.displayTextToSpeech}
+                    >
+                        <TextToSpeech hideLabels={!layout.current.displayLabels} />
+                    </div>
+                    <div
+                        className={className("operator-rosbag-recorder", {
+                            hideLabels: !layout.current.displayLabels,
+                        })}
+                        hidden={!layout.current.displayRosbagRecorder}
+                    >
+                        <RosbagRecorder hideLabels={!layout.current.displayLabels} />
+                    </div>
                 </div>
-                <div
-                    className={className("operator-rosbag-recorder", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayRosbagRecorder}
-                >
-                    <RosbagRecorder hideLabels={!layout.current.displayLabels} />
+            )}
+
+            {/* Create Program mode - show text editor */}
+            {isCreateProgramMode && (
+                <div style={{
+                    padding: "20px",
+                    height: "calc(100vh - 80px)",
+                    display: "flex",
+                    flexDirection: "column"
+                }}>
+                    <div style={{
+                        background: "white",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        flex: 1,
+                        padding: "16px",
+                        fontFamily: "monospace",
+                        fontSize: "14px",
+                        lineHeight: "1.5"
+                    }}>
+                        <textarea
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                                outline: "none",
+                                resize: "none",
+                                fontFamily: "inherit",
+                                fontSize: "inherit",
+                                lineHeight: "inherit"
+                            }}
+                            placeholder="Enter your program here..."
+                            defaultValue="// Program Editor\n// Write your robot program here\n\n"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
+
             <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
                 {/* Program mode dropdown */}
                 <Dropdown
@@ -397,18 +433,20 @@ export const Operator = (props: {
                     showActive
                     placement="bottom"
                 />
-                {/* Action mode dropdown */}
-                <div style={{ marginLeft: 16 }}>
-                    <Dropdown
-                        onChange={(idx) => setActionMode(actionModes[idx])}
-                        selectedIndex={actionModes.indexOf(
-                            layout.current.actionMode
-                        )}
-                        possibleOptions={actionModes}
-                        showActive
-                        placement="bottom"
-                    />
-                </div>
+                {/* Action mode dropdown - only show in Demonstrate mode */}
+                {isDemonstrateMode && (
+                    <div style={{ marginLeft: 16 }}>
+                        <Dropdown
+                            onChange={(idx) => setActionMode(actionModes[idx])}
+                            selectedIndex={actionModes.indexOf(
+                                layout.current.actionMode
+                            )}
+                            possibleOptions={actionModes}
+                            showActive
+                            placement="bottom"
+                        />
+                    </div>
+                )}
                 <AudioControl remoteStreams={remoteStreams} />
                 <SpeedControl
                     scale={velocityScale}
@@ -422,86 +460,93 @@ export const Operator = (props: {
                     onClick={handleToggleCustomize}
                 />
             </div>
-            {robotNotHomed && (
-                <div className="operator-collision-alerts">
-                    <div
-                        className={className("operator-alert", {
-                            fadeIn: robotNotHomed,
-                            fadeOut: !robotNotHomed,
-                        })}
-                    >
-                        <HomeTheRobot
-                            hideLabels={!layout.current.displayLabels}
-                        />
-                    </div>
-                </div>
+
+            {/* Alerts - only show in Demonstrate and Run Program modes */}
+            {(isDemonstrateMode || isRunProgramMode) && (
+                <>
+                    {robotNotHomed && (
+                        <div className="operator-collision-alerts">
+                            <div
+                                className={className("operator-alert", {
+                                    fadeIn: robotNotHomed,
+                                    fadeOut: !robotNotHomed,
+                                })}
+                            >
+                                <HomeTheRobot
+                                    hideLabels={!layout.current.displayLabels}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {
+                        <div className="operator-collision-alerts">
+                            <div
+                                className={className("operator-alert", {
+                                    fadeIn: buttonCollision.length > 0,
+                                    fadeOut: buttonCollision.length == 0,
+                                })}
+                            >
+                                <Alert type="warning">
+                                    <span>
+                                        {buttonCollision.length > 0
+                                            ? buttonCollision.join(", ") +
+                                              " in collision!"
+                                            : ""}
+                                    </span>
+                                </Alert>
+                            </div>
+                        </div>
+                    }
+                    {moveBaseState && (
+                        <div className="operator-collision-alerts">
+                            <div
+                                className={className("operator-alert", {
+                                    fadeIn: moveBaseState !== undefined,
+                                    fadeOut: moveBaseState == undefined,
+                                })}
+                            >
+                                <Alert
+                                    type={moveBaseState.alert_type}
+                                    message={moveBaseState.state}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {moveToPregraspState && (
+                        <div className="operator-collision-alerts">
+                            <div
+                                className={className("operator-alert", {
+                                    fadeIn: moveToPregraspState !== undefined,
+                                    fadeOut: moveToPregraspState == undefined,
+                                })}
+                            >
+                                <Alert
+                                    type={moveToPregraspState.alert_type}
+                                    message={moveToPregraspState.state}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {showTabletState && (
+                        <div className="operator-collision-alerts">
+                            <div
+                                className={className("operator-alert", {
+                                    fadeIn: showTabletState !== undefined,
+                                    fadeOut: showTabletState == undefined,
+                                })}
+                            >
+                                <Alert
+                                    type={showTabletState.alert_type}
+                                    message={showTabletState.state}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
-            {
-                <div className="operator-collision-alerts">
-                    <div
-                        className={className("operator-alert", {
-                            fadeIn: buttonCollision.length > 0,
-                            fadeOut: buttonCollision.length == 0,
-                        })}
-                    >
-                        <Alert type="warning">
-                            <span>
-                                {buttonCollision.length > 0
-                                    ? buttonCollision.join(", ") +
-                                      " in collision!"
-                                    : ""}
-                            </span>
-                        </Alert>
-                    </div>
-                </div>
-            }
-            {moveBaseState && (
-                <div className="operator-collision-alerts">
-                    <div
-                        className={className("operator-alert", {
-                            fadeIn: moveBaseState !== undefined,
-                            fadeOut: moveBaseState == undefined,
-                        })}
-                    >
-                        <Alert
-                            type={moveBaseState.alert_type}
-                            message={moveBaseState.state}
-                        />
-                    </div>
-                </div>
-            )}
-            {moveToPregraspState && (
-                <div className="operator-collision-alerts">
-                    <div
-                        className={className("operator-alert", {
-                            fadeIn: moveToPregraspState !== undefined,
-                            fadeOut: moveToPregraspState == undefined,
-                        })}
-                    >
-                        <Alert
-                            type={moveToPregraspState.alert_type}
-                            message={moveToPregraspState.state}
-                        />
-                    </div>
-                </div>
-            )}
-            {showTabletState && (
-                <div className="operator-collision-alerts">
-                    <div
-                        className={className("operator-alert", {
-                            fadeIn: showTabletState !== undefined,
-                            fadeOut: showTabletState == undefined,
-                        })}
-                    >
-                        <Alert
-                            type={showTabletState.alert_type}
-                            message={showTabletState.state}
-                        />
-                    </div>
-                </div>
-            )}
-            {/* Pop-up Modal */}
-            {showPopup && (
+
+            {/* Pop-up Modal - only show in Run Program mode */}
+            {isRunProgramMode && showPopup && (
                 <div style={{
                     position: "fixed",
                     top: 0,
@@ -562,46 +607,31 @@ export const Operator = (props: {
                     </div>
                 </div>
             )}
-            <div id="operator-body">
-                <LayoutArea layout={layout.current} sharedState={sharedState} />
-            </div>
-            {/* Bottom left controls */}
-            <div style={{
-                position: "fixed",
-                bottom: 20,
-                left: 20,
-                zIndex: 100,
-                display: "flex",
-                alignItems: "center",
-                gap: 12
-            }}>
-                {/* Human/Robot mode toggle */}
-                <button
-                    style={{
-                        background: isHumanMode ? "#4caf50" : "#ff9800",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 4,
-                        padding: "8px 16px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        fontSize: "0.9em",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-                    }}
-                    onClick={e => {
-                        e.stopPropagation();
-                        setIsHumanMode(mode => !mode);
-                    }}
-                >
-                    {isHumanMode ? "Human" : "Robot"} Mode
-                </button>
-                {/* Pop-up button */}
-                {!isHumanMode && (
+
+            {/* Layout Area - only show in Demonstrate and Run Program modes */}
+            {(isDemonstrateMode || isRunProgramMode) && (
+                <div id="operator-body">
+                    <LayoutArea layout={layout.current} sharedState={sharedState} />
+                </div>
+            )}
+
+            {/* Bottom left controls - only show in Run Program mode */}
+            {isRunProgramMode && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 20,
+                    left: 20,
+                    zIndex: 100,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12
+                }}>
+                    {/* Human/Robot mode toggle */}
                     <button
                         style={{
-                            background: "#fff",
-                            color: "#ff9800",
-                            border: "1px solid #ff9800",
+                            background: isHumanMode ? "#4caf50" : "#ff9800",
+                            color: "white",
+                            border: "none",
                             borderRadius: 4,
                             padding: "8px 16px",
                             fontWeight: "bold",
@@ -611,13 +641,36 @@ export const Operator = (props: {
                         }}
                         onClick={e => {
                             e.stopPropagation();
-                            setShowPopup(true);
+                            setIsHumanMode(mode => !mode);
                         }}
                     >
-                        Pop-up
+                        {isHumanMode ? "Human" : "Robot"} Mode
                     </button>
-                )}
-            </div>
+                    {/* Pop-up button */}
+                    {!isHumanMode && (
+                        <button
+                            style={{
+                                background: "#fff",
+                                color: "#ff9800",
+                                border: "1px solid #ff9800",
+                                borderRadius: 4,
+                                padding: "8px 16px",
+                                fontWeight: "bold",
+                                cursor: "pointer",
+                                fontSize: "0.9em",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+                            }}
+                            onClick={e => {
+                                e.stopPropagation();
+                                setShowPopup(true);
+                            }}
+                        >
+                            Pop-up
+                        </button>
+                    )}
+                </div>
+            )}
+
             <Sidebar
                 hidden={!customizing}
                 onDelete={handleDelete}
