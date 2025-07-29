@@ -5,27 +5,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className } from "shared/util";
-import { FunctionProvider } from "../function_providers/FunctionProvider";
 import "operator/css/ProgramEditor.css";
-
-// Simple function provider for ProgramEditor test
-class ProgramEditorFunctionProvider extends FunctionProvider {
-    public testRobotControl() {
-        if (FunctionProvider.remoteRobot) {
-            const testPose = {
-                joint_lift: 0.1, 
-            };
-            console.log("Sending test pose:", testPose);
-            // remoteRobot to send the pose command
-            FunctionProvider.remoteRobot.setRobotPose(testPose);
-        } else {
-            console.warn("No remote robot available for robot control");
-        }
-    }
-}
-
-// Create a singleton instance
-const programEditorFunctionProvider = new ProgramEditorFunctionProvider();
 
 /** Properties for {@link ProgramEditor} */
 type ProgramEditorProps = CustomizableComponentProps & {
@@ -113,6 +93,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (!props.readOnly) {
             setCode(prevCode => prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text);
         }
+    };
+
+    // Function to read the program code 
+    const readProgramCode = (): string => {
+        return code;
     };
 
     // Expose the addText function to sharedState
@@ -266,10 +251,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to handle Run Program button click
     const handleRunProgram = () => {
         if (props.onRunProgram) {
-            props.onRunProgram(code);
-        } else {
-            // Testing the run program button 
-            programEditorFunctionProvider.testRobotControl();
+            const programText = readProgramCode();
+            console.log("Running program:", programText);
+            props.onRunProgram(programText);
         }
     };
 
