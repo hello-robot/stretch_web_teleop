@@ -32,6 +32,21 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
+    // Function to add text to the editor
+    const addText = (text: string) => {
+        if (!props.readOnly) {
+            setCode(prevCode => prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text);
+        }
+    };
+
+    // Expose the addText function to sharedState
+    React.useEffect(() => {
+        if (props.sharedState.addToProgramEditor === undefined) {
+            // Add the function to sharedState if it doesn't exist
+            (props.sharedState as any).addToProgramEditor = addText;
+        }
+    }, [props.sharedState]);
+
     // Update line numbers when code changes
     useEffect(() => {
         const lines = code.split('\n');

@@ -44,19 +44,54 @@ export const Library = (props: CustomizableComponentProps) => {
                     <div className="library-subsection">
                         <h4 className="library-subsection-title robot-heading">Robot</h4>
                         <div className="library-text">
-                            <div>MoveEEToPose(x,y,z)</div>
-                            <div>AdjustGripperWidth()</div>
-                            <div>RotateEE(theta)</div>
-                            <div>ResetRobot()</div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("MoveEEToPose(x,y,z)")}
+                            >
+                                MoveEEToPose(x,y,z)
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
+                            >
+                                AdjustGripperWidth()
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("RotateEE(theta)")}
+                            >
+                                RotateEE(theta)
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
+                            >
+                                ResetRobot()
+                            </div>
                         </div>
                     </div>
                     
                     <div className="library-subsection">
                         <h4 className="library-subsection-title human-heading">Human</h4>
                         <div className="library-text">
-                            <div>PauseAndConfirm()</div>
-                            <div>GiveControl()</div>
-                            <div>TakeControl()</div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
+                            >
+                                PauseAndConfirm()
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
+                            >
+                                GiveControl()
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
+                            >
+                                TakeControl()
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,10 +99,27 @@ export const Library = (props: CustomizableComponentProps) => {
                 {/* Saved Positions Section */}
                 <div className="library-section">
                     <h3 className="library-section-title">Saved Positions</h3>
-                    <div className="library-text">
-                            <div>approach_pose</div>
-                            <div>red_cub_pose</div>
-                            <div>end_pose</div>
+                    <div className="library-subsection">
+                        <div className="library-text">
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("approach_pose")}
+                            >
+                                approach_pose
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("red_cub_pose")}
+                            >
+                                red_cub_pose
+                            </div>
+                            <div 
+                                className="library-function-item"
+                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("end_pose")}
+                            >
+                                end_pose
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

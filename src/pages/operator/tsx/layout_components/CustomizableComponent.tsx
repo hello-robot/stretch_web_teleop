@@ -41,6 +41,8 @@ export type SharedState = {
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
     isHumanMode: boolean;
+    /** Function to add text to program editor */
+    addToProgramEditor?: (text: string) => void;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

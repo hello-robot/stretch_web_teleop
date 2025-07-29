@@ -101,6 +101,18 @@
     line-height: 1.4;
 }
 
+.library-function-item {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.library-function-item:hover {
+    background-color: var(--tertiary-background-color);
+    color: var(--text-color);
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     .library-root {
