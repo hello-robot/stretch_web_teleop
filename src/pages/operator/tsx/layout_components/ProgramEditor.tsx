@@ -17,6 +17,42 @@ type ProgramEditorProps = CustomizableComponentProps & {
     readOnly?: boolean;
 };
 
+// Robot functions (orange)
+const ROBOT_FUNCTIONS = [
+    'MoveEEToPose',
+    'AdjustGripperWidth', 
+    'RotateEE',
+    'ResetRobot'
+];
+
+// Human functions (green)
+const HUMAN_FUNCTIONS = [
+    'PauseAndConfirm',
+    'GiveControl',
+    'TakeControl'
+];
+
+/**
+ * Syntax highlighting function for robot and human functions
+ */
+const highlightSyntax = (text: string): string => {
+    let highlightedText = text;
+    
+    // Highlight robot functions in orange
+    ROBOT_FUNCTIONS.forEach(func => {
+        const regex = new RegExp(`\\b${func}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="robot-function">${func}</span>`);
+    });
+    
+    // Highlight human functions in green
+    HUMAN_FUNCTIONS.forEach(func => {
+        const regex = new RegExp(`\\b${func}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
+    });
+    
+    return highlightedText;
+};
+
 /**
  * A code editor component with line numbers and syntax highlighting
  * similar to VS Code interface
@@ -28,6 +64,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
+    const highlightedRef = useRef<HTMLDivElement>(null);
     
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
@@ -58,6 +95,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const handleScroll = () => {
         if (textareaRef.current && lineNumbersRef.current) {
             lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+        }
+        if (textareaRef.current && highlightedRef.current) {
+            highlightedRef.current.scrollTop = textareaRef.current.scrollTop;
+            highlightedRef.current.scrollLeft = textareaRef.current.scrollLeft;
         }
     };
 
@@ -95,6 +136,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
+    // Create highlighted version of the code
+    const highlightedCode = highlightSyntax(code);
+
     return (
         <div
             className={className("program-editor-root", {
@@ -117,17 +161,24 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         </div>
                     ))}
                 </div>
-                <textarea
-                    ref={textareaRef}
-                    className="code-textarea"
-                    value={code}
-                    onChange={handleCodeChange}
-                    onKeyDown={handleKeyDown}
-                    onScroll={handleScroll}
-                    readOnly={props.readOnly}
-                    placeholder="Enter your code here..."
-                    spellCheck={false}
-                />
+                <div className="editor-content">
+                    <textarea
+                        ref={textareaRef}
+                        className="code-textarea"
+                        value={code}
+                        onChange={handleCodeChange}
+                        onKeyDown={handleKeyDown}
+                        onScroll={handleScroll}
+                        readOnly={props.readOnly}
+                        placeholder="Enter your code here..."
+                        spellCheck={false}
+                    />
+                    <div 
+                        ref={highlightedRef}
+                        className="code-highlighted"
+                        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
+                </div>
             </div>
         </div>
     );
