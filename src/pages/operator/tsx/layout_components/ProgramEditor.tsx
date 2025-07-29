@@ -161,7 +161,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         </div>
                     ))}
                 </div>
-                <div className="editor-content">
+                <div className="editor-wrapper">
                     <textarea
                         ref={textareaRef}
                         className="code-textarea"

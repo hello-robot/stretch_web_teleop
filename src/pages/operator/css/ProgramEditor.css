@@ -58,7 +58,7 @@
     overflow: hidden;
 }
 
-.editor-content {
+.editor-wrapper {
     position: relative;
     flex: 1;
     overflow: hidden;
@@ -70,8 +70,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--background-color);
-    color: var(--text-color);
+    background: transparent;
+    color: transparent;
     caret-color: var(--text-color);
     z-index: 2;
     border: none;
@@ -106,7 +106,6 @@
     overflow-y: auto;
     pointer-events: none;
     z-index: 1;
-    display: none; /* Hide the highlighted version for now */
 }
 
 /* Syntax highlighting colors */
