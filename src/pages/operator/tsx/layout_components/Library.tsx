@@ -161,47 +161,117 @@ export const Library = (props: CustomizableComponentProps) => {
             
             {/* Modal */}
             {showModal && (
-                <div className="modal-overlay" onClick={handleCancel}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="modal-title">Add New Position</h3>
-                        <div className="modal-form">
-                            <div className="form-group">
-                                <label htmlFor="position-name">Position Name:</label>
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    background: "rgba(0,0,0,0.4)",
+                    zIndex: 1000,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}>
+                    <div style={{
+                        background: "white",
+                        borderRadius: 8,
+                        padding: 32,
+                        minWidth: 400,
+                        maxWidth: 500,
+                        boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+                        textAlign: "center"
+                    }}>
+                        <div style={{ fontSize: "1.2em", marginBottom: 24 }}>
+                            Add New Position
+                        </div>
+                        <div style={{ 
+                            display: "flex", 
+                            flexDirection: "column", 
+                            gap: 16,
+                            textAlign: "left",
+                            marginBottom: 24
+                        }}>
+                            <div>
+                                <label style={{ 
+                                    display: "block", 
+                                    marginBottom: 6,
+                                    fontWeight: "bold",
+                                    fontSize: "0.9em"
+                                }}>
+                                    Position Name:
+                                </label>
                                 <input
-                                    id="position-name"
                                     type="text"
                                     value={newPositionName}
                                     onChange={(e) => setNewPositionName(e.target.value)}
                                     placeholder="e.g., pickup_pose"
-                                    className="form-input"
+                                    style={{
+                                        width: "100%",
+                                        padding: "8px 12px",
+                                        border: "1px solid #ccc",
+                                        borderRadius: 4,
+                                        fontSize: "0.9em"
+                                    }}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="joint-states">Joint States:</label>
+                            <div>
+                                <label style={{ 
+                                    display: "block", 
+                                    marginBottom: 6,
+                                    fontWeight: "bold",
+                                    fontSize: "0.9em"
+                                }}>
+                                    Joint States:
+                                </label>
                                 <input
-                                    id="joint-states"
                                     type="text"
                                     value={newJointStates}
                                     onChange={(e) => setNewJointStates(e.target.value)}
                                     placeholder="e.g., [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]"
-                                    className="form-input"
+                                    style={{
+                                        width: "100%",
+                                        padding: "8px 12px",
+                                        border: "1px solid #ccc",
+                                        borderRadius: 4,
+                                        fontSize: "0.9em"
+                                    }}
                                 />
                             </div>
-                            <div className="modal-buttons">
-                                <button 
-                                    className="btn btn-primary"
-                                    onClick={handleAddPosition}
-                                    disabled={!newPositionName.trim() || !newJointStates.trim()}
-                                >
-                                    Save Position
-                                </button>
-                                <button 
-                                    className="btn btn-secondary"
-                                    onClick={handleCancel}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+                            <button
+                                style={{
+                                    background: "#4caf50",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: "8px 20px",
+                                    fontWeight: "bold",
+                                    fontSize: "1em",
+                                    cursor: "pointer",
+                                    opacity: (!newPositionName.trim() || !newJointStates.trim()) ? 0.5 : 1
+                                }}
+                                onClick={handleAddPosition}
+                                disabled={!newPositionName.trim() || !newJointStates.trim()}
+                            >
+                                Save Position
+                            </button>
+                            <button
+                                style={{
+                                    background: "#ff9800",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: "8px 20px",
+                                    fontWeight: "bold",
+                                    fontSize: "1em",
+                                    cursor: "pointer"
+                                }}
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>
