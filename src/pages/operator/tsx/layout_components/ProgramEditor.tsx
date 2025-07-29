@@ -32,37 +32,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
-    // Function to highlight code with colors
-    const highlightCode = (codeText: string): string => {
-        const robotFunctions = [
-            'MoveEEToPose(x,y,z)',
-            'AdjustGripperWidth()',
-            'RotateEE(theta)',
-            'ResetRobot()'
-        ];
-        const humanFunctions = [
-            'PauseAndConfirm()',
-            'GiveControl()',
-            'TakeControl()'
-        ];
-        
-        let highlightedCode = codeText;
-        
-        // Highlight robot functions in orange
-        robotFunctions.forEach(func => {
-            const regex = new RegExp(`\\b${func.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
-            highlightedCode = highlightedCode.replace(regex, `<span style="color: #ff8c00;">${func}</span>`);
-        });
-        
-        // Highlight human functions in green
-        humanFunctions.forEach(func => {
-            const regex = new RegExp(`\\b${func.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
-            highlightedCode = highlightedCode.replace(regex, `<span style="color: #28a745;">${func}</span>`);
-        });
-        
-        return highlightedCode;
-    };
-
     // Function to add text to the editor
     const addText = (text: string) => {
         if (!props.readOnly) {
@@ -148,50 +117,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         </div>
                     ))}
                 </div>
-                <div className="code-editor-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <textarea
-                        ref={textareaRef}
-                        className="code-textarea"
-                        value={code}
-                        onChange={handleCodeChange}
-                        onKeyDown={handleKeyDown}
-                        onScroll={handleScroll}
-                        readOnly={props.readOnly}
-                        placeholder="Enter your code here..."
-                        spellCheck={false}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'transparent',
-                            color: 'transparent',
-                            caretColor: 'var(--text-color)',
-                            zIndex: 2
-                        }}
-                    />
-                    <div 
-                        className="code-highlight-overlay"
-                        dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            pointerEvents: 'none',
-                            zIndex: 1,
-                            whiteSpace: 'pre-wrap',
-                            fontFamily: 'monospace',
-                            fontSize: '14px',
-                            lineHeight: '1.5',
-                            color: 'var(--text-color)',
-                            backgroundColor: 'transparent',
-                            overflow: 'hidden'
-                        }}
-                    />
-                </div>
+                <textarea
+                    ref={textareaRef}
+                    className="code-textarea"
+                    value={code}
+                    onChange={handleCodeChange}
+                    onKeyDown={handleKeyDown}
+                    onScroll={handleScroll}
+                    readOnly={props.readOnly}
+                    placeholder="Enter your code here..."
+                    spellCheck={false}
+                />
             </div>
         </div>
     );
