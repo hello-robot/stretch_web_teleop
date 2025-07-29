@@ -18,7 +18,6 @@ import { BatteryGuage } from "../static_components/BatteryGauge";
 import { RosbagRecorder } from "./RosbagRecorder";
 import { ProgramEditor } from "./ProgramEditor";
 import { Library } from "./Library";
-import { StorageHandler } from "../storage_handler/StorageHandler";
 
 /** State required for all elements */
 export type SharedState = {
@@ -41,10 +40,7 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
-    /** Whether the user is in control (only relevant in Run Program mode) */
     isHumanMode: boolean;
-    /** Storage handler for accessing saved data */
-    storageHandler: StorageHandler;
     /** Function to add text to program editor */
     addToProgramEditor?: (text: string) => void;
 };

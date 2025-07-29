@@ -32,6 +32,16 @@ const HUMAN_FUNCTIONS = [
     'TakeControl'
 ];
 
+// Saved positions (blue)
+const SAVED_POSITIONS = [
+    'approach_pose',
+    'red_cube_pose',
+    'end_pose'
+];
+
+// All available functions for tab completion
+const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...SAVED_POSITIONS];
+
 /**
  * Syntax highlighting function for robot and human functions
  */
@@ -48,6 +58,12 @@ const highlightSyntax = (text: string): string => {
     HUMAN_FUNCTIONS.forEach(func => {
         const regex = new RegExp(`\\b${func}\\b`, 'g');
         highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
+    });
+    
+    // Highlight saved positions in blue
+    SAVED_POSITIONS.forEach(position => {
+        const regex = new RegExp(`\\b${position}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
     });
     
     return highlightedText;
@@ -86,15 +102,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         }
     }, [props.sharedState]);
 
-    // Get all available functions and positions for tab completion
-    const getAllCompletions = (): string[] => {
-        const robotFunctions = ROBOT_FUNCTIONS;
-        const humanFunctions = HUMAN_FUNCTIONS;
-        const savedPositions = props.sharedState.storageHandler.getMapPoseNames();
-        
-        return [...robotFunctions, ...humanFunctions, ...savedPositions];
-    };
-
     // Update line numbers when code changes
     useEffect(() => {
         const lines = code.split('\n');
@@ -123,13 +130,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         
         // Find the start of the current word
         let start = cursorPos;
-        while (start > 0 && /[a-zA-Z_]/.test(text[start - 1])) {
+        while (start > 0 && /[a-zA-Z]/.test(text[start - 1])) {
             start--;
         }
         
         // Find the end of the current word
         let end = cursorPos;
-        while (end < text.length && /[a-zA-Z_]/.test(text[end])) {
+        while (end < text.length && /[a-zA-Z]/.test(text[end])) {
             end++;
         }
         
@@ -145,9 +152,8 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             return;
         }
         
-        const allCompletions = getAllCompletions();
-        const filtered = allCompletions.filter(completion => 
-            completion.toLowerCase().startsWith(word.toLowerCase()) && completion.toLowerCase() !== word.toLowerCase()
+        const filtered = ALL_FUNCTIONS.filter(func => 
+            func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
         
         if (filtered.length > 0) {
@@ -167,23 +173,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        // Check if it's a function or a position
-        const allCompletions = getAllCompletions();
-        const isFunction = ROBOT_FUNCTIONS.includes(currentSuggestion) || HUMAN_FUNCTIONS.includes(currentSuggestion);
-        const isPosition = props.sharedState.storageHandler.getMapPoseNames().includes(currentSuggestion);
-        
-        let completionText = currentSuggestion;
-        if (isFunction) {
-            completionText += '()';
-        } else if (isPosition) {
-            completionText = `"${currentSuggestion}"`;
-        }
-        
-        const newText = text.substring(0, start) + completionText + text.substring(end);
+        const newText = text.substring(0, start) + currentSuggestion + '()' + text.substring(end);
         setCode(newText);
         
-        // Set cursor position after the completed text
-        const newCursorPos = start + completionText.length;
+        // Set cursor position after the completed function
+        const newCursorPos = start + currentSuggestion.length + 2; // +2 for the parentheses
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = newCursorPos;
             textarea.focus();
@@ -255,18 +249,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Add the suggestion as grey text after the current word
                 const beforeWord = code.substring(0, start);
                 const afterWord = code.substring(end);
-                
-                // Determine the suggestion text based on type
-                const allCompletions = getAllCompletions();
-                const isFunction = ROBOT_FUNCTIONS.includes(currentSuggestion) || HUMAN_FUNCTIONS.includes(currentSuggestion);
-                const isPosition = props.sharedState.storageHandler.getMapPoseNames().includes(currentSuggestion);
-                
-                let suggestionText = currentSuggestion.substring(word.length);
-                if (isFunction) {
-                    suggestionText += '()';
-                } else if (isPosition) {
-                    suggestionText = `"${currentSuggestion}"`.substring(word.length);
-                }
+                const suggestionText = currentSuggestion.substring(word.length) + '()';
                 
                 // Create the highlighted version with suggestion
                 const beforeHighlighted = highlightSyntax(beforeWord);
