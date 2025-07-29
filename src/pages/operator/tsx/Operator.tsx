@@ -91,7 +91,7 @@ export const Operator = (props: {
     // Initialize mode-specific layouts on first load
     React.useEffect(() => {
         const initializeModeLayouts = () => {
-            const programModes = ["Demonstrate", "Create Program", "Run Program"];
+            const programModes = ["Demonstrate", "Program Editor", "Program Executor"];
             const initialLayouts: { [mode: string]: LayoutDefinition } = {};
             
             programModes.forEach(mode => {
@@ -368,7 +368,7 @@ export const Operator = (props: {
     };
 
     const actionModes = Object.values(ActionMode);
-    const programModes = ["Demonstrate", "Create Program", "Run Program"];
+    const programModes = ["Demonstrate", "Program Editor", "Program Executor"];
 
     // Function to switch layouts when program mode changes
     const switchToModeLayout = (newMode: string) => {
