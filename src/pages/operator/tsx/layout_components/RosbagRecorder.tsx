@@ -53,13 +53,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (
-        <div
-            className={className("operator-rosbag-recorder", {
-                customizing,
-                selected,
-            })}
-            {...selectProp}
-        >
+        <div {...selectProp}>
             <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
                 <button
                     className="save-btn btn-label"
@@ -70,10 +64,21 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                         fontWeight: "bold",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center"
+                        justifyContent: "center",
+                        gap: "8px"
                     }}
                 >
-                    {!isRecording ? "Record Demo" : "Stop Recording"}
+                    {!isRecording ? (
+                        <>
+                            <RadioButtonCheckedIcon />
+                            Record Demo
+                        </>
+                    ) : (
+                        <>
+                            <SaveIcon />
+                            Stop Recording
+                        </>
+                    )}
                 </button>
             </Tooltip>
             {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
