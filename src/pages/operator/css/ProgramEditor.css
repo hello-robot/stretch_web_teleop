@@ -59,7 +59,7 @@
 }
 
 .run-program-button {
-    background: var(--primary-color, #007bff);
+    background: var(--primary-color, #28a745);
     color: white;
     border: none;
     border-radius: 4px;
