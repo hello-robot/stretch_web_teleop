@@ -5,7 +5,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className } from "shared/util";
-import { FunctionProvider } from "../function_providers/FunctionProvider";
+import { storageHandler } from "../index";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -36,8 +36,6 @@ const HUMAN_FUNCTIONS = [
 // Get saved position names dynamically
 const getSavedPositionNames = (): string[] => {
     try {
-        // Access storage handler through FunctionProvider
-        const storageHandler = (FunctionProvider as any).storageHandler;
         if (storageHandler && storageHandler.getMapPoseNames) {
             return storageHandler.getMapPoseNames();
         }
