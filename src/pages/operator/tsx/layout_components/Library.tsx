@@ -21,7 +21,7 @@ export const Library = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
     
-    // State for saved positions and modal
+    // State for saved positions and modal- temporary placeholder
     const [savedPositions, setSavedPositions] = useState<SavedPosition[]>([
         { name: "approach_pose", jointStates: "[0.1, 0.2, 0.3, 0.4, 0.5, 0.6]", timestamp: new Date() },
         { name: "red_cub_pose", jointStates: "[0.2, 0.3, 0.4, 0.5, 0.6, 0.7]", timestamp: new Date() },
@@ -37,7 +37,6 @@ export const Library = (props: CustomizableComponentProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     };
 
-    // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     // Handle adding new position
@@ -55,7 +54,7 @@ export const Library = (props: CustomizableComponentProps) => {
         }
     };
 
-    // Handle cancel
+    // Handle cancel button
     const handleCancel = () => {
         setNewPositionName("");
         setNewJointStates("");

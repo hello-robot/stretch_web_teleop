@@ -415,7 +415,7 @@ export const Operator = (props: {
                     {isHumanMode ? "You are in control" : "Robot in control"}
                 </div>
             )}
-            {/* Global controls (Demonstration Recorder, etc.) */}
+            {/* Global controls */}
             <div id="operator-global-controls">
                 <div
                     className={className("operator-pose-recorder", {
@@ -625,7 +625,7 @@ export const Operator = (props: {
             <div id="operator-body">
                 <LayoutArea layout={layout.current} sharedState={sharedState} />
             </div>
-            {/* Bottom left controls - only show in Run Program mode */}
+            {/* Bottom left controls - only show in Run Program mode - temporary*/}
             {programMode === "Run Program" && (
                 <div style={{
                     position: "fixed",

@@ -124,9 +124,9 @@
     font-weight: normal;
 }
 
-/* Inline suggestion styling */
+/* Inline suggestions*/
 .inline-suggestion {
-    color: #6c757d; /* Grey color for suggestions */
+    color: #6c757d; /* Gray for suggestions */
     opacity: 0.7;
     font-style: italic;
 }
@@ -159,7 +159,6 @@
     opacity: 0.7;
 }
 
-/* Scrollbar styling */
 .line-numbers::-webkit-scrollbar,
 .code-textarea::-webkit-scrollbar {
     width: 8px;
@@ -181,67 +180,3 @@
 .code-textarea::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-text-color);
 }
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .program-editor-root {
-        min-height: 200px;
-        font-size: 12px;
-    }
-    
-    .line-numbers {
-        min-width: 40px;
-    }
-    
-    .line-number {
-        font-size: 11px;
-        height: 18px;
-    }
-    
-    .program-editor-header {
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-    
-    .code-textarea {
-        /* Mobile styles handled by new structure */
-    }
-    
-    .code-highlighted {
-        padding: 6px 8px;
-    }
-}
-
-/* Dark theme adjustments */
-@media (prefers-color-scheme: dark) {
-    .program-editor-root {
-        background: #1e1e1e;
-        border-color: #404040;
-    }
-    
-    .program-editor-header {
-        background: #252526;
-        border-bottom-color: #404040;
-    }
-    
-    .line-numbers {
-        background: #252526;
-        border-right-color: #404040;
-    }
-    
-    .code-textarea {
-        background: transparent;
-        color: transparent;
-        caret-color: #d4d4d4;
-    }
-    
-    .code-highlighted {
-        background: #1e1e1e;
-        color: #d4d4d4;
-    }
-    
-    .inline-suggestion {
-        color: #8b8b8b; /* Darker grey for dark theme */
-        opacity: 0.8;
-    }
-} 

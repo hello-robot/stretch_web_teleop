@@ -87,11 +87,11 @@
 }
 
 .library-subsection-title.robot-heading {
-    color: #ff8c00; /* Orange color for Robot heading */
+    color: #ff8c00; /* Orange for robot */
 }
 
 .library-subsection-title.human-heading {
-    color: #28a745; /* Green color for Human heading */
+    color: #28a745; /* Green for human */
 }
 
 .library-text {
@@ -129,55 +129,3 @@
 .add-position-btn:hover {
     background: var(--tertiary-background-color);
 }
-
-
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .library-root {
-        min-height: 200px;
-        font-size: 12px;
-    }
-    
-    .library-header {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-    
-    .library-title {
-        font-size: 14px;
-    }
-    
-    .library-content {
-        padding: 12px;
-    }
-    
-    .library-section-title {
-        font-size: 14px;
-    }
-    
-    .library-subsection-title {
-        font-size: 12px;
-    }
-    
-    .library-text {
-        font-size: 11px;
-    }
-}
-
-/* Dark theme adjustments */
-@media (prefers-color-scheme: dark) {
-    .library-root {
-        background: #1e1e1e;
-        border-color: #404040;
-    }
-    
-    .library-header {
-        background: #252526;
-        border-bottom-color: #404040;
-    }
-    
-    .library-section-title {
-        border-bottom-color: #404040;
-    }
-} 

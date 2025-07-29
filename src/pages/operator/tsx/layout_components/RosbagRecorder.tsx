@@ -53,7 +53,6 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
         props.sharedState?.onSelect(props.definition, props.path);
     };
 
-    // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (

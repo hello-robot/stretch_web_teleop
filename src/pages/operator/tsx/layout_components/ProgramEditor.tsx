@@ -39,11 +39,11 @@ const SAVED_POSITIONS = [
     'end_pose'
 ];
 
-// All available functions for tab completion
+//available functions for tab completion
 const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...SAVED_POSITIONS];
 
 /**
- * Syntax highlighting function for robot and human functions
+ * Syntax highlighting function
  */
 const highlightSyntax = (text: string): string => {
     let highlightedText = text;
@@ -71,7 +71,6 @@ const highlightSyntax = (text: string): string => {
 
 /**
  * A code editor component with line numbers and syntax highlighting
- * similar to VS Code interface
  *
  * @param props {@link ProgramEditorProps}
  */
@@ -120,7 +119,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         }
     };
 
-    // Get current word being typed
+    // Get the current word being typed
     const getCurrentWord = (): { word: string; start: number; end: number } => {
         if (!textareaRef.current) return { word: '', start: 0, end: 0 };
         
@@ -165,7 +164,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         }
     };
 
-    // Complete the current word with the suggestion
+    // Complete current word with suggestion
     const completeWord = () => {
         if (!textareaRef.current || !showSuggestion) return;
         
@@ -202,7 +201,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         }
     };
 
-    // Handle key events
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Tab') {
             event.preventDefault();
