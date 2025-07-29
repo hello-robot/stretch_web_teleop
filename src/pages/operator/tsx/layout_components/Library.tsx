@@ -42,21 +42,22 @@ export const Library = (props: CustomizableComponentProps) => {
                     <h3 className="library-section-title">Functions</h3>
                     
                     <div className="library-subsection">
-                        <h4 className="library-subsection-title">Robot</h4>
-                        <p className="library-text">
-                            Robot functions and capabilities will be displayed here. 
-                            This section will contain various robot operations and commands 
-                            that can be executed during program execution.
-                        </p>
+                        <h4 className="library-subsection-title robot-heading">Robot</h4>
+                        <div className="library-text">
+                            <div>MoveEEToPose(x,y,z)</div>
+                            <div>AdjustGripperWidth()</div>
+                            <div>RotateEE(theta)</div>
+                            <div>ResetRobot()</div>
+                        </div>
                     </div>
                     
                     <div className="library-subsection">
-                        <h4 className="library-subsection-title">Human</h4>
-                        <p className="library-text">
-                            Human interaction functions and controls will be displayed here. 
-                            This section will contain user interface elements and human 
-                            input handling for the robot system.
-                        </p>
+                        <h4 className="library-subsection-title human-heading">Human</h4>
+                        <div className="library-text">
+                            <div>PauseAndConfirm()</div>
+                            <div>GiveControl()</div>
+                            <div>TakeControl()</div>
+                        </div>
                     </div>
                 </div>
                 

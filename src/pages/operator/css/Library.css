@@ -86,6 +86,14 @@
     font-weight: 500;
 }
 
+.library-subsection-title.robot-heading {
+    color: #ff8c00; /* Orange color for Robot heading */
+}
+
+.library-subsection-title.human-heading {
+    color: #28a745; /* Green color for Human heading */
+}
+
 .library-text {
     margin: 0;
     color: var(--secondary-text-color);
