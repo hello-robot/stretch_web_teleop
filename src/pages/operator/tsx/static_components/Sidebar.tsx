@@ -96,6 +96,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case ComponentType.ButtonGrid:
         case ComponentType.Map:
         case ComponentType.ProgramEditor:
+        case ComponentType.Library:
             return definition.type;
         default:
             throw Error(
@@ -504,6 +505,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Map },
         { type: ComponentType.BatteryGuage },
         { type: ComponentType.ProgramEditor },
+        { type: ComponentType.Library },
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {

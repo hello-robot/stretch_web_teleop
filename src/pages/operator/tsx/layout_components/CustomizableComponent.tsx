@@ -17,6 +17,7 @@ import { RunStopButton } from "../static_components/RunStop";
 import { BatteryGuage } from "../static_components/BatteryGauge";
 import { RosbagRecorder } from "./RosbagRecorder";
 import { ProgramEditor } from "./ProgramEditor";
+import { Library } from "./Library";
 
 /** State required for all elements */
 export type SharedState = {
@@ -96,6 +97,8 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <RosbagRecorder {...props} hideLabels={props.hideLabels ?? props.sharedState.hideLabels ?? false} />;
         case ComponentType.ProgramEditor:
             return <ProgramEditor {...props} />;
+        case ComponentType.Library:
+            return <Library {...props} />;
         default:
             throw Error(
                 `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`

@@ -1,0 +1,140 @@
+/* Library Component Styles */
+
+.library-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 300px;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.library-root.customizing {
+    cursor: pointer;
+}
+
+.library-root.selected {
+    border: 2px solid var(--selected-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.library-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--secondary-background-color);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.library-title {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.library-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.library-section {
+    margin-bottom: 24px;
+}
+
+.library-section:last-child {
+    margin-bottom: 0;
+}
+
+.library-section-title {
+    margin: 0 0 12px 0;
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.library-subsection {
+    margin-bottom: 16px;
+    padding-left: 12px;
+}
+
+.library-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.library-subsection-title {
+    margin: 0 0 8px 0;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.library-text {
+    margin: 0;
+    color: var(--secondary-text-color);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .library-root {
+        min-height: 200px;
+        font-size: 12px;
+    }
+    
+    .library-header {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .library-title {
+        font-size: 14px;
+    }
+    
+    .library-content {
+        padding: 12px;
+    }
+    
+    .library-section-title {
+        font-size: 14px;
+    }
+    
+    .library-subsection-title {
+        font-size: 12px;
+    }
+    
+    .library-text {
+        font-size: 11px;
+    }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+    .library-root {
+        background: #1e1e1e;
+        border-color: #404040;
+    }
+    
+    .library-header {
+        background: #252526;
+        border-bottom-color: #404040;
+    }
+    
+    .library-section-title {
+        border-bottom-color: #404040;
+    }
+} 

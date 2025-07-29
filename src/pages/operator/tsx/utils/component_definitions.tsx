@@ -26,7 +26,8 @@ export enum ComponentType {
     RunStopButton = "Run Stop Button",
     BatteryGuage = "Battery Gauge",
     RosbagRecorder = "Rosbag Recorder",
-    ProgramEditor = "Program Editor"
+    ProgramEditor = "Program Editor",
+    Library = "Library"
 }
 
 /**
@@ -230,3 +231,5 @@ export type RunStopDefinition = ComponentDefinition;
  * Definition for the program editor component
  */
 export type ProgramEditorDefinition = ComponentDefinition;
+
+export type LibraryDefinition = ComponentDefinition;
