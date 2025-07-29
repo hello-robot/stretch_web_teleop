@@ -80,7 +80,6 @@
 .operator-pose-library,
 .operator-pose-recorder,
 .operator-text-to-speech,
-.operator-rosbag-recorder,
 .operator-aruco-markers {
     background-color: whitesmoke;
     box-shadow: var(--shadow);
@@ -116,7 +115,6 @@
 .operator-pose-library[hidden],
 .operator-pose-recorder[hidden],
 .operator-text-to-speech[hidden],
-.operator-rosbag-recorder[hidden],
 .operator-aruco-markers[hidden] {
     display: none;
 }
@@ -212,7 +210,6 @@
     .operator-pose-library,
     .operator-pose-recorder,
     .operator-text-to-speech,
-    .operator-rosbag-recorder,
     .operator-aruco-markers {
         width: 30rem;
         height: 5rem;

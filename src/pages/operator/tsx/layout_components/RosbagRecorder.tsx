@@ -11,9 +11,11 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selected = props.sharedState ? isSelected(props) : false;
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const handleClick = async () => {
         setError(null);
+        setSuccessMessage(null);
         if (!isRecording) {
             // Start recording
             try {
@@ -33,6 +35,8 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                 const res = await fetch("/stop_rosbag", { method: "POST" });
                 if (res.ok) {
                     setIsRecording(false);
+                    setSuccessMessage("Recording saved. Open demo in Foxglove and create your program!");
+                    setTimeout(() => setSuccessMessage(null), 5000);
                 } else {
                     const data = await res.json();
                     setError(data.error || "Failed to stop recording");
@@ -76,12 +80,13 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                     ) : (
                         <>
                             <SaveIcon />
-                            Stop Recording
+                            Save Demo
                         </>
                     )}
                 </button>
             </Tooltip>
             {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
+            {successMessage && <div style={{ color: "green", marginTop: 8, fontWeight: "bold" }}>{successMessage}</div>}
         </div>
     );
 }; 
