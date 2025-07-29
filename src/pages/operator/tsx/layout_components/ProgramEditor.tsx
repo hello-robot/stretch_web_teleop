@@ -26,7 +26,7 @@ type ProgramEditorProps = CustomizableComponentProps & {
 export const ProgramEditor = (props: ProgramEditorProps) => {
     const [code, setCode] = useState(props.initialCode || "");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-    const textareaRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     
     const { customizing } = props.sharedState;
@@ -93,29 +93,27 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     };
 
     // Handle code changes
-    const handleCodeChange = (event: React.FormEvent<HTMLDivElement>) => {
+    const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (!props.readOnly) {
-            const target = event.target as HTMLDivElement;
-            setCode(target.textContent || '');
+            setCode(event.target.value);
         }
     };
 
     // Handle tab key
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Tab') {
             event.preventDefault();
-            const target = event.target as HTMLDivElement;
-            const selection = window.getSelection();
-            if (selection && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const tabNode = document.createTextNode('    ');
-                range.deleteContents();
-                range.insertNode(tabNode);
-                range.setStartAfter(tabNode);
-                range.setEndAfter(tabNode);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
+            const target = event.target as HTMLTextAreaElement;
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            
+            const newCode = code.substring(0, start) + '    ' + code.substring(end);
+            setCode(newCode);
+            
+            // Set cursor position after the inserted tab
+            setTimeout(() => {
+                target.selectionStart = target.selectionEnd = start + 4;
+            }, 0);
         }
     };
 
@@ -150,29 +148,50 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         </div>
                     ))}
                 </div>
-                <div
-                    ref={textareaRef}
-                    className="code-textarea"
-                    contentEditable={!props.readOnly}
-                    onInput={handleCodeChange}
-                    onKeyDown={handleKeyDown}
-                    onScroll={handleScroll}
-                    dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
-                    style={{ 
-                        whiteSpace: 'pre-wrap',
-                        outline: 'none',
-                        fontFamily: 'monospace',
-                        fontSize: '14px',
-                        lineHeight: '1.5',
-                        color: 'var(--text-color)',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        resize: 'none',
-                        width: '100%',
-                        height: '100%',
-                        overflow: 'auto'
-                    }}
-                />
+                <div className="code-editor-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <textarea
+                        ref={textareaRef}
+                        className="code-textarea"
+                        value={code}
+                        onChange={handleCodeChange}
+                        onKeyDown={handleKeyDown}
+                        onScroll={handleScroll}
+                        readOnly={props.readOnly}
+                        placeholder="Enter your code here..."
+                        spellCheck={false}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'transparent',
+                            color: 'transparent',
+                            caretColor: 'var(--text-color)',
+                            zIndex: 2
+                        }}
+                    />
+                    <div 
+                        className="code-highlight-overlay"
+                        dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none',
+                            zIndex: 1,
+                            whiteSpace: 'pre-wrap',
+                            fontFamily: 'monospace',
+                            fontSize: '14px',
+                            lineHeight: '1.5',
+                            color: 'var(--text-color)',
+                            backgroundColor: 'transparent',
+                            overflow: 'hidden'
+                        }}
+                    />
+                </div>
             </div>
         </div>
     );
