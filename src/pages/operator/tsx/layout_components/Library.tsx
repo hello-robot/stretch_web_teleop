@@ -64,11 +64,11 @@ export const Library = (props: CustomizableComponentProps) => {
                 {/* Saved Positions Section */}
                 <div className="library-section">
                     <h3 className="library-section-title">Saved Positions</h3>
-                    <p className="library-text">
-                        Saved robot positions and poses will be displayed here. 
-                        This section will show a list of stored positions that 
-                        can be recalled and used in programs or demonstrations.
-                    </p>
+                    <div className="library-text">
+                            <div>approach_pose</div>
+                            <div>red_cub_pose</div>
+                            <div>end_pose</div>
+                    </div>
                 </div>
             </div>
         </div>
