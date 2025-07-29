@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Tooltip } from "../static_components/Tooltip";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import SaveIcon from "@mui/icons-material/Save";
-import "operator/css/MovementRecorder.css";
+import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
+import { className } from "shared/util";
 import "operator/css/basic_components.css";
-import { CustomizableComponentProps } from "./CustomizableComponent";
 
 export const RosbagRecorder = (props: CustomizableComponentProps) => {
-    const hideLabels = props.hideLabels ?? false;
+    const { customizing } = props.sharedState;
+    const selected = isSelected(props);
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -42,10 +43,24 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
         }
     };
 
+    /** Callback when component is clicked during customize mode */
+    const onSelect = (event: React.MouseEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+        props.sharedState.onSelect(props.definition, props.path);
+    };
+
+    // In customizing state add onClick callback
+    const selectProp = customizing ? { onClick: onSelect } : {};
+
     return (
-        <div id="movement-recorder-container">
-            <span>Demonstration Recorder</span>
-            <Tooltip text={!isRecording ? "Record rosbag" : "Save rosbag"} position="top">
+        <div
+            className={className("operator-rosbag-recorder", {
+                customizing,
+                selected,
+            })}
+            {...selectProp}
+        >
+            <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
                 <button
                     className="save-btn btn-label"
                     onClick={handleClick}
@@ -58,21 +73,10 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                         justifyContent: "center"
                     }}
                 >
-                    {!isRecording ? (
-                        <>
-                            <i hidden={hideLabels}>Record</i>
-                            <RadioButtonCheckedIcon />
-                        </>
-                    ) : (
-                        <>
-                            <i hidden={hideLabels}>Save</i>
-                            <SaveIcon />
-                        </>
-                    )}
+                    {!isRecording ? "Record Demo" : "Stop Recording"}
                 </button>
             </Tooltip>
-            {isRecording && <span style={{ color: "red", marginLeft: 10 }}>● Recording</span>}
-            {error && <div style={{ color: "red" }}>{error}</div>}
+            {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
         </div>
     );
 }; 
