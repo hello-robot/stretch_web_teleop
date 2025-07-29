@@ -70,10 +70,22 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: transparent;
-    color: transparent;
+    background: var(--background-color);
+    color: var(--text-color);
     caret-color: var(--text-color);
     z-index: 2;
+    border: none;
+    outline: none;
+    resize: none;
+    tab-size: 4;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .code-highlighted {
@@ -94,6 +106,7 @@
     overflow-y: auto;
     pointer-events: none;
     z-index: 1;
+    display: none; /* Hide the highlighted version for now */
 }
 
 /* Syntax highlighting colors */
@@ -130,21 +143,14 @@
     justify-content: flex-end;
 }
 
-.code-textarea {
-    border: none;
-    outline: none;
-    resize: none;
-    tab-size: 4;
-}
+
 
 .code-textarea::placeholder {
     color: var(--secondary-text-color);
     opacity: 0.7;
 }
 
-.code-textarea:focus {
-    background: var(--background-color);
-}
+
 
 /* Scrollbar styling */
 .line-numbers::-webkit-scrollbar,
