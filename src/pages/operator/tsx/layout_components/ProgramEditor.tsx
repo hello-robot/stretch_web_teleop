@@ -5,6 +5,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className } from "shared/util";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -32,8 +33,25 @@ const HUMAN_FUNCTIONS = [
     'TakeControl'
 ];
 
-// All available functions for tab completion
-const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS];
+// Get saved position names dynamically
+const getSavedPositionNames = (): string[] => {
+    try {
+        // Access storage handler through FunctionProvider
+        const storageHandler = (FunctionProvider as any).storageHandler;
+        if (storageHandler && storageHandler.getMapPoseNames) {
+            return storageHandler.getMapPoseNames();
+        }
+    } catch (error) {
+        console.warn('Could not access saved position names:', error);
+    }
+    return [];
+};
+
+// All available functions for tab completion (including saved positions)
+const getAllFunctions = (): string[] => {
+    const savedPositions = getSavedPositionNames();
+    return [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+};
 
 /**
  * Syntax highlighting function for robot and human functions
@@ -51,6 +69,13 @@ const highlightSyntax = (text: string): string => {
     HUMAN_FUNCTIONS.forEach(func => {
         const regex = new RegExp(`\\b${func}\\b`, 'g');
         highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
+    });
+    
+    // Highlight saved positions in blue
+    const savedPositions = getSavedPositionNames();
+    savedPositions.forEach(position => {
+        const regex = new RegExp(`\\b${position}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
     });
     
     return highlightedText;
@@ -139,7 +164,8 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             return;
         }
         
-        const filtered = ALL_FUNCTIONS.filter(func => 
+        const allFunctions = getAllFunctions();
+        const filtered = allFunctions.filter(func => 
             func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
         
@@ -160,11 +186,16 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        const newText = text.substring(0, start) + currentSuggestion + '()' + text.substring(end);
+        // Check if it's a saved position (no parentheses needed)
+        const savedPositions = getSavedPositionNames();
+        const isSavedPosition = savedPositions.includes(currentSuggestion);
+        
+        const completionText = isSavedPosition ? currentSuggestion : currentSuggestion + '()';
+        const newText = text.substring(0, start) + completionText + text.substring(end);
         setCode(newText);
         
-        // Set cursor position after the completed function
-        const newCursorPos = start + currentSuggestion.length + 2; // +2 for the parentheses
+        // Set cursor position after the completed function/position
+        const newCursorPos = start + completionText.length;
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = newCursorPos;
             textarea.focus();
@@ -236,7 +267,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Add the suggestion as grey text after the current word
                 const beforeWord = code.substring(0, start);
                 const afterWord = code.substring(end);
-                const suggestionText = currentSuggestion.substring(word.length) + '()';
+                
+                // Check if it's a saved position (no parentheses needed)
+                const savedPositions = getSavedPositionNames();
+                const isSavedPosition = savedPositions.includes(currentSuggestion);
+                const suggestionText = currentSuggestion.substring(word.length) + (isSavedPosition ? '' : '()');
                 
                 // Create the highlighted version with suggestion
                 const beforeHighlighted = highlightSyntax(beforeWord);

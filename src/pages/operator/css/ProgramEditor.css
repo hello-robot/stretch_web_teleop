@@ -119,6 +119,11 @@
     font-weight: 600;
 }
 
+.saved-position {
+    color: #007acc; /* Blue for saved positions */
+    font-weight: 600;
+}
+
 /* Inline suggestion styling */
 .inline-suggestion {
     color: #6c757d; /* Grey color for suggestions */
@@ -233,6 +238,10 @@
     .code-highlighted {
         background: #1e1e1e;
         color: #d4d4d4;
+    }
+    
+    .saved-position {
+        color: #4fc3f7; /* Lighter blue for dark theme */
     }
     
     .inline-suggestion {
