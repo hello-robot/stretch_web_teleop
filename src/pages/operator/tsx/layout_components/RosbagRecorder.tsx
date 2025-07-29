@@ -7,8 +7,8 @@ import { className } from "shared/util";
 import "operator/css/basic_components.css";
 
 export const RosbagRecorder = (props: CustomizableComponentProps) => {
-    const { customizing } = props.sharedState;
-    const selected = isSelected(props);
+    const customizing = props.sharedState?.customizing ?? false;
+    const selected = props.sharedState ? isSelected(props) : false;
     const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +46,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     /** Callback when component is clicked during customize mode */
     const onSelect = (event: React.MouseEvent<HTMLDivElement>) => {
         event.stopPropagation();
-        props.sharedState.onSelect(props.definition, props.path);
+        props.sharedState?.onSelect(props.definition, props.path);
     };
 
     // In customizing state add onClick callback
