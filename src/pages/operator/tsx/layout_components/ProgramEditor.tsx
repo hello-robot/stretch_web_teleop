@@ -250,9 +250,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Function to handle Run Program button click
     const handleRunProgram = () => {
+        console.log("Run Program button clicked!");
+        const programText = readProgramCode();
+        console.log("Program text:", programText);
+        console.log("Code state:", code);
+        
         if (props.onRunProgram) {
-            const programText = readProgramCode();
-            console.log("Running program:", programText);
             props.onRunProgram(programText);
         }
     };
