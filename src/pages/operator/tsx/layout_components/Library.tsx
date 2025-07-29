@@ -242,6 +242,21 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
+                                    background: "#6c757d",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: "8px 20px",
+                                    fontWeight: "bold",
+                                    fontSize: "1em",
+                                    cursor: "pointer"
+                                }}
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                style={{
                                     background: "#4caf50",
                                     color: "white",
                                     border: "none",
@@ -256,21 +271,6 @@ export const Library = (props: CustomizableComponentProps) => {
                                 disabled={!newPositionName.trim() || !newJointStates.trim()}
                             >
                                 Save Position
-                            </button>
-                            <button
-                                style={{
-                                    background: "#ff9800",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: 4,
-                                    padding: "8px 20px",
-                                    fontWeight: "bold",
-                                    fontSize: "1em",
-                                    cursor: "pointer"
-                                }}
-                                onClick={handleCancel}
-                            >
-                                Cancel
                             </button>
                         </div>
                     </div>
