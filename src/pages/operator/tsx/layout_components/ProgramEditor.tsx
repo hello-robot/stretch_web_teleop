@@ -26,11 +26,42 @@ type ProgramEditorProps = CustomizableComponentProps & {
 export const ProgramEditor = (props: ProgramEditorProps) => {
     const [code, setCode] = useState(props.initialCode || "");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const textareaRef = useRef<HTMLDivElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
+
+    // Function to highlight code with colors
+    const highlightCode = (codeText: string): string => {
+        const robotFunctions = [
+            'MoveEEToPose(x,y,z)',
+            'AdjustGripperWidth()',
+            'RotateEE(theta)',
+            'ResetRobot()'
+        ];
+        const humanFunctions = [
+            'PauseAndConfirm()',
+            'GiveControl()',
+            'TakeControl()'
+        ];
+        
+        let highlightedCode = codeText;
+        
+        // Highlight robot functions in orange
+        robotFunctions.forEach(func => {
+            const regex = new RegExp(`\\b${func.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+            highlightedCode = highlightedCode.replace(regex, `<span style="color: #ff8c00;">${func}</span>`);
+        });
+        
+        // Highlight human functions in green
+        humanFunctions.forEach(func => {
+            const regex = new RegExp(`\\b${func.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+            highlightedCode = highlightedCode.replace(regex, `<span style="color: #28a745;">${func}</span>`);
+        });
+        
+        return highlightedCode;
+    };
 
     // Function to add text to the editor
     const addText = (text: string) => {
@@ -62,27 +93,29 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     };
 
     // Handle code changes
-    const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleCodeChange = (event: React.FormEvent<HTMLDivElement>) => {
         if (!props.readOnly) {
-            setCode(event.target.value);
+            const target = event.target as HTMLDivElement;
+            setCode(target.textContent || '');
         }
     };
 
     // Handle tab key
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Tab') {
             event.preventDefault();
-            const target = event.target as HTMLTextAreaElement;
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            
-            const newCode = code.substring(0, start) + '    ' + code.substring(end);
-            setCode(newCode);
-            
-            // Set cursor position after the inserted tab
-            setTimeout(() => {
-                target.selectionStart = target.selectionEnd = start + 4;
-            }, 0);
+            const target = event.target as HTMLDivElement;
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const tabNode = document.createTextNode('    ');
+                range.deleteContents();
+                range.insertNode(tabNode);
+                range.setStartAfter(tabNode);
+                range.setEndAfter(tabNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         }
     };
 
@@ -117,16 +150,28 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         </div>
                     ))}
                 </div>
-                <textarea
+                <div
                     ref={textareaRef}
                     className="code-textarea"
-                    value={code}
-                    onChange={handleCodeChange}
+                    contentEditable={!props.readOnly}
+                    onInput={handleCodeChange}
                     onKeyDown={handleKeyDown}
                     onScroll={handleScroll}
-                    readOnly={props.readOnly}
-                    placeholder="Enter your code here..."
-                    spellCheck={false}
+                    dangerouslySetInnerHTML={{ __html: highlightCode(code) }}
+                    style={{ 
+                        whiteSpace: 'pre-wrap',
+                        outline: 'none',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        lineHeight: '1.5',
+                        color: 'var(--text-color)',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        resize: 'none',
+                        width: '100%',
+                        height: '100%',
+                        overflow: 'auto'
+                    }}
                 />
             </div>
         </div>

@@ -46,25 +46,25 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div className="library-text">
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("MoveEEToPose(x,y,z)")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose(x,y,z)")}
                             >
                                 MoveEEToPose(x,y,z)
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
                             >
                                 AdjustGripperWidth()
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("RotateEE(theta)")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("RotateEE(theta)")}
                             >
                                 RotateEE(theta)
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
                             >
                                 ResetRobot()
                             </div>
@@ -76,19 +76,19 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div className="library-text">
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
                             >
                                 PauseAndConfirm()
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
                             >
                                 GiveControl()
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
                             >
                                 TakeControl()
                             </div>
@@ -103,19 +103,19 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div className="library-text">
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("approach_pose")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("approach_pose")}
                             >
                                 approach_pose
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("red_cub_pose")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("red_cub_pose")}
                             >
                                 red_cub_pose
                             </div>
                             <div 
                                 className="library-function-item"
-                                onMouseEnter={() => props.sharedState.addToProgramEditor?.("end_pose")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("end_pose")}
                             >
                                 end_pose
                             </div>
