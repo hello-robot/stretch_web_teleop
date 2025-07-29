@@ -201,7 +201,7 @@ export const Operator = (props: {
     function setActionMode(actionMode: ActionMode) {
         layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
-        props.storageHandler.saveCurrentLayout(layout.current, programMode);
+        props.storageHandler.saveCurrentLayout(layout.current);
         updateLayout();
     }
 
@@ -312,7 +312,7 @@ export const Operator = (props: {
     const handleToggleCustomize = () => {
         if (customizing) {
             console.log("saving layout");
-            props.storageHandler.saveCurrentLayout(layout.current, programMode);
+            props.storageHandler.saveCurrentLayout(layout.current);
         }
         setCustomizing(!customizing);
         setSelectedDefinition(undefined);
@@ -339,7 +339,7 @@ export const Operator = (props: {
         hideLabels: !layout.current.displayLabels,
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
-        robotNotHomed: robotNotHomed,
+        robotNotHomed: !!robotNotHomed,
         // Only pass human mode information in Run Program mode
         isHumanMode: programMode === "Run Program" ? isHumanMode : true,
         storageHandler: props.storageHandler,

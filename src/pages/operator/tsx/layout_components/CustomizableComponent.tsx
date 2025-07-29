@@ -41,11 +41,12 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
+    /** Whether the user is in control (only relevant in Run Program mode) */
     isHumanMode: boolean;
-    /** Function to add text to program editor */
-    addToProgramEditor?: (text: string) => void;
     /** Storage handler for accessing saved data */
     storageHandler: StorageHandler;
+    /** Function to add text to program editor */
+    addToProgramEditor?: (text: string) => void;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
