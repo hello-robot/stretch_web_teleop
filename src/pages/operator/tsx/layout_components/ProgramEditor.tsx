@@ -15,6 +15,8 @@ type ProgramEditorProps = CustomizableComponentProps & {
     language?: string;
     /* Whether the editor is read-only */
     readOnly?: boolean;
+    /* Callback function when Run Program button is clicked */
+    onRunProgram?: (code: string) => void;
 };
 
 // Robot functions (orange)
@@ -241,6 +243,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
+    // Function to handle Run Program button click
+    const handleRunProgram = () => {
+        if (props.onRunProgram) {
+            props.onRunProgram(code);
+        }
+    };
+
     // Create highlighted version of the code with inline suggestion
     const createHighlightedCode = (): string => {
         let highlightedText = highlightSyntax(code);
@@ -281,9 +290,20 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         >
             <div className="program-editor-header">
                 <span className="program-editor-title">Program Editor</span>
-                {props.language && (
-                    <span className="program-editor-language">{props.language}</span>
-                )}
+                <div className="program-editor-header-right">
+                    {props.language && (
+                        <span className="program-editor-language">{props.language}</span>
+                    )}
+                    {!props.readOnly && (
+                        <button 
+                            className="run-program-button"
+                            onClick={handleRunProgram}
+                            type="button"
+                        >
+                            Run Program
+                        </button>
+                    )}
+                </div>
             </div>
             <div className="program-editor-container">
                 <div className="line-numbers" ref={lineNumbersRef}>

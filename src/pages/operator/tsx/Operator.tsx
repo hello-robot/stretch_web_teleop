@@ -84,8 +84,8 @@ export const Operator = (props: {
     // Mode-specific layouts
     const [modeLayouts, setModeLayouts] = React.useState<{ [mode: string]: LayoutDefinition }>({
         "Demonstrate": props.layout,
-        "Create Program": props.layout,
-        "Run Program": props.layout,
+        "Program Editor": props.layout,
+        "Program Executor": props.layout,
     });
 
     // Initialize mode-specific layouts on first load

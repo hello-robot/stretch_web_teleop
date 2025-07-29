@@ -43,6 +43,12 @@
     font-weight: 600;
 }
 
+.program-editor-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .program-editor-language {
     color: var(--secondary-text-color);
     background: var(--tertiary-background-color);
@@ -50,6 +56,33 @@
     border-radius: 4px;
     font-size: 11px;
     text-transform: uppercase;
+}
+
+.run-program-button {
+    background: var(--primary-color, #007bff);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.run-program-button:hover {
+    background: var(--primary-hover-color, #0056b3);
+}
+
+.run-program-button:active {
+    background: var(--primary-active-color, #004085);
+}
+
+.run-program-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
 }
 
 .program-editor-container {
