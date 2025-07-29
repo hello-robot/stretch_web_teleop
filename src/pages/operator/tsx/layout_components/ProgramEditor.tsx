@@ -65,9 +65,8 @@ const highlightSyntax = (text: string): string => {
 export const ProgramEditor = (props: ProgramEditorProps) => {
     const [code, setCode] = useState(props.initialCode || "");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
+    const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
+    const [showSuggestion, setShowSuggestion] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
@@ -132,48 +131,47 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return { word, start, end };
     };
 
-    // Update suggestions based on current word
-    const updateSuggestions = (word: string) => {
+    // Update suggestion based on current word
+    const updateSuggestion = (word: string) => {
         if (word.length === 0) {
-            setShowSuggestions(false);
-            setSuggestions([]);
+            setShowSuggestion(false);
+            setCurrentSuggestion("");
             return;
         }
         
         const filtered = ALL_FUNCTIONS.filter(func => 
-            func.toLowerCase().startsWith(word.toLowerCase())
+            func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
         
         if (filtered.length > 0) {
-            setSuggestions(filtered);
-            setShowSuggestions(true);
-            setSelectedSuggestionIndex(0);
+            setCurrentSuggestion(filtered[0]);
+            setShowSuggestion(true);
         } else {
-            setShowSuggestions(false);
-            setSuggestions([]);
+            setShowSuggestion(false);
+            setCurrentSuggestion("");
         }
     };
 
-    // Complete the current word with the selected suggestion
-    const completeWord = (suggestion: string) => {
-        if (!textareaRef.current) return;
+    // Complete the current word with the suggestion
+    const completeWord = () => {
+        if (!textareaRef.current || !showSuggestion) return;
         
         const textarea = textareaRef.current;
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        const newText = text.substring(0, start) + suggestion + '()' + text.substring(end);
+        const newText = text.substring(0, start) + currentSuggestion + '()' + text.substring(end);
         setCode(newText);
         
         // Set cursor position after the completed function
-        const newCursorPos = start + suggestion.length + 2; // +2 for the parentheses
+        const newCursorPos = start + currentSuggestion.length + 2; // +2 for the parentheses
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = newCursorPos;
             textarea.focus();
         }, 0);
         
-        setShowSuggestions(false);
-        setSuggestions([]);
+        setShowSuggestion(false);
+        setCurrentSuggestion("");
     };
 
     // Handle code changes
@@ -181,9 +179,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (!props.readOnly) {
             setCode(event.target.value);
             
-            // Update suggestions based on current word
+            // Update suggestion based on current word
             const { word } = getCurrentWord();
-            updateSuggestions(word);
+            updateSuggestion(word);
         }
     };
 
@@ -192,9 +190,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (event.key === 'Tab') {
             event.preventDefault();
             
-            if (showSuggestions && suggestions.length > 0) {
-                // Complete with selected suggestion
-                completeWord(suggestions[selectedSuggestionIndex]);
+            if (showSuggestion) {
+                // Complete with suggestion
+                completeWord();
             } else {
                 // Insert tab as usual
                 const target = event.target as HTMLTextAreaElement;
@@ -209,23 +207,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     target.selectionStart = target.selectionEnd = start + 4;
                 }, 0);
             }
-        } else if (event.key === 'Enter' && showSuggestions && suggestions.length > 0) {
+        } else if (event.key === 'Enter' && showSuggestion) {
             event.preventDefault();
-            completeWord(suggestions[selectedSuggestionIndex]);
-        } else if (event.key === 'ArrowDown' && showSuggestions) {
+            completeWord();
+        } else if (event.key === 'Escape' && showSuggestion) {
             event.preventDefault();
-            setSelectedSuggestionIndex(prev => 
-                prev < suggestions.length - 1 ? prev + 1 : 0
-            );
-        } else if (event.key === 'ArrowUp' && showSuggestions) {
-            event.preventDefault();
-            setSelectedSuggestionIndex(prev => 
-                prev > 0 ? prev - 1 : suggestions.length - 1
-            );
-        } else if (event.key === 'Escape' && showSuggestions) {
-            event.preventDefault();
-            setShowSuggestions(false);
-            setSuggestions([]);
+            setShowSuggestion(false);
+            setCurrentSuggestion("");
         }
     };
 
@@ -238,8 +226,30 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
-    // Create highlighted version of the code
-    const highlightedCode = highlightSyntax(code);
+    // Create highlighted version of the code with inline suggestion
+    const createHighlightedCode = (): string => {
+        let highlightedText = highlightSyntax(code);
+        
+        if (showSuggestion && currentSuggestion) {
+            const { word, start, end } = getCurrentWord();
+            if (word.length > 0) {
+                // Add the suggestion as grey text after the current word
+                const beforeWord = code.substring(0, start);
+                const afterWord = code.substring(end);
+                const suggestionText = currentSuggestion.substring(word.length) + '()';
+                
+                // Create the highlighted version with suggestion
+                const beforeHighlighted = highlightSyntax(beforeWord);
+                const afterHighlighted = highlightSyntax(afterWord);
+                
+                highlightedText = beforeHighlighted + word + `<span class="inline-suggestion">${suggestionText}</span>` + afterHighlighted;
+            }
+        }
+        
+        return highlightedText;
+    };
+
+    const highlightedCode = createHighlightedCode();
 
     return (
         <div
@@ -280,19 +290,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         className="code-highlighted"
                         dangerouslySetInnerHTML={{ __html: highlightedCode }}
                     />
-                    {showSuggestions && suggestions.length > 0 && (
-                        <div className="suggestions-dropdown">
-                            {suggestions.map((suggestion, index) => (
-                                <div
-                                    key={suggestion}
-                                    className={`suggestion-item ${index === selectedSuggestionIndex ? 'selected' : ''}`}
-                                    onClick={() => completeWord(suggestion)}
-                                >
-                                    {suggestion}()
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
