@@ -18,6 +18,7 @@ import { BatteryGuage } from "../static_components/BatteryGauge";
 import { RosbagRecorder } from "./RosbagRecorder";
 import { ProgramEditor } from "./ProgramEditor";
 import { Library } from "./Library";
+import { StorageHandler } from "../storage_handler/StorageHandler";
 
 /** State required for all elements */
 export type SharedState = {
@@ -43,6 +44,8 @@ export type SharedState = {
     isHumanMode: boolean;
     /** Function to add text to program editor */
     addToProgramEditor?: (text: string) => void;
+    /** Storage handler for accessing saved data */
+    storageHandler: StorageHandler;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or

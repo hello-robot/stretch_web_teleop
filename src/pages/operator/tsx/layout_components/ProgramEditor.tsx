@@ -5,7 +5,6 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className } from "shared/util";
-import { storageHandler } from "../index";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -33,23 +32,8 @@ const HUMAN_FUNCTIONS = [
     'TakeControl'
 ];
 
-// Get saved position names dynamically
-const getSavedPositionNames = (): string[] => {
-    try {
-        if (storageHandler && storageHandler.getMapPoseNames) {
-            return storageHandler.getMapPoseNames();
-        }
-    } catch (error) {
-        console.warn('Could not access saved position names:', error);
-    }
-    return [];
-};
-
-// All available functions for tab completion (including saved positions)
-const getAllFunctions = (): string[] => {
-    const savedPositions = getSavedPositionNames();
-    return [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
-};
+// All available functions for tab completion (will be populated with saved positions)
+let ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS];
 
 /**
  * Syntax highlighting function for robot and human functions
@@ -67,13 +51,6 @@ const highlightSyntax = (text: string): string => {
     HUMAN_FUNCTIONS.forEach(func => {
         const regex = new RegExp(`\\b${func}\\b`, 'g');
         highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
-    });
-    
-    // Highlight saved positions in blue
-    const savedPositions = getSavedPositionNames();
-    savedPositions.forEach(position => {
-        const regex = new RegExp(`\\b${position}\\b`, 'g');
-        highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
     });
     
     return highlightedText;
@@ -119,6 +96,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         setLineNumbers(numbers);
     }, [code]);
 
+    // Update available functions to include saved positions
+    useEffect(() => {
+        try {
+            const savedPositions = props.sharedState.storageHandler.getMapPoseNames();
+            ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+        } catch (error) {
+            console.warn('Could not load saved positions for tab completion:', error);
+            ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS];
+        }
+    }, [props.sharedState.storageHandler]);
+
     // Sync scroll between textarea and line numbers
     const handleScroll = () => {
         if (textareaRef.current && lineNumbersRef.current) {
@@ -162,8 +150,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             return;
         }
         
-        const allFunctions = getAllFunctions();
-        const filtered = allFunctions.filter(func => 
+        const filtered = ALL_FUNCTIONS.filter(func => 
             func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
         
@@ -184,16 +171,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        // Check if it's a saved position (no parentheses needed)
-        const savedPositions = getSavedPositionNames();
-        const isSavedPosition = savedPositions.includes(currentSuggestion);
+        // Check if this is a saved position (not a function)
+        const isSavedPosition = !ROBOT_FUNCTIONS.includes(currentSuggestion) && !HUMAN_FUNCTIONS.includes(currentSuggestion);
         
-        const completionText = isSavedPosition ? currentSuggestion : currentSuggestion + '()';
-        const newText = text.substring(0, start) + completionText + text.substring(end);
+        const newText = text.substring(0, start) + currentSuggestion + (isSavedPosition ? '' : '()') + text.substring(end);
         setCode(newText);
         
         // Set cursor position after the completed function/position
-        const newCursorPos = start + completionText.length;
+        const newCursorPos = start + currentSuggestion.length + (isSavedPosition ? 0 : 2); // +2 for the parentheses if function
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = newCursorPos;
             textarea.focus();
@@ -266,9 +251,8 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 const beforeWord = code.substring(0, start);
                 const afterWord = code.substring(end);
                 
-                // Check if it's a saved position (no parentheses needed)
-                const savedPositions = getSavedPositionNames();
-                const isSavedPosition = savedPositions.includes(currentSuggestion);
+                // Check if this is a saved position (not a function)
+                const isSavedPosition = !ROBOT_FUNCTIONS.includes(currentSuggestion) && !HUMAN_FUNCTIONS.includes(currentSuggestion);
                 const suggestionText = currentSuggestion.substring(word.length) + (isSavedPosition ? '' : '()');
                 
                 // Create the highlighted version with suggestion

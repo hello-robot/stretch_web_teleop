@@ -201,7 +201,7 @@ export const Operator = (props: {
     function setActionMode(actionMode: ActionMode) {
         layout.current.actionMode = actionMode;
         FunctionProvider.actionMode = actionMode;
-        props.storageHandler.saveCurrentLayout(layout.current);
+        props.storageHandler.saveCurrentLayout(layout.current, programMode);
         updateLayout();
     }
 
@@ -312,7 +312,7 @@ export const Operator = (props: {
     const handleToggleCustomize = () => {
         if (customizing) {
             console.log("saving layout");
-            props.storageHandler.saveCurrentLayout(layout.current);
+            props.storageHandler.saveCurrentLayout(layout.current, programMode);
         }
         setCustomizing(!customizing);
         setSelectedDefinition(undefined);
@@ -342,15 +342,18 @@ export const Operator = (props: {
         robotNotHomed: robotNotHomed,
         // Only pass human mode information in Run Program mode
         isHumanMode: programMode === "Run Program" ? isHumanMode : true,
+        storageHandler: props.storageHandler,
     };
 
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
         displayMovementRecorder: layout.current.displayMovementRecorder,
         displayTextToSpeech: layout.current.displayTextToSpeech,
+        displayLabels: layout.current.displayLabels,
         displayRosbagRecorder: layout.current.displayRosbagRecorder,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
         setDisplayTextToSpeech: setDisplayTextToSpeech,
+        setDisplayLabels: setDisplayLabels,
         setDisplayRosbagRecorder: setDisplayRosbagRecorder,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
