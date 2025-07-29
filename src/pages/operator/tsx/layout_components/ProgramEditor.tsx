@@ -173,11 +173,15 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        const newText = text.substring(0, start) + currentSuggestion + '()' + text.substring(end);
+        // Check if the suggestion is a function (robot or human function) or a saved position
+        const isFunction = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS].includes(currentSuggestion);
+        const suffix = isFunction ? '()' : '';
+        
+        const newText = text.substring(0, start) + currentSuggestion + suffix + text.substring(end);
         setCode(newText);
         
-        // Set cursor position after the completed function
-        const newCursorPos = start + currentSuggestion.length + 2; // +2 for the parentheses
+        // Set cursor position after the completed word
+        const newCursorPos = start + currentSuggestion.length + suffix.length;
         setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = newCursorPos;
             textarea.focus();
@@ -249,7 +253,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Add the suggestion as grey text after the current word
                 const beforeWord = code.substring(0, start);
                 const afterWord = code.substring(end);
-                const suggestionText = currentSuggestion.substring(word.length) + '()';
+                
+                // Check if the suggestion is a function (robot or human function) or a saved position
+                const isFunction = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS].includes(currentSuggestion);
+                const suffix = isFunction ? '()' : '';
+                
+                const suggestionText = currentSuggestion.substring(word.length) + suffix;
                 
                 // Create the highlighted version with suggestion
                 const beforeHighlighted = highlightSyntax(beforeWord);
