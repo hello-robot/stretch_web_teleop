@@ -84,9 +84,9 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div className="library-text">
                             <div 
                                 className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose(x,y,z)")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
                             >
-                                MoveEEToPose(x,y,z)
+                                MoveEEToPose()
                             </div>
                             <div 
                                 className="library-function-item"
@@ -96,15 +96,16 @@ export const Library = (props: CustomizableComponentProps) => {
                             </div>
                             <div 
                                 className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("RotateEE(theta)")}
+                                onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
                             >
-                                RotateEE(theta)
+                                RotateEE()
                             </div>
                             <div 
                                 className="library-function-item"
                                 onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
                             >
                                 ResetRobot()
+                                
                             </div>
                         </div>
                     </div>
