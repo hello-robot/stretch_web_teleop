@@ -351,6 +351,9 @@ export const Operator = (props: {
         // Get isExecutingProgram from the state managed by ButtonFunctionProvider
         isExecutingProgram: isExecutingProgram,
     };
+    
+    // Debug logging for shared state
+    console.log("SharedState isExecutingProgram:", isExecutingProgram);
 
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
@@ -422,7 +425,7 @@ export const Operator = (props: {
                         pointerEvents: props.isReconnecting ? "none" : "auto"
                     }}
                 >
-                    {isExecutingProgram ? "Robot in control" : "You are in control"}
+                    {isExecutingProgram ? "Robot in control" : "You are in control"} (Debug: isExecutingProgram={isExecutingProgram.toString()})
                 </div>
             )}
             {/* Global controls */}
