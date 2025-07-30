@@ -63,6 +63,20 @@ const POSE_DEFINITIONS = {
     realsenseBase: {
         joint_head_pan: 0.075,
         joint_head_tilt: -1.1,
+    },
+    testPose: {
+        joint_arm_l0:-1.6137320244357253e-08,
+        joint_arm_l1:-2.9392484829061376e-07,
+        joint_arm_l2:-2.8036125938539207e-07,
+        joint_arm_l3: -2.056847528567165e-07,
+        joint_gripper_finger_left: -2.0518734302754638e-06,
+        joint_gripper_finger_right: -5.98271107676851e-06,
+        joint_head_pan: 2.9291786329821434e-07,
+        joint_head_tilt: 1.3802900147297237e-06,
+        joint_left_wheel: 0.08154086954434359,
+        joint_lift: 1.4361499260374905e-07,
+        joint_right_wheel: 0.4139061738340768,
+        joint_wrist_yaw: 9.32603306580404e-07,
     }
 };
 
