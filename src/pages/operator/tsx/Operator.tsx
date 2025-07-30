@@ -395,7 +395,7 @@ export const Operator = (props: {
     return (
         <div id="operator">
             {/* Persistent banner for control mode - only show in Run Program mode */}
-            {programMode === "Run Program" && (
+            {programMode === "Program Executor" && (
                 <div
                     style={{
                         width: "100%",
