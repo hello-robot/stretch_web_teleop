@@ -76,7 +76,7 @@ for (let i = 0; i < 4; i++) {
 export const ButtonGrid = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
-    const isDisabled = !props.sharedState.isHumanMode;
+    const isDisabled = props.sharedState.isExecutingProgram;
     function handleSelect(event: React.MouseEvent<HTMLDivElement>) {
         event.stopPropagation();
         props.sharedState.onSelect(props.definition, props.path);

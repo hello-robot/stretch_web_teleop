@@ -99,7 +99,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
             }
             : {};
 
-    const isDisabled = !props.sharedState.isHumanMode;
+    const isDisabled = props.sharedState.isExecutingProgram;
 
     return (
         <div
@@ -163,7 +163,7 @@ const SingleButton = (props: SingleButtonProps) => {
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
+    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed || props.sharedState.isExecutingProgram;
 
     return (
         <React.Fragment>

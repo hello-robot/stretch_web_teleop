@@ -129,6 +129,7 @@ const parseProgram = (code: string): Program => {
     };
 };
 
+
 /**
  * Execute the parsed program line by line
  */
@@ -161,6 +162,26 @@ const executeProgram = async (program: Program) => {
                 } else {
                     console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
                 }
+            }
+            else if (line.command === "AdjustGripperWidth") {
+                (window as any).remoteRobot.isExecutingProgram = true; 
+
+            }
+            else if (line.command === "RotateEE") {
+                (window as any).remoteRobot.isExecutingProgram = true; 
+
+            }
+            else if (line.command === "ResetRobot") {
+                (window as any).remoteRobot.isExecutingProgram = true; 
+
+            }
+            else if (line.command === "PauseAndConfirm") {
+                (window as any).remoteRobot.isExecutingProgram = false; 
+
+            }
+            else if (line.command === "TakeControl") {
+                (window as any).remoteRobot.isExecutingProgram = false; 
+
             }
         } else {
             console.log(`Skipping line ${line.lineNumber}: ${line.content}`);

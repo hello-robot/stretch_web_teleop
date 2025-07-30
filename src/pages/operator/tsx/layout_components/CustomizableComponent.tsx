@@ -40,7 +40,8 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
-    isHumanMode: boolean;
+    /** Whether a program is currently executing */
+    isExecutingProgram: boolean;
     /** Function to add text to program editor */
     addToProgramEditor?: (text: string) => void;
     /** Function to insert text at cursor position in program editor */
