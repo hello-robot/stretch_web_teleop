@@ -44,6 +44,28 @@ const SAVED_POSITIONS = [
 //available functions for tab completion
 const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...SAVED_POSITIONS];
 
+// Define poses that can be referenced in the program
+const POSE_DEFINITIONS = {
+    stowGripper: {
+        joint_wrist_roll: 0.0,
+        joint_wrist_pitch: -0.497,
+        joint_wrist_yaw: 3.19579,
+    },
+    centerWrist: {
+        joint_wrist_roll: 0.0,
+        joint_wrist_pitch: 0.0,
+        joint_wrist_yaw: 0.0,
+    },
+    realsenseForward: {
+        joint_head_pan: 0.075,
+        joint_head_tilt: 0.0,
+    },
+    realsenseBase: {
+        joint_head_pan: 0.075,
+        joint_head_tilt: -1.1,
+    }
+};
+
 // Program data structure for parsing 
 interface ProgramLine {
     lineNumber: number;
@@ -115,11 +137,23 @@ const executeProgram = async (program: Program) => {
         if (line.isExecutable) {
             console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
             
-            // Execute the command 
+            // Execute the command based on what it is
             if (line.command === "MoveEEToPose") {
-                console.log(`Would send setRobotPose command with parameter: ${line.parameters}`);
-                // need to implement- actually send command to robot
-                // remoteRobot.setRobotPose(pose);??
+                const poseName = line.parameters;
+                const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                
+                if (pose) {
+                    console.log(`Sending setRobotPose command with pose: ${poseName}`, pose);
+                    // Send command to robot
+                    if ((window as any).remoteRobot) {
+                        (window as any).remoteRobot.setRobotPose(pose);
+                        console.log(`Command sent to robot!`);
+                    } else {
+                        console.error("RemoteRobot not available");
+                    }
+                } else {
+                    console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                }
             }
         } else {
             console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
