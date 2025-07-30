@@ -62,7 +62,7 @@ const POSE_DEFINITIONS = {
         joint_head_tilt: -1.1,
     },
     testPose: {
-        joint_lift: 0.4,
+        joint_lift: 0.8,
     }
 };
 
