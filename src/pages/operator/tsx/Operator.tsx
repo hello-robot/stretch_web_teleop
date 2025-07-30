@@ -129,10 +129,7 @@ export const Operator = (props: {
     
     // Set up execution state callback
     function executionStateCallback(isExecuting: boolean) {
-        console.log("Operator received execution state update:", isExecuting);
-        console.log("Setting isExecutingProgram state to:", isExecuting);
         setIsExecutingProgram(isExecuting);
-        console.log("State set, should trigger re-render");
     }
     buttonFunctionProvider.setExecutionStateCallback(executionStateCallback);
 
@@ -354,9 +351,7 @@ export const Operator = (props: {
         isExecutingProgram: isExecutingProgram,
     };
     
-    // Debug logging for shared state
-    console.log("SharedState isExecutingProgram:", isExecutingProgram);
-    console.log("Operator component rendering with isExecutingProgram:", isExecutingProgram);
+
 
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
@@ -428,7 +423,7 @@ export const Operator = (props: {
                         pointerEvents: props.isReconnecting ? "none" : "auto"
                     }}
                 >
-                    {isExecutingProgram ? "Robot in control" : "You are in control"} (Debug: isExecutingProgram={isExecutingProgram.toString()})
+                    {isExecutingProgram ? "Robot in control" : "You are in control"}
                 </div>
             )}
             {/* Global controls */}
