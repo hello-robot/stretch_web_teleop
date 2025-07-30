@@ -93,7 +93,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                     MoveEEToPose()
                                 </div>
                                 <div className="function-description">
-                                    Move the robot's end effector to a specific pose
+                                    Move the robot's end effector to a specific pose.
+                                    Input: Saved position from demo recording.
                                 </div>
                             </div>
                             <div className="function-group">
@@ -104,7 +105,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                     AdjustGripperWidth()
                                 </div>
                                 <div className="function-description">
-                                    Adjust the width of the gripper
+                                    Adjust the width of the end effector.
+                                    Input: Value betweem -0.37 and 0.17.
                                 </div>
                             </div>
                             <div className="function-group">
@@ -115,7 +117,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                     RotateEE()
                                 </div>
                                 <div className="function-description">
-                                    Rotate the end effector around its axis
+                                    Adjust the angle of the end effector.
+                                    Input: Saved position from demo recording.
                                 </div>
                             </div>
                             <div className="function-group">
@@ -126,7 +129,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                     ResetRobot()
                                 </div>
                                 <div className="function-description">
-                                    Reset the robot to its home position
+                                    Reset the robot to its home position.
+                                    Input: N/A
                                 </div>
                             </div>
                         </div>
@@ -143,18 +147,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                     PauseAndConfirm()
                                 </div>
                                 <div className="function-description">
-                                    Pause execution and wait for human confirmation
-                                </div>
-                            </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
-                                >
-                                    GiveControl()
-                                </div>
-                                <div className="function-description">
-                                    Give manual control to the human operator
+                                    Pause execution and wait for your confirmation.
+                                    Input: Message shown while execution is paused.
                                 </div>
                             </div>
                             <div className="function-group">
@@ -165,7 +159,20 @@ export const Library = (props: CustomizableComponentProps) => {
                                     TakeControl()
                                 </div>
                                 <div className="function-description">
-                                    Take control back from the human operator
+                                    Control the robot by tele-operating it.
+                                    Input: N/A
+                                </div>
+                            </div>
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
+                                >
+                                    GiveControl()
+                                </div>
+                                <div className="function-description">
+                                    Allow the robot to assume operation.
+                                    Input: N/A
                                 </div>
                             </div>
                         </div>
