@@ -341,7 +341,7 @@ export const Operator = (props: {
         stretchTool: stretchTool,
         robotNotHomed: robotNotHomed,
         // Only pass human mode information in Run Program mode
-        isHumanMode: programMode === "Run Program" ? isHumanMode : true,
+        isHumanMode: programMode === "Program Executor" ? isHumanMode : true,
     };
 
     /** Properties for the global options area of the sidebar */
@@ -561,7 +561,7 @@ export const Operator = (props: {
                 </div>
             )}
             {/* Pop-up Modal */}
-            {showPopup && programMode === "Run Program" && (
+            {showPopup && programMode === "Program Executor" && (
                 <div style={{
                     position: "fixed",
                     top: 0,
@@ -626,7 +626,7 @@ export const Operator = (props: {
                 <LayoutArea layout={layout.current} sharedState={sharedState} />
             </div>
             {/* Bottom left controls - only show in Run Program mode - temporary*/}
-            {programMode === "Run Program" && (
+            {programMode === "Program Executor" && (
                 <div style={{
                     position: "fixed",
                     bottom: 20,
