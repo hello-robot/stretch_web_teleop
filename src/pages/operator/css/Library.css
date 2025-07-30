@@ -113,6 +113,24 @@
     color: var(--text-color);
 }
 
+.function-group {
+    margin-bottom: 8px;
+}
+
+.function-group:last-child {
+    margin-bottom: 0;
+}
+
+.function-description {
+    font-size: 11px;
+    color: var(--secondary-text-color);
+    font-style: italic;
+    margin-top: 2px;
+    margin-left: 8px;
+    line-height: 1.3;
+    opacity: 0.8;
+}
+
 /* Add Position Button */
 .add-position-btn {
     margin-top: 12px;

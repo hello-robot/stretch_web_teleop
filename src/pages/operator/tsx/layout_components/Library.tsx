@@ -85,30 +85,49 @@ export const Library = (props: CustomizableComponentProps) => {
                     <div className="library-subsection">
                         <h4 className="library-subsection-title robot-heading">Robot</h4>
                         <div className="library-text">
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
-                            >
-                                MoveEEToPose()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
+                                >
+                                    MoveEEToPose()
+                                </div>
+                                <div className="function-description">
+                                    Move the robot's end effector to a specific pose
+                                </div>
                             </div>
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
-                            >
-                                AdjustGripperWidth()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
+                                >
+                                    AdjustGripperWidth()
+                                </div>
+                                <div className="function-description">
+                                    Adjust the width of the gripper
+                                </div>
                             </div>
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
-                            >
-                                RotateEE()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
+                                >
+                                    RotateEE()
+                                </div>
+                                <div className="function-description">
+                                    Rotate the end effector around its axis
+                                </div>
                             </div>
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
-                            >
-                                ResetRobot()
-                                
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
+                                >
+                                    ResetRobot()
+                                </div>
+                                <div className="function-description">
+                                    Reset the robot to its home position
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -116,23 +135,38 @@ export const Library = (props: CustomizableComponentProps) => {
                     <div className="library-subsection">
                         <h4 className="library-subsection-title human-heading">Human</h4>
                         <div className="library-text">
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
-                            >
-                                PauseAndConfirm()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
+                                >
+                                    PauseAndConfirm()
+                                </div>
+                                <div className="function-description">
+                                    Pause execution and wait for human confirmation
+                                </div>
                             </div>
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
-                            >
-                                GiveControl()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
+                                >
+                                    GiveControl()
+                                </div>
+                                <div className="function-description">
+                                    Give manual control to the human operator
+                                </div>
                             </div>
-                            <div 
-                                className="library-function-item"
-                                onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
-                            >
-                                TakeControl()
+                            <div className="function-group">
+                                <div 
+                                    className="library-function-item"
+                                    onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
+                                >
+                                    TakeControl()
+                                </div>
+                                <div className="function-description">
+                                    Take control back from the human operator
+                                </div>
                             </div>
                         </div>
                     </div>
