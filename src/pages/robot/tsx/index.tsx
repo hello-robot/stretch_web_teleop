@@ -351,7 +351,9 @@ function handleMessage(message: WebRTCMessage) {
             robot.stopShowTabletClient();
             break;
         case "homeTheRobot":
+            console.log("Robot received homeTheRobot command");
             robot.homeTheRobot();
+            console.log("Robot called homeTheRobot() method");
             break;
     }
 }

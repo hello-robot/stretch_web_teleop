@@ -228,6 +228,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     console.log(`Sending ResetRobot command (homing the robot)`);
                     // Send homeTheRobot command to robot
                     if ((window as any).remoteRobot) {
+                        console.log(`Calling remoteRobot.homeTheRobot()`);
                         (window as any).remoteRobot.homeTheRobot();
                         console.log(`Command sent to robot!`);
                         console.log(`Waiting...`);
