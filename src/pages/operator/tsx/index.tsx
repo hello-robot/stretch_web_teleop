@@ -277,7 +277,8 @@ function configureRemoteRobot() {
         runStopFunctionProvider.updateRunStopState,
     );
     
-    (window as any).remoteRobot = remoteRobot; //Make remotRobot globally available 
+    (window as any).remoteRobot = remoteRobot; //Make remotRobot globally available
+    (window as any).buttonFunctionProvider = buttonFunctionProvider; //Make buttonFunctionProvider globally available 
 }
 
 /**

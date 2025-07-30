@@ -59,6 +59,7 @@ export const Operator = (props: {
     const [tabletOrientationRerender, setTabletOrientationRerender] =
         React.useState<boolean>(false);
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
+    const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
 
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
     const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
@@ -125,6 +126,12 @@ export const Operator = (props: {
         setButtonStateMapRerender(!buttonStateMapRerender);
     }
     buttonFunctionProvider.setOperatorCallback(operatorCallback);
+    
+    // Set up execution state callback
+    function executionStateCallback(isExecuting: boolean) {
+        setIsExecutingProgram(isExecuting);
+    }
+    buttonFunctionProvider.setExecutionStateCallback(executionStateCallback);
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
@@ -340,8 +347,8 @@ export const Operator = (props: {
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
         robotNotHomed: robotNotHomed,
-        // Get isExecutingProgram from remoteRobot if available
-        isExecutingProgram: (window as any).remoteRobot?.isExecutingProgram || false,
+        // Get isExecutingProgram from the state managed by ButtonFunctionProvider
+        isExecutingProgram: isExecutingProgram,
     };
 
     /** Properties for the global options area of the sidebar */
@@ -399,7 +406,7 @@ export const Operator = (props: {
                 <div
                     style={{
                         width: "100%",
-                        background: (window as any).remoteRobot?.isExecutingProgram ? "#ff9800" : "#4caf50",
+                        background: isExecutingProgram ? "#ff9800" : "#4caf50",
                         color: "white",
                         textAlign: "center",
                         fontWeight: "bold",
@@ -412,7 +419,7 @@ export const Operator = (props: {
                         pointerEvents: props.isReconnecting ? "none" : "auto"
                     }}
                 >
-                    {(window as any).remoteRobot?.isExecutingProgram ? "Robot in control" : "You are in control"}
+                    {isExecutingProgram ? "Robot in control" : "You are in control"}
                 </div>
             )}
             {/* Global controls */}

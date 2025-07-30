@@ -57,6 +57,7 @@ export class RemoteRobot extends React.Component<{}, any> {
             } as ROSLIB.Quaternion,
         } as ROSLIB.Transform;
         this.moveBaseGoalReached = false;
+        this.isExecutingProgram = false;
     }
 
     setGoalReached(reached: boolean) {

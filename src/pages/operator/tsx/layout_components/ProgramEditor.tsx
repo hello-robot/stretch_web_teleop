@@ -131,73 +131,6 @@ const parseProgram = (code: string): Program => {
 
 
 /**
- * Execute the parsed program line by line
- */
-const executeProgram = async (program: Program) => {
-    console.log("Starting program execution...");
-    
-    for (const line of program.lines) {
-        if (line.isExecutable) {
-            console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
-            
-            // Execute the command based on what it is
-            if (line.command === "MoveEEToPose") {
-                (window as any).remoteRobot.isExecutingProgram = true; 
-                const poseName = line.parameters;
-                const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
-                
-                if (pose) {
-                    console.log(`Sending setRobotPose command with pose: ${poseName}`, pose);
-                    // Send command to robot
-                    if ((window as any).remoteRobot) {
-                        (window as any).remoteRobot.setRobotPose(pose);
-                        console.log(`Command sent to robot!`);
-                        console.log("isExecutingProgram value:", (window as any).remoteRobot.isExecutingProgram);
-                        console.log(`Waiting...`);
-                        await new Promise(resolve => setTimeout(resolve, 5000));
-                        console.log(`Executing next command...`);
-                    } else {
-                        console.error("RemoteRobot not available");
-                    }
-                } else {
-                    console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
-                }
-            }
-            else if (line.command === "AdjustGripperWidth") {
-                (window as any).remoteRobot.isExecutingProgram = true; 
-
-            }
-            else if (line.command === "RotateEE") {
-                (window as any).remoteRobot.isExecutingProgram = true; 
-
-            }
-            else if (line.command === "ResetRobot") {
-                (window as any).remoteRobot.isExecutingProgram = true; 
-
-            }
-            else if (line.command === "PauseAndConfirm") {
-                (window as any).remoteRobot.isExecutingProgram = false; 
-
-            }
-            else if (line.command === "TakeControl") {
-                (window as any).remoteRobot.isExecutingProgram = false; 
-
-            }
-        } else {
-            console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
-        }
-    }
-    
-    console.log("Program execution complete!");
-    (window as any).remoteRobot.isExecutingProgram = false; 
-};
-
-/**
- * Syntax highlighting function
- */
-
-
-/**
  * A code editor component with line numbers and syntax highlighting
  *
  * @param props {@link ProgramEditorProps}
@@ -217,6 +150,122 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Create dynamic ALL_FUNCTIONS array
     const allFunctions = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+
+    // Execute the parsed program line by line
+    const executeProgram = async (program: Program) => {
+        console.log("Starting program execution...");
+        
+        // Set execution state to true at the start
+        const buttonFunctionProvider = (window as any).buttonFunctionProvider;
+        if (buttonFunctionProvider) {
+            buttonFunctionProvider.setExecutionState(true);
+        }
+        
+        for (const line of program.lines) {
+            if (line.isExecutable) {
+                console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
+                
+                // Executes the command based on what function it is
+                if (line.command === "MoveEEToPose") {
+                    const poseName = line.parameters;
+                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                    
+                    if (pose) {
+                        console.log(`Sending MoveEEToPose command with pose: ${poseName}`, pose);
+                        // Send command to robot
+                        if ((window as any).remoteRobot) {
+                            (window as any).remoteRobot.setRobotPose(pose);
+                            console.log(`Command sent to robot!`);
+                            console.log(`Waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            console.log(`Executing next command...`);
+                        } else {
+                            console.error("RemoteRobot not available");
+                        }
+                    } else {
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                    }
+                }
+                else if (line.command === "AdjustGripperWidth") {
+                    const poseName = line.parameters;
+                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                    if (pose) {
+                        console.log(`Sending AdjustGripperWidth command with pose: ${poseName}`, pose);
+                        // Send command to robot
+                        if ((window as any).remoteRobot) {
+                            //TODO: implement sending robot the correct command
+                            console.log(`Command sent to robot!`);
+                            console.log(`Waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            console.log(`Executing next command...`);
+                        } else {
+                            console.error("RemoteRobot not available");
+                        }
+                    } else {
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                    }
+                }
+                else if (line.command === "RotateEE") {
+                    const poseName = line.parameters;
+                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                    if (pose) {
+                        console.log(`Sending RotateEE command with pose: ${poseName}`, pose);
+                        // Send command to robot
+                        if ((window as any).remoteRobot) {
+                            //TODO: implement sending robot the correct command
+                            console.log(`Command sent to robot!`);
+                            console.log(`Waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            console.log(`Executing next command...`);
+                        } else {
+                            console.error("RemoteRobot not available");
+                        }
+                    } else {
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                    }
+                }
+                else if (line.command === "ResetRobot") {
+                    console.log(`Sending ResetRobot command (homing the robot)`);
+                    // Send homeTheRobot command to robot
+                    if ((window as any).remoteRobot) {
+                        (window as any).remoteRobot.homeTheRobot();
+                        console.log(`Command sent to robot!`);
+                        console.log(`Waiting...`);
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        console.log(`Executing next command...`);
+                    } else {
+                        console.error("RemoteRobot not available");
+                    }
+                }
+                else if (line.command === "PauseAndConfirm") {
+                    console.log(`Pausing program execution for user confirmation`);
+                    // Set execution state to false to allow manual control
+                    if (buttonFunctionProvider) {
+                        buttonFunctionProvider.setExecutionState(false);
+                    }
+                    console.log(`Program paused. Waiting for user to resume...`);
+                    // TODO: Implement pause and wait for user confirmation
+                }
+                else if (line.command === "TakeControl") {
+                    console.log(`Taking control from robot`);
+                    // Set execution state to false to allow manual control
+                    if (buttonFunctionProvider) {
+                        buttonFunctionProvider.setExecutionState(false);
+                    }
+                    console.log(`Control returned to user`);
+                }
+            } else {
+                console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
+            }
+        }
+        
+        console.log("Program execution complete!");
+        
+        // Set execution state to false at the end 
+        if (buttonFunctionProvider) {
+            buttonFunctionProvider.setExecutionState(false);
+        }
+    };
 
     // Syntax highlighting function
     const highlightSyntax = (text: string): string => {
@@ -278,7 +327,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return code;
     };
 
-    // Function to add new saved position
+    // Function to add a new saved position
     const addSavedPosition = (positionName: string) => {
         if (!savedPositions.includes(positionName)) {
             setSavedPositions(prev => [...prev, positionName]);
