@@ -189,6 +189,7 @@ const executeProgram = async (program: Program) => {
     }
     
     console.log("Program execution complete!");
+    (window as any).remoteRobot.isExecutingProgram = false; 
 };
 
 /**
