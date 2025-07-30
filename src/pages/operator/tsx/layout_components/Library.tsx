@@ -93,7 +93,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     MoveEEToPose()
                                 </div>
                                 <div className="function-description">
-                                    Move the robot's end effector to a specific pose.
+                                    Move the robot's end effector to a specific pose.{'\n'}
                                     Input: Saved position from demo recording.
                                 </div>
                             </div>
@@ -105,7 +105,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     AdjustGripperWidth()
                                 </div>
                                 <div className="function-description">
-                                    Adjust the width of the end effector.
+                                    Adjust the width of the end effector.{'\n'}
                                     Input: Value betweem -0.37 and 0.17.
                                 </div>
                             </div>
@@ -117,7 +117,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     RotateEE()
                                 </div>
                                 <div className="function-description">
-                                    Adjust the angle of the end effector.
+                                    Adjust the angle of the end effector.{'\n'}
                                     Input: Saved position from demo recording.
                                 </div>
                             </div>
@@ -129,7 +129,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     ResetRobot()
                                 </div>
                                 <div className="function-description">
-                                    Reset the robot to its home position.
+                                    Reset the robot to its home position.{'\n'}
                                     Input: N/A
                                 </div>
                             </div>
@@ -147,7 +147,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     PauseAndConfirm()
                                 </div>
                                 <div className="function-description">
-                                    Pause execution and wait for your confirmation.
+                                    Pause execution and wait for your confirmation.{'\n'}
                                     Input: Message shown while execution is paused.
                                 </div>
                             </div>
@@ -159,7 +159,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     TakeControl()
                                 </div>
                                 <div className="function-description">
-                                    Control the robot by tele-operating it.
+                                    Control the robot by tele-operating it.{'\n'}
                                     Input: N/A
                                 </div>
                             </div>
@@ -171,7 +171,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     GiveControl()
                                 </div>
                                 <div className="function-description">
-                                    Allow the robot to assume operation.
+                                    Allow the robot to assume operation.{'\n'}
                                     Input: N/A
                                 </div>
                             </div>
