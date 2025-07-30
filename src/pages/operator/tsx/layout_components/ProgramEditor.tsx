@@ -106,6 +106,30 @@ const parseProgram = (code: string): Program => {
 };
 
 /**
+ * Execute the parsed program line by line
+ */
+const executeProgram = async (program: Program) => {
+    console.log("Starting program execution...");
+    
+    for (const line of program.lines) {
+        if (line.isExecutable) {
+            console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
+            
+            // Execute the command 
+            if (line.command === "MoveEEToPose") {
+                console.log(`Would send setRobotPose command with parameter: ${line.parameters}`);
+                // need to implement- actually send command to robot
+                // remoteRobot.setRobotPose(pose);??
+            }
+        } else {
+            console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
+        }
+    }
+    
+    console.log("Program execution complete!");
+};
+
+/**
  * Syntax highlighting function
  */
 const highlightSyntax = (text: string): string => {
@@ -327,6 +351,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 console.log(`Line ${line.lineNumber}: Non-executable (${line.content})`);
             }
         });
+        
+        // Execute the program line by line
+        executeProgram(program);
         
         if (props.onRunProgram) {
             props.onRunProgram(programText);
