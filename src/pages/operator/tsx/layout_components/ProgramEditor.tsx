@@ -44,6 +44,65 @@ const SAVED_POSITIONS = [
 //available functions for tab completion
 const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...SAVED_POSITIONS];
 
+// Program data structure for parsing 
+interface ProgramLine {
+    lineNumber: number;
+    content: string;
+    command?: string;  // ex.MoveEEToPose
+    parameters?: any;   
+    isExecutable: boolean; // handling for empty lines or if invalid 
+}
+
+interface Program {
+    lines: ProgramLine[];
+    totalLines: number;
+}
+
+/**
+ * Parse program code into structured format for execution
+ */
+const parseProgram = (code: string): Program => {
+    const lines = code.split('\n');
+    const programLines: ProgramLine[] = [];
+    
+    lines.forEach((line, index) => {
+        const lineNumber = index + 1;
+        const trimmedLine = line.trim();
+        
+        if (trimmedLine === '') {
+            // if there is an empty line
+            programLines.push({
+                lineNumber,
+                content: line,
+                isExecutable: false
+            });
+        } else {
+            // Check if command (testing this command for now- will add others)
+            const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*\)/);
+            if (moveEEMatch) {
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "MoveEEToPose",
+                    isExecutable: true
+                });
+            } else {
+                // Unknown command or invalid line
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    isExecutable: false
+                });
+            }
+        }
+    });
+    
+    return {
+        lines: programLines,
+        totalLines: lines.length
+    };
+};
+
 /**
  * Syntax highlighting function
  */
@@ -253,7 +312,19 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         console.log("Run Program button clicked!");
         const programText = readProgramCode();
         console.log("Program text:", programText);
-        console.log("Code state:", code);
+        
+        // Parse the program into structured format
+        const program = parseProgram(programText);
+        console.log("Parsed program:", program);
+        
+        // Log each line for debugging
+        program.lines.forEach(line => {
+            if (line.isExecutable) {
+                console.log(`Line ${line.lineNumber}: Executable command "${line.command}"`);
+            } else {
+                console.log(`Line ${line.lineNumber}: Non-executable (${line.content})`);
+            }
+        });
         
         if (props.onRunProgram) {
             props.onRunProgram(programText);
