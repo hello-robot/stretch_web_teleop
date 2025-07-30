@@ -234,8 +234,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (!props.readOnly && textareaRef.current) {
             const textarea = textareaRef.current;
             const cursorPos = textarea.selectionStart;
-            const textBefore = code.substring(0, cursorPos);
-            const textAfter = code.substring(cursorPos);
+            const currentValue = textarea.value; // Use current textarea value
+            const textBefore = currentValue.substring(0, cursorPos);
+            const textAfter = currentValue.substring(cursorPos);
             
             const newText = textBefore + text + textAfter;
             setCode(newText);
