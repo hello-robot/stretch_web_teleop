@@ -78,12 +78,14 @@ const parseProgram = (code: string): Program => {
             });
         } else {
             // Check if command (testing this command for now- will add others)
-            const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*\)/);
+            const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*([^)]*)\s*\)/);
             if (moveEEMatch) {
+                const parameter = moveEEMatch[1] || null;
                 programLines.push({
                     lineNumber,
                     content: line,
                     command: "MoveEEToPose",
+                    parameters: parameter,
                     isExecutable: true
                 });
             } else {
