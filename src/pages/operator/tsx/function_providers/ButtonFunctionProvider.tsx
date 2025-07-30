@@ -211,6 +211,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
     public setExecutionStateCallback(
         callback: (isExecuting: boolean) => void,
     ) {
+        console.log("ButtonFunctionProvider: Setting execution state callback");
         this.executionStateCallback = callback;
     }
 
@@ -220,9 +221,14 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @param isExecuting whether a program is currently executing
      */
     public setExecutionState(isExecuting: boolean) {
+        console.log("ButtonFunctionProvider: setExecutionState called with:", isExecuting);
         this.isExecutingProgram = isExecuting;
+        console.log("ButtonFunctionProvider: executionStateCallback exists:", !!this.executionStateCallback);
         if (this.executionStateCallback) {
+            console.log("ButtonFunctionProvider: Calling executionStateCallback with:", isExecuting);
             this.executionStateCallback(isExecuting);
+        } else {
+            console.error("ButtonFunctionProvider: No executionStateCallback set!");
         }
     }
 
