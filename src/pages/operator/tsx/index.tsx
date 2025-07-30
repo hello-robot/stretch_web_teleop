@@ -276,6 +276,8 @@ function configureRemoteRobot() {
     remoteRobot.sensors.setRunStopFunctionProviderCallback(
         runStopFunctionProvider.updateRunStopState,
     );
+    
+    (window as any).remoteRobot = remoteRobot;
 }
 
 /**
