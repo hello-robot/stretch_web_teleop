@@ -78,128 +78,130 @@ export const Library = (props: CustomizableComponentProps) => {
             </div>
             
             <div className="library-content">
-                {/* Functions Section */}
-                <div className="library-section">
-                    <h3 className="library-section-title">Functions</h3>
-                    
-                    <div className="library-subsection">
-                        <h4 className="library-subsection-title robot-heading">Robot</h4>
-                        <div className="library-text">
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
-                                >
-                                    MoveEEToPose()
+                <div className="library-sections-container">
+                    {/* Functions Section */}
+                    <div className="library-section">
+                        <h3 className="library-section-title">Functions</h3>
+                        
+                        <div className="library-subsection">
+                            <h4 className="library-subsection-title robot-heading">Robot</h4>
+                            <div className="library-text">
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
+                                    >
+                                        MoveEEToPose()
+                                    </div>
+                                    <div className="function-description">
+                                        Move the robot's end effector to a specific pose.{'\n'}
+                                        Input: Saved position from demo recording.
+                                    </div>
                                 </div>
-                                <div className="function-description">
-                                    Move the robot's end effector to a specific pose.{'\n'}
-                                    Input: Saved position from demo recording.
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
+                                    >
+                                        AdjustGripperWidth()
+                                    </div>
+                                    <div className="function-description">
+                                        Adjust the width of the end effector.{'\n'}
+                                        Input: Value betweem -0.37 and 0.17.
+                                    </div>
+                                </div>
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
+                                    >
+                                        RotateEE()
+                                    </div>
+                                    <div className="function-description">
+                                        Adjust the angle of the end effector.{'\n'}
+                                        Input: Saved position from demo recording.
+                                    </div>
+                                </div>
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
+                                    >
+                                        ResetRobot()
+                                    </div>
+                                    <div className="function-description">
+                                        Reset the robot to its home position.{'\n'}
+                                        Input: N/A
+                                    </div>
                                 </div>
                             </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
-                                >
-                                    AdjustGripperWidth()
+                        </div>
+                        
+                        <div className="library-subsection">
+                            <h4 className="library-subsection-title human-heading">Human</h4>
+                            <div className="library-text">
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
+                                    >
+                                        PauseAndConfirm()
+                                    </div>
+                                    <div className="function-description">
+                                        Pause execution and wait for your confirmation.{'\n'}
+                                        Input: Message shown while execution is paused.
+                                    </div>
                                 </div>
-                                <div className="function-description">
-                                    Adjust the width of the end effector.{'\n'}
-                                    Input: Value betweem -0.37 and 0.17.
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
+                                    >
+                                        TakeControl()
+                                    </div>
+                                    <div className="function-description">
+                                        Control the robot by tele-operating it.{'\n'}
+                                        Input: N/A
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
-                                >
-                                    RotateEE()
-                                </div>
-                                <div className="function-description">
-                                    Adjust the angle of the end effector.{'\n'}
-                                    Input: Saved position from demo recording.
-                                </div>
-                            </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
-                                >
-                                    ResetRobot()
-                                </div>
-                                <div className="function-description">
-                                    Reset the robot to its home position.{'\n'}
-                                    Input: N/A
+                                <div className="function-group">
+                                    <div 
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
+                                    >
+                                        GiveControl()
+                                    </div>
+                                    <div className="function-description">
+                                        Allow the robot to assume operation.{'\n'}
+                                        Input: N/A
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div className="library-subsection">
-                        <h4 className="library-subsection-title human-heading">Human</h4>
-                        <div className="library-text">
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
-                                >
-                                    PauseAndConfirm()
-                                </div>
-                                <div className="function-description">
-                                    Pause execution and wait for your confirmation.{'\n'}
-                                    Input: Message shown while execution is paused.
-                                </div>
+                    {/* Saved Positions Section */}
+                    <div className="library-section">
+                        <h3 className="library-section-title">Saved Positions</h3>
+                        <div className="library-subsection">
+                            <div className="library-text">
+                                {savedPositions.map((position, index) => (
+                                    <div 
+                                        key={index}
+                                        className="library-function-item"
+                                        onClick={() => props.sharedState.insertTextAtCursor?.(position.name)}
+                                    >
+                                        {position.name}
+                                    </div>
+                                ))}
                             </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
-                                >
-                                    TakeControl()
-                                </div>
-                                <div className="function-description">
-                                    Control the robot by tele-operating it.{'\n'}
-                                    Input: N/A
-                                </div>
-                            </div>
-                            <div className="function-group">
-                                <div 
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
-                                >
-                                    GiveControl()
-                                </div>
-                                <div className="function-description">
-                                    Allow the robot to assume operation.{'\n'}
-                                    Input: N/A
-                                </div>
-                            </div>
+                            <button 
+                                className="add-position-btn"
+                                onClick={() => setShowModal(true)}
+                            >
+                                + Add Position
+                            </button>
                         </div>
-                    </div>
-                </div>
-                
-                {/* Saved Positions Section */}
-                <div className="library-section">
-                    <h3 className="library-section-title">Saved Positions</h3>
-                    <div className="library-subsection">
-                        <div className="library-text">
-                            {savedPositions.map((position, index) => (
-                                <div 
-                                    key={index}
-                                    className="library-function-item"
-                                    onClick={() => props.sharedState.insertTextAtCursor?.(position.name)}
-                                >
-                                    {position.name}
-                                </div>
-                            ))}
-                        </div>
-                        <button 
-                            className="add-position-btn"
-                            onClick={() => setShowModal(true)}
-                        >
-                            + Add Position
-                        </button>
                     </div>
                 </div>
             </div>

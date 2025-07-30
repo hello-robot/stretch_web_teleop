@@ -53,6 +53,12 @@
     overflow-y: auto;
 }
 
+.library-sections-container {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+}
+
 .library-section {
     margin-bottom: 24px;
 }
