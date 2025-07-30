@@ -159,6 +159,10 @@ const executeProgram = async (program: Program) => {
                     if ((window as any).remoteRobot) {
                         (window as any).remoteRobot.setRobotPose(pose);
                         console.log(`Command sent to robot!`);
+                        
+                        console.log(`Waiting...`);
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        console.log(`Executing next command...`);
                     } else {
                         console.error("RemoteRobot not available");
                     }
