@@ -72,9 +72,9 @@ export const Operator = (props: {
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>();
     const [robotNotHomed, setRobotNotHomed] =
-        React.useState<ActionState>();
+        React.useState<boolean>(false);
     function showHomeTheRobotGlobalControl(isHomed: boolean) {
-        setRobotNotHomed(isHomed ? undefined : { state: "not_homed", alert_type: "warning" });
+        setRobotNotHomed(!isHomed);
     }
     homeTheRobotFunctionProvider.setIsHomedCallback(
         showHomeTheRobotGlobalControl
@@ -129,6 +129,7 @@ export const Operator = (props: {
     
     // Set up execution state callback
     function executionStateCallback(isExecuting: boolean) {
+        console.log("Operator received execution state update:", isExecuting);
         setIsExecutingProgram(isExecuting);
     }
     buttonFunctionProvider.setExecutionStateCallback(executionStateCallback);
@@ -356,9 +357,11 @@ export const Operator = (props: {
         displayMovementRecorder: layout.current.displayMovementRecorder,
         displayTextToSpeech: layout.current.displayTextToSpeech,
         displayRosbagRecorder: layout.current.displayRosbagRecorder,
+        displayLabels: layout.current.displayLabels,
         setDisplayMovementRecorder: setDisplayMovementRecorder,
         setDisplayTextToSpeech: setDisplayTextToSpeech,
         setDisplayRosbagRecorder: setDisplayRosbagRecorder,
+        setDisplayLabels: setDisplayLabels,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
         customLayouts: props.storageHandler.getCustomLayoutNames(),
         loadLayout: (layoutName: string, dflt: boolean) => {

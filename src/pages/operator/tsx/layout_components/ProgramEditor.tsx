@@ -187,8 +187,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         
         // Set execution state to true at the start
         const buttonFunctionProvider = (window as any).buttonFunctionProvider;
+        console.log("buttonFunctionProvider available:", !!buttonFunctionProvider);
         if (buttonFunctionProvider) {
+            console.log("Setting execution state to TRUE");
             buttonFunctionProvider.setExecutionState(true);
+        } else {
+            console.error("buttonFunctionProvider not available!");
         }
         
         for (const line of program.lines) {
@@ -293,7 +297,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         
         // Set execution state to false at the end 
         if (buttonFunctionProvider) {
+            console.log("Setting execution state to FALSE");
             buttonFunctionProvider.setExecutionState(false);
+        } else {
+            console.error("buttonFunctionProvider not available at end!");
         }
     };
 
