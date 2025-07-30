@@ -55,7 +55,7 @@
 
 .library-sections-container {
     display: flex;
-    gap: 24px;
+    gap: 32px;
     flex: 1;
 }
 
