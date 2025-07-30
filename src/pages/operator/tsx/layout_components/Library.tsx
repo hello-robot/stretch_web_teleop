@@ -23,9 +23,9 @@ export const Library = (props: CustomizableComponentProps) => {
     
     // State for saved positions and modal- temporary placeholder
     const [savedPositions, setSavedPositions] = useState<SavedPosition[]>([
-        { name: "approach_pose", jointStates: "[0.1, 0.2, 0.3, 0.4, 0.5, 0.6]", timestamp: new Date() },
-        { name: "red_cub_pose", jointStates: "[0.2, 0.3, 0.4, 0.5, 0.6, 0.7]", timestamp: new Date() },
-        { name: "end_pose", jointStates: "[0.3, 0.4, 0.5, 0.6, 0.7, 0.8]", timestamp: new Date() }
+        { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
+        { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() },
+        { name: "testPose", jointStates: "[-1.61e-08, -2.94e-07, -2.80e-07, -2.06e-07, -2.05e-06, 2.93e-07, 1.38e-06, 1.44e-07, 9.33e-07]", timestamp: new Date() }
     ]);
     const [showModal, setShowModal] = useState(false);
     const [newPositionName, setNewPositionName] = useState("");
