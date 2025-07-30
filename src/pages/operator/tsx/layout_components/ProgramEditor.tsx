@@ -4,7 +4,7 @@ import {
     SharedState,
     isSelected,
 } from "./CustomizableComponent";
-import { className } from "shared/util";
+import { className, RobotPose } from "shared/util";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -182,22 +182,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const allFunctions = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
 
         // Function to wait for goal completion
-        const waitForGoalCompletion = (): Promise<void> => {
+        const waitForPoseCompletion = (targetPose: RobotPose): Promise<void> => {
+            //TODO: implement this by storing the target pose + comparing w/ current joint states
             return new Promise((resolve) => {
-                const originalSetGoalReached = (window as any).remoteRobot.setGoalReached;
-                (window as any).remoteRobot.setGoalReached = (reached: boolean) => {
-                    if (reached) {
-                        // Restore original function
-                        (window as any).remoteRobot.setGoalReached = originalSetGoalReached;
-                        resolve();
-                    }
-                };
-                // Timeout after 60 seconds as backup
-                setTimeout(() => {
-                    (window as any).remoteRobot.setGoalReached = originalSetGoalReached;
-                    console.log("Goal completion timeout - proceeding anyway");
-                    resolve();
-                }, 60000);
+                // For now, just resolve immediately
+                resolve();
             });
         };
     
@@ -227,9 +216,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             (window as any).remoteRobot.setRobotPose(pose);
                             console.log(`Command sent to robot!`);
                             //testing this out 
-                            console.log(`Waiting for robot to complete movement...`);
-                            await waitForGoalCompletion();
-                            console.log(`Movement complete, executing next command...`);
+                            console.log(`Waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            console.log(`Executing next command...`);
                         } else {
                             console.error("RemoteRobot not available");
                         }
