@@ -47,11 +47,13 @@ const POSE_DEFINITIONS = {
         joint_wrist_roll: 0.0,
         joint_wrist_pitch: -0.497,
         joint_wrist_yaw: 3.19579,
+        joint_lift: 0.4,
     },
     centerWrist: {
         joint_wrist_roll: 0.0,
         joint_wrist_pitch: 0.0,
         joint_wrist_yaw: 0.0,
+        joint_lift: 0.6,
     },
     realsenseForward: {
         joint_head_pan: 0.075,
