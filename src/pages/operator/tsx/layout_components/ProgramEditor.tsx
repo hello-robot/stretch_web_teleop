@@ -180,18 +180,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Create dynamic ALL_FUNCTIONS array
     const allFunctions = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
-    
-        // Execute the parsed program line by line
-        const executeProgram = async (program: Program) => {
-            console.log("Starting program execution...");
-            
-            // Set execution state to true at the start
-            const buttonFunctionProvider = (window as any).buttonFunctionProvider;
-            if (buttonFunctionProvider) {
-                buttonFunctionProvider.setExecutionState(true);
-            }
-    
-    
+
         // Function to wait for goal completion
         const waitForGoalCompletion = (): Promise<void> => {
             return new Promise((resolve) => {
@@ -212,15 +201,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             });
         };
     
-        // Execute the parsed program line by line
-        const executeProgram = async (program: Program) => {
-            console.log("Starting program execution...");
-            
-            // Set execution state to true at the start
-            const buttonFunctionProvider = (window as any).buttonFunctionProvider;
-            if (buttonFunctionProvider) {
-                buttonFunctionProvider.setExecutionState(true);
-            }
     // Execute the parsed program line by line
     const executeProgram = async (program: Program) => {
         console.log("Starting program execution...");
