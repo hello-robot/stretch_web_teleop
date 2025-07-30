@@ -34,15 +34,12 @@ const HUMAN_FUNCTIONS = [
     'TakeControl'
 ];
 
-// Saved positions (blue)
-const SAVED_POSITIONS = [
+// Saved positions (blue) - will be made dynamic
+const DEFAULT_SAVED_POSITIONS = [
     'stowGripper',
     'testPose',
     'centerWrist'
 ];
-
-//available functions for tab completion
-const ALL_FUNCTIONS = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...SAVED_POSITIONS];
 
 // Define poses that can be referenced in the program
 const POSE_DEFINITIONS = {
@@ -181,29 +178,7 @@ const executeProgram = async (program: Program) => {
 /**
  * Syntax highlighting function
  */
-const highlightSyntax = (text: string): string => {
-    let highlightedText = text;
-    
-    // Highlight robot functions in orange
-    ROBOT_FUNCTIONS.forEach(func => {
-        const regex = new RegExp(`\\b${func}\\b`, 'g');
-        highlightedText = highlightedText.replace(regex, `<span class="robot-function">${func}</span>`);
-    });
-    
-    // Highlight human functions in green
-    HUMAN_FUNCTIONS.forEach(func => {
-        const regex = new RegExp(`\\b${func}\\b`, 'g');
-        highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
-    });
-    
-    // Highlight saved positions in blue
-    SAVED_POSITIONS.forEach(position => {
-        const regex = new RegExp(`\\b${position}\\b`, 'g');
-        highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
-    });
-    
-    return highlightedText;
-};
+
 
 /**
  * A code editor component with line numbers and syntax highlighting
@@ -215,12 +190,41 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
+    const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
     
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
+
+    // Create dynamic ALL_FUNCTIONS array
+    const allFunctions = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+
+    // Syntax highlighting function
+    const highlightSyntax = (text: string): string => {
+        let highlightedText = text;
+        
+        // Highlight robot functions in orange
+        ROBOT_FUNCTIONS.forEach(func => {
+            const regex = new RegExp(`\\b${func}\\b`, 'g');
+            highlightedText = highlightedText.replace(regex, `<span class="robot-function">${func}</span>`);
+        });
+        
+        // Highlight human functions in green
+        HUMAN_FUNCTIONS.forEach(func => {
+            const regex = new RegExp(`\\b${func}\\b`, 'g');
+            highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
+        });
+        
+        // Highlight saved positions in blue
+        savedPositions.forEach(position => {
+            const regex = new RegExp(`\\b${position}\\b`, 'g');
+            highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
+        });
+        
+        return highlightedText;
+    };
 
     // Function to add text to the editor (as new line)
     const addText = (text: string) => {
@@ -257,6 +261,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return code;
     };
 
+    // Function to add new saved position
+    const addSavedPosition = (positionName: string) => {
+        if (!savedPositions.includes(positionName)) {
+            setSavedPositions(prev => [...prev, positionName]);
+        }
+    };
+
     // Expose the functions to sharedState
     React.useEffect(() => {
         if (props.sharedState.addToProgramEditor === undefined) {
@@ -266,6 +277,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if ((props.sharedState as any).insertTextAtCursor === undefined) {
             // Add the insert function to sharedState if it doesn't exist
             (props.sharedState as any).insertTextAtCursor = insertTextAtCursor;
+        }
+        if ((props.sharedState as any).addSavedPosition === undefined) {
+            // Add the function to add saved positions if it doesn't exist
+            (props.sharedState as any).addSavedPosition = addSavedPosition;
         }
     }, [props.sharedState]);
 
@@ -319,7 +334,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             return;
         }
         
-        const filtered = ALL_FUNCTIONS.filter(func => 
+        const filtered = allFunctions.filter(func => 
             func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
         

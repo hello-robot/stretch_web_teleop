@@ -48,6 +48,10 @@ export const Library = (props: CustomizableComponentProps) => {
                 timestamp: new Date()
             };
             setSavedPositions(prev => [...prev, newPosition]);
+            
+            // Add to program editor's autocomplete and syntax highlighting
+            props.sharedState.addSavedPosition?.(newPositionName.trim());
+            
             setNewPositionName("");
             setNewJointStates("");
             setShowModal(false);

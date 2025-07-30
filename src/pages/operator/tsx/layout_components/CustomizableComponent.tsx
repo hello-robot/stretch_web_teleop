@@ -45,6 +45,8 @@ export type SharedState = {
     addToProgramEditor?: (text: string) => void;
     /** Function to insert text at cursor position in program editor */
     insertTextAtCursor?: (text: string) => void;
+    /** Function to add new saved position to autocomplete and syntax highlighting */
+    addSavedPosition?: (positionName: string) => void;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
