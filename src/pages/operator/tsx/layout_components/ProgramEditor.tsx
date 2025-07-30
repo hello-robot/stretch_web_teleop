@@ -141,6 +141,7 @@ const executeProgram = async (program: Program) => {
             
             // Execute the command based on what it is
             if (line.command === "MoveEEToPose") {
+                (window as any).remoteRobot.isExecutingProgram = true; 
                 const poseName = line.parameters;
                 const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
                 
@@ -150,7 +151,7 @@ const executeProgram = async (program: Program) => {
                     if ((window as any).remoteRobot) {
                         (window as any).remoteRobot.setRobotPose(pose);
                         console.log(`Command sent to robot!`);
-                        
+                        console.log("isExecutingProgram value:", (window as any).remoteRobot.isExecutingProgram);
                         console.log(`Waiting...`);
                         await new Promise(resolve => setTimeout(resolve, 5000));
                         console.log(`Executing next command...`);
@@ -421,13 +422,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to handle Run Program button click
     const handleRunProgram = () => {
         console.log("Run Program button clicked!");
-        
-        // Test accessing isExecutingProgram boolean from remoteRobot
-        if ((window as any).remoteRobot) {
-            console.log("isExecutingProgram value:", (window as any).remoteRobot.isExecutingProgram);
-        } else {
-            console.log("RemoteRobot not available for isExecutingProgram check");
-        }
         
         const programText = readProgramCode();
         console.log("Program text:", programText);
