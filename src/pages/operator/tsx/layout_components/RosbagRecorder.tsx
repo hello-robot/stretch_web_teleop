@@ -86,6 +86,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
             </Tooltip>
             {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
             {successMessage && <div style={{ color: "green", marginTop: 8, fontWeight: "bold" }}>{successMessage}</div>}
+            {isRecording && <div style={{ color: "orange", marginTop: 8, fontWeight: "bold" }}>Recording in progress...</div>}
         </div>
     );
 }; 
