@@ -36,9 +36,9 @@ const HUMAN_FUNCTIONS = [
 
 // Saved positions (blue)
 const SAVED_POSITIONS = [
-    'approach_pose',
-    'red_cube_pose',
-    'end_pose'
+    'stowGripper',
+    'testPose',
+    'centerWrist'
 ];
 
 //available functions for tab completion
