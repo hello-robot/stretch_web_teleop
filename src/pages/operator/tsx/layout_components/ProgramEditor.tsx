@@ -421,6 +421,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to handle Run Program button click
     const handleRunProgram = () => {
         console.log("Run Program button clicked!");
+        
+        // Test accessing isExecutingProgram boolean from remoteRobot
+        if ((window as any).remoteRobot) {
+            console.log("isExecutingProgram value:", (window as any).remoteRobot.isExecutingProgram);
+        } else {
+            console.log("RemoteRobot not available for isExecutingProgram check");
+        }
+        
         const programText = readProgramCode();
         console.log("Program text:", programText);
         

@@ -35,6 +35,7 @@ export class RemoteRobot extends React.Component<{}, any> {
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
     moveBaseState?: string;
+    isExecutingProgram: boolean;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
