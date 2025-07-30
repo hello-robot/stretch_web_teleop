@@ -143,7 +143,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div 
                                     key={index}
                                     className="library-function-item"
-                                    onClick={() => props.sharedState.addToProgramEditor?.(position.name)}
+                                    onClick={() => props.sharedState.insertTextAtCursor?.(position.name)}
                                 >
                                     {position.name}
                                 </div>

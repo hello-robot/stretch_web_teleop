@@ -222,10 +222,32 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
-    // Function to add text to the editor
+    // Function to add text to the editor (as new line)
     const addText = (text: string) => {
         if (!props.readOnly) {
             setCode(prevCode => prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text);
+        }
+    };
+
+    // Function to insert text at cursor position
+    const insertTextAtCursor = (text: string) => {
+        if (!props.readOnly && textareaRef.current) {
+            const textarea = textareaRef.current;
+            const cursorPos = textarea.selectionStart;
+            const textBefore = code.substring(0, cursorPos);
+            const textAfter = code.substring(cursorPos);
+            
+            const newText = textBefore + text + textAfter;
+            setCode(newText);
+            
+            // Set cursor position after the inserted text
+            const newCursorPos = cursorPos + text.length;
+            setTimeout(() => {
+                if (textareaRef.current) {
+                    textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+                    textareaRef.current.focus();
+                }
+            }, 0);
         }
     };
 
@@ -234,11 +256,15 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return code;
     };
 
-    // Expose the addText function to sharedState
+    // Expose the functions to sharedState
     React.useEffect(() => {
         if (props.sharedState.addToProgramEditor === undefined) {
             // Add the function to sharedState if it doesn't exist
             (props.sharedState as any).addToProgramEditor = addText;
+        }
+        if ((props.sharedState as any).insertTextAtCursor === undefined) {
+            // Add the insert function to sharedState if it doesn't exist
+            (props.sharedState as any).insertTextAtCursor = insertTextAtCursor;
         }
     }, [props.sharedState]);
 

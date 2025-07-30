@@ -43,6 +43,8 @@ export type SharedState = {
     isHumanMode: boolean;
     /** Function to add text to program editor */
     addToProgramEditor?: (text: string) => void;
+    /** Function to insert text at cursor position in program editor */
+    insertTextAtCursor?: (text: string) => void;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
