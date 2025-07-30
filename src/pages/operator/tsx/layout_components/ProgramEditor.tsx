@@ -62,15 +62,15 @@ const POSE_DEFINITIONS = {
         joint_head_tilt: -1.1,
     },
     testPose: {
-        joint_arm_l0:-1.6137320244357253e-08,
-        joint_arm_l1:-2.9392484829061376e-07,
-        joint_arm_l2:-2.8036125938539207e-07,
-        joint_arm_l3: -2.056847528567165e-07,
-        joint_gripper_finger_left: -2.0518734302754638e-06,
-        joint_head_pan: 2.9291786329821434e-07,
-        joint_head_tilt: 1.3802900147297237e-06,
-        joint_lift: 1.4361499260374905e-07,
-        joint_wrist_yaw: 9.32603306580404e-07,
+        joint_head_tilt: -0.8685727632205512,
+        joint_head_pan: -1.60304640469,
+        joint_gripper_finger_left: -0.3528386849110064,
+        joint_arm: 0.014408687608157503,
+        wrist_extension: 0.0,
+        joint_lift: 0.834653415041275,
+        joint_wrist_roll: -0.00153398807878856412,
+        joint_wrist_pitch: -0.015339807878856412,
+        joint_wrist_yaw: 0.0006391586616190172,
     }
 };
 
