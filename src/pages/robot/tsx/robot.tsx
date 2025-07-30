@@ -856,14 +856,11 @@ export class Robot extends React.Component {
      * Ask the robot to home itself.
      */
     homeTheRobot() {
-        console.log("homeTheRobot() method called");
-        console.log("homeTheRobotService exists:", !!this.homeTheRobotService);
         var request = new ROSLIB.ServiceRequest({});
         this.homeTheRobotService!.callService(request, () => {
             robotMode = "unknown"; // returns to whatever mode the robot was in before this service was called
             console.log("Homing complete");
         });
-        console.log("Service call initiated");
     }
 
     executeBaseVelocity = (props: { linVel: number; angVel: number }): void => {

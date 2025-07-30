@@ -101,14 +101,44 @@ const parseProgram = (code: string): Program => {
                 isExecutable: false
             });
         } else {
-            // Check if command (testing this command for now- will add others)
+            // Check for different command types
             const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*([^)]*)\s*\)/);
+            const resetRobotMatch = trimmedLine.match(/ResetRobot\s*\(\s*\)/);
+            const adjustGripperMatch = trimmedLine.match(/AdjustGripperWidth\s*\(\s*([^)]*)\s*\)/);
+            const rotateEEMatch = trimmedLine.match(/RotateEE\s*\(\s*([^)]*)\s*\)/);
+            
             if (moveEEMatch) {
                 const parameter = moveEEMatch[1] || null;
                 programLines.push({
                     lineNumber,
                     content: line,
                     command: "MoveEEToPose",
+                    parameters: parameter,
+                    isExecutable: true
+                });
+            } else if (resetRobotMatch) {
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "ResetRobot",
+                    parameters: null,
+                    isExecutable: true
+                });
+            } else if (adjustGripperMatch) {
+                const parameter = adjustGripperMatch[1] || null;
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "AdjustGripperWidth",
+                    parameters: parameter,
+                    isExecutable: true
+                });
+            } else if (rotateEEMatch) {
+                const parameter = rotateEEMatch[1] || null;
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "RotateEE",
                     parameters: parameter,
                     isExecutable: true
                 });
@@ -228,7 +258,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     console.log(`Sending ResetRobot command (homing the robot)`);
                     // Send homeTheRobot command to robot
                     if ((window as any).remoteRobot) {
-                        console.log(`Calling remoteRobot.homeTheRobot()`);
                         (window as any).remoteRobot.homeTheRobot();
                         console.log(`Command sent to robot!`);
                         console.log(`Waiting...`);
