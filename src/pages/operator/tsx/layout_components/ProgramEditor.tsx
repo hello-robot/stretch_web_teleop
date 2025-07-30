@@ -62,15 +62,7 @@ const POSE_DEFINITIONS = {
         joint_head_tilt: -1.1,
     },
     testPose: {
-        joint_head_tilt: -0.8685727632205512,
-        joint_head_pan: -1.60304640469,
-        joint_gripper_finger_left: -0.3528386849110064,
-        joint_arm: 0.014408687608157503,
-        wrist_extension: 0.0,
-        joint_lift: 0.834653415041275,
-        joint_wrist_roll: -0.00153398807878856412,
-        joint_wrist_pitch: -0.015339807878856412,
-        joint_wrist_yaw: 0.0006391586616190172,
+        joint_lift: 0.4,
     }
 };
 
