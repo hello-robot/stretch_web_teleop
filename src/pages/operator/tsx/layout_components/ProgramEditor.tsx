@@ -100,6 +100,7 @@ const parseProgram = (code: string): Program => {
             const resetRobotMatch = trimmedLine.match(/ResetRobot\s*\(\s*\)/);
             const adjustGripperMatch = trimmedLine.match(/AdjustGripperWidth\s*\(\s*([^)]*)\s*\)/);
             const rotateEEMatch = trimmedLine.match(/RotateEE\s*\(\s*([^)]*)\s*\)/);
+            const takeControlMatch = trimmedLine.match(/TakeControl\s*\(\s*\)/);
             
             if (moveEEMatch) {
                 const parameter = moveEEMatch[1] || null;
@@ -134,6 +135,14 @@ const parseProgram = (code: string): Program => {
                     content: line,
                     command: "RotateEE",
                     parameters: parameter,
+                    isExecutable: true
+                });
+            } else if (takeControlMatch) {
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "TakeControl",
+                    parameters: null,
                     isExecutable: true
                 });
             } else {
