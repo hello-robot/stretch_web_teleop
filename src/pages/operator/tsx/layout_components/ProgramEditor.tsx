@@ -172,9 +172,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Load custom poses from session storage
     const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
         const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
+        console.log("Loading custom poses from session storage:", sessionPoses);
         if (sessionPoses) {
             try {
-                return JSON.parse(sessionPoses);
+                const parsed = JSON.parse(sessionPoses);
+                console.log("Parsed custom poses:", parsed);
+                return parsed;
             } catch (error) {
                 console.error("Error parsing custom poses:", error);
             }
@@ -190,6 +193,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
+    
+    // Debug logging for pose definitions
+    console.log("Current POSE_DEFINITIONS:", POSE_DEFINITIONS);
+    console.log("Current customPoses:", customPoses);
+    console.log("Combined ALL_POSE_DEFINITIONS:", ALL_POSE_DEFINITIONS);
+    
+    // Effect to log when custom poses change
+    useEffect(() => {
+        console.log("Custom poses updated:", customPoses);
+        console.log("Updated ALL_POSE_DEFINITIONS:", { ...POSE_DEFINITIONS, ...customPoses });
+    }, [customPoses]);
     
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
@@ -223,6 +237,8 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Executes the command based on what function it is
                 if (line.command === "MoveEEToPose") {
                     const poseName = line.parameters;
+                    console.log(`Looking for pose: ${poseName}`);
+                    console.log(`Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                     
                     if (pose) {
@@ -422,10 +438,15 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Function to add a custom pose
     const addCustomPose = (poseName: string, pose: RobotPose) => {
-        const updatedPoses = { ...customPoses, [poseName]: pose };
-        setCustomPoses(updatedPoses);
-        // Save to session storage
-        sessionStorage.setItem('programEditorCustomPoses', JSON.stringify(updatedPoses));
+        console.log("Adding custom pose:", poseName, pose);
+        setCustomPoses(prev => {
+            const updatedPoses = { ...prev, [poseName]: pose };
+            console.log("Updated poses:", updatedPoses);
+            // Save to session storage
+            sessionStorage.setItem('programEditorCustomPoses', JSON.stringify(updatedPoses));
+            console.log("Saved to session storage:", sessionStorage.getItem('programEditorCustomPoses'));
+            return updatedPoses;
+        });
     };
 
     // Expose the functions to sharedState
