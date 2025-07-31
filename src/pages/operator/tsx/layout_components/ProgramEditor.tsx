@@ -261,12 +261,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     if (pose) {
                         // Filter pose to only include joints for MoveEEToPose
                         const filteredPose: RobotPose = {};
-                        if ('joint_arm' in pose && pose.joint_arm !== undefined) filteredPose.joint_arm = pose.joint_arm as number;
                         if ('joint_arm_l0' in pose && pose.joint_arm_l0 !== undefined) filteredPose.joint_arm_l0 = pose.joint_arm_l0 as number;
                         if ('joint_arm_l1' in pose && pose.joint_arm_l1 !== undefined) filteredPose.joint_arm_l1 = pose.joint_arm_l1 as number;
                         if ('joint_arm_l2' in pose && pose.joint_arm_l2 !== undefined) filteredPose.joint_arm_l2 = pose.joint_arm_l2 as number;
                         if ('joint_arm_l3' in pose && pose.joint_arm_l3 !== undefined) filteredPose.joint_arm_l3 = pose.joint_arm_l3 as number;
-                        if ('wrist_extension' in pose && pose.wrist_extension !== undefined) filteredPose.wrist_extension = pose.wrist_extension as number;
                         if ('joint_lift' in pose && pose.joint_lift !== undefined) filteredPose.joint_lift = pose.joint_lift as number;
                         if ('joint_head_pan' in pose && pose.joint_head_pan !== undefined) filteredPose.joint_head_pan = pose.joint_head_pan as number;
                         if ('joint_head_tilt' in pose && pose.joint_head_tilt !== undefined) filteredPose.joint_head_tilt = pose.joint_head_tilt as number;
