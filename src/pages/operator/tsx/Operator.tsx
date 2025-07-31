@@ -83,6 +83,10 @@ export const Operator = (props: {
     // Function to handle "Done teleoperating" button click
     const handleDoneTeleoperating = () => {
         setWaitingForUserConfirmation(false);
+        // Set execution state back to true
+        if ((window as any).buttonFunctionProvider) {
+            (window as any).buttonFunctionProvider.setExecutionState(true);
+        }
         if ((window as any).resumeProgramExecution) {
             (window as any).resumeProgramExecution();
             (window as any).resumeProgramExecution = null;
