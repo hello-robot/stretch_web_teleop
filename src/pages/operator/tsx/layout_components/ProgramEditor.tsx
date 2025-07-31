@@ -215,7 +215,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         if ((window as any).remoteRobot) {
                             (window as any).remoteRobot.setRobotPose(pose);
                             console.log(`Command sent to robot!`);
-                            //testing this out 
                             console.log(`Waiting...`);
                             await new Promise(resolve => setTimeout(resolve, 5000));
                             console.log(`Executing next command...`);
