@@ -538,7 +538,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         console.log("Program text:", programText);
         
         // Write program to file
-        const userId = 0; // For testing, use temporary constant 
+        const userId = 0; // For testing, using temporary constant 
         const fileName = `user_${userId}_program.json`;
         const filePath = `media/hello-robot/HCRLAB/data/${fileName}`;
         

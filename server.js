@@ -194,3 +194,22 @@ app.post('/stop_rosbag', (req, res) => {
         return res.status(500).json({ error: 'Failed to stop rosbag process.' });
     }
 });
+
+
+app.use(express.json());
+app.post('/save_program', (req, res) => {
+    try {
+        const { filePath, fileName, content } = req.body;
+        
+        if (!filePath || !fileName || !content) {
+            return res.status(400).json({ error: 'Missing required fields: filePath, fileName, or content' });
+        }
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`Program saved to: ${filePath}`);
+        
+        res.json({ success: true, message: 'Program saved successfully' });
+    } catch (error) {
+        console.error('Error saving program:', error);
+        res.status(500).json({ error: 'Failed to save program file' });
+    }
+});
