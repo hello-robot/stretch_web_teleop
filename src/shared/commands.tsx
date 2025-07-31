@@ -73,7 +73,8 @@ export interface ToggleCommand {
         | "setGripperDepthSensing"
         | "setRealsenseBodyPoseEstimate"
         | "setRunStop"
-        | "setExpandedGripper";
+        | "setExpandedGripper"
+        | "testGripper"; // Temporary test type
     toggle: boolean;
 }
 
