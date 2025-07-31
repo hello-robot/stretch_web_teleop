@@ -185,7 +185,20 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return {};
     };
     
-    const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
+    // Load saved positions from session storage
+    const getInitialSavedPositions = (): string[] => {
+        const sessionPositions = sessionStorage.getItem('programEditorSavedPositions');
+        if (sessionPositions) {
+            try {
+                return JSON.parse(sessionPositions);
+            } catch (error) {
+                console.error("Error parsing saved positions:", error);
+            }
+        }
+        return DEFAULT_SAVED_POSITIONS;
+    };
+    
+    const [savedPositions, setSavedPositions] = useState<string[]>(getInitialSavedPositions());
     const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>(getInitialCustomPoses());
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -193,23 +206,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
-    
-    // Debug logging for pose definitions
-    console.log("Current POSE_DEFINITIONS:", POSE_DEFINITIONS);
-    console.log("Current customPoses:", customPoses);
-    console.log("Combined ALL_POSE_DEFINITIONS:", ALL_POSE_DEFINITIONS);
-    
-    // Effect to log when custom poses change
-    useEffect(() => {
-        console.log("Custom poses updated:", customPoses);
-        console.log("Updated ALL_POSE_DEFINITIONS:", { ...POSE_DEFINITIONS, ...customPoses });
-    }, [customPoses]);
-    
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
-    // Create dynamic ALL_FUNCTIONS array
-    const allFunctions = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+    // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
+    const allFunctions = React.useMemo(() => {
+        return [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
+    }, [savedPositions]);
 
         // Function to wait for goal completion
         const waitForPoseCompletion = (targetPose: RobotPose): Promise<void> => {
@@ -237,8 +240,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Executes the command based on what function it is
                 if (line.command === "MoveEEToPose") {
                     const poseName = line.parameters;
-                    console.log(`Looking for pose: ${poseName}`);
-                    console.log(`Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                     
                     if (pose) {
@@ -432,7 +433,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to add a new saved position
     const addSavedPosition = (positionName: string) => {
         if (!savedPositions.includes(positionName)) {
-            setSavedPositions(prev => [...prev, positionName]);
+            setSavedPositions(prev => {
+                const updatedPositions = [...prev, positionName];
+                // Save to session storage
+                sessionStorage.setItem('programEditorSavedPositions', JSON.stringify(updatedPositions));
+                return updatedPositions;
+            });
         }
     };
     
