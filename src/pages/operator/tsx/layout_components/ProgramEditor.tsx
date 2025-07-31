@@ -213,10 +213,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                     
                     if (pose) {
-                        console.log(`Sending MoveEEToPose command with pose: ${poseName}`, pose);
+                        // Filter pose to only include joints for MoveEEToPose
+                        const filteredPose: RobotPose = {};
+                        if ('joint_arm' in pose && pose.joint_arm !== undefined) filteredPose.joint_arm = pose.joint_arm as number;
+                        if ('joint_lift' in pose && pose.joint_lift !== undefined) filteredPose.joint_lift = pose.joint_lift as number;
+                        if ('joint_head_pan' in pose && pose.joint_head_pan !== undefined) filteredPose.joint_head_pan = pose.joint_head_pan as number;
+                        if ('joint_head_tilt' in pose && pose.joint_head_tilt !== undefined) filteredPose.joint_head_tilt = pose.joint_head_tilt as number;
+                        
+                        console.log(`Sending MoveEEToPose command with pose: ${poseName}`, filteredPose);
                         // Send command to robot
                         if ((window as any).remoteRobot) {
-                            (window as any).remoteRobot.setRobotPose(pose);
+                            (window as any).remoteRobot.setRobotPose(filteredPose);
                             console.log(`Command sent to robot!`);
                             console.log(`Waiting...`);
                             await new Promise(resolve => setTimeout(resolve, 5000));
@@ -229,30 +236,42 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     }
                 }
                 else if (line.command === "AdjustGripperWidth") {
-                    const gripperWidth = line.parameters;
-                    console.log(`Sending AdjustGripperWidth command with width: ${gripperWidth}`);
-                    // Send command to robot
-                    if ((window as any).remoteRobot) {
-                        // Convert the parameter to boolean (true for expanded, false for closed)
-                        const toggle = gripperWidth === "open";
-                        console.log(`Converting to toggle: ${toggle}`);
-                        (window as any).remoteRobot.setExpandedGripper(toggle);
-                        console.log(`Command sent to robot!`);
-                        console.log(`Waiting...`);
-                        await new Promise(resolve => setTimeout(resolve, 5000));
-                        console.log(`Executing next command...`);
+                    const poseName = line.parameters;
+                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
+                    
+                    if (pose) {
+                        // Filter pose to only include joints for AdjustGripperWidth
+                        const filteredPose: RobotPose = {};
+                        if ('joint_gripper_finger_left' in pose && pose.joint_gripper_finger_left !== undefined) filteredPose.joint_gripper_finger_left = pose.joint_gripper_finger_left as number;
+                        console.log(`Sending AdjustGripperWidth command with pose: ${poseName}`, filteredPose);
+                        // Send command to robot
+                        if ((window as any).remoteRobot) {
+                            (window as any).remoteRobot.setRobotPose(filteredPose);
+                            console.log(`Command sent to robot!`);
+                            console.log(`Waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            console.log(`Executing next command...`);
+                        } else {
+                            console.error("RemoteRobot not available");
+                        }
                     } else {
-                        console.error("RemoteRobot not available");
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     }
                 }
                 else if (line.command === "RotateEE") {
                     const poseName = line.parameters;
                     const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
+                    
                     if (pose) {
-                        console.log(`Sending RotateEE command with pose: ${poseName}`, pose);
+                        // Filter pose to only include joints for RotateEE
+                        const filteredPose: RobotPose = {};
+                        if ('joint_wrist_roll' in pose && pose.joint_wrist_roll !== undefined) filteredPose.joint_wrist_roll = pose.joint_wrist_roll as number;
+                        if ('joint_wrist_pitch' in pose && pose.joint_wrist_pitch !== undefined) filteredPose.joint_wrist_pitch = pose.joint_wrist_pitch as number;
+                        if ('joint_wrist_yaw' in pose && pose.joint_wrist_yaw !== undefined) filteredPose.joint_wrist_yaw = pose.joint_wrist_yaw as number;
+                        console.log(`Sending RotateEE command with pose: ${poseName}`, filteredPose);
                         // Send command to robot
                         if ((window as any).remoteRobot) {
-                            //TODO: implement sending robot the correct command
+                            (window as any).remoteRobot.setRobotPose(filteredPose);
                             console.log(`Command sent to robot!`);
                             console.log(`Waiting...`);
                             await new Promise(resolve => setTimeout(resolve, 5000));
@@ -308,7 +327,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     };
 
     // Syntax highlighting function
-const highlightSyntax = (text: string): string => {
+    const highlightSyntax = (text: string): string => {
     let highlightedText = text;
     
     // Highlight robot functions in orange

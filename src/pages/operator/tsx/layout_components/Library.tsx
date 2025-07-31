@@ -335,16 +335,6 @@ export const Library = (props: CustomizableComponentProps) => {
                                         fontSize: "0.9em"
                                     }}
                                 />
-                                <small style={{ 
-                                    fontSize: "0.8em", 
-                                    color: "#666", 
-                                    marginTop: "4px",
-                                    display: "block"
-                                }}>
-                                    Order: [skip, skip, joint_lift, skip, skip, skip, joint_arm, joint_wrist_yaw, 
-                                    joint_head_pan, joint_head_tilt, joint_wrist_pitch, joint_wrist_roll, skip,
-                                    joint_gripper_finger_left]
-                                </small>
                             </div>
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
