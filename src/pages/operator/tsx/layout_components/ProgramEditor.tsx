@@ -232,6 +232,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     if ((window as any).remoteRobot) {
                         // Convert the parameter to boolean (true for expanded, false for closed)
                         const toggle = gripperWidth === "expanded" || gripperWidth === "true" || gripperWidth === "open";
+                        console.log(`Converting to toggle: ${toggle}`);
                         (window as any).remoteRobot.setExpandedGripper(toggle);
                         console.log(`Command sent to robot!`);
                         console.log(`Waiting...`);

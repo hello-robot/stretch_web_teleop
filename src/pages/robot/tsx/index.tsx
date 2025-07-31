@@ -304,6 +304,7 @@ function handleMessage(message: WebRTCMessage) {
             robot.setGripperDepthSensing(message.toggle);
             break;
         case "setExpandedGripper":
+            console.log(`Robot: received setExpandedGripper command with toggle: ${message.toggle}`);
             robot.setExpandedGripper(message.toggle);
             break;
         case "setRealsenseBodyPoseEstimate":
