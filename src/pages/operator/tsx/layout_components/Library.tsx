@@ -11,10 +11,10 @@ const JOINT_MAPPING = [
     null,                    // joint_right_wheel (skip)
     null,                    // joint_left_wheel (skip)
     "joint_lift",            
-    "joint_arm_l3",                    
-    "joint_arm_l2",                    
-    "joint_arm_l1",                    
-    "joint_arm_l0",             
+    "wrist_extension",       // Sum of joint_arm_l0 + joint_arm_l1 + joint_arm_l2 + joint_arm_l3
+    null,                    // joint_arm_l2 (skip - included in wrist_extension)
+    null,                    // joint_arm_l1 (skip - included in wrist_extension)
+    null,                    // joint_arm_l0 (skip - included in wrist_extension)
     "joint_wrist_yaw",      
     "joint_head_pan",        
     "joint_head_tilt",                        
@@ -81,12 +81,22 @@ export const Library = (props: CustomizableComponentProps) => {
         const values = cleanString.split(',').map(v => parseFloat(v.trim()));
         const pose: RobotPose = {};
         
+        // Calculate wrist_extension as sum of arm segments (positions 3, 4, 5, 6)
+        let wristExtensionSum = 0;
+        if (values.length >= 7) {
+            wristExtensionSum = values[3] + values[4] + values[5] + values[6]; // joint_arm_l3 + joint_arm_l2 + joint_arm_l1 + joint_arm_l0
+        }
+        
         values.forEach((value, index) => {
             if (index < JOINT_MAPPING.length && !isNaN(value)) {
                 const jointName = JOINT_MAPPING[index];
                 // Only add to pose if jointName is not null (valid joint)
                 if (jointName !== null) {
-                    pose[jointName as keyof RobotPose] = value;
+                    if (jointName === "wrist_extension") {
+                        pose[jointName as keyof RobotPose] = wristExtensionSum;
+                    } else {
+                        pose[jointName as keyof RobotPose] = value;
+                    }
                 }
             }
         });
