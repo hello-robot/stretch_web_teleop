@@ -281,16 +281,7 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel(cmd);
     }
 
-    setExpandedGripper(toggle: boolean) {
-        console.log(`RemoteRobot: setExpandedGripper called with toggle: ${toggle}`);
-        // Try sending with a shorter test type name
-        let cmd: ToggleCommand = {
-            type: "testGripper",
-            toggle: toggle,
-        };
-        console.log(`RemoteRobot: setExpandedGripper sending command with testGripper:`, cmd);
-        this.robotChannel(cmd);
-    }
+
 }
 
 class RobotSensors extends React.Component {

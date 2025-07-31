@@ -308,10 +308,6 @@ function handleMessage(message: WebRTCMessage) {
             console.log(`Robot: received setExpandedGripper command with toggle: ${message.toggle}`);
             robot.setExpandedGripper(message.toggle);
             break;
-        case "testGripper":
-            console.log(`Robot: received testGripper command with toggle: ${message.toggle}`);
-            robot.setExpandedGripper(message.toggle);
-            break;
         case "setRealsenseBodyPoseEstimate":
             robot.setComputeBodyPose(message.toggle);
             robot.setRealsenseShowBodyPose(message.toggle);
