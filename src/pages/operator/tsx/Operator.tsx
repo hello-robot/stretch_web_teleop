@@ -394,13 +394,16 @@ export const Operator = (props: {
             props.storageHandler.saveCurrentLayout(layout.current, programMode);
         }
         
-        // Load layout for new mode
-        const newModeLayout = props.storageHandler.loadCurrentLayout(newMode);
-        if (newModeLayout) {
-            layout.current = newModeLayout;
+        // Load layout for new mode from our initialized modeLayouts
+        if (modeLayouts[newMode]) {
+            layout.current = modeLayouts[newMode];
         } else {
-            // If no saved layout for this mode, start with a clean default layout
-            layout.current = props.storageHandler.loadCurrentLayoutOrDefault(newMode);
+            const newModeLayout = props.storageHandler.loadCurrentLayout(newMode);
+            if (newModeLayout) {
+                layout.current = newModeLayout;
+            } else {
+                layout.current = props.storageHandler.loadCurrentLayoutOrDefault(newMode);
+            }
         }
         
         updateLayout();
