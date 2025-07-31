@@ -183,6 +183,7 @@ export class RemoteRobot extends React.Component<{}, any> {
             type: type,
             toggle: toggle,
         };
+        console.log(`RemoteRobot: setToggle sending command:`, cmd);
         this.robotChannel(cmd);
     }
 
