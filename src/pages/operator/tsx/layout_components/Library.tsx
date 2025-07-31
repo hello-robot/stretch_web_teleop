@@ -3,8 +3,26 @@ import {
     CustomizableComponentProps,
     isSelected,
 } from "./CustomizableComponent";
-import { className } from "shared/util";
+import { className, RobotPose } from "shared/util";
 import "operator/css/Library.css";
+
+// Mapping from user's joint order to ValidJoints (filtered to only valid joints)
+const JOINT_MAPPING = [
+    null,                    // joint_right_wheel (skip)
+    null,                    // joint_left_wheel (skip)
+    "joint_lift",            
+    null,                    // joint_arm_l3 (skip)
+    null,                    // joint_arm_l2 (skip)
+    null,                    // joint_arm_l1 (skip)
+    "joint_arm",             // 7th position (combined arm)
+    "joint_wrist_yaw",      
+    "joint_head_pan",        
+    "joint_head_tilt",                        
+    "joint_wrist_pitch",    
+    "joint_wrist_roll",
+    null,      
+    "joint_gripper_finger_left" 
+];
 
 interface SavedPosition {
     name: string;
@@ -39,22 +57,55 @@ export const Library = (props: CustomizableComponentProps) => {
 
     const selectProp = customizing ? { onClick: onSelect } : {};
 
+    // Function to parse joint values from user input
+    const parseJointValues = (valuesString: string): RobotPose => {
+        // Remove brackets and split by comma
+        const cleanString = valuesString.replace(/[\[\]]/g, '');
+        const values = cleanString.split(',').map(v => parseFloat(v.trim()));
+        const pose: RobotPose = {};
+        
+        values.forEach((value, index) => {
+            if (index < JOINT_MAPPING.length && !isNaN(value)) {
+                const jointName = JOINT_MAPPING[index];
+                // Only add to pose if jointName is not null (valid joint)
+                if (jointName !== null) {
+                    pose[jointName as keyof RobotPose] = value;
+                }
+            }
+        });
+        
+        return pose;
+    };
+
     // Handle adding new position
     const handleAddPosition = () => {
         if (newPositionName.trim() && newJointStates.trim()) {
-            const newPosition: SavedPosition = {
-                name: newPositionName.trim(),
-                jointStates: newJointStates.trim(),
-                timestamp: new Date()
-            };
-            setSavedPositions(prev => [...prev, newPosition]);
-            
-            // Add to program editor's autocomplete and syntax highlighting
-            props.sharedState.addSavedPosition?.(newPositionName.trim());
-            
-            setNewPositionName("");
-            setNewJointStates("");
-            setShowModal(false);
+            try {
+                // Parse the joint values into a proper RobotPose
+                const pose = parseJointValues(newJointStates);
+                
+                const newPosition: SavedPosition = {
+                    name: newPositionName.trim(),
+                    jointStates: newJointStates.trim(),
+                    timestamp: new Date()
+                };
+                setSavedPositions(prev => [...prev, newPosition]);
+                
+                // Add to program editor's autocomplete and syntax highlighting
+                props.sharedState.addSavedPosition?.(newPositionName.trim());
+                
+                // Store the pose in the shared state for the program editor to use
+                if ((props.sharedState as any).addCustomPose) {
+                    (props.sharedState as any).addCustomPose(newPositionName.trim(), pose);
+                }
+                
+                setNewPositionName("");
+                setNewJointStates("");
+                setShowModal(false);
+            } catch (error) {
+                console.error("Error parsing joint values:", error);
+                alert("Invalid joint values. Please check the format.");
+            }
         }
     };
 
@@ -275,7 +326,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     type="text"
                                     value={newJointStates}
                                     onChange={(e) => setNewJointStates(e.target.value)}
-                                    placeholder="e.g., [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]"
+                                    placeholder="e.g., [0.0, 0.0, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]"
                                     style={{
                                         width: "100%",
                                         padding: "8px 12px",
@@ -284,6 +335,16 @@ export const Library = (props: CustomizableComponentProps) => {
                                         fontSize: "0.9em"
                                     }}
                                 />
+                                <small style={{ 
+                                    fontSize: "0.8em", 
+                                    color: "#666", 
+                                    marginTop: "4px",
+                                    display: "block"
+                                }}>
+                                    Order: [skip, skip, joint_lift, skip, skip, skip, joint_arm, joint_wrist_yaw, 
+                                    joint_head_pan, joint_head_tilt, joint_wrist_pitch, joint_wrist_roll, skip,
+                                    joint_gripper_finger_left]
+                                </small>
                             </div>
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>

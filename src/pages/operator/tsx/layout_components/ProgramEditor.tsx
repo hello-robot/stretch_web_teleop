@@ -47,21 +47,12 @@ const POSE_DEFINITIONS = {
         joint_wrist_roll: 0.0,
         joint_wrist_pitch: -0.497,
         joint_wrist_yaw: 3.19579,
-        joint_lift: 0.4,
     },
     centerWrist: {
         joint_wrist_roll: 0.0,
         joint_wrist_pitch: 0.0,
         joint_wrist_yaw: 0.0,
-        joint_lift: 0.6,
-    },
-    realsenseForward: {
-        joint_head_pan: 0.075,
-        joint_head_tilt: 0.0,
-    },
-    realsenseBase: {
-        joint_head_pan: 0.075,
-        joint_head_tilt: -1.1,
+   
     },
     testPose: {
         joint_lift: 0.8,
@@ -179,9 +170,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
+    const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>({});
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
+    
+    // Combine default and custom poses
+    const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
     
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
@@ -215,7 +210,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Executes the command based on what function it is
                 if (line.command === "MoveEEToPose") {
                     const poseName = line.parameters;
-                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                     
                     if (pose) {
                         console.log(`Sending MoveEEToPose command with pose: ${poseName}`, pose);
@@ -230,7 +225,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             console.error("RemoteRobot not available");
                         }
                     } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     }
                 }
                 else if (line.command === "AdjustGripperWidth") {
@@ -252,7 +247,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 }
                 else if (line.command === "RotateEE") {
                     const poseName = line.parameters;
-                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
+                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                     if (pose) {
                         console.log(`Sending RotateEE command with pose: ${poseName}`, pose);
                         // Send command to robot
@@ -266,7 +261,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             console.error("RemoteRobot not available");
                         }
                     } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     }
                 }
                 else if (line.command === "ResetRobot") {
@@ -313,29 +308,29 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     };
 
     // Syntax highlighting function
-    const highlightSyntax = (text: string): string => {
-        let highlightedText = text;
-        
-        // Highlight robot functions in orange
-        ROBOT_FUNCTIONS.forEach(func => {
-            const regex = new RegExp(`\\b${func}\\b`, 'g');
-            highlightedText = highlightedText.replace(regex, `<span class="robot-function">${func}</span>`);
-        });
-        
-        // Highlight human functions in green
-        HUMAN_FUNCTIONS.forEach(func => {
-            const regex = new RegExp(`\\b${func}\\b`, 'g');
-            highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
-        });
-        
-        // Highlight saved positions in blue
+const highlightSyntax = (text: string): string => {
+    let highlightedText = text;
+    
+    // Highlight robot functions in orange
+    ROBOT_FUNCTIONS.forEach(func => {
+        const regex = new RegExp(`\\b${func}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="robot-function">${func}</span>`);
+    });
+    
+    // Highlight human functions in green
+    HUMAN_FUNCTIONS.forEach(func => {
+        const regex = new RegExp(`\\b${func}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="human-function">${func}</span>`);
+    });
+    
+    // Highlight saved positions in blue
         savedPositions.forEach(position => {
-            const regex = new RegExp(`\\b${position}\\b`, 'g');
-            highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
-        });
-        
-        return highlightedText;
-    };
+        const regex = new RegExp(`\\b${position}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
+    });
+    
+    return highlightedText;
+};
 
     // Function to add text to the editor (as new line)
     const addText = (text: string) => {
@@ -392,6 +387,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             setSavedPositions(prev => [...prev, positionName]);
         }
     };
+    
+    // Function to add a custom pose
+    const addCustomPose = (poseName: string, pose: RobotPose) => {
+        setCustomPoses(prev => ({ ...prev, [poseName]: pose }));
+    };
 
     // Expose the functions to sharedState
     React.useEffect(() => {
@@ -406,6 +406,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if ((props.sharedState as any).addSavedPosition === undefined) {
             // Add the function to add saved positions if it doesn't exist
             (props.sharedState as any).addSavedPosition = addSavedPosition;
+        }
+        if ((props.sharedState as any).addCustomPose === undefined) {
+            // Add the function to add custom poses if it doesn't exist
+            (props.sharedState as any).addCustomPose = addCustomPose;
         }
     }, [props.sharedState]);
 
@@ -686,13 +690,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             >
                                 Clear
                             </button>
-                            <button 
-                                className="run-program-button"
-                                onClick={handleRunProgram}
-                                type="button"
-                            >
-                                Run Program
-                            </button>
+                        <button 
+                            className="run-program-button"
+                            onClick={handleRunProgram}
+                            type="button"
+                        >
+                            Run Program
+                        </button>
                         </>
                     )}
                 </div>
