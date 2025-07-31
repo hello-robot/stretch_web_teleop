@@ -466,6 +466,24 @@ export const Operator = (props: {
                     }}
                 >
                     {isExecutingProgram ? "Robot in control" : "You are in control"}
+                    {waitingForUserConfirmation && (
+                        <button
+                            onClick={handleDoneTeleoperating}
+                            style={{
+                                background: "#4caf50",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                padding: "8px 16px",
+                                fontWeight: "bold",
+                                fontSize: "1em",
+                                cursor: "pointer",
+                                marginLeft: "16px"
+                            }}
+                        >
+                            Done teleoperating
+                        </button>
+                    )}
                 </div>
             )}
             
@@ -491,42 +509,7 @@ export const Operator = (props: {
                 </div>
             )}
             
-            {/* Done teleoperating button - only show in Execution Monitor mode during TakeControl */}
-            {programMode === "Execution Monitor" && waitingForUserConfirmation && (
-                <div
-                    style={{
-                        width: "100%",
-                        background: "#ff9800",
-                        color: "white",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        fontSize: "1.2em",
-                        padding: "8px 0",
-                        position: "relative",
-                        zIndex: 1,
-                        opacity: props.isReconnecting ? 0.5 : 1,
-                        filter: props.isReconnecting ? "grayscale(1)" : "none",
-                        pointerEvents: props.isReconnecting ? "none" : "auto"
-                    }}
-                >
-                    <button
-                        onClick={handleDoneTeleoperating}
-                        style={{
-                            background: "#4caf50",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            padding: "8px 16px",
-                            fontWeight: "bold",
-                            fontSize: "1em",
-                            cursor: "pointer",
-                            marginLeft: "16px"
-                        }}
-                    >
-                        Done teleoperating
-                    </button>
-                </div>
-            )}
+
             {/* Global controls */}
             <div id="operator-global-controls">
                 <div
