@@ -5,6 +5,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className, RobotPose } from "shared/util";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
