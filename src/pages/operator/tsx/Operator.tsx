@@ -97,7 +97,7 @@ export const Operator = (props: {
             
             programModes.forEach(mode => {
                 const savedLayout = props.storageHandler.loadCurrentLayout(mode);
-                if (savedLayout) {
+                if (savedLayout && mode !== "Program Editor") {
                     initialLayouts[mode] = savedLayout;
                 } else {
                     if (mode === "Program Editor") {
