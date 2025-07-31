@@ -175,7 +175,8 @@ export class RemoteRobot extends React.Component<{}, any> {
             | "setRealsenseDepthSensing"
             | "setGripperDepthSensing"
             | "setRealsenseBodyPoseEstimate"
-            | "setRunStop",
+            | "setRunStop"
+            | "setExpandedGripper",
         toggle: boolean,
     ) {
         let cmd: ToggleCommand = {
@@ -280,12 +281,7 @@ export class RemoteRobot extends React.Component<{}, any> {
 
     setExpandedGripper(toggle: boolean) {
         console.log(`RemoteRobot: setExpandedGripper called with toggle: ${toggle}`);
-        let cmd: ToggleCommand = {
-            type: "setExpandedGripper",
-            toggle: toggle,
-        };
-        console.log(`RemoteRobot: sending command:`, cmd);
-        this.robotChannel(cmd);
+        this.setToggle("setExpandedGripper", toggle);
     }
 }
 
