@@ -61,6 +61,7 @@ export const Operator = (props: {
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
     const [showExecutionMessage, setShowExecutionMessage] = React.useState<boolean>(false);
+    const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
 
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
     const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
@@ -77,6 +78,27 @@ export const Operator = (props: {
             setShowExecutionMessage(false);
         }
     }, [programMode, isExecutingProgram]);
+    
+    // Function to handle "Done teleoperating" button click
+    const handleDoneTeleoperating = () => {
+        setWaitingForUserConfirmation(false);
+        if ((window as any).resumeProgramExecution) {
+            (window as any).resumeProgramExecution();
+            (window as any).resumeProgramExecution = null;
+        }
+    };
+    
+    // Effect to detect when TakeControl is called
+    React.useEffect(() => {
+        const checkForTakeControl = () => {
+            if (isExecutingProgram && !waitingForUserConfirmation && (window as any).resumeProgramExecution) {
+                setWaitingForUserConfirmation(true);
+            }
+        };
+        
+        const interval = setInterval(checkForTakeControl, 100);
+        return () => clearInterval(interval);
+    }, [isExecutingProgram, waitingForUserConfirmation]);
     const [buttonCollision, setButtonCollision] = React.useState<
         ButtonPadButton[]
     >([]);
@@ -466,6 +488,43 @@ export const Operator = (props: {
                     }}
                 >
                     You can now switch to the Execution Monitor!
+                </div>
+            )}
+            
+            {/* Done teleoperating button - only show in Execution Monitor mode during TakeControl */}
+            {programMode === "Execution Monitor" && waitingForUserConfirmation && (
+                <div
+                    style={{
+                        width: "100%",
+                        background: "#ff9800",
+                        color: "white",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.2em",
+                        padding: "8px 0",
+                        position: "relative",
+                        zIndex: 1,
+                        opacity: props.isReconnecting ? 0.5 : 1,
+                        filter: props.isReconnecting ? "grayscale(1)" : "none",
+                        pointerEvents: props.isReconnecting ? "none" : "auto"
+                    }}
+                >
+                    <button
+                        onClick={handleDoneTeleoperating}
+                        style={{
+                            background: "#4caf50",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            padding: "8px 16px",
+                            fontWeight: "bold",
+                            fontSize: "1em",
+                            cursor: "pointer",
+                            marginLeft: "16px"
+                        }}
+                    >
+                        Done teleoperating
+                    </button>
                 </div>
             )}
             {/* Global controls */}

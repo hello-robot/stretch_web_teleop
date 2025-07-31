@@ -342,6 +342,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         buttonFunctionProvider.setExecutionState(false);
                     }
                     console.log(`Control returned to user`);
+                    
+                    // Wait for user to finish teleoperating
+                    await new Promise<void>((resolve) => {
+                        // Store the resolve function so it can be called from the "Done teleoperating" button
+                        (window as any).resumeProgramExecution = resolve;
+                    });
+                    
+                    console.log(`Resuming program execution`);
                 }
             } else {
                 console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
