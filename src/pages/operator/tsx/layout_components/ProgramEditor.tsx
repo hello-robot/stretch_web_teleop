@@ -200,23 +200,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     const [savedPositions, setSavedPositions] = useState<string[]>(getInitialSavedPositions());
     const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>(getInitialCustomPoses());
-    const [showExecutionMessage, setShowExecutionMessage] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
-    
-    // Effect to handle execution message timing
-    useEffect(() => {
-        if (props.sharedState.isExecutingProgram) {
-            setShowExecutionMessage(true);
-            const timer = setTimeout(() => {
-                setShowExecutionMessage(false);
-            }, 5000);
-            return () => clearTimeout(timer);
-        } else {
-            setShowExecutionMessage(false);
-        }
-    }, [props.sharedState.isExecutingProgram]);
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
@@ -778,22 +764,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 </div>
             </div>
             <div className="program-editor-container">
-                {/* Execution Monitor message - only show during program execution */}
-                {showExecutionMessage && (
-                    <div style={{
-                        background: "#4caf50",
-                        color: "white",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        fontSize: "1em",
-                        padding: "8px 12px",
-                        marginBottom: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #45a049"
-                    }}>
-                        You can now switch to the Execution Monitor!
-                    </div>
-                )}
                 <div className="line-numbers" ref={lineNumbersRef}>
                     {lineNumbers.map((number, index) => (
                         <div key={index} className="line-number">

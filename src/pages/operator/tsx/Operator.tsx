@@ -60,9 +60,23 @@ export const Operator = (props: {
         React.useState<boolean>(false);
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
+    const [showExecutionMessage, setShowExecutionMessage] = React.useState<boolean>(false);
 
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
     const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
+    
+    // Effect to handle execution message timing for Program Editor mode
+    React.useEffect(() => {
+        if (programMode === "Program Editor" && isExecutingProgram) {
+            setShowExecutionMessage(true);
+            const timer = setTimeout(() => {
+                setShowExecutionMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowExecutionMessage(false);
+        }
+    }, [programMode, isExecutingProgram]);
     const [buttonCollision, setButtonCollision] = React.useState<
         ButtonPadButton[]
     >([]);
@@ -411,7 +425,7 @@ export const Operator = (props: {
 
     return (
         <div id="operator">
-            {/* Persistent banner for control mode - only show in Run Program mode */}
+            {/* Persistent banner for control mode - only show in Execution Monitor mode */}
             {programMode === "Execution Monitor" && (
                 <div
                     style={{
@@ -430,6 +444,28 @@ export const Operator = (props: {
                     }}
                 >
                     {isExecutingProgram ? "Robot in control" : "You are in control"}
+                </div>
+            )}
+            
+            {/* Execution Monitor message - only show in Program Editor mode during execution */}
+            {programMode === "Program Editor" && showExecutionMessage && (
+                <div
+                    style={{
+                        width: "100%",
+                        background: "#4caf50",
+                        color: "white",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.2em",
+                        padding: "8px 0",
+                        position: "relative",
+                        zIndex: 1,
+                        opacity: props.isReconnecting ? 0.5 : 1,
+                        filter: props.isReconnecting ? "grayscale(1)" : "none",
+                        pointerEvents: props.isReconnecting ? "none" : "auto"
+                    }}
+                >
+                    You can now switch to the Execution Monitor!
                 </div>
             )}
             {/* Global controls */}
