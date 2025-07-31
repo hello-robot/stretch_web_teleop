@@ -400,17 +400,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     return highlightedText;
 };
 
-    // Function to add text to the editor (as new line)
-    const addText = (text: string) => {
-        if (!props.readOnly) {
-            setCode(prevCode => {
-                const newCode = prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text;
-                // Save to session storage
-                sessionStorage.setItem('programEditorCode', newCode);
-                return newCode;
-            });
-        }
-    };
+
 
     // Function to insert text at cursor position
     const insertTextAtCursor = (text: string) => {
@@ -476,10 +466,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Expose the functions to sharedState
     React.useEffect(() => {
-        if (props.sharedState.addToProgramEditor === undefined) {
-            // Add the function to sharedState if it doesn't exist
-            (props.sharedState as any).addToProgramEditor = addText;
-        }
         if ((props.sharedState as any).insertTextAtCursor === undefined) {
             // Add the insert function to sharedState if it doesn't exist
             (props.sharedState as any).insertTextAtCursor = insertTextAtCursor;
