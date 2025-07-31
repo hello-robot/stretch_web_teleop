@@ -169,8 +169,21 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
+    // Load custom poses from session storage
+    const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
+        const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
+        if (sessionPoses) {
+            try {
+                return JSON.parse(sessionPoses);
+            } catch (error) {
+                console.error("Error parsing custom poses:", error);
+            }
+        }
+        return {};
+    };
+    
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>({});
+    const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>(getInitialCustomPoses());
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
@@ -409,7 +422,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Function to add a custom pose
     const addCustomPose = (poseName: string, pose: RobotPose) => {
-        setCustomPoses(prev => ({ ...prev, [poseName]: pose }));
+        const updatedPoses = { ...customPoses, [poseName]: pose };
+        setCustomPoses(updatedPoses);
+        // Save to session storage
+        sessionStorage.setItem('programEditorCustomPoses', JSON.stringify(updatedPoses));
     };
 
     // Expose the functions to sharedState

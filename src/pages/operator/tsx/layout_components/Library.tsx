@@ -39,12 +39,29 @@ export const Library = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
     
-    // State for saved positions and modal- temporary placeholder
-    const [savedPositions, setSavedPositions] = useState<SavedPosition[]>([
-        { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
-        { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() },
-        { name: "testPose", jointStates: "[-1.61e-08, -2.94e-07, -2.80e-07, -2.06e-07, -2.05e-06, 2.93e-07, 1.38e-06, 1.44e-07, 9.33e-07]", timestamp: new Date() }
-    ]);
+    // Load saved positions from session storage or use defaults
+    const getInitialSavedPositions = (): SavedPosition[] => {
+        const sessionPositions = sessionStorage.getItem('librarySavedPositions');
+        if (sessionPositions) {
+            try {
+                const parsed = JSON.parse(sessionPositions);
+                return parsed.map((pos: any) => ({
+                    ...pos,
+                    timestamp: new Date(pos.timestamp)
+                }));
+            } catch (error) {
+                console.error("Error parsing saved positions:", error);
+            }
+        }
+        // Default positions if no session data
+        return [
+            { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
+            { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() },
+            { name: "testPose", jointStates: "[-1.61e-08, -2.94e-07, -2.80e-07, -2.06e-07, -2.05e-06, 2.93e-07, 1.38e-06, 1.44e-07, 9.33e-07]", timestamp: new Date() }
+        ];
+    };
+    
+    const [savedPositions, setSavedPositions] = useState<SavedPosition[]>(getInitialSavedPositions());
     const [showModal, setShowModal] = useState(false);
     const [newPositionName, setNewPositionName] = useState("");
     const [newJointStates, setNewJointStates] = useState("");
@@ -89,7 +106,11 @@ export const Library = (props: CustomizableComponentProps) => {
                     jointStates: newJointStates.trim(),
                     timestamp: new Date()
                 };
-                setSavedPositions(prev => [...prev, newPosition]);
+                const updatedPositions = [...savedPositions, newPosition];
+                setSavedPositions(updatedPositions);
+                
+                // Save to session storage
+                sessionStorage.setItem('librarySavedPositions', JSON.stringify(updatedPositions));
                 
                 // Add to program editor's autocomplete and syntax highlighting
                 props.sharedState.addSavedPosition?.(newPositionName.trim());
