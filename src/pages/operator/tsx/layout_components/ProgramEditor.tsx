@@ -554,22 +554,28 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         
         // Save File 
         try {
+            const requestBody = {
+                filePath: filePath,
+                fileName: fileName,
+                content: fileContent
+            };
+            
+            console.log('Sending save_program request:', requestBody);
+            
             const response = await fetch('/save_program', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    filePath: filePath,
-                    fileName: fileName,
-                    content: fileContent
-                })
+                body: JSON.stringify(requestBody)
             });
             
             if (response.ok) {
-                console.log(`Program saved to: ${filePath}`);
+                const result = await response.json();
+                console.log(`Program saved successfully:`, result);
             } else {
-                console.error('Failed to save program file');
+                const errorData = await response.json();
+                console.error('Failed to save program file:', errorData);
             }
         } catch (error) {
             console.error('Error saving program file:', error);

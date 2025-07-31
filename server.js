@@ -204,6 +204,10 @@ app.post('/save_program', (req, res) => {
         if (!filePath || !fileName || !content) {
             return res.status(400).json({ error: 'Missing required fields: filePath, fileName, or content' });
         }
+        
+        console.log('Received save_program request:', { filePath, fileName });
+        
+        const dir = path.dirname(filePath);
         fs.writeFileSync(filePath, content, 'utf8');
         console.log(`Program saved to: ${filePath}`);
         
