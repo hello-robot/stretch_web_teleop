@@ -251,7 +251,10 @@ function initializeOperator() {
  */
 function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
-        robotChannel: (message: cmd) => connection.sendData(message),
+        robotChannel: (message: cmd) => {
+            console.log(`Operator: robotChannel sending message:`, message);
+            connection.sendData(message);
+        },
     });
     occupancyGrid = undefined;
     remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit");

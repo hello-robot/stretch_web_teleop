@@ -283,7 +283,13 @@ export class RemoteRobot extends React.Component<{}, any> {
 
     setExpandedGripper(toggle: boolean) {
         console.log(`RemoteRobot: setExpandedGripper called with toggle: ${toggle}`);
-        this.setToggle("setExpandedGripper", toggle);
+        // Try sending directly instead of using setToggle
+        let cmd: ToggleCommand = {
+            type: "setExpandedGripper",
+            toggle: toggle,
+        };
+        console.log(`RemoteRobot: setExpandedGripper sending command directly:`, cmd);
+        this.robotChannel(cmd);
     }
 }
 
