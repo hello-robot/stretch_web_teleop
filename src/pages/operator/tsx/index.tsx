@@ -252,7 +252,6 @@ function initializeOperator() {
 function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
         robotChannel: (message: cmd) => {
-            console.log(`Operator: robotChannel sending message:`, message);
             connection.sendData(message);
         },
     });

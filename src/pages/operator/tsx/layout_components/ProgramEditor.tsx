@@ -191,11 +191,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Load custom poses from session storage
     const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
         const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
-        console.log("Loading custom poses from session storage:", sessionPoses);
         if (sessionPoses) {
             try {
                 const parsed = JSON.parse(sessionPoses);
-                console.log("Parsed custom poses:", parsed);
                 return parsed;
             } catch (error) {
                 console.error("Error parsing custom poses:", error);
@@ -348,11 +346,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 else if (line.command === "PauseAndConfirm") {
                     const message = line.parameters;
                     console.log(`Pausing program execution for user confirmation: ${message}`);
-                    // Set execution state to false to allow manual control
-                    if (buttonFunctionProvider) {
-                        buttonFunctionProvider.setExecutionState(false);
-                    }
-                    console.log(`Control returned to user for confirmation`);
                     await new Promise<void>((resolve) => {
                         (window as any).pauseAndConfirmResolve = resolve;
                         (window as any).pauseAndConfirmMessage = message;
