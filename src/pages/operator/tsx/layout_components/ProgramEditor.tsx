@@ -65,6 +65,7 @@ const POSE_DEFINITIONS = {
     },
     testPose: {
         joint_lift: 0.8,
+        gripper_aperture: 0.1,
     }
 };
 
