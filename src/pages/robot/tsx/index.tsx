@@ -323,6 +323,7 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "getHasBetaTeleopKit":
             robot.getHasBetaTeleopKit();
+            break;
         case "moveToPregrasp":
             robot.executeMoveToPregraspGoal(
                 message.scaled_x,
