@@ -101,6 +101,7 @@ const parseProgram = (code: string): Program => {
             const adjustGripperMatch = trimmedLine.match(/AdjustGripperWidth\s*\(\s*([^)]*)\s*\)/);
             const rotateEEMatch = trimmedLine.match(/RotateEE\s*\(\s*([^)]*)\s*\)/);
             const takeControlMatch = trimmedLine.match(/TakeControl\s*\(\s*\)/);
+            const pauseAndConfirmMatch = trimmedLine.match(/PauseAndConfirm\s*\(\s*([^)]*)\s*\)/);
             
             if (moveEEMatch) {
                 const parameter = moveEEMatch[1] || null;
@@ -143,6 +144,15 @@ const parseProgram = (code: string): Program => {
                     content: line,
                     command: "TakeControl",
                     parameters: null,
+                    isExecutable: true
+                });
+            } else if (pauseAndConfirmMatch) {
+                const parameter = pauseAndConfirmMatch[1] || null;
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "PauseAndConfirm",
+                    parameters: parameter,
                     isExecutable: true
                 });
             } else {
@@ -336,28 +346,28 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     }
                 }
                 else if (line.command === "PauseAndConfirm") {
-                    console.log(`Pausing program execution for user confirmation`);
+                    const message = line.parameters;
+                    console.log(`Pausing program execution for user confirmation: ${message}`);
                     // Set execution state to false to allow manual control
                     if (buttonFunctionProvider) {
                         buttonFunctionProvider.setExecutionState(false);
                     }
-                    console.log(`Program paused. Waiting for user to resume...`);
-                    // TODO: Implement pause and wait for user confirmation
+                    console.log(`Control returned to user for confirmation`);
+                    await new Promise<void>((resolve) => {
+                        (window as any).pauseAndConfirmResolve = resolve;
+                        (window as any).pauseAndConfirmMessage = message;
+                    });
+                    console.log(`Resuming program execution after confirmation`);
                 }
                 else if (line.command === "TakeControl") {
                     console.log(`Taking control from robot`);
-                    // Set execution state to false to allow manual control
                     if (buttonFunctionProvider) {
                         buttonFunctionProvider.setExecutionState(false);
                     }
                     console.log(`Control returned to user`);
-                    
-                    // Wait for user to finish teleoperating
                     await new Promise<void>((resolve) => {
-                        // Store the resolve function so it can be called from the "Done teleoperating" button
                         (window as any).resumeProgramExecution = resolve;
                     });
-                    
                     console.log(`Resuming program execution`);
                 }
             } else {

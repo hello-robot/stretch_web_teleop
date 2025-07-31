@@ -62,6 +62,7 @@ export const Operator = (props: {
     const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
     const [showExecutionMessage, setShowExecutionMessage] = React.useState<boolean>(false);
     const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
+    const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
 
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
     const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
@@ -99,6 +100,42 @@ export const Operator = (props: {
         const interval = setInterval(checkForTakeControl, 100);
         return () => clearInterval(interval);
     }, [isExecutingProgram, waitingForUserConfirmation]);
+
+    // Function to handle "Confirm and Proceed" button click
+    const handleConfirmAndProceed = () => {
+        if ((window as any).pauseAndConfirmResolve) {
+            (window as any).pauseAndConfirmResolve();
+            (window as any).pauseAndConfirmResolve = null;
+            (window as any).pauseAndConfirmMessage = null;
+        }
+    };
+
+    // Function to handle "Reset" button click
+    const handleReset = () => {
+        // Home the robot
+        if ((window as any).remoteRobot) {
+            (window as any).remoteRobot.homeTheRobot();
+        }
+        // Also resolve the promise to continue program execution
+        if ((window as any).pauseAndConfirmResolve) {
+            (window as any).pauseAndConfirmResolve();
+            (window as any).pauseAndConfirmResolve = null;
+            (window as any).pauseAndConfirmMessage = null;
+        }
+    };
+
+    // Effect to detect when PauseAndConfirm is called
+    React.useEffect(() => {
+        const checkForPauseAndConfirm = () => {
+            if (isExecutingProgram && !showPopup && (window as any).pauseAndConfirmResolve && (window as any).pauseAndConfirmMessage) {
+                setPauseAndConfirmMessage((window as any).pauseAndConfirmMessage);
+                setShowPopup(true);
+            }
+        };
+        
+        const interval = setInterval(checkForPauseAndConfirm, 100);
+        return () => clearInterval(interval);
+    }, [isExecutingProgram, showPopup]);
     const [buttonCollision, setButtonCollision] = React.useState<
         ButtonPadButton[]
     >([]);
@@ -508,7 +545,8 @@ export const Operator = (props: {
                     You can now switch to the Execution Monitor!
                 </div>
             )}
-            
+
+
 
             {/* Global controls */}
             <div id="operator-global-controls">
@@ -678,12 +716,12 @@ export const Operator = (props: {
                         textAlign: "center"
                     }}>
                         <div style={{ fontSize: "1.2em", marginBottom: 24 }}>
-                            Insert text specified by the user
+                            {pauseAndConfirmMessage || "Insert text specified by the user"}
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
-                                    backgroundColor: "orange",
+                                    backgroundColor: "#f44336",
                                     color: "white",
                                     border: "none",
                                     padding: "10px 20px",
@@ -693,6 +731,7 @@ export const Operator = (props: {
                                 }}
                                 onClick={() => {
                                     setShowPopup(false);
+                                    handleReset();
                                 }}
                             >
                                 Reset
@@ -708,7 +747,10 @@ export const Operator = (props: {
                                     fontSize: "1em",
                                     cursor: "pointer"
                                 }}
-                                onClick={() => setShowPopup(false)}
+                                onClick={() => {
+                                    setShowPopup(false);
+                                    handleConfirmAndProceed();
+                                }}
                             >
                                 Confirm and proceed
                             </button>
