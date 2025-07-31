@@ -92,14 +92,14 @@ export const Operator = (props: {
     // Effect to detect when TakeControl is called
     React.useEffect(() => {
         const checkForTakeControl = () => {
-            if (isExecutingProgram && !waitingForUserConfirmation && (window as any).resumeProgramExecution) {
+            if (!waitingForUserConfirmation && (window as any).resumeProgramExecution) {
                 setWaitingForUserConfirmation(true);
             }
         };
         
         const interval = setInterval(checkForTakeControl, 100);
         return () => clearInterval(interval);
-    }, [isExecutingProgram, waitingForUserConfirmation]);
+    }, [waitingForUserConfirmation]);
 
     // Function to handle "Confirm and Proceed" button click
     const handleConfirmAndProceed = () => {
