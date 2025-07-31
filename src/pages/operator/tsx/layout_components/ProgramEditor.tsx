@@ -5,7 +5,6 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className, RobotPose } from "shared/util";
-import { FunctionProvider } from "../function_providers/FunctionProvider";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -167,7 +166,12 @@ const parseProgram = (code: string): Program => {
  * @param props {@link ProgramEditorProps}
  */
 export const ProgramEditor = (props: ProgramEditorProps) => {
-    const [code, setCode] = useState(props.initialCode || "");
+    const getInitialCode = () => {
+        const sessionCode = sessionStorage.getItem('programEditorCode');
+        return sessionCode || props.initialCode || "";
+    };
+    
+    const [code, setCode] = useState(getInitialCode());
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
@@ -234,7 +238,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         // Convert the parameter to boolean (true for expanded, false for closed)
                         const toggle = gripperWidth === "open";
                         console.log(`Converting to toggle: ${toggle}`);
-                        (window as any).remoteRobot.setToggle("setFollowGripper", toggle);
+                        (window as any).remoteRobot.setExpandedGripper(toggle);
                         console.log(`Command sent to robot!`);
                         console.log(`Waiting...`);
                         await new Promise(resolve => setTimeout(resolve, 5000));
@@ -333,7 +337,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to add text to the editor (as new line)
     const addText = (text: string) => {
         if (!props.readOnly) {
-            setCode(prevCode => prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text);
+            setCode(prevCode => {
+                const newCode = prevCode + (prevCode.endsWith('\n') || prevCode === '' ? '' : '\n') + text;
+                // Save to session storage
+                sessionStorage.setItem('programEditorCode', newCode);
+                return newCode;
+            });
         }
     };
 
@@ -349,6 +358,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             const newText = textBefore + text + textAfter;
             setCode(newText);
             
+            // Save to session storage
+            sessionStorage.setItem('programEditorCode', newText);
+            
             // Set cursor position after the inserted text
             const newCursorPos = cursorPos + text.length;
             setTimeout(() => {
@@ -363,6 +375,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Function to read the program code 
     const readProgramCode = (): string => {
         return code;
+    };
+    
+    // Function to clear the program
+    const clearProgram = () => {
+        setCode("");
+        sessionStorage.removeItem('programEditorCode');
     };
 
     // Function to add a new saved position
@@ -466,6 +484,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const newText = text.substring(0, start) + currentSuggestion + suffix + text.substring(end);
         setCode(newText);
         
+        // Save to session storage
+        sessionStorage.setItem('programEditorCode', newText);
+        
         // Set cursor position after the completed word
         const newCursorPos = start + currentSuggestion.length + suffix.length;
         setTimeout(() => {
@@ -480,7 +501,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // Handle code changes
     const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (!props.readOnly) {
-            setCode(event.target.value);
+            const newCode = event.target.value;
+            setCode(newCode);
+            
+            // Save to session storage for persistence across mode switches
+            sessionStorage.setItem('programEditorCode', newCode);
             
             // Update suggestion based on current word
             const { word } = getCurrentWord();
@@ -503,6 +528,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 
                 const newCode = code.substring(0, start) + '    ' + code.substring(end);
                 setCode(newCode);
+                
+                // Save to session storage
+                sessionStorage.setItem('programEditorCode', newCode);
                 
                 // Set cursor position after the inserted tab
                 setTimeout(() => {
@@ -647,13 +675,22 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         <span className="program-editor-language">{props.language}</span>
                     )}
                     {!props.readOnly && (
-                        <button 
-                            className="run-program-button"
-                            onClick={handleRunProgram}
-                            type="button"
-                        >
-                            Run Program
-                        </button>
+                        <>
+                            <button 
+                                className="clear-program-button"
+                                onClick={clearProgram}
+                                type="button"
+                            >
+                                Clear
+                            </button>
+                            <button 
+                                className="run-program-button"
+                                onClick={handleRunProgram}
+                                type="button"
+                            >
+                                Run Program
+                            </button>
+                        </>
                     )}
                 </div>
             </div>

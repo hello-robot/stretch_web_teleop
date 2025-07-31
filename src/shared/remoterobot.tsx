@@ -281,7 +281,10 @@ export class RemoteRobot extends React.Component<{}, any> {
         this.robotChannel(cmd);
     }
 
-
+    setExpandedGripper(toggle: boolean) {
+        console.log(`RemoteRobot: setExpandedGripper called with toggle: ${toggle}`);
+        this.setToggle("setExpandedGripper", toggle);
+    }
 }
 
 class RobotSensors extends React.Component {
