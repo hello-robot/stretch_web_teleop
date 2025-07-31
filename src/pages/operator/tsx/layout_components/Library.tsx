@@ -161,7 +161,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("MoveEEToPose()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("MoveEEToPose()\n")}
                                     >
                                         MoveEEToPose()
                                     </div>
@@ -173,7 +173,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("AdjustGripperWidth()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("AdjustGripperWidth()\n")}
                                     >
                                         AdjustGripperWidth()
                                     </div>
@@ -185,7 +185,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("RotateEE()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("RotateEE()\n")}
                                     >
                                         RotateEE()
                                     </div>
@@ -197,7 +197,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("ResetRobot()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("ResetRobot()\n")}
                                     >
                                         ResetRobot()
                                     </div>
@@ -215,7 +215,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("PauseAndConfirm()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("PauseAndConfirm()\n")}
                                     >
                                         PauseAndConfirm()
                                     </div>
@@ -227,7 +227,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("TakeControl()")}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("TakeControl()\n")}
                                     >
                                         TakeControl()
                                     </div>
