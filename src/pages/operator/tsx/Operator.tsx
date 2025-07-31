@@ -89,7 +89,7 @@ export const Operator = (props: {
         "Program Executor": props.layout,
     });
 
-    // Initialize mode-specific layouts on first load
+    // Initialize mode-specific layouts
     React.useEffect(() => {
         const initializeModeLayouts = () => {
             const programModes = ["Demonstrate", "Program Editor", "Program Executor"];
@@ -100,8 +100,11 @@ export const Operator = (props: {
                 if (savedLayout) {
                     initialLayouts[mode] = savedLayout;
                 } else {
-                    // Use a fresh default layout for each mode
-                    initialLayouts[mode] = props.storageHandler.loadCurrentLayoutOrDefault(mode);
+                    if (mode === "Program Editor") {
+                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Program Editor Layout" as any);
+                    } else {
+                        initialLayouts[mode] = props.storageHandler.loadCurrentLayoutOrDefault(mode);
+                    }
                 }
             });
             
