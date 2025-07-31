@@ -11,10 +11,10 @@ const JOINT_MAPPING = [
     null,                    // joint_right_wheel (skip)
     null,                    // joint_left_wheel (skip)
     "joint_lift",            
-    null,                    // joint_arm_l3 (skip)
-    null,                    // joint_arm_l2 (skip)
-    null,                    // joint_arm_l1 (skip)
-    "joint_arm",             // 7th position (combined arm)
+    "joint_arm_l3",                    
+    "joint_arm_l2",                    
+    "joint_arm_l1",                    
+    "joint_arm_l0",             
     "joint_wrist_yaw",      
     "joint_head_pan",        
     "joint_head_tilt",                        
