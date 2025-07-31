@@ -236,18 +236,6 @@ export const Library = (props: CustomizableComponentProps) => {
                                         Input: N/A
                                     </div>
                                 </div>
-                                <div className="function-group">
-                                    <div 
-                                        className="library-function-item"
-                                        onClick={() => props.sharedState.addToProgramEditor?.("GiveControl()")}
-                                    >
-                                        GiveControl()
-                                    </div>
-                                    <div className="function-description">
-                                        Allow the robot to assume operation.{'\n'}
-                                        Input: N/A
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

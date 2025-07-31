@@ -30,7 +30,6 @@ const ROBOT_FUNCTIONS = [
 // Human functions (green)
 const HUMAN_FUNCTIONS = [
     'PauseAndConfirm',
-    'GiveControl',
     'TakeControl'
 ];
 
