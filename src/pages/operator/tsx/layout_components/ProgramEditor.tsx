@@ -227,22 +227,19 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     }
                 }
                 else if (line.command === "AdjustGripperWidth") {
-                    const poseName = line.parameters;
-                    const pose = POSE_DEFINITIONS[poseName as keyof typeof POSE_DEFINITIONS];
-                    if (pose) {
-                        console.log(`Sending AdjustGripperWidth command with pose: ${poseName}`, pose);
-                        // Send command to robot
-                        if ((window as any).remoteRobot) {
-                            //TODO: implement sending robot the correct command
-                            console.log(`Command sent to robot!`);
-                            console.log(`Waiting...`);
-                            await new Promise(resolve => setTimeout(resolve, 5000));
-                            console.log(`Executing next command...`);
-                        } else {
-                            console.error("RemoteRobot not available");
-                        }
+                    const gripperWidth = line.parameters;
+                    console.log(`Sending AdjustGripperWidth command with width: ${gripperWidth}`);
+                    // Send command to robot
+                    if ((window as any).remoteRobot) {
+                        // Convert the parameter to boolean (true for expanded, false for closed)
+                        const toggle = gripperWidth === "expanded" || gripperWidth === "true" || gripperWidth === "open";
+                        (window as any).remoteRobot.setExpandedGripper(toggle);
+                        console.log(`Command sent to robot!`);
+                        console.log(`Waiting...`);
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        console.log(`Executing next command...`);
                     } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(POSE_DEFINITIONS).join(', ')}`);
+                        console.error("RemoteRobot not available");
                     }
                 }
                 else if (line.command === "RotateEE") {
