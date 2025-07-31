@@ -531,16 +531,16 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     // Function to handle Run Program button click
-    const handleRunProgram = () => {
+    const handleRunProgram = async () => {
         console.log("Run Program button clicked!");
         
         const programText = readProgramCode();
         console.log("Program text:", programText);
         
         // Write program to file
-        const userId = 0; // For testing, temporary constant 
+        const userId = 0; // For testing, use temporary constant 
         const fileName = `user_${userId}_program.json`;
-        const filePath = `/HCRLAB/data/${fileName}`;
+        const filePath = `media/hello-robot/HCRLAB/data/${fileName}`;
         
         // Create JSON object with program data 
         const programData = {
@@ -552,18 +552,28 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         
         const fileContent = JSON.stringify(programData, null, 2);
         
-        const blob = new Blob([fileContent], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        console.log(`Program saved to: ${filePath}`);
+        // Save File 
+        try {
+            const response = await fetch('/save_program', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    filePath: filePath,
+                    fileName: fileName,
+                    content: fileContent
+                })
+            });
+            
+            if (response.ok) {
+                console.log(`Program saved to: ${filePath}`);
+            } else {
+                console.error('Failed to save program file');
+            }
+        } catch (error) {
+            console.error('Error saving program file:', error);
+        }
         
         // Parse the program into structured format
         const program = parseProgram(programText);
