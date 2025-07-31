@@ -537,6 +537,34 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const programText = readProgramCode();
         console.log("Program text:", programText);
         
+        // Write program to file
+        const userId = 0; // For testing, temporary constant 
+        const fileName = `user_${userId}_program.json`;
+        const filePath = `/HCRLAB/data/${fileName}`;
+        
+        // Create JSON object with program data 
+        const programData = {
+            timestamp: new Date().toISOString(),
+            userId: userId,
+            programText: programText,
+            programLines: parseProgram(programText).lines
+        };
+        
+        const fileContent = JSON.stringify(programData, null, 2);
+        
+        const blob = new Blob([fileContent], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log(`Program saved to: ${filePath}`);
+        
         // Parse the program into structured format
         const program = parseProgram(programText);
         console.log("Parsed program:", program);
@@ -556,6 +584,8 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (props.onRunProgram) {
             props.onRunProgram(programText);
         }
+        
+
     };
 
     // Create highlighted version of the code with inline suggestion
