@@ -525,10 +525,6 @@ export const Operator = (props: {
                             Done teleoperating
                         </button>
                     )}
-                    {/* Debug info */}
-                    <div style={{ fontSize: "0.8em", marginTop: "4px" }}>
-                        Debug: isExecutingProgram={isExecutingProgram.toString()}, waitingForUserConfirmation={waitingForUserConfirmation.toString()}, resumeProgramExecution={!!(window as any).resumeProgramExecution}
-                    </div>
                 </div>
             )}
             
