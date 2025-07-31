@@ -256,6 +256,7 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
 }
 
 function handleMessage(message: WebRTCMessage) {
+    console.log(`Robot: received message:`, message);
     if (!("type" in message)) {
         console.error("Malformed message:", message);
         return;
