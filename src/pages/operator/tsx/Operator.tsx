@@ -86,13 +86,13 @@ export const Operator = (props: {
     const [modeLayouts, setModeLayouts] = React.useState<{ [mode: string]: LayoutDefinition }>({
         "Demonstrate": props.layout,
         "Program Editor": props.layout,
-        "Program Executor": props.layout,
+        "Execution Monitor": props.layout,
     });
 
     // Initialize mode-specific layouts
     React.useEffect(() => {
         const initializeModeLayouts = () => {
-            const programModes = ["Demonstrate", "Program Editor", "Program Executor"];
+            const programModes = ["Demonstrate", "Program Editor", "Execution Monitor"];
             const initialLayouts: { [mode: string]: LayoutDefinition } = {};
             
             programModes.forEach(mode => {
@@ -382,7 +382,7 @@ export const Operator = (props: {
     };
 
     const actionModes = Object.values(ActionMode);
-    const programModes = ["Demonstrate", "Program Editor", "Program Executor"];
+    const programModes = ["Demonstrate", "Program Editor", "Execution Monitor"];
 
     // Function to switch layouts when program mode changes
     const switchToModeLayout = (newMode: string) => {
@@ -412,7 +412,7 @@ export const Operator = (props: {
     return (
         <div id="operator">
             {/* Persistent banner for control mode - only show in Run Program mode */}
-            {programMode === "Program Executor" && (
+            {programMode === "Execution Monitor" && (
                 <div
                     style={{
                         width: "100%",
@@ -578,7 +578,7 @@ export const Operator = (props: {
                 </div>
             )}
             {/* Pop-up Modal */}
-            {showPopup && programMode === "Program Executor" && (
+            {showPopup && programMode === "Execution Monitor" && (
                 <div style={{
                     position: "fixed",
                     top: 0,
