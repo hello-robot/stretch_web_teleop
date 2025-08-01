@@ -57,7 +57,14 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
 
     return (
         <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ position: "relative", width: "100%" }}>
+            <div style={{ 
+                position: "relative", 
+                width: "100%", 
+                height: 40,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
                 <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
                     <button
                         className="save-btn btn-label"
@@ -71,7 +78,11 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                             justifyContent: "center",
                             gap: "8px",
                             whiteSpace: "nowrap",
-                            textAlign: "center"
+                            textAlign: "center",
+                            position: "absolute",
+                            top: 0,
+                            left: "50%",
+                            transform: "translateX(-50%)"
                         }}
                     >
                         {!isRecording ? (
