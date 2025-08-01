@@ -40,7 +40,7 @@ import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
-import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { HomeTheRobot, HomeTheRobotFunction } from "./layout_components/HomeTheRobot";
 import { RosbagRecorder } from "./layout_components/RosbagRecorder";
 
 /** Operator interface webpage */
@@ -618,6 +618,33 @@ export const Operator = (props: {
                     customizing={customizing}
                     onClick={handleToggleCustomize}
                 />
+                {/* Home Robot Button */}
+                <button
+                    onClick={() => {
+                        if ((window as any).remoteRobot) {
+                            (window as any).remoteRobot.homeTheRobot();
+                        } else {
+                            console.error("RemoteRobot not available");
+                        }
+                    }}
+                    style={{
+                        background: "#4caf50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "8px 16px",
+                        fontWeight: "bold",
+                        fontSize: "1em",
+                        cursor: "pointer",
+                        marginLeft: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px"
+                    }}
+                    title="Home the robot to its default position"
+                >
+                    <span>Home Robot</span>
+                </button>
             </div>
             {robotNotHomed && (
                 <div className="operator-collision-alerts">
