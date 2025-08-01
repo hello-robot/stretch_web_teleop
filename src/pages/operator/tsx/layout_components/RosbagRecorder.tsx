@@ -62,8 +62,8 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                     className="save-btn btn-label"
                     onClick={handleClick}
                     style={{
-                        minWidth: 120,
-                        minHeight: 40,
+                        width: 140,
+                        height: 40,
                         fontWeight: "bold",
                         display: "flex",
                         alignItems: "center",
@@ -84,16 +84,18 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                     )}
                 </button>
             </Tooltip>
-            <div style={{ 
-                minHeight: 32, 
-                marginTop: 8,
-                display: "flex",
-                alignItems: "center"
-            }}>
-                {error && <div style={{ color: "red" }}>{error}</div>}
-                {successMessage && <div style={{ color: "green", fontWeight: "bold" }}>{successMessage}</div>}
-                {isRecording && <div style={{ color: "orange", fontWeight: "bold" }}>Recording in progress...</div>}
-            </div>
+            {(error || successMessage || isRecording) && (
+                <div style={{ 
+                    height: 32, 
+                    marginTop: 8,
+                    display: "flex",
+                    alignItems: "center"
+                }}>
+                    {error && <div style={{ color: "red" }}>{error}</div>}
+                    {successMessage && <div style={{ color: "green", fontWeight: "bold" }}>{successMessage}</div>}
+                    {isRecording && <div style={{ color: "orange", fontWeight: "bold" }}>Recording in progress...</div>}
+                </div>
+            )}
         </div>
     );
 }; 

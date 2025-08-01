@@ -403,24 +403,22 @@ export const Library = (props: CustomizableComponentProps) => {
                                     style={{
                                         width: "100%",
                                         padding: "8px 12px",
-                                        border: "1px solid #ccc",
+                                        border: validationError ? "1px solid #f44336" : "1px solid #ccc",
                                         borderRadius: 4,
                                         fontSize: "0.9em"
                                     }}
                                 />
+                                {validationError && (
+                                    <div style={{ 
+                                        color: "#f44336", 
+                                        fontSize: "0.75em", 
+                                        marginTop: "4px"
+                                    }}>
+                                        Invalid joint states, copy and paste position from demo recording.
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        {validationError && (
-                            <div style={{ 
-                                color: "#f44336", 
-                                fontSize: "0.9em", 
-                                textAlign: "center", 
-                                marginBottom: "16px",
-                                fontWeight: "bold"
-                            }}>
-                                {validationError}
-                            </div>
-                        )}
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
