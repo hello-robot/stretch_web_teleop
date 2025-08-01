@@ -245,10 +245,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             buttonFunctionProvider.setExecutionState(true);
         }
         
+        // Create a local execution state that can be checked and updated
+        let localExecuting = true;
+        
+        // Function to check if execution should continue
+        const shouldContinue = () => {
+            return isExecuting && localExecuting;
+        };
+        
         try {
             for (const line of program.lines) {
-                // Check if execution was stopped
-                if (!isExecuting) {
+                if (!shouldContinue()) {
                     console.log("Program execution stopped by user");
                     break;
                 }
@@ -375,6 +382,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             console.error("Error during program execution:", error);
         } finally {
             // Always reset execution state and button state when program completes or stops
+            localExecuting = false;
             if (buttonFunctionProvider) {
                 buttonFunctionProvider.setExecutionState(false);
             }
