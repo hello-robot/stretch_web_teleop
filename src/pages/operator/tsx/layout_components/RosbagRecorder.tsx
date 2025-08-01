@@ -100,7 +100,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                 </Tooltip>
             </div>
             <div style={{ 
-                height: 32,
+                height: 24,
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
