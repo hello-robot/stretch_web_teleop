@@ -417,12 +417,12 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
-                                    background: "#6c757d",
-                                    color: "white",
+                                    background: "var(--btn-gray)",
+                                    color: "var(--text-color)",
                                     border: "none",
                                     borderRadius: 4,
                                     padding: "8px 20px",
-                                    fontWeight: "bold",
+                                    fontWeight: "normal",
                                     fontSize: "1em",
                                     cursor: "pointer"
                                 }}
