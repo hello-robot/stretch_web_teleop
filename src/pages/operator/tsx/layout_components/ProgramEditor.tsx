@@ -343,7 +343,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     }
                 }
                 else if (line.command === "PauseAndConfirm") {
-                    const message = line.parameters;
+                    const message = line.parameters || "Ready to continue? Please confirm before the robot proceeds or reset to revise.";
                     console.log(`Pausing program execution for user confirmation: ${message}`);
                     await new Promise<void>((resolve) => {
                         (window as any).pauseAndConfirmResolve = resolve;

@@ -744,7 +744,7 @@ export const Operator = (props: {
                         textAlign: "center"
                     }}>
                         <div style={{ fontSize: "1.2em", marginBottom: 24 }}>
-                            {pauseAndConfirmMessage || "Insert text specified by the user"}
+                            {pauseAndConfirmMessage || "Ready to continue? Please confirm before the robot proceeds or reset to revise."}
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
