@@ -100,12 +100,14 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                 </Tooltip>
             </div>
             <div style={{ 
-                height: 24,
+                height: 32,
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "12px"
+                marginTop: "12px",
+                marginBottom: "0",
+                paddingBottom: "0"
             }}>
                 {error && <div style={{ color: "red", textAlign: "center", width: "100%" }}>{error}</div>}
                 {successMessage && <div style={{ color: "green", fontWeight: "bold", textAlign: "center", width: "100%" }}>{successMessage}</div>}
