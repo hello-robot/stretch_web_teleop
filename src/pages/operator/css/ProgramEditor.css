@@ -68,12 +68,14 @@
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
 }
 
 .run-program-button:hover {
-    background: var(--btn-blue);
+    filter: brightness(90%);
+    box-shadow: none;
 }
 
 .run-program-button:active {
@@ -95,7 +97,6 @@
     font-weight: normal;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 

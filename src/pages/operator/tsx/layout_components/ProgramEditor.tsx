@@ -5,6 +5,8 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className, RobotPose } from "shared/util";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import CloseIcon from "@mui/icons-material/Close";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -180,6 +182,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
+    const [isExecuting, setIsExecuting] = useState(false);
     // Load custom poses from session storage
     const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
         const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
@@ -640,78 +643,99 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
-    // Function to handle Run Program button click
+    // Function to handle Run/Stop Program button click
     const handleRunProgram = async () => {
-        console.log("Run Program button clicked!");
-        
-        const programText = readProgramCode();
-        console.log("Program text:", programText);
-        
-        // Write program to file
-        const userId = 0; // For testing, using temporary constant 
-        const fileName = `user_${userId}_program.json`;
-        const filePath = `/media/hello-robot/HCRLAB/data/${fileName}`;
-        
-        // Create JSON object with program data 
-        const programData = {
-            timestamp: new Date().toISOString(),
-            userId: userId,
-            programText: programText,
-            programLines: parseProgram(programText).lines
-        };
-        
-        const fileContent = JSON.stringify(programData, null, 2);
-        
-        // Save File 
-        try {
-            const requestBody = {
-                filePath: filePath,
-                fileName: fileName,
-                content: fileContent
+        if (isExecuting) {
+            // Stop execution
+            console.log("Stop Program button clicked!");
+            setIsExecuting(false);
+            
+            // Set execution state to false
+            const buttonFunctionProvider = (window as any).buttonFunctionProvider;
+            if (buttonFunctionProvider) {
+                buttonFunctionProvider.setExecutionState(false);
+            }
+            
+            // Activate run stop to stop the robot
+            if ((window as any).remoteRobot) {
+                (window as any).remoteRobot.setToggle("setRunStop", true);
+                console.log("Run stop activated to stop program execution");
+            } else {
+                console.error("RemoteRobot not available");
+            }
+            
+        } else {
+            // Start execution
+            console.log("Run Program button clicked!");
+            setIsExecuting(true);
+            
+            const programText = readProgramCode();
+            console.log("Program text:", programText);
+            
+            // Write program to file
+            const userId = 0; // For testing, using temporary constant 
+            const fileName = `user_${userId}_program.json`;
+            const filePath = `/media/hello-robot/HCRLAB/data/${fileName}`;
+            
+            // Create JSON object with program data 
+            const programData = {
+                timestamp: new Date().toISOString(),
+                userId: userId,
+                programText: programText,
+                programLines: parseProgram(programText).lines
             };
             
-            console.log('Sending save_program request:', requestBody);
+            const fileContent = JSON.stringify(programData, null, 2);
             
-            const response = await fetch('/save_program', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
+            // Save File 
+            try {
+                const requestBody = {
+                    filePath: filePath,
+                    fileName: fileName,
+                    content: fileContent
+                };
+                
+                console.log('Sending save_program request:', requestBody);
+                
+                const response = await fetch('/save_program', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log(`Program saved successfully:`, result);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Failed to save program file:', errorData);
+                }
+            } catch (error) {
+                console.error('Error saving program file:', error);
+            }
+            
+            // Parse the program 
+            const program = parseProgram(programText);
+            console.log("Parsed program:", program);
+            
+            // Log lines for debugging
+            program.lines.forEach(line => {
+                if (line.isExecutable) {
+                    console.log(`Line ${line.lineNumber}: Executable command "${line.command}"`);
+                } else {
+                    console.log(`Line ${line.lineNumber}: Non-executable (${line.content})`);
+                }
             });
             
-            if (response.ok) {
-                const result = await response.json();
-                console.log(`Program saved successfully:`, result);
-            } else {
-                const errorData = await response.json();
-                console.error('Failed to save program file:', errorData);
+            // Execute the program line by line
+            executeProgram(program);
+            
+            if (props.onRunProgram) {
+                props.onRunProgram(programText);
             }
-        } catch (error) {
-            console.error('Error saving program file:', error);
         }
-        
-        // Parse the program into structured format
-        const program = parseProgram(programText);
-        console.log("Parsed program:", program);
-        
-        // Log each line for debugging
-        program.lines.forEach(line => {
-            if (line.isExecutable) {
-                console.log(`Line ${line.lineNumber}: Executable command "${line.command}"`);
-            } else {
-                console.log(`Line ${line.lineNumber}: Non-executable (${line.content})`);
-            }
-        });
-        
-        // Execute the program line by line
-        executeProgram(program);
-        
-        if (props.onRunProgram) {
-            props.onRunProgram(programText);
-        }
-        
-
     };
 
     // Create highlighted version of the code with inline suggestion
@@ -771,8 +795,21 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             className="run-program-button"
                             onClick={handleRunProgram}
                             type="button"
+                            style={{
+                                backgroundColor: isExecuting ? "#dc3545" : undefined
+                            }}
                         >
-                            Run Program
+                            {isExecuting ? (
+                                <>
+                                    <CloseIcon style={{ marginRight: "4px" }} />
+                                    Stop
+                                </>
+                            ) : (
+                                <>
+                                    <PlayArrowIcon style={{ marginRight: "4px" }} />
+                                    Run
+                                </>
+                            )}
                         </button>
                         </>
                     )}
