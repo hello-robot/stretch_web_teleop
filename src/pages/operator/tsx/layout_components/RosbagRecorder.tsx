@@ -56,21 +56,22 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (
-        <div {...selectProp} style={{ position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
+        <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ position: "relative", width: "100%" }}>
                 <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
                     <button
                         className="save-btn btn-label"
                         onClick={handleClick}
                         style={{
-                            width: 160,
+                            width: 180,
                             height: 40,
                             fontWeight: "bold",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             gap: "8px",
-                            whiteSpace: "nowrap"
+                            whiteSpace: "nowrap",
+                            textAlign: "center"
                         }}
                     >
                         {!isRecording ? (
@@ -87,18 +88,16 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                     </button>
                 </Tooltip>
             </div>
-            {(error || successMessage || isRecording) && (
-                <div style={{ 
-                    height: 32, 
-                    marginTop: 48,
-                    display: "flex",
-                    alignItems: "center"
-                }}>
-                    {error && <div style={{ color: "red" }}>{error}</div>}
-                    {successMessage && <div style={{ color: "green", fontWeight: "bold" }}>{successMessage}</div>}
-                    {isRecording && <div style={{ color: "orange", fontWeight: "bold" }}>Recording in progress...</div>}
-                </div>
-            )}
+            <div style={{ 
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+            }}>
+                {error && <div style={{ color: "red" }}>{error}</div>}
+                {successMessage && <div style={{ color: "green", fontWeight: "bold" }}>{successMessage}</div>}
+                {isRecording && <div style={{ color: "orange", fontWeight: "bold" }}>Recording in progress...</div>}
+            </div>
         </div>
     );
 }; 
