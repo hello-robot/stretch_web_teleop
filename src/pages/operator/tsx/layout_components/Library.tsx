@@ -64,6 +64,7 @@ export const Library = (props: CustomizableComponentProps) => {
     const [showModal, setShowModal] = useState(false);
     const [newPositionName, setNewPositionName] = useState("");
     const [newJointStates, setNewJointStates] = useState("");
+    const [validationError, setValidationError] = useState<string>("");
 
     /** Callback when component is clicked during customize mode */
     const onSelect = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -103,9 +104,35 @@ export const Library = (props: CustomizableComponentProps) => {
         return pose;
     };
 
+    // Validate joint states input- can add checking to see if its from rosbag recording
+    const validateJointStates = (input: string): boolean => {
+        try {
+            // Check if it's a valid array format
+            const trimmed = input.trim();
+            if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+                return false;
+            }
+        
+            const array = JSON.parse(trimmed);
+            if (!Array.isArray(array)) {
+                return false;
+            }
+    
+            return array.every(item => typeof item === 'number');
+        } catch {
+            return false;
+        }
+    };
+
     // Handle adding new position
     const handleAddPosition = () => {
         if (newPositionName.trim() && newJointStates.trim()) {
+            // Validate joint states format
+            if (!validateJointStates(newJointStates)) {
+                setValidationError("Invalid joint states, copy and paste position from demo recording.");
+                return;
+            }
+            
             try {
                 // Parse the joint values into a proper RobotPose
                 const pose = parseJointValues(newJointStates);
@@ -131,10 +158,11 @@ export const Library = (props: CustomizableComponentProps) => {
                 
                 setNewPositionName("");
                 setNewJointStates("");
+                setValidationError("");
                 setShowModal(false);
             } catch (error) {
                 console.error("Error parsing joint values:", error);
-                alert("Invalid joint values. Please check the format.");
+                setValidationError("Invalid joint states, copy and paste position from demo recording.");
             }
         }
     };
@@ -143,6 +171,7 @@ export const Library = (props: CustomizableComponentProps) => {
     const handleCancel = () => {
         setNewPositionName("");
         setNewJointStates("");
+        setValidationError("");
         setShowModal(false);
     };
 
@@ -341,13 +370,13 @@ export const Library = (props: CustomizableComponentProps) => {
                                     fontWeight: "bold",
                                     fontSize: "0.9em"
                                 }}>
-                                    Position Name:
+                                    Position Name
                                 </label>
                                 <input
                                     type="text"
                                     value={newPositionName}
                                     onChange={(e) => setNewPositionName(e.target.value)}
-                                    placeholder="e.g., pickup_pose"
+                                    placeholder="e.g.pickup_pose"
                                     style={{
                                         width: "100%",
                                         padding: "8px 12px",
@@ -364,13 +393,13 @@ export const Library = (props: CustomizableComponentProps) => {
                                     fontWeight: "bold",
                                     fontSize: "0.9em"
                                 }}>
-                                    Joint States:
+                                    Joint States
                                 </label>
                                 <input
                                     type="text"
                                     value={newJointStates}
                                     onChange={(e) => setNewJointStates(e.target.value)}
-                                    placeholder="e.g., [0.0, 0.0, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]"
+                                    placeholder="e.g.[0.0,...,0.0]"
                                     style={{
                                         width: "100%",
                                         padding: "8px 12px",
@@ -381,6 +410,17 @@ export const Library = (props: CustomizableComponentProps) => {
                                 />
                             </div>
                         </div>
+                        {validationError && (
+                            <div style={{ 
+                                color: "#f44336", 
+                                fontSize: "0.9em", 
+                                textAlign: "center", 
+                                marginBottom: "16px",
+                                fontWeight: "bold"
+                            }}>
+                                {validationError}
+                            </div>
+                        )}
                         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
                             <button
                                 style={{
