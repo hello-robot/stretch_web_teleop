@@ -87,13 +87,13 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                     >
                         {!isRecording ? (
                             <>
-                                <RadioButtonCheckedIcon />
-                                Record Demo
+                                <RadioButtonCheckedIcon style={{ color: "white" }} />
+                                <span style={{ color: "white" }}>Record Demo</span>
                             </>
                         ) : (
                             <>
-                                <SaveIcon />
-                                Save Demo
+                                <SaveIcon style={{ color: "white" }} />
+                                <span style={{ color: "white" }}>Save Demo</span>
                             </>
                         )}
                     </button>

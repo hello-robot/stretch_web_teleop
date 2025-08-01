@@ -144,7 +144,7 @@
 .add-position-btn {
     padding: 8px 16px;
     background: var(--btn-turquoise);
-    color: var(--text-color);
+    color: var(--font-white);
     border: none;
     border-radius: 4px;
     cursor: pointer;
