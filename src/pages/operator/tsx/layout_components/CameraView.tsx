@@ -660,6 +660,8 @@ function executeFixedOverheadSettings(definition: FixedOverheadVideoStreamDef) {
 function executeAdjustableOverheadettings(
     definition: AdjustableOverheadVideoStreamDef,
 ) {
+    // Set default camera perspective to look at gripper 
+    underVideoFunctionProvider.provideFunctions(UnderVideoButton.GripperView).onClick!();
     underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper)
         .onCheck!(definition.followGripper || false);
 }
