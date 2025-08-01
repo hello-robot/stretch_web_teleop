@@ -372,6 +372,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const highlightSyntax = (text: string): string => {
     let highlightedText = text;
     
+    // no highlighting in PauseAndConfirm parameters
+    const pauseAndConfirmParams: string[] = [];
+    let paramIndex = 0;
+    highlightedText = highlightedText.replace(/PauseAndConfirm\s*\(\s*([^)]*)\s*\)/g, (match, content) => {
+        const placeholder = `__PAUSE_CONFIRM_PARAM_${paramIndex}__`;
+        pauseAndConfirmParams[paramIndex] = content;
+        paramIndex++;
+        return `PauseAndConfirm(${placeholder})`;
+    });
+    
+    
     // Highlight robot functions in orange
     ROBOT_FUNCTIONS.forEach(func => {
         const regex = new RegExp(`\\b${func}\\b`, 'g');
@@ -385,9 +396,21 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     });
     
     // Highlight saved positions in blue
-        savedPositions.forEach(position => {
+    savedPositions.forEach(position => {
         const regex = new RegExp(`\\b${position}\\b`, 'g');
         highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
+    });
+    
+    // Restore quoted strings without highlighting
+    quotedStrings.forEach((quotedString, index) => {
+        const placeholder = `__QUOTED_STRING_${index}__`;
+        highlightedText = highlightedText.replace(placeholder, quotedString);
+    });
+    
+    // Restore PauseAndConfirm parameters without highlighting
+    pauseAndConfirmParams.forEach((param, index) => {
+        const placeholder = `__PAUSE_CONFIRM_PARAM_${index}__`;
+        highlightedText = highlightedText.replace(placeholder, param);
     });
     
     return highlightedText;
