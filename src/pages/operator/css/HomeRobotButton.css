@@ -2,15 +2,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 11rem; 
+    width: 12rem; 
+    gap: 0.5rem;
+    text-align: center;
 }
 
 #home-robot-button span {
-    margin-right: 2rem;
+    margin-right: 0; 
+    flex: 0 0 auto; 
 }
 
 @media (max-width: 900px) {
     #home-robot-button {
-        width: 7rem; 
+        width: 8rem; 
     }
 } 
