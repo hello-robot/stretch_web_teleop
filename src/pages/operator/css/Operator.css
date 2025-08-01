@@ -115,7 +115,8 @@
 .operator-pose-library[hidden],
 .operator-pose-recorder[hidden],
 .operator-text-to-speech[hidden],
-.operator-aruco-markers[hidden] {
+.operator-aruco-markers[hidden],
+.operator-rosbag-recorder[hidden] {
     display: none;
 }
 
