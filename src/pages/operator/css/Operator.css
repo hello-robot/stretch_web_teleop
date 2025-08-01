@@ -17,7 +17,7 @@
     justify-content: space-between;
     grid-row: 1;
     grid-column: 1/3;
-    --header-btn-width: 11rem;
+    --header-btn-width: 14rem;
     --header-btn-width-med: 7rem;
 }
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Tooltip } from "../static_components/Tooltip";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import SaveIcon from "@mui/icons-material/Save";
+import StopIcon from "@mui/icons-material/Stop";
 import { CustomizableComponentProps, isSelected } from "./CustomizableComponent";
 import { className } from "shared/util";
 import "operator/css/basic_components.css";
@@ -92,8 +92,8 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                             </>
                         ) : (
                             <>
-                                <SaveIcon style={{ color: "white" }} />
-                                <span style={{ color: "white" }}>Save Demo</span>
+                                <StopIcon style={{ color: "white" }} />
+                                <span style={{ color: "white" }}>Stop Recording</span>
                             </>
                         )}
                     </button>
@@ -111,7 +111,6 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
             }}>
                 {error && <div style={{ color: "red", textAlign: "center", width: "100%" }}>{error}</div>}
                 {successMessage && <div style={{ color: "green", fontWeight: "bold", textAlign: "center", width: "100%" }}>{successMessage}</div>}
-                {isRecording && <div style={{ color: "orange", fontWeight: "bold", textAlign: "center", width: "100%" }}>Recording in progress...</div>}
             </div>
         </div>
     );
