@@ -274,7 +274,12 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <button 
                                     className="clear-positions-btn"
                                     onClick={() => {
-                                        setSavedPositions([]);
+                                        // Reset to default positions
+                                        const defaultPositions = [
+                                            { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
+                                            { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() }
+                                        ];
+                                        setSavedPositions(defaultPositions);
                                         sessionStorage.removeItem('librarySavedPositions');
                                     }}
                                     style={{
