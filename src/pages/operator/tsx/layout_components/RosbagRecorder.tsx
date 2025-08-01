@@ -56,7 +56,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (
-        <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+        <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", marginBottom: "0", paddingBottom: "0" }}>
             <div style={{ 
                 position: "relative", 
                 width: "100%", 
