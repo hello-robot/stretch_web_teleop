@@ -98,6 +98,15 @@
     font-size: large;
 }
 
+.operator-rosbag-recorder {
+    height: 4rem;
+    width: 50rem;
+    display: inline-grid;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+}
+
 .operator-pose-library.hideLabels,
 .operator-pose-recorder.hideLabels {
     width: 32rem;
