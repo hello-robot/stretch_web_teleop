@@ -401,12 +401,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         highlightedText = highlightedText.replace(regex, `<span class="saved-position">${position}</span>`);
     });
     
-    // Restore quoted strings without highlighting
-    quotedStrings.forEach((quotedString, index) => {
-        const placeholder = `__QUOTED_STRING_${index}__`;
-        highlightedText = highlightedText.replace(placeholder, quotedString);
-    });
-    
     // Restore PauseAndConfirm parameters without highlighting
     pauseAndConfirmParams.forEach((param, index) => {
         const placeholder = `__PAUSE_CONFIRM_PARAM_${index}__`;
