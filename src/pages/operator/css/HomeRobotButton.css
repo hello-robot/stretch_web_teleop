@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 12rem; 
+    width: 11rem; 
 }
 
 #home-robot-button span {
@@ -11,6 +11,6 @@
 
 @media (max-width: 900px) {
     #home-robot-button {
-        width: 8rem; 
+        width: 7rem; 
     }
 } 
