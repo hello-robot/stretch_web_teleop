@@ -56,38 +56,41 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (
-        <div {...selectProp}>
-            <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
-                <button
-                    className="save-btn btn-label"
-                    onClick={handleClick}
-                    style={{
-                        width: 140,
-                        height: 40,
-                        fontWeight: "bold",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px"
-                    }}
-                >
-                    {!isRecording ? (
-                        <>
-                            <RadioButtonCheckedIcon />
-                            Record Demo
-                        </>
-                    ) : (
-                        <>
-                            <SaveIcon />
-                            Save Demo
-                        </>
-                    )}
-                </button>
-            </Tooltip>
+        <div {...selectProp} style={{ position: "relative" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
+                <Tooltip text={!isRecording ? "Record demo" : "Stop recording"} position="top">
+                    <button
+                        className="save-btn btn-label"
+                        onClick={handleClick}
+                        style={{
+                            width: 160,
+                            height: 40,
+                            fontWeight: "bold",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            whiteSpace: "nowrap"
+                        }}
+                    >
+                        {!isRecording ? (
+                            <>
+                                <RadioButtonCheckedIcon />
+                                Record Demo
+                            </>
+                        ) : (
+                            <>
+                                <SaveIcon />
+                                Save Demo
+                            </>
+                        )}
+                    </button>
+                </Tooltip>
+            </div>
             {(error || successMessage || isRecording) && (
                 <div style={{ 
                     height: 32, 
-                    marginTop: 8,
+                    marginTop: 48,
                     display: "flex",
                     alignItems: "center"
                 }}>
