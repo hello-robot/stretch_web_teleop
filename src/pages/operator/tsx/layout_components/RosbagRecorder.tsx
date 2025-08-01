@@ -56,11 +56,11 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     return (
-        <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div {...selectProp} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
             <div style={{ 
                 position: "relative", 
                 width: "100%", 
-                height: 40,
+                height: 32,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center"
@@ -80,7 +80,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                             whiteSpace: "nowrap",
                             textAlign: "center",
                             position: "absolute",
-                            top: 0,
+                            top: -4,
                             left: "50%",
                             transform: "translateX(-50%)"
                         }}
@@ -100,11 +100,12 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                 </Tooltip>
             </div>
             <div style={{ 
-                height: 40,
+                height: 32,
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
+                marginTop: "8px"
             }}>
                 {error && <div style={{ color: "red", textAlign: "center", width: "100%" }}>{error}</div>}
                 {successMessage && <div style={{ color: "green", fontWeight: "bold", textAlign: "center", width: "100%" }}>{successMessage}</div>}
