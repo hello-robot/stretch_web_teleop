@@ -57,7 +57,6 @@ export const Library = (props: CustomizableComponentProps) => {
         return [
             { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
             { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() },
-            { name: "testPose", jointStates: "[-1.61e-08, -2.94e-07, -2.80e-07, -2.06e-07, -2.05e-06, 2.93e-07, 1.38e-06, 1.44e-07, 9.33e-07]", timestamp: new Date() }
         ];
     };
     
@@ -189,7 +188,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     </div>
                                     <div className="function-description">
                                         Adjust the width of the end effector.{'\n'}
-                                        Input: Value betweem -0.37 and 0.17.
+                                        Input: Saved position from demo recording.
                                     </div>
                                 </div>
                                 <div className="function-group">
@@ -231,7 +230,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     </div>
                                     <div className="function-description">
                                         Pause execution and wait for your confirmation.{'\n'}
-                                        Input: Message shown while execution is paused.
+                                        Input(Optional): Message shown while execution is paused.
                                     </div>
                                 </div>
                                 <div className="function-group">
@@ -265,12 +264,33 @@ export const Library = (props: CustomizableComponentProps) => {
                                     </div>
                                 ))}
                             </div>
-                            <button 
-                                className="add-position-btn"
-                                onClick={() => setShowModal(true)}
-                            >
-                                + Add Position
-                            </button>
+                            <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                                <button 
+                                    className="add-position-btn"
+                                    onClick={() => setShowModal(true)}
+                                >
+                                    + Add Position
+                                </button>
+                                <button 
+                                    className="clear-positions-btn"
+                                    onClick={() => {
+                                        setSavedPositions([]);
+                                        sessionStorage.removeItem('librarySavedPositions');
+                                    }}
+                                    style={{
+                                        background: "#f44336",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "4px",
+                                        padding: "8px 16px",
+                                        fontWeight: "bold",
+                                        fontSize: "1em",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    Clear All
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
