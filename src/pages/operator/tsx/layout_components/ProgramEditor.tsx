@@ -245,129 +245,140 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             buttonFunctionProvider.setExecutionState(true);
         }
         
-        for (const line of program.lines) {
-            if (line.isExecutable) {
-                console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
+        try {
+            for (const line of program.lines) {
+                // Check if execution should be stopped
+                if (!isExecuting) {
+                    console.log("Program execution stopped by user");
+                    break;
+                }
                 
-                // Executes the command based on what function it is
-                if (line.command === "MoveEEToPose") {
-                    const poseName = line.parameters;
-                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
+                if (line.isExecutable) {
+                    console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
                     
-                    if (pose) {
-                        // Filter pose to only include joints for MoveEEToPose
-                        const filteredPose: RobotPose = {};
-                        if ('wrist_extension' in pose && pose.wrist_extension !== undefined) filteredPose.wrist_extension = pose.wrist_extension as number;
-                        if ('joint_lift' in pose && pose.joint_lift !== undefined) filteredPose.joint_lift = pose.joint_lift as number;
-                        if ('joint_head_pan' in pose && pose.joint_head_pan !== undefined) filteredPose.joint_head_pan = pose.joint_head_pan as number;
-                        if ('joint_head_tilt' in pose && pose.joint_head_tilt !== undefined) filteredPose.joint_head_tilt = pose.joint_head_tilt as number;
+                    // Executes the command based on what function it is
+                    if (line.command === "MoveEEToPose") {
+                        const poseName = line.parameters;
+                        const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                         
-                        console.log(`Sending MoveEEToPose command with pose: ${poseName}`, filteredPose);
-                        // Send command to robot
+                        if (pose) {
+                            // Filter pose to only include joints for MoveEEToPose
+                            const filteredPose: RobotPose = {};
+                            if ('wrist_extension' in pose && pose.wrist_extension !== undefined) filteredPose.wrist_extension = pose.wrist_extension as number;
+                            if ('joint_lift' in pose && pose.joint_lift !== undefined) filteredPose.joint_lift = pose.joint_lift as number;
+                            if ('joint_head_pan' in pose && pose.joint_head_pan !== undefined) filteredPose.joint_head_pan = pose.joint_head_pan as number;
+                            if ('joint_head_tilt' in pose && pose.joint_head_tilt !== undefined) filteredPose.joint_head_tilt = pose.joint_head_tilt as number;
+                            
+                            console.log(`Sending MoveEEToPose command with pose: ${poseName}`, filteredPose);
+                            // Send command to robot
+                            if ((window as any).remoteRobot) {
+                                (window as any).remoteRobot.setRobotPose(filteredPose);
+                                console.log(`Command sent to robot!`);
+                                console.log(`Waiting...`);
+                                await new Promise(resolve => setTimeout(resolve, 5000));
+                                console.log(`Executing next command...`);
+                            } else {
+                                console.error("RemoteRobot not available");
+                            }
+                        } else {
+                            console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                        }
+                    }
+                    else if (line.command === "AdjustGripperWidth") {
+                        const poseName = line.parameters;
+                        const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
+                        
+                        if (pose) {
+                            // Filter pose to only include joints for AdjustGripperWidth
+                            const filteredPose: RobotPose = {};
+                            if ('joint_gripper_finger_left' in pose && pose.joint_gripper_finger_left !== undefined) filteredPose.joint_gripper_finger_left = pose.joint_gripper_finger_left as number;
+                            console.log(`Sending AdjustGripperWidth command with pose: ${poseName}`, filteredPose);
+                            // Send command to robot
+                            if ((window as any).remoteRobot) {
+                                (window as any).remoteRobot.setRobotPose(filteredPose);
+                                console.log(`Command sent to robot!`);
+                                console.log(`Waiting...`);
+                                await new Promise(resolve => setTimeout(resolve, 5000));
+                                console.log(`Executing next command...`);
+                            } else {
+                                console.error("RemoteRobot not available");
+                            }
+                        } else {
+                            console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                        }
+                    }
+                    else if (line.command === "RotateEE") {
+                        const poseName = line.parameters;
+                        const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
+                        
+                        if (pose) {
+                            // Filter pose to only include joints for RotateEE
+                            const filteredPose: RobotPose = {};
+                            if ('joint_wrist_roll' in pose && pose.joint_wrist_roll !== undefined) filteredPose.joint_wrist_roll = pose.joint_wrist_roll as number;
+                            if ('joint_wrist_pitch' in pose && pose.joint_wrist_pitch !== undefined) filteredPose.joint_wrist_pitch = pose.joint_wrist_pitch as number;
+                            if ('joint_wrist_yaw' in pose && pose.joint_wrist_yaw !== undefined) filteredPose.joint_wrist_yaw = pose.joint_wrist_yaw as number;
+                            console.log(`Sending RotateEE command with pose: ${poseName}`, filteredPose);
+                            // Send command to robot
+                            if ((window as any).remoteRobot) {
+                                (window as any).remoteRobot.setRobotPose(filteredPose);
+                                console.log(`Command sent to robot!`);
+                                console.log(`Waiting...`);
+                                await new Promise(resolve => setTimeout(resolve, 5000));
+                                console.log(`Executing next command...`);
+                            } else {
+                                console.error("RemoteRobot not available");
+                            }
+                        } else {
+                            console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                        }
+                    }
+                    else if (line.command === "ResetRobot") {
+                        console.log(`Sending ResetRobot command (homing the robot)`);
+                        // Send homeTheRobot command to robot
                         if ((window as any).remoteRobot) {
-                            (window as any).remoteRobot.setRobotPose(filteredPose);
+                            (window as any).remoteRobot.homeTheRobot();
                             console.log(`Command sent to robot!`);
                             console.log(`Waiting...`);
-                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            await new Promise(resolve => setTimeout(resolve, 25000));
                             console.log(`Executing next command...`);
                         } else {
                             console.error("RemoteRobot not available");
                         }
-                    } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
                     }
-                }
-                else if (line.command === "AdjustGripperWidth") {
-                    const poseName = line.parameters;
-                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
-                    
-                    if (pose) {
-                        // Filter pose to only include joints for AdjustGripperWidth
-                        const filteredPose: RobotPose = {};
-                        if ('joint_gripper_finger_left' in pose && pose.joint_gripper_finger_left !== undefined) filteredPose.joint_gripper_finger_left = pose.joint_gripper_finger_left as number;
-                        console.log(`Sending AdjustGripperWidth command with pose: ${poseName}`, filteredPose);
-                        // Send command to robot
-                        if ((window as any).remoteRobot) {
-                            (window as any).remoteRobot.setRobotPose(filteredPose);
-                            console.log(`Command sent to robot!`);
-                            console.log(`Waiting...`);
-                            await new Promise(resolve => setTimeout(resolve, 5000));
-                            console.log(`Executing next command...`);
-                        } else {
-                            console.error("RemoteRobot not available");
+                    else if (line.command === "PauseAndConfirm") {
+                        const message = line.parameters || "Ready to continue? Please confirm before the robot proceeds or reset to revise.";
+                        console.log(`Pausing program execution for user confirmation: ${message}`);
+                        await new Promise<void>((resolve) => {
+                            (window as any).pauseAndConfirmResolve = resolve;
+                            (window as any).pauseAndConfirmMessage = message;
+                        });
+                        console.log(`Resuming program execution after confirmation`);
+                    }
+                    else if (line.command === "TakeControl") {
+                        console.log(`Taking control from robot`);
+                        if (buttonFunctionProvider) {
+                            buttonFunctionProvider.setExecutionState(false);
                         }
-                    } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                        console.log(`Control returned to user`);
+                        await new Promise<void>((resolve) => {
+                            (window as any).resumeProgramExecution = resolve;
+                        });
+                        console.log(`Resuming program execution`);
                     }
+                } else {
+                    console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
                 }
-                else if (line.command === "RotateEE") {
-                    const poseName = line.parameters;
-                    const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
-                    
-                    if (pose) {
-                        // Filter pose to only include joints for RotateEE
-                        const filteredPose: RobotPose = {};
-                        if ('joint_wrist_roll' in pose && pose.joint_wrist_roll !== undefined) filteredPose.joint_wrist_roll = pose.joint_wrist_roll as number;
-                        if ('joint_wrist_pitch' in pose && pose.joint_wrist_pitch !== undefined) filteredPose.joint_wrist_pitch = pose.joint_wrist_pitch as number;
-                        if ('joint_wrist_yaw' in pose && pose.joint_wrist_yaw !== undefined) filteredPose.joint_wrist_yaw = pose.joint_wrist_yaw as number;
-                        console.log(`Sending RotateEE command with pose: ${poseName}`, filteredPose);
-                        // Send command to robot
-                        if ((window as any).remoteRobot) {
-                            (window as any).remoteRobot.setRobotPose(filteredPose);
-                            console.log(`Command sent to robot!`);
-                            console.log(`Waiting...`);
-                            await new Promise(resolve => setTimeout(resolve, 5000));
-                            console.log(`Executing next command...`);
-                        } else {
-                            console.error("RemoteRobot not available");
-                        }
-                    } else {
-                        console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
-                    }
-                }
-                else if (line.command === "ResetRobot") {
-                    console.log(`Sending ResetRobot command (homing the robot)`);
-                    // Send homeTheRobot command to robot
-                    if ((window as any).remoteRobot) {
-                        (window as any).remoteRobot.homeTheRobot();
-                        console.log(`Command sent to robot!`);
-                        console.log(`Waiting...`);
-                        await new Promise(resolve => setTimeout(resolve, 25000));
-                        console.log(`Executing next command...`);
-                    } else {
-                        console.error("RemoteRobot not available");
-                    }
-                }
-                else if (line.command === "PauseAndConfirm") {
-                    const message = line.parameters || "Ready to continue? Please confirm before the robot proceeds or reset to revise.";
-                    console.log(`Pausing program execution for user confirmation: ${message}`);
-                    await new Promise<void>((resolve) => {
-                        (window as any).pauseAndConfirmResolve = resolve;
-                        (window as any).pauseAndConfirmMessage = message;
-                    });
-                    console.log(`Resuming program execution after confirmation`);
-                }
-                else if (line.command === "TakeControl") {
-                    console.log(`Taking control from robot`);
-                    if (buttonFunctionProvider) {
-                        buttonFunctionProvider.setExecutionState(false);
-                    }
-                    console.log(`Control returned to user`);
-                    await new Promise<void>((resolve) => {
-                        (window as any).resumeProgramExecution = resolve;
-                    });
-                    console.log(`Resuming program execution`);
-                }
-            } else {
-                console.log(`Skipping line ${line.lineNumber}: ${line.content}`);
             }
-        }
-        
-        console.log("Program execution complete!");
-        
-        // Set execution state to false at the end 
-        if (buttonFunctionProvider) {
-            buttonFunctionProvider.setExecutionState(false);
+            
+            console.log("Program execution complete!");
+        } catch (error) {
+            console.error("Error during program execution:", error);
+        } finally {
+            // Always reset execution state when done
+            setIsExecuting(false);
+            if (buttonFunctionProvider) {
+                buttonFunctionProvider.setExecutionState(false);
+            }
         }
     };
 
@@ -777,19 +788,22 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             {...selectProp}
         >
             <div className="program-editor-header">
-                <div className="program-editor-header-right">
+                <div className="program-editor-header-left">
                     {props.language && (
                         <span className="program-editor-language">{props.language}</span>
                     )}
                     {!props.readOnly && (
-                        <>
-                            <button 
-                                className="clear-program-button"
-                                onClick={clearProgram}
-                                type="button"
-                            >
-                                Clear
-                            </button>
+                        <button 
+                            className="clear-program-button"
+                            onClick={clearProgram}
+                            type="button"
+                        >
+                            Clear
+                        </button>
+                    )}
+                </div>
+                <div className="program-editor-header-right">
+                    {!props.readOnly && (
                         <button 
                             className="run-program-button"
                             onClick={handleRunProgram}
@@ -810,7 +824,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                                 </>
                             )}
                         </button>
-                        </>
                     )}
                 </div>
             </div>

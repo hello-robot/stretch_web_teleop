@@ -38,9 +38,10 @@
     font-weight: 500;
 }
 
-.program-editor-title {
-    color: var(--text-color);
-    font-weight: 600;
+.program-editor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .program-editor-header-right {
