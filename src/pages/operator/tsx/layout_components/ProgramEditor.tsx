@@ -254,7 +254,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         };
         
         try {
+            console.log("Starting program loop, isExecuting:", isExecuting, "localExecuting:", localExecuting);
             for (const line of program.lines) {
+                console.log("Checking line", line.lineNumber, "isExecuting:", isExecuting, "localExecuting:", localExecuting);
                 if (!shouldContinue()) {
                     console.log("Program execution stopped by user");
                     break;
@@ -664,6 +666,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Function to handle Run/Stop Program button click
     const handleRunProgram = async () => {
+        console.log("handleRunProgram called, current isExecuting:", isExecuting);
         if (isExecuting) {
             // Stop execution
             console.log("Stop Program button clicked!");
@@ -686,6 +689,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         } else {
             // Start execution
             console.log("Run Program button clicked!");
+            console.log("Setting isExecuting to true");
             setIsExecuting(true);
             
             const programText = readProgramCode();
