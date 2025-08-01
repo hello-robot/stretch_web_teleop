@@ -63,14 +63,15 @@
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 4px 12px;
-    font-size: 13px;
+    padding: 6px 16px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s ease;
     letter-spacing: 0.5px;
     display: flex;
     align-items: center;
+    min-width: 100px;
 }
 
 .run-program-button:hover {
@@ -92,12 +93,13 @@
     color: var(--text-color);
     border: none;
     border-radius: 4px;
-    padding: 4px 12px;
-    font-size: 13px;
+    padding: 6px 16px;
+    font-size: 15px;
     font-weight: normal;
     cursor: pointer;
     transition: background-color 0.2s ease;
     letter-spacing: 0.5px;
+    min-width: 80px;
 }
 
 .clear-program-button:hover {

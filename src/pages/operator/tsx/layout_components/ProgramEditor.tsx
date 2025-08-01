@@ -777,7 +777,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             {...selectProp}
         >
             <div className="program-editor-header">
-                <span className="program-editor-title">Program Editor</span>
                 <div className="program-editor-header-right">
                     {props.language && (
                         <span className="program-editor-language">{props.language}</span>

@@ -183,10 +183,6 @@ export const Library = (props: CustomizableComponentProps) => {
             })}
             {...selectProp}
         >
-            <div className="library-header">
-                <h2 className="library-title">Library</h2>
-            </div>
-            
             <div className="library-content">
                 <div className="library-sections-container">
                     {/* Functions Section */}
