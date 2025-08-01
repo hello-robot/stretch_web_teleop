@@ -82,7 +82,8 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
                             position: "absolute",
                             top: -8,
                             left: "50%",
-                            transform: "translateX(-50%)"
+                            transform: "translateX(-50%)",
+                            backgroundColor: isRecording ? "var(--btn-red)" : undefined
                         }}
                     >
                         {!isRecording ? (
