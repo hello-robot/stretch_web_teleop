@@ -279,10 +279,10 @@ export const Library = (props: CustomizableComponentProps) => {
                     </div>
                     
                     {/* Saved Positions Section */}
-                    <div className="library-section">
+                    <div className="library-section" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                         <h3 className="library-section-title">Saved Positions</h3>
-                        <div className="library-subsection">
-                            <div className="library-text">
+                        <div className="library-subsection" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                            <div className="library-text" style={{ flex: 1 }}>
                                 {savedPositions.map((position, index) => (
                                     <div 
                                         key={index}
@@ -293,13 +293,12 @@ export const Library = (props: CustomizableComponentProps) => {
                                     </div>
                                 ))}
                             </div>
-                            <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                                <button 
-                                    className="add-position-btn"
-                                    onClick={() => setShowModal(true)}
-                                >
-                                    + Add Position
-                                </button>
+                            <div style={{ 
+                                display: "flex", 
+                                gap: "8px", 
+                                paddingTop: "16px",
+                                justifyContent: "flex-start"
+                            }}>
                                 <button 
                                     className="clear-positions-btn"
                                     onClick={() => {
@@ -311,18 +310,14 @@ export const Library = (props: CustomizableComponentProps) => {
                                         setSavedPositions(defaultPositions);
                                         sessionStorage.removeItem('librarySavedPositions');
                                     }}
-                                    style={{
-                                        background: "#f44336",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "4px",
-                                        padding: "8px 16px",
-                                        fontWeight: "bold",
-                                        fontSize: "1em",
-                                        cursor: "pointer"
-                                    }}
                                 >
-                                    Clear All
+                                    Clear
+                                </button>
+                                <button 
+                                    className="add-position-btn"
+                                    onClick={() => setShowModal(true)}
+                                >
+                                    + Add Position
                                 </button>
                             </div>
                         </div>

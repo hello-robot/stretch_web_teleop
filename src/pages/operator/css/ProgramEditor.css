@@ -73,7 +73,7 @@
 }
 
 .run-program-button:hover {
-    background: var(--primary-hover-color, #0056b3);
+    background: var(--btn-blue);
 }
 
 .run-program-button:active {
@@ -86,13 +86,13 @@
 }
 
 .clear-program-button {
-    background: var(--secondary-color, #6c757d);
-    color: white;
+    background: var(--btn-gray);
+    color: var(--text-color);
     border: none;
     border-radius: 4px;
     padding: 4px 12px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: normal;
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-transform: uppercase;
@@ -100,11 +100,12 @@
 }
 
 .clear-program-button:hover {
-    background: var(--secondary-hover-color, #5a6268);
+    filter: brightness(90%);
+    box-shadow: none;
 }
 
 .clear-program-button:active {
-    background: var(--secondary-active-color, #545b62);
+    filter: brightness(85%);
 }
 
 .clear-program-button:focus {

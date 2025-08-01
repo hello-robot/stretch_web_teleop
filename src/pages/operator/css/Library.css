@@ -142,17 +142,36 @@
 
 /* Add Position Button */
 .add-position-btn {
-    margin-top: 12px;
     padding: 8px 16px;
-    background: var(--secondary-background-color);
+    background: var(--btn-turquoise);
     color: var(--text-color);
-    border: 1px solid var(--border-color);
+    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 13px;
+    font-weight: bold;
     transition: background-color 0.2s ease;
 }
 
 .add-position-btn:hover {
-    background: var(--tertiary-background-color);
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+/* Clear Button */
+.clear-positions-btn {
+    padding: 8px 16px;
+    background: var(--btn-gray);
+    color: var(--text-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: normal;
+    transition: background-color 0.2s ease;
+}
+
+.clear-positions-btn:hover {
+    filter: brightness(90%);
+    box-shadow: none;
 }
