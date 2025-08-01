@@ -250,7 +250,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 // Check if execution was stopped
                 if (!isExecuting) {
                     console.log("Program execution stopped by user");
-                    return;
+                    break;
                 }
                 
                 if (line.isExecutable) {
@@ -374,7 +374,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         } catch (error) {
             console.error("Error during program execution:", error);
         } finally {
-            // Set execution state to false at the end and update local state
+            // Always reset execution state and button state when program completes or stops
             if (buttonFunctionProvider) {
                 buttonFunctionProvider.setExecutionState(false);
             }
@@ -667,7 +667,13 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 buttonFunctionProvider.setExecutionState(false);
             }
             
-            console.log("Program execution stopped by user");
+            // Activate run stop to stop the robot
+            if ((window as any).remoteRobot) {
+                (window as any).remoteRobot.setToggle("setRunStop", true);
+                console.log("Run stop activated to stop program execution");
+            } else {
+                console.error("RemoteRobot not available");
+            }
             
         } else {
             // Start execution
