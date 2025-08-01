@@ -39,9 +39,11 @@ import {
 import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
+import "operator/css/HomeRobotButton.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot, HomeTheRobotFunction } from "./layout_components/HomeTheRobot";
 import { RosbagRecorder } from "./layout_components/RosbagRecorder";
+import HomeIcon from "@mui/icons-material/Home";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -627,15 +629,9 @@ export const Operator = (props: {
                             console.error("RemoteRobot not available");
                         }
                     }}
+                    id="home-robot-button"
+                    className="btn-turquoise font-white"
                     style={{
-                        background: "#4caf50",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "8px 16px",
-                        fontWeight: "bold",
-                        fontSize: "1em",
-                        cursor: "pointer",
                         marginLeft: "16px",
                         display: "flex",
                         alignItems: "center",
@@ -643,6 +639,7 @@ export const Operator = (props: {
                     }}
                     title="Home the robot to its default position"
                 >
+                    <HomeIcon />
                     <span>Home Robot</span>
                 </button>
             </div>
