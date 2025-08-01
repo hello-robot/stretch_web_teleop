@@ -90,13 +90,14 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
             </div>
             <div style={{ 
                 height: 40,
+                width: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center"
             }}>
-                {error && <div style={{ color: "red" }}>{error}</div>}
-                {successMessage && <div style={{ color: "green", fontWeight: "bold" }}>{successMessage}</div>}
-                {isRecording && <div style={{ color: "orange", fontWeight: "bold" }}>Recording in progress...</div>}
+                {error && <div style={{ color: "red", textAlign: "center", width: "100%" }}>{error}</div>}
+                {successMessage && <div style={{ color: "green", fontWeight: "bold", textAlign: "center", width: "100%" }}>{successMessage}</div>}
+                {isRecording && <div style={{ color: "orange", fontWeight: "bold", textAlign: "center", width: "100%" }}>Recording in progress...</div>}
             </div>
         </div>
     );
