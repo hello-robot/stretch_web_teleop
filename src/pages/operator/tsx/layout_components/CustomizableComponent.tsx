@@ -53,6 +53,8 @@ export type SharedState = {
     handleDoneTeleoperating?: () => void;
     /** Function to set execution error */
     setExecutionError?: (error: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string }) => void;
+    /** Function to clear execution error */
+    clearExecutionError?: () => void;
     /** Current execution error */
     executionError?: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null;
     /** Function to insert text at cursor position in program editor */

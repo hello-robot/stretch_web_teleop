@@ -45,7 +45,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError } = props.sharedState;
+    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -163,7 +163,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             <div 
                 key={index}
                 className={className("code-line", {
-                    executing: isExecuting && !hasError,
+                    executing: isExecuting,
                     error: hasError
                 })}
                 dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
@@ -208,8 +208,17 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             </div>
             {executionError && (
                 <div className="execution-monitor-error-banner">
-                    <span>⚠️</span>
-                    {executionError.message}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>⚠️</span>
+                        {executionError.message}
+                    </div>
+                    <button 
+                        className="execution-monitor-error-close"
+                        onClick={clearExecutionError}
+                        type="button"
+                    >
+                        ×
+                    </button>
                 </div>
             )}
             <div className="execution-monitor-container">
@@ -223,7 +232,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                             <div 
                                 key={index} 
                                 className={className("line-number", {
-                                    executing: isExecuting && !hasError,
+                                    executing: isExecuting,
                                     error: hasError
                                 })}
                             >

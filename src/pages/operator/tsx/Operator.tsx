@@ -444,6 +444,7 @@ export const Operator = (props: {
         waitingForUserConfirmation: waitingForUserConfirmation,
         handleDoneTeleoperating: handleDoneTeleoperating,
         setExecutionError: setExecutionError,
+        clearExecutionError: () => setExecutionError(null),
         executionError: executionError,
     };
     

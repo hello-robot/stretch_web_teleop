@@ -236,7 +236,29 @@
     font-weight: 500;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
+}
+
+.program-editor-error-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.program-editor-error-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .code-textarea::placeholder {

@@ -111,13 +111,27 @@ const parseProgram = (code: string): Program => {
                     isExecutable: true
                 });
             } else if (resetRobotMatch) {
-                programLines.push({
-                    lineNumber,
-                    content: line,
-                    command: "ResetRobot",
-                    parameters: null,
-                    isExecutable: true
-                });
+                // Check if ResetRobot has parameters - error if it does
+                const hasParameters = trimmedLine.match(/ResetRobot\s*\(\s*[^)]+\s*\)/);
+                if (hasParameters) {
+                    programLines.push({
+                        lineNumber,
+                        content: line,
+                        isExecutable: false,
+                        error: {
+                            type: 'invalid_input',
+                            message: `Line ${lineNumber}: Invalid input`
+                        }
+                    });
+                } else {
+                    programLines.push({
+                        lineNumber,
+                        content: line,
+                        command: "ResetRobot",
+                        parameters: null,
+                        isExecutable: true
+                    });
+                }
             } else if (adjustGripperMatch) {
                 const parameter = adjustGripperMatch[1] || null;
                 programLines.push({
@@ -137,13 +151,27 @@ const parseProgram = (code: string): Program => {
                     isExecutable: true
                 });
             } else if (takeControlMatch) {
-                programLines.push({
-                    lineNumber,
-                    content: line,
-                    command: "TakeControl",
-                    parameters: null,
-                    isExecutable: true
-                });
+                // Check if TakeControl has parameters - error if it does
+                const hasParameters = trimmedLine.match(/TakeControl\s*\(\s*[^)]+\s*\)/);
+                if (hasParameters) {
+                    programLines.push({
+                        lineNumber,
+                        content: line,
+                        isExecutable: false,
+                        error: {
+                            type: 'invalid_input',
+                            message: `Line ${lineNumber}: Invalid input`
+                        }
+                    });
+                } else {
+                    programLines.push({
+                        lineNumber,
+                        content: line,
+                        command: "TakeControl",
+                        parameters: null,
+                        isExecutable: true
+                    });
+                }
             } else if (pauseAndConfirmMatch) {
                 const parameter = pauseAndConfirmMatch[1] || null;
                 programLines.push({
@@ -232,7 +260,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
-    const { customizing, executionError, currentExecutingLine } = props.sharedState;
+    const { customizing, executionError, currentExecutingLine, clearExecutionError } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -904,8 +932,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             </div>
             {executionError && (
                 <div className="program-editor-error-banner">
-                    <span>⚠️</span>
-                    {executionError.message}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>⚠️</span>
+                        {executionError.message}
+                    </div>
+                    <button 
+                        className="program-editor-error-close"
+                        onClick={clearExecutionError}
+                        type="button"
+                    >
+                        ×
+                    </button>
                 </div>
             )}
             <div className="program-editor-container">
