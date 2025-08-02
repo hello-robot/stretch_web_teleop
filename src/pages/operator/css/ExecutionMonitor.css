@@ -72,6 +72,7 @@
     text-align: right;
     user-select: none;
     overflow-y: auto;
+    flex-shrink: 0;
 }
 
 .line-number {
@@ -83,6 +84,8 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    box-sizing: border-box;
+    min-height: 21px;
 }
 
 .line-number.executing {
@@ -105,7 +108,7 @@
     bottom: 0;
     background: var(--background-color);
     color: var(--text-color);
-    padding: 8px 12px;
+    padding: 8px 0;
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -113,12 +116,28 @@
     overflow-wrap: normal;
     overflow-x: auto;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Syntax highlighting colors */
 .robot-function {
     color: #ff8c00; /* Orange for robot functions */
     font-weight: 600;
+}
+
+/* Code line styling */
+.code-line {
+    height: 21px;
+    line-height: 21px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+    min-height: 21px;
+    box-sizing: border-box;
 }
 
 /* Executing line highlighting */

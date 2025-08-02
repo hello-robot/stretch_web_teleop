@@ -144,7 +144,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                 className={className("code-line", {
                     executing: isExecuting
                 })}
-                dangerouslySetInnerHTML={{ __html: highlightedLine }}
+                dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
             />
         );
     });
