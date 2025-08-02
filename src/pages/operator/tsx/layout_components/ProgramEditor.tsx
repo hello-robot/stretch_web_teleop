@@ -909,7 +909,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         <span 
                             style={{
                                 color: "#4caf50",
-                                fontWeight: "500",
+                                fontWeight: "bold",
                                 fontSize: "14px",
                                 marginLeft: "16px"
                             }}

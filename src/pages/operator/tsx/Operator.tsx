@@ -566,7 +566,26 @@ export const Operator = (props: {
                     <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
-            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center" }}>
+            {/* Mode Title */}
+            <div style={{
+                width: "100%",
+                background: "var(--background-color)",
+                borderBottom: "1px solid var(--border-color)",
+                padding: "16px 20px 8px 20px",
+                textAlign: "center"
+            }}>
+                <h1 style={{
+                    margin: 0,
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    color: "var(--text-color)",
+                    textTransform: "capitalize"
+                }}>
+                    {programMode}
+                </h1>
+            </div>
+            
+            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center", padding: "12px 20px" }}>
                 {/* Program mode dropdown */}
                 <Dropdown
                     onChange={(idx) => {
