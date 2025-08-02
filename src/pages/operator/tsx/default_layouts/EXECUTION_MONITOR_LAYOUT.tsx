@@ -48,6 +48,11 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
                         },
                     ],
                 } as PanelDefinition,
+            ],
+        } as LayoutGridDefinition,
+        {
+            type: ComponentType.LayoutGrid,
+            children: [
                 {
                     type: ComponentType.Panel,
                     children: [
