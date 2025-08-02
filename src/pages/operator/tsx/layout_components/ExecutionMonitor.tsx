@@ -7,6 +7,7 @@ import {
 import { className } from "shared/util";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import ErrorIcon from "@mui/icons-material/Error";
 import "operator/css/ExecutionMonitor.css";
 
 /** Properties for {@link ExecutionMonitor} */
@@ -163,7 +164,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             <div 
                 key={index}
                 className={className("code-line", {
-                    executing: isExecuting,
+                    executing: isExecuting && !hasError,
                     error: hasError
                 })}
                 dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
@@ -208,10 +209,10 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             </div>
             {executionError && (
                 <div className="execution-monitor-error-banner">
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span>⚠️</span>
-                        {executionError.message}
-                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ErrorIcon style={{ fontSize: "16px" }} />
+                    {executionError.message}
+                </div>
                     <button 
                         className="execution-monitor-error-close"
                         onClick={clearExecutionError}
@@ -232,7 +233,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                             <div 
                                 key={index} 
                                 className={className("line-number", {
-                                    executing: isExecuting,
+                                    executing: isExecuting && !hasError,
                                     error: hasError
                                 })}
                             >

@@ -7,6 +7,7 @@ import {
 import { className, RobotPose } from "shared/util";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import CloseIcon from "@mui/icons-material/Close";
+import ErrorIcon from "@mui/icons-material/Error";
 import "operator/css/ProgramEditor.css";
 
 /** Properties for {@link ProgramEditor} */
@@ -96,9 +97,11 @@ const parseProgram = (code: string): Program => {
             // Check for different command types
             const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*([^)]*)\s*\)/);
             const resetRobotMatch = trimmedLine.match(/ResetRobot\s*\(\s*\)/);
+            const resetRobotWithParamsMatch = trimmedLine.match(/ResetRobot\s*\(\s*[^)]+\s*\)/);
             const adjustGripperMatch = trimmedLine.match(/AdjustGripperWidth\s*\(\s*([^)]*)\s*\)/);
             const rotateEEMatch = trimmedLine.match(/RotateEE\s*\(\s*([^)]*)\s*\)/);
             const takeControlMatch = trimmedLine.match(/TakeControl\s*\(\s*\)/);
+            const takeControlWithParamsMatch = trimmedLine.match(/TakeControl\s*\(\s*[^)]+\s*\)/);
             const pauseAndConfirmMatch = trimmedLine.match(/PauseAndConfirm\s*\(\s*([^)]*)\s*\)/);
             
             if (moveEEMatch) {
@@ -110,28 +113,25 @@ const parseProgram = (code: string): Program => {
                     parameters: parameter,
                     isExecutable: true
                 });
+            } else if (resetRobotWithParamsMatch) {
+                // ResetRobot with parameters - invalid input
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    isExecutable: false,
+                    error: {
+                        type: 'invalid_input',
+                        message: `Line ${lineNumber}: Invalid input`
+                    }
+                });
             } else if (resetRobotMatch) {
-                // Check if ResetRobot has parameters - error if it does
-                const hasParameters = trimmedLine.match(/ResetRobot\s*\(\s*[^)]+\s*\)/);
-                if (hasParameters) {
-                    programLines.push({
-                        lineNumber,
-                        content: line,
-                        isExecutable: false,
-                        error: {
-                            type: 'invalid_input',
-                            message: `Line ${lineNumber}: Invalid input`
-                        }
-                    });
-                } else {
-                    programLines.push({
-                        lineNumber,
-                        content: line,
-                        command: "ResetRobot",
-                        parameters: null,
-                        isExecutable: true
-                    });
-                }
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "ResetRobot",
+                    parameters: null,
+                    isExecutable: true
+                });
             } else if (adjustGripperMatch) {
                 const parameter = adjustGripperMatch[1] || null;
                 programLines.push({
@@ -150,28 +150,25 @@ const parseProgram = (code: string): Program => {
                     parameters: parameter,
                     isExecutable: true
                 });
+            } else if (takeControlWithParamsMatch) {
+                // TakeControl with parameters - invalid input
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    isExecutable: false,
+                    error: {
+                        type: 'invalid_input',
+                        message: `Line ${lineNumber}: Invalid input`
+                    }
+                });
             } else if (takeControlMatch) {
-                // Check if TakeControl has parameters - error if it does
-                const hasParameters = trimmedLine.match(/TakeControl\s*\(\s*[^)]+\s*\)/);
-                if (hasParameters) {
-                    programLines.push({
-                        lineNumber,
-                        content: line,
-                        isExecutable: false,
-                        error: {
-                            type: 'invalid_input',
-                            message: `Line ${lineNumber}: Invalid input`
-                        }
-                    });
-                } else {
-                    programLines.push({
-                        lineNumber,
-                        content: line,
-                        command: "TakeControl",
-                        parameters: null,
-                        isExecutable: true
-                    });
-                }
+                programLines.push({
+                    lineNumber,
+                    content: line,
+                    command: "TakeControl",
+                    parameters: null,
+                    isExecutable: true
+                });
             } else if (pauseAndConfirmMatch) {
                 const parameter = pauseAndConfirmMatch[1] || null;
                 programLines.push({
@@ -932,10 +929,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             </div>
             {executionError && (
                 <div className="program-editor-error-banner">
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span>⚠️</span>
-                        {executionError.message}
-                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ErrorIcon style={{ fontSize: "16px" }} />
+                    {executionError.message}
+                </div>
                     <button 
                         className="program-editor-error-close"
                         onClick={clearExecutionError}
