@@ -1,0 +1,23 @@
+/* Execution Monitor Layout - Custom styling for the ExecutionMonitor layout */
+
+/* Make camera view panels smaller in the ExecutionMonitor layout */
+.execution-monitor-layout .tabs-component {
+    flex: 0.5 1 0; 
+}
+
+.execution-monitor-layout .execution-monitor-root {
+    flex: 2 1 0; 
+    min-width: 300px;
+    max-width: 600px;
+}
+
+.execution-monitor-layout .video-container {
+    flex: 0.5 1 0;
+}
+
+/* Ensure the layout uses the execution monitor layout class */
+.execution-monitor-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+} 
