@@ -3,7 +3,7 @@ import { BASIC_LAYOUT } from "../default_layouts/SIMPLE_LAYOUT";
 import { PROGRAM_EDITOR_LAYOUT } from "../default_layouts/PROGRAM_EDITOR_LAYOUT";
 import { EXECUTION_MONITOR_LAYOUT } from "../default_layouts/EXECUTION_MONITOR_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
-import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { RobotPose } from "shared/util";
 import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 
 /** Type for all the possible names of default layouts. */

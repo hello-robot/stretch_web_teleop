@@ -12,7 +12,7 @@ import {
 } from "../utils/component_definitions";
 
 /**
- * Execution Monitor Layout - Like simple layout but with ExecutionMonitor panel
+ * Execution Monitor Layout
  */
 export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
