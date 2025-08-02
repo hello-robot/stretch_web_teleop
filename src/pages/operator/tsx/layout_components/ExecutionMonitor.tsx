@@ -46,6 +46,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
+    const [showDoneMessage, setShowDoneMessage] = useState(false);
     const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
@@ -81,6 +82,21 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
         const numbers = lines.map((_, index) => (index + 1).toString());
         setLineNumbers(numbers);
     }, [code]);
+
+    // Message when program finishes executing
+    useEffect(() => {
+        if (!isExecutingProgram && currentExecutingLine !== undefined) {
+            setShowDoneMessage(true);
+            const timer = setTimeout(() => {
+                setShowDoneMessage(false);
+            }, 5000); // Show for 5 seconds
+            
+            return () => clearTimeout(timer);
+        } else if (isExecutingProgram) {
+            // Program is executing, hide done message
+            setShowDoneMessage(false);
+        }
+    }, [isExecutingProgram, currentExecutingLine]);
 
     // Syntax highlighting function (same as ProgramEditor)
     const highlightSyntax = (text: string): string => {
@@ -186,6 +202,17 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
                 </div>
+                {showDoneMessage && (
+                    <div style={{
+                        color: "#28a745",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        display: "flex",
+                        alignItems: "center"
+                    }}>
+                        Done Executing!
+                    </div>
+                )}
                 {isExecutingProgram && !waitingForUserConfirmation && (
                     <button 
                         className="execution-monitor-stop-button"
