@@ -571,7 +571,7 @@ export const Operator = (props: {
                 <div style={{ 
                     display: "flex", 
                     justifyContent: "center", 
-                    marginBottom: "12px",
+                    marginBottom: "5px",
                     width: "100%"
                 }}>
                     <span style={{
