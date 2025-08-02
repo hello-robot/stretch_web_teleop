@@ -27,7 +27,8 @@ export enum ComponentType {
     BatteryGuage = "Battery Gauge",
     RosbagRecorder = "Rosbag Recorder",
     ProgramEditor = "Program Editor",
-    Library = "Library"
+    Library = "Library",
+    ExecutionMonitor = "Execution Monitor"
 }
 
 /**
@@ -233,3 +234,5 @@ export type RunStopDefinition = ComponentDefinition;
 export type ProgramEditorDefinition = ComponentDefinition;
 
 export type LibraryDefinition = ComponentDefinition;
+
+export type ExecutionMonitorDefinition = ComponentDefinition;

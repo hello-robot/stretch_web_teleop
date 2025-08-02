@@ -1,0 +1,145 @@
+.execution-monitor-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 300px;
+    min-width: 800px;
+    flex: 3 1 0;
+    width: 100%;
+    max-width: 100%;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.execution-monitor-root.customizing {
+    cursor: pointer;
+}
+
+.execution-monitor-root.selected {
+    border: 2px solid var(--selected-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.execution-monitor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--secondary-background-color);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.execution-monitor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.execution-monitor-language {
+    color: var(--secondary-text-color);
+    background: var(--tertiary-background-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.execution-monitor-title {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.execution-monitor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    background: var(--secondary-background-color);
+    border-right: 1px solid var(--border-color);
+    padding: 8px 0;
+    min-width: 50px;
+    text-align: right;
+    user-select: none;
+    overflow-y: auto;
+}
+
+.line-number {
+    padding: 0 8px;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    line-height: 1.5;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.monitor-wrapper {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+.code-display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* Syntax highlighting colors */
+.robot-function {
+    color: #ff8c00; /* Orange for robot functions */
+    font-weight: 600;
+}
+
+.human-function {
+    color: #28a745; /* Green for human functions */
+    font-weight: 600;
+}
+
+.saved-position {
+    color: #007bff; /* Blue for saved positions */
+    font-weight: normal;
+}
+
+/* Scrollbar styling */
+.code-display::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.code-display::-webkit-scrollbar-track {
+    background: var(--secondary-background-color);
+}
+
+.code-display::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.code-display::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-text-color);
+} 
