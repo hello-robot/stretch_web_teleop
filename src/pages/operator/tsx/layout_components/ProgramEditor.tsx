@@ -905,6 +905,18 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             Clear
                         </button>
                     )}
+                    {isExecuting && (
+                        <span 
+                            style={{
+                                color: "#4caf50",
+                                fontWeight: "500",
+                                fontSize: "14px",
+                                marginLeft: "16px"
+                            }}
+                        >
+                            Running... View execution details in the Execution Monitor.
+                        </span>
+                    )}
                 </div>
                 <div className="program-editor-header-right">
                     {!props.readOnly && (

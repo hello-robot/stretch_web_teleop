@@ -533,27 +533,7 @@ export const Operator = (props: {
                 </div>
             )}
             
-            {/* Execution Monitor message - only show in Program Editor mode during execution */}
-            {programMode === "Program Editor" && showExecutionMessage && (
-                <div
-                    style={{
-                        width: "100%",
-                        background: "#4caf50",
-                        color: "white",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        fontSize: "1.2em",
-                        padding: "8px 0",
-                        position: "relative",
-                        zIndex: 1,
-                        opacity: props.isReconnecting ? 0.5 : 1,
-                        filter: props.isReconnecting ? "grayscale(1)" : "none",
-                        pointerEvents: props.isReconnecting ? "none" : "auto"
-                    }}
-                >
-                    You can now switch to the Execution Monitor!
-                </div>
-            )}
+
 
 
 
