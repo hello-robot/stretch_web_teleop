@@ -592,6 +592,7 @@ export const Operator = (props: {
                     width: "100%",
                     minHeight: "40px"
                 }}>
+                    {/* Left side controls */}
                     <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
                         {/* Program mode dropdown */}
                         <Dropdown
@@ -618,11 +619,14 @@ export const Operator = (props: {
                             />
                         </div>
                     </div>
+                    
+                    {/* Center controls */}
                     <div style={{ 
                         display: "flex", 
                         alignItems: "center", 
-                        flex: "0 0 auto",
-                        gap: "8px"
+                        justifyContent: "center",
+                        flex: "1 1 auto",
+                        gap: "16px"
                     }}>
                         <AudioControl remoteStreams={remoteStreams} />
                         <SpeedControl
@@ -632,6 +636,15 @@ export const Operator = (props: {
                                 FunctionProvider.velocityScale = newScale;
                             }}
                         />
+                    </div>
+                    
+                    {/* Right side controls */}
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        flex: "0 0 auto",
+                        gap: "8px"
+                    }}>
                         <CustomizeButton
                             customizing={customizing}
                             onClick={handleToggleCustomize}
