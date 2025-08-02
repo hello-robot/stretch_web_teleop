@@ -566,77 +566,88 @@ export const Operator = (props: {
                     <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
-            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", alignItems: "center", padding: "12px 20px", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
+            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", flexDirection: "column", padding: "12px 20px" }}>
+                {/* Centered Title */}
+                <div style={{ 
+                    display: "flex", 
+                    justifyContent: "center", 
+                    marginBottom: "12px",
+                    width: "100%"
+                }}>
                     <span style={{
                         fontSize: "18px",
                         fontWeight: "bold",
                         color: "var(--text-color)",
-                        textTransform: "capitalize",
-                        marginRight: "20px"
+                        textTransform: "capitalize"
                     }}>
                         {programMode}
                     </span>
-                    {/* Program mode dropdown */}
-                    <Dropdown
-                        onChange={(idx) => {
-                            const newMode = programModes[idx];
-                            setProgramMode(newMode);
-                            switchToModeLayout(newMode);
-                        }}
-                        selectedIndex={programModes.indexOf(programMode)}
-                        possibleOptions={programModes}
-                        showActive
-                        placement="bottom"
-                    />
-                    {/* Action mode dropdown */}
-                    <div style={{ marginLeft: 16 }}>
+                </div>
+                
+                {/* Header Controls */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        {/* Program mode dropdown */}
                         <Dropdown
-                            onChange={(idx) => setActionMode(actionModes[idx])}
-                            selectedIndex={actionModes.indexOf(
-                                layout.current.actionMode
-                            )}
-                            possibleOptions={actionModes}
+                            onChange={(idx) => {
+                                const newMode = programModes[idx];
+                                setProgramMode(newMode);
+                                switchToModeLayout(newMode);
+                            }}
+                            selectedIndex={programModes.indexOf(programMode)}
+                            possibleOptions={programModes}
                             showActive
                             placement="bottom"
                         />
+                        {/* Action mode dropdown */}
+                        <div style={{ marginLeft: 16 }}>
+                            <Dropdown
+                                onChange={(idx) => setActionMode(actionModes[idx])}
+                                selectedIndex={actionModes.indexOf(
+                                    layout.current.actionMode
+                                )}
+                                possibleOptions={actionModes}
+                                showActive
+                                placement="bottom"
+                            />
+                        </div>
                     </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                    <AudioControl remoteStreams={remoteStreams} />
-                    <SpeedControl
-                        scale={velocityScale}
-                        onChange={(newScale: number) => {
-                            setVelocityScale(newScale);
-                            FunctionProvider.velocityScale = newScale;
-                        }}
-                    />
-                    <CustomizeButton
-                        customizing={customizing}
-                        onClick={handleToggleCustomize}
-                    />
-                    {/* Home Robot Button */}
-                    <button
-                        onClick={() => {
-                            if ((window as any).remoteRobot) {
-                                (window as any).remoteRobot.homeTheRobot();
-                            } else {
-                                console.error("RemoteRobot not available");
-                            }
-                        }}
-                        id="home-robot-button"
-                        className="btn-turquoise font-white"
-                        style={{
-                            marginLeft: "16px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px"
-                        }}
-                        title="Home the robot to its default position"
-                    >
-                        <HomeIcon />
-                        <span>Home Robot</span>
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <AudioControl remoteStreams={remoteStreams} />
+                        <SpeedControl
+                            scale={velocityScale}
+                            onChange={(newScale: number) => {
+                                setVelocityScale(newScale);
+                                FunctionProvider.velocityScale = newScale;
+                            }}
+                        />
+                        <CustomizeButton
+                            customizing={customizing}
+                            onClick={handleToggleCustomize}
+                        />
+                        {/* Home Robot Button */}
+                        <button
+                            onClick={() => {
+                                if ((window as any).remoteRobot) {
+                                    (window as any).remoteRobot.homeTheRobot();
+                                } else {
+                                    console.error("RemoteRobot not available");
+                                }
+                            }}
+                            id="home-robot-button"
+                            className="btn-turquoise font-white"
+                            style={{
+                                marginLeft: "16px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px"
+                            }}
+                            title="Home the robot to its default position"
+                        >
+                            <HomeIcon />
+                            <span>Home Robot</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             {robotNotHomed && (
