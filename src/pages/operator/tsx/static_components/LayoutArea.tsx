@@ -12,7 +12,6 @@ import {
     ComponentListProps,
 } from "../layout_components/ComponentList";
 import "operator/css/LayoutArea.css";
-import "operator/css/ExecutionMonitor.css";
 import { DropZone } from "../layout_components/DropZone";
 
 /** Properties for {@link LayoutArea} */
@@ -31,22 +30,8 @@ export const LayoutArea = (props: LayoutAreaProps) => {
     // }
     const panelColumn = props.layout.children;
     const dropZoneIdx = 0;
-    
-    // Check if this is the Execution Monitor layout by looking for ExecutionMonitor component
-    const isExecutionMonitorLayout = panelColumn.some(grid => 
-        grid.children.some(panel => 
-            panel.children.some(tab => 
-                tab.children.some(component => 
-                    component.type === "Execution Monitor"
-                )
-            )
-        )
-    );
-    
-    const layoutClassName = isExecutionMonitorLayout ? "execution-monitor-layout" : "";
-    
     return (
-        <div className={layoutClassName}>
+        <>
             {panelColumn.map((compDef: LayoutGridDefinition, index: number) => {
                 return (
                     // compDef.children.length > 0 ?
@@ -76,6 +61,6 @@ export const LayoutArea = (props: LayoutAreaProps) => {
                 sharedState={props.sharedState}
                 parentDef={props.layout}
             />
-        </div>
+        </>
     );
 };
