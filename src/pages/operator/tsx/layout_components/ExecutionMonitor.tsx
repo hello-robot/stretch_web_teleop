@@ -43,7 +43,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing, currentExecutingLine } = props.sharedState;
+    const { customizing, currentExecutingLine, isExecutingProgram } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -126,6 +126,13 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     };
 
+    const handleStopProgram = () => {
+        const buttonFunctionProvider = (window as any).buttonFunctionProvider;
+        if (buttonFunctionProvider) {
+            buttonFunctionProvider.setExecutionState(false);
+        }
+    };
+
     // In customizing state add onClick callback
     const selectProp = customizing ? { onClick: onSelect } : {};
 
@@ -162,7 +169,16 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     {props.language && (
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
+                    <span className="execution-monitor-title">Execution Monitor</span>
                 </div>
+                {isExecutingProgram && (
+                    <button 
+                        className="execution-monitor-stop-button"
+                        onClick={handleStopProgram}
+                    >
+                        Stop Program
+                    </button>
+                )}
             </div>
             <div className="execution-monitor-container">
                 <div className="line-numbers">
