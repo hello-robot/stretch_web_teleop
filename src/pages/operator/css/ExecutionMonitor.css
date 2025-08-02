@@ -142,4 +142,28 @@
 
 .code-display::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-text-color);
+}
+
+.execution-monitor-layout .tabs-component {
+    flex: 0.5 1 0; 
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.execution-monitor-layout .tabs-component:has(.execution-monitor-root) {
+    flex: 2 1 0; 
+    min-width: 300px;
+    max-width: 600px;
+}
+
+.execution-monitor-layout .tabs-component:has([data-tab-label="Execution Monitor"]) {
+    flex: 2 1 0;
+    min-width: 300px;
+    max-width: 600px;
+}
+
+.execution-monitor-layout .tabs-component:has([data-tab-label="Camera Views"]) {
+    flex: 0.5 1 0;
+    min-width: 200px;
+    max-width: 300px;
 } 
