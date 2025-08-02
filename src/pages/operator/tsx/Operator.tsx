@@ -53,30 +53,31 @@ export const Operator = (props: {
     storageHandler: StorageHandler;
     isReconnecting?: boolean;
 }) => {
+    // Layout and customization state
     const [customizing, setCustomizing] = React.useState<boolean>(false);
-    const [selectedDefinition, setSelectedDefinition] =
-        React.useState<ComponentDefinition>();
+    const [selectedDefinition, setSelectedDefinition] = React.useState<ComponentDefinition>();
     const [selectedPath, setSelectedPath] = React.useState<string>();
-    const [buttonStateMapRerender, setButtonStateMapRerender] =
-        React.useState<boolean>(false);
-    const [tabletOrientationRerender, setTabletOrientationRerender] =
-        React.useState<boolean>(false);
+    const [buttonStateMapRerender, setButtonStateMapRerender] = React.useState<boolean>(false);
+    const [tabletOrientationRerender, setTabletOrientationRerender] = React.useState<boolean>(false);
+    
+    // Program execution state
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
     const [currentExecutingLine, setCurrentExecutingLine] = React.useState<number | undefined>(undefined);
     const [showExecutionMessage, setShowExecutionMessage] = React.useState<boolean>(false);
+    const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
+    const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
+    const [executionError, setExecutionError] = React.useState<{ type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null>(null);
+    const [errorLineNumber, setErrorLineNumber] = React.useState<number | null>(null);
+    
+    // Program mode state
+    const [showPopup, setShowPopup] = React.useState<boolean>(false);
+    const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
     
     // Function to update current executing line
     const updateCurrentExecutingLine = (lineNumber: number | undefined) => {
         setCurrentExecutingLine(lineNumber);
     };
-    const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
-    const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
-    const [executionError, setExecutionError] = React.useState<{ type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null>(null);
-    const [errorLineNumber, setErrorLineNumber] = React.useState<number | null>(null);
-
-    const [showPopup, setShowPopup] = React.useState<boolean>(false);
-    const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
     
     // Effect to handle execution message timing for Program Editor mode
     React.useEffect(() => {

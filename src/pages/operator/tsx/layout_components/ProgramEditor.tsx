@@ -22,7 +22,7 @@ type ProgramEditorProps = CustomizableComponentProps & {
     onRunProgram?: (code: string) => void;
 };
 
-// Robot functions (orange)
+// Robot functions 
 const ROBOT_FUNCTIONS = [
     'MoveEEToPose',
     'AdjustGripperWidth', 
@@ -30,19 +30,19 @@ const ROBOT_FUNCTIONS = [
     'ResetRobot'
 ];
 
-// Human functions (green)
+// Human functions 
 const HUMAN_FUNCTIONS = [
     'PauseAndConfirm',
     'TakeControl'
 ];
 
-// Saved positions (blue) - will be made dynamic
+// Default saved positions 
 const DEFAULT_SAVED_POSITIONS = [
     'stowGripper',
     'centerWrist'
 ];
 
-// Define poses that can be referenced in the program
+// Define default saved positions
 const POSE_DEFINITIONS = {
     stowGripper: {
         joint_wrist_roll: 0.0,
@@ -53,7 +53,6 @@ const POSE_DEFINITIONS = {
         joint_wrist_roll: 0.0,
         joint_wrist_pitch: 0.0,
         joint_wrist_yaw: 0.0,
-   
     }
 };
 
@@ -61,7 +60,7 @@ const POSE_DEFINITIONS = {
 interface ProgramLine {
     lineNumber: number;
     content: string;
-    command?: string;  // ex.MoveEEToPose
+    command?: string;  
     parameters?: any;   
     isExecutable: boolean; // handling for empty lines or if invalid 
     error?: {
@@ -206,16 +205,12 @@ const parseProgram = (code: string): Program => {
  * @param props {@link ProgramEditorProps}
  */
 export const ProgramEditor = (props: ProgramEditorProps) => {
+    // Initialize code from session storage or props
     const getInitialCode = () => {
         const sessionCode = sessionStorage.getItem('programEditorCode');
         return sessionCode || props.initialCode || "";
     };
-    
-    const [code, setCode] = useState(getInitialCode());
-    const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-    const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
-    const [showSuggestion, setShowSuggestion] = useState(false);
-    const [isExecuting, setIsExecuting] = useState(false);
+
     // Load custom poses from session storage
     const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
         const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
@@ -243,8 +238,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         return DEFAULT_SAVED_POSITIONS;
     };
     
+    // State management
+    const [code, setCode] = useState(getInitialCode());
+    const [lineNumbers, setLineNumbers] = useState<string[]>([]);
+    const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
+    const [showSuggestion, setShowSuggestion] = useState(false);
+    const [isExecuting, setIsExecuting] = useState(false);
+    
     const [savedPositions, setSavedPositions] = useState<string[]>(getInitialSavedPositions());
     const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>(getInitialCustomPoses());
+    
+    // Refs
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
@@ -260,16 +264,15 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const { customizing, executionError, currentExecutingLine, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
-    // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
+    // Create dynamic array that updates when savedPositions changes
     const allFunctions = React.useMemo(() => {
         return [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
     }, [savedPositions]);
 
         // Function to wait for goal completion
         const waitForPoseCompletion = (targetPose: RobotPose): Promise<void> => {
-            //TODO: implement this by storing the target pose + comparing w/ current joint states
+            // TODO: implement this by storing the target pose + comparing w/ current joint states
             return new Promise((resolve) => {
-                // For now, just resolve immediately
                 resolve();
             });
         };
@@ -594,11 +597,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             (props.sharedState as any).insertTextAtCursor = insertTextAtCursor;
         }
         if ((props.sharedState as any).addSavedPosition === undefined) {
-            // Add the function to add saved positions if it doesn't exist
             (props.sharedState as any).addSavedPosition = addSavedPosition;
         }
         if ((props.sharedState as any).addCustomPose === undefined) {
-            // Add the function to add custom poses if it doesn't exist
             (props.sharedState as any).addCustomPose = addCustomPose;
         }
     }, [props.sharedState]);
@@ -652,11 +653,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             setCurrentSuggestion("");
             return;
         }
-        
         const filtered = allFunctions.filter(func => 
             func.toLowerCase().startsWith(word.toLowerCase()) && func.toLowerCase() !== word.toLowerCase()
         );
-        
         if (filtered.length > 0) {
             setCurrentSuggestion(filtered[0]);
             setShowSuggestion(true);
@@ -674,7 +673,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const { start, end } = getCurrentWord();
         const text = textarea.value;
         
-        // Check if the suggestion is a function (robot or human function) or a saved position
+        // Check if the suggestion is a function or a saved position
         const isFunction = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS].includes(currentSuggestion);
         const suffix = isFunction ? '()' : '';
         
@@ -864,7 +863,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 const beforeWord = code.substring(0, start);
                 const afterWord = code.substring(end);
                 
-                // Check if the suggestion is a function (robot or human function) or a saved position
+                // Check if the suggestion is a function or a saved position
                 const isFunction = [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS].includes(currentSuggestion);
                 const suffix = isFunction ? '()' : '';
                 

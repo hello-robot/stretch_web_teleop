@@ -8,13 +8,13 @@ import "operator/css/Library.css";
 
 // Mapping from user's joint order to ValidJoints (filtered to only valid joints)
 const JOINT_MAPPING = [
-    null,                    // joint_right_wheel (skip)
-    null,                    // joint_left_wheel (skip)
+    null,                   
+    null,                    
     "joint_lift",            
     "wrist_extension",       // Sum of joint_arm_l0 + joint_arm_l1 + joint_arm_l2 + joint_arm_l3
-    null,                    // joint_arm_l2 (skip - included in wrist_extension)
-    null,                    // joint_arm_l1 (skip - included in wrist_extension)
-    null,                    // joint_arm_l0 (skip - included in wrist_extension)
+    null,                   
+    null,                    
+    null,                    
     "joint_wrist_yaw",      
     "joint_head_pan",        
     "joint_head_tilt",                        
@@ -104,10 +104,11 @@ export const Library = (props: CustomizableComponentProps) => {
         return pose;
     };
 
-    // Validate joint states input- can add checking to see if its from rosbag recording
+    // Validate joint states input
     const validateJointStates = (input: string): boolean => {
         try {
             // Check if it's a valid array format
+            // TODO: add checking to see if its from rosbag recording
             const trimmed = input.trim();
             if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
                 return false;

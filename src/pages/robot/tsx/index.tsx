@@ -369,9 +369,8 @@ window.onbeforeunload = () => {
     connection.hangup();
 };
 
-// New method of rendering in react 18
 const container = document.getElementById("root");
-const root = createRoot(container!); // createRoot(container!) if you use TypeScript
+const root = createRoot(container!); 
 root.render(
     <AllVideoStreamComponent
         streams={[navigationStream, realsenseStream, gripperStream]}

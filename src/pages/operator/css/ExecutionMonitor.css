@@ -183,7 +183,7 @@
 
 /* Syntax highlighting colors */
 .robot-function {
-    color: #ff8c00; /* Orange for robot functions */
+    color: #ff8c00; 
     font-weight: 600;
 }
 
@@ -205,14 +205,14 @@
 .code-line.executing {
     background-color: rgba(128, 128, 128, 0.15);
     border-left: 3px solid #666666;
-    padding-left: 9px; /* 12px - 3px border */
+    padding-left: 9px; 
 }
 
 /* Error line highlighting */
 .code-line.error {
     background-color: rgba(220, 53, 69, 0.15) !important;
     border-left: 3px solid #dc3545 !important;
-    padding-left: 9px !important; /* 12px - 3px border */
+    padding-left: 9px !important; 
 }
 
 .line-number.error {
@@ -257,16 +257,15 @@
 
 
 .human-function {
-    color: #28a745; /* Green for human functions */
+    color: #28a745; 
     font-weight: 600;
 }
 
 .saved-position {
-    color: #007bff; /* Blue for saved positions */
+    color: #007bff; 
     font-weight: normal;
 }
 
-/* Scrollbar styling */
 .code-display::-webkit-scrollbar {
     width: 8px;
     height: 8px;

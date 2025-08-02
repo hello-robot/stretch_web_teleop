@@ -16,7 +16,7 @@ type ExecutionMonitorProps = CustomizableComponentProps & {
     language?: string;
 };
 
-// Robot functions (orange)
+// Robot functions 
 const ROBOT_FUNCTIONS = [
     'MoveEEToPose',
     'AdjustGripperWidth', 
@@ -24,13 +24,13 @@ const ROBOT_FUNCTIONS = [
     'ResetRobot'
 ];
 
-// Human functions (green)
+// Human functions 
 const HUMAN_FUNCTIONS = [
     'PauseAndConfirm',
     'TakeControl'
 ];
 
-// Saved positions (blue) - will be made dynamic
+// Default saved positions 
 const DEFAULT_SAVED_POSITIONS = [
     'stowGripper',
     'centerWrist'
@@ -43,20 +43,22 @@ const DEFAULT_SAVED_POSITIONS = [
  * @param props {@link ExecutionMonitorProps}
  */
 export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
+    // State management
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
     const [showDoneMessage, setShowDoneMessage] = useState(false);
     const prevIsExecutingRef = React.useRef(false);
+    
     const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
-    // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
+    // Create dynamic array that updates when savedPositions changes
     const allFunctions = React.useMemo(() => {
         return [...ROBOT_FUNCTIONS, ...HUMAN_FUNCTIONS, ...savedPositions];
     }, [savedPositions]);
 
-    // Load code from session storage (same as ProgramEditor)
+    // Load code from session storage
     useEffect(() => {
         const sessionCode = sessionStorage.getItem('programEditorCode');
         if (sessionCode) {
@@ -90,7 +92,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             setShowDoneMessage(true);
             const timer = setTimeout(() => {
                 setShowDoneMessage(false);
-            }, 5000); // Show for 5 seconds
+            }, 5000); 
             
             return () => clearTimeout(timer);
         } else if (isExecutingProgram) {
@@ -100,7 +102,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
         prevIsExecutingRef.current = isExecutingProgram;
     }, [isExecutingProgram, executionError]);
 
-    // Syntax highlighting function (same as ProgramEditor)
+    // Syntax highlighting function 
     const highlightSyntax = (text: string): string => {
         let highlightedText = text;
         

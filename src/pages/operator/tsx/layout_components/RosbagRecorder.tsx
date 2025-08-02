@@ -7,6 +7,7 @@ import { className } from "shared/util";
 import "operator/css/basic_components.css";
 
 export const RosbagRecorder = (props: CustomizableComponentProps) => {
+    // State management
     const customizing = props.sharedState?.customizing ?? false;
     const selected = props.sharedState ? isSelected(props) : false;
     const [isRecording, setIsRecording] = useState(false);
@@ -16,6 +17,7 @@ export const RosbagRecorder = (props: CustomizableComponentProps) => {
     const handleClick = async () => {
         setError(null);
         setSuccessMessage(null);
+        
         if (!isRecording) {
             // Start recording
             try {
