@@ -63,6 +63,10 @@ interface ProgramLine {
     command?: string;  // ex.MoveEEToPose
     parameters?: any;   
     isExecutable: boolean; // handling for empty lines or if invalid 
+    error?: {
+        type: 'syntax' | 'invalid_input' | 'unknown_pose';
+        message: string;
+    };
 }
 
 interface Program {
@@ -150,11 +154,15 @@ const parseProgram = (code: string): Program => {
                     isExecutable: true
                 });
             } else {
-                // Unknown command or invalid line
+                // Unknown command or invalid line - syntax error
                 programLines.push({
                     lineNumber,
                     content: line,
-                    isExecutable: false
+                    isExecutable: false,
+                    error: {
+                        type: 'syntax',
+                        message: `Line ${lineNumber}: Syntax error`
+                    }
                 });
             }
         }
@@ -224,7 +232,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
-    const { customizing } = props.sharedState;
+    const { customizing, executionError, currentExecutingLine } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -272,6 +280,19 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     break;
                 }
                 
+                // Check for errors in the line
+                if (line.error) {
+                    console.error(`Error on line ${line.lineNumber}: ${line.error.message}`);
+                    // Stop execution and display error
+                    if (props.sharedState.updateCurrentExecutingLine) {
+                        props.sharedState.updateCurrentExecutingLine(line.lineNumber);
+                    }
+                    if (props.sharedState.setExecutionError) {
+                        props.sharedState.setExecutionError(line.error);
+                    }
+                    break;
+                }
+                
                 if (line.isExecutable) {
                     console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
                     
@@ -301,6 +322,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             }
                         } else {
                             console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                            // Stop execution and display error
+                            if (props.sharedState.setExecutionError) {
+                                props.sharedState.setExecutionError({
+                                    type: 'unknown_pose',
+                                    message: `Line ${line.lineNumber}: Unknown pose: ${poseName}`
+                                });
+                            }
+                            break;
                         }
                     }
                     else if (line.command === "AdjustGripperWidth") {
@@ -324,6 +353,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             }
                         } else {
                             console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                            // Stop execution and display error
+                            if (props.sharedState.setExecutionError) {
+                                props.sharedState.setExecutionError({
+                                    type: 'unknown_pose',
+                                    message: `Line ${line.lineNumber}: Unknown pose: ${poseName}`
+                                });
+                            }
+                            break;
                         }
                     }
                     else if (line.command === "RotateEE") {
@@ -349,6 +386,14 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             }
                         } else {
                             console.error(`Unknown pose: ${poseName}. Available poses: ${Object.keys(ALL_POSE_DEFINITIONS).join(', ')}`);
+                            // Stop execution and display error
+                            if (props.sharedState.setExecutionError) {
+                                props.sharedState.setExecutionError({
+                                    type: 'unknown_pose',
+                                    message: `Line ${line.lineNumber}: Unknown pose: ${poseName}`
+                                });
+                            }
+                            break;
                         }
                     }
                     else if (line.command === "ResetRobot") {
@@ -857,13 +902,29 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     )}
                 </div>
             </div>
+            {executionError && (
+                <div className="program-editor-error-banner">
+                    <span>⚠️</span>
+                    {executionError.message}
+                </div>
+            )}
             <div className="program-editor-container">
                 <div className="line-numbers" ref={lineNumbersRef}>
-                    {lineNumbers.map((number, index) => (
-                        <div key={index} className="line-number">
-                            {number}
-                        </div>
-                    ))}
+                    {lineNumbers.map((number, index) => {
+                        const lineNumber = index + 1;
+                        const hasError = executionError && currentExecutingLine === lineNumber;
+                        
+                        return (
+                            <div 
+                                key={index} 
+                                className={className("line-number", {
+                                    error: hasError
+                                })}
+                            >
+                                {number}
+                            </div>
+                        );
+                    })}
                 </div>
                 <div className="editor-wrapper">
                     <textarea

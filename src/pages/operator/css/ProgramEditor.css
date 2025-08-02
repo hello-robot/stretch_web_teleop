@@ -219,6 +219,26 @@
     justify-content: flex-end;
 }
 
+.line-number.error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Error banner */
+.program-editor-error-banner {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .code-textarea::placeholder {
     color: var(--secondary-text-color);
     opacity: 0.7;

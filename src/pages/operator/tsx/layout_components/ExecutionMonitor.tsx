@@ -45,7 +45,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating } = props.sharedState;
+    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -156,13 +156,15 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const highlightedLines = codeLines.map((line, index) => {
         const lineNumber = index + 1;
         const isExecuting = currentExecutingLine === lineNumber;
+        const hasError = executionError && currentExecutingLine === lineNumber;
         const highlightedLine = highlightSyntax(line);
         
         return (
             <div 
                 key={index}
                 className={className("code-line", {
-                    executing: isExecuting
+                    executing: isExecuting && !hasError,
+                    error: hasError
                 })}
                 dangerouslySetInnerHTML={{ __html: highlightedLine || '&nbsp;' }}
             />
@@ -204,18 +206,31 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     </button>
                 )}
             </div>
+            {executionError && (
+                <div className="execution-monitor-error-banner">
+                    <span>⚠️</span>
+                    {executionError.message}
+                </div>
+            )}
             <div className="execution-monitor-container">
                 <div className="line-numbers">
-                    {lineNumbers.map((number, index) => (
-                        <div 
-                            key={index} 
-                            className={className("line-number", {
-                                executing: currentExecutingLine === index + 1
-                            })}
-                        >
-                            {number}
-                        </div>
-                    ))}
+                    {lineNumbers.map((number, index) => {
+                        const lineNumber = index + 1;
+                        const isExecuting = currentExecutingLine === lineNumber;
+                        const hasError = executionError && currentExecutingLine === lineNumber;
+                        
+                        return (
+                            <div 
+                                key={index} 
+                                className={className("line-number", {
+                                    executing: isExecuting && !hasError,
+                                    error: hasError
+                                })}
+                            >
+                                {number}
+                            </div>
+                        );
+                    })}
                 </div>
                 <div className="monitor-wrapper">
                     <div className="code-display">

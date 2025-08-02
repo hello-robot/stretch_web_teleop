@@ -51,6 +51,10 @@ export type SharedState = {
     waitingForUserConfirmation?: boolean;
     /** Function to handle "Done teleoperating" button click */
     handleDoneTeleoperating?: () => void;
+    /** Function to set execution error */
+    setExecutionError?: (error: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string }) => void;
+    /** Current execution error */
+    executionError?: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null;
     /** Function to insert text at cursor position in program editor */
     insertTextAtCursor?: (text: string) => void;
     /** Function to add new saved position to autocomplete and syntax highlighting */
