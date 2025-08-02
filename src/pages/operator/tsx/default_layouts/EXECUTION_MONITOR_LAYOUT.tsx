@@ -23,7 +23,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
     children: [
         {
             type: ComponentType.LayoutGrid,
-            flex: 0.25, 
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,
@@ -53,7 +53,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
-            flex: 2,
+            flex: 1,
             children: [
                 {
                     type: ComponentType.Panel,
@@ -73,7 +73,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
-            flex: 0.5, 
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,

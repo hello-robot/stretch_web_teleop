@@ -23,6 +23,7 @@ export const PROGRAM_EDITOR_LAYOUT: LayoutDefinition = {
     children: [
         {
             type: ComponentType.LayoutGrid,
+            flex: 2, 
             children: [
                 {
                     type: ComponentType.Panel,
@@ -42,6 +43,7 @@ export const PROGRAM_EDITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,
