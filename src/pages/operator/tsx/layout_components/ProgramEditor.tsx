@@ -215,6 +215,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
     const highlightedRef = useRef<HTMLDivElement>(null);
+    const stopExecutionRef = useRef<boolean>(false);
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
@@ -244,19 +245,17 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         if (buttonFunctionProvider) {
             buttonFunctionProvider.setExecutionState(true);
         }
-        
-        // Create a local execution state that can be checked and updated
-        let localExecuting = true;
-        
+        // Reset stop execution flag at the start
+        stopExecutionRef.current = false;
         // Function to check if execution should continue
         const shouldContinue = () => {
-            return isExecuting && localExecuting;
+            return !stopExecutionRef.current; 
         };
         
         try {
-            console.log("Starting program loop, isExecuting:", isExecuting, "localExecuting:", localExecuting);
+            console.log("Starting program loop, stopExecutionRef.current:", stopExecutionRef.current);
             for (const line of program.lines) {
-                console.log("Checking line", line.lineNumber, "isExecuting:", isExecuting, "localExecuting:", localExecuting);
+                console.log("Checking line", line.lineNumber, "stopExecutionRef.current:", stopExecutionRef.current);
                 if (!shouldContinue()) {
                     console.log("Program execution stopped by user");
                     break;
@@ -384,7 +383,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             console.error("Error during program execution:", error);
         } finally {
             // Always reset execution state and button state when program completes or stops
-            localExecuting = false;
+            stopExecutionRef.current = true;
             if (buttonFunctionProvider) {
                 buttonFunctionProvider.setExecutionState(false);
             }
@@ -671,6 +670,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             // Stop execution
             console.log("Stop Program button clicked!");
             setIsExecuting(false);
+            stopExecutionRef.current = true;
             
             // Set execution state to false
             const buttonFunctionProvider = (window as any).buttonFunctionProvider;
