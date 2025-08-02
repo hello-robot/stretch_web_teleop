@@ -18,6 +18,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayMovementRecorder: false,
     displayTextToSpeech: false,
+    displayRosbagRecorder: true,
     displayLabels: true,
     actionMode: ActionMode.PressAndHold,
     children: [

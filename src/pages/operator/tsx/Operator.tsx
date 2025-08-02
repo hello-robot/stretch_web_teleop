@@ -185,13 +185,16 @@ export const Operator = (props: {
             
             programModes.forEach(mode => {
                 const savedLayout = props.storageHandler.loadCurrentLayout(mode);
-                if (savedLayout && mode !== "Program Editor") {
+                if (savedLayout) {
                     initialLayouts[mode] = savedLayout;
                 } else {
-                    if (mode === "Program Editor") {
+                    // Load default layouts for each mode
+                    if (mode === "Demonstrate") {
+                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Basic Layout" as any);
+                    } else if (mode === "Program Editor") {
                         initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Program Editor Layout" as any);
-                    } else {
-                        initialLayouts[mode] = props.storageHandler.loadCurrentLayoutOrDefault(mode);
+                    } else if (mode === "Execution Monitor") {
+                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Execution Monitor Layout" as any);
                     }
                 }
             });
@@ -502,7 +505,14 @@ export const Operator = (props: {
             if (newModeLayout) {
                 layout.current = newModeLayout;
             } else {
-                layout.current = props.storageHandler.loadCurrentLayoutOrDefault(newMode);
+                // Load default layouts for each mode
+                if (newMode === "Demonstrate") {
+                    layout.current = props.storageHandler.loadDefaultLayout("Basic Layout" as any);
+                } else if (newMode === "Program Editor") {
+                    layout.current = props.storageHandler.loadDefaultLayout("Program Editor Layout" as any);
+                } else if (newMode === "Execution Monitor") {
+                    layout.current = props.storageHandler.loadDefaultLayout("Execution Monitor Layout" as any);
+                }
             }
         }
         
