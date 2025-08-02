@@ -566,21 +566,13 @@ export const Operator = (props: {
                     <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
-            <div id="operator-header" onClick={handleClickHeader} style={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                padding: "16px 20px", 
-                minHeight: "80px",
-                width: "100%",
-                boxSizing: "border-box"
-            }}>
+            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", flexDirection: "column", padding: "12px 20px" }}>
                 {/* Centered Title */}
                 <div style={{ 
                     display: "flex", 
                     justifyContent: "center", 
-                    marginBottom: "8px",
-                    width: "100%",
-                    flexShrink: 0
+                    marginBottom: "5px",
+                    width: "100%"
                 }}>
                     <span style={{
                         fontSize: "18px",
@@ -597,16 +589,10 @@ export const Operator = (props: {
                     display: "flex", 
                     alignItems: "center", 
                     justifyContent: "space-between",
-                    flex: 1,
-                    minHeight: "40px",
-                    width: "100%"
+                    width: "100%",
+                    minHeight: "40px"
                 }}>
-                    <div style={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        gap: "16px",
-                        flexShrink: 0
-                    }}>
+                    <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
                         {/* Program mode dropdown */}
                         <Dropdown
                             onChange={(idx) => {
@@ -620,21 +606,23 @@ export const Operator = (props: {
                             placement="bottom"
                         />
                         {/* Action mode dropdown */}
-                        <Dropdown
-                            onChange={(idx) => setActionMode(actionModes[idx])}
-                            selectedIndex={actionModes.indexOf(
-                                layout.current.actionMode
-                            )}
-                            possibleOptions={actionModes}
-                            showActive
-                            placement="bottom"
-                        />
+                        <div style={{ marginLeft: 16 }}>
+                            <Dropdown
+                                onChange={(idx) => setActionMode(actionModes[idx])}
+                                selectedIndex={actionModes.indexOf(
+                                    layout.current.actionMode
+                                )}
+                                possibleOptions={actionModes}
+                                showActive
+                                placement="bottom"
+                            />
+                        </div>
                     </div>
                     <div style={{ 
                         display: "flex", 
                         alignItems: "center", 
-                        gap: "12px",
-                        flexShrink: 0
+                        flex: "0 0 auto",
+                        gap: "8px"
                     }}>
                         <AudioControl remoteStreams={remoteStreams} />
                         <SpeedControl
