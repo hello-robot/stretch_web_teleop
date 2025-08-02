@@ -439,6 +439,8 @@ export const Operator = (props: {
         isExecutingProgram: isExecutingProgram,
         currentExecutingLine: currentExecutingLine,
         updateCurrentExecutingLine: updateCurrentExecutingLine,
+        waitingForUserConfirmation: waitingForUserConfirmation,
+        handleDoneTeleoperating: handleDoneTeleoperating,
     };
     
 
@@ -517,24 +519,6 @@ export const Operator = (props: {
                     }}
                 >
                     {isExecutingProgram ? "Robot in control" : "You are in control"}
-                    {waitingForUserConfirmation && (
-                        <button
-                            onClick={handleDoneTeleoperating}
-                            style={{
-                                background: "#4caf50",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                padding: "8px 16px",
-                                fontWeight: "bold",
-                                fontSize: "1em",
-                                cursor: "pointer",
-                                marginLeft: "16px"
-                            }}
-                        >
-                            Done teleoperating
-                        </button>
-                    )}
                 </div>
             )}
             

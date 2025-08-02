@@ -44,7 +44,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing, currentExecutingLine, isExecutingProgram } = props.sharedState;
+    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -182,7 +182,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
                 </div>
-                {isExecutingProgram && (
+                {isExecutingProgram && !waitingForUserConfirmation && (
                     <button 
                         className="execution-monitor-stop-button"
                         onClick={handleStopProgram}
@@ -190,6 +190,15 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     >
                         <CloseIcon style={{ marginRight: "4px" }} />
                         Stop
+                    </button>
+                )}
+                {waitingForUserConfirmation && handleDoneTeleoperating && (
+                    <button 
+                        className="execution-monitor-done-button"
+                        onClick={handleDoneTeleoperating}
+                        type="button"
+                    >
+                        Done teleoperating
                     </button>
                 )}
             </div>

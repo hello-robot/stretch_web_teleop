@@ -87,6 +87,36 @@
     outline-offset: 2px;
 }
 
+.execution-monitor-done-button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+}
+
+.execution-monitor-done-button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+.execution-monitor-done-button:active {
+    background: #45a049;
+}
+
+.execution-monitor-done-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
+}
+
 .execution-monitor-container {
     display: flex;
     flex: 1;

@@ -47,6 +47,10 @@ export type SharedState = {
     currentExecutingLine?: number;
     /** Function to update current executing line */
     updateCurrentExecutingLine?: (lineNumber: number | undefined) => void;
+    /** Whether waiting for user confirmation after TakeControl */
+    waitingForUserConfirmation?: boolean;
+    /** Function to handle "Done teleoperating" button click */
+    handleDoneTeleoperating?: () => void;
     /** Function to insert text at cursor position in program editor */
     insertTextAtCursor?: (text: string) => void;
     /** Function to add new saved position to autocomplete and syntax highlighting */
