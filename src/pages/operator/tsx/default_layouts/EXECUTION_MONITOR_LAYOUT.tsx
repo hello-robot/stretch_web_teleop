@@ -23,6 +23,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
     children: [
         {
             type: ComponentType.LayoutGrid,
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,
@@ -52,6 +53,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
+            flex: 2,
             children: [
                 {
                     type: ComponentType.Panel,
@@ -71,20 +73,11 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,
                     children: [
-                        {
-                            type: ComponentType.SingleTab,
-                            label: "Base",
-                            children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Base,
-                                } as ButtonPadDefinition,
-                            ],
-                        } as TabDefinition,
                         {
                             type: ComponentType.SingleTab,
                             label: "Wrist & Gripper",
