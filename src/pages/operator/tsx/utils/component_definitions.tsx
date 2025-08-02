@@ -101,6 +101,7 @@ export type LayoutDefinition = ComponentDefinition & {
 
 export type LayoutGridDefinition = ComponentDefinition & {
     children: PanelDefinition[];
+    flex?: number;
 };
 
 /**
