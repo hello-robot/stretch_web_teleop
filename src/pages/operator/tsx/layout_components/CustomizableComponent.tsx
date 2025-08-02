@@ -55,8 +55,12 @@ export type SharedState = {
     setExecutionError?: (error: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string }) => void;
     /** Function to clear execution error */
     clearExecutionError?: () => void;
+    /** Function to set error line number */
+    setErrorLineNumber?: (lineNumber: number | null) => void;
     /** Current execution error */
     executionError?: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null;
+    /** Line number where error occurred */
+    errorLineNumber?: number | null;
     /** Function to insert text at cursor position in program editor */
     insertTextAtCursor?: (text: string) => void;
     /** Function to add new saved position to autocomplete and syntax highlighting */

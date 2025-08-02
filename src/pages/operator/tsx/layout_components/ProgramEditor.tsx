@@ -257,7 +257,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
-    const { customizing, executionError, currentExecutingLine, clearExecutionError } = props.sharedState;
+    const { customizing, executionError, currentExecutingLine, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -314,6 +314,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     }
                     if (props.sharedState.setExecutionError) {
                         props.sharedState.setExecutionError(line.error);
+                    }
+                    // Set error line number for highlighting
+                    if (props.sharedState.setErrorLineNumber) {
+                        props.sharedState.setErrorLineNumber(line.lineNumber);
                     }
                     break;
                 }
@@ -946,7 +950,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 <div className="line-numbers" ref={lineNumbersRef}>
                     {lineNumbers.map((number, index) => {
                         const lineNumber = index + 1;
-                        const hasError = executionError && currentExecutingLine === lineNumber;
+                        const hasError = errorLineNumber === lineNumber;
                         
                         return (
                             <div 

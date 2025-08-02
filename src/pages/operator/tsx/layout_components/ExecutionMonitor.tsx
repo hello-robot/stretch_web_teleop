@@ -46,7 +46,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError } = props.sharedState;
+    const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -157,7 +157,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const highlightedLines = codeLines.map((line, index) => {
         const lineNumber = index + 1;
         const isExecuting = currentExecutingLine === lineNumber;
-        const hasError = executionError && currentExecutingLine === lineNumber;
+        const hasError = errorLineNumber === lineNumber;
         const highlightedLine = highlightSyntax(line);
         
         return (
@@ -227,7 +227,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     {lineNumbers.map((number, index) => {
                         const lineNumber = index + 1;
                         const isExecuting = currentExecutingLine === lineNumber;
-                        const hasError = executionError && currentExecutingLine === lineNumber;
+                        const hasError = errorLineNumber === lineNumber;
                         
                         return (
                             <div 

@@ -73,6 +73,7 @@ export const Operator = (props: {
     const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
     const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
     const [executionError, setExecutionError] = React.useState<{ type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null>(null);
+    const [errorLineNumber, setErrorLineNumber] = React.useState<number | null>(null);
 
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
     const [programMode, setProgramMode] = React.useState<string>("Demonstrate");
@@ -444,8 +445,13 @@ export const Operator = (props: {
         waitingForUserConfirmation: waitingForUserConfirmation,
         handleDoneTeleoperating: handleDoneTeleoperating,
         setExecutionError: setExecutionError,
-        clearExecutionError: () => setExecutionError(null),
+        clearExecutionError: () => {
+            setExecutionError(null);
+            setErrorLineNumber(null);
+        },
+        setErrorLineNumber: setErrorLineNumber,
         executionError: executionError,
+        errorLineNumber: errorLineNumber,
     };
     
 
