@@ -2,18 +2,18 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 200px;
-    min-width: 200px;
-    flex: 3 1 0;
+    min-height: 300px;
+    min-width: 300px;
+    flex: 4 1 0;
     width: auto;
-    max-width: 500px;
+    max-width: 800px;
     background: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .execution-monitor-root.customizing {
@@ -83,6 +83,20 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.line-number.executing-line {
+    background-color: #ff9800;
+    color: white;
+    font-weight: bold;
+    border-radius: 3px;
+}
+
+.executing-code-line {
+    background-color: rgba(255, 152, 0, 0.2);
+    border-left: 3px solid #ff9800;
+    padding-left: 8px;
+    margin-left: -8px;
 }
 
 .monitor-wrapper {

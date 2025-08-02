@@ -183,6 +183,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
     const [isExecuting, setIsExecuting] = useState(false);
+    const [currentExecutionLine, setCurrentExecutionLine] = useState<number>(0);
     // Load custom poses from session storage
     const getInitialCustomPoses = (): {[key: string]: RobotPose} => {
         const sessionPoses = sessionStorage.getItem('programEditorCustomPoses');
@@ -260,6 +261,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     console.log("Program execution stopped by user");
                     break;
                 }
+                
+                // Update current execution line
+                setCurrentExecutionLine(line.lineNumber);
+                // Share it globally
+                (window as any).currentExecutionLine = line.lineNumber;
                 
                 if (line.isExecutable) {
                     console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
@@ -388,6 +394,9 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 buttonFunctionProvider.setExecutionState(false);
             }
             setIsExecuting(false);
+            // Reset current execution line
+            setCurrentExecutionLine(0);
+            (window as any).currentExecutionLine = 0;
         }
     };
 

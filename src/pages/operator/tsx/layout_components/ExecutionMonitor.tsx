@@ -43,6 +43,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
+    const [currentExecutionLine, setCurrentExecutionLine] = useState<number>(0);
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
 
@@ -78,6 +79,21 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
         const numbers = lines.map((_, index) => (index + 1).toString());
         setLineNumbers(numbers);
     }, [code]);
+
+    // Monitor global execution line
+    useEffect(() => {
+        const checkExecutionLine = () => {
+            const globalLine = (window as any).currentExecutionLine;
+            if (globalLine !== undefined && globalLine !== currentExecutionLine) {
+                setCurrentExecutionLine(globalLine);
+            }
+        };
+
+        checkExecutionLine();
+        const interval = setInterval(checkExecutionLine, 100);
+
+        return () => clearInterval(interval);
+    }, [currentExecutionLine]);
 
     // Syntax highlighting function (same as ProgramEditor)
     const highlightSyntax = (text: string): string => {
@@ -131,6 +147,23 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
 
     const highlightedCode = highlightSyntax(code);
 
+    // Add highlighting to the current execution line in the code display
+    const addExecutionLineHighlighting = (code: string, currentLine: number): string => {
+        if (currentLine === 0) return code;
+        
+        const lines = code.split('\n');
+        const highlightedLines = lines.map((line, index) => {
+            if (index + 1 === currentLine) {
+                return `<div class="executing-code-line">${line}</div>`;
+            }
+            return line;
+        });
+        
+        return highlightedLines.join('\n');
+    };
+
+    const highlightedCodeWithExecution = addExecutionLineHighlighting(highlightedCode, currentExecutionLine);
+
     return (
         <div
             className={className("execution-monitor-root", {
@@ -149,7 +182,10 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             <div className="execution-monitor-container">
                 <div className="line-numbers">
                     {lineNumbers.map((number, index) => (
-                        <div key={index} className="line-number">
+                        <div 
+                            key={index} 
+                            className={`line-number ${index + 1 === currentExecutionLine ? 'executing-line' : ''}`}
+                        >
                             {number}
                         </div>
                     ))}
@@ -157,7 +193,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                 <div className="monitor-wrapper">
                     <div 
                         className="code-display"
-                        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                        dangerouslySetInnerHTML={{ __html: highlightedCodeWithExecution }}
                     />
                 </div>
             </div>
