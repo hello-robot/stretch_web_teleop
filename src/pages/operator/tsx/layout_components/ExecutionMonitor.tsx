@@ -182,16 +182,6 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     {props.language && (
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
-                    {waitingForUserConfirmation && handleDoneTeleoperating && (
-                        <button 
-                            className="execution-monitor-done-button"
-                            onClick={handleDoneTeleoperating}
-                            type="button"
-                        >
-                            <CheckIcon style={{ marginRight: "4px" }} />
-                            Done teleoperating
-                        </button>
-                    )}
                 </div>
                 {isExecutingProgram && !waitingForUserConfirmation && (
                     <button 
@@ -201,6 +191,16 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     >
                         <CloseIcon style={{ marginRight: "4px" }} />
                         Stop
+                    </button>
+                )}
+                {waitingForUserConfirmation && handleDoneTeleoperating && (
+                    <button 
+                        className="execution-monitor-done-button"
+                        onClick={handleDoneTeleoperating}
+                        type="button"
+                    >
+                        <CheckIcon style={{ marginRight: "4px" }} />
+                        Done teleoperating
                     </button>
                 )}
             </div>

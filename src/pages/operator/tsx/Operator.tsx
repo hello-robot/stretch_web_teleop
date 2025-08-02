@@ -44,6 +44,7 @@ import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot, HomeTheRobotFunction } from "./layout_components/HomeTheRobot";
 import { RosbagRecorder } from "./layout_components/RosbagRecorder";
 import HomeIcon from "@mui/icons-material/Home";
+import CheckIcon from "@mui/icons-material/Check";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -765,13 +766,17 @@ export const Operator = (props: {
                                     padding: "8px 20px",
                                     fontWeight: "bold",
                                     fontSize: "1em",
-                                    cursor: "pointer"
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px"
                                 }}
                                 onClick={() => {
                                     setShowPopup(false);
                                     handleConfirmAndProceed();
                                 }}
                             >
+                                <CheckIcon style={{ fontSize: "1em" }} />
                                 Confirm and proceed
                             </button>
                         </div>
