@@ -5,6 +5,7 @@ import {
     isSelected,
 } from "./CustomizableComponent";
 import { className } from "shared/util";
+import CloseIcon from "@mui/icons-material/Close";
 import "operator/css/ExecutionMonitor.css";
 
 /** Properties for {@link ExecutionMonitor} */
@@ -127,6 +128,11 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     };
 
     const handleStopProgram = () => {
+        if ((window as any).stopExecutionRef) {
+            (window as any).stopExecutionRef.current = true;
+        }
+        
+        // Set execution state to false
         const buttonFunctionProvider = (window as any).buttonFunctionProvider;
         if (buttonFunctionProvider) {
             buttonFunctionProvider.setExecutionState(false);
@@ -169,14 +175,15 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     {props.language && (
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
-                    <span className="execution-monitor-title">Execution Monitor</span>
                 </div>
                 {isExecutingProgram && (
                     <button 
                         className="execution-monitor-stop-button"
                         onClick={handleStopProgram}
+                        type="button"
                     >
-                        Stop Program
+                        <CloseIcon style={{ marginRight: "4px" }} />
+                        Stop
                     </button>
                 )}
             </div>

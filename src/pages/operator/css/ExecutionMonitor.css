@@ -58,23 +58,33 @@
 }
 
 .execution-monitor-stop-button {
-    background-color: #dc3545;
+    background: #dc3545;
     color: white;
     border: none;
-    padding: 8px 16px;
     border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
 }
 
 .execution-monitor-stop-button:hover {
-    background-color: #c82333;
+    filter: brightness(90%);
+    box-shadow: none;
 }
 
 .execution-monitor-stop-button:active {
-    background-color: #bd2130;
+    background: #c82333;
+}
+
+.execution-monitor-stop-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
 }
 
 .execution-monitor-container {
