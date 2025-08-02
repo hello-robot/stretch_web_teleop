@@ -96,6 +96,7 @@ function componentDescription(definition: ComponentDefinition): string {
         case ComponentType.ButtonGrid:
         case ComponentType.Map:
         case ComponentType.ProgramEditor:
+        case ComponentType.ExecutionMonitor:
         case ComponentType.Library:
             return definition.type;
         default:
@@ -505,6 +506,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Map },
         { type: ComponentType.BatteryGuage },
         { type: ComponentType.ProgramEditor },
+        { type: ComponentType.ExecutionMonitor },
         { type: ComponentType.Library },
     ];
 
