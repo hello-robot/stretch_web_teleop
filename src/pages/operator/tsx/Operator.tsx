@@ -566,13 +566,21 @@ export const Operator = (props: {
                     <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
-            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", flexDirection: "column", padding: "12px 20px" }}>
+            <div id="operator-header" onClick={handleClickHeader} style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                padding: "16px 20px", 
+                minHeight: "80px",
+                width: "100%",
+                boxSizing: "border-box"
+            }}>
                 {/* Centered Title */}
                 <div style={{ 
                     display: "flex", 
                     justifyContent: "center", 
-                    marginBottom: "5px",
-                    width: "100%"
+                    marginBottom: "8px",
+                    width: "100%",
+                    flexShrink: 0
                 }}>
                     <span style={{
                         fontSize: "18px",
@@ -585,8 +593,20 @@ export const Operator = (props: {
                 </div>
                 
                 {/* Header Controls */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "space-between",
+                    flex: 1,
+                    minHeight: "40px",
+                    width: "100%"
+                }}>
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: "16px",
+                        flexShrink: 0
+                    }}>
                         {/* Program mode dropdown */}
                         <Dropdown
                             onChange={(idx) => {
@@ -600,19 +620,22 @@ export const Operator = (props: {
                             placement="bottom"
                         />
                         {/* Action mode dropdown */}
-                        <div style={{ marginLeft: 16 }}>
-                            <Dropdown
-                                onChange={(idx) => setActionMode(actionModes[idx])}
-                                selectedIndex={actionModes.indexOf(
-                                    layout.current.actionMode
-                                )}
-                                possibleOptions={actionModes}
-                                showActive
-                                placement="bottom"
-                            />
-                        </div>
+                        <Dropdown
+                            onChange={(idx) => setActionMode(actionModes[idx])}
+                            selectedIndex={actionModes.indexOf(
+                                layout.current.actionMode
+                            )}
+                            possibleOptions={actionModes}
+                            showActive
+                            placement="bottom"
+                        />
                     </div>
-                    <div style={{ display: "flex", alignItems: "center" }}>
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: "12px",
+                        flexShrink: 0
+                    }}>
                         <AudioControl remoteStreams={remoteStreams} />
                         <SpeedControl
                             scale={velocityScale}
@@ -637,7 +660,6 @@ export const Operator = (props: {
                             id="home-robot-button"
                             className="btn-turquoise font-white"
                             style={{
-                                marginLeft: "16px",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px"
