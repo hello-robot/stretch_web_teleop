@@ -62,7 +62,13 @@ export const Operator = (props: {
         React.useState<boolean>(false);
     const [velocityScale, setVelocityScale] = React.useState<number>(0.8);
     const [isExecutingProgram, setIsExecutingProgram] = React.useState<boolean>(false);
+    const [currentExecutingLine, setCurrentExecutingLine] = React.useState<number | undefined>(undefined);
     const [showExecutionMessage, setShowExecutionMessage] = React.useState<boolean>(false);
+    
+    // Function to update current executing line
+    const updateCurrentExecutingLine = (lineNumber: number | undefined) => {
+        setCurrentExecutingLine(lineNumber);
+    };
     const [waitingForUserConfirmation, setWaitingForUserConfirmation] = React.useState<boolean>(false);
     const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
 
@@ -431,6 +437,8 @@ export const Operator = (props: {
         robotNotHomed: robotNotHomed,
         // Get isExecutingProgram from the state managed by ButtonFunctionProvider
         isExecutingProgram: isExecutingProgram,
+        currentExecutingLine: currentExecutingLine,
+        updateCurrentExecutingLine: updateCurrentExecutingLine,
     };
     
 

@@ -85,6 +85,12 @@
     justify-content: flex-end;
 }
 
+.line-number.executing {
+    background-color: rgba(255, 140, 0, 0.2);
+    color: #ff8c00;
+    font-weight: 600;
+}
+
 .monitor-wrapper {
     position: relative;
     flex: 1;
@@ -113,6 +119,13 @@
 .robot-function {
     color: #ff8c00; /* Orange for robot functions */
     font-weight: 600;
+}
+
+/* Executing line highlighting */
+.code-line.executing {
+    background-color: rgba(255, 140, 0, 0.15);
+    border-left: 3px solid #ff8c00;
+    padding-left: 9px; /* 12px - 3px border */
 }
 
 .human-function {

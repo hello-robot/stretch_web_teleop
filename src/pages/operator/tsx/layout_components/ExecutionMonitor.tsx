@@ -43,7 +43,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [code, setCode] = useState<string>("");
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
-    const { customizing } = props.sharedState;
+    const { customizing, currentExecutingLine } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic ALL_FUNCTIONS array that updates when savedPositions changes
@@ -130,6 +130,24 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const selectProp = customizing ? { onClick: onSelect } : {};
 
     const highlightedCode = highlightSyntax(code);
+    
+    // Split code into lines for highlighting the current executing line
+    const codeLines = code.split('\n');
+    const highlightedLines = codeLines.map((line, index) => {
+        const lineNumber = index + 1;
+        const isExecuting = currentExecutingLine === lineNumber;
+        const highlightedLine = highlightSyntax(line);
+        
+        return (
+            <div 
+                key={index}
+                className={className("code-line", {
+                    executing: isExecuting
+                })}
+                dangerouslySetInnerHTML={{ __html: highlightedLine }}
+            />
+        );
+    });
 
     return (
         <div
@@ -149,16 +167,20 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             <div className="execution-monitor-container">
                 <div className="line-numbers">
                     {lineNumbers.map((number, index) => (
-                        <div key={index} className="line-number">
+                        <div 
+                            key={index} 
+                            className={className("line-number", {
+                                executing: currentExecutingLine === index + 1
+                            })}
+                        >
                             {number}
                         </div>
                     ))}
                 </div>
                 <div className="monitor-wrapper">
-                    <div 
-                        className="code-display"
-                        dangerouslySetInnerHTML={{ __html: highlightedCode }}
-                    />
+                    <div className="code-display">
+                        {highlightedLines}
+                    </div>
                 </div>
             </div>
         </div>

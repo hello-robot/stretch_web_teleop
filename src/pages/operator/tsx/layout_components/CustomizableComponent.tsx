@@ -43,6 +43,10 @@ export type SharedState = {
     robotNotHomed: boolean;
     /** Whether a program is currently executing */
     isExecutingProgram: boolean;
+    /** Current line being executed (1-indexed) */
+    currentExecutingLine?: number;
+    /** Function to update current executing line */
+    updateCurrentExecutingLine?: (lineNumber: number | undefined) => void;
     /** Function to insert text at cursor position in program editor */
     insertTextAtCursor?: (text: string) => void;
     /** Function to add new saved position to autocomplete and syntax highlighting */

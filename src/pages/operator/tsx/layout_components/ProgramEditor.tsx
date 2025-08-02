@@ -256,6 +256,12 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             console.log("Starting program loop, stopExecutionRef.current:", stopExecutionRef.current);
             for (const line of program.lines) {
                 console.log("Checking line", line.lineNumber, "stopExecutionRef.current:", stopExecutionRef.current);
+                
+                // Update current executing line
+                if (props.sharedState.updateCurrentExecutingLine) {
+                    props.sharedState.updateCurrentExecutingLine(line.lineNumber);
+                }
+                
                 if (!shouldContinue()) {
                     console.log("Program execution stopped by user");
                     break;
@@ -388,6 +394,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 buttonFunctionProvider.setExecutionState(false);
             }
             setIsExecuting(false);
+            
+            // Reset current executing line
+            if (props.sharedState.updateCurrentExecutingLine) {
+                props.sharedState.updateCurrentExecutingLine(undefined);
+            }
         }
     };
 
@@ -678,11 +689,21 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 buttonFunctionProvider.setExecutionState(false);
             }
             
+            // Reset current executing line
+            if (props.sharedState.updateCurrentExecutingLine) {
+                props.sharedState.updateCurrentExecutingLine(undefined);
+            }
+            
         } else {
             // Start execution
             console.log("Run Program button clicked!");
             console.log("Setting isExecuting to true");
             setIsExecuting(true);
+            
+            // Reset current executing line at start
+            if (props.sharedState.updateCurrentExecutingLine) {
+                props.sharedState.updateCurrentExecutingLine(undefined);
+            }
             
             const programText = readProgramCode();
             console.log("Program text:", programText);
