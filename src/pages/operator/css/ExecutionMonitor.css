@@ -226,14 +226,15 @@
     background-color: #dc3545;
     color: white;
     padding: 8px 12px;
-    margin: 8px 0;
-    border-radius: 4px;
+    margin: 0;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .execution-monitor-error-close {

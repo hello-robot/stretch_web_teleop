@@ -86,7 +86,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
 
     // Message when program finishes executing
     useEffect(() => {
-        if (prevIsExecutingRef.current && !isExecutingProgram) {
+        if (prevIsExecutingRef.current && !isExecutingProgram && !executionError) {
             setShowDoneMessage(true);
             const timer = setTimeout(() => {
                 setShowDoneMessage(false);
@@ -98,7 +98,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             setShowDoneMessage(false);
         }
         prevIsExecutingRef.current = isExecutingProgram;
-    }, [isExecutingProgram]);
+    }, [isExecutingProgram, executionError]);
 
     // Syntax highlighting function (same as ProgramEditor)
     const highlightSyntax = (text: string): string => {
