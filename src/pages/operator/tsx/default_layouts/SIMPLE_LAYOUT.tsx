@@ -24,7 +24,7 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     children: [
         {
             type: ComponentType.LayoutGrid,
-            flex: 2, 
+            flex: 2.25, 
             children: [
                 {
                     type: ComponentType.Panel,
