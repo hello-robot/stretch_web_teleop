@@ -47,6 +47,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [savedPositions, setSavedPositions] = useState<string[]>(DEFAULT_SAVED_POSITIONS);
     const [showDoneMessage, setShowDoneMessage] = useState(false);
+    const prevIsExecutingRef = React.useRef(false);
     const { customizing, currentExecutingLine, isExecutingProgram, waitingForUserConfirmation, handleDoneTeleoperating, executionError, clearExecutionError, errorLineNumber } = props.sharedState;
     const selected = isSelected(props);
 
@@ -85,7 +86,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
 
     // Message when program finishes executing
     useEffect(() => {
-        if (!isExecutingProgram && currentExecutingLine !== undefined) {
+        if (prevIsExecutingRef.current && !isExecutingProgram) {
             setShowDoneMessage(true);
             const timer = setTimeout(() => {
                 setShowDoneMessage(false);
@@ -96,7 +97,8 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
             // Program is executing, hide done message
             setShowDoneMessage(false);
         }
-    }, [isExecutingProgram, currentExecutingLine]);
+        prevIsExecutingRef.current = isExecutingProgram;
+    }, [isExecutingProgram]);
 
     // Syntax highlighting function (same as ProgramEditor)
     const highlightSyntax = (text: string): string => {
