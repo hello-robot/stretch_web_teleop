@@ -595,28 +595,49 @@ export const Operator = (props: {
                     {/* Left side controls */}
                     <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
                         {/* Program mode dropdown */}
-                        <Dropdown
-                            onChange={(idx) => {
-                                const newMode = programModes[idx];
-                                setProgramMode(newMode);
-                                switchToModeLayout(newMode);
-                            }}
-                            selectedIndex={programModes.indexOf(programMode)}
-                            possibleOptions={programModes}
-                            showActive
-                            placement="bottom"
-                        />
+                        <div style={{ 
+                            display: "flex", 
+                            alignItems: "center",
+                            height: "40px"
+                        }}>
+                            <style>
+                                {`
+                                    .header-dropdown .dropdown-button {
+                                        padding-top: 0.5rem !important;
+                                        padding-bottom: 0.5rem !important;
+                                        height: 40px !important;
+                                        display: flex !important;
+                                        align-items: center !important;
+                                    }
+                                `}
+                            </style>
+                            <div className="header-dropdown">
+                                <Dropdown
+                                    onChange={(idx) => {
+                                        const newMode = programModes[idx];
+                                        setProgramMode(newMode);
+                                        switchToModeLayout(newMode);
+                                    }}
+                                    selectedIndex={programModes.indexOf(programMode)}
+                                    possibleOptions={programModes}
+                                    showActive
+                                    placement="bottom"
+                                />
+                            </div>
+                        </div>
                         {/* Action mode dropdown */}
-                        <div style={{ marginLeft: 16 }}>
-                            <Dropdown
-                                onChange={(idx) => setActionMode(actionModes[idx])}
-                                selectedIndex={actionModes.indexOf(
-                                    layout.current.actionMode
-                                )}
-                                possibleOptions={actionModes}
-                                showActive
-                                placement="bottom"
-                            />
+                        <div style={{ marginLeft: 16, height: "40px" }}>
+                            <div className="header-dropdown">
+                                <Dropdown
+                                    onChange={(idx) => setActionMode(actionModes[idx])}
+                                    selectedIndex={actionModes.indexOf(
+                                        layout.current.actionMode
+                                    )}
+                                    possibleOptions={actionModes}
+                                    showActive
+                                    placement="bottom"
+                                />
+                            </div>
                         </div>
                     </div>
                     
