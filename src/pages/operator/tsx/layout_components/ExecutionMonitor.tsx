@@ -128,6 +128,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     };
 
     const handleStopProgram = () => {
+        // Stop the program execution 
         if ((window as any).stopExecutionRef) {
             (window as any).stopExecutionRef.current = true;
         }
@@ -136,6 +137,11 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
         const buttonFunctionProvider = (window as any).buttonFunctionProvider;
         if (buttonFunctionProvider) {
             buttonFunctionProvider.setExecutionState(false);
+        }
+        
+        // Reset current executing line
+        if (props.sharedState.updateCurrentExecutingLine) {
+            props.sharedState.updateCurrentExecutingLine(undefined);
         }
     };
 

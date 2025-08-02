@@ -217,6 +217,11 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const highlightedRef = useRef<HTMLDivElement>(null);
     const stopExecutionRef = useRef<boolean>(false);
     
+    // Make stopExecutionRef accessible globally 
+    React.useEffect(() => {
+        (window as any).stopExecutionRef = stopExecutionRef;
+    }, []);
+    
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
     const { customizing } = props.sharedState;
