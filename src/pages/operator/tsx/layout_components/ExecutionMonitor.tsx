@@ -144,7 +144,6 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                     {props.language && (
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
-                    <span className="execution-monitor-title">Program Monitor</span>
                 </div>
             </div>
             <div className="execution-monitor-container">
