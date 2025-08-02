@@ -678,14 +678,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 buttonFunctionProvider.setExecutionState(false);
             }
             
-            // Activate run stop to stop the robot
-            if ((window as any).remoteRobot) {
-                (window as any).remoteRobot.setToggle("setRunStop", true);
-                console.log("Run stop activated to stop program execution");
-            } else {
-                console.error("RemoteRobot not available");
-            }
-            
         } else {
             // Start execution
             console.log("Run Program button clicked!");
