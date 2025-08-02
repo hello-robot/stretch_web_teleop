@@ -53,7 +53,10 @@
 
 .batteryGaugeContainer {
     align-items: center;
+    justify-content: center;
     display: flex;
     flex-direction: column;
-    max-height: 90%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
 }

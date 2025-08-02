@@ -142,7 +142,7 @@
 
 /* Add Position Button */
 .add-position-btn {
-    padding: 8px 16px;
+    padding: 6px 24px;
     background: var(--btn-turquoise);
     color: var(--font-white);
     border: none;
@@ -151,6 +151,7 @@
     font-size: 13px;
     font-weight: bold;
     transition: background-color 0.2s ease;
+    min-width: 140px;
 }
 
 .add-position-btn:hover {
@@ -160,7 +161,7 @@
 
 /* Clear Button */
 .clear-positions-btn {
-    padding: 8px 16px;
+    padding: 6px 16px;
     background: var(--btn-gray);
     color: var(--text-color);
     border: none;
