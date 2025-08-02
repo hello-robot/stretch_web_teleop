@@ -185,17 +185,13 @@ export const Operator = (props: {
             
             programModes.forEach(mode => {
                 const savedLayout = props.storageHandler.loadCurrentLayout(mode);
-                if (savedLayout) {
-                    initialLayouts[mode] = savedLayout;
-                } else {
-                    // Load default layouts for each mode
-                    if (mode === "Demonstrate") {
-                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Basic Layout" as any);
-                    } else if (mode === "Program Editor") {
-                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Program Editor Layout" as any);
-                    } else if (mode === "Execution Monitor") {
-                        initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Execution Monitor Layout" as any);
-                    }
+                // always use default layouts to ensure proper structure
+                if (mode === "Demonstrate") {
+                    initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Basic Layout" as any);
+                } else if (mode === "Program Editor") {
+                    initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Program Editor Layout" as any);
+                } else if (mode === "Execution Monitor") {
+                    initialLayouts[mode] = props.storageHandler.loadDefaultLayout("Execution Monitor Layout" as any);
                 }
             });
             
