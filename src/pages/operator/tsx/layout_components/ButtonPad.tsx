@@ -110,8 +110,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                    ? SVG_RESOLUTION / props.aspectRatio + 50
-                    : SVG_RESOLUTION + 50
+                    ? SVG_RESOLUTION / props.aspectRatio + 60
+                    : SVG_RESOLUTION + 60
                     }`}
                 preserveAspectRatio="none"
                 className={className("button-pads", {
@@ -156,8 +156,17 @@ const SingleButton = (props: SingleButtonProps) => {
         ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = isMobile ? 75 : 85;
-    const width = isMobile ? 75 : 85;
+    
+    // Reduce icon size for Base Forward/Reverse and Arm Lift/Lower buttons
+    const isReducedSizeIcon = props.funct === ButtonPadButton.BaseForward ||
+                              props.funct === ButtonPadButton.BaseReverse ||
+                              props.funct === ButtonPadButton.ArmLift ||
+                              props.funct === ButtonPadButton.ArmLower;
+    
+    const baseHeight = isMobile ? 75 : 85;
+    const baseWidth = isMobile ? 75 : 85;
+    const height = isReducedSizeIcon ? baseHeight * 0.8 : baseHeight;
+    const width = isReducedSizeIcon ? baseWidth * 0.8 : baseWidth;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
     
@@ -178,10 +187,10 @@ const SingleButton = (props: SingleButtonProps) => {
     const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "12px" : "13px";
     const labelOffsetX = labelWidth / 2;
     
-    // Adjust vertical offset
-    let labelOffsetY = isSmallScreen ? 6 : isMediumScreen ? 7 : 8;
+    // Better center labels at the bottom of each button
+    let labelOffsetY = isSmallScreen ? 8 : isMediumScreen ? 10 : 12;
     
-    // For SimpleButtonPad (Base and Arm), add extra bottom padding for bottom row buttons
+    // For SimpleButtonPad (Base and Arm), adjust positioning for better centering
     const isSimpleButtonPad = props.funct === ButtonPadButton.BaseForward || 
                               props.funct === ButtonPadButton.BaseReverse || 
                               props.funct === ButtonPadButton.BaseRotateLeft || 
@@ -194,7 +203,7 @@ const SingleButton = (props: SingleButtonProps) => {
     if (isSimpleButtonPad) {
         const isBottomRow = props.iconPosition.y > 250; 
         if (isBottomRow) {
-            labelOffsetY += 5; 
+            labelOffsetY += 8; 
         }
     }
     const disabledDueToNotHomed =
