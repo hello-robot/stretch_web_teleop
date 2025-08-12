@@ -307,7 +307,7 @@ export const Library = (props: CustomizableComponentProps) => {
                     <div className="library-section" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                         <h3 className="library-section-title">Saved Configurations</h3>
                         <div className="library-subsection" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                            <div className="library-text" style={{ flex: 1 }}>
+                            <div className="library-text">
                                 {savedPositions.map((position, index) => (
                                     <div 
                                         key={index}
@@ -317,24 +317,24 @@ export const Library = (props: CustomizableComponentProps) => {
                                         {position.name}
                                     </div>
                                 ))}
-                            </div>
-                            <div style={{ 
-                                paddingTop: "8px",
-                                paddingBottom: "8px"
-                            }}>
-                                <button 
-                                    className="add-position-btn"
-                                    onClick={() => setShowModal(true)}
-                                    style={{
-                                        width: "100%",
-                                        textAlign: "center",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center"
-                                    }}
-                                >
-                                    + Add Configuration
-                                </button>
+                                <div style={{ 
+                                    paddingTop: "8px",
+                                    paddingBottom: "8px"
+                                }}>
+                                    <button 
+                                        className="add-position-btn"
+                                        onClick={() => setShowModal(true)}
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center",
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center"
+                                        }}
+                                    >
+                                        + Add Configuration
+                                    </button>
+                                </div>
                             </div>
                             <div style={{ 
                                 marginTop: "auto",
