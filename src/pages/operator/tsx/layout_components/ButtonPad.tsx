@@ -110,8 +110,8 @@ export const ButtonPad = (props: ButtonPadProps) => {
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                    ? SVG_RESOLUTION / props.aspectRatio
-                    : SVG_RESOLUTION
+                    ? SVG_RESOLUTION / props.aspectRatio + 30
+                    : SVG_RESOLUTION + 30
                     }`}
                 preserveAspectRatio="none"
                 className={className("button-pads", {
@@ -188,9 +188,9 @@ const SingleButton = (props: SingleButtonProps) => {
             />
             <foreignObject
                 x={props.iconPosition.x - 40}
-                y={props.iconPosition.y + height/2 + 10}
+                y={props.iconPosition.y + height/2 + 5}
                 width="80"
-                height="20"
+                height="25"
                 style={{
                     pointerEvents: "none"
                 }}
@@ -202,13 +202,14 @@ const SingleButton = (props: SingleButtonProps) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "12px",
+                        fontSize: "11px",
                         fontWeight: "600",
                         color: isDisabled ? "#ccc" : "white",
                         fontFamily: "Arial, sans-serif",
                         textAlign: "center",
-                        lineHeight: "1",
-                        userSelect: "none"
+                        lineHeight: "1.1",
+                        userSelect: "none",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.8)"
                     }}
                 >
                     {title}
