@@ -187,10 +187,10 @@ const SingleButton = (props: SingleButtonProps) => {
                 })}
             />
             <foreignObject
-                x={props.iconPosition.x - 40}
-                y={props.iconPosition.y + height/2 + 5}
-                width="80"
-                height="25"
+                x={props.iconPosition.x - 50}
+                y={props.iconPosition.y + height/2 + 8}
+                width="100"
+                height="30"
                 style={{
                     pointerEvents: "none"
                 }}
@@ -202,12 +202,12 @@ const SingleButton = (props: SingleButtonProps) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "11px",
+                        fontSize: "13px",
                         fontWeight: "600",
                         color: isDisabled ? "#ccc" : "white",
                         fontFamily: "Arial, sans-serif",
                         textAlign: "center",
-                        lineHeight: "1.1",
+                        lineHeight: "1.2",
                         userSelect: "none",
                         textShadow: "1px 1px 2px rgba(0,0,0,0.8)"
                     }}
