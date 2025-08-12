@@ -182,13 +182,12 @@ const SingleButton = (props: SingleButtonProps) => {
     const isSmallScreen = screenWidth < 1200;
     const isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
     
-    const labelWidth = isSmallScreen ? 70 : isMediumScreen ? 85 : 100;
-    const labelHeight = isSmallScreen ? 24 : isMediumScreen ? 28 : 30;
-    const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "12px" : "13px";
+    const labelWidth = isSmallScreen ? 60 : isMediumScreen ? 70 : 80;
+    const labelHeight = isSmallScreen ? 20 : isMediumScreen ? 24 : 26;
+    const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "11px" : "12px";
     const labelOffsetX = labelWidth / 2;
     
-    // Better center labels at the bottom of each button
-    let labelOffsetY = isSmallScreen ? 8 : isMediumScreen ? 10 : 12;
+    let labelOffsetY = isSmallScreen ? 4 : isMediumScreen ? 5 : 6;
     
     // For SimpleButtonPad (Base and Arm), adjust positioning for better centering
     const isSimpleButtonPad = props.funct === ButtonPadButton.BaseForward || 
@@ -203,7 +202,7 @@ const SingleButton = (props: SingleButtonProps) => {
     if (isSimpleButtonPad) {
         const isBottomRow = props.iconPosition.y > 250; 
         if (isBottomRow) {
-            labelOffsetY += 8; 
+            labelOffsetY += 3; 
         }
     }
     const disabledDueToNotHomed =
@@ -253,9 +252,10 @@ const SingleButton = (props: SingleButtonProps) => {
                         color: isDisabled ? "#ccc" : "white",
                         fontFamily: "Arial, sans-serif",
                         textAlign: "center",
-                        lineHeight: "1.2",
+                        lineHeight: "1.1",
                         userSelect: "none",
-                        textShadow: "1px 1px 2px rgba(0,0,0,0.8)"
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                        whiteSpace: "nowrap"
                     }}
                 >
                     {title}
