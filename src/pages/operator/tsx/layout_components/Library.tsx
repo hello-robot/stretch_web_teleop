@@ -329,7 +329,8 @@ export const Library = (props: CustomizableComponentProps) => {
                                             textAlign: "center",
                                             display: "flex",
                                             justifyContent: "center",
-                                            alignItems: "center"
+                                            alignItems: "center",
+                                            whiteSpace: "nowrap"
                                         }}
                                     >
                                         + Add Configuration
