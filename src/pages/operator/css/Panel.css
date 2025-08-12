@@ -21,6 +21,10 @@
     border: 3px solid var(--btn-blue);
     flex: 1 1 0;
     background-color: var(--background-color);
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header *********************************************************************/
