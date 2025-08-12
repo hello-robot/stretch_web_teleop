@@ -186,7 +186,34 @@ const SingleButton = (props: SingleButtonProps) => {
                     disable: isDisabled,
                 })}
             />
-            <p>{title}</p>
+            <foreignObject
+                x={props.iconPosition.x - 40}
+                y={props.iconPosition.y + height/2 + 10}
+                width="80"
+                height="20"
+                style={{
+                    pointerEvents: "none"
+                }}
+            >
+                <div
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        color: isDisabled ? "#ccc" : "white",
+                        fontFamily: "Arial, sans-serif",
+                        textAlign: "center",
+                        lineHeight: "1",
+                        userSelect: "none"
+                    }}
+                >
+                    {title}
+                </div>
+            </foreignObject>
         </React.Fragment>
     );
 };

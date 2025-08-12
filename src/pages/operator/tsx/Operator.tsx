@@ -632,39 +632,43 @@ export const Operator = (props: {
                                 />
                             </div>
                         </div>
-                        {/* Action mode dropdown */}
-                        <div style={{ marginLeft: 16, height: "40px" }}>
-                            <div className="header-dropdown">
-                                <Dropdown
-                                    onChange={(idx) => setActionMode(actionModes[idx])}
-                                    selectedIndex={actionModes.indexOf(
-                                        layout.current.actionMode
-                                    )}
-                                    possibleOptions={actionModes}
-                                    showActive
-                                    placement="bottom"
-                                />
+                        {/* Action mode dropdown - hide in Program Editor mode */}
+                        {programMode !== "Program Editor" && (
+                            <div style={{ marginLeft: 16, height: "40px" }}>
+                                <div className="header-dropdown">
+                                    <Dropdown
+                                        onChange={(idx) => setActionMode(actionModes[idx])}
+                                        selectedIndex={actionModes.indexOf(
+                                            layout.current.actionMode
+                                        )}
+                                        possibleOptions={actionModes}
+                                        showActive
+                                        placement="bottom"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                     
-                    {/* Center controls */}
-                    <div style={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        justifyContent: "center",
-                        flex: "1 1 auto",
-                        gap: "16px"
-                    }}>
-                        <AudioControl remoteStreams={remoteStreams} />
-                        <SpeedControl
-                            scale={velocityScale}
-                            onChange={(newScale: number) => {
-                                setVelocityScale(newScale);
-                                FunctionProvider.velocityScale = newScale;
-                            }}
-                        />
-                    </div>
+                    {/* Center controls - hide in Program Editor mode */}
+                    {programMode !== "Program Editor" && (
+                        <div style={{ 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center",
+                            flex: "1 1 auto",
+                            gap: "16px"
+                        }}>
+                            <AudioControl remoteStreams={remoteStreams} />
+                            <SpeedControl
+                                scale={velocityScale}
+                                onChange={(newScale: number) => {
+                                    setVelocityScale(newScale);
+                                    FunctionProvider.velocityScale = newScale;
+                                }}
+                            />
+                        </div>
+                    )}
                     
                     {/* Right side controls */}
                     <div style={{ 
