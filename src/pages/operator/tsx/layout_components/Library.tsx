@@ -305,7 +305,7 @@ export const Library = (props: CustomizableComponentProps) => {
                     
                     {/* Saved Configurations Section */}
                     <div className="library-section" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                        <h3 className="library-section-title" style={{ fontSize: "1.1em" }}>Saved Configurations</h3>
+                        <h3 className="library-section-title">Saved Configurations</h3>
                         <div className="library-subsection" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                             <div className="library-text">
                                 {savedPositions.map((position, index) => (
