@@ -189,6 +189,11 @@
     font-weight: normal;
 }
 
+.comment {
+    color: #6c757d; /* Grey for comments */
+    font-style: italic;
+}
+
 /* Inline suggestions*/
 .inline-suggestion {
     color: #6c757d; /* Gray for suggestions */

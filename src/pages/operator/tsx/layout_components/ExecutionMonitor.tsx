@@ -277,6 +277,37 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const highlightSyntax = (text: string): string => {
         let highlightedText = text;
         
+        // Split into lines to handle each line separately
+        const lines = highlightedText.split('\n');
+        const processedLines = lines.map(line => {
+            const trimmedLine = line.trim();
+            
+            // Check if line starts with comment markers
+            if (trimmedLine.startsWith('//')) {
+                // Full comment line - wrap in comment styling
+                return `<span class="comment">${line}</span>`;
+            }
+            
+            // Check for inline comments
+            const commentMatch = line.match(/^(.*?)(\/\/.*)$/);
+            if (commentMatch) {
+                const beforeComment = commentMatch[1];
+                const commentPart = commentMatch[2];
+                const beforeHighlighted = beforeComment ? highlightContent(beforeComment) : '';
+                return beforeHighlighted + `<span class="comment">${commentPart}</span>`;
+            }
+            
+            // No comments - normal highlighting
+            return highlightContent(line);
+        });
+        
+        return processedLines.join('\n');
+    };
+
+    // Helper function to highlight non-comment content
+    const highlightContent = (text: string): string => {
+        let highlightedText = text;
+        
         // no highlighting in Pause_And_Confirm parameters
         const pauseAndConfirmParams: string[] = [];
         let paramIndex = 0;

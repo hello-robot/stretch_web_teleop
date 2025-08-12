@@ -103,16 +103,24 @@ const parseProgram = (code: string): Program => {
                 content: line,
                 isExecutable: false
             });
+        } else if (trimmedLine.startsWith('//')) {
+            // Full comment line - non-executable
+            programLines.push({
+                lineNumber,
+                content: line,
+                isExecutable: false
+            });
         } else {
-            // Check for different command types
-            const moveArmMatch = trimmedLine.match(/Move_Arm_to_Config\s*\(\s*([^)]*)\s*\)/);
-            const resetRobotMatch = trimmedLine.match(/Reset_Robot\s*\(\s*\)/);
-            const resetRobotWithParamsMatch = trimmedLine.match(/Reset_Robot\s*\(\s*[^)]+\s*\)/);
-            const adjustGripperMatch = trimmedLine.match(/Adjust_Gripper_Width\s*\(\s*([^)]*)\s*\)/);
-            const rotateWristMatch = trimmedLine.match(/Rotate_Wrist_to_Config\s*\(\s*([^)]*)\s*\)/);
-            const takeControlMatch = trimmedLine.match(/Take_Control\s*\(\s*\)/);
-            const takeControlWithParamsMatch = trimmedLine.match(/Take_Control\s*\(\s*[^)]+\s*\)/);
-            const pauseAndConfirmMatch = trimmedLine.match(/Pause_And_Confirm\s*\(\s*([^)]*)\s*\)/);
+            // Check for different command types (ignore comments after //)
+            const lineWithoutComments = trimmedLine.split('//')[0].trim();
+            const moveArmMatch = lineWithoutComments.match(/Move_Arm_to_Config\s*\(\s*([^)]*)\s*\)/);
+            const resetRobotMatch = lineWithoutComments.match(/Reset_Robot\s*\(\s*\)/);
+            const resetRobotWithParamsMatch = lineWithoutComments.match(/Reset_Robot\s*\(\s*[^)]+\s*\)/);
+            const adjustGripperMatch = lineWithoutComments.match(/Adjust_Gripper_Width\s*\(\s*([^)]*)\s*\)/);
+            const rotateWristMatch = lineWithoutComments.match(/Rotate_Wrist_to_Config\s*\(\s*([^)]*)\s*\)/);
+            const takeControlMatch = lineWithoutComments.match(/Take_Control\s*\(\s*\)/);
+            const takeControlWithParamsMatch = lineWithoutComments.match(/Take_Control\s*\(\s*[^)]+\s*\)/);
+            const pauseAndConfirmMatch = lineWithoutComments.match(/Pause_And_Confirm\s*\(\s*([^)]*)\s*\)/);
             
             if (moveArmMatch) {
                 const parameter = moveArmMatch[1] || null;
@@ -502,6 +510,37 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const highlightSyntax = (text: string): string => {
     let highlightedText = text;
     
+    // Split into lines to handle each line separately
+    const lines = highlightedText.split('\n');
+    const processedLines = lines.map(line => {
+        const trimmedLine = line.trim();
+        
+        // Check if line starts with comment markers
+        if (trimmedLine.startsWith('//')) {
+            // Full comment line - wrap in comment styling
+            return `<span class="comment">${line}</span>`;
+        }
+        
+        // Check for inline comments
+        const commentMatch = line.match(/^(.*?)(\/\/.*)$/);
+        if (commentMatch) {
+            const beforeComment = commentMatch[1];
+            const commentPart = commentMatch[2];
+            const beforeHighlighted = beforeComment ? highlightContent(beforeComment) : '';
+            return beforeHighlighted + `<span class="comment">${commentPart}</span>`;
+        }
+        
+        // No comments - normal highlighting
+        return highlightContent(line);
+    });
+    
+    return processedLines.join('\n');
+};
+
+// Helper function to highlight non-comment content
+const highlightContent = (text: string): string => {
+    let highlightedText = text;
+    
     // no highlighting in PauseAndConfirm parameters
     const pauseAndConfirmParams: string[] = [];
     let paramIndex = 0;
@@ -511,7 +550,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         paramIndex++;
         return `PauseAndConfirm(${placeholder})`;
     });
-    
     
     // Highlight robot functions in orange
     ROBOT_FUNCTIONS.forEach(func => {
@@ -643,6 +681,18 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         const textarea = textareaRef.current;
         const cursorPos = textarea.selectionStart;
         const text = textarea.value;
+        
+        // Check if cursor is in a comment
+        const lineStart = text.lastIndexOf('\n', cursorPos - 1) + 1;
+        const lineEnd = text.indexOf('\n', cursorPos);
+        const lineEndPos = lineEnd === -1 ? text.length : lineEnd;
+        const currentLine = text.substring(lineStart, lineEndPos);
+        const commentIndex = currentLine.indexOf('//');
+        
+        // If cursor is after a comment marker, don't provide suggestions
+        if (commentIndex !== -1 && cursorPos > lineStart + commentIndex) {
+            return { word: '', start: cursorPos, end: cursorPos };
+        }
         
         // Find the start of the current word
         let start = cursorPos;
