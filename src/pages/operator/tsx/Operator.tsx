@@ -46,6 +46,8 @@ import { RosbagRecorder } from "./layout_components/RosbagRecorder";
 import HomeIcon from "@mui/icons-material/Home";
 import CheckIcon from "@mui/icons-material/Check";
 
+
+
 /** Operator interface webpage */
 export const Operator = (props: {
     remoteStreams: Map<string, RemoteStream>;
@@ -701,9 +703,15 @@ export const Operator = (props: {
                         />
                         {/* Home Robot Button */}
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 if ((window as any).remoteRobot) {
+                                    const retractedPose = { wrist_extension: 0.00211174 };
+                                    (window as any).remoteRobot.setRobotPose(retractedPose);
+                                    console.log(`Arm retraction command sent to robot!`);
+                                    console.log(`Waiting for arm retraction...`);
+                                    await new Promise(resolve => setTimeout(resolve, 2000));
                                     (window as any).remoteRobot.homeTheRobot();
+                                    console.log(`Home robot command sent to robot!`);
                                 } else {
                                     console.error("RemoteRobot not available");
                                 }

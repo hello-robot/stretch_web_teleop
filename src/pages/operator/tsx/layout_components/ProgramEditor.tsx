@@ -56,6 +56,17 @@ const POSE_DEFINITIONS = {
     }
 };
 
+// Define home pose
+const HOME_POSE: RobotPose = {
+    joint_lift: 0.6000133947603754,
+    wrist_extension: 0.10000127,
+    joint_head_pan: -1.734968752451231,
+    joint_wrist_roll: -0.0015339807878856412,
+    joint_gripper_finger_left: 0.0003447935031709283,
+    joint_wrist_pitch: -0.6258641614573416,
+    joint_wrist_yaw: 0.002556634646760688,
+};
+
 // Program data structure for parsing 
 interface ProgramLine {
     lineNumber: number;
@@ -243,7 +254,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     const [lineNumbers, setLineNumbers] = useState<string[]>([]);
     const [currentSuggestion, setCurrentSuggestion] = useState<string>("");
     const [showSuggestion, setShowSuggestion] = useState(false);
-    const [isExecuting, setIsExecuting] = useState(false);
     
     const [savedPositions, setSavedPositions] = useState<string[]>(getInitialSavedPositions());
     const [customPoses, setCustomPoses] = useState<{[key: string]: RobotPose}>(getInitialCustomPoses());
@@ -261,7 +271,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
     
     // Combine default and custom poses
     const ALL_POSE_DEFINITIONS = { ...POSE_DEFINITIONS, ...customPoses };
-    const { customizing, executionError, currentExecutingLine, clearExecutionError, errorLineNumber } = props.sharedState;
+    const { customizing, executionError, currentExecutingLine, clearExecutionError, errorLineNumber, isExecutingProgram } = props.sharedState;
     const selected = isSelected(props);
 
     // Create dynamic array that updates when savedPositions changes
@@ -429,13 +439,18 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         }
                     }
                     else if (line.command === "Reset_Robot") {
-                        console.log(`Sending ResetRobot command (homing the robot)`);
-                        // Send homeTheRobot command to robot
+                        console.log(`Sending ResetRobot command (setting robot to home pose)`);
+                        // Send setRobotPose command to robot with stow pose
                         if ((window as any).remoteRobot) {
-                            (window as any).remoteRobot.homeTheRobot();
+                            const retractedPose = { wrist_extension: 0.00211174 };
+                            (window as any).remoteRobot.setRobotPose(retractedPose);
+                            console.log(`Arm retraction command sent to robot!`);
+                            console.log(`Waiting for arm retraction...`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            (window as any).remoteRobot.setRobotPose(HOME_POSE);
                             console.log(`Command sent to robot!`);
                             console.log(`Waiting...`);
-                            await new Promise(resolve => setTimeout(resolve, 25000));
+                            await new Promise(resolve => setTimeout(resolve, 5000));
                             console.log(`Executing next command...`);
                         } else {
                             console.error("RemoteRobot not available");
@@ -475,7 +490,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
             if (buttonFunctionProvider) {
                 buttonFunctionProvider.setExecutionState(false);
             }
-            setIsExecuting(false);
             
             // Reset current executing line
             if (props.sharedState.updateCurrentExecutingLine) {
@@ -754,11 +768,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
 
     // Function to handle Run/Stop Program button click
     const handleRunProgram = async () => {
-        console.log("handleRunProgram called, current isExecuting:", isExecuting);
-        if (isExecuting) {
+        console.log("handleRunProgram called, current isExecutingProgram:", isExecutingProgram);
+        if (isExecutingProgram) {
             // Stop execution
             console.log("Stop Program button clicked!");
-            setIsExecuting(false);
             stopExecutionRef.current = true;
             
             // Set execution state to false
@@ -775,8 +788,6 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
         } else {
             // Start execution
             console.log("Run Program button clicked!");
-            console.log("Setting isExecuting to true");
-            setIsExecuting(true);
             
             // Reset current executing line at start
             if (props.sharedState.updateCurrentExecutingLine) {
@@ -917,7 +928,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             Clear
                         </button>
                     )}
-                    {isExecuting && (
+                    {isExecutingProgram && (
                         <span 
                             style={{
                                 color: "#4caf50",
@@ -934,28 +945,61 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     fontSize: window.innerWidth < 1200 ? "12px" : "14px"
                 }}>
                     {!props.readOnly && (
-                        <button 
-                            className="run-program-button"
-                            onClick={handleRunProgram}
-                            type="button"
-                            style={{
-                                backgroundColor: isExecuting ? "#dc3545" : undefined,
+                        <>
+                            <button 
+                                style={{
+                                    background: "#ff8c00",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 4,
+                                    padding: window.innerWidth < 1200 ? "6px 12px" : "6px 16px",
+                                    fontSize: window.innerWidth < 1200 ? "12px" : "16px",
+                                    fontWeight: "700",
+                                    cursor: "pointer",
+                                    transition: "background-color 0.2s ease",
+                                    letterSpacing: "0.5px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    marginRight: "8px"
+                                }}
+                                onClick={async () => {
+                                    if ((window as any).remoteRobot) {
+                                        const retractedPose = { wrist_extension: 0.00211174 };
+                                        (window as any).remoteRobot.setRobotPose(retractedPose);
+                                        console.log(`Arm retraction command sent to robot!`);
+                                        console.log(`Waiting for arm retraction...`);
+                                        await new Promise(resolve => setTimeout(resolve, 2000));
+                                        (window as any).remoteRobot.setRobotPose(HOME_POSE);
+                                        console.log(`Home pose command sent to robot!`);
+                                    }
+                                }}
+                                title="Reset robot to home position"
+                            >
+                                Reset Robot
+                            </button>
+                            <button 
+                                className="run-program-button"
+                                onClick={handleRunProgram}
+                                type="button"
+                                                            style={{
+                                backgroundColor: isExecutingProgram ? "#dc3545" : undefined,
                                 fontSize: window.innerWidth < 1200 ? "12px" : "14px",
                                 padding: window.innerWidth < 1200 ? "6px 12px" : "8px 16px"
                             }}
                         >
-                            {isExecuting ? (
-                                <>
-                                    <CloseIcon style={{ marginRight: "4px" }} />
-                                    Stop
-                                </>
-                            ) : (
-                                <>
-                                    <PlayArrowIcon style={{ marginRight: "4px" }} />
-                                    Run
-                                </>
-                            )}
-                        </button>
+                            {isExecutingProgram ? (
+                                    <>
+                                        <CloseIcon style={{ marginRight: "4px" }} />
+                                        Stop
+                                    </>
+                                ) : (
+                                    <>
+                                        <PlayArrowIcon style={{ marginRight: "4px" }} />
+                                        Run
+                                    </>
+                                )}
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
