@@ -14,9 +14,9 @@
     flex: 1 1 0;
     padding: 0.4rem;
     height: 100%;
-    width: 90%;
+    width: 100%;
     max-width: 400px;
-    min-height: 0;
+    min-height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
