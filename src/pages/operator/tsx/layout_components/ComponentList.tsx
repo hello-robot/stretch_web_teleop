@@ -28,7 +28,7 @@ export const ComponentList = (props: ComponentListProps) => {
     const { path } = props;
     const components = props.definition.children;
     return (
-        <div className="component-list">
+        <>
             {components.map((compDef: ComponentDefinition, index: number) => {
                 const curPath = (path ? path + "-" : "") + `${index}`;
                 const cProps: CustomizableComponentProps = {
@@ -65,6 +65,6 @@ export const ComponentList = (props: ComponentListProps) => {
             ) : (
                 <></>
             )}
-        </div>
+        </>
     );
 };
