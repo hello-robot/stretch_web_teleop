@@ -221,9 +221,9 @@ export const Library = (props: CustomizableComponentProps) => {
                                         onClick={() => props.sharedState.insertTextAtCursor?.("Move_Arm_to_Config()\n")}
                                         style={{ marginBottom: "12px" }}
                                     >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Move_Arm_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
+                                        <span style={{ fontWeight: "600", fontSize: "1em" }}>Move_Arm_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
                                         Adjust the lift and extension of the robot's arm.{'\n'}
                                         Input: Saved configuration from demo recording.
                                     </div>
@@ -234,9 +234,9 @@ export const Library = (props: CustomizableComponentProps) => {
                                         onClick={() => props.sharedState.insertTextAtCursor?.("Adjust_Gripper_Width()\n")}
                                         style={{ marginBottom: "12px" }}
                                     >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Adjust_Gripper_Width</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
+                                        <span style={{ fontWeight: "600", fontSize: "1em" }}>Adjust_Gripper_Width</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
                                         Adjust the width of the robot's gripper. {'\n'}
                                         Input: Saved configuration from demo recording.
                                     </div>
@@ -247,9 +247,9 @@ export const Library = (props: CustomizableComponentProps) => {
                                         onClick={() => props.sharedState.insertTextAtCursor?.("Rotate_Wrist_to_Config()\n")}
                                         style={{ marginBottom: "12px" }}
                                     >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Rotate_Wrist_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
+                                        <span style={{ fontWeight: "600", fontSize: "1em" }}>Rotate_Wrist_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
                                         Adjust the angle of the robot's wrist.{'\n'}
                                         Input: Saved configuration from demo recording.
                                     </div>
@@ -260,9 +260,9 @@ export const Library = (props: CustomizableComponentProps) => {
                                         onClick={() => props.sharedState.insertTextAtCursor?.("Reset_Robot()\n")}
                                         style={{ marginBottom: "12px" }}
                                     >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Reset_Robot</span>()
+                                        <span style={{ fontWeight: "600", fontSize: "1em" }}>Reset_Robot</span>()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
                                         Reset the robot to its home position.{'\n'}
                                         Input: N/A
                                     </div>
@@ -274,31 +274,31 @@ export const Library = (props: CustomizableComponentProps) => {
                         <div className="library-subsection">
                             <div className="library-text">
                                 <div className="function-group">
-                                    <div 
-                                        className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("Pause_And_Confirm()\n")}
-                                        style={{ marginBottom: "12px" }}
-                                    >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Pause_And_Confirm</span>()
-                                    </div>
-                                    <div className="function-description">
-                                        Pause execution and wait for your confirmation.{'\n'}
-                                        Input(Optional): Message shown while execution is paused.
-                                    </div>
+                                                                                <div 
+                                                className="library-function-item"
+                                                onClick={() => props.sharedState.insertTextAtCursor?.("Pause_And_Confirm()\n")}
+                                                style={{ marginBottom: "12px" }}
+                                            >
+                                                <span style={{ fontWeight: "600", fontSize: "1em" }}>Pause_And_Confirm</span>()
+                                            </div>
+                                            <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
+                                                Pause execution and wait for your confirmation.{'\n'}
+                                                Input(Optional): Message shown while execution is paused.
+                                            </div>
                                 </div>
-                                <div className="function-group">
-                                    <div 
-                                        className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("Take_Control()\n")}
-                                        style={{ marginBottom: "12px" }}
-                                    >
-                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Take_Control</span>()
-                                    </div>
-                                    <div className="function-description">
-                                        Control the robot by tele-operating it.{'\n'}
-                                        Input: N/A
-                                    </div>
-                                </div>
+                                                                        <div className="function-group">
+                                            <div 
+                                                className="library-function-item"
+                                                onClick={() => props.sharedState.insertTextAtCursor?.("Take_Control()\n")}
+                                                style={{ marginBottom: "12px" }}
+                                            >
+                                                <span style={{ fontWeight: "600", fontSize: "1em" }}>Take_Control</span>()
+                                            </div>
+                                            <div className="function-description" style={{ color: '#495057', fontSize: '0.9em', lineHeight: '1.4' }}>
+                                                Control the robot by tele-operating it.{'\n'}
+                                                Input: N/A
+                                            </div>
+                                        </div>
                             </div>
                         </div>
                     </div>
