@@ -208,7 +208,16 @@ const SingleButton = (props: SingleButtonProps) => {
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed || props.sharedState.isExecutingProgram;
+    
+    // In Execution Monitor mode, disable teleoperation unless TakeControl is active
+    const disabledInExecutionMonitor = 
+        props.sharedState.programMode === "Execution Monitor" && 
+        !props.sharedState.isTakeControlActive;
+    
+    const isDisabled = props.sharedState.customizing || 
+                      disabledDueToNotHomed || 
+                      props.sharedState.isExecutingProgram ||
+                      disabledInExecutionMonitor;
 
     return (
         <React.Fragment>

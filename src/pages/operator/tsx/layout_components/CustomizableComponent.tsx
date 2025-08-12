@@ -43,6 +43,10 @@ export type SharedState = {
     robotNotHomed: boolean;
     /** Whether a program is currently executing */
     isExecutingProgram: boolean;
+    /** Whether TakeControl is currently active (enables teleoperation in Execution Monitor) */
+    isTakeControlActive?: boolean;
+    /** Current program mode (Demonstrate, Program Editor, Execution Monitor) */
+    programMode?: string;
     /** Current line being executed (1-indexed) */
     currentExecutingLine?: number;
     /** Function to update current executing line */

@@ -69,6 +69,7 @@ export const Operator = (props: {
     const [pauseAndConfirmMessage, setPauseAndConfirmMessage] = React.useState<string>("");
     const [executionError, setExecutionError] = React.useState<{ type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null>(null);
     const [errorLineNumber, setErrorLineNumber] = React.useState<number | null>(null);
+    const [isTakeControlActive, setIsTakeControlActive] = React.useState<boolean>(false);
     
     // Program mode state
     const [showPopup, setShowPopup] = React.useState<boolean>(false);
@@ -95,6 +96,7 @@ export const Operator = (props: {
     // Function to handle "Done teleoperating" button click
     const handleDoneTeleoperating = () => {
         setWaitingForUserConfirmation(false);
+        setIsTakeControlActive(false);
         // Set execution state back to true
         if ((window as any).buttonFunctionProvider) {
             (window as any).buttonFunctionProvider.setExecutionState(true);
@@ -110,6 +112,7 @@ export const Operator = (props: {
         const checkForTakeControl = () => {
             if (!waitingForUserConfirmation && (window as any).resumeProgramExecution) {
                 setWaitingForUserConfirmation(true);
+                setIsTakeControlActive(true);
             }
         };
         
@@ -221,6 +224,10 @@ export const Operator = (props: {
     // Set up execution state callback
     function executionStateCallback(isExecuting: boolean) {
         setIsExecutingProgram(isExecuting);
+        // Reset TakeControl state when execution starts
+        if (isExecuting) {
+            setIsTakeControlActive(false);
+        }
     }
     buttonFunctionProvider.setExecutionStateCallback(executionStateCallback);
 
@@ -440,6 +447,8 @@ export const Operator = (props: {
         robotNotHomed: robotNotHomed,
         // Get isExecutingProgram from the state managed by ButtonFunctionProvider
         isExecutingProgram: isExecutingProgram,
+        isTakeControlActive: isTakeControlActive,
+        programMode: programMode,
         currentExecutingLine: currentExecutingLine,
         updateCurrentExecutingLine: updateCurrentExecutingLine,
         waitingForUserConfirmation: waitingForUserConfirmation,
@@ -518,8 +527,8 @@ export const Operator = (props: {
 
     return (
         <div id="operator">
-            {/* Persistent banner for control mode - only show in Execution Monitor mode */}
-            {programMode === "Execution Monitor" && (
+            {/* Persistent banner for control mode - only show in Execution Monitor mode when program is executing */}
+            {programMode === "Execution Monitor" && isExecutingProgram && (
                 <div
                     style={{
                         width: "100%",
