@@ -39,6 +39,17 @@ export const Library = (props: CustomizableComponentProps) => {
     const { customizing } = props.sharedState;
     const selected = isSelected(props);
     
+    // Responsive for screen dimensions 
+    const isSmallScreen = window.innerWidth < 1200;
+    const functionItemStyle = {
+        fontSize: isSmallScreen ? "12px" : "14px",
+        padding: isSmallScreen ? "6px 8px" : "8px 12px"
+    };
+    const descriptionStyle = {
+        fontSize: isSmallScreen ? "11px" : "13px",
+        lineHeight: isSmallScreen ? "1.3" : "1.4"
+    };
+    
     // Load saved positions from session storage or use defaults
     const getInitialSavedPositions = (): SavedPosition[] => {
         const sessionPositions = sessionStorage.getItem('librarySavedPositions');
@@ -182,25 +193,44 @@ export const Library = (props: CustomizableComponentProps) => {
                 customizing,
                 selected,
             })}
+            style={{
+                fontSize: window.innerWidth < 1200 ? "14px" : "16px",
+                padding: window.innerWidth < 1200 ? "8px" : "12px"
+            }}
             {...selectProp}
         >
-            <div className="library-content">
-                <div className="library-sections-container">
+            <div className="library-content" style={{
+                gap: window.innerWidth < 1200 ? "12px" : "16px"
+            }}>
+                <div className="library-sections-container" style={{
+                    gap: window.innerWidth < 1200 ? "12px" : "16px"
+                }}>
                     {/* Functions Section */}
-                    <div className="library-section">
-                        <h3 className="library-section-title">Functions</h3>
+                    <div className="library-section" style={{
+                        gap: window.innerWidth < 1200 ? "8px" : "12px"
+                    }}>
+                        <h3 className="library-section-title" style={{
+                            fontSize: window.innerWidth < 1200 ? "16px" : "18px"
+                        }}>Functions</h3>
                         
-                        <div className="library-subsection">
-                            <h4 className="library-subsection-title robot-heading">Robot</h4>
-                            <div className="library-text">
+                        <div className="library-subsection" style={{
+                            gap: window.innerWidth < 1200 ? "6px" : "8px"
+                        }}>
+                            <h4 className="library-subsection-title robot-heading" style={{
+                                fontSize: window.innerWidth < 1200 ? "14px" : "16px"
+                            }}>Robot</h4>
+                            <div className="library-text" style={{
+                                gap: window.innerWidth < 1200 ? "8px" : "12px"
+                            }}>
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("MoveEEToPose()\n")}
+                                        style={functionItemStyle}
                                     >
                                         MoveEEToPose()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Move the robot's end effector to a specific pose.{'\n'}
                                         Input: Saved position from demo recording.
                                     </div>
@@ -209,10 +239,11 @@ export const Library = (props: CustomizableComponentProps) => {
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("AdjustGripperWidth()\n")}
+                                        style={functionItemStyle}
                                     >
                                         AdjustGripperWidth()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Adjust the width of the end effector.{'\n'}
                                         Input: Saved position from demo recording.
                                     </div>
@@ -221,10 +252,11 @@ export const Library = (props: CustomizableComponentProps) => {
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("RotateEE()\n")}
+                                        style={functionItemStyle}
                                     >
                                         RotateEE()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Adjust the angle of the end effector.{'\n'}
                                         Input: Saved position from demo recording.
                                     </div>
@@ -233,10 +265,11 @@ export const Library = (props: CustomizableComponentProps) => {
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("ResetRobot()\n")}
+                                        style={functionItemStyle}
                                     >
                                         ResetRobot()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Reset the robot to its home position.{'\n'}
                                         Input: N/A
                                     </div>
@@ -244,17 +277,24 @@ export const Library = (props: CustomizableComponentProps) => {
                             </div>
                         </div>
                         
-                        <div className="library-subsection">
-                            <h4 className="library-subsection-title human-heading">Human</h4>
-                            <div className="library-text">
+                        <div className="library-subsection" style={{
+                            gap: window.innerWidth < 1200 ? "6px" : "8px"
+                        }}>
+                            <h4 className="library-subsection-title human-heading" style={{
+                                fontSize: window.innerWidth < 1200 ? "14px" : "16px"
+                            }}>Human</h4>
+                            <div className="library-text" style={{
+                                gap: window.innerWidth < 1200 ? "8px" : "12px"
+                            }}>
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("PauseAndConfirm()\n")}
+                                        style={functionItemStyle}
                                     >
                                         PauseAndConfirm()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Pause execution and wait for your confirmation.{'\n'}
                                         Input(Optional): Message shown while execution is paused.
                                     </div>
@@ -263,10 +303,11 @@ export const Library = (props: CustomizableComponentProps) => {
                                     <div 
                                         className="library-function-item"
                                         onClick={() => props.sharedState.insertTextAtCursor?.("TakeControl()\n")}
+                                        style={functionItemStyle}
                                     >
                                         TakeControl()
                                     </div>
-                                    <div className="function-description">
+                                    <div className="function-description" style={descriptionStyle}>
                                         Control the robot by tele-operating it.{'\n'}
                                         Input: N/A
                                     </div>

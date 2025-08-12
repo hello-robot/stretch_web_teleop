@@ -177,7 +177,26 @@ const SingleButton = (props: SingleButtonProps) => {
     const labelHeight = isSmallScreen ? 24 : isMediumScreen ? 28 : 30;
     const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "12px" : "13px";
     const labelOffsetX = labelWidth / 2;
-    const labelOffsetY = isSmallScreen ? 6 : isMediumScreen ? 7 : 8;
+    
+    // Adjust vertical offset
+    let labelOffsetY = isSmallScreen ? 6 : isMediumScreen ? 7 : 8;
+    
+    // For SimpleButtonPad (Base and Arm), add extra bottom padding for bottom row buttons
+    const isSimpleButtonPad = props.funct === ButtonPadButton.BaseForward || 
+                              props.funct === ButtonPadButton.BaseReverse || 
+                              props.funct === ButtonPadButton.BaseRotateLeft || 
+                              props.funct === ButtonPadButton.BaseRotateRight ||
+                              props.funct === ButtonPadButton.ArmLift || 
+                              props.funct === ButtonPadButton.ArmLower || 
+                              props.funct === ButtonPadButton.ArmExtend || 
+                              props.funct === ButtonPadButton.ArmRetract;
+    
+    if (isSimpleButtonPad) {
+        const isBottomRow = props.iconPosition.y > 250; 
+        if (isBottomRow) {
+            labelOffsetY += 5; 
+        }
+    }
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);

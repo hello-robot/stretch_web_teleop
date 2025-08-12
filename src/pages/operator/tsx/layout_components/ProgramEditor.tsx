@@ -888,10 +888,19 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                 customizing,
                 selected,
             })}
+            style={{
+                fontSize: window.innerWidth < 1200 ? "14px" : "16px",
+                padding: window.innerWidth < 1200 ? "8px" : "12px"
+            }}
             {...selectProp}
         >
-            <div className="program-editor-header">
-                <div className="program-editor-header-left">
+            <div className="program-editor-header" style={{
+                padding: window.innerWidth < 1200 ? "8px" : "12px",
+                gap: window.innerWidth < 1200 ? "8px" : "12px"
+            }}>
+                <div className="program-editor-header-left" style={{
+                    fontSize: window.innerWidth < 1200 ? "12px" : "14px"
+                }}>
                     {props.language && (
                         <span className="program-editor-language">{props.language}</span>
                     )}
@@ -900,6 +909,10 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             className="clear-program-button"
                             onClick={clearProgram}
                             type="button"
+                            style={{
+                                fontSize: window.innerWidth < 1200 ? "12px" : "14px",
+                                padding: window.innerWidth < 1200 ? "6px 12px" : "8px 16px"
+                            }}
                         >
                             Clear
                         </button>
@@ -909,22 +922,26 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             style={{
                                 color: "#4caf50",
                                 fontWeight: "bold",
-                                fontSize: "14px",
-                                marginLeft: "16px"
+                                fontSize: window.innerWidth < 1200 ? "12px" : "14px",
+                                marginLeft: window.innerWidth < 1200 ? "12px" : "16px"
                             }}
                         >
                             Running... View execution details in the Execution Monitor.
                         </span>
                     )}
                 </div>
-                <div className="program-editor-header-right">
+                <div className="program-editor-header-right" style={{
+                    fontSize: window.innerWidth < 1200 ? "12px" : "14px"
+                }}>
                     {!props.readOnly && (
                         <button 
                             className="run-program-button"
                             onClick={handleRunProgram}
                             type="button"
                             style={{
-                                backgroundColor: isExecuting ? "#dc3545" : undefined
+                                backgroundColor: isExecuting ? "#dc3545" : undefined,
+                                fontSize: window.innerWidth < 1200 ? "12px" : "14px",
+                                padding: window.innerWidth < 1200 ? "6px 12px" : "8px 16px"
                             }}
                         >
                             {isExecuting ? (

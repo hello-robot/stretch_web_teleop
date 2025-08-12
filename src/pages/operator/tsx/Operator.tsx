@@ -573,16 +573,20 @@ export const Operator = (props: {
                     <RosbagRecorder hideLabels={!layout.current.displayLabels} />
                 </div>
             </div>
-            <div id="operator-header" onClick={handleClickHeader} style={{ display: "flex", flexDirection: "column", padding: "12px 20px" }}>
+            <div id="operator-header" onClick={handleClickHeader} style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                padding: window.innerWidth < 1200 ? "8px 12px" : "12px 20px" 
+            }}>
                 {/* Centered Title */}
                 <div style={{ 
                     display: "flex", 
                     justifyContent: "center", 
-                    marginBottom: "5px",
+                    marginBottom: window.innerWidth < 1200 ? "3px" : "5px",
                     width: "100%"
                 }}>
                     <span style={{
-                        fontSize: "18px",
+                        fontSize: window.innerWidth < 1200 ? "16px" : "18px",
                         fontWeight: "bold",
                         color: "var(--text-color)",
                         textTransform: "capitalize"
@@ -597,7 +601,9 @@ export const Operator = (props: {
                     alignItems: "center", 
                     justifyContent: "space-between",
                     width: "100%",
-                    minHeight: "40px"
+                    minHeight: window.innerWidth < 1200 ? "32px" : "40px",
+                    flexWrap: window.innerWidth < 1000 ? "wrap" : "nowrap",
+                    gap: window.innerWidth < 1000 ? "8px" : "0"
                 }}>
                     {/* Left side controls */}
                     <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
@@ -634,7 +640,10 @@ export const Operator = (props: {
                         </div>
                         {/* Action mode dropdown - hide in Program Editor mode */}
                         {programMode !== "Program Editor" && (
-                            <div style={{ marginLeft: 16, height: "40px" }}>
+                            <div style={{ 
+                                marginLeft: window.innerWidth < 1200 ? 8 : 16, 
+                                height: window.innerWidth < 1200 ? "32px" : "40px" 
+                            }}>
                                 <div className="header-dropdown">
                                     <Dropdown
                                         onChange={(idx) => setActionMode(actionModes[idx])}
@@ -657,7 +666,7 @@ export const Operator = (props: {
                             alignItems: "center", 
                             justifyContent: "center",
                             flex: "1 1 auto",
-                            gap: "16px"
+                            gap: window.innerWidth < 1200 ? "12px" : "16px"
                         }}>
                             <AudioControl remoteStreams={remoteStreams} />
                             <SpeedControl
