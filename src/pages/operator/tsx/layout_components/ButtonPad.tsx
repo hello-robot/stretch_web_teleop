@@ -160,6 +160,24 @@ const SingleButton = (props: SingleButtonProps) => {
     const width = isMobile ? 75 : 85;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
+    
+    // Responsive label sizing 
+    const [screenWidth, setScreenWidth] = React.useState(window.innerWidth);
+    
+    React.useEffect(() => {
+        const handleResize = () => setScreenWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    const isSmallScreen = screenWidth < 1200;
+    const isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
+    
+    const labelWidth = isSmallScreen ? 70 : isMediumScreen ? 85 : 100;
+    const labelHeight = isSmallScreen ? 24 : isMediumScreen ? 28 : 30;
+    const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "12px" : "13px";
+    const labelOffsetX = labelWidth / 2;
+    const labelOffsetY = isSmallScreen ? 6 : isMediumScreen ? 7 : 8;
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);
@@ -187,10 +205,10 @@ const SingleButton = (props: SingleButtonProps) => {
                 })}
             />
             <foreignObject
-                x={props.iconPosition.x - 50}
-                y={props.iconPosition.y + height/2 + 8}
-                width="100"
-                height="30"
+                x={props.iconPosition.x - labelOffsetX}
+                y={props.iconPosition.y + height/2 + labelOffsetY}
+                width={labelWidth}
+                height={labelHeight}
                 style={{
                     pointerEvents: "none"
                 }}
@@ -202,7 +220,7 @@ const SingleButton = (props: SingleButtonProps) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "13px",
+                        fontSize: labelFontSize,
                         fontWeight: "600",
                         color: isDisabled ? "#ccc" : "white",
                         fontFamily: "Arial, sans-serif",
