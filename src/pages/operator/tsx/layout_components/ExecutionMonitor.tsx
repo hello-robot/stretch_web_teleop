@@ -678,7 +678,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                         </div>
                     )}
                 </div>
-                <div className="execution-monitor-header-right">
+                <div className="execution-monitor-header-right" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <button 
                         style={{
                             background: "#ff8c00",
@@ -692,8 +692,7 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                             transition: "background-color 0.2s ease",
                             letterSpacing: "0.5px",
                             display: "flex",
-                            alignItems: "center",
-                            marginRight: "8px"
+                            alignItems: "center"
                         }}
                         onClick={async () => {
                             if ((window as any).remoteRobot) {
