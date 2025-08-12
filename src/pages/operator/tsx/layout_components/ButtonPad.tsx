@@ -110,10 +110,10 @@ export const ButtonPad = (props: ButtonPadProps) => {
             <svg
                 ref={svgRef}
                 viewBox={`0 0 ${SVG_RESOLUTION} ${props.aspectRatio
-                    ? SVG_RESOLUTION / props.aspectRatio + 60
-                    : SVG_RESOLUTION + 60
+                    ? SVG_RESOLUTION / props.aspectRatio
+                    : SVG_RESOLUTION
                     }`}
-                preserveAspectRatio="none"
+                preserveAspectRatio="xMidYMid meet"
                 className={className("button-pads", {
                     customizing,
                     selected,
