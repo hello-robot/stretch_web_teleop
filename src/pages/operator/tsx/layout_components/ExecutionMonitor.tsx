@@ -664,19 +664,21 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                         <span className="execution-monitor-language">{props.language}</span>
                     )}
                 </div>
-                <div className="execution-monitor-header-right">
+                                <div className="execution-monitor-header-left">
                     {showDoneMessage && (
                         <div style={{
-                            color: "#28a745",
+                            color: "#1e7e34",
                             fontWeight: "bold",
-                            fontSize: "14px",
+                            fontSize: "18px",
                             display: "flex",
                             alignItems: "center",
-                            marginRight: "8px"
+                            marginRight: "16px"
                         }}>
                             Done Executing!
                         </div>
                     )}
+                </div>
+                <div className="execution-monitor-header-right">
                     <button 
                         style={{
                             background: "#ff8c00",
@@ -693,17 +695,17 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
                             alignItems: "center",
                             marginRight: "8px"
                         }}
-                                                        onClick={async () => {
-                                    if ((window as any).remoteRobot) {
-                                        const retractedPose = { wrist_extension: 0.00211174 };
-                                        (window as any).remoteRobot.setRobotPose(retractedPose);
-                                        console.log(`Arm retraction command sent to robot!`);
-                                        console.log(`Waiting for arm retraction...`);
-                                        await new Promise(resolve => setTimeout(resolve, 2000));
-                                        (window as any).remoteRobot.setRobotPose(HOME_POSE);
-                                        console.log(`Home pose command sent to robot!`);
-                                    }
-                                }}
+                        onClick={async () => {
+                            if ((window as any).remoteRobot) {
+                                const retractedPose = { wrist_extension: 0.00211174 };
+                                (window as any).remoteRobot.setRobotPose(retractedPose);
+                                console.log(`Arm retraction command sent to robot!`);
+                                console.log(`Waiting for arm retraction...`);
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                (window as any).remoteRobot.setRobotPose(HOME_POSE);
+                                console.log(`Home pose command sent to robot!`);
+                            }
+                        }}
                         title="Reset robot to home position"
                     >
                         Reset Robot

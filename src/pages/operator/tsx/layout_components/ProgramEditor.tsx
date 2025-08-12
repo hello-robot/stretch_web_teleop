@@ -931,13 +931,31 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     {isExecutingProgram && (
                         <span 
                             style={{
-                                color: "#4caf50",
+                                color: "#1e7e34",
                                 fontWeight: "bold",
-                                fontSize: window.innerWidth < 1200 ? "12px" : "14px",
+                                fontSize: window.innerWidth < 1200 ? "16px" : "18px",
                                 marginLeft: window.innerWidth < 1200 ? "12px" : "16px"
                             }}
                         >
-                            Running... View execution details in the Execution Monitor.
+                            Running... View execution details in the{" "}
+                            <span 
+                                style={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                    color: "#1e7e34"
+                                }}
+                                onClick={() => {
+                                    // Switch to Execution Monitor mode
+                                    const switchToModeLayout = (window as any).switchToModeLayout;
+                                    if (switchToModeLayout) {
+                                        switchToModeLayout("Execution Monitor");
+                                    }
+                                }}
+                                title="Click to switch to Execution Monitor"
+                            >
+                                Execution Monitor
+                            </span>
+                            .
                         </span>
                     )}
                 </div>
