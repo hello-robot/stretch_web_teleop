@@ -4,7 +4,7 @@
     border-radius: 10px;
     opacity: 100%;
     flex: 0 0 2rem;
-    margin: 0.5rem 0.5rem;
+    margin: 1rem 0.5rem;
     cursor: pointer;
     text-align: center;
     transition-property: opacity, flex, width;
