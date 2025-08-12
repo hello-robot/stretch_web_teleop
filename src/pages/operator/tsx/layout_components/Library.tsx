@@ -50,6 +50,8 @@ export const Library = (props: CustomizableComponentProps) => {
         lineHeight: isSmallScreen ? "1.3" : "1.4"
     };
     
+
+    
     // Load saved positions from session storage or use defaults
     const getInitialSavedPositions = (): SavedPosition[] => {
         const sessionPositions = sessionStorage.getItem('librarySavedPositions');
@@ -209,67 +211,58 @@ export const Library = (props: CustomizableComponentProps) => {
                     <div className="library-section" style={{
                         gap: window.innerWidth < 1200 ? "8px" : "12px"
                     }}>
-                        <h3 className="library-section-title" style={{
-                            fontSize: window.innerWidth < 1200 ? "16px" : "18px"
-                        }}>Functions</h3>
+                        <h3 className="library-section-title" style={{ fontWeight: "600", color: "#ff8c00" }}>Robot Functions</h3>
                         
-                        <div className="library-subsection" style={{
-                            gap: window.innerWidth < 1200 ? "6px" : "8px"
-                        }}>
-                            <h4 className="library-subsection-title robot-heading" style={{
-                                fontSize: window.innerWidth < 1200 ? "14px" : "16px"
-                            }}>Robot</h4>
-                            <div className="library-text" style={{
-                                gap: window.innerWidth < 1200 ? "8px" : "12px"
-                            }}>
+                        <div className="library-subsection">
+                            <div className="library-text">
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("MoveEEToPose()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Move_Arm_to_Config()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        MoveEEToPose()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Move_Arm_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
-                                        Move the robot's end effector to a specific pose.{'\n'}
-                                        Input: Saved position from demo recording.
+                                    <div className="function-description">
+                                        Adjust the lift and extension of the robot's arm.{'\n'}
+                                        Input: Saved configuration from demo recording.
                                     </div>
                                 </div>
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("AdjustGripperWidth()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Adjust_Gripper_Width()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        AdjustGripperWidth()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Adjust_Gripper_Width</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
-                                        Adjust the width of the end effector.{'\n'}
-                                        Input: Saved position from demo recording.
+                                    <div className="function-description">
+                                        Adjust the width of the robot's gripper. {'\n'}
+                                        Input: Saved configuration from demo recording.
                                     </div>
                                 </div>
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("RotateEE()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Rotate_Wrist_to_Config()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        RotateEE()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Rotate_Wrist_to_Config</span>(<span style={{ color: '#6c757d' }}>configuration name</span>)
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
-                                        Adjust the angle of the end effector.{'\n'}
-                                        Input: Saved position from demo recording.
+                                    <div className="function-description">
+                                        Adjust the angle of the robot's wrist.{'\n'}
+                                        Input: Saved configuration from demo recording.
                                     </div>
                                 </div>
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("ResetRobot()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Reset_Robot()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        ResetRobot()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Reset_Robot</span>()
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
+                                    <div className="function-description">
                                         Reset the robot to its home position.{'\n'}
                                         Input: N/A
                                     </div>
@@ -277,24 +270,18 @@ export const Library = (props: CustomizableComponentProps) => {
                             </div>
                         </div>
                         
-                        <div className="library-subsection" style={{
-                            gap: window.innerWidth < 1200 ? "6px" : "8px"
-                        }}>
-                            <h4 className="library-subsection-title human-heading" style={{
-                                fontSize: window.innerWidth < 1200 ? "14px" : "16px"
-                            }}>Human</h4>
-                            <div className="library-text" style={{
-                                gap: window.innerWidth < 1200 ? "8px" : "12px"
-                            }}>
+                        <h3 className="library-section-title" style={{ fontWeight: "600", marginTop: "16px", color: "#28a745" }}>Human Functions</h3>
+                        <div className="library-subsection">
+                            <div className="library-text">
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("PauseAndConfirm()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Pause_And_Confirm()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        PauseAndConfirm()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Pause_And_Confirm</span>()
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
+                                    <div className="function-description">
                                         Pause execution and wait for your confirmation.{'\n'}
                                         Input(Optional): Message shown while execution is paused.
                                     </div>
@@ -302,12 +289,12 @@ export const Library = (props: CustomizableComponentProps) => {
                                 <div className="function-group">
                                     <div 
                                         className="library-function-item"
-                                        onClick={() => props.sharedState.insertTextAtCursor?.("TakeControl()\n")}
-                                        style={functionItemStyle}
+                                        onClick={() => props.sharedState.insertTextAtCursor?.("Take_Control()\n")}
+                                        style={{ marginBottom: "12px" }}
                                     >
-                                        TakeControl()
+                                        <span style={{ fontWeight: "600", fontSize: "0.9em" }}>Take_Control</span>()
                                     </div>
-                                    <div className="function-description" style={descriptionStyle}>
+                                    <div className="function-description">
                                         Control the robot by tele-operating it.{'\n'}
                                         Input: N/A
                                     </div>
@@ -316,9 +303,9 @@ export const Library = (props: CustomizableComponentProps) => {
                         </div>
                     </div>
                     
-                    {/* Saved Positions Section */}
+                    {/* Saved Configurations Section */}
                     <div className="library-section" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                        <h3 className="library-section-title">Saved Positions</h3>
+                        <h3 className="library-section-title">Saved Configurations</h3>
                         <div className="library-subsection" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                             <div className="library-text" style={{ flex: 1 }}>
                                 {savedPositions.map((position, index) => (
@@ -332,30 +319,43 @@ export const Library = (props: CustomizableComponentProps) => {
                                 ))}
                             </div>
                             <div style={{ 
+                                paddingTop: "8px",
+                                paddingBottom: "8px"
+                            }}>
+                                <button 
+                                    className="add-position-btn"
+                                    onClick={() => setShowModal(true)}
+                                    style={{
+                                        width: "100%",
+                                        textAlign: "center",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center"
+                                    }}
+                                >
+                                    + Add Configuration
+                                </button>
+                            </div>
+                            <div style={{ 
+                                marginTop: "auto",
                                 display: "flex", 
-                                gap: "8px", 
-                                paddingTop: "16px",
-                                justifyContent: "flex-start"
+                                justifyContent: "flex-end",
+                                paddingTop: "8px"
                             }}>
                                 <button 
                                     className="clear-positions-btn"
                                     onClick={() => {
-                                        // Reset to default positions
-                                        const defaultPositions = [
-                                            { name: "stowGripper", jointStates: "[0.0, -0.497, 3.19579]", timestamp: new Date() },
-                                            { name: "centerWrist", jointStates: "[0.0, 0.0, 0.0]", timestamp: new Date() }
-                                        ];
-                                        setSavedPositions(defaultPositions);
+                                        // Reset to empty positions
+                                        setSavedPositions([]);
                                         sessionStorage.removeItem('librarySavedPositions');
+                                    }}
+                                    style={{
+                                        minWidth: "auto",
+                                        maxWidth: "auto",
+                                        flex: "none"
                                     }}
                                 >
                                     Clear
-                                </button>
-                                <button 
-                                    className="add-position-btn"
-                                    onClick={() => setShowModal(true)}
-                                >
-                                    + Add Position
                                 </button>
                             </div>
                         </div>
@@ -387,7 +387,7 @@ export const Library = (props: CustomizableComponentProps) => {
                         textAlign: "center"
                     }}>
                         <div style={{ fontSize: "1.2em", marginBottom: 24 }}>
-                            Add New Position
+                            Add New Configuration
                         </div>
                         <div style={{ 
                             display: "flex", 
@@ -403,7 +403,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                     fontWeight: "bold",
                                     fontSize: "0.9em"
                                 }}>
-                                    Position Name
+                                    Configuration Name
                                 </label>
                                 <input
                                     type="text"
@@ -483,7 +483,7 @@ export const Library = (props: CustomizableComponentProps) => {
                                 onClick={handleAddPosition}
                                 disabled={!newPositionName.trim() || !newJointStates.trim()}
                             >
-                                Save Position
+                                Save Configuration
                             </button>
                         </div>
                     </div>

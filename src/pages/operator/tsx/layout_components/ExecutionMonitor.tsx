@@ -18,19 +18,19 @@ type ExecutionMonitorProps = CustomizableComponentProps & {
 
 // Robot functions 
 const ROBOT_FUNCTIONS = [
-    'MoveEEToPose',
-    'AdjustGripperWidth', 
-    'RotateEE',
-    'ResetRobot'
+    'Move_Arm_to_Config',
+    'Adjust_Gripper_Width', 
+    'Rotate_Wrist_to_Config',
+    'Reset_Robot'
 ];
 
 // Human functions 
 const HUMAN_FUNCTIONS = [
-    'PauseAndConfirm',
-    'TakeControl'
+    'Pause_And_Confirm',
+    'Take_Control'
 ];
 
-// Default saved positions 
+// Default saved configurations 
 const DEFAULT_SAVED_POSITIONS = [
     'stowGripper',
     'centerWrist'
@@ -106,14 +106,14 @@ export const ExecutionMonitor = (props: ExecutionMonitorProps) => {
     const highlightSyntax = (text: string): string => {
         let highlightedText = text;
         
-        // no highlighting in PauseAndConfirm parameters
+        // no highlighting in Pause_And_Confirm parameters
         const pauseAndConfirmParams: string[] = [];
         let paramIndex = 0;
-        highlightedText = highlightedText.replace(/PauseAndConfirm\s*\(\s*([^)]*)\s*\)/g, (match, content) => {
+        highlightedText = highlightedText.replace(/Pause_And_Confirm\s*\(\s*([^)]*)\s*\)/g, (match, content) => {
             const placeholder = `__PAUSE_CONFIRM_PARAM_${paramIndex}__`;
             pauseAndConfirmParams[paramIndex] = content;
             paramIndex++;
-            return `PauseAndConfirm(${placeholder})`;
+            return `Pause_And_Confirm(${placeholder})`;
         });
         
         // Highlight robot functions in orange

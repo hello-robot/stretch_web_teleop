@@ -12,8 +12,8 @@
     border-radius: 8px;
     overflow: hidden;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .execution-monitor-root.customizing {
@@ -128,7 +128,7 @@
     flex-direction: column;
     background: var(--secondary-background-color);
     border-right: 1px solid var(--border-color);
-    padding: 8px 0;
+    padding: 8px 12px;
     min-width: 50px;
     text-align: right;
     user-select: none;
@@ -137,9 +137,9 @@
 }
 
 .line-number {
-    padding: 0 8px;
+    padding: 0;
     color: var(--secondary-text-color);
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.5;
     height: 21px;
     display: flex;
@@ -169,7 +169,7 @@
     bottom: 0;
     background: var(--background-color);
     color: var(--text-color);
-    padding: 8px 0;
+    padding: 8px 12px;
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -191,7 +191,7 @@
 .code-line {
     height: 21px;
     line-height: 21px;
-    padding: 0 12px;
+    padding: 0;
     display: flex;
     align-items: center;
     white-space: pre;

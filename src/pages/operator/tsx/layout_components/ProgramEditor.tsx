@@ -24,19 +24,19 @@ type ProgramEditorProps = CustomizableComponentProps & {
 
 // Robot functions 
 const ROBOT_FUNCTIONS = [
-    'MoveEEToPose',
-    'AdjustGripperWidth', 
-    'RotateEE',
-    'ResetRobot'
+    'Move_Arm_to_Config',
+    'Adjust_Gripper_Width', 
+    'Rotate_Wrist_to_Config',
+    'Reset_Robot'
 ];
 
 // Human functions 
 const HUMAN_FUNCTIONS = [
-    'PauseAndConfirm',
-    'TakeControl'
+    'Pause_And_Confirm',
+    'Take_Control'
 ];
 
-// Default saved positions 
+// Default saved configurations 
 const DEFAULT_SAVED_POSITIONS = [
     'stowGripper',
     'centerWrist'
@@ -94,21 +94,21 @@ const parseProgram = (code: string): Program => {
             });
         } else {
             // Check for different command types
-            const moveEEMatch = trimmedLine.match(/MoveEEToPose\s*\(\s*([^)]*)\s*\)/);
-            const resetRobotMatch = trimmedLine.match(/ResetRobot\s*\(\s*\)/);
-            const resetRobotWithParamsMatch = trimmedLine.match(/ResetRobot\s*\(\s*[^)]+\s*\)/);
-            const adjustGripperMatch = trimmedLine.match(/AdjustGripperWidth\s*\(\s*([^)]*)\s*\)/);
-            const rotateEEMatch = trimmedLine.match(/RotateEE\s*\(\s*([^)]*)\s*\)/);
-            const takeControlMatch = trimmedLine.match(/TakeControl\s*\(\s*\)/);
-            const takeControlWithParamsMatch = trimmedLine.match(/TakeControl\s*\(\s*[^)]+\s*\)/);
-            const pauseAndConfirmMatch = trimmedLine.match(/PauseAndConfirm\s*\(\s*([^)]*)\s*\)/);
+            const moveArmMatch = trimmedLine.match(/Move_Arm_to_Config\s*\(\s*([^)]*)\s*\)/);
+            const resetRobotMatch = trimmedLine.match(/Reset_Robot\s*\(\s*\)/);
+            const resetRobotWithParamsMatch = trimmedLine.match(/Reset_Robot\s*\(\s*[^)]+\s*\)/);
+            const adjustGripperMatch = trimmedLine.match(/Adjust_Gripper_Width\s*\(\s*([^)]*)\s*\)/);
+            const rotateWristMatch = trimmedLine.match(/Rotate_Wrist_to_Config\s*\(\s*([^)]*)\s*\)/);
+            const takeControlMatch = trimmedLine.match(/Take_Control\s*\(\s*\)/);
+            const takeControlWithParamsMatch = trimmedLine.match(/Take_Control\s*\(\s*[^)]+\s*\)/);
+            const pauseAndConfirmMatch = trimmedLine.match(/Pause_And_Confirm\s*\(\s*([^)]*)\s*\)/);
             
-            if (moveEEMatch) {
-                const parameter = moveEEMatch[1] || null;
+            if (moveArmMatch) {
+                const parameter = moveArmMatch[1] || null;
                 programLines.push({
                     lineNumber,
                     content: line,
-                    command: "MoveEEToPose",
+                    command: "Move_Arm_to_Config",
                     parameters: parameter,
                     isExecutable: true
                 });
@@ -140,12 +140,12 @@ const parseProgram = (code: string): Program => {
                     parameters: parameter,
                     isExecutable: true
                 });
-            } else if (rotateEEMatch) {
-                const parameter = rotateEEMatch[1] || null;
+            } else if (rotateWristMatch) {
+                const parameter = rotateWristMatch[1] || null;
                 programLines.push({
                     lineNumber,
                     content: line,
-                    command: "RotateEE",
+                    command: "Rotate_Wrist_to_Config",
                     parameters: parameter,
                     isExecutable: true
                 });
@@ -329,7 +329,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                     console.log(`Executing line ${line.lineNumber}: ${line.command} with parameter: ${line.parameters}`);
                     
                     // Executes the command based on what function it is
-                    if (line.command === "MoveEEToPose") {
+                    if (line.command === "Move_Arm_to_Config") {
                         const poseName = line.parameters;
                         const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                         
@@ -364,7 +364,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             break;
                         }
                     }
-                    else if (line.command === "AdjustGripperWidth") {
+                    else if (line.command === "Adjust_Gripper_Width") {
                         const poseName = line.parameters;
                         const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                         
@@ -395,7 +395,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             break;
                         }
                     }
-                    else if (line.command === "RotateEE") {
+                    else if (line.command === "Rotate_Wrist_to_Config") {
                         const poseName = line.parameters;
                         const pose = ALL_POSE_DEFINITIONS[poseName as keyof typeof ALL_POSE_DEFINITIONS];
                         
@@ -428,7 +428,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             break;
                         }
                     }
-                    else if (line.command === "ResetRobot") {
+                    else if (line.command === "Reset_Robot") {
                         console.log(`Sending ResetRobot command (homing the robot)`);
                         // Send homeTheRobot command to robot
                         if ((window as any).remoteRobot) {
@@ -441,7 +441,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                             console.error("RemoteRobot not available");
                         }
                     }
-                    else if (line.command === "PauseAndConfirm") {
+                    else if (line.command === "Pause_And_Confirm") {
                         const message = line.parameters || "Ready to continue? Please confirm before the robot proceeds or reset to revise.";
                         console.log(`Pausing program execution for user confirmation: ${message}`);
                         await new Promise<void>((resolve) => {
@@ -450,7 +450,7 @@ export const ProgramEditor = (props: ProgramEditorProps) => {
                         });
                         console.log(`Resuming program execution after confirmation`);
                     }
-                    else if (line.command === "TakeControl") {
+                    else if (line.command === "Take_Control") {
                         console.log(`Taking control from robot`);
                         if (buttonFunctionProvider) {
                             buttonFunctionProvider.setExecutionState(false);
