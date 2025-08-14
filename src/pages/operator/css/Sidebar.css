@@ -45,18 +45,18 @@
 }
 
 #delete-button {
-    font-size: 3rem;
-    padding: 1rem;
+    font-size: 2rem;
+    padding: 0.5rem;
     /* Center it */
     display: block;
     width: 90%;
-    margin: 0.8rem auto;
+    margin: 0.4rem auto;
 }
 
 /* Options ********************************************************************/
 
 #sidebar-options > button {
-    height: 5rem;
+    height: 2.5rem;
     width: 100%;
 }
 
@@ -68,7 +68,7 @@
     display: inline-block;
     margin-right: 1rem;
     width: 7rem;
-    height: 5rem;
+    height: 2.5rem;
     border-radius: var(--btn-brdr-radius);
 }
 
@@ -213,158 +213,4 @@
     text-wrap: wrap;
 }
 
-/* Responsive design for smaller screens */
-@media (max-width: 1400px) {
-    #sidebar {
-        width: 18rem;
-        grid-template-rows: 4rem auto 6rem;
-    }
-    
-    #sidebar-header {
-        padding: 0.8rem;
-        font-size: 16px;
-    }
-    
-    #sidebar-body {
-        padding: 0.8rem;
-    }
-    
-    #delete-button {
-        font-size: 2.5rem;
-        padding: 0.8rem;
-        height: 4rem;
-    }
-    
-    .toggle-button {
-        width: 6rem;
-        height: 4rem;
-        margin-right: 0.8rem;
-    }
-    
-    #sidebar-component-provider button {
-        height: 2.5rem;
-        padding: 0.6rem 1rem;
-    }
-    
-    #global-settings button {
-        height: 2.5rem;
-    }
-    
-    .toggle-button-div {
-        padding-bottom: 6px;
-        margin-bottom: 4px;
-    }
-    
-    .global-label {
-        font-size: 0.9em;
-        inline-size: 140px;
-    }
-    
-    #global-settings {
-        margin-bottom: 1rem;
-    }
-}
 
-@media (max-width: 1200px) {
-    #sidebar {
-        width: 16rem;
-        grid-template-rows: 3.5rem auto 5rem;
-    }
-    
-    #sidebar-header {
-        padding: 0.6rem;
-        font-size: 15px;
-    }
-    
-    #sidebar-body {
-        padding: 0.6rem;
-    }
-    
-    #delete-button {
-        font-size: 2rem;
-        padding: 0.6rem;
-        height: 3.5rem;
-    }
-    
-    .toggle-button {
-        width: 5rem;
-        height: 3.5rem;
-        margin-right: 0.6rem;
-    }
-    
-    #sidebar-component-provider button {
-        height: 2.2rem;
-        padding: 0.5rem 0.8rem;
-    }
-    
-    #global-settings button {
-        height: 2.2rem;
-    }
-    
-    .toggle-button-div {
-        padding-bottom: 4px;
-        margin-bottom: 2px;
-    }
-    
-    .global-label {
-        font-size: 0.85em;
-        inline-size: 120px;
-    }
-    
-    #global-settings {
-        margin-bottom: 0.8rem;
-    }
-}
-
-@media (max-width: 900px) {
-    #sidebar {
-        grid-template-rows: auto;
-        width: 14rem;
-    }
-
-    #sidebar-header {
-        padding: 0.5rem;
-        font-size: 14px;
-    }
-    
-    #sidebar-body {
-        padding: 0.5rem;
-        display: block;
-        overflow: scroll;
-    }
-
-    #delete-button {
-        font-size: 1.5rem;
-        padding: 0.4rem;
-        height: 3rem;
-    }
-    
-    .toggle-button {
-        width: 4rem;
-        height: 3rem;
-        margin-right: 0.4rem;
-    }
-    
-    #sidebar-component-provider button {
-        height: 2rem;
-        padding: 0.4rem 0.6rem;
-    }
-    
-    #global-settings button {
-        height: 2rem;
-    }
-    
-    .toggle-button-div {
-        padding-bottom: 2px;
-        margin-bottom: 1px;
-    }
-    
-    .global-label {
-        font-size: 0.8em;
-        inline-size: 100px;
-    }
-    
-    #global-settings {
-        margin-bottom: 0.6rem;
-    }
-}

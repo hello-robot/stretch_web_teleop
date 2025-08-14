@@ -208,8 +208,7 @@ export const Library = (props: CustomizableComponentProps) => {
             <div className="library-content" style={{
                 gap: window.innerWidth < 1200 ? "12px" : "16px",
                 flex: "1",
-                overflowY: "auto",
-                paddingBottom: "60px" // Space for clear button
+                overflowY: "auto"
             }}>
                 <div className="library-sections-container" style={{
                     gap: window.innerWidth < 1200 ? "12px" : "16px"
@@ -360,6 +359,7 @@ export const Library = (props: CustomizableComponentProps) => {
                 background: "var(--background-color)",
                 borderTop: "1px solid var(--border-color)",
                 padding: "8px 16px",
+                marginTop: "20px",
                 display: "flex", 
                 justifyContent: "flex-end",
                 zIndex: 10
