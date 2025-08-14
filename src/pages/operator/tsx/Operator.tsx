@@ -620,8 +620,7 @@ export const Operator = (props: {
                     width: "100%",
                     minHeight: window.innerWidth < 1200 ? "32px" : "40px",
                     flexWrap: window.innerWidth < 1000 ? "wrap" : "nowrap",
-                    gap: window.innerWidth < 1000 ? "8px" : "0",
-                    position: "relative"
+                    gap: window.innerWidth < 1000 ? "8px" : "0"
                 }}>
                     {/* Left side controls */}
                     <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
@@ -677,30 +676,16 @@ export const Operator = (props: {
                         )}
                     </div>
                     
-                    {/* Audio Control - left side of center */}
-                    {programMode !== "Program Editor" && (
-                        <div style={{ 
-                            display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "flex-start",
-                            flex: "0 0 auto"
-                        }}>
-                            <AudioControl remoteStreams={remoteStreams} />
-                        </div>
-                    )}
-                    
-                    {/* Speed Control - truly centered */}
+                    {/* Center controls - hide in Program Editor mode */}
                     {programMode !== "Program Editor" && (
                         <div style={{ 
                             display: "flex", 
                             alignItems: "center", 
                             justifyContent: "center",
                             flex: "1 1 auto",
-                            position: "absolute",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            pointerEvents: "auto"
+                            gap: "2px"
                         }}>
+                            <AudioControl remoteStreams={remoteStreams} />
                             <SpeedControl
                                 scale={velocityScale}
                                 onChange={(newScale: number) => {
