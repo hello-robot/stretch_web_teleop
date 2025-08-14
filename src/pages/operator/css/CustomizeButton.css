@@ -8,7 +8,7 @@
 }
 
 #customize-button span {
-    margin-right: 2rem;
+    margin-right: 1rem;
 }
 
 @media (max-width: 1200px) {
@@ -18,7 +18,7 @@
         font-size: 13px;
     }
     #customize-button span {
-        margin-right: 1.5rem;
+        margin-right: 0.75rem;
     }
 }
 
@@ -29,7 +29,7 @@
         font-size: 12px;
     }
     #customize-button span {
-        margin-right: 1rem;
+        margin-right: 0.5rem;
     }
 }
 
@@ -40,7 +40,7 @@
         font-size: 11px;
     }
     #customize-button span {
-        margin-right: 0.5rem;
+        margin-right: 0.25rem;
     }
 }
 
@@ -51,6 +51,6 @@
         font-size: 10px;
     }
     #customize-button span {
-        margin-right: 0.25rem;
+        margin-right: 0.1rem;
     }
 }

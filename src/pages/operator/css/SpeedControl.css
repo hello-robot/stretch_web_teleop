@@ -17,45 +17,46 @@
 
 #velocity-control-container button {
     border-radius: 0;
-    /* Make buttons responsive */
-    width: 6rem;
-    padding: 6px 8px;
+    /* Make buttons responsive but larger to match other header buttons */
+    width: 8rem;
+    padding: 8px 12px;
     font-size: 14px;
-    min-width: 60px;
+    min-width: 80px;
+    height: 100%;
 }
 
 @media (max-width: 1200px) {
     #velocity-control-container button {
-        width: 5rem;
-        padding: 4px 6px;
+        width: 7rem;
+        padding: 6px 10px;
         font-size: 13px;
-        min-width: 50px;
+        min-width: 70px;
     }
 }
 
 @media (max-width: 1000px) {
     #velocity-control-container button {
-        width: 4rem;
-        padding: 4px 4px;
+        width: 6rem;
+        padding: 5px 8px;
         font-size: 12px;
-        min-width: 40px;
+        min-width: 60px;
     }
 }
 
 @media (max-width: 800px) {
     #velocity-control-container button {
-        width: 3.5rem;
-        padding: 3px 3px;
+        width: 5rem;
+        padding: 4px 6px;
         font-size: 11px;
-        min-width: 35px;
+        min-width: 50px;
     }
 }
 
 @media (max-width: 600px) {
     #velocity-control-container button {
-        width: 3rem;
-        padding: 2px 2px;
+        width: 4rem;
+        padding: 3px 4px;
         font-size: 10px;
-        min-width: 30px;
+        min-width: 40px;
     }
 }
