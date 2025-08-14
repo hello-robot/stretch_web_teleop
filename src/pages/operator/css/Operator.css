@@ -19,6 +19,8 @@
     grid-column: 1/3;
     --header-btn-width: 14rem;
     --header-btn-width-med: 7rem;
+    --header-btn-width-small: 5rem;
+    --header-btn-width-xs: 4rem;
 }
 
 .operator-collision-alerts {
@@ -74,6 +76,43 @@
 
 #operator-header .dropdown {
     width: var(--header-btn-width);
+}
+
+/* Responsive header buttons */
+@media (max-width: 1200px) {
+    #operator-header {
+        --header-btn-width: 12rem;
+        --header-btn-width-med: 6rem;
+        --header-btn-width-small: 4.5rem;
+        --header-btn-width-xs: 3.5rem;
+    }
+}
+
+@media (max-width: 1000px) {
+    #operator-header {
+        --header-btn-width: 10rem;
+        --header-btn-width-med: 5rem;
+        --header-btn-width-small: 4rem;
+        --header-btn-width-xs: 3rem;
+    }
+}
+
+@media (max-width: 800px) {
+    #operator-header {
+        --header-btn-width: 8rem;
+        --header-btn-width-med: 4rem;
+        --header-btn-width-small: 3.5rem;
+        --header-btn-width-xs: 2.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    #operator-header {
+        --header-btn-width: 6rem;
+        --header-btn-width-med: 3rem;
+        --header-btn-width-small: 3rem;
+        --header-btn-width-xs: 2rem;
+    }
 }
 
 .operator-voice,

@@ -3,6 +3,8 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    width: var(--header-btn-width);
+    padding: 6px 12px;
 }
 
 .audioControl {
@@ -12,4 +14,55 @@
 .audioControlButton {
     border-radius: 50%;
     aspect-ratio: 1;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 14px;
+}
+
+@media (max-width: 1200px) {
+    .audioControlContainer {
+        width: var(--header-btn-width);
+        padding: 5px 10px;
+    }
+    .audioControlButton {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .audioControlContainer {
+        width: var(--header-btn-width-med);
+        padding: 4px 8px;
+    }
+    .audioControlButton {
+        width: 2rem;
+        height: 2rem;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 800px) {
+    .audioControlContainer {
+        width: var(--header-btn-width-small);
+        padding: 3px 6px;
+    }
+    .audioControlButton {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 600px) {
+    .audioControlContainer {
+        width: var(--header-btn-width-xs);
+        padding: 2px 4px;
+    }
+    .audioControlButton {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 10px;
+    }
 }
