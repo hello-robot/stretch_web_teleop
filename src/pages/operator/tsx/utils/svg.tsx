@@ -27,7 +27,7 @@ import { ButtonPadButton } from "../function_providers/ButtonFunctionProvider";
 import { isMobile } from "react-device-detect";
 
 /** The pixel width of SVG components. */
-export const SVG_RESOLUTION = 500;
+export const SVG_RESOLUTION = 700;
 
 /**
  * Possible layouts for the button pad (i.e. the shape and arrangement of the
