@@ -1,3 +1,10 @@
+#velocity-control-container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+}
+
 #velocity-control-container button:first-of-type {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }
@@ -8,12 +15,45 @@
 
 #velocity-control-container button {
     border-radius: 0;
-    /* Make buttons wider than default */
-    width: 8rem;
+    /* Make buttons responsive */
+    width: 6rem;
+    padding: 6px 8px;
+    font-size: 14px;
+    min-width: 60px;
+}
+
+@media (max-width: 1200px) {
+    #velocity-control-container button {
+        width: 5rem;
+        padding: 4px 6px;
+        font-size: 13px;
+        min-width: 50px;
+    }
 }
 
 @media (max-width: 1000px) {
     #velocity-control-container button {
-        width: auto;
+        width: 4rem;
+        padding: 4px 4px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 800px) {
+    #velocity-control-container button {
+        width: 3.5rem;
+        padding: 3px 3px;
+        font-size: 11px;
+        min-width: 35px;
+    }
+}
+
+@media (max-width: 600px) {
+    #velocity-control-container button {
+        width: 3rem;
+        padding: 2px 2px;
+        font-size: 10px;
+        min-width: 30px;
     }
 }
