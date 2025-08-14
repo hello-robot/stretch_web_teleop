@@ -209,7 +209,6 @@ export const Library = (props: CustomizableComponentProps) => {
                 gap: window.innerWidth < 1200 ? "12px" : "16px",
                 flex: "1",
                 overflowY: "auto",
-                paddingBottom: "60px",
                 position: "relative"
             }}>
                 <div className="library-sections-container" style={{
@@ -349,6 +348,9 @@ export const Library = (props: CustomizableComponentProps) => {
                         </div>
                     </div>
                 </div>
+                
+                {/* Spacer to prevent content from being covered by clear button */}
+                <div style={{ height: "60px" }}></div>
                 
             </div>
             
