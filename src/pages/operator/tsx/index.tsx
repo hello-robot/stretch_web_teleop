@@ -34,6 +34,7 @@ import "operator/css/index.css";
 import { RunStopFunctionProvider } from "./function_providers/RunStopFunctionProvider";
 import { BatteryVoltageFunctionProvider } from "./function_providers/BatteryVoltageFunctionProvider";
 import { waitUntilAsync } from "../../../shared/util";
+import { useState, useEffect } from "react";
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<
     string,
@@ -46,6 +47,7 @@ export let hasBetaTeleopKit: boolean;
 export let stretchTool: StretchTool;
 export let occupancyGrid: ROSOccupancyGrid | undefined = undefined;
 export let storageHandler: StorageHandler;
+let isReconnecting = false;
 
 // Create the function providers. These abstract the logic between the React
 // components and remote robot.
@@ -249,7 +251,9 @@ function initializeOperator() {
  */
 function configureRemoteRobot() {
     remoteRobot = new RemoteRobot({
-        robotChannel: (message: cmd) => connection.sendData(message),
+        robotChannel: (message: cmd) => {
+            connection.sendData(message);
+        },
     });
     occupancyGrid = undefined;
     remoteRobot.getHasBetaTeleopKit("getHasBetaTeleopKit");
@@ -274,6 +278,9 @@ function configureRemoteRobot() {
     remoteRobot.sensors.setRunStopFunctionProviderCallback(
         runStopFunctionProvider.updateRunStopState,
     );
+    
+    (window as any).remoteRobot = remoteRobot; //Make remotRobot globally available
+    (window as any).buttonFunctionProvider = buttonFunctionProvider; //Make buttonFunctionProvider globally available 
 }
 
 /**
@@ -312,14 +319,32 @@ function renderOperator(storageHandler: StorageHandler) {
     const layout = storageHandler.loadCurrentLayoutOrDefault();
     FunctionProvider.initialize(DEFAULT_VELOCITY_SCALE, layout.actionMode);
 
+    // Add a React state for isReconnecting
+    function OperatorWithReconnect() {
+        const [reconnecting, setReconnecting] = useState(false);
+        useEffect(() => {
+            // Observe the DOM for the loader
+            const observer = new MutationObserver(() => {
+                const loader = document.querySelector('.loader');
+                setReconnecting(!!loader);
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            // Initial check
+            setReconnecting(!!document.querySelector('.loader'));
+            return () => observer.disconnect();
+        }, []);
+        return (
+            <Operator
+                remoteStreams={allRemoteStreams}
+                layout={layout}
+                storageHandler={storageHandler}
+                isReconnecting={reconnecting}
+            />
+        );
+    }
+
     !isMobile
-        ? root.render(
-              <Operator
-                  remoteStreams={allRemoteStreams}
-                  layout={layout}
-                  storageHandler={storageHandler}
-              />,
-          )
+        ? root.render(<OperatorWithReconnect />)
         : root.render(
               <MobileOperator
                   remoteStreams={allRemoteStreams}

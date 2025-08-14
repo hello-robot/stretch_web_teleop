@@ -35,6 +35,7 @@ export class RemoteRobot extends React.Component<{}, any> {
     mapPose: ROSLIB.Transform;
     moveBaseGoalReached: boolean;
     moveBaseState?: string;
+    isExecutingProgram: boolean;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
@@ -56,6 +57,7 @@ export class RemoteRobot extends React.Component<{}, any> {
             } as ROSLIB.Quaternion,
         } as ROSLIB.Transform;
         this.moveBaseGoalReached = false;
+        this.isExecutingProgram = false;
     }
 
     setGoalReached(reached: boolean) {
@@ -173,7 +175,8 @@ export class RemoteRobot extends React.Component<{}, any> {
             | "setRealsenseDepthSensing"
             | "setGripperDepthSensing"
             | "setRealsenseBodyPoseEstimate"
-            | "setRunStop",
+            | "setRunStop"
+            | "setExpandedGripper",
         toggle: boolean,
     ) {
         let cmd: ToggleCommand = {
@@ -274,6 +277,11 @@ export class RemoteRobot extends React.Component<{}, any> {
             type: "homeTheRobot",
         };
         this.robotChannel(cmd);
+    }
+
+    setExpandedGripper(toggle: boolean) {
+        console.log(`RemoteRobot: setExpandedGripper called with toggle: ${toggle}`);
+        this.setToggle("setExpandedGripper", toggle);
     }
 }
 

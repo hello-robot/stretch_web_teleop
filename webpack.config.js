@@ -42,9 +42,9 @@ module.exports = (env) => {
             new webpack.ProvidePlugin({
                 Buffer: ["buffer", "Buffer"],
             }),
-            // new webpack.ProvidePlugin({
-            //   process: 'process/browser',
-            // }),
+            new webpack.ProvidePlugin({
+              process: 'process/browser',
+            }),
             new webpack.DefinePlugin(envKeys),
         ].concat(
             pages.map(

@@ -1,16 +1,20 @@
 import ROSLIB from "roslib";
 import { BASIC_LAYOUT } from "../default_layouts/SIMPLE_LAYOUT";
+import { PROGRAM_EDITOR_LAYOUT } from "../default_layouts/PROGRAM_EDITOR_LAYOUT";
+import { EXECUTION_MONITOR_LAYOUT } from "../default_layouts/EXECUTION_MONITOR_LAYOUT";
 import { LayoutDefinition } from "operator/tsx/utils/component_definitions";
-import { ArucoMarkersInfo, RobotPose } from "shared/util";
+import { RobotPose } from "shared/util";
 import { ARUCO_MARKER_INFO } from "../utils/aruco_markers_dict";
 
 /** Type for all the possible names of default layouts. */
-export type DefaultLayoutName = "Basic Layout";
+export type DefaultLayoutName = "Basic Layout" | "Program Editor Layout" | "Execution Monitor Layout";
 
 /** Object with all the default layouts. */
 export const DEFAULT_LAYOUTS: { [key in DefaultLayoutName]: LayoutDefinition } =
     {
         "Basic Layout": BASIC_LAYOUT,
+        "Program Editor Layout": PROGRAM_EDITOR_LAYOUT,
+        "Execution Monitor Layout": EXECUTION_MONITOR_LAYOUT,
     };
 
 /**
@@ -48,13 +52,15 @@ export abstract class StorageHandler {
     /**
      * Saves the current layout to preserve state between reloading the browser.
      * @param layout the current layout
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      */
-    public abstract saveCurrentLayout(layout: LayoutDefinition): void;
+    public abstract saveCurrentLayout(layout: LayoutDefinition, mode?: string): void;
 
     /**
      * Loads the last used layout to preserve state between reloading the browser.
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      */
-    public abstract loadCurrentLayout(): LayoutDefinition | null;
+    public abstract loadCurrentLayout(mode?: string): LayoutDefinition | null;
 
     /**
      * Gets the list of all the user's saved layouts
@@ -154,13 +160,14 @@ export abstract class StorageHandler {
     /**
      * Gets the last saved state from the user's layout, or gets the default
      * layout if the user has no saved state.
+     * @param mode the program mode (Demonstrate, Create Program, Run Program)
      * @returns layout definition for the layout that should be loaded into the
      *          operator page.
      */
-    public loadCurrentLayoutOrDefault(): LayoutDefinition {
-        const currentLayout = this.loadCurrentLayout();
+    public loadCurrentLayoutOrDefault(mode?: string): LayoutDefinition {
+        const currentLayout = this.loadCurrentLayout(mode);
         if (!currentLayout) return Object.values(DEFAULT_LAYOUTS)[0];
-        console.log("loading saved layout");
+        console.log("loading saved layout for mode:", mode);
         return currentLayout;
     }
 

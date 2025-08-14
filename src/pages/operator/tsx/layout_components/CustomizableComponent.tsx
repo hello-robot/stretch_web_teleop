@@ -15,6 +15,10 @@ import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
 import { RunStopButton } from "../static_components/RunStop";
 import { BatteryGuage } from "../static_components/BatteryGauge";
+import { RosbagRecorder } from "./RosbagRecorder";
+import { ProgramEditor } from "./ProgramEditor";
+import { Library } from "./Library";
+import { ExecutionMonitor } from "./ExecutionMonitor";
 
 /** State required for all elements */
 export type SharedState = {
@@ -37,6 +41,35 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
+    /** Whether a program is currently executing */
+    isExecutingProgram: boolean;
+    /** Whether TakeControl is currently active (enables teleoperation in Execution Monitor) */
+    isTakeControlActive?: boolean;
+    /** Current program mode (Demonstrate, Program Editor, Execution Monitor) */
+    programMode?: string;
+    /** Current line being executed (1-indexed) */
+    currentExecutingLine?: number;
+    /** Function to update current executing line */
+    updateCurrentExecutingLine?: (lineNumber: number | undefined) => void;
+    /** Whether waiting for user confirmation after TakeControl */
+    waitingForUserConfirmation?: boolean;
+    /** Function to handle "Done teleoperating" button click */
+    handleDoneTeleoperating?: () => void;
+    /** Function to set execution error */
+    setExecutionError?: (error: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string }) => void;
+    /** Function to clear execution error */
+    clearExecutionError?: () => void;
+    /** Function to set error line number */
+    setErrorLineNumber?: (lineNumber: number | null) => void;
+    /** Current execution error */
+    executionError?: { type: 'syntax' | 'invalid_input' | 'unknown_pose'; message: string } | null;
+    /** Line number where error occurred */
+    errorLineNumber?: number | null;
+    /** Function to insert text at cursor position in program editor */
+    insertTextAtCursor?: (text: string) => void;
+    /** Function to add new saved position to autocomplete and syntax highlighting */
+    addSavedPosition?: (positionName: string) => void;
+
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
@@ -55,6 +88,7 @@ export type CustomizableComponentProps = {
     definition: ComponentDefinition;
     /** see {@link SharedState} */
     sharedState: SharedState;
+    hideLabels?: boolean;
 };
 
 /**
@@ -88,6 +122,14 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <RunStopButton {...props} />;
         case ComponentType.BatteryGuage:
             return <BatteryGuage {...props} />;
+        case ComponentType.RosbagRecorder:
+            return <RosbagRecorder {...props} hideLabels={props.hideLabels ?? props.sharedState.hideLabels ?? false} />;
+        case ComponentType.ProgramEditor:
+            return <ProgramEditor {...props} />;
+        case ComponentType.Library:
+            return <Library {...props} />;
+        case ComponentType.ExecutionMonitor:
+            return <ExecutionMonitor {...props} />;
         default:
             throw Error(
                 `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`

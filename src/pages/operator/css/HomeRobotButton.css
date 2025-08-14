@@ -1,0 +1,54 @@
+#home-robot-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12rem; 
+    gap: 0.5rem;
+    text-align: center;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+#home-robot-button span {
+    margin-right: 0; 
+    flex: 0 0 auto; 
+}
+
+@media (max-width: 1200px) {
+    #home-robot-button {
+        width: 10rem;
+        padding: 5px 10px;
+        font-size: 13px;
+        gap: 0.4rem;
+    }
+}
+
+@media (max-width: 1000px) {
+    #home-robot-button {
+        width: 8rem;
+        padding: 4px 8px;
+        font-size: 12px;
+        gap: 0.3rem;
+    }
+}
+
+@media (max-width: 800px) {
+    #home-robot-button {
+        width: 6rem;
+        padding: 3px 6px;
+        font-size: 11px;
+        gap: 0.2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    #home-robot-button {
+        width: 4rem;
+        padding: 2px 4px;
+        font-size: 10px;
+        gap: 0.1rem;
+    }
+    #home-robot-button span {
+        display: none; /* Hide text on very small screens */
+    }
+} 

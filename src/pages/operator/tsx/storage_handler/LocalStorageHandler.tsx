@@ -42,17 +42,14 @@ export class LocalStorageHandler extends StorageHandler {
         localStorage.setItem(layoutName, JSON.stringify(layout));
     }
 
-    public saveCurrentLayout(layout: LayoutDefinition): void {
-        localStorage.setItem(
-            LocalStorageHandler.CURRENT_LAYOUT_KEY,
-            JSON.stringify(layout),
-        );
+    public saveCurrentLayout(layout: LayoutDefinition, mode?: string): void {
+        const key = mode ? `${LocalStorageHandler.CURRENT_LAYOUT_KEY}_${mode}` : LocalStorageHandler.CURRENT_LAYOUT_KEY;
+        localStorage.setItem(key, JSON.stringify(layout));
     }
 
-    public loadCurrentLayout(): LayoutDefinition | null {
-        const storedJson = localStorage.getItem(
-            LocalStorageHandler.CURRENT_LAYOUT_KEY,
-        );
+    public loadCurrentLayout(mode?: string): LayoutDefinition | null {
+        const key = mode ? `${LocalStorageHandler.CURRENT_LAYOUT_KEY}_${mode}` : LocalStorageHandler.CURRENT_LAYOUT_KEY;
+        const storedJson = localStorage.getItem(key);
         if (!storedJson) return null;
         return JSON.parse(storedJson);
     }

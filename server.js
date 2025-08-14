@@ -148,3 +148,69 @@ io.on('connection', function (socket) {
         updateRooms();
     });
 });
+
+const { spawn } = require('child_process');
+let rosbagProcess = null;
+
+app.post('/start_rosbag', (req, res) => {
+    if (rosbagProcess) {
+        return res.status(400).json({ error: 'Rosbag recording already in progress.' });
+    }
+
+     
+    const outputDir = '/media/hello-robot/HCRLAB/rosbags/latest_' + Date.now();
+    rosbagProcess = spawn('ros2', [
+        'bag', 'record',
+        '-a',
+        '-s', 'mcap',
+        '-o', outputDir
+    ], {
+        detached: true,
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    rosbagProcess.stdout.on('data', (data) => {
+        console.log(`[rosbag stdout]: ${data}`);
+    });
+    rosbagProcess.stderr.on('data', (data) => {
+        console.error(`[rosbag stderr]: ${data}`);
+    });
+    rosbagProcess.on('exit', (code, signal) => {
+        console.log(`ros2 bag record exited with code ${code}, signal ${signal}`);
+        rosbagProcess = null; 
+    });
+    res.json({ status: 'started', dir: outputDir });
+});
+
+app.post('/stop_rosbag', (req, res) => {
+    if (!rosbagProcess) {
+        return res.status(400).json({ error: 'No rosbag recording in progress.' });
+    }
+    try {
+        process.kill(-rosbagProcess.pid, 'SIGINT');
+        res.json({ status: 'stopped' });
+    } catch (e) {
+        console.error('Error stopping rosbag process:', e);
+        return res.status(500).json({ error: 'Failed to stop rosbag process.' });
+    }
+});
+
+
+app.use(express.json());
+app.post('/save_program', (req, res) => {
+    try {
+        const { filePath, fileName, content } = req.body;
+        
+        if (!filePath || !fileName || !content) {
+            return res.status(400).json({ error: 'Missing required fields: filePath, fileName, or content' });
+        }
+        const dir = path.dirname(filePath);
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`Program saved to: ${filePath}`);
+        
+        res.json({ success: true, message: 'Program saved successfully' });
+    } catch (error) {
+        console.error('Error saving program:', error);
+        res.status(500).json({ error: 'Failed to save program file' });
+    }
+});

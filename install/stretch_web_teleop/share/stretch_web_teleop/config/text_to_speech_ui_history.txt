@@ -1,0 +1,30 @@
+###############################################################################
+# Hard-Coded Utterances
+###############################################################################
+# General Introduction
+Hello, my name is Stretch.
+What's your name?
+It's nice to meet you, 
+Thank you for inviting me here today.
+Would you like to see the motions I can do?
+I can do several types of motions.
+I can move around, like this.
+I can lengthen or shorten my arm, like this.
+I can rotate my wrist, like this.
+I can open and close my hand, like this.
+You can talk to me and tell me what to do.
+Do you have any questions?
+# General Tray Delivery
+Let me fetch the tray of candy.
+I'm going to move my arm closer to you to give you something.
+I'm going to bring the tray closer to you. Please wait for my cue.
+Please take one candy.
+You can put the candy in your mouth now.
+Enjoy your candy!
+# Prompts Specific to Jane Doe
+Jane, it's nice to see you again.
+Jane, do you see the tray in front of you?
+Jane, please reach inside the tray and take one candy.
+###############################################################################
+# Live Record of History During Runtime
+###############################################################################

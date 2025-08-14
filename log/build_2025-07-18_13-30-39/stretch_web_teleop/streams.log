@@ -1,0 +1,334 @@
+[0.009s] Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake /home/hello-robot/dev_ws/src/stretch_web_teleop -DCMAKE_INSTALL_PREFIX=/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop
+[0.139s] -- The C compiler identification is GNU 11.4.0
+[0.211s] -- The CXX compiler identification is GNU 11.4.0
+[0.219s] -- Detecting C compiler ABI info
+[0.295s] -- Detecting C compiler ABI info - done
+[0.302s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.302s] -- Detecting C compile features
+[0.303s] -- Detecting C compile features - done
+[0.306s] -- Detecting CXX compiler ABI info
+[0.380s] -- Detecting CXX compiler ABI info - done
+[0.384s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.384s] -- Detecting CXX compile features
+[0.385s] -- Detecting CXX compile features - done
+[0.389s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.747s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.870s] -- Found geometry_msgs: 4.8.0 (/opt/ros/humble/share/geometry_msgs/cmake)
+[0.917s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.924s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.934s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.951s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.969s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.999s] -- Found rosbridge_server: 1.3.2 (/home/hello-robot/ament_ws/install/rosbridge_server/share/rosbridge_server/cmake)
+[1.002s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[1.342s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[1.773s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.938s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.972s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[1.975s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[2.020s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[2.020s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[2.020s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[2.020s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[2.055s] -- Found PythonExtra: .so  
+[2.129s] -- Configuring done
+[2.157s] -- Generating done
+[2.165s] -- Build files have been written to: /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop
+[2.172s] Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake /home/hello-robot/dev_ws/src/stretch_web_teleop -DCMAKE_INSTALL_PREFIX=/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop
+[2.174s] Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --build /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop -- -j16 -l16
+[2.213s] [  2%] [34m[1mGenerating C code for ROS interfaces[0m
+[2.224s] [  5%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[2.232s] [  5%] Built target ament_cmake_python_copy_stretch_web_teleop_helpers
+[2.233s] [  5%] Built target ament_cmake_python_copy_stretch_web_teleop
+[2.521s] running egg_info
+[2.521s] running egg_info
+[2.538s] creating stretch_web_teleop.egg-info
+[2.538s] creating stretch_web_teleop_helpers.egg-info
+[2.538s] writing stretch_web_teleop.egg-info/PKG-INFO
+[2.538s] writing stretch_web_teleop_helpers.egg-info/PKG-INFO
+[2.539s] writing dependency_links to stretch_web_teleop_helpers.egg-info/dependency_links.txt
+[2.539s] writing dependency_links to stretch_web_teleop.egg-info/dependency_links.txt
+[2.539s] writing top-level names to stretch_web_teleop.egg-info/top_level.txt
+[2.539s] writing top-level names to stretch_web_teleop_helpers.egg-info/top_level.txt
+[2.539s] writing manifest file 'stretch_web_teleop.egg-info/SOURCES.txt'
+[2.539s] writing manifest file 'stretch_web_teleop_helpers.egg-info/SOURCES.txt'
+[2.700s] [  7%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_generator_c.dir/rosidl_generator_c/stretch_web_teleop/action/detail/move_to_pregrasp__functions.c.o[0m
+[2.701s] [ 10%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_generator_c.dir/rosidl_generator_c/stretch_web_teleop/msg/detail/text_to_speech__functions.c.o[0m
+[2.713s] [ 10%] Built target stretch_web_teleop__cpp
+[2.724s] [ 15%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[2.724s] [ 15%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[2.725s] [ 17%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[2.839s] [ 20%] [32m[1mLinking C shared library libstretch_web_teleop__rosidl_generator_c.so[0m
+[2.886s] [ 20%] Built target stretch_web_teleop__rosidl_generator_c
+[2.900s] [ 28%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[2.900s] [ 28%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[2.901s] [ 28%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[3.149s] [ 30%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.cpp.o[0m
+[3.155s] [ 33%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/stretch_web_teleop/msg/detail/text_to_speech__type_support.cpp.o[0m
+[3.221s] [ 35%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/stretch_web_teleop/action/move_to_pregrasp__type_support.cpp.o[0m
+[3.224s] [ 38%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/stretch_web_teleop/msg/text_to_speech__type_support.cpp.o[0m
+[3.250s] [ 41%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/stretch_web_teleop/msg/detail/dds_fastrtps/text_to_speech__type_support.cpp.o[0m
+[3.250s] [ 43%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/stretch_web_teleop/action/detail/dds_fastrtps/move_to_pregrasp__type_support.cpp.o[0m
+[3.398s] [ 46%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_c.dir/rosidl_typesupport_c/stretch_web_teleop/action/move_to_pregrasp__type_support.cpp.o[0m
+[3.402s] [ 48%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_c.dir/rosidl_typesupport_c/stretch_web_teleop/msg/text_to_speech__type_support.cpp.o[0m
+[3.488s] [ 51%] [32m[1mLinking CXX shared library libstretch_web_teleop__rosidl_typesupport_c.so[0m
+[3.501s] reading manifest file 'stretch_web_teleop_helpers.egg-info/SOURCES.txt'
+[3.502s] reading manifest file 'stretch_web_teleop.egg-info/SOURCES.txt'
+[3.503s] writing manifest file 'stretch_web_teleop_helpers.egg-info/SOURCES.txt'
+[3.505s] writing manifest file 'stretch_web_teleop.egg-info/SOURCES.txt'
+[3.539s] [ 53%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.c.o[0m
+[3.544s] [ 56%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/stretch_web_teleop/msg/detail/text_to_speech__type_support.c.o[0m
+[3.578s] [ 56%] Built target stretch_web_teleop__rosidl_typesupport_c
+[3.630s] [ 58%] [32m[1mLinking C shared library libstretch_web_teleop__rosidl_typesupport_introspection_c.so[0m
+[3.646s] [ 58%] Built target ament_cmake_python_build_stretch_web_teleop_egg
+[3.647s] [ 58%] Built target ament_cmake_python_build_stretch_web_teleop_helpers_egg
+[3.679s] [ 58%] Built target stretch_web_teleop__rosidl_typesupport_introspection_c
+[3.725s] [ 64%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/stretch_web_teleop/msg/detail/text_to_speech__type_support_c.cpp.o[0m
+[3.725s] [ 64%] [32mBuilding CXX object CMakeFiles/stretch_web_teleop__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/stretch_web_teleop/action/detail/move_to_pregrasp__type_support_c.cpp.o[0m
+[3.879s] [ 66%] [32m[1mLinking CXX shared library libstretch_web_teleop__rosidl_typesupport_introspection_cpp.so[0m
+[3.882s] [ 69%] [32m[1mLinking CXX shared library libstretch_web_teleop__rosidl_typesupport_cpp.so[0m
+[3.927s] [ 69%] Built target stretch_web_teleop__rosidl_typesupport_cpp
+[3.962s] [ 71%] [32m[1mLinking CXX shared library libstretch_web_teleop__rosidl_typesupport_fastrtps_cpp.so[0m
+[3.967s] [ 71%] Built target stretch_web_teleop__rosidl_typesupport_introspection_cpp
+[4.031s] [ 71%] Built target stretch_web_teleop__rosidl_typesupport_fastrtps_cpp
+[4.039s] [ 74%] [32m[1mLinking CXX shared library libstretch_web_teleop__rosidl_typesupport_fastrtps_c.so[0m
+[4.101s] [ 74%] Built target stretch_web_teleop__rosidl_typesupport_fastrtps_c
+[4.121s] [ 74%] Built target stretch_web_teleop
+[4.140s] [ 76%] [34m[1mGenerating Python code for ROS interfaces[0m
+[4.739s] [ 76%] Built target stretch_web_teleop__py
+[4.761s] [ 79%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_generator_py.dir/rosidl_generator_py/stretch_web_teleop/action/_move_to_pregrasp_s.c.o[0m
+[4.762s] [ 82%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_generator_py.dir/rosidl_generator_py/stretch_web_teleop/msg/_text_to_speech_s.c.o[0m
+[4.871s] [ 84%] [32m[1mLinking C shared library rosidl_generator_py/stretch_web_teleop/libstretch_web_teleop__rosidl_generator_py.so[0m
+[4.907s] [ 84%] Built target stretch_web_teleop__rosidl_generator_py
+[4.926s] [ 87%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_c.c.o[0m
+[4.926s] [ 89%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[4.926s] [ 92%] [32mBuilding C object CMakeFiles/stretch_web_teleop__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[5.018s] [ 94%] [32m[1mLinking C shared library rosidl_generator_py/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[5.019s] [ 97%] [32m[1mLinking C shared library rosidl_generator_py/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[5.019s] [100%] [32m[1mLinking C shared library rosidl_generator_py/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[5.059s] [100%] Built target stretch_web_teleop__rosidl_typesupport_c__pyext
+[5.060s] [100%] Built target stretch_web_teleop__rosidl_typesupport_fastrtps_c__pyext
+[5.060s] [100%] Built target stretch_web_teleop__rosidl_typesupport_introspection_c__pyext
+[5.070s] Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --build /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop -- -j16 -l16
+[5.078s] Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --install /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop
+[5.086s] -- Install configuration: ""
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/rosidl_interfaces/stretch_web_teleop
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/move_to_pregrasp.h
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.h
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__functions.c
+[5.086s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__functions.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__struct.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__struct.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__type_support.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__functions.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__functions.c
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/text_to_speech.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/rosidl_generator_c__visibility_control.h
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/library_path.sh
+[5.087s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/library_path.dsv
+[5.088s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_generator_c.so
+[5.088s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_generator_c.so" to ""
+[5.088s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.088s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.088s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.088s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__rosidl_typesupport_fastrtps_c.h
+[5.088s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.088s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[5.088s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.088s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__rosidl_typesupport_fastrtps_c.h
+[5.088s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_fastrtps_c.so
+[5.089s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_fastrtps_c.so" to ""
+[5.089s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.089s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.089s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.089s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.hpp
+[5.089s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__struct.hpp
+[5.089s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__traits.hpp
+[5.089s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__builder.hpp
+[5.089s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/move_to_pregrasp.hpp
+[5.089s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.089s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__struct.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__builder.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__traits.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__type_support.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/text_to_speech.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/rosidl_generator_cpp__visibility_control.hpp
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/dds_fastrtps
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__rosidl_typesupport_fastrtps_cpp.hpp
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__rosidl_typesupport_fastrtps_cpp.hpp
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/dds_fastrtps
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_fastrtps_cpp.so
+[5.090s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_fastrtps_cpp.so" to ""
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__rosidl_typesupport_introspection_c.h
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.c
+[5.090s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.090s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__type_support.c
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__rosidl_typesupport_introspection_c.h
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_introspection_c.so
+[5.091s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_introspection_c.so" to ""
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_c.so
+[5.091s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_c.so" to ""
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__type_support.cpp
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/action/detail/move_to_pregrasp__rosidl_typesupport_introspection_cpp.hpp
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg
+[5.091s] -- Up-to-date: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__type_support.cpp
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/include/stretch_web_teleop/stretch_web_teleop/msg/detail/text_to_speech__rosidl_typesupport_introspection_cpp.hpp
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_introspection_cpp.so
+[5.091s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_introspection_cpp.so" to ""
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_cpp.so
+[5.091s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_typesupport_cpp.so" to ""
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/pythonpath.sh
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/pythonpath.dsv
+[5.091s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop-0.1.0-py3.10.egg-info
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop-0.1.0-py3.10.egg-info/PKG-INFO
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop-0.1.0-py3.10.egg-info/top_level.txt
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop-0.1.0-py3.10.egg-info/SOURCES.txt
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop-0.1.0-py3.10.egg-info/dependency_links.txt
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action/_move_to_pregrasp.py
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action/__init__.py
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action/_move_to_pregrasp_s.c
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_c.c
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg/_text_to_speech_s.c
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg/__init__.py
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg/_text_to_speech.py
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/__init__.py
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_fastrtps_c.c
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/_stretch_web_teleop_s.ep.rosidl_typesupport_introspection_c.c
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/libstretch_web_teleop__rosidl_generator_py.so
+[5.092s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[5.129s] Listing '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop'...
+[5.129s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/__init__.py'...
+[5.129s] Listing '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action'...
+[5.129s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action/__init__.py'...
+[5.129s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/action/_move_to_pregrasp.py'...
+[5.129s] Listing '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg'...
+[5.129s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg/__init__.py'...
+[5.129s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/msg/_text_to_speech.py'...
+[5.132s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[5.132s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so" to ""
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[5.133s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so" to ""
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[5.133s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop/stretch_web_teleop_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so" to ""
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_generator_py.so
+[5.133s] -- Set runtime path of "/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/libstretch_web_teleop__rosidl_generator_py.so" to ""
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/action/MoveToPregrasp.idl
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/msg/TextToSpeech.idl
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/action/MoveToPregrasp.action
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/msg/TextToSpeech.msg
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers-0.1.0-py3.10.egg-info
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers-0.1.0-py3.10.egg-info/PKG-INFO
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers-0.1.0-py3.10.egg-info/top_level.txt
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers-0.1.0-py3.10.egg-info/SOURCES.txt
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers-0.1.0-py3.10.egg-info/dependency_links.txt
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/pinocchio_ik_solver.py
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/stretch_ik_control.py
+[5.133s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/move_to_pregrasp_state.py
+[5.134s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/text_to_speech_helpers.py
+[5.134s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/conversions.py
+[5.134s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/__init__.py
+[5.134s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/constants.py
+[5.176s] Listing '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/__init__.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/constants.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/conversions.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/move_to_pregrasp_state.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/pinocchio_ik_solver.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/stretch_ik_control.py'...
+[5.176s] Compiling '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/local/lib/python3.10/dist-packages/stretch_web_teleop_helpers/text_to_speech_helpers.py'...
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/compressed_image_visualizer.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/move_to_pregrasp.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/navigation_camera.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/text_to_speech.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/stretch_web_teleop/text_to_speech_ui.py
+[5.181s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/web_interface.launch.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/gripper_camera.launch.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/navigation_camera.launch.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/launch/multi_camera.launch.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/certificates/.gitkeep
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/old_navigation_camera.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/blank_image.png
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/navigation_camera.py
+[5.182s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/compressed_image_visualizer.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/text_to_speech_ui.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/move_to_pregrasp.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/text_to_speech.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/gripper_camera.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/nodes/configure_video_streams.py
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/config
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/config/text_to_speech_ui_history.txt
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps/map.yaml
+[5.183s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/maps/map.pgm
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/package_run_dependencies/stretch_web_teleop
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/parent_prefix_path/stretch_web_teleop
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/ament_prefix_path.sh
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/ament_prefix_path.dsv
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/path.sh
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/environment/path.dsv
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.bash
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.sh
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.zsh
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/local_setup.dsv
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.dsv
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/ament_index/resource_index/packages/stretch_web_teleop
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_generator_cExport.cmake
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_generator_cExport-noconfig.cmake
+[5.184s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_typesupport_fastrtps_cExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_generator_cppExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_typesupport_fastrtps_cppExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_introspection_cExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_cExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_cExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_introspection_cppExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_cppExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleop__rosidl_typesupport_cppExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_generator_pyExport.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/export_stretch_web_teleop__rosidl_generator_pyExport-noconfig.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/rosidl_cmake-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/ament_cmake_export_dependencies-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/ament_cmake_export_include_directories-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/ament_cmake_export_libraries-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/ament_cmake_export_targets-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[5.185s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[5.186s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleopConfig.cmake
+[5.186s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/cmake/stretch_web_teleopConfig-version.cmake
+[5.186s] -- Installing: /home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.xml
+[5.188s] Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --install /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop

@@ -1,0 +1,114 @@
+[0.203s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.203s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=16, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x761810e79e70>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x761810f14eb0>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x761810f14eb0>>, mixin_verb=('build',))
+[0.242s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.242s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.243s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.243s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.243s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.243s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.243s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/hello-robot/dev_ws/src/stretch_web_teleop'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.264s] DEBUG:colcon.colcon_core.package_identification:Package '.' with type 'ros.ament_cmake' and name 'stretch_web_teleop'
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.265s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.289s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.289s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.291s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 34 installed packages in /home/hello-robot/ament_ws/install
+[0.292s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 411 installed packages in /opt/ros/humble
+[0.293s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.341s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_args' from command line to 'None'
+[0.341s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_target' from command line to 'None'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_clean_cache' from command line to 'False'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_clean_first' from command line to 'False'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'cmake_force_configure' from command line to 'False'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'ament_cmake_args' from command line to 'None'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'catkin_cmake_args' from command line to 'None'
+[0.342s] Level 5:colcon.colcon_core.verb:set package 'stretch_web_teleop' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.342s] DEBUG:colcon.colcon_core.verb:Building package 'stretch_web_teleop' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop', 'merge_install': False, 'path': '/home/hello-robot/dev_ws/src/stretch_web_teleop', 'symlink_install': False, 'test_result_base': None}
+[0.342s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.343s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.343s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/hello-robot/dev_ws/src/stretch_web_teleop' with build type 'ament_cmake'
+[0.343s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/hello-robot/dev_ws/src/stretch_web_teleop'
+[0.346s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.346s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.346s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.352s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake /home/hello-robot/dev_ws/src/stretch_web_teleop -DCMAKE_INSTALL_PREFIX=/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop
+[2.515s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake /home/hello-robot/dev_ws/src/stretch_web_teleop -DCMAKE_INSTALL_PREFIX=/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop
+[2.517s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --build /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop -- -j16 -l16
+[5.413s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --build /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop -- -j16 -l16
+[5.421s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --install /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop
+[5.531s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(stretch_web_teleop)
+[5.531s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/hello-robot/ament_ws/install/tf2_web_republisher_py:/home/hello-robot/ament_ws/install/stretch_simulation:/home/hello-robot/ament_ws/install/stretch_ros_tutorials:/home/hello-robot/ament_ws/install/stretch_funmap:/home/hello-robot/ament_ws/install/stretch_calibration:/home/hello-robot/ament_ws/install/stretch_demos:/home/hello-robot/ament_ws/install/stretch_deep_perception:/home/hello-robot/ament_ws/install/stretch_core:/home/hello-robot/ament_ws/install/respeaker_ros2:/home/hello-robot/ament_ws/install/hello_helpers:/opt/ros/humble /usr/bin/cmake --install /home/hello-robot/dev_ws/src/stretch_web_teleop/build/stretch_web_teleop
+[5.535s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop' for CMake module files
+[5.536s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop' for CMake config files
+[5.537s] Level 1:colcon.colcon_core.shell:create_environment_hook('stretch_web_teleop', 'cmake_prefix_path')
+[5.537s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.ps1'
+[5.538s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.dsv'
+[5.538s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.sh'
+[5.539s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib'
+[5.539s] Level 1:colcon.colcon_core.shell:create_environment_hook('stretch_web_teleop', 'ld_library_path_lib')
+[5.539s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.ps1'
+[5.540s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.dsv'
+[5.540s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.sh'
+[5.540s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/bin'
+[5.540s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/pkgconfig/stretch_web_teleop.pc'
+[5.540s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/python3.10/site-packages'
+[5.540s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/bin'
+[5.540s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.ps1'
+[5.541s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.dsv'
+[5.541s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.sh'
+[5.542s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.bash'
+[5.542s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.zsh'
+[5.542s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/colcon-core/packages/stretch_web_teleop)
+[5.543s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(stretch_web_teleop)
+[5.543s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop' for CMake module files
+[5.543s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop' for CMake config files
+[5.544s] Level 1:colcon.colcon_core.shell:create_environment_hook('stretch_web_teleop', 'cmake_prefix_path')
+[5.544s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.ps1'
+[5.544s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.dsv'
+[5.544s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/cmake_prefix_path.sh'
+[5.544s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib'
+[5.544s] Level 1:colcon.colcon_core.shell:create_environment_hook('stretch_web_teleop', 'ld_library_path_lib')
+[5.544s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.ps1'
+[5.545s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.dsv'
+[5.545s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/hook/ld_library_path_lib.sh'
+[5.545s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/bin'
+[5.545s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/pkgconfig/stretch_web_teleop.pc'
+[5.545s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/lib/python3.10/site-packages'
+[5.545s] Level 1:colcon.colcon_core.environment:checking '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/bin'
+[5.545s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.ps1'
+[5.546s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.dsv'
+[5.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.sh'
+[5.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.bash'
+[5.546s] INFO:colcon.colcon_core.shell:Creating package script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/stretch_web_teleop/package.zsh'
+[5.546s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/hello-robot/dev_ws/src/stretch_web_teleop/install/stretch_web_teleop/share/colcon-core/packages/stretch_web_teleop)
+[5.547s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[5.547s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[5.547s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[5.547s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[5.551s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[5.551s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[5.551s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[5.571s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[5.571s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/local_setup.ps1'
+[5.572s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/_local_setup_util_ps1.py'
+[5.573s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/setup.ps1'
+[5.574s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/local_setup.sh'
+[5.575s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/_local_setup_util_sh.py'
+[5.575s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/setup.sh'
+[5.577s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/local_setup.bash'
+[5.577s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/setup.bash'
+[5.579s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/local_setup.zsh'
+[5.580s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/hello-robot/dev_ws/src/stretch_web_teleop/install/setup.zsh'
