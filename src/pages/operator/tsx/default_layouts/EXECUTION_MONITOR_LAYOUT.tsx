@@ -80,16 +80,6 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
                     children: [
                         {
                             type: ComponentType.SingleTab,
-                            label: "Base",
-                            children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Base,
-                                } as ButtonPadDefinition,
-                            ],
-                        } as TabDefinition,
-                        {
-                            type: ComponentType.SingleTab,
                             label: "Wrist & Gripper",
                             children: [
                                 {
