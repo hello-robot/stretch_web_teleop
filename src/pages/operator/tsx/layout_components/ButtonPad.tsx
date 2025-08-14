@@ -171,8 +171,9 @@ const SingleButton = (props: SingleButtonProps) => {
     const baseWidth = isMobile ? 75 : 85;
     const height = (isReducedSizeIcon ? baseHeight * 0.8 : baseHeight) * scaleFactor;
     const width = (isReducedSizeIcon ? baseWidth * 0.8 : baseWidth) * scaleFactor;
-    const x = props.iconPosition.x * scaleFactor - width / 2;
-    const y = props.iconPosition.y * scaleFactor - height / 2;
+    // Scale the positions to match the stretched SVG
+    const x = (props.iconPosition.x / SVG_RESOLUTION) * (svgElement ? svgElement.clientWidth : SVG_RESOLUTION) - width / 2;
+    const y = (props.iconPosition.y / SVG_RESOLUTION) * (svgElement ? svgElement.clientHeight : SVG_RESOLUTION) - height / 2;
     
     // Responsive label sizing 
     const [screenWidth, setScreenWidth] = React.useState(window.innerWidth);
@@ -188,7 +189,7 @@ const SingleButton = (props: SingleButtonProps) => {
     
     const labelWidth = (isSmallScreen ? 75 : isMediumScreen ? 85 : 95) * scaleFactor;
     const labelHeight = (isSmallScreen ? 20 : isMediumScreen ? 24 : 26) * scaleFactor;
-    const labelFontSize = `${(isSmallScreen ? 10 : isMediumScreen ? 11 : 12) * scaleFactor}px`;
+    const labelFontSize = `${(isSmallScreen ? 12 : isMediumScreen ? 14 : 16) * scaleFactor}px`;
     const labelOffsetX = labelWidth / 2;
     
     let labelOffsetY = (isSmallScreen ? 4 : isMediumScreen ? 5 : 6) * scaleFactor;
@@ -245,8 +246,8 @@ const SingleButton = (props: SingleButtonProps) => {
                 })}
             />
             <foreignObject
-                x={props.iconPosition.x * scaleFactor - labelOffsetX}
-                y={props.iconPosition.y * scaleFactor + height/2 + labelOffsetY}
+                x={(props.iconPosition.x / SVG_RESOLUTION) * (svgElement ? svgElement.clientWidth : SVG_RESOLUTION) - labelOffsetX}
+                y={(props.iconPosition.y / SVG_RESOLUTION) * (svgElement ? svgElement.clientHeight : SVG_RESOLUTION) + height/2 + labelOffsetY}
                 width={labelWidth}
                 height={labelHeight}
                 style={{
