@@ -1,8 +1,10 @@
 #velocity-control-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0;
     flex-wrap: nowrap;
+    margin: 0 auto;
 }
 
 #velocity-control-container button:first-of-type {
