@@ -1,6 +1,6 @@
 .video-container {
     position: relative;
-    flex: 2 1 0;
+    flex: 1 1 0;
     display: grid;
     justify-items: center;
     padding: 0.4rem;
@@ -11,6 +11,24 @@
     justify-content: center;
     /* align-items: center;
     flex-direction: column; */
+}
+
+/* Make camera views bigger in demonstrate mode */
+.video-container.demonstrate-mode {
+    flex: 3 1 0;
+    min-height: 600px;
+    min-width: 500px;
+    padding: 0.2rem;
+}
+
+.video-container.demonstrate-mode .video-area {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.video-container.demonstrate-mode .video-canvas {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 /* Overlays the button pad on top of the camera view*/
@@ -68,10 +86,9 @@
     grid-row: 2/2;
     width: 100%;
     max-height: 100%;
-    max-width: 100%;
+    max-width: fit-content; /* 100% */
     object-fit: cover;
     display: inline-block;
-    flex: 1 1 0;
 }
 
 .video-canvas {
@@ -79,8 +96,6 @@
     width: 100%;
     height: auto;
     object-fit: cover;
-    min-width: 100%;
-    min-height: 100%;
 }
 
 .video-canvas.constrainedHeight {

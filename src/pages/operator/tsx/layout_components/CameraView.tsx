@@ -323,7 +323,9 @@ export const CameraView = (props: CustomizableComponentProps) => {
         </div>
     );
     return (
-        <div className="video-container" draggable={false}>
+        <div className={className("video-container", {
+            "demonstrate-mode": props.sharedState.programMode === "Demonstrate"
+        })} draggable={false}>
             {videoComponent}
             {definition.displayButtons ? (
                 <div className="under-video-area" ref={underVideoAreaRef}>
