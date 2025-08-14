@@ -113,7 +113,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
                     ? SVG_RESOLUTION / props.aspectRatio
                     : SVG_RESOLUTION
                     }`}
-                preserveAspectRatio="none"
+                preserveAspectRatio="xMidYMid slice"
                 className={className("button-pads", {
                     customizing,
                     selected,

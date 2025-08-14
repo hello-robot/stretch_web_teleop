@@ -684,7 +684,7 @@ export const Operator = (props: {
                             justifyContent: "center",
                             flex: "1 1 auto",
                             gap: "2px",
-                            marginRight: "16px"
+                            marginRight: "20px"
                         }}>
                             <AudioControl remoteStreams={remoteStreams} />
                             <SpeedControl
