@@ -240,9 +240,10 @@
     min-height: 100%;
     max-width: none;
     max-height: none;
-    /* Force larger width */
-    width: 120% !important;
-    min-width: 120% !important;
+    /* Expand to fill available space */
+    flex-grow: 3;
+    flex-shrink: 0;
+    flex-basis: auto;
 }
 
 .button-pad-root.disabled,
