@@ -24,6 +24,11 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     min-height: 100%;
     min-width: 100%;
+    max-width: none;
+    max-height: none;
+    /* Force larger width */
+    width: 120% !important;
+    min-width: 120% !important;
 }
 
 .button-pads svg {
@@ -123,12 +128,10 @@
 .button-pad {
     font-size: x-large;
     flex: 1 1 0;
-    display: flex;
+    display: grid;
     text-align: center;
-    height: 100%;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
+    max-height: 100%;
+    justify-items: center;
 }
 
 @media (max-width: 1300px) {

@@ -236,9 +236,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1 1 0;
-    min-height: 100%;
     min-width: 100%;
+    min-height: 100%;
+    max-width: none;
+    max-height: none;
+    /* Force larger width */
+    width: 120% !important;
+    min-width: 120% !important;
 }
 
 .button-pad-root.disabled,

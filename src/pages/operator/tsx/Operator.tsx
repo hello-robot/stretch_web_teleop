@@ -9,6 +9,7 @@ import {
     ActionMode,
     ComponentDefinition,
     LayoutDefinition,
+    ComponentType,
 } from "./utils/component_definitions";
 import { className, ActionState, RemoteStream, RobotPose } from "shared/util";
 import {
@@ -235,7 +236,7 @@ export const Operator = (props: {
 
     // Just used as a flag to force the operator to rerender when the tablet orientation
     // changes.
-    underVideoFunctionProvider.setTabletOrientationOperatorCallback((_) => {
+    underVideoFunctionProvider.setTabletOrientationOperatorCallback((tabletOrientation) => {
         setTabletOrientationRerender(!tabletOrientationRerender);
     });
 
@@ -581,7 +582,12 @@ export const Operator = (props: {
                     })}
                     hidden={!layout.current.displayRosbagRecorder}
                 >
-                    <RosbagRecorder hideLabels={!layout.current.displayLabels} />
+                    <RosbagRecorder 
+                        path=""
+                        definition={{ type: ComponentType.RosbagRecorder }}
+                        sharedState={{} as any}
+                        hideLabels={!layout.current.displayLabels} 
+                    />
                 </div>
             </div>
             <div id="operator-header" onClick={handleClickHeader} style={{ 
@@ -680,6 +686,17 @@ export const Operator = (props: {
                             gap: window.innerWidth < 1200 ? "4px" : "8px"
                         }}>
                             <AudioControl remoteStreams={remoteStreams} />
+                        </div>
+                    )}
+                    
+                    {/* Speed Control - centered independently */}
+                    {programMode !== "Program Editor" && (
+                        <div style={{ 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center",
+                            flex: "1 1 auto"
+                        }}>
                             <SpeedControl
                                 scale={velocityScale}
                                 onChange={(newScale: number) => {

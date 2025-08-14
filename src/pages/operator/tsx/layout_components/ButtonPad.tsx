@@ -182,9 +182,9 @@ const SingleButton = (props: SingleButtonProps) => {
     const isSmallScreen = screenWidth < 1200;
     const isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
     
-    const labelWidth = isSmallScreen ? 85 : isMediumScreen ? 95 : 105;
-    const labelHeight = isSmallScreen ? 24 : isMediumScreen ? 28 : 30;
-    const labelFontSize = isSmallScreen ? "12px" : isMediumScreen ? "14px" : "16px";
+    const labelWidth = isSmallScreen ? 75 : isMediumScreen ? 85 : 95;
+    const labelHeight = isSmallScreen ? 20 : isMediumScreen ? 24 : 26;
+    const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "11px" : "12px";
     const labelOffsetX = labelWidth / 2;
     
     let labelOffsetY = isSmallScreen ? 4 : isMediumScreen ? 5 : 6;

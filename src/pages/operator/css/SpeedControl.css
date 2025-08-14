@@ -5,8 +5,6 @@
     gap: 0;
     flex-wrap: nowrap;
     margin: 0 auto;
-    width: 100%;
-    max-width: 500px;
 }
 
 #velocity-control-container button:first-of-type {
@@ -22,8 +20,7 @@
     /* Make buttons responsive but larger to match other header buttons */
     width: 8rem;
     padding: 8px 12px;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
     min-width: 80px;
     height: 100%;
 }
@@ -32,8 +29,7 @@
     #velocity-control-container button {
         width: 7rem;
         padding: 6px 10px;
-        font-size: 15px;
-        font-weight: 600;
+        font-size: 13px;
         min-width: 70px;
     }
 }
@@ -42,8 +38,7 @@
     #velocity-control-container button {
         width: 6rem;
         padding: 5px 8px;
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 12px;
         min-width: 60px;
     }
 }
@@ -52,8 +47,7 @@
     #velocity-control-container button {
         width: 5rem;
         padding: 4px 6px;
-        font-size: 13px;
-        font-weight: 600;
+        font-size: 11px;
         min-width: 50px;
     }
 }
@@ -62,8 +56,7 @@
     #velocity-control-container button {
         width: 4rem;
         padding: 3px 4px;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 10px;
         min-width: 40px;
     }
 }
