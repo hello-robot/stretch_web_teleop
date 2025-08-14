@@ -73,7 +73,7 @@ export const EXECUTION_MONITOR_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
-            flex: 1, 
+            flex: 0.75, 
             children: [
                 {
                     type: ComponentType.Panel,
