@@ -18,6 +18,167 @@
     line-height: 1.5;
 }
 
+/* Responsive design for different screen sizes */
+@media (max-width: 1400px) {
+    .library-root {
+        font-size: 13px;
+        min-width: 350px;
+    }
+    
+    .library-header {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .library-title {
+        font-size: 15px;
+    }
+    
+    .library-content {
+        padding: 12px;
+    }
+    
+    .library-section-title {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .library-subsection-title {
+        font-size: 13px;
+    }
+    
+    .library-text {
+        font-size: 12px;
+    }
+    
+    .function-description {
+        font-size: 10px;
+    }
+    
+    .add-position-btn {
+        font-size: 12px;
+        padding: 5px 20px;
+        min-width: 120px;
+    }
+    
+    .clear-positions-btn {
+        font-size: 12px;
+        padding: 5px 14px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .library-root {
+        font-size: 12px;
+        min-width: 300px;
+        min-height: 250px;
+    }
+    
+    .library-header {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .library-title {
+        font-size: 14px;
+    }
+    
+    .library-content {
+        padding: 10px;
+    }
+    
+    .library-sections-container {
+        gap: 20px;
+    }
+    
+    .library-section-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .library-subsection-title {
+        font-size: 12px;
+    }
+    
+    .library-text {
+        font-size: 11px;
+    }
+    
+    .function-description {
+        font-size: 9px;
+        margin-left: 6px;
+    }
+    
+    .add-position-btn {
+        font-size: 11px;
+        padding: 4px 16px;
+        min-width: 100px;
+    }
+    
+    .clear-positions-btn {
+        font-size: 11px;
+        padding: 4px 12px;
+    }
+    
+    .library-function-item {
+        padding: 1px 3px;
+    }
+}
+
+@media (max-width: 900px) {
+    .library-root {
+        font-size: 11px;
+        min-width: 250px;
+        min-height: 200px;
+    }
+    
+    .library-header {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .library-title {
+        font-size: 13px;
+    }
+    
+    .library-content {
+        padding: 8px;
+    }
+    
+    .library-sections-container {
+        gap: 16px;
+    }
+    
+    .library-section-title {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    .library-subsection-title {
+        font-size: 11px;
+    }
+    
+    .library-text {
+        font-size: 10px;
+    }
+    
+    .function-description {
+        font-size: 8px;
+        margin-left: 4px;
+    }
+    
+    .add-position-btn {
+        font-size: 10px;
+        padding: 3px 12px;
+        min-width: 80px;
+    }
+    
+    .clear-positions-btn {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+}
+
 .library-root.customizing {
     cursor: pointer;
 }

@@ -18,6 +18,90 @@
     line-height: 1.5;
 }
 
+/* Responsive design for when sidebar is open */
+@media (max-width: 1600px) {
+    .program-editor-root {
+        min-width: 600px;
+        font-size: 13px;
+    }
+    
+    .program-editor-header {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 13px;
+        padding: 5px 12px;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .program-editor-root {
+        min-width: 400px;
+        font-size: 12px;
+    }
+    
+    .program-editor-header {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 12px;
+        padding: 4px 10px;
+        min-width: 70px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        padding: 6px 10px;
+    }
+    
+    .line-numbers {
+        padding: 6px 10px;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .program-editor-root {
+        min-width: 300px;
+        font-size: 11px;
+        min-height: 250px;
+    }
+    
+    .program-editor-header {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 11px;
+        padding: 3px 8px;
+        min-width: 60px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        padding: 4px 8px;
+    }
+    
+    .line-numbers {
+        padding: 4px 8px;
+        min-width: 35px;
+    }
+    
+    .line-number {
+        font-size: 11px;
+        height: 18px;
+    }
+}
+
 .program-editor-root.customizing {
     cursor: pointer;
 }
