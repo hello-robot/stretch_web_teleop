@@ -208,8 +208,7 @@ export const Library = (props: CustomizableComponentProps) => {
             <div className="library-content" style={{
                 gap: window.innerWidth < 1200 ? "12px" : "16px",
                 flex: "1",
-                overflowY: "auto",
-                position: "relative"
+                overflowY: "auto"
             }}>
                 <div className="library-sections-container" style={{
                     gap: window.innerWidth < 1200 ? "12px" : "16px"
@@ -349,24 +348,17 @@ export const Library = (props: CustomizableComponentProps) => {
                     </div>
                 </div>
                 
-                {/* Spacer to prevent content from being covered by clear button */}
-                <div style={{ height: "60px" }}></div>
+                </div>
                 
-            </div>
-            
-            {/* Clear button - fixed at bottom of content area */}
-            <div style={{ 
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: "var(--background-color)",
-                borderTop: "1px solid var(--border-color)",
-                padding: "8px 16px",
-                display: "flex", 
-                justifyContent: "flex-end",
-                zIndex: 10
-            }}>
+                {/* Clear button - as part of normal flow */}
+                <div style={{ 
+                    background: "var(--background-color)",
+                    borderTop: "1px solid var(--border-color)",
+                    padding: "8px 16px",
+                    display: "flex", 
+                    justifyContent: "flex-end",
+                    marginTop: "16px"
+                }}>
                 <button 
                     className="clear-positions-btn"
                     onClick={() => {
