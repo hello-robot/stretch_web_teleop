@@ -113,7 +113,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
                     ? SVG_RESOLUTION / props.aspectRatio
                     : SVG_RESOLUTION
                     }`}
-                preserveAspectRatio="none"
+                preserveAspectRatio="xMidYMid meet"
                 className={className("button-pads", {
                     customizing,
                     selected,
@@ -163,17 +163,12 @@ const SingleButton = (props: SingleButtonProps) => {
                               props.funct === ButtonPadButton.ArmLift ||
                               props.funct === ButtonPadButton.ArmLower;
     
-    // Get the actual SVG container size to scale icons proportionally
-    const svgElement = document.querySelector('.button-pads') as SVGSVGElement;
-    const scaleFactor = svgElement ? svgElement.clientWidth / SVG_RESOLUTION : 1;
-    
     const baseHeight = isMobile ? 75 : 85;
     const baseWidth = isMobile ? 75 : 85;
-    const height = (isReducedSizeIcon ? baseHeight * 0.8 : baseHeight) * scaleFactor;
-    const width = (isReducedSizeIcon ? baseWidth * 0.8 : baseWidth) * scaleFactor;
-    // Scale the positions to match the stretched SVG
-    const x = (props.iconPosition.x / SVG_RESOLUTION) * (svgElement ? svgElement.clientWidth : SVG_RESOLUTION) - width / 2;
-    const y = (props.iconPosition.y / SVG_RESOLUTION) * (svgElement ? svgElement.clientHeight : SVG_RESOLUTION) - height / 2;
+    const height = isReducedSizeIcon ? baseHeight * 0.8 : baseHeight;
+    const width = isReducedSizeIcon ? baseWidth * 0.8 : baseWidth;
+    const x = props.iconPosition.x - width / 2;
+    const y = props.iconPosition.y - height / 2;
     
     // Responsive label sizing 
     const [screenWidth, setScreenWidth] = React.useState(window.innerWidth);
@@ -187,12 +182,12 @@ const SingleButton = (props: SingleButtonProps) => {
     const isSmallScreen = screenWidth < 1200;
     const isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
     
-    const labelWidth = (isSmallScreen ? 75 : isMediumScreen ? 85 : 95) * scaleFactor;
-    const labelHeight = (isSmallScreen ? 20 : isMediumScreen ? 24 : 26) * scaleFactor;
-    const labelFontSize = `${(isSmallScreen ? 12 : isMediumScreen ? 14 : 16) * scaleFactor}px`;
+    const labelWidth = isSmallScreen ? 75 : isMediumScreen ? 85 : 95;
+    const labelHeight = isSmallScreen ? 20 : isMediumScreen ? 24 : 26;
+    const labelFontSize = isSmallScreen ? "10px" : isMediumScreen ? "11px" : "12px";
     const labelOffsetX = labelWidth / 2;
     
-    let labelOffsetY = (isSmallScreen ? 4 : isMediumScreen ? 5 : 6) * scaleFactor;
+    let labelOffsetY = isSmallScreen ? 4 : isMediumScreen ? 5 : 6;
     
     // For SimpleButtonPad (Base and Arm), adjust positioning for better centering
     const isSimpleButtonPad = props.funct === ButtonPadButton.BaseForward || 
@@ -246,8 +241,8 @@ const SingleButton = (props: SingleButtonProps) => {
                 })}
             />
             <foreignObject
-                x={(props.iconPosition.x / SVG_RESOLUTION) * (svgElement ? svgElement.clientWidth : SVG_RESOLUTION) - labelOffsetX}
-                y={(props.iconPosition.y / SVG_RESOLUTION) * (svgElement ? svgElement.clientHeight : SVG_RESOLUTION) + height/2 + labelOffsetY}
+                x={props.iconPosition.x - labelOffsetX}
+                y={props.iconPosition.y + height/2 + labelOffsetY}
                 width={labelWidth}
                 height={labelHeight}
                 style={{
