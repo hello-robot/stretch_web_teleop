@@ -528,6 +528,9 @@ export const Operator = (props: {
         updateLayout();
     };
 
+    // Expose switchToModeLayout to window for use by other components
+    (window as any).switchToModeLayout = switchToModeLayout;
+
     return (
         <div id="operator">
             {/* Persistent banner for control mode - only show in Execution Monitor mode when program is executing */}
