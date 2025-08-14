@@ -19,10 +19,10 @@
 }
 
 /* Responsive design for different screen sizes */
-@media (max-width: 1400px) {
+@media (max-width: 1600px) {
     .library-root {
         font-size: 13px;
-        min-width: 350px;
+        min-width: 300px;
     }
     
     .library-header {
@@ -64,6 +64,63 @@
     .clear-positions-btn {
         font-size: 12px;
         padding: 5px 14px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .library-root {
+        font-size: 12px;
+        min-width: 250px;
+    }
+    
+    .library-header {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .library-title {
+        font-size: 14px;
+    }
+    
+    .library-content {
+        padding: 10px;
+    }
+    
+    .library-sections-container {
+        gap: 20px;
+    }
+    
+    .library-section-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .library-subsection-title {
+        font-size: 12px;
+    }
+    
+    .library-text {
+        font-size: 11px;
+    }
+    
+    .function-description {
+        font-size: 9px;
+        margin-left: 6px;
+    }
+    
+    .add-position-btn {
+        font-size: 11px;
+        padding: 4px 16px;
+        min-width: 100px;
+    }
+    
+    .clear-positions-btn {
+        font-size: 11px;
+        padding: 4px 12px;
+    }
+    
+    .library-function-item {
+        padding: 1px 3px;
     }
 }
 
@@ -125,10 +182,10 @@
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     .library-root {
         font-size: 11px;
-        min-width: 250px;
+        min-width: 200px;
         min-height: 200px;
     }
     
@@ -176,6 +233,60 @@
     .clear-positions-btn {
         font-size: 10px;
         padding: 3px 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    .library-root {
+        font-size: 10px;
+        min-width: 150px;
+        min-height: 150px;
+    }
+    
+    .library-header {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+    
+    .library-title {
+        font-size: 12px;
+    }
+    
+    .library-content {
+        padding: 6px;
+    }
+    
+    .library-sections-container {
+        gap: 12px;
+    }
+    
+    .library-section-title {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .library-subsection-title {
+        font-size: 10px;
+    }
+    
+    .library-text {
+        font-size: 9px;
+    }
+    
+    .function-description {
+        font-size: 7px;
+        margin-left: 3px;
+    }
+    
+    .add-position-btn {
+        font-size: 9px;
+        padding: 2px 8px;
+        min-width: 60px;
+    }
+    
+    .clear-positions-btn {
+        font-size: 9px;
+        padding: 2px 8px;
     }
 }
 

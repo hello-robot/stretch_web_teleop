@@ -42,6 +42,7 @@
     .program-editor-root {
         min-width: 400px;
         font-size: 12px;
+        line-height: 1.45;
     }
     
     .program-editor-header {
@@ -59,11 +60,20 @@
     .code-textarea,
     .code-highlighted {
         padding: 6px 10px;
+        line-height: 1.45;
+        font-size: 12px;
     }
     
     .line-numbers {
         padding: 6px 10px;
         min-width: 40px;
+    }
+    
+    .line-number {
+        font-size: 12px;
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
     }
 }
 
@@ -72,6 +82,7 @@
         min-width: 300px;
         font-size: 11px;
         min-height: 250px;
+        line-height: 1.4;
     }
     
     .program-editor-header {
@@ -89,6 +100,8 @@
     .code-textarea,
     .code-highlighted {
         padding: 4px 8px;
+        line-height: 1.4;
+        font-size: 11px;
     }
     
     .line-numbers {
@@ -98,7 +111,9 @@
     
     .line-number {
         font-size: 11px;
-        height: 18px;
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
     }
 }
 

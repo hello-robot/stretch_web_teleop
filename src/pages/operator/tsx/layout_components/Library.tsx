@@ -338,30 +338,36 @@ export const Library = (props: CustomizableComponentProps) => {
                                     </button>
                                 </div>
                             </div>
-                            <div style={{ 
-                                marginTop: "auto",
-                                display: "flex", 
-                                justifyContent: "flex-end",
-                                paddingTop: "8px"
-                            }}>
-                                <button 
-                                    className="clear-positions-btn"
-                                    onClick={() => {
-                                        // Reset to empty positions
-                                        setSavedPositions([]);
-                                        sessionStorage.removeItem('librarySavedPositions');
-                                    }}
-                                    style={{
-                                        minWidth: "auto",
-                                        maxWidth: "auto",
-                                        flex: "none"
-                                    }}
-                                >
-                                    Clear
-                                </button>
-                            </div>
                         </div>
                     </div>
+                </div>
+                
+                {/* Clear button - fixed at bottom */}
+                <div style={{ 
+                    position: "sticky",
+                    bottom: 0,
+                    background: "var(--background-color)",
+                    borderTop: "1px solid var(--border-color)",
+                    padding: "8px 16px",
+                    display: "flex", 
+                    justifyContent: "flex-end",
+                    zIndex: 10
+                }}>
+                    <button 
+                        className="clear-positions-btn"
+                        onClick={() => {
+                            // Reset to empty positions
+                            setSavedPositions([]);
+                            sessionStorage.removeItem('librarySavedPositions');
+                        }}
+                        style={{
+                            minWidth: "auto",
+                            maxWidth: "auto",
+                            flex: "none"
+                        }}
+                    >
+                        Clear All
+                    </button>
                 </div>
             </div>
             

@@ -43,6 +43,7 @@
         min-width: 250px;
         max-width: 500px;
         font-size: 12px;
+        line-height: 1.45;
     }
     
     .execution-monitor-header {
@@ -65,6 +66,22 @@
     
     .code-display {
         padding: 6px 10px;
+        line-height: 1.45;
+        font-size: 12px;
+    }
+    
+    .line-number {
+        font-size: 12px;
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
+    }
+    
+    .code-line {
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
+        font-size: 12px;
     }
 }
 
@@ -74,6 +91,7 @@
         max-width: 400px;
         font-size: 11px;
         min-height: 150px;
+        line-height: 1.4;
     }
     
     .execution-monitor-header {
@@ -96,18 +114,22 @@
     
     .code-display {
         padding: 4px 8px;
+        line-height: 1.4;
+        font-size: 11px;
     }
     
     .line-number {
         font-size: 11px;
-        height: 18px;
-        min-height: 18px;
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
     }
     
     .code-line {
-        height: 18px;
-        line-height: 18px;
-        min-height: 18px;
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
+        font-size: 11px;
     }
 }
 
