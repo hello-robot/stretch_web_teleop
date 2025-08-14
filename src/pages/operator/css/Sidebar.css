@@ -156,6 +156,40 @@
     margin-bottom: 0.4rem;
 }
 
+/* Responsive adjustments for global settings */
+@media (max-width: 1400px) {
+    #global-settings button {
+        height: 2.5rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.3rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    #global-settings button {
+        height: 2.2rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.2rem;
+    }
+}
+
+@media (max-width: 900px) {
+    #global-settings button {
+        height: 2rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.15rem;
+    }
+}
+
 #load-layout-modal .dropdown p {
     margin: 0;
 }
@@ -215,6 +249,20 @@
     #global-settings button {
         height: 2.5rem;
     }
+    
+    .toggle-button-div {
+        padding-bottom: 6px;
+        margin-bottom: 4px;
+    }
+    
+    .global-label {
+        font-size: 0.9em;
+        inline-size: 140px;
+    }
+    
+    #global-settings {
+        margin-bottom: 1rem;
+    }
 }
 
 @media (max-width: 1200px) {
@@ -254,7 +302,17 @@
     }
     
     .toggle-button-div {
-        padding-bottom: 6px;
+        padding-bottom: 4px;
+        margin-bottom: 2px;
+    }
+    
+    .global-label {
+        font-size: 0.85em;
+        inline-size: 120px;
+    }
+    
+    #global-settings {
+        margin-bottom: 0.8rem;
     }
 }
 
@@ -297,6 +355,16 @@
     }
     
     .toggle-button-div {
-        padding-bottom: 4px;
+        padding-bottom: 2px;
+        margin-bottom: 1px;
+    }
+    
+    .global-label {
+        font-size: 0.8em;
+        inline-size: 100px;
+    }
+    
+    #global-settings {
+        margin-bottom: 0.6rem;
     }
 }

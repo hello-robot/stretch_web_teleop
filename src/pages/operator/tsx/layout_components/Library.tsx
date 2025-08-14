@@ -197,12 +197,19 @@ export const Library = (props: CustomizableComponentProps) => {
             })}
             style={{
                 fontSize: window.innerWidth < 1200 ? "14px" : "16px",
-                padding: window.innerWidth < 1200 ? "8px" : "12px"
+                padding: window.innerWidth < 1200 ? "8px" : "12px",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%"
             }}
             {...selectProp}
         >
             <div className="library-content" style={{
-                gap: window.innerWidth < 1200 ? "12px" : "16px"
+                gap: window.innerWidth < 1200 ? "12px" : "16px",
+                flex: "1",
+                overflowY: "auto",
+                paddingBottom: "60px" // Space for clear button
             }}>
                 <div className="library-sections-container" style={{
                     gap: window.innerWidth < 1200 ? "12px" : "16px"
@@ -342,33 +349,36 @@ export const Library = (props: CustomizableComponentProps) => {
                     </div>
                 </div>
                 
-                {/* Clear button - fixed at bottom */}
-                <div style={{ 
-                    position: "sticky",
-                    bottom: 0,
-                    background: "var(--background-color)",
-                    borderTop: "1px solid var(--border-color)",
-                    padding: "8px 16px",
-                    display: "flex", 
-                    justifyContent: "flex-end",
-                    zIndex: 10
-                }}>
-                    <button 
-                        className="clear-positions-btn"
-                        onClick={() => {
-                            // Reset to empty positions
-                            setSavedPositions([]);
-                            sessionStorage.removeItem('librarySavedPositions');
-                        }}
-                        style={{
-                            minWidth: "auto",
-                            maxWidth: "auto",
-                            flex: "none"
-                        }}
-                    >
-                        Clear All
-                    </button>
-                </div>
+            </div>
+            
+            {/* Clear button - fixed at bottom outside scrollable area */}
+            <div style={{ 
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: "var(--background-color)",
+                borderTop: "1px solid var(--border-color)",
+                padding: "8px 16px",
+                display: "flex", 
+                justifyContent: "flex-end",
+                zIndex: 10
+            }}>
+                <button 
+                    className="clear-positions-btn"
+                    onClick={() => {
+                        // Reset to empty positions
+                        setSavedPositions([]);
+                        sessionStorage.removeItem('librarySavedPositions');
+                    }}
+                    style={{
+                        minWidth: "auto",
+                        maxWidth: "auto",
+                        flex: "none"
+                    }}
+                >
+                    Clear All
+                </button>
             </div>
             
             {/* Modal */}
