@@ -209,7 +209,8 @@ export const Library = (props: CustomizableComponentProps) => {
                 gap: window.innerWidth < 1200 ? "12px" : "16px",
                 flex: "1",
                 overflowY: "auto",
-                paddingBottom: "60px"
+                paddingBottom: "60px",
+                position: "relative"
             }}>
                 <div className="library-sections-container" style={{
                     gap: window.innerWidth < 1200 ? "12px" : "16px"
@@ -351,12 +352,12 @@ export const Library = (props: CustomizableComponentProps) => {
                 
             </div>
             
-            {/* Clear button - fixed at bottom outside scrollable area */}
+            {/* Clear button - fixed at bottom of content area */}
             <div style={{ 
                 position: "absolute",
-                bottom: window.innerWidth < 1200 ? "8px" : "12px",
-                left: window.innerWidth < 1200 ? "8px" : "12px",
-                right: window.innerWidth < 1200 ? "8px" : "12px",
+                bottom: 0,
+                left: 0,
+                right: 0,
                 background: "var(--background-color)",
                 borderTop: "1px solid var(--border-color)",
                 padding: "8px 16px",
