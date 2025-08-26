@@ -20,7 +20,7 @@ export const Map: React.FC<MapProps> = ({
 }) => {
 
     const goBack = useCallback(() => {
-        swipeableViewsIdxSet(0);
+        swipeableViewsIdxSet(1);
     }, []);
 
     return (

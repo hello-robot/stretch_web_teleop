@@ -34,13 +34,11 @@ const HeadCam: React.FC<HeadCamProps> = ({
     return (
         <div className="head-cam-wrapper">
             <div className="controls">
-                <div className="simple-camera-view-wrapper_XP">
-                    <SimpleCameraView
-                        id={cameraID}
-                        remoteStreams={remoteStreams}
-                        isCameraVeilVisible={isCameraVeilVisible}
-                    />
-                </div>
+                <SimpleCameraView
+                    id={cameraID}
+                    remoteStreams={remoteStreams}
+                    isCameraVeilVisible={isCameraVeilVisible}
+                />
                 <TabGroup
                     tabLabels={["Controls", "Recordings"]}
                     tabContent={tabContent}

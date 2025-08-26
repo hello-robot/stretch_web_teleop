@@ -33,7 +33,7 @@ const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onAc
             />
             <div className="auto-nav-toggle-wrapper">
                 <button
-                    onClick={() => swipeableViewsIdxSet(1)}
+                    onClick={() => swipeableViewsIdxSet(2)}
                     className="auto-nav-toggle"
                 >
                     <span className="auto-nav-toggle-icon" />

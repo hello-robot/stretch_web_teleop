@@ -4,8 +4,6 @@
     object-fit: cover;
     justify-content: center;
     text-align: -webkit-center;
-    height: 100%;
-    padding: 10px 0px;
     background-color: #000000;
 }
 
@@ -18,7 +16,7 @@
 
 .simple-headcam .simple-headcam-area {
     position: relative;
-    /* width: 100%; */
+    padding: 10px 0px;
     max-height: 100%;
     object-fit: cover;
     aspect-ratio: 9 / 16;
@@ -35,15 +33,10 @@
 
 /* END HeadCam */
 
+/* START GripperCam */
 .simple-grippercam {}
 
-.simple-grippercam .simple-grippercam-area {
-    position: relative;
-    /* width: 100%; */
-    max-height: 100%;
-    object-fit: cover;
-    aspect-ratio: 9 / 16;
-}
+.simple-grippercam .simple-grippercam-area {}
 
 
 .simple-grippercam .simple-grippercam-area .simple-grippercam-canvas {
@@ -60,6 +53,9 @@
     height: 100%; */
     object-fit: cover;
 }
+
+/* END GripperCam */
+
 
 .icon {
     border-radius: 60px;
