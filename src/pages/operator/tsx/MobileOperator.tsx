@@ -28,21 +28,21 @@ import {
 } from "./function_providers/ButtonFunctionProvider";
 import { StorageHandler } from "./storage_handler/StorageHandler";
 import { FunctionProvider } from "./function_providers/FunctionProvider";
-import HeadCam from "./layout_components/HeadCam";
 import "operator/css/MobileOperator.css";
-import { SimpleCameraView } from "./layout_components/SimpleCameraView";
 import { SharedState } from "./layout_components/CustomizableComponent";
-import FooterHeadCam from "./layout_components/FooterHeadCam";
 import { ButtonPad } from "./layout_components/ButtonPad";
-// import Swipe from "./static_components/Swipe";
-import { Map } from "./layout_components/Map";
 import { TabGroup } from "./basic_components/TabGroup";
 import SwipeableViews from 'react-swipeable-views';
 import {
     MovementRecorder,
     MovementRecorderFunction,
 } from "./layout_components/MovementRecorder";
+import GripperCam from "./layout_components/GripperCam";
+import HeadCam from "./layout_components/HeadCam";
 import AutoNav from "./layout_components/AutoNav";
+import { SimpleCameraView } from "./layout_components/SimpleCameraView";
+import FooterHeadCam from "./layout_components/FooterHeadCam";
+import { Map } from "./layout_components/Map";
 import { CheckToggleButton } from "./basic_components/CheckToggleButton";
 import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvider";
 import { Alert } from "./basic_components/Alert";
@@ -318,6 +318,23 @@ export const MobileOperator = (props: {
                 >
                     <div
                         style={swipeableViewsStyles[0]}
+                        className="gripper-wrapper"
+                    >
+                        <GripperCam
+                            cameraID={CameraViewId.gripper}
+                            isCameraVeilVisible={isCameraVeilVisible}
+                            remoteStreams={remoteStreams}
+                            tabContent={[controlModes, recordingList]}
+                            activeMainGroupTab={activeMainGroupTab}
+                            setActiveMainGroupTab={setActiveMainGroupTab}
+                            setVelocityScale={setVelocityScale}
+                            setActionMode={setActionMode}
+                            isCameraVeilVisibleSet={isCameraVeilVisibleSet}
+                            swipeableViewsIdxSet={swipeableViewsIdxSet} />
+                    </div>
+
+                    <div
+                        style={swipeableViewsStyles[1]}
                         className="head-cam-wrapper"
                     >
                         <HeadCam
@@ -334,7 +351,7 @@ export const MobileOperator = (props: {
                         />
                     </div>
                     <div
-                        style={swipeableViewsStyles[1]}
+                        style={swipeableViewsStyles[2]}
                         className="auto-nav-wrapper"
                     >
                         <AutoNav
