@@ -82,32 +82,12 @@ export const SimpleCameraView = (props: {
     const videoComponent =
         props.id === CameraViewId.realsense ||
             props.id === CameraViewId.overhead ? (
-            <>
+            <div
+                className="simple-headcam"
+            >
+                <DeviceVisualOverlay />
                 <div
-                    className="simple-realsense"
-                >
-                    <DeviceVisualOverlay />
-                    <div
-                        className="simple-video-area"
-                        style={{ gridRow: 2, gridColumn: 1 }}
-                        ref={videoAreaRef}
-                    >
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            muted={true}
-                            disablePictureInPicture={true}
-                            playsInline={true}
-                            className="simple-video-canvas"
-                            onPlay={() => setVideoSize(videoRef)}
-                        />
-                    </div>
-                </div>
-            </>
-        ) : (
-            <>
-                <div
-                    className="simple-video-area"
+                    className="simple-headcam-area"
                     style={{ gridRow: 2, gridColumn: 1 }}
                     ref={videoAreaRef}
                 >
@@ -117,11 +97,31 @@ export const SimpleCameraView = (props: {
                         muted={true}
                         disablePictureInPicture={true}
                         playsInline={true}
-                        className="simple-video-canvas"
+                        className="simple-headcam-canvas"
                         onPlay={() => setVideoSize(videoRef)}
                     />
                 </div>
-            </>
+            </div>
+        ) : (
+            <div
+                className="simple-grippercam"
+            >
+                <div
+                    className="simple-grippercam-area"
+                    style={{ gridRow: 2, gridColumn: 1 }}
+                    ref={videoAreaRef}
+                >
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        muted={true}
+                        disablePictureInPicture={true}
+                        playsInline={true}
+                        className="simple-grippercam-canvas"
+                        onPlay={() => setVideoSize(videoRef)}
+                    />
+                </div>
+            </div>
         );
 
     return (

@@ -1,9 +1,15 @@
 import React from 'react';
 import { SimpleCameraView } from './SimpleCameraView';
-import { TabGroup } from "../basic_components/TabGroup";
-// import FooterGripperCam from './FooterGripperCam';
-// import { FunctionProvider } from "../function_providers/FunctionProvider";
 import { CameraViewId } from "../utils/component_definitions";
+import {
+    underVideoFunctionProvider,
+} from "..";
+import {
+    UnderVideoButton,
+} from "../function_providers/UnderVideoFunctionProvider";
+// import { TabGroup } from "../basic_components/TabGroup";
+import FooterHeadCam from './FooterHeadCam';
+import { FunctionProvider } from "../function_providers/FunctionProvider";
 // import "../../css/GripperCam.css";
 
 interface GripperCamProps {
@@ -23,14 +29,22 @@ const GripperCam: React.FC<GripperCamProps> = ({
     cameraID,
     remoteStreams,
     isCameraVeilVisible,
-    // isCameraVeilVisibleSet,
+    isCameraVeilVisibleSet,
     tabContent,
     activeMainGroupTab,
     setActiveMainGroupTab,
-    // setVelocityScale,
-    // setActionMode,
-    // swipeableViewsIdxSet,
+    setVelocityScale,
+    setActionMode,
+    swipeableViewsIdxSet,
 }) => {
+
+    // Disable the circular masking on the camera view
+    React.useEffect(() => {
+        underVideoFunctionProvider.provideFunctions(
+            UnderVideoButton.ExpandedGripperView,
+        ).onCheck(true);
+    }, []);
+
     return (
         <div className="gripper-cam-wrapper">
             <div className="controls">
@@ -50,7 +64,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     key={"main-group"}
                 /> */}
             </div>
-            {/* <FooterGripperCam
+            <FooterHeadCam
                 actionSpeedCurrent={FunctionProvider.velocityScale}
                 onActionSpeedChange={(newSpeed: number) => {
                     setVelocityScale(newSpeed);
@@ -61,7 +75,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                 isCameraVeilVisible={isCameraVeilVisible}
                 isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 swipeableViewsIdxSet={swipeableViewsIdxSet}
-            /> */}
+            />
         </div>
     );
 };

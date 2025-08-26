@@ -59,9 +59,6 @@ export const MobileOperator = (props: {
         ButtonPadButton[]
     >([]);
     const [moveBaseState, setMoveBaseState] = React.useState<MoveBaseState>();
-    const [cameraID, setCameraID] = React.useState<CameraViewId>(
-        CameraViewId.overhead,
-    );
     const [velocityScale, setVelocityScale] = React.useState<number>(
         FunctionProvider.velocityScale
     );
@@ -338,7 +335,7 @@ export const MobileOperator = (props: {
                         className="head-cam-wrapper"
                     >
                         <HeadCam
-                            cameraID={cameraID}
+                            cameraID={CameraViewId.overhead}
                             isCameraVeilVisible={isCameraVeilVisible}
                             remoteStreams={remoteStreams}
                             tabContent={[controlModes, recordingList]}

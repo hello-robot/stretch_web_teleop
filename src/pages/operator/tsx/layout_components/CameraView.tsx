@@ -108,8 +108,8 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const overlayDefinition = predictiveDisplay
         ? { type: ComponentType.PredictiveDisplay }
         : definition.children && definition.children.length > 0
-          ? definition.children[0]
-          : undefined;
+            ? definition.children[0]
+            : undefined;
     const videoAspectRatio = getVideoAspectRatio(definition);
     const overlay = createOverlay(
         overlayDefinition,
@@ -278,7 +278,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         videoOverlay = (
             <>
                 {overlayDefinition?.type !== ComponentType.PredictiveDisplay &&
-                !props.sharedState.hasBetaTeleopKit ? (
+                    !props.sharedState.hasBetaTeleopKit ? (
                     <div
                         className={className("realsense-pan-tilt-grid", {
                             constrainedHeight,
@@ -578,9 +578,9 @@ function createOverlay(
         default:
             throw Error(
                 "Video stream at path " +
-                    path +
-                    " cannot overlay child of type" +
-                    overlayDefinition.type,
+                path +
+                " cannot overlay child of type" +
+                overlayDefinition.type,
             );
     }
 }
@@ -1128,19 +1128,19 @@ const UnderGripperButtons = (props: {
                     />
                     {(props.stretchTool === StretchTool.GRIPPER ||
                         props.stretchTool === StretchTool.DEX_GRIPPER) && (
-                        <CheckToggleButton
-                            checked={props.definition.depthSensing || false}
-                            onClick={() => {
-                                props.definition.depthSensing =
-                                    !props.definition.depthSensing;
-                                setRerender(!rerender);
-                                underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.GripperDepthSensing,
-                                ).onCheck!(props.definition.depthSensing);
-                            }}
-                            label="Depth Sensing"
-                        />
-                    )}
+                            <CheckToggleButton
+                                checked={props.definition.depthSensing || false}
+                                onClick={() => {
+                                    props.definition.depthSensing =
+                                        !props.definition.depthSensing;
+                                    setRerender(!rerender);
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.GripperDepthSensing,
+                                    ).onCheck!(props.definition.depthSensing);
+                                }}
+                                label="Depth Sensing"
+                            />
+                        )}
                 </React.Fragment>
             )}
             {props.stretchTool === StretchTool.TABLET && (

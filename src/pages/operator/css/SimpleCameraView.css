@@ -9,7 +9,14 @@
     background-color: #000000;
 }
 
-.simple-video-area {
+/* START HeadCam */
+.simple-headcam {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.simple-headcam .simple-headcam-area {
     position: relative;
     /* width: 100%; */
     max-height: 100%;
@@ -17,7 +24,7 @@
     aspect-ratio: 9 / 16;
 }
 
-.simple-video-canvas {
+.simple-headcam .simple-headcam-area .simple-headcam-canvas {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -26,17 +33,32 @@
     aspect-ratio: 9 / 16;
 }
 
+/* END HeadCam */
+
+.simple-grippercam {}
+
+.simple-grippercam .simple-grippercam-area {
+    position: relative;
+    /* width: 100%; */
+    max-height: 100%;
+    object-fit: cover;
+    aspect-ratio: 9 / 16;
+}
+
+
+.simple-grippercam .simple-grippercam-area .simple-grippercam-canvas {
+    width: 100%;
+    object-fit: none;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+}
+
 .simple-video-canvas.constrainedHeight {
     display: inline-block;
     /* width: auto;
     height: 100%; */
     object-fit: cover;
-}
-
-.simple-realsense {
-    position: relative;
-    width: 100%;
-    height: 100%;
 }
 
 .icon {
