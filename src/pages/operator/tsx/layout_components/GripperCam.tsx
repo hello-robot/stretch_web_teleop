@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import SwipeableViews from 'react-swipeable-views';
+
 import { SimpleCameraView } from './SimpleCameraView';
 import { CameraViewId } from "../utils/component_definitions";
 import {
@@ -37,6 +39,8 @@ const GripperCam: React.FC<GripperCamProps> = ({
     swipeableViewsIdxSet,
 }) => {
 
+    const [activeTabIndex, activeTabIndexSet] = useState<number | 0>(0);
+
     // By default, circular masking should be off
     React.useEffect(() => {
         underVideoFunctionProvider.provideFunctions(
@@ -54,19 +58,87 @@ const GripperCam: React.FC<GripperCamProps> = ({
         };
     }
 
+    const onChangeIndex = (index: number) => {
+        activeTabIndexSet(index);
+    }
+
+    const tabButtons = [
+        { name: "Arm & Gripper" },
+        { name: "Wrist" },
+        { name: "Grab Assist" },
+    ];
 
     return (
-        <div className="gripper-cam-wrapper">
+        <div className="grippercam-wrapper">
             <div className="simple-camera-view-wrapper_XP">
                 <SimpleCameraView
                     id={cameraID}
                     remoteStreams={remoteStreams}
                     isCameraVeilVisible={isCameraVeilVisible}
                 />
-                {/* START Buttons! */}
-                <button {...clickPropsGet(ButtonPadButton.ArmLift)}>Up</button>
-                <button {...clickPropsGet(ButtonPadButton.ArmLower)}>Down</button>
-                {/* END Buttons! */}
+                <div className="grippercam-controls">
+                    <div className="grippercam-tab-buttons">
+                        {tabButtons.map((item, index) => {
+                            return (
+                                <button onClick={() => onChangeIndex(index)} className={`grippercam-tab-button  ${activeTabIndex === index ? "active" : "inactive"}`}>
+                                    {item.name}
+                                </button>
+
+                            )
+                        })}
+                    </div>
+                    <SwipeableViews index={activeTabIndex} onChangeIndex={onChangeIndex} className="grippercam-buttons">
+                        <div className="grippercam-buttons-group-wrapper">
+                            <div className="grippercam-buttons-group">
+                                <p>Arm Elevator</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.ArmLift)}>Up</button>
+                                    <button {...clickPropsGet(ButtonPadButton.ArmLower)}>Down</button>
+                                </div>
+                            </div>
+                            <div className="grippercam-buttons-group">
+                                <p>Gripper</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.GripperOpen)}>Open</button>
+                                    <button {...clickPropsGet(ButtonPadButton.GripperClose)}>Close</button>
+                                </div>
+                            </div>
+                            <div className="grippercam-buttons-group">
+                                <p>Arm Extender</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.ArmExtend)}>Out</button>
+                                    <button {...clickPropsGet(ButtonPadButton.ArmRetract)}>In</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grippercam-buttons-group-wrapper">
+                            <div className="grippercam-buttons-group">
+                                <p>Turn Wrist</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.WristRotateIn)}>Left</button>
+                                    <button {...clickPropsGet(ButtonPadButton.WristRotateOut)}>Right</button>
+                                </div>
+                            </div>
+                            <div className="grippercam-buttons-group">
+                                <p>Bend Wrist</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.WristPitchUp)}>Up</button>
+                                    <button {...clickPropsGet(ButtonPadButton.WristPitchDown)}>Down</button>
+                                </div>
+                            </div>
+                            <div className="grippercam-buttons-group">
+                                <p>Roll Wrist</p>
+                                <div className="button-group">
+                                    <button {...clickPropsGet(ButtonPadButton.WristRollLeft)}>Left</button>
+                                    <button {...clickPropsGet(ButtonPadButton.WristRollRight)}>Right</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grippercam-buttons-group-wrapper">
+                            😳
+                        </div>
+                    </SwipeableViews>
+                </div>
             </div>
             <FooterHeadCam
                 actionSpeedCurrent={FunctionProvider.velocityScale}

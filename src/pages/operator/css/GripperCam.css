@@ -1,0 +1,107 @@
+/* START <video>-related styles */
+.grippercam-wrapper {}
+
+.grippercam-wrapper .simple-camera-view-wrapper_XP {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0px;
+    aspect-ratio: 9 / 16;
+}
+
+/* END <video>-related styles */
+
+
+.grippercam-controls {
+    position: relative;
+    top: -3px;
+    flex: 1;
+    background: radial-gradient(153.13% 94.95% at 50% 50%, hsl(204, 50%, 10%) 0%, hsla(204, 30%, 20%, 0) 100%), #000000 50% / cover no-repeat;
+
+}
+
+/* START Tabs */
+.grippercam-tab-buttons {
+    display: flex;
+    overflow: hidden;
+}
+
+button.grippercam-tab-button {
+    padding: 20px 0px;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 0;
+    border-right: 0.5px solid hsl(204, 50%, 13%);
+    border-left: 0.5px solid hsl(204, 50%, 13%);
+    transition: all 0.3s ease-out;
+}
+
+button.grippercam-tab-button.active {
+    color: hsl(204, 100%, 50%);
+    background-color: hsla(0, 0%, 100%, 1%);
+    box-shadow: 0 0 150px 0 hsl(204, 100%, 50%);
+    border-bottom: none;
+}
+
+button.grippercam-tab-button.inactive {
+    color: hsla(204, 15%, 55%, 100%);
+    background-color: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid hsl(204, 50%, 13%);
+}
+
+/* END Tabs */
+
+
+/* START Buttons */
+.grippercam-buttons-group-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 5px 20px;
+    height: 100%;
+}
+
+.grippercam-buttons-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    align-self: stretch;
+    width: 100%;
+}
+
+.grippercam-buttons-group .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background: hsl(0deg 0% 100% / 5%);
+    overflow: hidden;
+}
+
+.grippercam-buttons-group .button-group button {
+    padding: 15px 0px;
+    width: 100%;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0px;
+    background-color: hsl(204 40% 6% / 1);
+    box-shadow: none;
+}
+
+.grippercam-buttons-group .button-group button:active {
+    color: hsl(204 100% 50%);
+}
+
+.grippercam-buttons-group p {
+    color: hsl(204 20% 40% / 1);
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-feature-settings: 'liga' off, 'clig' off;
+}
+
+/* END Buttons */
