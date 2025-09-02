@@ -98,24 +98,24 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     <SwipeableViews index={activeTabIndex} onChangeIndex={onChangeIndex} className="grippercam-buttons">
                         <div className="grippercam-buttons-group-wrapper">
                             <div className="grippercam-buttons-group">
-                                <p>Arm</p>
+                                <p>ARM UP/DOWN</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.ArmLift)}>Up</button>
                                     <button {...clickPropsGet(ButtonPadButton.ArmLower)}>Down</button>
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
-                                <p>Gripper</p>
+                                <p>GRIPPER</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.GripperOpen)}>Open</button>
                                     <button {...clickPropsGet(ButtonPadButton.GripperClose)}>Close</button>
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
-                                <p>Arm</p>
+                                <p>ARM OUT/IN</p>
                                 <div className="button-group">
-                                    <button {...clickPropsGet(ButtonPadButton.ArmRetract)}>In</button>
                                     <button {...clickPropsGet(ButtonPadButton.ArmExtend)}>Out</button>
+                                    <button {...clickPropsGet(ButtonPadButton.ArmRetract)}>In</button>
                                 </div>
                             </div>
                         </div>
