@@ -2,7 +2,7 @@ import React from 'react'
 import { ActionSpeed } from '../static_components/ActionSpeed';
 import { ActionModeType } from '../utils/component_definitions';
 import { ActionMode } from '../static_components/ActionMode';
-import "operator/css/FooterHeadCam.css";
+import "operator/css/FooterGripperCam.css";
 
 interface FooterControlsProps {
     actionSpeedCurrent?: number;
@@ -14,7 +14,7 @@ interface FooterControlsProps {
     swipeableViewsIdxSet: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible, swipeableViewsIdxSet }) => {
+const FooterGripperCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onActionSpeedChange, actionModeCurrent, onActionModeChange, isCameraVeilVisibleSet, isCameraVeilVisible, swipeableViewsIdxSet }) => {
 
     return (
         <div className="footer-head-cam_XP">
@@ -30,16 +30,16 @@ const FooterHeadCam: React.FC<FooterControlsProps> = ({ actionSpeedCurrent, onAc
                 isCameraVeilVisible={isCameraVeilVisible}
                 setCameraVeilCallback={isCameraVeilVisibleSet}
             />
-            <div className="auto-nav-toggle-wrapper">
+            <div className="drive-toggle-wrapper">
                 <button
-                    onClick={() => swipeableViewsIdxSet(2)}
-                    className="auto-nav-toggle"
+                    onClick={() => swipeableViewsIdxSet(1)}
+                    className="drive-toggle"
                 >
-                    <span className="auto-nav-toggle-icon" />
+                    <span className="drive-toggle-icon" />
                 </button>
             </div>
         </div>
     )
 }
 
-export default FooterHeadCam;
+export default FooterGripperCam;

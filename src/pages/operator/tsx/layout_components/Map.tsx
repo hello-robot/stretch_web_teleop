@@ -1,6 +1,5 @@
 import React, { useCallback, Dispatch, SetStateAction } from "react";
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import "latest-createjs";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'; import "latest-createjs";
 import "operator/css/Map.css";
 
 interface MapProps {
@@ -32,7 +31,7 @@ export const Map: React.FC<MapProps> = ({
                         onClick={goBack}
                         className="btn btn-oval-ghost back-button"
                     >
-                        <CameraAltIcon />
+                        <ChevronLeftIcon />
                     </button>
                 </div>
             </div>

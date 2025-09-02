@@ -243,3 +243,9 @@ input:focus {
     font-weight: 800;
     letter-spacing: -0.3px; */
 }
+
+.back-button-wrapper {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}

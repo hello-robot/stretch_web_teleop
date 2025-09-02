@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import SwipeableViews from 'react-swipeable-views';
 
 import { SimpleCameraView } from './SimpleCameraView';
@@ -11,7 +11,7 @@ import {
     UnderVideoButton,
 } from "../function_providers/UnderVideoFunctionProvider";
 // import { TabGroup } from "../basic_components/TabGroup";
-import FooterHeadCam from './FooterHeadCam';
+import FooterGripperCam from './FooterGripperCam';
 import {
     ButtonFunctions,
     ButtonPadButton,
@@ -29,6 +29,13 @@ interface GripperCamProps {
     swipeableViewsIdxSet: (idx: number) => void;
 }
 
+type ClickProps = {
+    onPointerDown?: React.PointerEventHandler<HTMLButtonElement>;
+    onPointerUp?: React.PointerEventHandler<HTMLButtonElement>;
+    onPointerCancel?: React.PointerEventHandler<HTMLButtonElement>;
+    onPointerLeave?: React.PointerEventHandler<HTMLButtonElement>;
+};
+
 const GripperCam: React.FC<GripperCamProps> = ({
     cameraID,
     remoteStreams,
@@ -38,17 +45,16 @@ const GripperCam: React.FC<GripperCamProps> = ({
     setActionMode,
     swipeableViewsIdxSet,
 }) => {
+    const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
 
-    const [activeTabIndex, activeTabIndexSet] = useState<number | 0>(0);
-
-    // By default, circular masking should be off
-    React.useEffect(() => {
-        underVideoFunctionProvider.provideFunctions(
-            UnderVideoButton.ExpandedGripperView,
-        ).onCheck(true);
+    useEffect(() => {
+        // By default, circular masking should be off
+        underVideoFunctionProvider
+            .provideFunctions(UnderVideoButton.ExpandedGripperView)
+            .onCheck(true);
     }, []);
 
-    const clickPropsGet = (funct) => {
+    const clickPropsGet = useCallback((funct: ButtonPadButton): ClickProps => {
         const functs: ButtonFunctions = buttonFunctionProvider.provideFunctions(funct);
         return {
             onPointerDown: functs.onClick,
@@ -56,18 +62,20 @@ const GripperCam: React.FC<GripperCamProps> = ({
             onPointerCancel: functs.onRelease,
             onPointerLeave: functs.onLeave,
         };
-    }
+    }, []);
 
-    const onChangeIndex = (index: number) => {
-        activeTabIndexSet(index);
-    }
+    const onChangeIndex = useCallback((index: number) => {
+        setActiveTabIndex(index);
+    }, []);
 
-    const tabButtons = [
-        { name: "Arm & Gripper" },
-        { name: "Wrist" },
-        { name: "Grab Assist" },
-    ];
-
+    const tabButtons = useMemo(
+        () => [
+            { name: 'Arm & Gripper' },
+            { name: 'Wrist' },
+            { name: 'Grab Assist' },
+        ],
+        []
+    );
     return (
         <div className="grippercam">
             <div className="simple-camera-view-wrapper_XP">
@@ -142,7 +150,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     </SwipeableViews>
                 </div>
             </div>
-            <FooterHeadCam
+            <FooterGripperCam
                 actionSpeedCurrent={FunctionProvider.velocityScale}
                 onActionSpeedChange={(newSpeed: number) => {
                     setVelocityScale(newSpeed);
@@ -154,7 +162,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                 isCameraVeilVisibleSet={isCameraVeilVisibleSet}
                 swipeableViewsIdxSet={swipeableViewsIdxSet}
             />
-        </div>
+        </div >
     );
 };
 

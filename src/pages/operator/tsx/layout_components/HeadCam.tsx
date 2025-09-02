@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'; import "latest-createjs";
+
 import { SimpleCameraView } from './SimpleCameraView';
 import { TabGroup } from "../basic_components/TabGroup";
 import FooterHeadCam from './FooterHeadCam';
@@ -31,6 +33,11 @@ const HeadCam: React.FC<HeadCamProps> = ({
     setActionMode,
     swipeableViewsIdxSet,
 }) => {
+
+    const goBack = useCallback(() => {
+        swipeableViewsIdxSet(0);
+    }, []);
+
     return (
         <div className="head-cam-wrapper">
             <div className="controls">
@@ -47,6 +54,14 @@ const HeadCam: React.FC<HeadCamProps> = ({
                     pill={false}
                     key={"main-group"}
                 />
+                <div className="back-button-wrapper">
+                    <button
+                        onClick={goBack}
+                        className="btn btn-oval-ghost back-button"
+                    >
+                        <ChevronLeftIcon />
+                    </button>
+                </div>
             </div>
             <FooterHeadCam
                 actionSpeedCurrent={FunctionProvider.velocityScale}

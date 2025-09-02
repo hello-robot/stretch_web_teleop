@@ -14,7 +14,6 @@ import ScrollableList from '../static_components/ScrollableList';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { set } from 'firebase/database';
 
 interface FooterAutoNavProps {
     handleSelectGoal: (selectGoal: boolean) => void;
