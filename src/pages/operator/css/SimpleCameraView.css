@@ -1,8 +1,20 @@
-.simple-video-container {
+.head-cam-wrapper .simple-video-container {
     position: relative;
     justify-items: center;
-    object-fit: cover;
     justify-content: center;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    text-align: -webkit-center;
+    background-color: #000000;
+}
+
+.grippercam-wrapper .simple-video-container {
+    position: relative;
+    justify-items: center;
+    justify-content: center;
+    width: 100%;
+    object-fit: cover;
     text-align: -webkit-center;
     background-color: #000000;
 }
@@ -15,9 +27,11 @@
 }
 
 .simple-headcam .simple-headcam-area {
-    position: relative;
+    position: absolute;
+    bottom: 0px;
     padding: 10px 0px;
     max-height: 100%;
+    width: 100%;
     object-fit: cover;
     aspect-ratio: 9 / 16;
 }

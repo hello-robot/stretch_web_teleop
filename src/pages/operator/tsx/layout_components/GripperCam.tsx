@@ -69,7 +69,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
     ];
 
     return (
-        <div className="grippercam-wrapper">
+        <div className="grippercam">
             <div className="simple-camera-view-wrapper_XP">
                 <SimpleCameraView
                     id={cameraID}
@@ -135,7 +135,9 @@ const GripperCam: React.FC<GripperCamProps> = ({
                             </div>
                         </div>
                         <div className="grippercam-buttons-group-wrapper">
-                            😳
+                            <div style={{ marginTop: 20 }}>
+                                😊
+                            </div>
                         </div>
                     </SwipeableViews>
                 </div>

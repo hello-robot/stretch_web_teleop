@@ -1,5 +1,10 @@
 /* START <video>-related styles */
-.grippercam-wrapper {}
+.grippercam-wrapper,
+.grippercam {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
 .grippercam-wrapper .simple-camera-view-wrapper_XP {
     display: flex;

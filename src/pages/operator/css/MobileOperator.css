@@ -252,13 +252,13 @@
 
 .controls {
     position: relative;
+    height: 100%;
 }
 
 .swipeable-views {
     transition: filter 0.5s ease-out;
 }
 
-.head-cam-wrapper,
 .auto-nav-wrapper {
     height: 100%;
 }

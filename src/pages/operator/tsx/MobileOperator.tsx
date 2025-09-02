@@ -315,7 +315,7 @@ export const MobileOperator = (props: {
                 >
                     <div
                         style={swipeableViewsStyles[0]}
-                        className="gripper-wrapper"
+                        className="grippercam-wrapper"
                     >
                         <GripperCam
                             cameraID={CameraViewId.gripper}
