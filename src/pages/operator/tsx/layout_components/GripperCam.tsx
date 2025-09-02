@@ -90,7 +90,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     <SwipeableViews index={activeTabIndex} onChangeIndex={onChangeIndex} className="grippercam-buttons">
                         <div className="grippercam-buttons-group-wrapper">
                             <div className="grippercam-buttons-group">
-                                <p>Arm Elevator</p>
+                                <p>Arm</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.ArmLift)}>Up</button>
                                     <button {...clickPropsGet(ButtonPadButton.ArmLower)}>Down</button>
@@ -104,10 +104,10 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
-                                <p>Arm Extender</p>
+                                <p>Arm</p>
                                 <div className="button-group">
-                                    <button {...clickPropsGet(ButtonPadButton.ArmExtend)}>Out</button>
                                     <button {...clickPropsGet(ButtonPadButton.ArmRetract)}>In</button>
+                                    <button {...clickPropsGet(ButtonPadButton.ArmExtend)}>Out</button>
                                 </div>
                             </div>
                         </div>
@@ -127,7 +127,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
-                                <p>Roll Wrist</p>
+                                <p>Rotate Wrist</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.WristRollLeft)}>Left</button>
                                     <button {...clickPropsGet(ButtonPadButton.WristRollRight)}>Right</button>
