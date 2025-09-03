@@ -75,9 +75,9 @@ const ModalMobile: React.FC<ModalMobileProps> = ({
             onClose();
         }
     };
-    if (!visible) return null
 
-    return (
+    if (!visible) return null
+    else return (
         <dialog
             className={`modal-overlay ${animState} ${overlayClassName}`}
             onClick={handleOverlayClick}

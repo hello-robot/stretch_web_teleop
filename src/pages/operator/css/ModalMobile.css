@@ -23,6 +23,17 @@
   /* --animation-timing-function is defined in ActionMode.css, ensure it's accessible or redefine here */
   transition: opacity 300ms 200ms var(--animation-timing-function-modal);
   backdrop-filter: blur(5px);
+  /* START Hide scrollbars
+  on Firefox, Edge, IE */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* END Hide scrollbars
+  on Firefox, Edge, IE */
+}
+
+/* Hide scrollbar on iOS */
+.modal-overlay::--webkit-scrollbar {
+  display: none;
 }
 
 .modal-overlay.enter {

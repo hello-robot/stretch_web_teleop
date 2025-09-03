@@ -125,6 +125,7 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
             subtitle="NAVIGATE"
             footer={modalFooterContent}
             modalClassName="action-mode-modal"
+            onClose={() => handleClose(mode)}
         >
             <div className="action-mode-options">
                 {options.map(opt => (

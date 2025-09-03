@@ -262,3 +262,22 @@
 .auto-nav-wrapper {
     height: 100%;
 }
+
+/************************
+ * react-swipeable-views 
+ ************************/
+
+.swipeable-views-slide {
+    overflow-x: hidden;
+    position: relative;
+    scrollbar-width: none;
+    /* hide scrollbar in Firefox */
+    -ms-overflow-style: none;
+    /* hide scrollbar in IE/Edge */
+}
+
+/* Hide iOS scrollbar here */
+.swipeable-views-slide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, newer Edge */
+}

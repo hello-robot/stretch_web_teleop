@@ -119,6 +119,7 @@ const ModalActionSpeed: React.FC<ModalActionSpeedProps> = ({ isOpen, handleClose
             title="Action Speed"
             subtitle="NAVIGATE"
             modalClassName="action-speed-modal"
+            onClose={() => handleClose(selectedSpeed)}
         >
             <div className="action-speed-options">
                 {options.map(opt => {

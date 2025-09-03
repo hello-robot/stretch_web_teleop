@@ -276,7 +276,7 @@ export const MobileOperator = (props: {
                     onChangeIndex={(idx: number) => (swipeableViewsIdxSet(idx))}
                     enableMouseEvents={true}
                     containerStyle={{ height: '100%' }}
-                    slideStyle={{ overflowX: 'hidden', position: 'relative' }}
+                    slideClassName="swipeable-views-slide"
                     springConfig={{
                         duration: '0.2s',
                         easeFunction: 'cubic-bezier(0.15, 0.3, 0.25, 1)',
@@ -284,7 +284,10 @@ export const MobileOperator = (props: {
                     }}
                     // This "style" prop is required...
                     // CSS via "className" won't be applied.
-                    style={{ overflowX: 'visible', height: '100%' }}
+                    // style={{
+                    //     overflowX: 'visible',
+                    //     height: '100%',
+                    // }}
                     // Handler for animation brightness/blur fx
                     // as user is swiping between views
                     onSwitching={(slideOffset, type) => {
