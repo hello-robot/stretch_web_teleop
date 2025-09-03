@@ -52,7 +52,16 @@ export const ActionMode = (props: ActionModeProps) => {
                 handleClose={(newActionMode: ActionModeType) => {
                     setIsModalOpen(false);
                     props.setCameraVeilCallback(false);
-                    props.onChange(newActionMode)
+                    // If newActionMode is undefined, the user closed the modal without confirming a change
+                    // In that case, we do not call props.onChange and keep the current mode
+                    if (newActionMode === props.mode) return; // No change
+                    // Only call onChange if a different mode was selected
+                    // and the user confirmed the change
+                    // (i.e., newActionMode is defined and different from current mode)
+                    // This prevents unnecessary updates
+                    else {
+                        props.onChange(newActionMode)
+                    }
                 }}
             />
             <MagneticWrapper>
@@ -108,13 +117,28 @@ const ModalActionMode: React.FC<ModalActionModeProps> = ({ mode, isOpen, handleC
 
     const modalFooterContent = (
         <MagneticWrapper>
-            <button
-                className="btn btn-primary" // Style from ModalActionMode.css
-                onPointerDown={handleConfirm}
-                disabled={loading}
-            >
-                {loading ? <span className="spinner" /> : 'Confirm'}
-            </button>
+            {mode === selectedMode
+                ? (
+                    // Nothing changed, so show "Close" button
+                    <button
+                        className="btn btn-tertiary"
+                        onPointerDown={() => handleClose(mode)}
+                        disabled={loading}
+                    >
+                        {loading ? <span className="spinner" /> : 'Close'}
+                    </button>
+                )
+                : (
+                    // Selection has changed, show "Confirm" button
+                    <button
+                        className="btn btn-primary"
+                        onPointerDown={handleConfirm}
+                        disabled={loading}
+                    >
+                        {loading ? <span className="spinner" /> : 'Confirm'}
+                    </button>
+                )}
+            {/* "Confirm" button */}
         </MagneticWrapper>
     );
 

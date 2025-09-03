@@ -88,7 +88,11 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     <div className="grippercam-tab-buttons">
                         {tabButtons.map((item, index) => {
                             return (
-                                <button onClick={() => onChangeIndex(index)} className={`grippercam-tab-button  ${activeTabIndex === index ? "active" : "inactive"}`}>
+                                <button
+                                    key={item.name}
+                                    onClick={() => onChangeIndex(index)}
+                                    className={`grippercam-tab-button  ${activeTabIndex === index ? "active" : "inactive"}`}
+                                >
                                     {item.name}
                                 </button>
 

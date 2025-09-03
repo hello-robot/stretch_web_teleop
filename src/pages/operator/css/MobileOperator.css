@@ -253,13 +253,14 @@
 .controls {
     position: relative;
     height: 100%;
+    margin: 10px 0px;
 }
 
 .swipeable-views {
     transition: filter 0.5s ease-out;
 }
 
-.auto-nav-wrapper {
+.autonav-wrapper {
     height: 100%;
 }
 

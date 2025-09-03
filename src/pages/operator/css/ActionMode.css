@@ -26,7 +26,7 @@
 
 .radio-group {
   display: block;
-  padding: 15px 15px 15px 5px;
+  padding: 15px 15px 17px 5px;
   /* Original padding */
   cursor: pointer;
   border-radius: 10px;
@@ -48,13 +48,12 @@
 }
 
 .radio-desc {
-  /* Original background */
   border-radius: 8px;
   margin: 0px 0px 0px 41px;
-  /* Adjusted margin to align with radio + margin-right */
   font-size: 14px;
   opacity: 0.8;
-  /* Slightly increased opacity for readability */
+  line-height: 130%;
+  text-wrap: balance;
 }
 
 /* If you have other button types like btn-outline or btn-icon, keep their styles here if specific to this modal's content */

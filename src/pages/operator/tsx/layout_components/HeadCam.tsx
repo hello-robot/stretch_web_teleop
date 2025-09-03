@@ -39,7 +39,7 @@ const HeadCam: React.FC<HeadCamProps> = ({
     }, []);
 
     return (
-        <div className="head-cam-wrapper">
+        <div className="headcam-wrapper">
             <div className="controls">
                 <SimpleCameraView
                     id={cameraID}

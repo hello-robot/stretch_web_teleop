@@ -74,6 +74,7 @@ export const MobileOperator = (props: {
     const [swipeableViewsStyles, swipeableViewsStylesSet] = useState([
         { filter: 'brightness(1) blur(0px)' },
         { filter: 'brightness(1) blur(0px)' },
+        { filter: 'brightness(1) blur(0px)' },
     ]);
 
     React.useEffect(() => {
@@ -282,14 +283,6 @@ export const MobileOperator = (props: {
                         easeFunction: 'cubic-bezier(0.15, 0.3, 0.25, 1)',
                         delay: '0s'
                     }}
-                    // This "style" prop is required...
-                    // CSS via "className" won't be applied.
-                    // style={{
-                    //     overflowX: 'visible',
-                    //     height: '100%',
-                    // }}
-                    // Handler for animation brightness/blur fx
-                    // as user is swiping between views
                     onSwitching={(slideOffset, type) => {
                         if (type === 'move') {
                             // Calculate filter values based on slide offset
@@ -316,6 +309,8 @@ export const MobileOperator = (props: {
                         }
                     }}
                 >
+
+                    {/* GripperCam or "Gripper" */}
                     <div
                         style={swipeableViewsStyles[0]}
                         className="grippercam-wrapper"
@@ -330,9 +325,10 @@ export const MobileOperator = (props: {
                             swipeableViewsIdxSet={swipeableViewsIdxSet} />
                     </div>
 
+                    {/* HeadCam or "Drive" */}
                     <div
                         style={swipeableViewsStyles[1]}
-                        className="head-cam-wrapper"
+                        className="headcam-wrapper"
                     >
                         <HeadCam
                             cameraID={CameraViewId.overhead}
@@ -347,9 +343,11 @@ export const MobileOperator = (props: {
                             swipeableViewsIdxSet={swipeableViewsIdxSet}
                         />
                     </div>
+
+                    {/* AutoNav */}
                     <div
                         style={swipeableViewsStyles[2]}
-                        className="auto-nav-wrapper"
+                        className="autonav-wrapper"
                     >
                         <AutoNav
                             sharedState={sharedState}
@@ -357,6 +355,8 @@ export const MobileOperator = (props: {
                             swipeableViewsIdxSet={swipeableViewsIdxSet}
                         />
                     </div>
+
+
                 </SwipeableViews>
             </div>
         </div >
