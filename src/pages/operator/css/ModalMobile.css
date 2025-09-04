@@ -21,7 +21,7 @@
   z-index: 1000;
   opacity: 0;
   /* --animation-timing-function is defined in ActionMode.css, ensure it's accessible or redefine here */
-  transition: opacity 300ms 200ms var(--animation-timing-function-modal);
+  transition: opacity 400ms 200ms var(--animation-timing-function-modal);
   backdrop-filter: blur(5px);
   /* START Hide scrollbars
   on Firefox, Edge, IE */
@@ -61,15 +61,6 @@
   padding: 20px 20px 40px;
   /* General padding */
   box-sizing: border-box;
-
-
-  /* top: 100%); /`
-  position: relative;
-  top: 100%;
-
-
-  /* Start off-screen */
-  /* transition: transform 300ms 200ms var(--animation-timing-function-modal); */
 }
 
 @media (min-width: 600px) {
@@ -96,7 +87,7 @@
 }
 
 .modal-content-wrapper.exit {
-  animation: modal-slide-down 250ms var(--animation-timing-function-modal) forwards;
+  animation: modal-slide-down 400ms var(--animation-timing-function-modal) forwards;
 }
 
 .modal-header {

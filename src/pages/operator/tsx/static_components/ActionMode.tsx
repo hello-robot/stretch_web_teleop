@@ -67,7 +67,7 @@ export const ActionMode = (props: ActionModeProps) => {
             <MagneticWrapper>
                 <button
                     className="button-action-mode"
-                    onClick={() => {
+                    onPointerDown={() => {
                         setIsModalOpen(!isModalOpen);
                         props.setCameraVeilCallback(!isModalOpen)
                         buttonFunctionProvider.disableActiveButton()
