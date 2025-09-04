@@ -27,8 +27,31 @@ export const SimpleCameraView = (props: {
 
     // Update the source of the video stream
     React.useEffect(() => {
-        if (!videoRef?.current) return;
-        videoRef.current.srcObject = stream;
+
+        const video = videoRef.current;
+
+        if (!video) return;
+
+        // Patch in the video stream!
+        video.srcObject = stream;
+
+        // If GripperCam's video is low-res
+        // then scale up to "videoResolutionWidthMaximum"
+        if (props.id === CameraViewId.gripper) {
+            const handleResize = () => {
+                const videoResolutionWidth = video.videoWidth
+                const videoResolutionWidthMaximum = 1000;
+
+                if (videoResolutionWidth === videoResolutionWidthMaximum) {
+                    video.style.scale = '1';
+                } else {
+                    video.style.scale = (videoResolutionWidthMaximum / videoResolutionWidth).toString();
+                }
+            };
+
+            video.addEventListener("resize", handleResize);
+        }
+
     }, [stream]);
 
     function setVideoSize(videoRef) {
@@ -55,7 +78,6 @@ export const SimpleCameraView = (props: {
                 (videoRect.height + marginTop - 42).toString() +
                 "px;",
             );
-        videoRef.current.style.marginTop = marginTop.toString() + "px";
     }
 
     // Constrain the width or height when the stream gets too large

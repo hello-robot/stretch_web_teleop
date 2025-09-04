@@ -83,8 +83,8 @@ export class VideoStream extends React.Component<VideoStreamProps> {
                 this.streamName,
                 "stream got image with latency",
                 Date.now() / 1.0e3 -
-                    (message.header.stamp.sec +
-                        message.header.stamp.nanosec / 1.0e9),
+                (message.header.stamp.sec +
+                    message.header.stamp.nanosec / 1.0e9),
             );
         }
         if (!this.imageReceived) {
