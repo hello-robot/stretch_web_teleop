@@ -73,11 +73,11 @@ homeTheRobot() {
 
 At the top of the file, be sure to import `HomeTheRobotCommand` from [`commands.tsx`](#commandstsx).
 
-### `utils.tsx`
+### `util.tsx`
 
 *Note: This file is not needed to add homing functionality.*
 
-This file contains shared custom message types, variables, and enums For example, this file defines the WebRTC message types:
+This file (`/src/shared/util.tsx`) contains shared custom message types, variables, and enums For example, this file defines the WebRTC message types:
 
 ```js
 export type WebRTCMessage =
