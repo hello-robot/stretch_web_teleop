@@ -1,8 +1,13 @@
 import React from "react";
-import { className, RemoteStream } from "shared/util";
+import { className, RemoteStream, StretchModel } from "shared/util";
+import { stretchModel } from '..'
 import { CameraViewId } from "../utils/component_definitions";
+// import DeviceVisualOverlay from "../static_components/DeviceVisualOverlay";
+import {
+    panTiltButtons,
+} from "../function_providers/ButtonFunctionProvider";
+import { PanTiltButton } from "./PanTiltButton";
 import "operator/css/SimpleCameraView.css";
-import DeviceVisualOverlay from "../static_components/DeviceVisualOverlay";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -107,12 +112,26 @@ export const SimpleCameraView = (props: {
             <div
                 className="simple-headcam"
             >
-                <DeviceVisualOverlay />
+                {/* <DeviceVisualOverlay /> */}
                 <div
                     className="simple-headcam-area"
                     style={{ gridRow: 2, gridColumn: 1 }}
                     ref={videoAreaRef}
                 >
+                    {
+                        // If Stretch3 or earlier && Realsense camera, show pan-tilt overlay
+                        stretchModel === StretchModel.SE3
+                            ? <div
+                                className={className("realsense-pan-tilt-grid", {
+                                    constrainedHeight,
+                                })}
+                            >
+                                {panTiltButtons.map((dir) => (
+                                    <PanTiltButton direction={dir} key={dir} />
+                                ))}
+                            </div>
+                            : null
+                    }
                     <video
                         ref={videoRef}
                         autoPlay

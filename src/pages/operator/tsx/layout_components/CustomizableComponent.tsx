@@ -5,7 +5,7 @@ import {
 } from "../utils/component_definitions";
 import { DropZoneState } from "./DropZone";
 import { Panel } from "./Panel";
-import { RemoteStream, StretchTool } from "shared/util";
+import { RemoteStream, StretchTool, StretchModel } from "shared/util";
 import { ButtonPad } from "./ButtonPad";
 import { CameraView } from "./CameraView";
 import { PredictiveDisplay } from "./PredictiveDisplay";
@@ -35,6 +35,8 @@ export type SharedState = {
     hasBetaTeleopKit: boolean;
     /** What tool is attached to the stretch gripper. */
     stretchTool: StretchTool;
+    /** The model of the Stretch robot. */
+    stretchModel: StretchModel;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
 };

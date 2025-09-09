@@ -17,6 +17,7 @@ import {
     buttonFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
+    stretchModel,
     movementRecorderFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
@@ -48,6 +49,7 @@ import { UnderVideoButton } from "./function_providers/UnderVideoFunctionProvide
 import { Alert } from "./basic_components/Alert";
 import { VirtualJoystick } from "./layout_components/VirtualJoystick";
 import { RadioFunctions, RadioGroup } from "./basic_components/RadioGroup";
+import { robot } from "robot/tsx";
 
 /** Operator interface webpage */
 export const MobileOperator = (props: {
@@ -163,6 +165,7 @@ export const MobileOperator = (props: {
         hideLabels: false,
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
+        stretchModel: stretchModel,
     };
 
     const driveMode = (show: boolean) => {

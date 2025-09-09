@@ -75,6 +75,7 @@ export class Robot extends React.Component {
     private isRunStoppedCallback: (isRunStopped: boolean) => void;
     private hasBetaTeleopKitCallback: (value: boolean) => void;
     private stretchToolCallback: (value: string) => void;
+    private stretchModelCallback: (value: string) => void;
     private lookAtGripperInterval?: number; // ReturnType<typeof setInterval>
     private subscriptions: ROSLIB.Topic[] = [];
     private hasBetaTeleopKitParam: ROSLIB.Param;
@@ -99,6 +100,7 @@ export class Robot extends React.Component {
         isRunStoppedCallback: (isRunStopped: boolean) => void;
         hasBetaTeleopKitCallback: (value: boolean) => void;
         stretchToolCallback: (value: string) => void;
+        stretchModelCallback: (value: string) => void;
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback;
@@ -113,6 +115,7 @@ export class Robot extends React.Component {
         this.isRunStoppedCallback = props.isRunStoppedCallback;
         this.hasBetaTeleopKitCallback = props.hasBetaTeleopKitCallback;
         this.stretchToolCallback = props.stretchToolCallback;
+        this.stretchModelCallback = props.stretchModelCallback;
     }
 
     setOnRosConnectCallback(callback: () => Promise<void>) {
@@ -469,6 +472,13 @@ export class Robot extends React.Component {
         });
     }
 
+    getStretchModel() {
+        console.log("Getting stretch model", this.ros.isConnected);
+        // TODO: Deeper ROS2 stuff needed here. For now, just force "SE3".
+        const value = "SE3";
+        if (this.stretchModelCallback) this.stretchModelCallback(value);
+    }
+
     getOccupancyGrid() {
         let getMapService = new ROSLIB.Service({
             ros: this.ros,
@@ -741,13 +751,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -759,13 +769,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set gripper depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set gripper depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set gripper depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set gripper depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -777,9 +787,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set expanded gripper to",
-                          toggle,
-                      )
+                        "Successfully set expanded gripper to",
+                        toggle,
+                    )
                     : console.log("Failed to set expanded gripper to", toggle);
             },
         );
@@ -792,13 +802,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -810,9 +820,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set compute body pose to",
-                          toggle,
-                      )
+                        "Successfully set compute body pose to",
+                        toggle,
+                    )
                     : console.log("Failed to set compute body pose to", toggle);
             },
         );
@@ -820,7 +830,7 @@ export class Robot extends React.Component {
 
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
-        this.setRunStopService?.callService(request, (response: boolean) => {});
+        this.setRunStopService?.callService(request, (response: boolean) => { });
     }
 
     /**
@@ -867,7 +877,7 @@ export class Robot extends React.Component {
         linVelX: number,
         linVelY: number,
         angVel: number,
-      }): void => {
+    }): void => {
         // this.switchToNavigationMode();
         this.stopExecution();
         let twist = new ROSLIB.Message({

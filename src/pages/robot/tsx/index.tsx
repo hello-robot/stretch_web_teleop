@@ -24,14 +24,13 @@ import {
     ROSBatteryState,
     BatteryVoltageMessage,
     delay,
+    HasBetaTeleopKitMessage,
+    StretchToolMessage,
+    StretchModelMessage,
 } from "shared/util";
 import { AllVideoStreamComponent, VideoStream } from "./videostreams";
 import { AudioStream } from "./audiostreams";
 import ROSLIB from "roslib";
-import {
-    HasBetaTeleopKitMessage,
-    StretchToolMessage,
-} from "../../../shared/util";
 import { loginFirebaseSignalerAsRobot } from "shared/signaling/get_signaler";
 
 export const robot = new Robot({
@@ -50,6 +49,7 @@ export const robot = new Robot({
     isRunStoppedCallback: forwardIsRunStopped,
     hasBetaTeleopKitCallback: forwardHasBetaTeleopKit,
     stretchToolCallback: forwardStretchTool,
+    stretchModelCallback: forwardStretchModel,
 });
 
 export let connection: WebRTCConnection;
@@ -195,6 +195,15 @@ function forwardStretchTool(value: string) {
     } as StretchToolMessage);
 }
 
+function forwardStretchModel(value: string) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "stretchModel",
+        value: value,
+    } as StretchModelMessage);
+}
+
 function forwardJointStates(
     robotPose: RobotPose,
     jointValues: ValidJointStateDict,
@@ -333,6 +342,9 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "getStretchTool":
             robot.getStretchTool();
+            break;
+        case "getStretchModel":
+            robot.getStretchModel();
             break;
         case "playTextToSpeech":
             robot.playTextToSpeech(

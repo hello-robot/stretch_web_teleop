@@ -59,6 +59,10 @@ export enum StretchTool {
     UNKNOWN = "unknown",
 }
 
+export enum StretchModel {
+    SE3 = "SE3",
+}
+
 export function getStretchTool(stretchTool: string) {
     if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
         return StretchTool.TABLET;
@@ -72,6 +76,15 @@ export function getStretchTool(stretchTool: string) {
         return StretchTool.GRIPPER;
     } else {
         return StretchTool.UNKNOWN;
+    }
+}
+
+export function getStretchModel(stretchModel: string) {
+    if (stretchModel === "SE3") {
+        return StretchModel.SE3;
+    } else {
+        // Forced default to SE3
+        return StretchModel.SE3;
     }
 }
 
@@ -117,6 +130,7 @@ export type WebRTCMessage =
     | IsRunStoppedMessage
     | HasBetaTeleopKitMessage
     | StretchToolMessage
+    | StretchModelMessage
     | cmd;
 
 interface StopTrajectoryMessage {
@@ -158,6 +172,11 @@ export interface HasBetaTeleopKitMessage {
 
 export interface StretchToolMessage {
     type: "stretchTool";
+    value: string;
+}
+
+export interface StretchModelMessage {
+    type: "stretchModel";
     value: string;
 }
 

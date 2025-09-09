@@ -20,6 +20,7 @@ export type cmd =
     | GetBatteryVoltageCommand
     | GetHasBetaTeleopKit
     | GetStretchTool
+    | GetStretchModel
     | PlayTextToSpeech
     | StopTextToSpeech
     | ShowTabletCommand
@@ -69,11 +70,11 @@ export interface CameraPerspectiveCommand {
 
 export interface ToggleCommand {
     type:
-        | "setFollowGripper"
-        | "setRealsenseDepthSensing"
-        | "setGripperDepthSensing"
-        | "setRealsenseBodyPoseEstimate"
-        | "setRunStop";
+    | "setFollowGripper"
+    | "setRealsenseDepthSensing"
+    | "setGripperDepthSensing"
+    | "setRealsenseBodyPoseEstimate"
+    | "setRunStop";
     toggle: boolean;
 }
 
@@ -91,6 +92,10 @@ export interface GetHasBetaTeleopKit {
 
 export interface GetStretchTool {
     type: "getStretchTool";
+}
+
+export interface GetStretchModel {
+    type: "getStretchModel";
 }
 
 export interface MoveBaseCommand {

@@ -18,6 +18,7 @@ import {
     homeTheRobotFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
+    stretchModel,
 } from ".";
 import {
     ButtonPadButton,
@@ -297,6 +298,7 @@ export const Operator = (props: {
         hideLabels: !layout.current.displayLabels,
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
+        stretchModel: stretchModel,
         robotNotHomed: robotNotHomed,
     };
 
