@@ -18,6 +18,7 @@ import {
 } from "../function_providers/ButtonFunctionProvider";
 import { FunctionProvider } from "../function_providers/FunctionProvider";
 import "../../css/GripperCam.css";
+import RadiantOrb from './RadiantOrb';
 
 interface GripperCamProps {
     cameraID: CameraViewId;
@@ -102,6 +103,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                     <SwipeableViews index={activeTabIndex} onChangeIndex={onChangeIndex} className="grippercam-buttons">
                         <div className="grippercam-buttons-group-wrapper">
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram armupdown" />
                                 <p>ARM UP/DOWN</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.ArmLift)}>Up</button>
@@ -109,6 +111,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram gripper" />
                                 <p>GRIPPER</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.GripperOpen)}>Open</button>
@@ -116,6 +119,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram arminout" />
                                 <p>ARM OUT/IN</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.ArmExtend)}>Out</button>
@@ -125,6 +129,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                         </div>
                         <div className="grippercam-buttons-group-wrapper">
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram turnwrist" />
                                 <p>Turn Wrist</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.WristRotateIn)}>Left</button>
@@ -132,6 +137,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram bendwrist" />
                                 <p>Bend Wrist</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.WristPitchUp)}>Up</button>
@@ -139,6 +145,7 @@ const GripperCam: React.FC<GripperCamProps> = ({
                                 </div>
                             </div>
                             <div className="grippercam-buttons-group">
+                                <div className="pictogram rotatewrist" />
                                 <p>Rotate Wrist</p>
                                 <div className="button-group">
                                     <button {...clickPropsGet(ButtonPadButton.WristRollLeft)}>Left</button>
@@ -152,6 +159,11 @@ const GripperCam: React.FC<GripperCamProps> = ({
                             </div>
                         </div>
                     </SwipeableViews>
+                    <RadiantOrb>
+                        {/* This is where actual heavy-lifting for GripperVision™ will be */}
+                        <div>
+                        </div>
+                    </RadiantOrb>
                 </div>
             </div>
             <FooterGripperCam
