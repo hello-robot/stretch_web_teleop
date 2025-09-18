@@ -1,0 +1,37 @@
+.bar {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #436fb7;
+    display: flex;
+    margin-top: 3px;
+}
+
+.barsContainer {
+    width: 2rem;
+    height: 4rem;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.batteryBar {
+    height: 4rem;
+    position: absolute;
+}
+
+.batteryBarContainer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1200px) {
+    .barsContainer {
+        width: 1.5rem;
+        height: 3rem;
+    }
+
+    .batteryBar {
+        height: 3rem;
+    }
+}

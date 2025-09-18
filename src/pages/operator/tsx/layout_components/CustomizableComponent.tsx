@@ -13,7 +13,7 @@ import { ButtonStateMap } from "../function_providers/ButtonFunctionProvider";
 import { ButtonGrid } from "./ButtonGrid";
 import { VirtualJoystick } from "./VirtualJoystick";
 import { Map } from "./Map";
-import { RunStopButton } from "../static_components/RunStop";
+import { RunStop } from "../static_components/RunStop";
 import { BatteryGuage } from "../static_components/BatteryGauge";
 
 /** State required for all elements */
@@ -84,8 +84,6 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
             return <VirtualJoystick {...props} />;
         case ComponentType.Map:
             return <Map {...props} />;
-        case ComponentType.RunStopButton:
-            return <RunStopButton {...props} />;
         case ComponentType.BatteryGuage:
             return <BatteryGuage {...props} />;
         default:
