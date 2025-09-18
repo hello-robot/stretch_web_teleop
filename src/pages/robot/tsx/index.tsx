@@ -44,6 +44,8 @@ export const robot = new Robot({
         forwardActionState(goalState, "moveToPregraspState"),
     showTabletResultCallback: (goalState: ActionState) =>
         forwardActionState(goalState, "showTabletState"),
+    playbackPosesResultCallback: (goalState: ActionState) =>
+        forwardActionState(goalState, "playbackPosesState"),
     amclPoseCallback: forwardAMCLPose,
     modeCallback: forwardMode,
     isHomedCallback: forwardIsHomed,

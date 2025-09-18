@@ -3,19 +3,33 @@ import {
     MovementRecorderFunctions,
     MovementRecorderFunction,
 } from "../layout_components/MovementRecorder";
-import { RobotPose, ValidJoints } from "shared/util";
+import { ActionState, RobotPose, ValidJoints } from "shared/util";
+import { movementStatesTerminal } from "robot/tsx/robot";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 
 export class MovementRecorderFunctionProvider extends FunctionProvider {
     private recordPosesHeartbeat?: number; // ReturnType<typeof setInterval>
     private poses: RobotPose[];
     private storageHandler: StorageHandler;
+    private playbackComplete: boolean;
+
+    /**
+     * Callback function to update the move base state in the operator
+     */
+    private operatorCallback?: (state: ActionState) => void = undefined;
 
     constructor(storageHandler: StorageHandler) {
         super();
         this.provideFunctions = this.provideFunctions.bind(this);
         this.poses = [];
         this.storageHandler = storageHandler;
+    }
+
+    public setPlaybackPosesState(state: ActionState) {
+        if (movementStatesTerminal.includes(state.alert_type)) {
+            this.playbackComplete = true
+        };
+        if (this.operatorCallback) this.operatorCallback(state);
     }
 
     public provideFunctions(poseRecordFunction: MovementRecorderFunction) {
@@ -53,7 +67,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                 if (
                                     Math.abs(
                                         currentPose[key as ValidJoints]! -
-                                            prevPose[key as ValidJoints]!,
+                                        prevPose[key as ValidJoints]!,
                                     ) > 0.025
                                 ) {
                                     // If there is no prevJoint or the current joint moving has changed
@@ -61,9 +75,9 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                         prevJoint = key as ValidJoints;
                                         prevJointDirection = Math.sign(
                                             currentPose[key as ValidJoints] -
-                                                prevPose[
-                                                    prevJoint as ValidJoints
-                                                ],
+                                            prevPose[
+                                            prevJoint as ValidJoints
+                                            ],
                                         );
                                         this.poses.push(currentPose);
                                         return;
@@ -71,7 +85,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
 
                                     currJointDirection = Math.sign(
                                         currentPose[key as ValidJoints] -
-                                            prevPose[prevJoint as ValidJoints],
+                                        prevPose[prevJoint as ValidJoints],
                                     );
 
                                     // If the direction of joint movement has not been changed
@@ -145,8 +159,28 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                     let recording = this.storageHandler.getRecording(name);
                     FunctionProvider.remoteRobot?.playbackPoses(recording);
                 };
+            case MovementRecorderFunction.RenameRecording:
+                return (recordingID: number, recordingNameNew: string) => {
+                    let recordingNames = this.storageHandler.getRecordingNames();
+                    // Grab poses from old recording
+                    const poses = this.storageHandler.getRecording(recordingNames[recordingID])
+                    // Delete old recording
+                    this.storageHandler.deleteRecording(recordingNames[recordingID]);
+                    // Save with new name
+                    this.storageHandler.savePoseRecording(recordingNameNew, poses);
+                };
             case MovementRecorderFunction.Cancel:
                 return () => FunctionProvider.remoteRobot?.stopTrajectory();
         }
+    }
+
+    /**
+     * Sets the local pointer to the operator's callback function, to be called
+     * whenever the playback poses state changes.
+     *
+     * @param callback operator's callback function to playback poses state
+     */
+    public setOperatorCallback(callback: (state: ActionState) => void) {
+        this.operatorCallback = callback;
     }
 }
