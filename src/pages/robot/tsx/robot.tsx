@@ -20,6 +20,16 @@ import {
 
 export var robotMode: "navigation" | "position" | "unknown" = "position";
 export var rosConnected = false;
+export const movementStatesTerminal = [
+    "Movement canceled!",
+    "Movement succeeded!",
+    "Movement failed!",
+];
+export const movementStatesTransitory = ["Movement executing!"];
+export const movementStatesAll = [
+    ...movementStatesTransitory,
+    ...movementStatesTerminal
+];
 
 // Names of ROS actions
 const moveBaseActionName = "/navigate_to_pose";
@@ -289,10 +299,7 @@ export class Robot extends React.Component {
         this.subscribeToActionResult(
             followJointTrajectoryActionName,
             this.playbackPosesResultCallback,
-            "Movement executing!",
-            "Movement canceled!",
-            "Movement suceeded!",
-            "Movement failed!",
+            ...movementStatesAll
         )
         this.createTrajectoryClient();
         this.createMoveBaseClient();
@@ -762,13 +769,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -780,13 +787,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set gripper depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set gripper depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set gripper depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set gripper depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -798,9 +805,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set expanded gripper to",
-                          toggle,
-                      )
+                        "Successfully set expanded gripper to",
+                        toggle,
+                    )
                     : console.log("Failed to set expanded gripper to", toggle);
             },
         );
@@ -813,13 +820,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -831,9 +838,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set compute body pose to",
-                          toggle,
-                      )
+                        "Successfully set compute body pose to",
+                        toggle,
+                    )
                     : console.log("Failed to set compute body pose to", toggle);
             },
         );
@@ -841,7 +848,7 @@ export class Robot extends React.Component {
 
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
-        this.setRunStopService?.callService(request, (response: boolean) => {});
+        this.setRunStopService?.callService(request, (response: boolean) => { });
     }
 
     /**

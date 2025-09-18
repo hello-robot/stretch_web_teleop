@@ -4,13 +4,14 @@ import {
     MovementRecorderFunction,
 } from "../layout_components/MovementRecorder";
 import { ActionState, RobotPose, ValidJoints } from "shared/util";
+import { movementStatesTerminal } from "robot/tsx/robot";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 
 export class MovementRecorderFunctionProvider extends FunctionProvider {
     private recordPosesHeartbeat?: number; // ReturnType<typeof setInterval>
     private poses: RobotPose[];
     private storageHandler: StorageHandler;
-    private playbackComplete?: boolean;
+    private playbackComplete: boolean;
 
     /**
      * Callback function to update the move base state in the operator
@@ -25,7 +26,9 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
     }
 
     public setPlaybackPosesState(state: ActionState) {
-        if (state.alert_type == "success") this.playbackComplete = true;
+        if (movementStatesTerminal.includes(state.alert_type)) {
+            this.playbackComplete = true
+        };
         if (this.operatorCallback) this.operatorCallback(state);
     }
 

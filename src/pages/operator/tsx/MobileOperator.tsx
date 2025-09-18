@@ -17,6 +17,7 @@ import {
     hasBetaTeleopKit,
     stretchTool,
     movementRecorderFunctionProvider,
+    homeTheRobotFunctionProvider,
     underMapFunctionProvider,
     underVideoFunctionProvider,
 } from ".";
@@ -65,6 +66,9 @@ export const MobileOperator = (props: {
     const [isRecording, setIsRecording] = React.useState<boolean>();
     const [depthSensing, setDepthSensing] = React.useState<boolean>(false);
     const [showAlert, setShowAlert] = React.useState<boolean>(true);
+    const [robotNotHomed, setRobotNotHomed] =
+        React.useState<boolean>(false);
+    const [idxFixedRecordingPlaying, idxFixedRecordingPlayingSet] = React.useState<number>(-1);
 
     React.useEffect(() => {
         setTimeout(function () {
@@ -116,20 +120,30 @@ export const MobileOperator = (props: {
 
     let remoteStreams = props.remoteStreams;
 
+    function showHomeTheRobotGlobalControl(isHomed: boolean) {
+        setRobotNotHomed(!isHomed);
+    }
+    homeTheRobotFunctionProvider.setIsHomedCallback(
+        showHomeTheRobotGlobalControl
+    );
+
     /** State passed from the operator and shared by all components */
     const sharedState: SharedState = {
         customizing: false,
-        onSelect: () => {},
+        onSelect: () => { },
         remoteStreams: remoteStreams,
         selectedPath: "deselected",
         dropZoneState: {
-            onDrop: () => {},
+            onDrop: () => { },
             selectedDefinition: undefined,
         },
         buttonStateMap: buttonStateMap.current,
         hideLabels: false,
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
+        robotNotHomed: robotNotHomed,
+        idxFixedRecordingPlaying: idxFixedRecordingPlaying,
+        idxFixedRecordingPlayingSet: idxFixedRecordingPlayingSet,
     };
 
     function updateScreens() {

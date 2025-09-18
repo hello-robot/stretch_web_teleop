@@ -36,6 +36,15 @@ export type SharedState = {
     stretchTool: StretchTool;
     /** Whether or not robot has been homed */
     robotNotHomed: boolean;
+    /** Movement recorder's playback state  */
+    playbackPosesState?: undefined | {
+        state: string;
+        alert_type: string;
+    };
+    /** Index of the recording in LocalStorage that's being played back */
+    idxFixedRecordingPlaying: number;
+    /** Set value of "idxFixedRecordingPlaying" */
+    idxFixedRecordingPlayingSet: React.Dispatch<React.SetStateAction<number>>;
 };
 
 /** Properties for any of the customizable components: tabs, video streams, or
@@ -63,6 +72,7 @@ export type CustomizableComponentProps = {
  * @returns rendered component
  */
 export const CustomizableComponent = (props: CustomizableComponentProps) => {
+
     if (!props.definition.type) {
         throw new Error(`Component at ${props.path} is missing type`);
     }
@@ -84,7 +94,7 @@ export const CustomizableComponent = (props: CustomizableComponentProps) => {
         case ComponentType.Map:
             return <Map {...props} />;
         case ComponentType.MovementRecorder:
-            return <MovementRecorder {...props} hideLabels={false} />;
+            return <MovementRecorder {...props} />;
         default:
             throw Error(
                 `CustomizableComponent cannot render component of unknown type: ${props.definition.type}\nYou may need to add a case for this component in the switch statement in CustomizableComponent.`
