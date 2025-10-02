@@ -10,13 +10,27 @@
 .switch-camera {
     z-index: 5;
     position: absolute;
-    border-radius: 0px;
-    opacity: 0.5;
-    padding: 0;
-    float: right;
+    top: 5px;
+    left: calc(100% - 96px);
+    padding: 4px;
+    width: 90px;
+    height: auto;
+    padding: 4px;
     text-align: right;
-    margin-left: 85%;
-    color: black;
+    background-color: hsl(0deg 0% 0% / 5%);
+    backdrop-filter: blur(2px);
+    border-radius: 32px;
+    border: 1px solid hsl(0deg 0% 100% / 10%);
+}
+
+.switch-camera button {
+    background: none;
+    border: none;
+    outline: none;
+}
+
+.switch-camera button:hover {
+    border: 2px solid transparent !important;
 }
 
 .switch-camera .icons {
@@ -124,7 +138,7 @@
         width: var(--header-btn-width-med);
     }
 
-    #operator-header > *,
+    #operator-header>*,
     #operator-header button {
         height: 3rem;
     }
@@ -209,14 +223,17 @@
     -webkit-animation-iteration-count: infinite;
     opacity: 0;
 }
+
 @-webkit-keyframes pulsate {
     0% {
         -webkit-transform: scale(0.1, 0.1);
         opacity: 0;
     }
+
     50% {
         opacity: 1;
     }
+
     100% {
         -webkit-transform: scale(1.2, 1.2);
         opacity: 0;

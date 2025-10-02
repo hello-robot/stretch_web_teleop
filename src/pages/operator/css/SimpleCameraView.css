@@ -48,14 +48,6 @@
         width: 75%;
     }
 } */
-.icon {
-    border-radius: 60px;
-    background-color: aliceblue;
-    font-size: 3rem !important;
-    opacity: 0.5;
-    color: black;
-}
-
 .simple-overlay {
     font-size: 3rem;
     position: absolute;
@@ -66,25 +58,65 @@
     box-shadow: none;
 }
 
-.btn-left {
-    width: 20%;
+.simple-overlay.btn {
+    border-radius: 0px;
+    background-color: hsla(0deg 0% 100% / 0);
+    filter: unset !important;
+    border: 2px solid transparent !important;
+}
+
+.simple-overlay.btn:hover,
+.simple-overlay.btn:active {
+    background-color: hsla(0deg 0% 100% / 0.075);
+}
+
+.simple-overlay.btn.btn-left {
+    width: 78px;
     height: 100%;
 }
 
-.btn-right {
-    width: 20%;
+.simple-overlay.btn.btn-right {
+    right: 0px;
+    width: 78px;
     height: 100%;
-    margin-left: 80%;
 }
 
-.btn-up {
-    width: 100%;
-}
-
-.btn-down {
+.simple-overlay.btn.btn-up {
+    top: 0px;
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: center;
+    height: 78px;
+}
+
+.simple-overlay.btn.btn-down {
+    top: -8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 78px;
+}
+
+.simple-overlay.btn .icon, .switch-camera button .icon {
+    min-width: 70px;
+    min-height: 50px;
+    padding: 4px 0;
+    font-size: 3rem !important;
+    color: #ffffff;
+    background-color: hsl(0deg 0% 0% / 10%);
+    border: 1px solid hsl(0deg 0% 100% / 10%);
+    box-shadow: 0px 0px 10px 0px hsl(0deg 0% 0% / 35%);
+    border-radius: 70px;
+    backdrop-filter: blur(3px);
+
+}
+
+.simple-overlay.btn:active .icon, 
+.switch-camera button:active .icon {
+    color: #ffffff;
+    background-color: hsl(201deg 69% 54% / 80%);
 }
 
 /* Context menu popup *********************************************************/
