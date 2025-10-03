@@ -64,6 +64,10 @@
     --footer-height: 60px;
 }
 
+#movement-recorder-container button {
+    display: flex;
+    align-items: center;
+}
 
 .pulse {
     animation: pulse-red-bg 2s infinite;
@@ -127,6 +131,10 @@
 }
 
 #movement-recorder-container .footer button.button-record {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 8px 8px 16px;
     font-weight: 600;
 }
 
@@ -151,13 +159,14 @@
     display: flex;
     width: calc(100% - 20px);
     padding: 12px 9px;
+    margin: 0 10px 0 0;
+    border-radius: 0.4em;
+    box-shadow: none;
+    border: none;
+    background: #f1f1f1;
 }
 
-.footer button.button-cancel,
-.footer button.button-filter,
-.footer .button-scroll-wrapper button.button-scroll {
-    width: 50px;
-}
+.footer .button-scroll-wrapper {}
 
 .joints-list {
     position: absolute;
@@ -217,7 +226,12 @@
 }
 
 .naming-modal button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
     height: 100%;
+    font-weight: 600;
 }
 
 .recording-name-text-area {

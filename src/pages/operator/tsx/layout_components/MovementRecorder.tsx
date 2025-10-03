@@ -164,7 +164,6 @@ const ButtonFilter = (props: {
             </button>
         );
     } else return (
-        <div>
             <input
                 ref={refInput}
                 type="text"
@@ -173,7 +172,6 @@ const ButtonFilter = (props: {
                 onFocus={(e) => e.target.select()}
                 onChange={(e) => props.filterQuerySet(e.target.value)}
             />
-        </div>
     );
 }
 
@@ -600,7 +598,7 @@ export const MovementRecorder = (props: CustomizableComponentProps) => {
     }, [isNamingModalVisible]);
 
 
-
+    
     /*********************************************
      * Unset index to -1 when playback ended     *
      * due to success, canceled, or failed state *
