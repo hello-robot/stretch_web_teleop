@@ -164,14 +164,14 @@ const ButtonFilter = (props: {
             </button>
         );
     } else return (
-            <input
-                ref={refInput}
-                type="text"
-                placeholder="Type to filter..."
-                value={props.filterQuery}
-                onFocus={(e) => e.target.select()}
-                onChange={(e) => props.filterQuerySet(e.target.value)}
-            />
+        <input
+            ref={refInput}
+            type="text"
+            placeholder="Type to filter..."
+            value={props.filterQuery}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => props.filterQuerySet(e.target.value)}
+        />
     );
 }
 
@@ -268,6 +268,7 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
             functions.LoadRecording(idxFixed);
         }
     }, [idxFixedRecordingPlaying, idxFixed, functions]);
+    const isDisabled = isRecordingPlaying && idxFixedRecordingPlaying !== idxFixed;
 
     return (
         <div
@@ -293,7 +294,7 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                         `button-playback
                         ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`
                     }
-                    disabled={isRecordingPlaying && idxFixedRecordingPlaying !== idxFixed}
+                    disabled={isDisabled}
                 >
                     {
                         isThisPlaying
@@ -309,11 +310,12 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                         ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}
                         ${isEditing ? 'editing' : ''}
                     `}
+                    disabled={isDisabled}
                 > <EditIcon className="button-edit-icon" /> </button>
                 <Flex className="button-delete-recording-wrapper">
                     <button
                         onPointerDown={() => { isAskingConfirmationBeforeDeleteSet(false) }}
-                        disabled={!isAskingConfirmationBeforeDelete}
+                        disabled={!isAskingConfirmationBeforeDelete || isDisabled}
                         className={`button-cancel-deletion ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
                     >
                         <KeyboardArrowLeftIcon />
@@ -330,6 +332,7 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                             }
                         }}
                         className={`button-delete ${isAskingConfirmationBeforeDelete ? " pulse" : " "}`}
+                        disabled={isDisabled}
                     >
                         <DeleteIcon
                             className="button-delete-icon"
@@ -598,7 +601,7 @@ export const MovementRecorder = (props: CustomizableComponentProps) => {
     }, [isNamingModalVisible]);
 
 
-    
+
     /*********************************************
      * Unset index to -1 when playback ended     *
      * due to success, canceled, or failed state *
