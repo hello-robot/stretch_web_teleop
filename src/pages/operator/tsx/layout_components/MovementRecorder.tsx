@@ -211,6 +211,7 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
     const [isAskingConfirmationBeforeDelete, isAskingConfirmationBeforeDeleteSet] = useState<boolean>(false);
     const isRecordingPlaying = movementStatesTransitory.includes(playbackPosesState?.state);
     const isThisPlaying = idxFixedRecordingPlaying === idxFixed;
+    const isDisabled = isRecordingPlaying && !isThisPlaying;
 
 
     // Focus <textarea>, and select value inside <textarea> when focused
@@ -268,13 +269,16 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
             functions.LoadRecording(idxFixed);
         }
     }, [idxFixedRecordingPlaying, idxFixed, functions]);
-    const isDisabled = isRecordingPlaying && idxFixedRecordingPlaying !== idxFixed;
 
     return (
         <div
             className="recording-item"
             key={recordingName}
         >
+
+            {/************************
+                   Recording Name
+            **************************/}
             <textarea
                 ref={refTextArea}
                 className="recording-name-text-area"
@@ -287,7 +291,13 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                 disabled={!isEditing}
                 onBlur={updateRecordingName}
             />
+            {/************************
+                     3 Buttons
+            **************************/}
             <Flex gap={4} className="recording-item-buttons">
+                {/************************
+                           Play
+                **************************/}
                 <button
                     onPointerDown={onPointerDown}
                     className={
@@ -301,6 +311,9 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                             ? <StopCircleIcon />
                             : <PlayCircle />}
                 </button>
+                {/************************
+                           Edit
+                **************************/}
                 <button
                     onPointerDown={() => {
                         isEditingSet(true);
@@ -310,12 +323,15 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                         ${!isAskingConfirmationBeforeDelete ? "visible" : "hidden"}
                         ${isEditing ? 'editing' : ''}
                     `}
-                    disabled={isDisabled}
+                    disabled={isRecordingPlaying}
                 > <EditIcon className="button-edit-icon" /> </button>
+                {/************************
+                          Delete
+                **************************/}
                 <Flex className="button-delete-recording-wrapper">
                     <button
                         onPointerDown={() => { isAskingConfirmationBeforeDeleteSet(false) }}
-                        disabled={!isAskingConfirmationBeforeDelete || isDisabled}
+                        disabled={!isAskingConfirmationBeforeDelete || isRecordingPlaying}
                         className={`button-cancel-deletion ${isAskingConfirmationBeforeDelete ? "visible" : "hidden"}`}
                     >
                         <KeyboardArrowLeftIcon />
@@ -332,7 +348,7 @@ const RecordingItem: React.FC<RecordingItemProps> = ({
                             }
                         }}
                         className={`button-delete ${isAskingConfirmationBeforeDelete ? " pulse" : " "}`}
-                        disabled={isDisabled}
+                        disabled={isRecordingPlaying}
                     >
                         <DeleteIcon
                             className="button-delete-icon"

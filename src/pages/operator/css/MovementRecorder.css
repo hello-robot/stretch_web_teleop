@@ -247,6 +247,12 @@
     border: 1px solid transparent;
     border-radius: 4px;
     background-color: #fafafa;
+    /* Allow highlighting */
+    user-select: unset !important;
+    -webkit-user-select: unset !important;
+    -moz-user-select: unset !important;
+    -ms-user-select: unset !important;
+
 }
 
 .recording-name-text-area:disabled {
