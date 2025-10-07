@@ -31,11 +31,17 @@ echo "-l $REDIRECT_LOGDIR" &>> $REDIRECT_LOGFILE
 echo "-m $MAP_ARG" &>> $REDIRECT_LOGFILE
 echo "-t $TTS_ARG" &>> $REDIRECT_LOGFILE
 
-# if [[ -z `nmcli -t -f DEVICE c show --active | grep wlo1` ]]; then
-#     echo "Not connected to Wifi. Starting Wifi-Connect..."
-#     echo "Please connect to $HOSTNAME wifi and provide your home network's credentials"
-#     sudo wifi-connect -s $HOSTNAME &>> $REDIRECT_LOGFILE
-# fi
+# Disabled on Sept 9th bc it is triggering when the wifi adapter is something else, like wlp0s20f3
+#if [[ -z `nmcli -t -f DEVICE c show --active | grep wlo1` ]]; then
+#    if ! command -v wifi-connect 2>&1 >/dev/null
+#    then
+#        echo "Not connected to Wifi, but Wifi-Connect CLI is missing. Doing nothing..."
+#    else
+#        echo "Not connected to Wifi. Starting Wifi-Connect..."
+#        echo "Please connect to $HOSTNAME wifi and provide your home network's credentials"
+#        sudo wifi-connect -s $HOSTNAME &>> $REDIRECT_LOGFILE
+#    fi
+#fi
 
 echo "Setup environment..."
 . /etc/hello-robot/hello-robot.conf

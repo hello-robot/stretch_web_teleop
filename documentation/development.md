@@ -2,6 +2,31 @@
 
 This document captures the organization of Web Teleop's codebase and best practices for adding new development. It takes the example of adding a "homing" button to the web interface. Homing is a 30 second sequence the robot must go through every time it wakes up to ascertain its zero positions. This document is meant to be read from top to bottom.
 
+## Breaking apart the launch script
+
+Web Teleop has a nice launch script, `./launch_interface.sh` that brings up all the processes that are needed. But it's easier for development if they're brought up separately in different terminals since this makes it easier to see errors and debug printouts. To launch Web Teleop this way, run the following commands in separate terminals.
+
+- Terminal 1
+  ```
+  ros2 launch stretch_web_teleop web_interface.launch.py
+  # optional map arg: ros2 launch stretch_web_teleop web_interface.launch.py map_yaml:=/home/hello-robot/stretch_user/maps/<map_name>.yaml
+  # optional text-to-speech arg: ros2 launch stretch_web_teleop web_interface.launch.py tts_engine:=pyttsx3
+  ```
+- Before continuing, install NPM modules using `npm install --force` in the stretch_web_teleop folder.
+- Be sure to `cd` into the stretch_web_teleop repo and set certs using `export NODE_EXTRA_CA_CERTS="/home/hello-robot/ament_ws/src/stretch_web_teleop/certificates/rootCA.pem"` before running these commands.
+- Terminal 2
+  ```
+  npm run localstorage # optional: npm run firebase
+  ```
+- Terminal 3
+  ```
+  node server.js
+  ```
+- Terminal 4
+  ```
+  node start_robot_browser.js
+  ```
+
 ## `src/shared`
 
 Within the `src/shared` folder, there is:
