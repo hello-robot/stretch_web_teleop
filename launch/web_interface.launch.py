@@ -164,6 +164,13 @@ def map_configuration_to_drivers(model, tool, has_beta_teleop_kit, has_nav_head_
         and has_nav_head_cam is True
     ):
         return "both", False, False, True
+    elif (
+        model == "SE3"
+        and tool == "eoa_wrist_dw3_tool_sg3_pro"
+        and has_beta_teleop_kit is False
+        and has_nav_head_cam is True
+    ):
+        return "both", False, False, True
 
     raise ValueError(
         f"cannot find valid configuration for model={model}, tool={tool}, "
