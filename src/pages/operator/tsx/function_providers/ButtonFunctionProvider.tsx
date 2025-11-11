@@ -108,7 +108,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
      */
     public updateJointStates(
         inJointLimit: ValidJointStateDict,
-        inCollision: ValidJointStateDict,
+        inCollision: ValidJointStateDict
     ) {
         // For all the joints that are in collision, set their corresponding buttons
         // either to collision (for the button corresponding to the direction the
@@ -135,14 +135,14 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     buttonNeg,
                     inCollisionNeg
                         ? ButtonState.Collision
-                        : ButtonState.Inactive,
+                        : ButtonState.Inactive
                 );
             if (!prevButtonStatePos || inCollisionPos !== prevInCollisionPos)
                 this.buttonStateMap.set(
                     buttonPos,
                     inCollisionPos
                         ? ButtonState.Collision
-                        : ButtonState.Inactive,
+                        : ButtonState.Inactive
                 );
         });
 
@@ -163,10 +163,13 @@ export class ButtonFunctionProvider extends FunctionProvider {
             // stop the current action. This will stop the robot from constantly sending
             // move commands when in click-click mode.
             if (prevButtonStateNeg === ButtonState.Active && !inLimitNeg) {
-                this.stopCurrentAction()
+                this.stopCurrentAction();
                 this.buttonStateMap.set(buttonNeg, ButtonState.Limit);
-            } else if (prevButtonStatePos === ButtonState.Active && !inLimitPos) {
-                this.stopCurrentAction()
+            } else if (
+                prevButtonStatePos === ButtonState.Active &&
+                !inLimitPos
+            ) {
+                this.stopCurrentAction();
                 this.buttonStateMap.set(buttonPos, ButtonState.Limit);
             }
 
@@ -176,7 +179,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
             )
                 this.buttonStateMap.set(
                     buttonNeg,
-                    inLimitNeg ? ButtonState.Inactive : ButtonState.Limit,
+                    inLimitNeg ? ButtonState.Inactive : ButtonState.Limit
                 );
             if (
                 prevButtonStatePos == undefined ||
@@ -184,7 +187,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
             )
                 this.buttonStateMap.set(
                     buttonPos,
-                    inLimitPos ? ButtonState.Inactive : ButtonState.Limit,
+                    inLimitPos ? ButtonState.Inactive : ButtonState.Limit
                 );
         });
 
@@ -198,13 +201,15 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @param callback operator's callback function to update the button state map
      */
     public setOperatorCallback(
-        callback: (buttonStateMap: ButtonStateMap) => void,
+        callback: (buttonStateMap: ButtonStateMap) => void
     ) {
         this.operatorCallback = callback;
     }
 
     public getActiveButton() {
-        return [...this.buttonStateMap].find(([key, value]) => value === ButtonState.Active)
+        return [...this.buttonStateMap].find(
+            ([key, value]) => value === ButtonState.Active
+        );
     }
 
     /**
@@ -255,7 +260,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @returns the {@link ButtonFunctions} for the button
      */
     public provideFunctions(
-        buttonPadFunction: ButtonPadButton,
+        buttonPadFunction: ButtonPadButton
     ): ButtonFunctions {
         let action: () => void;
         const onLeave = () => {
@@ -266,7 +271,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
         const jointName: ValidJoints =
             getJointNameFromButtonFunction(buttonPadFunction);
         const multiplier: number = negativeButtonPadFunctions.has(
-            buttonPadFunction,
+            buttonPadFunction
         )
             ? -1
             : 1;
@@ -313,7 +318,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                             this.incrementalJointMovement(jointName, increment);
                             FunctionProvider.remoteRobot?.setToggle(
                                 "setFollowGripper",
-                                false,
+                                false
                             );
                         };
                         break;
@@ -326,10 +331,10 @@ export class ButtonFunctionProvider extends FunctionProvider {
                         setTimeout(
                             () =>
                                 this.setButtonInactiveState(buttonPadFunction),
-                            1000,
+                            1000
                         );
                     },
-                    onLeave: onLeave,
+                    // onLeave: onLeave,
                 };
             case ActionMode.PressAndHold:
             case ActionMode.ClickClick:
@@ -366,7 +371,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
                             this.continuousJointMovement(jointName, increment);
                             FunctionProvider.remoteRobot?.setToggle(
                                 "setFollowGripper",
-                                false,
+                                false
                             );
                         };
                         break;
@@ -388,17 +393,35 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     : {
                           // For click-click, stop if button already active
                           onPointerDown: () => {
-                              if (this.activeVelocityAction) {
+                              let activeButton = this.getActiveButton();
+                              let activeButtonPadFunction = activeButton
+                                  ? activeButton[0]
+                                  : undefined;
+
+                              if (
+                                  this.activeVelocityAction &&
+                                  activeButtonPadFunction !== buttonPadFunction
+                              ) {
                                   this.stopCurrentAction();
                                   this.setButtonInactiveState(
-                                      buttonPadFunction,
+                                      activeButtonPadFunction
+                                  );
+                                  action();
+                                  this.setButtonActiveState(buttonPadFunction);
+                              } else if (
+                                  this.activeVelocityAction &&
+                                  activeButtonPadFunction == buttonPadFunction
+                              ) {
+                                  this.stopCurrentAction();
+                                  this.setButtonInactiveState(
+                                      buttonPadFunction
                                   );
                               } else {
                                   action();
                                   this.setButtonActiveState(buttonPadFunction);
                               }
                           },
-                          onLeave: !isMobile ? onLeave : () => {},
+                          //   onLeave: !isMobile ? onLeave : () => {},
                       };
         }
     }
@@ -412,7 +435,7 @@ export class ButtonFunctionProvider extends FunctionProvider {
  * negative or positive direction respectively)
  */
 function getButtonsFromJointName(
-    jointName: ValidJoints,
+    jointName: ValidJoints
 ): [ButtonPadButton, ButtonPadButton] | undefined {
     switch (jointName) {
         case "joint_gripper_finger_left":
@@ -465,7 +488,7 @@ function getButtonsFromJointName(
  * @returns the name of the corresponding joint
  */
 function getJointNameFromButtonFunction(
-    buttonType: ButtonPadButton,
+    buttonType: ButtonPadButton
 ): ValidJoints {
     switch (buttonType) {
         case ButtonPadButton.BaseReverse:
