@@ -95,6 +95,9 @@ function componentDescription(definition: ComponentDefinition): string {
         case ComponentType.VirtualJoystick:
         case ComponentType.ButtonGrid:
         case ComponentType.Map:
+        case ComponentType.ProgramEditor:
+        case ComponentType.ExecutionMonitor:
+        case ComponentType.Library:
             return definition.type;
         default:
             throw Error(
@@ -120,6 +123,10 @@ export type GlobalOptionsProps = {
     /** If the button text labels should be displayed */
     displayLabels: boolean;
     setDisplayLabels: (displayLabels: boolean) => void;
+
+    /** If the rosbag recorder should be displayed */
+    displayRosbagRecorder: boolean;
+    setDisplayRosbagRecorder: (displayRosbagRecorder: boolean) => void;
 
     /** List of names of the default layouts. */
     defaultLayouts: string[];
@@ -169,6 +176,15 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
                         props.setDisplayTextToSpeech(!props.displayTextToSpeech)
                     }
                     label="Display text-to-speech"
+                />
+                <OnOffToggleButton
+                    on={!props.displayRosbagRecorder}
+                    onClick={() =>
+                        props.setDisplayRosbagRecorder(
+                            !props.displayRosbagRecorder,
+                        )
+                    }
+                    label="Display demonstration recorder"
                 />
                 <button onClick={() => setShowLoadLayoutModal(true)}>
                     Load layout
@@ -488,6 +504,10 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.ButtonGrid },
         { type: ComponentType.VirtualJoystick },
         { type: ComponentType.Map },
+        { type: ComponentType.BatteryGuage },
+        { type: ComponentType.ProgramEditor },
+        { type: ComponentType.ExecutionMonitor },
+        { type: ComponentType.Library },
     ];
 
     function handleSelect(type: ComponentType, id?: ComponentId) {
@@ -500,7 +520,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
                 (definition as ParentComponentDefinition).children = [];
                 break;
             case ComponentType.Map:
-                (definition as MapDefinition).storageHandler = storageHandler;
+                (definition as any).storageHandler = storageHandler;
                 break;
         }
 

@@ -1,0 +1,30 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from stretch_web_teleop/msg/TextToSpeech.msg
+// generated code does not contain a copyright notice
+
+
+module stretch_web_teleop {
+  module msg {
+    module TextToSpeech_Constants {
+      @verbatim (language="comment", text=
+        "If a message is already being spoken, this flag controls what to do with this message:" "\n"        "add it to a queue to be executed sequentially (Default), or interrupt the" "\n"        "current message and queue to speak this message (in this case, the old queue gets" "\n"        "discarded).")
+      const uint8 OVERRIDE_BEHAVIOR_QUEUE = 0;
+      const uint8 OVERRIDE_BEHAVIOR_INTERRUPT = 1;
+    };
+    @verbatim (language="comment", text=
+      "The text to say")
+    struct TextToSpeech {
+      string text;
+
+      @verbatim (language="comment", text=
+        "The voice to use. Valid options for this depend on the engine.")
+      string voice;
+
+      @verbatim (language="comment", text=
+        "Whether to speak slow or not.")
+      boolean is_slow;
+
+      uint8 override_behavior;
+    };
+  };
+};

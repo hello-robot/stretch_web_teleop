@@ -1,0 +1,403 @@
+/* Program Editor Component Styles */
+
+.program-editor-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 300px;
+    min-width: 800px;
+    flex: 3 1 0;
+    width: 100%;
+    max-width: 100%;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Responsive design for when sidebar is open */
+@media (max-width: 1600px) {
+    .program-editor-root {
+        min-width: 600px;
+        font-size: 13px;
+    }
+    
+    .program-editor-header {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 13px;
+        padding: 5px 12px;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .program-editor-root {
+        min-width: 400px;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+    
+    .program-editor-header {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 12px;
+        padding: 4px 10px;
+        min-width: 70px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        padding: 6px 10px;
+        line-height: 1.45;
+        font-size: 12px;
+    }
+    
+    .line-numbers {
+        padding: 6px 10px;
+        min-width: 40px;
+    }
+    
+    .line-number {
+        font-size: 12px;
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        line-height: 19px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .program-editor-root {
+        min-width: 300px;
+        font-size: 11px;
+        min-height: 250px;
+        line-height: 1.4;
+    }
+    
+    .program-editor-header {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+    
+    .run-program-button,
+    .clear-program-button {
+        font-size: 11px;
+        padding: 3px 8px;
+        min-width: 60px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        padding: 4px 8px;
+        line-height: 1.4;
+        font-size: 11px;
+    }
+    
+    .line-numbers {
+        padding: 4px 8px;
+        min-width: 35px;
+    }
+    
+    .line-number {
+        font-size: 11px;
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
+    }
+    
+    .code-textarea,
+    .code-highlighted {
+        line-height: 16px;
+    }
+}
+
+.program-editor-root.customizing {
+    cursor: pointer;
+}
+
+.program-editor-root.selected {
+    border: 2px solid var(--selected-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.program-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--secondary-background-color);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.program-editor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.program-editor-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.program-editor-language {
+    color: var(--secondary-text-color);
+    background: var(--tertiary-background-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.run-program-button {
+    background: var(--primary-color, #28a745);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+}
+
+.run-program-button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+.run-program-button:active {
+    background: var(--primary-active-color, #004085);
+}
+
+.run-program-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
+}
+
+.clear-program-button {
+    background: var(--btn-gray);
+    color: var(--text-color);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: normal;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+}
+
+.clear-program-button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+.clear-program-button:active {
+    filter: brightness(85%);
+}
+
+.clear-program-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
+}
+
+.program-editor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.editor-wrapper {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+.code-textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--text-color);
+    z-index: 2;
+    border: none;
+    outline: none;
+    resize: none;
+    tab-size: 4;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 21px;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.code-highlighted {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 21px;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Syntax highlighting colors */
+.robot-function {
+    color: #ff8c00; /* Orange for robot functions */
+    font-weight: 600;
+}
+
+.human-function {
+    color: #28a745; /* Green for human functions */
+    font-weight: 600;
+}
+
+.saved-position {
+    color: #007bff; /* Blue for saved positions */
+    font-weight: normal;
+}
+
+.comment {
+    color: #6c757d; /* Grey for comments */
+    font-style: italic;
+}
+
+/* Inline suggestions*/
+.inline-suggestion {
+    color: #6c757d; /* Gray for suggestions */
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    background: var(--secondary-background-color);
+    border-right: 1px solid var(--border-color);
+    padding: 8px 12px;
+    min-width: 50px;
+    text-align: right;
+    user-select: none;
+    overflow-y: auto;
+}
+
+.line-number {
+    padding: 0;
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    line-height: 21px;
+    height: 21px;
+    min-height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.line-number.error {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    color: #dc3545 !important;
+    font-weight: 600 !important;
+}
+
+/* Error banner */
+.program-editor-error-banner {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.program-editor-error-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+
+
+.code-textarea::placeholder {
+    color: var(--secondary-text-color);
+    opacity: 0.7;
+}
+
+.line-numbers::-webkit-scrollbar,
+.code-textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.line-numbers::-webkit-scrollbar-track,
+.code-textarea::-webkit-scrollbar-track {
+    background: var(--secondary-background-color);
+}
+
+.line-numbers::-webkit-scrollbar-thumb,
+.code-textarea::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.line-numbers::-webkit-scrollbar-thumb:hover,
+.code-textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-text-color);
+}

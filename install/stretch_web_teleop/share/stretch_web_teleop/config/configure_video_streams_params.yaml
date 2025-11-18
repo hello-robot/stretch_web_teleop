@@ -1,0 +1,90 @@
+{
+  # Images published to /navigation_camera/image_raw
+  # Image size is 1024 x 768
+  "overhead": { "fixed": {
+          # The mask contain params to make a circular mask over the image
+          # Pass "mask": null to not create mask
+          "mask": {
+              "width": 768,
+              "height": 768,
+              "radius": null,
+              "center": null, # Pass "center": {"x": __, "y": __} to define center
+            },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "x_min": 128, "x_max": 896, "y_min": 0, "y_max": 768 },
+          # Number of degrees to rotate video stream clockwise
+          # Pass "rotate": null to not rotate
+          "rotate": null,
+        }, "wide_angle_cam": {
+          # The mask contain params to make a circular mask over the image
+          # Pass "mask": null to not create mask
+          "mask": null,
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": null,
+          # Number of degrees to rotate video stream clockwise
+          # Pass "rotate": null to not rotate
+          # "rotate": null,
+          "rotate": "ROTATE_90_COUNTERCLOCKWISE",
+        } },
+  "realsense":
+    {
+      "default":
+        { "mask": null, "crop": null, "rotate": "ROTATE_90_CLOCKWISE" },
+    },
+  # Images published to /gripper_camera/cropped/image_raw
+  # Default image size is 1024 x 768. D405 is 480 x 270
+  "gripper": { "default": {
+          # The mask contain params to make a circular mask over the image
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 768, "height": 768, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "x_min": 128, "x_max": 896, "y_min": 0, "y_max": 768 },
+          "rotate": null,
+        }, "d405": {
+          # The mask contain params to make a circular mask over the image
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 270, "height": 270, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "y_min": 0, "y_max": 270, "x_min": 125, "x_max": 395 },
+          "rotate": null,
+        } },
+  # Images published to /gripper_camera/expanded/image_raw
+  # Default image size is 1024 x 768. D405 is 480 x 270.
+  # Since the default camera is fisheye, it is already circular. So we don't
+  # expand it.
+  "expandedGripper": { "default": {
+          # The mask contain params to make a circular mask over the image
+          # For the mask the be circumscribed, its width/height must be:
+          # ((768**2) + (1024**2))**0.5
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 768, "height": 768, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "x_min": 128, "x_max": 896, "y_min": 0, "y_max": 768 },
+          "rotate": null,
+        }, "d405": {
+          # The mask contain params to make a circular mask over the image.
+          # For the mask the be circumscribed, its width/height must be:
+          # ((480**2) + (270**2))**0.5
+          # Pass "mask": null to not create mask
+          "mask":
+            { "width": 550, "height": 550, "radius": null, "center": null },
+          # The crop contain params to crop the image
+          # x_max - x_min = mask_width and y_max - y_min = mask_height
+          # Pass "crop": null to not crop image
+          "crop": { "y_min": -140, "y_max": 410, "x_min": -35, "x_max": 515 },
+          "rotate": null,
+        } },
+}

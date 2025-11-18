@@ -18,11 +18,13 @@ export const BASIC_LAYOUT: LayoutDefinition = {
     type: ComponentType.Layout,
     displayMovementRecorder: false,
     displayTextToSpeech: false,
+    displayRosbagRecorder: true,
     displayLabels: true,
     actionMode: ActionMode.PressAndHold,
     children: [
         {
             type: ComponentType.LayoutGrid,
+            flex: 3, 
             children: [
                 {
                     type: ComponentType.Panel,
@@ -52,20 +54,11 @@ export const BASIC_LAYOUT: LayoutDefinition = {
         } as LayoutGridDefinition,
         {
             type: ComponentType.LayoutGrid,
+            flex: 1, 
             children: [
                 {
                     type: ComponentType.Panel,
                     children: [
-                        {
-                            type: ComponentType.SingleTab,
-                            label: "Base",
-                            children: [
-                                {
-                                    type: ComponentType.ButtonPad,
-                                    id: ButtonPadId.Base,
-                                } as ButtonPadDefinition,
-                            ],
-                        } as TabDefinition,
                         {
                             type: ComponentType.SingleTab,
                             label: "Wrist & Gripper",

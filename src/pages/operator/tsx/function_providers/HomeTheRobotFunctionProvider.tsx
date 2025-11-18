@@ -43,6 +43,11 @@ export class HomeTheRobotFunctionProvider extends FunctionProvider {
     public updateIsHomedState(isHomed: boolean): void {
         this.isHomed = isHomed;
         if (this.isHomedCallback) this.isHomedCallback(this.isHomed);
+        
+        // When robot becomes homed, reset camera perspective to look at gripper
+        if (isHomed) {
+            FunctionProvider.remoteRobot?.setCameraPerspective("overhead", "manip");
+        }
     }
 
     public provideFunctions(homeTheRobotFunction: HomeTheRobotFunction) {

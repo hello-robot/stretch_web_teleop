@@ -1,0 +1,4 @@
+action/MoveToPregrasp.action
+action/MoveToPregrasp.idl
+msg/TextToSpeech.idl
+msg/TextToSpeech.msg

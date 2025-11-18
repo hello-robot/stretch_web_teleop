@@ -25,6 +25,10 @@ export enum ComponentType {
     Map = "Map",
     RunStopButton = "Run Stop Button",
     BatteryGuage = "Battery Gauge",
+    RosbagRecorder = "Rosbag Recorder",
+    ProgramEditor = "Program Editor",
+    Library = "Library",
+    ExecutionMonitor = "Execution Monitor"
 }
 
 /**
@@ -87,8 +91,9 @@ export type ParentComponentDefinition = ComponentDefinition & {
 };
 
 export type LayoutDefinition = ComponentDefinition & {
-    displayMovementRecorder: boolean;
-    displayTextToSpeech: boolean;
+    displayMovementRecorder?: boolean;
+    displayTextToSpeech?: boolean;
+    displayRosbagRecorder?: boolean;
     displayLabels: boolean;
     actionMode: ActionMode;
     children: LayoutGridDefinition[];
@@ -96,6 +101,7 @@ export type LayoutDefinition = ComponentDefinition & {
 
 export type LayoutGridDefinition = ComponentDefinition & {
     children: PanelDefinition[];
+    flex?: number;
 };
 
 /**
@@ -222,3 +228,12 @@ export type MapDefinition = ComponentDefinition & {
  * Definition for the run stop button
  */
 export type RunStopDefinition = ComponentDefinition;
+
+/**
+ * Definition for the program editor component
+ */
+export type ProgramEditorDefinition = ComponentDefinition;
+
+export type LibraryDefinition = ComponentDefinition;
+
+export type ExecutionMonitorDefinition = ComponentDefinition;
