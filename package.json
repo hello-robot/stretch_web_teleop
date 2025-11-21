@@ -34,7 +34,7 @@
         "react-native-keyboard-aware-scrollview": "^2.1.0",
         "react-native-web": "^0.19.7",
         "react-path-tooltip": "^1.0.25",
-        "roslib": "github:hello-vinitha/roslibjs#ros2actionclient",
+        "roslib": "^2.0.0",
         "socket.io": "^4.6.1",
         "socket.io-client": "^4.6.1",
         "style-loader": "^3.3.2",
@@ -72,7 +72,7 @@
         "@eslint/compat": "^1.2.8",
         "@eslint/eslintrc": "^3.3.1",
         "@eslint/js": "^9.25.1",
-        "@types/node": "^20.6.0",
+        "@types/node": "^20.19.25",
         "@types/three": "^0.157.0",
         "babel-loader": "^9.1.2",
         "babel-polyfill": "^6.26.0",
@@ -85,7 +85,7 @@
         "prettier": "3.2.5",
         "react-docgen-typescript": "^2.2.2",
         "react-styleguidist": "^13.1.1",
-        "typescript": "^5.2.2",
+        "typescript": "^5.9.3",
         "webpack": "^5.88.2",
         "webpack-cli": "^5.0.2"
     }

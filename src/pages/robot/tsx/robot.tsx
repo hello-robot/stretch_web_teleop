@@ -1,5 +1,5 @@
 import React from "react";
-import ROSLIB from "roslib";
+import { Ros, ActionClient, Goal, Topic, Service, TFClient, Transform, Param, Message, ServiceRequest } from "roslib";
 import {
     ROSJointState,
     ROSCompressedImage,
@@ -27,38 +27,38 @@ const moveToPregraspActionName = "/move_to_pregrasp";
 const showTabletActionName = "/show_tablet";
 
 export class Robot extends React.Component {
-    private ros: ROSLIB.Ros;
+    private ros: Ros;
     private readonly rosURL = "wss://localhost:9090";
     private rosReconnectTimerID?: ReturnType<typeof setTimeout>;
     private onRosConnectCallback?: () => Promise<void>;
     private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
     private jointState?: ROSJointState;
-    private poseGoal?: ROSLIB.ActionGoal;
+    private poseGoal?: Goal;
     private poseGoalComplete?: boolean;
     private isRunStopped?: boolean;
-    private moveBaseGoal?: ROSLIB.ActionGoal;
-    private trajectoryClient?: ROSLIB.ActionClient;
-    private moveBaseClient?: ROSLIB.ActionClient;
-    private moveToPregraspGoal?: ROSLIB.ActionGoal;
-    private showTabletGoal?: ROSLIB.ActionGoal;
-    private moveToPregraspClient?: ROSLIB.ActionClient;
-    private showTabletClient?: ROSLIB.ActionClient;
-    private cmdVelTopic?: ROSLIB.Topic;
-    private switchToNavigationService?: ROSLIB.Service;
-    private switchToPositionService?: ROSLIB.Service;
-    private setCameraPerspectiveService?: ROSLIB.Service;
-    private setRealsenseDepthSensingService?: ROSLIB.Service;
-    private setGripperDepthSensingService?: ROSLIB.Service;
-    private setExpandedGripperService?: ROSLIB.Service;
-    private setRealsenseShowBodyPoseService?: ROSLIB.Service;
-    private setComputeBodyPoseService?: ROSLIB.Service;
-    private setRunStopService?: ROSLIB.Service;
-    private robotFrameTfClient?: ROSLIB.TFClient;
-    private mapFrameTfClient?: ROSLIB.TFClient;
-    private linkGripperFingerLeftTF?: ROSLIB.Transform;
-    private linkTabletTF?: ROSLIB.Transform;
-    private linkWristYawTF?: ROSLIB.Transform;
-    private linkHeadTiltTF?: ROSLIB.Transform;
+    private moveBaseGoal?: Goal;
+    private trajectoryClient?: ActionClient;
+    private moveBaseClient?: ActionClient;
+    private moveToPregraspGoal?: Goal;
+    private showTabletGoal?: Goal;
+    private moveToPregraspClient?: ActionClient;
+    private showTabletClient?: ActionClient;
+    private cmdVelTopic?: Topic;
+    private switchToNavigationService?: Service;
+    private switchToPositionService?: Service;
+    private setCameraPerspectiveService?: Service;
+    private setRealsenseDepthSensingService?: Service;
+    private setGripperDepthSensingService?: Service;
+    private setExpandedGripperService?: Service;
+    private setRealsenseShowBodyPoseService?: Service;
+    private setComputeBodyPoseService?: Service;
+    private setRunStopService?: Service;
+    private robotFrameTfClient?: TFClient;
+    private mapFrameTfClient?: TFClient;
+    private linkGripperFingerLeftTF?: Transform;
+    private linkTabletTF?: Transform;
+    private linkWristYawTF?: Transform;
+    private linkHeadTiltTF?: Transform;
     private jointStateCallback: (
         robotPose: RobotPose,
         jointValues: ValidJointStateDict,
@@ -69,18 +69,18 @@ export class Robot extends React.Component {
     private moveBaseResultCallback: (goalState: ActionState) => void;
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
     private showTabletResultCallback: (goalState: ActionState) => void;
-    private amclPoseCallback: (pose: ROSLIB.Transform) => void;
+    private amclPoseCallback: (pose: Transform) => void;
     private modeCallback: (mode: string) => void;
     private isHomedCallback: (isHomed: boolean) => void;
     private isRunStoppedCallback: (isRunStopped: boolean) => void;
     private hasBetaTeleopKitCallback: (value: boolean) => void;
     private stretchToolCallback: (value: string) => void;
     private lookAtGripperInterval?: number; // ReturnType<typeof setInterval>
-    private subscriptions: ROSLIB.Topic[] = [];
-    private hasBetaTeleopKitParam: ROSLIB.Param;
-    private stretchToolParam: ROSLIB.Param;
-    private textToSpeechTopic?: ROSLIB.Topic;
-    private homeTheRobotService?: ROSLIB.Service;
+    private subscriptions: Topic[] = [];
+    private hasBetaTeleopKitParam: Param;
+    private stretchToolParam: Param;
+    private textToSpeechTopic?: Topic;
+    private homeTheRobotService?: Service;
 
     constructor(props: {
         jointStateCallback: (
@@ -93,7 +93,7 @@ export class Robot extends React.Component {
         moveBaseResultCallback: (goalState: ActionState) => void;
         moveToPregraspResultCallback: (goalState: ActionState) => void;
         showTabletResultCallback: (goalState: ActionState) => void;
-        amclPoseCallback: (pose: ROSLIB.Transform) => void;
+        amclPoseCallback: (pose: Transform) => void;
         modeCallback: (mode: string) => void;
         isHomedCallback: (isHomed: boolean) => void;
         isRunStoppedCallback: (isRunStopped: boolean) => void;
@@ -121,11 +121,7 @@ export class Robot extends React.Component {
 
     async connect(): Promise<void> {
         console.log("Connecting to ROS...");
-        this.ros = new ROSLIB.Ros({
-            // set this to false to use the new service interface to
-            // tf2_web_republisher. true is the default and means roslibjs
-            // will use the action interface
-            groovyCompatibility: false,
+        this.ros = new Ros({
             url: this.rosURL,
         });
 
@@ -317,7 +313,7 @@ export class Robot extends React.Component {
     }
 
     subscribeToJointState() {
-        const jointStateTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
+        const jointStateTopic: Topic<ROSJointState> = new Topic({
             ros: this.ros,
             name: "/stretch/joint_states",
             messageType: "sensor_msgs/msg/JointState",
@@ -344,7 +340,7 @@ export class Robot extends React.Component {
     }
 
     subscribeToJointLimits() {
-        const jointLimitsTopic: ROSLIB.Topic<ROSJointState> = new ROSLIB.Topic({
+        const jointLimitsTopic: Topic<ROSJointState> = new Topic({
             ros: this.ros,
             name: "/joint_limits",
             messageType: "sensor_msgs/msg/JointState",
@@ -366,8 +362,8 @@ export class Robot extends React.Component {
     }
 
     subscribeToBatteryState() {
-        const batteryStateTopic: ROSLIB.Topic<ROSBatteryState> =
-            new ROSLIB.Topic({
+        const batteryStateTopic: Topic<ROSBatteryState> =
+            new Topic({
                 ros: this.ros,
                 name: "/battery",
                 messageType: "sensor_msgs/msg/BatteryState",
@@ -380,20 +376,20 @@ export class Robot extends React.Component {
     }
 
     subscribeToMode() {
-        const modeTopic: ROSLIB.Topic = new ROSLIB.Topic({
+        const modeTopic: Topic = new Topic({
             ros: this.ros,
             name: "/mode",
             messageType: "std_msgs/msg/String",
         });
         this.subscriptions.push(modeTopic);
 
-        modeTopic.subscribe((msg) => {
+        modeTopic.subscribe((msg: Message) => {
             if (this.modeCallback) this.modeCallback(msg.data);
         });
     }
 
     subscribeToIsHomed() {
-        const isHomedTopic: ROSLIB.Topic = new ROSLIB.Topic({
+        const isHomedTopic: Topic = new Topic({
             ros: this.ros,
             name: "/is_homed",
             messageType: "std_msgs/msg/Bool",
@@ -406,7 +402,7 @@ export class Robot extends React.Component {
     }
 
     subscribeToIsRunStopped() {
-        let topic: ROSLIB.Topic = new ROSLIB.Topic({
+        let topic: Topic = new Topic({
             ros: this.ros,
             name: "is_runstopped",
             messageType: "std_msgs/msg/Bool",
@@ -419,7 +415,7 @@ export class Robot extends React.Component {
     }
 
     subscribeToVideo(props: VideoProps) {
-        let topic: ROSLIB.Topic<ROSCompressedImage> = new ROSLIB.Topic({
+        let topic: Topic<ROSCompressedImage> = new Topic({
             ros: this.ros,
             name: props.topicName,
             messageType: "sensor_msgs/CompressedImage",
@@ -429,7 +425,7 @@ export class Robot extends React.Component {
     }
 
     getHasBetaTeleopKit() {
-        this.hasBetaTeleopKitParam = new ROSLIB.Param({
+        this.hasBetaTeleopKitParam = new Param({
             ros: this.ros,
             name: "/configure_video_streams_gripper:has_beta_teleop_kit",
         });
@@ -445,7 +441,7 @@ export class Robot extends React.Component {
         console.log("Getting stretch tool", this.ros.isConnected);
         // NOTE: This information can also come from the /tool topic.
         // However, we only need it once, so opt for a parameter.
-        this.stretchToolParam = new ROSLIB.Param({
+        this.stretchToolParam = new Param({
             ros: this.ros,
             name: "/configure_video_streams_gripper:stretch_tool",
         });
@@ -470,13 +466,13 @@ export class Robot extends React.Component {
     }
 
     getOccupancyGrid() {
-        let getMapService = new ROSLIB.Service({
+        let getMapService = new Service({
             ros: this.ros,
             name: "/map_server/map",
             serviceType: "nav2_msgs/srv/GetMap",
         });
 
-        var request = new ROSLIB.ServiceRequest({});
+        var request: ServiceRequest = {};
         getMapService?.callService(
             request,
             (response: { map: ROSOccupancyGrid }) => {
@@ -488,13 +484,13 @@ export class Robot extends React.Component {
 
     getJointLimits() {
         console.log("Getting joint limits");
-        let getJointLimitsService = new ROSLIB.Service({
+        let getJointLimitsService = new Service({
             ros: this.ros,
             name: "/get_joint_states",
             serviceType: "std_srvs/Trigger",
         });
 
-        var request = new ROSLIB.ServiceRequest({});
+        var request: ServiceRequest = {};
         getJointLimitsService.callService(
             request,
             () => {
@@ -525,7 +521,7 @@ export class Robot extends React.Component {
         }
 
         // Create the topic
-        let topic: ROSLIB.Topic<ActionStatusList> = new ROSLIB.Topic({
+        let topic: Topic<ActionStatusList> = new Topic({
             ros: this.ros,
             name: actionName + "/_action/status",
             messageType: "action_msgs/msg/GoalStatusArray",
@@ -558,40 +554,40 @@ export class Robot extends React.Component {
     }
 
     createTrajectoryClient() {
-        this.trajectoryClient = new ROSLIB.ActionHandle({
+        this.trajectoryClient = new ActionClient({
             ros: this.ros,
-            name: "/stretch_controller/follow_joint_trajectory",
-            actionType: "control_msgs/action/FollowJointTrajectory",
+            serverName: "/stretch_controller/follow_joint_trajectory",
+            actionName: "control_msgs/action/FollowJointTrajectory",
         });
     }
 
     createMoveBaseClient() {
-        this.moveBaseClient = new ROSLIB.ActionHandle({
+        this.moveBaseClient = new ActionClient({
             ros: this.ros,
-            name: moveBaseActionName,
-            actionType: "nav2_msgs/action/NavigateToPose",
+            serverName: moveBaseActionName,
+            actionName: "nav2_msgs/action/NavigateToPose",
             // timeout: 100
         });
     }
 
     createMoveToPregraspClient() {
-        this.moveToPregraspClient = new ROSLIB.ActionHandle({
+        this.moveToPregraspClient = new ActionClient({
             ros: this.ros,
-            name: moveToPregraspActionName,
-            actionType: "stretch_web_teleop/action/MoveToPregrasp",
+            serverName: moveToPregraspActionName,
+            actionName: "stretch_web_teleop/action/MoveToPregrasp",
         });
     }
 
     createShowTabletClient() {
-        this.showTabletClient = new ROSLIB.ActionHandle({
+        this.showTabletClient = new ActionClient({
             ros: this.ros,
-            name: showTabletActionName,
-            actionType: "stretch_show_tablet_interfaces/action/ShowTablet",
+            serverName: showTabletActionName,
+            actionName: "stretch_show_tablet_interfaces/action/ShowTablet",
         });
     }
 
     createCmdVelTopic() {
-        this.cmdVelTopic = new ROSLIB.Topic({
+        this.cmdVelTopic = new Topic({
             ros: this.ros,
             name: "/stretch/cmd_vel",
             messageType: "geometry_msgs/Twist",
@@ -599,7 +595,7 @@ export class Robot extends React.Component {
     }
 
     createTextToSpeechTopic() {
-        this.textToSpeechTopic = new ROSLIB.Topic({
+        this.textToSpeechTopic = new Topic({
             ros: this.ros,
             name: "/text_to_speech",
             messageType: "stretch_web_teleop/msg/TextToSpeech",
@@ -607,7 +603,7 @@ export class Robot extends React.Component {
     }
 
     createSwitchToNavigationService() {
-        this.switchToNavigationService = new ROSLIB.Service({
+        this.switchToNavigationService = new Service({
             ros: this.ros,
             name: "/switch_to_navigation_mode",
             serviceType: "std_srvs/Trigger",
@@ -615,7 +611,7 @@ export class Robot extends React.Component {
     }
 
     createSwitchToPositionService() {
-        this.switchToPositionService = new ROSLIB.Service({
+        this.switchToPositionService = new Service({
             ros: this.ros,
             name: "/switch_to_position_mode",
             serviceType: "std_srvs/Trigger",
@@ -623,7 +619,7 @@ export class Robot extends React.Component {
     }
 
     createHomeTheRobotService() {
-        this.homeTheRobotService = new ROSLIB.Service({
+        this.homeTheRobotService = new Service({
             ros: this.ros,
             name: "/home_the_robot",
             serviceType: "std_srvs/Trigger",
@@ -631,7 +627,7 @@ export class Robot extends React.Component {
     }
 
     createRealsenseDepthSensingService() {
-        this.setRealsenseDepthSensingService = new ROSLIB.Service({
+        this.setRealsenseDepthSensingService = new Service({
             ros: this.ros,
             name: "/realsense_depth_ar",
             serviceType: "std_srvs/srv/SetBool",
@@ -639,7 +635,7 @@ export class Robot extends React.Component {
     }
 
     createGripperDepthSensingService() {
-        this.setGripperDepthSensingService = new ROSLIB.Service({
+        this.setGripperDepthSensingService = new Service({
             ros: this.ros,
             name: "/gripper_depth_ar",
             serviceType: "std_srvs/srv/SetBool",
@@ -647,7 +643,7 @@ export class Robot extends React.Component {
     }
 
     createExpandedGripperService() {
-        this.setExpandedGripperService = new ROSLIB.Service({
+        this.setExpandedGripperService = new Service({
             ros: this.ros,
             name: "/expanded_gripper",
             serviceType: "std_srvs/srv/SetBool",
@@ -655,7 +651,7 @@ export class Robot extends React.Component {
     }
 
     createRealsenseShowBodyPoseService() {
-        this.setRealsenseShowBodyPoseService = new ROSLIB.Service({
+        this.setRealsenseShowBodyPoseService = new Service({
             ros: this.ros,
             name: "/realsense_body_pose_ar",
             serviceType: "std_srvs/srv/SetBool",
@@ -663,7 +659,7 @@ export class Robot extends React.Component {
     }
 
     createComputeBodyPoseService() {
-        this.setComputeBodyPoseService = new ROSLIB.Service({
+        this.setComputeBodyPoseService = new Service({
             ros: this.ros,
             name: "/toggle_body_pose_estimator",
             serviceType: "std_srvs/srv/SetBool",
@@ -671,7 +667,7 @@ export class Robot extends React.Component {
     }
 
     createRunStopService() {
-        this.setRunStopService = new ROSLIB.Service({
+        this.setRunStopService = new Service({
             ros: this.ros,
             name: "/runstop",
             serviceType: "std_srvs/srv/SetBool",
@@ -679,7 +675,7 @@ export class Robot extends React.Component {
     }
 
     createRobotFrameTFClient() {
-        this.robotFrameTfClient = new ROSLIB.TFClient({
+        this.robotFrameTfClient = new TFClient({
             ros: this.ros,
             fixedFrame: "base_link",
             angularThres: 0.001,
@@ -689,7 +685,7 @@ export class Robot extends React.Component {
     }
 
     createMapFrameTFClient() {
-        this.mapFrameTfClient = new ROSLIB.TFClient({
+        this.mapFrameTfClient = new TFClient({
             ros: this.ros,
             fixedFrame: "map",
             angularThres: 0.001,
@@ -735,7 +731,7 @@ export class Robot extends React.Component {
     }
 
     setRealsenseDepthSensing(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setRealsenseDepthSensingService?.callService(
             request,
             (response: boolean) => {
@@ -753,7 +749,7 @@ export class Robot extends React.Component {
     }
 
     setGripperDepthSensing(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setGripperDepthSensingService?.callService(
             request,
             (response: boolean) => {
@@ -771,7 +767,7 @@ export class Robot extends React.Component {
     }
 
     setExpandedGripper(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setExpandedGripperService?.callService(
             request,
             (response: boolean) => {
@@ -786,7 +782,7 @@ export class Robot extends React.Component {
     }
 
     setRealsenseShowBodyPose(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setRealsenseShowBodyPoseService?.callService(
             request,
             (response: boolean) => {
@@ -804,7 +800,7 @@ export class Robot extends React.Component {
     }
 
     setComputeBodyPose(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setComputeBodyPoseService?.callService(
             request,
             (response: boolean) => {
@@ -819,7 +815,7 @@ export class Robot extends React.Component {
     }
 
     setRunStop(toggle: boolean) {
-        var request = new ROSLIB.ServiceRequest({ data: toggle });
+        var request: ServiceRequest = { data: toggle };
         this.setRunStopService?.callService(request, (response: boolean) => {});
     }
 
@@ -828,7 +824,7 @@ export class Robot extends React.Component {
      * velocity commands to the base.
      */
     switchToNavigationMode() {
-        var request = new ROSLIB.ServiceRequest({});
+        var request: ServiceRequest = {};
         if (robotMode !== "navigation") {
             this.switchToNavigationService!.callService(request, () => {
                 robotMode = "navigation";
@@ -843,7 +839,7 @@ export class Robot extends React.Component {
      * web interface.
      */
     switchToPositionMode = () => {
-        var request = new ROSLIB.ServiceRequest({});
+        var request: ServiceRequest = {};
         if (robotMode !== "position") {
             this.switchToPositionService!.callService(request, () => {
                 robotMode = "position";
@@ -856,7 +852,7 @@ export class Robot extends React.Component {
      * Ask the robot to home itself.
      */
     homeTheRobot() {
-        var request = new ROSLIB.ServiceRequest({});
+        var request: ServiceRequest = {};
         this.homeTheRobotService!.callService(request, () => {
             robotMode = "unknown"; // returns to whatever mode the robot was in before this service was called
             console.log("Homing complete");
@@ -866,7 +862,7 @@ export class Robot extends React.Component {
     executeBaseVelocity = (props: { linVel: number; angVel: number }): void => {
         this.switchToNavigationMode();
         this.stopExecution();
-        let twist = new ROSLIB.Message({
+        let twist = new Message({
             linear: {
                 x: props.linVel,
                 y: 0,
@@ -886,7 +882,7 @@ export class Robot extends React.Component {
     makeIncrementalMoveGoal(
         jointName: ValidJoints,
         jointValueInc: number,
-    ): ROSLIB.Goal | undefined {
+    ): Goal | undefined {
         if (!this.jointState) throw "jointState is undefined";
         let newJointValue = this.getJointValue(jointName);
         // Paper over Hello's fake joints
@@ -931,13 +927,16 @@ export class Robot extends React.Component {
     makeMoveBaseGoal(pose: ROSPose) {
         if (!this.moveBaseClient) throw "moveBaseClient is undefined";
 
-        let newGoal = new ROSLIB.ActionGoal({
-            pose: {
-                header: {
-                    frame_id: "map",
+        let newGoal = new Goal({
+            actionClient: this.moveBaseClient,
+            goalMessage: {
+                pose: {
+                    header: {
+                        frame_id: "map",
+                    },
+                    pose: pose,
                 },
-                pose: pose,
-            },
+            }
         });
 
         return newGoal;
@@ -951,10 +950,13 @@ export class Robot extends React.Component {
         if (!this.moveToPregraspClient)
             throw "moveToPregraspClient is undefined";
 
-        let newGoal = new ROSLIB.ActionGoal({
-            scaled_u: scaled_x,
-            scaled_v: scaled_y,
-            pregrasp_direction: horizontal ? 1 : 2,
+        let newGoal = new Goal({
+            actionClient: this.moveToPregraspClient,
+            goalMessage: {
+                scaled_u: scaled_x,
+                scaled_v: scaled_y,
+                pregrasp_direction: horizontal ? 1 : 2,
+            },
         });
 
         return newGoal;
@@ -963,9 +965,12 @@ export class Robot extends React.Component {
     makeShowTabletGoal() {
         if (!this.showTabletClient) throw "showTabletClient is undefined";
 
-        let newGoal = new ROSLIB.ActionGoal({
-            // TODO: Update once we have a finalized interface!
-            number_of_pose_estimates: 10,
+        let newGoal = new Goal({
+            actionClient: this.showTabletClient,
+            goalMessage: {
+                // TODO: Update once we have a finalized interface!
+                number_of_pose_estimates: 10,
+            }
         });
 
         return newGoal;
@@ -982,26 +987,29 @@ export class Robot extends React.Component {
         console.log(this.trajectoryClient);
 
         if (!this.trajectoryClient) throw "trajectoryClient is undefined";
-        let newGoal = new ROSLIB.ActionGoal({
-            trajectory: {
-                header: {
-                    stamp: {
-                        secs: 0,
-                        nsecs: 0,
-                    },
-                },
-                joint_names: jointNames,
-                points: [
-                    {
-                        positions: jointPositions,
-                        // The following might causing the jumpiness in continuous motions
-                        time_from_start: {
-                            secs: 1,
+        let newGoal = new Goal({
+            actionClient: this.trajectoryClient,
+            goalMessage:{
+                trajectory: {
+                    header: {
+                        stamp: {
+                            secs: 0,
                             nsecs: 0,
                         },
                     },
-                ],
-            },
+                    joint_names: jointNames,
+                    points: [
+                        {
+                            positions: jointPositions,
+                            // The following might causing the jumpiness in continuous motions
+                            time_from_start: {
+                                secs: 1,
+                                nsecs: 0,
+                            },
+                        },
+                    ],
+                },
+            }
         });
 
         return newGoal;
@@ -1030,17 +1038,20 @@ export class Robot extends React.Component {
         });
 
         if (!this.trajectoryClient) throw "trajectoryClient is undefined";
-        let newGoal = new ROSLIB.ActionGoal({
-            trajectory: {
-                header: {
-                    stamp: {
-                        secs: 0,
-                        nsecs: 0,
+        let newGoal = new Goal({
+            actionClient: this.trajectoryClient,
+            goalMessage: {
+                trajectory: {
+                    header: {
+                        stamp: {
+                            secs: 0,
+                            nsecs: 0,
+                        },
                     },
+                    joint_names: jointNames,
+                    points: points,
                 },
-                joint_names: jointNames,
-                points: points,
-            },
+            }
         });
 
         return newGoal;
@@ -1050,21 +1061,21 @@ export class Robot extends React.Component {
         this.switchToNavigationMode();
         this.stopExecution();
         this.poseGoal = this.makePoseGoal(pose);
-        this.trajectoryClient.createClient(this.poseGoal);
+        this.poseGoal.send();
     }
 
     async executePoseGoals(poses: RobotPose[], index: number) {
         this.switchToNavigationMode();
         this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses);
-        this.trajectoryClient.createClient(this.poseGoal);
+        this.poseGoal.send();
     }
 
     executeMoveBaseGoal(pose: ROSPose) {
         this.switchToNavigationMode();
         // this.stopExecution()
         this.moveBaseGoal = this.makeMoveBaseGoal(pose);
-        this.moveBaseClient.createClient(this.moveBaseGoal);
+        this.moveBaseGoal.send();
 
         // An autonomous client may change the robot's mode.
         robotMode = "unknown";
@@ -1074,7 +1085,7 @@ export class Robot extends React.Component {
         this.switchToNavigationMode();
         this.stopAutonomousClients();
         this.poseGoal = this.makeIncrementalMoveGoal(jointName, increment);
-        this.trajectoryClient.createClient(this.poseGoal);
+        this.poseGoal.send();
     }
 
     // NOTE: When we undo this temp fix (of not stopping the
@@ -1104,8 +1115,7 @@ export class Robot extends React.Component {
     stopTrajectoryClient() {
         if (!this.trajectoryClient) throw "trajectoryClient is undefined";
         if (this.poseGoal) {
-            this.trajectoryClient.cancelGoal();
-            // this.poseGoal.cancel()
+            this.poseGoal.cancel();
             this.poseGoal = undefined;
         }
     }
@@ -1113,8 +1123,7 @@ export class Robot extends React.Component {
     stopMoveBaseClient() {
         if (!this.moveBaseClient) throw "moveBaseClient is undefined";
         if (this.moveBaseGoal) {
-            this.moveBaseClient.cancelGoal();
-            // this.moveBaseGoal.cancel()
+            this.moveBaseGoal.cancel();
             this.moveBaseGoal = undefined;
         }
     }
@@ -1147,7 +1156,7 @@ export class Robot extends React.Component {
             scaled_y,
             horizontal,
         );
-        this.moveToPregraspClient.createClient(this.moveToPregraspGoal);
+        this.moveToPregraspGoal.send();
 
         // An autonomous client may change the robot's mode.
         robotMode = "unknown";
@@ -1157,14 +1166,14 @@ export class Robot extends React.Component {
         if (!this.moveToPregraspClient)
             throw "moveToPregraspClient is undefined";
         if (this.moveToPregraspGoal) {
-            this.moveToPregraspClient.cancelGoal();
+            this.moveToPregraspGoal.cancel();
             this.moveToPregraspGoal = undefined;
         }
     }
 
     executeShowTabletGoal() {
         this.showTabletGoal = this.makeShowTabletGoal();
-        this.showTabletClient.createClient(this.showTabletGoal);
+        this.showTabletGoal.send();
 
         // An autonomous client may change the robot's mode.
         robotMode = "unknown";
@@ -1173,7 +1182,7 @@ export class Robot extends React.Component {
     stopShowTabletClient() {
         if (!this.showTabletClient) throw "showTabletClient is undefined";
         if (this.showTabletGoal) {
-            this.showTabletClient.cancelGoal();
+            this.showTabletGoal.cancel();
             this.showTabletGoal = undefined;
         }
     }
@@ -1209,7 +1218,7 @@ export class Robot extends React.Component {
     lookAtGripper(panOffset: number, tiltOffset: number) {
         // If there is a gripper, follow its TF frame. Else, if there is a tablet, follow its TF frame.
         // Else, follow the quick connect TF frame.
-        let transform: ROSLIB.Transform | undefined =
+        let transform: Transform | undefined =
             this.linkGripperFingerLeftTF ||
             this.linkTabletTF ||
             this.linkWristYawTF;
@@ -1325,7 +1334,7 @@ export class Robot extends React.Component {
             );
             override_behavior = 0;
         }
-        let message = new ROSLIB.Message({
+        let message = new Message({
             text: text,
             is_slow: is_slow,
             override_behavior: override_behavior,
@@ -1348,15 +1357,15 @@ export class Robot extends React.Component {
         callback: (publishers: string[]) => void,
         failedCallback: (message: any) => void,
     ) {
-        var publishersClient = new ROSLIB.Service({
+        var publishersClient = new Service({
             ros: this.ros,
             name: "/rosapi/publishers",
             serviceType: "rosapi_msgs/srv/Publishers",
         });
 
-        var request = new ROSLIB.ServiceRequest({
+        var request: ServiceRequest = {
             topic: topic,
-        });
+        };
         if (typeof failedCallback === "function") {
             publishersClient.callService(
                 request,
