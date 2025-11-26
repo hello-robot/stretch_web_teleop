@@ -98,6 +98,10 @@
     font-size: large;
 }
 
+.operator-text-to-speech {
+    margin-top: 20px;
+}
+
 .operator-pose-library.hideLabels,
 .operator-pose-recorder.hideLabels {
     width: 32rem;
@@ -125,16 +129,18 @@
     row-gap: 10px;
     column-gap: 10px;
     justify-content: center;
-    padding-top: 20px;
 }
 
 #operator-body {
-    display: flex;
+    display: grid;
     justify-content: center;
     flex-flow: row;
     flex: 1 1 0;
     grid-column: 1/1;
     grid-row: 3;
+    grid-template-columns: 70% 30%;
+    gap: 16px;
+    padding: 23px;
 }
 
 /** https://stackoverflow.com/a/40989121 **/

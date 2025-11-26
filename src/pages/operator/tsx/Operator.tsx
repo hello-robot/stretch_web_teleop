@@ -18,6 +18,7 @@ import {
     homeTheRobotFunctionProvider,
     hasBetaTeleopKit,
     stretchTool,
+    movementRecorderFunctionProvider,
 } from ".";
 import {
     ButtonPadButton,
@@ -36,11 +37,11 @@ import {
     moveInLayout,
     removeFromLayout,
 } from "./utils/layout_helpers";
-import { MovementRecorder } from "./layout_components/MovementRecorder";
 import { Alert } from "./basic_components/Alert";
 import "operator/css/Operator.css";
 import { TextToSpeech } from "./layout_components/TextToSpeech";
 import { HomeTheRobot } from "./layout_components/HomeTheRobot";
+import { set } from "firebase/database";
 
 /** Operator interface webpage */
 export const Operator = (props: {
@@ -62,15 +63,19 @@ export const Operator = (props: {
         ButtonPadButton[]
     >([]);
     const [moveBaseState, setMoveBaseState] = React.useState<ActionState>();
+    const [playbackPosesState, setPlaybackPosesState] = React.useState<ActionState>(undefined);
     const [moveToPregraspState, setMoveToPregraspState] =
         React.useState<ActionState>();
     const [showTabletState, setShowTabletState] =
         React.useState<ActionState>(false);
     const [robotNotHomed, setRobotNotHomed] =
-        React.useState<ActionState>(false);
-    function showHomeTheRobotGlobalControl(isHomed: ActionState) {
+        React.useState<boolean>(false);
+    const [idxFixedRecordingPlaying, idxFixedRecordingPlayingSet] = React.useState<number>(-1);
+
+    function showHomeTheRobotGlobalControl(isHomed: boolean) {
         setRobotNotHomed(!isHomed);
     }
+    const alertTimeoutDuration = 5000; // milliseconds
     homeTheRobotFunctionProvider.setIsHomedCallback(
         showHomeTheRobotGlobalControl
     );
@@ -113,9 +118,25 @@ export const Operator = (props: {
             if (moveBaseAlertTimeout) clearTimeout(moveBaseAlertTimeout);
             moveBaseAlertTimeout = setTimeout(() => {
                 setMoveBaseState(undefined);
-            }, 5000);
+            }, alertTimeoutDuration);
         }
     }, [moveBaseState]);
+
+    // Callback for when the move base state is updated (e.g., the ROS2 action returns)
+    // Used to render alerts to the operator.
+    function playbackPosesCallback(state: ActionState) {
+        setPlaybackPosesState(state);
+    }
+    movementRecorderFunctionProvider.setOperatorCallback(playbackPosesCallback);
+    let playbackPosesAlertTimeout: NodeJS.Timeout;
+    React.useEffect(() => {
+        if (playbackPosesState && playbackPosesState.alert_type != "info") {
+            if (playbackPosesAlertTimeout) clearTimeout(playbackPosesAlertTimeout);
+            playbackPosesAlertTimeout = setTimeout(() => {
+                setPlaybackPosesState(undefined);
+            }, alertTimeoutDuration);
+        }
+    }, [playbackPosesState]);
 
     // Callback for when the move to pregrasp state is updated (e.g., the ROS2 action returns)
     // Used to render alerts to the operator.
@@ -132,7 +153,7 @@ export const Operator = (props: {
                 clearTimeout(moveToPregraspAlertTimeout);
             moveToPregraspAlertTimeout = setTimeout(() => {
                 setMoveToPregraspState(undefined);
-            }, 5000);
+            }, alertTimeoutDuration);
         }
     }, [moveToPregraspState]);
 
@@ -150,7 +171,7 @@ export const Operator = (props: {
             if (showTabletAlertTimeout) clearTimeout(showTabletAlertTimeout);
             showTabletAlertTimeout = setTimeout(() => {
                 setShowTabletState(undefined);
-            }, 5000);
+            }, alertTimeoutDuration);
         }
     }, [showTabletState]);
 
@@ -298,14 +319,15 @@ export const Operator = (props: {
         hasBetaTeleopKit: hasBetaTeleopKit,
         stretchTool: stretchTool,
         robotNotHomed: robotNotHomed,
+        playbackPosesState: playbackPosesState,
+        idxFixedRecordingPlaying: idxFixedRecordingPlaying,
+        idxFixedRecordingPlayingSet: idxFixedRecordingPlayingSet,
     };
 
     /** Properties for the global options area of the sidebar */
     const globalOptionsProps: GlobalOptionsProps = {
-        displayMovementRecorder: layout.current.displayMovementRecorder,
         displayTextToSpeech: layout.current.displayTextToSpeech,
         displayLabels: layout.current.displayLabels,
-        setDisplayMovementRecorder: setDisplayMovementRecorder,
         setDisplayTextToSpeech: setDisplayTextToSpeech,
         setDisplayLabels: setDisplayLabels,
         defaultLayouts: Object.keys(DEFAULT_LAYOUTS),
@@ -313,8 +335,8 @@ export const Operator = (props: {
         loadLayout: (layoutName: string, dflt: boolean) => {
             layout.current = dflt
                 ? props.storageHandler.loadDefaultLayout(
-                      layoutName as DefaultLayoutName
-                  )
+                    layoutName as DefaultLayoutName
+                )
                 : props.storageHandler.loadCustomLayout(layoutName);
             updateLayout();
         },
@@ -377,13 +399,28 @@ export const Operator = (props: {
                             <span>
                                 {buttonCollision.length > 0
                                     ? buttonCollision.join(", ") +
-                                      " in collision!"
+                                    " in collision!"
                                     : ""}
                             </span>
                         </Alert>
                     </div>
                 </div>
             }
+            {playbackPosesState && (
+                <div className="operator-collision-alerts">
+                    <div
+                        className={className("operator-alert", {
+                            fadeIn: playbackPosesState !== undefined,
+                            fadeOut: playbackPosesState == undefined,
+                        })}
+                    >
+                        <Alert
+                            type={playbackPosesState.alert_type}
+                            message={playbackPosesState.state}
+                        />
+                    </div>
+                </div>
+            )}
             {moveBaseState && (
                 <div className="operator-collision-alerts">
                     <div
@@ -430,16 +467,6 @@ export const Operator = (props: {
                 </div>
             )}
             <div id="operator-global-controls">
-                <div
-                    className={className("operator-pose-recorder", {
-                        hideLabels: !layout.current.displayLabels,
-                    })}
-                    hidden={!layout.current.displayMovementRecorder}
-                >
-                    <MovementRecorder
-                        hideLabels={!layout.current.displayLabels}
-                    />
-                </div>
                 <div
                     className={className("operator-text-to-speech", {
                         hideLabels: !layout.current.displayLabels,
