@@ -344,7 +344,6 @@ export class OccupancyGrid extends React.Component {
             } as ROSPose);
         }
         this.goal_position = undefined;
-        // if (isMobile) this.functs.SetSelectGoal(false)
         this.functs.SetSelectGoal(false);
     }
 

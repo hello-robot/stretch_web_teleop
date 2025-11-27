@@ -10,27 +10,28 @@ import {
 } from "./CustomizableComponent";
 import { className } from "shared/util";
 import "operator/css/ButtonGrid.css";
+import React from "react";
 
 const BUTTON_NAMES = [
     "Forward",
-    "Backwards",
+    "Backward",
     "Turn Left",
     "Turn Right",
 
-    "Move Lift Up",
-    "Move Lift Down",
+    "Raise Arm",
+    "Lower Arm",
     "Extend Arm",
-    "Collapse Arm",
+    "Retract Arm",
 
-    "Roll Left",
-    "Roll Right",
-    "Pitch Up",
-    "Pitch Down",
+    "Twist Left",
+    "Twist Right",
+    "Bend Up",
+    "Bend Down",
     "Rotate Left",
     "Rotate Right",
 
-    "Open Gripper",
-    "Close Gripper",
+    "Open",
+    "Close",
 ];
 
 const BUTTON_FUNCTIONS = [
@@ -53,10 +54,10 @@ const BUTTON_FUNCTIONS = [
 ];
 
 const HEADER_NAMES = [
-    "Basic Driving Controls",
-    "Basic Arm Controls",
-    "Wrist Controls",
-    "Gripper Controls",
+    "Base",
+    "Arm/Lift",
+    "Wrist/Gripper",
+    // "Gripper Controls"
 ];
 
 const BACKGROUND_COLORS: JSX.Element[] = [];
@@ -66,7 +67,7 @@ for (let i = 0; i < 4; i++) {
             key={i}
             style={{
                 gridRow: (i + 1) * 2,
-                backgroundColor: `hsl(317, 79%, ${35 - 6 * i}%)`,
+                // backgroundColor: `hsl(210, 100%, ${10 + (i * 6)}%)`
             }}
             className="button-grid-bkg-color"
         />,
@@ -83,14 +84,16 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
     return (
         <div
             className={className("button-grid", { selected, customizing })}
-            onClick={handleSelect}
+            onPointerDown={handleSelect}
         >
-            {BACKGROUND_COLORS}
-            {HEADER_NAMES.map((headerName, idx) => (
+            {/* {BACKGROUND_COLORS} */}
+            {/* {HEADER_NAMES.map((headerName, idx) => (
                 <p key={idx} style={{ gridArea: `header${idx}` }}>
                     {headerName}
                 </p>
-            ))}
+            ))} */}
+            <p key={0} style={{ gridArea: `a0` }}></p>
+            <p key={1} style={{ gridArea: `a1` }}></p>
             {BUTTON_NAMES.map((buttonName, idx) => {
                 const buttonFunction = BUTTON_FUNCTIONS[idx];
                 const buttonState: ButtonState =
@@ -101,9 +104,9 @@ export const ButtonGrid = (props: CustomizableComponentProps) => {
                 const clickProps = props.sharedState.customizing
                     ? {}
                     : {
-                          onMouseDown: functs.onClick,
-                          onMouseUp: functs.onRelease,
-                          onMouseLeave: functs.onLeave,
+                          onPointerDown: functs.onPointerDown,
+                          onPointerUp: functs.onRelease,
+                          onPointerLeave: functs.onLeave,
                       };
                 return (
                     <button

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     className,
     gripperProps,
@@ -17,6 +17,7 @@ import {
     RealsenseVideoStreamDef,
     AdjustableOverheadVideoStreamDef,
     GripperVideoStreamDef,
+    ActionMode,
 } from "../utils/component_definitions";
 import { ButtonPad } from "./ButtonPad";
 import {
@@ -46,9 +47,14 @@ import {
 import { CheckToggleButton } from "../basic_components/CheckToggleButton";
 import { AccordionSelect } from "../basic_components/AccordionSelect";
 import "operator/css/CameraView.css";
-import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import Autocomplete from "@mui/material/Autocomplete";
+import { Box, Popper } from "@mui/material";
+import { FunctionProvider } from "../function_providers/FunctionProvider";
+import { isTablet } from "react-device-detect";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -77,11 +83,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
         React.useState<boolean>(false);
     const definition = React.useMemo(
         () => props.definition as CameraViewDefinition,
-        [props.definition],
+        [props.definition]
     );
     if (!definition.children)
         console.warn(
-            `Video stream definition at ${props.path} should have a 'children' property.`,
+            `Video stream definition at ${props.path} should have a 'children' property.`
         );
     // Reference to the div immediately around the video element
     const videoAreaRef = React.useRef<HTMLDivElement>(null);
@@ -97,7 +103,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
     // Get the stream to display inside the video
     const stream: MediaStream = React.useMemo(
         () => getStream(definition.id, props.sharedState.remoteStreams),
-        [definition],
+        [definition]
     );
 
     React.useEffect(() => {
@@ -115,7 +121,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
         overlayDefinition,
         props.path,
         props.sharedState,
-        videoAspectRatio,
+        videoAspectRatio
     );
 
     // Update the source of the video stream
@@ -143,13 +149,28 @@ export const CameraView = (props: CustomizableComponentProps) => {
     }
 
     /** Opens a popup  */
-    function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    function handleClick(
+        event:
+            | React.TouchEvent<HTMLDivElement>
+            | React.MouseEvent<HTMLDivElement>
+    ) {
         event.stopPropagation();
-
+        console.log(event.type);
         // Get the coordinates of the click within the camera view
-        const { clientX, clientY } = event;
         const { left, top, right, bottom } =
             videoRef.current!.getBoundingClientRect();
+
+        let clientX, clientY;
+        if (event.nativeEvent instanceof TouchEvent) {
+            event = event as React.TouchEvent<HTMLDivElement>;
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else {
+            event = event as React.MouseEvent<HTMLDivElement>;
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+
         const x = clientX - left;
         const y = clientY - top;
 
@@ -187,7 +208,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
             console.log("scaled x", scaled_x, "scaled y", scaled_y);
             // underVideoFunctionProvider.provideFunctions(
             //   UnderVideoButton.MoveToPregrasp,
-            // ).onClick!(scaled_x, scaled_y);add
+            // ).onPointerDown!(scaled_x, scaled_y);add
         }
     }
 
@@ -230,7 +251,7 @@ export const CameraView = (props: CustomizableComponentProps) => {
                 predictiveDisplay,
             })}
             // style={overlayDimensions}
-            onClick={handleClick}
+            onPointerDown={handleClick}
         >
             {
                 // Display overlay on top of video stream
@@ -298,7 +319,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
     const videoComponent = (
         <div
             className="video-area"
-            style={{ gridRow: 2, gridColumn: 1 }}
+            style={{
+                gridRow: 2,
+                gridColumn: 1,
+                aspectRatio: getVideoAspectRatioString(definition),
+            }}
             ref={videoAreaRef}
         >
             {videoOverlay}
@@ -310,13 +335,11 @@ export const CameraView = (props: CustomizableComponentProps) => {
             />
             {overlayContainer}
             {selectObjectScaledXY ? (
-                <AddIcon
+                <div
+                    className="icon-crosshair"
                     style={{
-                        position: "absolute",
                         left: (selectObjectScaledXY[0] * 100).toString() + "%",
                         top: (selectObjectScaledXY[1] * 100).toString() + "%",
-                        color: "red",
-                        transform: "translateX(-50%) translateY(-50%)",
                     }}
                 />
             ) : undefined}
@@ -384,9 +407,10 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
         <button
             style={gridPosition}
             className={props.direction}
-            onMouseDown={functs.onClick}
-            onMouseUp={functs.onRelease}
-            onMouseLeave={functs.onLeave}
+            onPointerDown={functs.onPointerDown}
+            onPointerUp={functs.onRelease}
+            onPointerLeave={functs.onLeave}
+            aria-label={props.direction}
         >
             <PlayCircleFilledIcon
                 className="panTiltIcon"
@@ -427,7 +451,7 @@ const PanTiltButtonOverlay = (props: { direction: ButtonPadButton }) => {
     return (
         <button
             className={"overlay btn-" + dir}
-            onPointerDown={functs.onClick}
+            onPointerDown={functs.onPointerDown}
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
         >
@@ -480,9 +504,9 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
                 console.log("clicked");
             }
         };
-        window.addEventListener("click", handler, true);
+        window.addEventListener("pointerdown", handler, true);
         return () => {
-            window.removeEventListener("click", handler);
+            window.removeEventListener("pointerdown", handler);
         };
     }, []);
 
@@ -506,8 +530,8 @@ const SelectContexMenu = (props: SelectContexMenuProps) => {
             className="video-context-menu"
             style={{ top: `${y}px`, left: `${x}px` }}
         >
-            <li onClick={(e) => handleClick(e, false)}>Button Pad</li>
-            <li onClick={(e) => handleClick(e, true)}>Video Stream</li>
+            <li onPointerDown={(e) => handleClick(e, false)}>Button Pad</li>
+            <li onPointerDown={(e) => handleClick(e, true)}>Video Stream</li>
         </ul>
     );
 };
@@ -535,6 +559,19 @@ function getVideoAspectRatio(definition: CameraViewDefinition): number {
     }
 }
 
+function getVideoAspectRatioString(definition: CameraViewDefinition): string {
+    switch (definition.id) {
+        case CameraViewId.gripper:
+            return `${gripperProps.width} / ${gripperProps.height}`;
+        case CameraViewId.overhead:
+            return `${navigationProps.width} / ${navigationProps.height}`;
+        case CameraViewId.realsense:
+            return `${realsenseProps.width} / ${realsenseProps.height}`;
+        default:
+            return "1 / 1"; // Default to square aspect ratio
+    }
+}
+
 /**
  * Creates an overlay element for the video stream
  *
@@ -547,13 +584,13 @@ function createOverlay(
     overlayDefinition: ComponentDefinition | undefined,
     path: string,
     sharedState: SharedState,
-    aspectRatio: number,
+    aspectRatio: number
 ): JSX.Element | undefined {
     // If overlay definition is undefined then there's no overlay for this stream
     if (!overlayDefinition) return undefined;
     if (!overlayDefinition.type) {
         console.warn(
-            `Video stream at path ${path} has child with undefined type:`,
+            `Video stream at path ${path} has child with undefined type:`
         );
         console.warn(overlayDefinition);
         return undefined;
@@ -581,7 +618,7 @@ function createOverlay(
                 "Video stream at path " +
                     path +
                     " cannot overlay child of type" +
-                    overlayDefinition.type,
+                    overlayDefinition.type
             );
     }
 }
@@ -595,7 +632,7 @@ function createOverlay(
  */
 function getStream(
     id: CameraViewId,
-    remoteStreams: Map<string, RemoteStream>,
+    remoteStreams: Map<string, RemoteStream>
 ): MediaStream {
     let streamName: string;
     switch (id) {
@@ -629,7 +666,7 @@ function executeVideoSettings(definition: CameraViewDefinition) {
         case CameraViewId.overhead:
             // executeFixedOverheadSettings(definition as FixedOverheadVideoStreamDef);
             executeAdjustableOverheadettings(
-                definition as AdjustableOverheadVideoStreamDef,
+                definition as AdjustableOverheadVideoStreamDef
             );
             break;
         case CameraViewId.realsense:
@@ -649,7 +686,8 @@ function executeFixedOverheadSettings(definition: FixedOverheadVideoStreamDef) {
     const overheadViewButton = definition.gripperView
         ? UnderVideoButton.GripperView
         : UnderVideoButton.DriveView;
-    underVideoFunctionProvider.provideFunctions(overheadViewButton).onClick!();
+    underVideoFunctionProvider.provideFunctions(overheadViewButton)
+        .onPointerDown!();
 }
 
 /**
@@ -658,7 +696,7 @@ function executeFixedOverheadSettings(definition: FixedOverheadVideoStreamDef) {
  * @param definition {@link AdjustableOverheadVideoStreamDef}
  */
 function executeAdjustableOverheadettings(
-    definition: AdjustableOverheadVideoStreamDef,
+    definition: AdjustableOverheadVideoStreamDef
 ) {
     underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper)
         .onCheck!(definition.followGripper || false);
@@ -673,10 +711,10 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
     underVideoFunctionProvider.provideFunctions(UnderVideoButton.FollowGripper)
         .onCheck!(definition.followGripper || false);
     underVideoFunctionProvider.provideFunctions(
-        UnderVideoButton.RealsenseDepthSensing,
+        UnderVideoButton.RealsenseDepthSensing
     ).onCheck!(definition.depthSensing || false);
     underVideoFunctionProvider.provideFunctions(
-        UnderVideoButton.RealsenseBodyPoseEstimate,
+        UnderVideoButton.RealsenseBodyPoseEstimate
     ).onCheck!(definition.bodyPoseAR || false);
 }
 
@@ -687,10 +725,10 @@ function executeRealsenseSettings(definition: RealsenseVideoStreamDef) {
  */
 function executeGripperSettings(definition: GripperVideoStreamDef) {
     underVideoFunctionProvider.provideFunctions(
-        UnderVideoButton.GripperDepthSensing,
+        UnderVideoButton.GripperDepthSensing
     ).onCheck!(definition.depthSensing || false);
     underVideoFunctionProvider.provideFunctions(
-        UnderVideoButton.ExpandedGripperView,
+        UnderVideoButton.ExpandedGripperView
     ).onCheck!(definition.expandedGripperView || false);
 }
 
@@ -772,20 +810,24 @@ const UnderOverheadButtons = (props: {
 
     return (
         <React.Fragment>
-            <CheckToggleButton
-                checked={props.definition.predictiveDisplay || false}
-                onClick={() => {
-                    if (!props.definition.predictiveDisplay) {
-                        props.definition.predictiveDisplay = true;
-                        props.setPredictiveDisplay(true);
-                    } else {
-                        props.definition.predictiveDisplay = false;
-                        props.setPredictiveDisplay(false);
-                    }
-                    setRerender(!rerender);
-                }}
-                label="Predictive Display"
-            />
+            {isTablet ? (
+                <></>
+            ) : (
+                <CheckToggleButton
+                    checked={props.definition.predictiveDisplay || false}
+                    onPointerDown={() => {
+                        if (!props.definition.predictiveDisplay) {
+                            props.definition.predictiveDisplay = true;
+                            props.setPredictiveDisplay(true);
+                        } else {
+                            props.definition.predictiveDisplay = false;
+                            props.setPredictiveDisplay(false);
+                        }
+                        setRerender(!rerender);
+                    }}
+                    label="Predictive Display"
+                />
+            )}
         </React.Fragment>
     );
 };
@@ -800,8 +842,65 @@ const UnderAdjustableOverheadButtons = (props: {
 }) => {
     const [rerender, setRerender] = React.useState<boolean>(false);
 
+    // Only allow predictive display as an option in Press-And-Hold when using
+    // a tablet
+    if (isTablet && FunctionProvider.actionMode != ActionMode.PressAndHold) {
+        props.setPredictiveDisplay(false);
+    } else if (props.definition.predictiveDisplay) {
+        props.setPredictiveDisplay(true);
+    }
+
+    // Toggle Predictive Display when initiated via voice control
+    React.useEffect(() => {
+        if (props.definition.predictiveDisplay) {
+            underVideoFunctionProvider.provideFunctions(
+                UnderVideoButton.LookAtBase
+            ).onPointerDown!();
+            props.setPredictiveDisplay(true);
+        } else {
+            props.setPredictiveDisplay(false);
+        }
+    }, [props.definition.predictiveDisplay]);
+
+    let lookButtons = (
+        <div className="inline-buttons">
+            {/* <span>Look: </span> */}
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[0]
+                    ).onPointerDown!();
+                }}
+            >
+                Look Ahead
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[1]
+                    ).onPointerDown!();
+                }}
+            >
+                Look At Base
+            </button>
+            <button
+                className="quick-action-btn"
+                onPointerDown={() => {
+                    underVideoFunctionProvider.provideFunctions(
+                        realsenseButtons[2]
+                    ).onPointerDown!();
+                }}
+            >
+                Look At Gripper
+            </button>
+        </div>
+    );
+
     return (
         <React.Fragment>
+            {/* {lookButtons} */}
             <AccordionSelect
                 title="Look..."
                 possibleOptions={realsenseButtons.map((button) => {
@@ -812,13 +911,13 @@ const UnderAdjustableOverheadButtons = (props: {
                 })}
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
-                        realsenseButtons[idx],
-                    ).onClick!();
+                        realsenseButtons[idx]
+                    ).onPointerDown!();
                 }}
             />
-            <CheckToggleButton
+            {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.followGripper =
                         !props.definition.followGripper;
                     setRerender(!rerender);
@@ -827,24 +926,26 @@ const UnderAdjustableOverheadButtons = (props: {
                     ).onCheck!(props.definition.followGripper);
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
-            />
-            <CheckToggleButton
-                checked={props.definition.predictiveDisplay || false}
-                onClick={() => {
-                    if (!props.definition.predictiveDisplay) {
-                        underVideoFunctionProvider.provideFunctions(
-                            UnderVideoButton.LookAtBase,
-                        ).onClick!();
-                        props.setPredictiveDisplay(true);
-                        props.definition.predictiveDisplay = true;
-                    } else {
-                        props.setPredictiveDisplay(false);
-                        props.definition.predictiveDisplay = false;
-                    }
-                    setRerender(!rerender);
-                }}
-                label="Predictive Display"
-            />
+            /> */}
+            {(!isTablet ||
+                (isTablet &&
+                    FunctionProvider.actionMode ==
+                        ActionMode.PressAndHold)) && (
+                <CheckToggleButton
+                    checked={props.definition.predictiveDisplay || false}
+                    onPointerDown={() => {
+                        if (!props.definition.predictiveDisplay) {
+                            props.definition.predictiveDisplay = true;
+                            props.setPredictiveDisplay(true);
+                        } else {
+                            props.definition.predictiveDisplay = false;
+                            props.setPredictiveDisplay(false);
+                        }
+                        setRerender(!rerender);
+                    }}
+                    label="Predictive Display"
+                />
+            )}
         </React.Fragment>
     );
 };
@@ -870,7 +971,7 @@ const UnderRealsenseButtons = (props: {
     console.log(
         "UnderRealsenseButtons",
         props.isMovingToPregrasp,
-        props.isShowingTablet,
+        props.isShowingTablet
     );
 
     // Only show MoveToPregrasp buttons if the robot has a Dex wrist with a gripper
@@ -882,7 +983,7 @@ const UnderRealsenseButtons = (props: {
                     checked={
                         props.definition.selectObjectForMoveToPregrasp || false
                     }
-                    onClick={() => {
+                    onPointerDown={() => {
                         props.definition.selectObjectForMoveToPregrasp =
                             !props.definition.selectObjectForMoveToPregrasp;
                         props.setSelectObjectScaledXY(null);
@@ -895,8 +996,8 @@ const UnderRealsenseButtons = (props: {
                         className="map-cancel-btn"
                         onPointerDown={() => {
                             underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.CancelMoveToPregrasp,
-                            ).onClick!();
+                                UnderVideoButton.CancelMoveToPregrasp
+                            ).onPointerDown!();
                             props.setIsMovingToPregrasp(false);
                         }}
                     >
@@ -907,7 +1008,7 @@ const UnderRealsenseButtons = (props: {
                     <AccordionSelect
                         title="Align Gripper to Object"
                         possibleOptions={Object.values(
-                            realsenseMoveToPregraspButtons,
+                            realsenseMoveToPregraspButtons
                         )}
                         backgroundColor="var(--selected-color)"
                         onChange={(idx: number) => {
@@ -916,19 +1017,19 @@ const UnderRealsenseButtons = (props: {
                                     {
                                         state: "Please select an object first.",
                                         alert_type: "error",
-                                    },
+                                    }
                                 );
                                 return;
                             }
                             underVideoFunctionProvider.provideFunctions(
-                                realsenseMoveToPregraspButtons[idx],
-                            ).onClick!(props.selectObjectScaledXY);
+                                realsenseMoveToPregraspButtons[idx]
+                            ).onPointerDown!(props.selectObjectScaledXY);
                             props.setSelectObjectScaledXY(null);
                             props.setIsMovingToPregrasp(true);
                             props.definition.selectObjectForMoveToPregrasp =
                                 false;
                             underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.MoveToPregraspGoalReached,
+                                UnderVideoButton.MoveToPregraspGoalReached
                             ).getFuture!().then(() => {
                                 props.setIsMovingToPregrasp(false);
                             });
@@ -965,12 +1066,12 @@ const UnderRealsenseButtons = (props: {
             <React.Fragment>
                 <CheckToggleButton
                     checked={props.definition.bodyPoseAR || false}
-                    onClick={() => {
+                    onPointerDown={() => {
                         props.definition.bodyPoseAR =
                             !props.definition.bodyPoseAR;
                         setRerender(!rerender);
                         underVideoFunctionProvider.provideFunctions(
-                            UnderVideoButton.RealsenseBodyPoseEstimate,
+                            UnderVideoButton.RealsenseBodyPoseEstimate
                         ).onCheck!(props.definition.bodyPoseAR);
                     }}
                     label="Show Body Pose"
@@ -981,8 +1082,8 @@ const UnderRealsenseButtons = (props: {
                             className="map-cancel-btn"
                             onPointerDown={() => {
                                 underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.RealsenseStopShowTablet,
-                                ).onClick!();
+                                    UnderVideoButton.RealsenseStopShowTablet
+                                ).onPointerDown!();
                                 props.setIsShowingTablet(false);
                             }}
                         >
@@ -994,11 +1095,11 @@ const UnderRealsenseButtons = (props: {
                             className="map-play-btn"
                             onPointerDown={() => {
                                 underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.RealsenseShowTablet,
-                                ).onClick!();
+                                    UnderVideoButton.RealsenseShowTablet
+                                ).onPointerDown!();
                                 props.setIsShowingTablet(true);
                                 underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.RealsenseShowTabletGoalReached,
+                                    UnderVideoButton.RealsenseShowTabletGoalReached
                                 ).getFuture!().then(() => {
                                     props.setIsShowingTablet(false);
                                 });
@@ -1024,13 +1125,13 @@ const UnderRealsenseButtons = (props: {
                 })}
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
-                        realsenseButtons[idx],
-                    ).onClick!();
+                        realsenseButtons[idx]
+                    ).onPointerDown!();
                 }}
             />
-            <CheckToggleButton
+            {/* <CheckToggleButton
                 checked={props.definition.followGripper || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.followGripper =
                         !props.definition.followGripper;
                     setRerender(!rerender);
@@ -1039,15 +1140,15 @@ const UnderRealsenseButtons = (props: {
                     ).onCheck!(props.definition.followGripper);
                 }}
                 label={"Follow " + getGripperLabel(props.stretchTool)}
-            />
+            /> */}
             <CheckToggleButton
                 checked={props.definition.depthSensing || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.depthSensing =
                         !props.definition.depthSensing;
                     setRerender(!rerender);
                     underVideoFunctionProvider.provideFunctions(
-                        UnderVideoButton.RealsenseDepthSensing,
+                        UnderVideoButton.RealsenseDepthSensing
                     ).onCheck!(props.definition.depthSensing);
                 }}
                 label="Depth Sensing"
@@ -1056,7 +1157,7 @@ const UnderRealsenseButtons = (props: {
             {showTabletButtons}
             {/* <CheckToggleButton
                 checked={props.definition.arucoMarkers || false}
-                onClick={() => {
+                onPointerDown={() => {
                     props.definition.arucoMarkers = !props.definition.arucoMarkers;
                     setRerender(!rerender);
                     underVideoFunctionProvider.provideFunctions(UnderVideoButton.ToggleArucoMarkers).onCheck!(props.definition.arucoMarkers)
@@ -1070,7 +1171,7 @@ const UnderRealsenseButtons = (props: {
                 placeholderText="Select a marker..."
                 top={true}
             />
-            <button className="play-btn" onClick={
+            <button className="play-btn" onPointerDown={
                 () => {
                     if (selectedIdx != undefined) {
                         let marker_name = markers[selectedIdx]
@@ -1096,7 +1197,7 @@ const UnderGripperButtons = (props: {
     stretchTool: StretchTool;
 }) => {
     let tabletOrientation = underVideoFunctionProvider.provideFunctions(
-        UnderVideoButton.GetTabletOrientation,
+        UnderVideoButton.GetTabletOrientation
     ).get!();
     const [rerender, setRerender] = React.useState<boolean>(false);
 
@@ -1107,50 +1208,56 @@ const UnderGripperButtons = (props: {
                 possibleOptions={Object.values(wristButtons)}
                 onChange={(idx: number) => {
                     underVideoFunctionProvider.provideFunctions(
-                        wristButtons[idx],
-                    ).onClick!();
+                        wristButtons[idx]
+                    ).onPointerDown!();
                 }}
             />
             {props.betaTeleopKit ? (
                 <></>
             ) : (
                 <React.Fragment>
-                    <CheckToggleButton
-                        checked={props.definition.expandedGripperView || false}
-                        onClick={() => {
-                            props.definition.expandedGripperView =
-                                !props.definition.expandedGripperView;
-                            setRerender(!rerender);
-                            underVideoFunctionProvider.provideFunctions(
-                                UnderVideoButton.ExpandedGripperView,
-                            ).onCheck!(props.definition.expandedGripperView!);
-                        }}
-                        label="Expanded Gripper View"
-                    />
-                    {(props.stretchTool === StretchTool.GRIPPER ||
-                        props.stretchTool === StretchTool.DEX_GRIPPER) && (
+                    <div className="inline-buttons">
                         <CheckToggleButton
-                            checked={props.definition.depthSensing || false}
-                            onClick={() => {
-                                props.definition.depthSensing =
-                                    !props.definition.depthSensing;
+                            checked={
+                                props.definition.expandedGripperView || false
+                            }
+                            onPointerDown={() => {
+                                props.definition.expandedGripperView =
+                                    !props.definition.expandedGripperView;
                                 setRerender(!rerender);
                                 underVideoFunctionProvider.provideFunctions(
-                                    UnderVideoButton.GripperDepthSensing,
-                                ).onCheck!(props.definition.depthSensing);
+                                    UnderVideoButton.ExpandedGripperView
+                                ).onCheck!(
+                                    props.definition.expandedGripperView!
+                                );
                             }}
-                            label="Depth Sensing"
+                            label="Expanded Gripper View"
                         />
-                    )}
+                        {(props.stretchTool === StretchTool.GRIPPER ||
+                            props.stretchTool === StretchTool.DEX_GRIPPER) && (
+                            <CheckToggleButton
+                                checked={props.definition.depthSensing || false}
+                                onPointerDown={() => {
+                                    props.definition.depthSensing =
+                                        !props.definition.depthSensing;
+                                    setRerender(!rerender);
+                                    underVideoFunctionProvider.provideFunctions(
+                                        UnderVideoButton.GripperDepthSensing
+                                    ).onCheck!(props.definition.depthSensing);
+                                }}
+                                label="Gripper Depth Sensing"
+                            />
+                        )}
+                    </div>
                 </React.Fragment>
             )}
             {props.stretchTool === StretchTool.TABLET && (
                 <button
-                    onClick={() => {
+                    onPointerDown={() => {
                         let isPortait =
                             tabletOrientation === TabletOrientation.PORTRAIT;
                         underVideoFunctionProvider.provideFunctions(
-                            UnderVideoButton.ToggleTabletOrientation,
+                            UnderVideoButton.ToggleTabletOrientation
                         ).onCheck!(isPortait);
                         setRerender(!rerender);
                     }}
@@ -1176,10 +1283,10 @@ const CameraPerspectiveButton = (props: {
      */
     perspective: OverheadButtons | RealsenseButtons;
 }) => {
-    const onClick = underVideoFunctionProvider.provideFunctions(
-        props.perspective,
-    ).onClick;
-    return <button onClick={onClick}>{props.perspective}</button>;
+    const onPointerDown = underVideoFunctionProvider.provideFunctions(
+        props.perspective
+    ).onPointerDown;
+    return <button onPointerDown={onPointerDown}>{props.perspective}</button>;
 };
 
 function getGripperLabel(stretchTool: StretchTool) {

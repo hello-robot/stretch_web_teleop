@@ -1,0 +1,41 @@
+.run-stop-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.run-stop-button {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    border-radius: 100px;
+    border: 2px solid #000000;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 1;
+    background-color: var(--btn-gray);
+}
+
+.run-stop-button.enabled {
+    animation: blinker 1s linear infinite;
+    filter: brightness(30%) saturate(100%) invert(10%) sepia(28%)
+        saturate(4155%) hue-rotate(0deg) contrast(119%);
+}
+
+.text-run-stop {
+    padding: 0.3rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-wrap: nowrap;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}

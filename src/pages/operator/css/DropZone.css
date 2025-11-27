@@ -46,13 +46,14 @@
 }
 
 .drop-zone[hidden] {
-    flex: 0;
+    display: none;
+    /* flex: 0;
     width: 0;
     opacity: 0;
     margin: 0;
     padding: 0;
     border: none;
-    visibility: hidden;
+    visibility: hidden; */
 }
 
 .drop-zone:hover {

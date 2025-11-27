@@ -25,12 +25,13 @@ export const Alert = (props: {
         <div
             className={className("alert " + props.type, { hide: !isShow })}
             style={props.style}
+            aria-hidden={false}
         >
             <span
                 className={className("closebtn", {
                     hide: props.hide_close_button,
                 })}
-                onClick={() => setIsShow(false)}
+                onPointerDown={() => setIsShow(false)}
             >
                 &times;
             </span>

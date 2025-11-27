@@ -1,7 +1,7 @@
 :root {
     --btn-brdr-radius: 0.4rem;
     --btn-padding: 0.5em 1em;
-    --btn-padding-med: 0.4rem 0.5rem;
+    --btn-padding-med: 0.2rem 0.25rem;
 
     --selected-color: hsl(33, 95%, 63%);
 
@@ -11,12 +11,12 @@
     --btn-red: hsl(0, 70%, 70%);
     --btn-turquoise: hsl(171, 32%, 46%);
 
-    --shadow-color: rgba(112, 112, 112, 0.196);
+    --shadow-color: hsla(0, 0%, 44%, 0.1);
 
     --background-color: hsl(0, 0%, 98%);
     --gray-bg: hsl(0, 0%, 88%);
 
-    --shadow: 3px 3px 2px var(--shadow-color);
+    --shadow: 0px 1px 3px 0px var(--shadow-color);
 
     --tab-inactive: hsl(200, 20%, 85%);
 
@@ -25,23 +25,31 @@
     --path-blue: hsl(170, 37%, 53%);
 
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
+
+    touch-action: none;
 }
 
 * {
     box-sizing: border-box;
     min-width: 0;
     min-height: 0;
-    font: inherit;
+    font-size: 0.97rem;
+    font-weight: 500;
+    letter-spacing: 0.008rem;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 
 body {
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background-color);
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
 }
 
 html {
@@ -60,14 +68,6 @@ body,
     margin: 0;
     overflow: hidden;
     user-select: none;
-}
-
-@media screen and (orientation: landscape) and (max-device-width: 900px) {
-    html,
-    body,
-    #root {
-        overflow: scroll;
-    }
 }
 
 /* In customization mode add hidden shadow after each element, to be shown when
@@ -95,16 +95,17 @@ the element is selected */
 
 button {
     background-color: var(--btn-gray);
-    border: none;
+    border: 2px solid transparent !important;
     border-radius: var(--btn-brdr-radius);
     padding: var(--btn-padding);
     box-shadow: var(--shadow);
     cursor: pointer;
+    transition: border 150ms ease-out;
 }
 
 button:hover {
-    filter: brightness(90%);
-    box-shadow: none;
+    filter: brightness(95%);
+    border: 2px solid var(--btn-turquoise) !important;
 }
 
 button:disabled {
@@ -153,7 +154,7 @@ button .material-icons {
 
     .under-video-area button {
         /* font-size: 30px; */
-        padding: var(--btn-padding);
+        padding: var(--btn-padding-med);
         gap: 10px;
     }
 }

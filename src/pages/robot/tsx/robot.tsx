@@ -1293,8 +1293,8 @@ export class Robot extends React.Component {
         const MAX_EFFORTS: { [key in ValidJoints]?: [number, number] } = {
             joint_head_tilt: [-50, 50],
             joint_head_pan: [-50, 50],
-            wrist_extension: [-40, 40],
-            joint_lift: [0, 70],
+            // wrist_extension: [-40, 40],
+            // joint_lift: [0, 70],
             // "joint_wrist_yaw": [-10, 10],
             // "joint_wrist_pitch": [-10, 10],
             // "joint_wrist_roll": [-10, 10],

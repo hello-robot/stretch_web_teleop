@@ -5,7 +5,7 @@ import { Dropdown } from "../basic_components/Dropdown";
 import { Tooltip } from "../static_components/Tooltip";
 import "operator/css/MovementRecorder.css";
 import "operator/css/basic_components.css";
-import { isMobile } from "react-device-detect";
+import { isBrowser, isTablet } from "react-device-detect";
 import { RadioFunctions, RadioGroup } from "../basic_components/RadioGroup";
 import PlayCircle from "@mui/icons-material/PlayCircle";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -141,8 +141,8 @@ export const MovementRecorder = (props: {
                 }}
                 id="save-recording-modal"
                 acceptButtonText="Save"
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
                 <hr/> */}
@@ -192,7 +192,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristRoll}
                             onChange={(e) => setWristRoll(e.target.checked)}
                         />
-                        <label>Wrist Roll</label>
+                        <label>Wrist Twist</label>
                     </li>
                     <li>
                         <input
@@ -203,7 +203,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristPitch}
                             onChange={(e) => setWristPitch(e.target.checked)}
                         />
-                        <label>Wrist Pitch</label>
+                        <label>Wrist Bend</label>
                     </li>
                     <li>
                         <input
@@ -214,7 +214,7 @@ export const MovementRecorder = (props: {
                             defaultChecked={wristYaw}
                             onChange={(e) => setWristYaw(e.target.checked)}
                         />
-                        <label>Wrist Yaw</label>
+                        <label>Wrist Rotate</label>
                     </li>
                     <li>
                         <input
@@ -256,8 +256,8 @@ export const MovementRecorder = (props: {
                 id="save-recording-modal"
                 acceptButtonText="Save"
                 acceptDisabled={name.length < 1}
-                size={isMobile ? "small" : "large"}
-                mobile={isMobile}
+                size={!isBrowser && !isTablet  ? "small" : "large"}
+                mobile={!isBrowser && !isTablet }
             >
                 {/* <label htmlFor="new-recoding-name"><b>Save Recording</b></label>
                 <hr/> */}
@@ -277,15 +277,19 @@ export const MovementRecorder = (props: {
         );
     };
 
-    // useEffect(() => {
-    //     if (props.isRecording == undefined) {
-    //         return;
-    //     } else if (props.isRecording) {
-    //         functions.Record();
-    //     } else {
-    //         setShowSaveRecordingModal(true);
-    //     }
-    // }, [props.isRecording]);
+    useEffect(() => {
+        if (!isBrowser && !isTablet) {
+            if (props.isRecording == undefined) {
+                return;
+            } else if (props.isRecording) {
+                setIsRecording(true);
+                setShowJointSelectionModal(true);
+            } else {
+                setIsRecording(false);
+                setShowSaveRecordingModal(true);
+            }
+        }
+    }, [props.isRecording]);
 
     if (props.globalRecord !== undefined && !props.globalRecord)
         return (
@@ -295,7 +299,7 @@ export const MovementRecorder = (props: {
             />
         );
 
-    return !isMobile ? (
+    return isBrowser || isTablet ? (
         <React.Fragment>
             <div id="movement-recorder-container">Movement Recorder</div>
             <div id="movement-recorder-container">
@@ -309,7 +313,7 @@ export const MovementRecorder = (props: {
                 <Tooltip text="Play movement" position="top">
                     <button
                         className="play-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (selectedIdx != undefined) {
                                 functions.LoadRecording(selectedIdx);
                             }
@@ -325,7 +329,7 @@ export const MovementRecorder = (props: {
                 >
                     <button
                         className="save-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (!isRecording) {
                                 setIsRecording(true);
                                 setShowJointSelectionModal(true);
@@ -350,7 +354,7 @@ export const MovementRecorder = (props: {
                 <Tooltip text="Delete recording" position="top">
                     <button
                         className="delete-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             if (selectedIdx != undefined) {
                                 functions.DeleteRecording(selectedIdx);
                             }
@@ -375,9 +379,11 @@ export const MovementRecorder = (props: {
         </React.Fragment>
     ) : (
         <React.Fragment>
-            <RadioGroup functs={radioFuncts} />
+            <RadioGroup
+                functs={radioFuncts}
+            />
             <div className="global-btns">
-                {/* <div className="mobile-movement-save-btn" onClick={() => {
+                {/* <div className="mobile-movement-save-btn" onPointerDown={() => {
                         if (!isRecording) {
                             setIsRecording(true)
                             functions.Record()
@@ -397,7 +403,7 @@ export const MovementRecorder = (props: {
                 </div> */}
                 <div
                     className="mobile-movement-play-btn"
-                    onClick={() => {
+                    onPointerDown={() => {
                         if (selectedIdx != undefined && selectedIdx > -1) {
                             functions.LoadRecording(selectedIdx);
                         }

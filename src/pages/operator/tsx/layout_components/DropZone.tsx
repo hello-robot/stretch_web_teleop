@@ -156,7 +156,7 @@ export const DropZone = (props: DropZoneProps) => {
                     standard,
                 })}
                 hidden={!isActive}
-                onClick={handleClick}
+                onPointerDown={handleClick}
             >
                 <PushPinIcon />
             </span>
