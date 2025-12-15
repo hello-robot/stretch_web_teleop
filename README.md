@@ -335,13 +335,26 @@ Stay tuned for instructions on using the web interface with a tablet as an end e
 
 # Troubleshooting
 
-## Collecting logs
+If you run into issues with Stretch Web Teleop, please follow these steps:
 
-First, ensure that your robot has the latest version of Web Teleop by [updating your ROS workspace](https://docs.hello-robot.com/0.3/installation/ros_workspace/).
-
-Then, launch the program normally, and if you see "FAILURE. COULD NOT LAUNCH WEB TELEOP.", then locate the zipped-up logs file and send them to Hello Robot Support (support@hello-robot.com).
-
-To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
+1. Most issues are resolved by re-creating your ROS2 workspace with the update script: [https://docs.hello-robot.com/latest/installation/ros_workspace/](https://docs.hello-robot.com/0.3/installation/ros_workspace/). Note that this will remove your existing `~/ament_ws` directory, so please back up your ROS2 Workspace if you have made changes to it.
+    1. If you see an error mentioning `librealsense` try to run:
+        ```
+        curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp
+        echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | sudo tee /etc/apt/sources.list.d/librealsense.list
+        sudo apt update
+        sudo apt install librealsense2 librealsense2-udev-rules librealsense2-utils librealsense2-dev librealsense2-dbg
+        ```
+    1. If you do not see the camera feeds, [updating your ROS workspace](https://docs.hello-robot.com/latest/installation/ros_workspace/) usually resolves this problem, but you may also try running:
+       ```
+       cd ~/ament_ws/src/stretch_web_teleop
+       pip install -r ./requirements.txt
+       npm ci --force
+       sudo npx playwright install-deps
+       ```
+1. If your issues persist, then share the zipped-up "stretch_web_teleop_logs.zip" logs file at `$HOME/stretch_user/log/web_teleop` with the Hello Robot Support team (support@hello-robot.com).
+    1. To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", or run `nautilus $HOME/stretch_user/log/web_teleop`, and locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
+  
 
 # Licenses
 
