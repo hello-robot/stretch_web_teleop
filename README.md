@@ -20,7 +20,7 @@ For operator-to-robot text-to-speech, the web interface uses the system default 
 
 However, note the system defaults can change when you (un)plug audio devices (e.g., sometimes (un)plugging a mic can cause the system default speaker to change). Thus, it is best practice to always check.
 
-In the below instructions,  replace `<sink/source>` with `sink` for a speaker and `source` for a microphone. Note that this won't work if you're using X-11 forwarding:
+In the below instructions, replace `<sink/source>` with `sink` for a speaker and `source` for a microphone. Note that this won't work if you're using X-11 forwarding:
 
 1. List all speakers/microphones: `pactl list short <sink/source>s`
 1. Get the default: `pactl get-default-<sink/source>`
@@ -338,23 +338,22 @@ Stay tuned for instructions on using the web interface with a tablet as an end e
 If you run into issues with Stretch Web Teleop, please follow these steps:
 
 1. Most issues are resolved by re-creating your ROS2 workspace with the update script: [https://docs.hello-robot.com/latest/installation/ros_workspace/](https://docs.hello-robot.com/0.3/installation/ros_workspace/). Note that this will remove your existing `~/ament_ws` directory, so please back up your ROS2 Workspace if you have made changes to it.
-    1. If you see an error mentioning `librealsense` try to run:
-        ```
-        curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp
-        echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | sudo tee /etc/apt/sources.list.d/librealsense.list
-        sudo apt update
-        sudo apt install librealsense2 librealsense2-udev-rules librealsense2-utils librealsense2-dev librealsense2-dbg
-        ```
-    1. If you do not see the camera feeds, [updating your ROS workspace](https://docs.hello-robot.com/latest/installation/ros_workspace/) usually resolves this problem, but you may also try running:
-       ```
-       cd ~/ament_ws/src/stretch_web_teleop
-       pip install -r ./requirements.txt
-       npm ci --force
-       sudo npx playwright install-deps
-       ```
+   1. If you see an error mentioning `librealsense` try to run:
+      ```
+      curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp
+      echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | sudo tee /etc/apt/sources.list.d/librealsense.list
+      sudo apt update
+      sudo apt install librealsense2 librealsense2-udev-rules librealsense2-utils librealsense2-dev librealsense2-dbg
+      ```
+   1. If you do not see the camera feeds, [updating your ROS workspace](https://docs.hello-robot.com/latest/installation/ros_workspace/) usually resolves this problem, but you may also try running:
+      ```
+      cd ~/ament_ws/src/stretch_web_teleop
+      pip install -r ./requirements.txt
+      npm ci --force
+      sudo npx playwright install-deps
+      ```
 1. If your issues persist, then share the zipped-up "stretch_web_teleop_logs.zip" logs file at `$HOME/stretch_user/log/web_teleop` with the Hello Robot Support team (support@hello-robot.com).
-    1. To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", or run `nautilus $HOME/stretch_user/log/web_teleop`, and locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
-
+   1. To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", or run `nautilus $HOME/stretch_user/log/web_teleop`, and locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
 
 # Licenses
 
