@@ -354,7 +354,7 @@ If you run into issues with Stretch Web Teleop, please follow these steps:
        ```
 1. If your issues persist, then share the zipped-up "stretch_web_teleop_logs.zip" logs file at `$HOME/stretch_user/log/web_teleop` with the Hello Robot Support team (support@hello-robot.com).
     1. To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", or run `nautilus $HOME/stretch_user/log/web_teleop`, and locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
-  
+
 
 # Licenses
 
