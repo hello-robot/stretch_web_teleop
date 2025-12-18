@@ -352,8 +352,48 @@ If you run into issues with Stretch Web Teleop, please follow these steps:
       npm ci --force
       sudo npx playwright install-deps
       ```
-1. If your issues persist, then share the zipped-up "stretch_web_teleop_logs.zip" logs file at `$HOME/stretch_user/log/web_teleop` with the Hello Robot Support team (support@hello-robot.com).
-   1. To locate the logs, open a file explorer, go into "Home", go into "stretch_user", go into "log", go into "web_teleop", or run `nautilus $HOME/stretch_user/log/web_teleop`, and locate the folder with the latest timestamp, and send "stretch_web_teleop_logs.zip" to the support team.
+
+2. If your issue persists, please send **both** of the following log files to the Hello Robot Support team at `support@hello-robot.com` so we can further investigate the issue:
+
+    1. **Web Teleop logs:** 
+    
+        * Open a file explorer and navigate to: `Home → stretch_user → log → web_teleop`
+
+        *  Or run:
+            ```bash
+            nautilus $HOME/stretch_user/log/web_teleop
+            ```
+        
+        * Locate the folder with the most recent timestamp, compress (zip) that folder, and send the resulting file named `stretch_web_teleop_logs.zip` to the support team.
+
+    2. **Robot-side launch logs:**
+
+        * In **Terminal 1**, launch robot-side components and save logs:
+
+            ```bash
+            ros2 launch stretch_web_teleop web_interface.launch.py >> log.txt
+            ```
+
+        * In **Terminal 2**, start the web server and robot browser:
+
+            ```bash
+            cd ~/ament_ws/src/stretch_web_teleop/
+            ./start_web_server_and_robot_browser.sh
+            ```
+
+        * Open the Web Teleop interface as you normally do. You will see the same behavior where it will load indefinitely.
+
+        * In **Terminal 1**, press `Ctrl+C`.
+
+        * In **Terminal 2**, run:
+
+            ```bash
+            pm2 kill
+            ```
+        * A file named `log.txt` will be created in the directory where you ran the command in **Terminal 1**.
+
+
+    Attach this `log.txt` file and send it together with `stretch_web_teleop_logs.zip` to the support team at `support@hello-robot.com`.
 
 # Licenses
 
