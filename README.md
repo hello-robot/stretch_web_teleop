@@ -383,7 +383,7 @@ If you run into issues with Stretch Web Teleop, please follow these steps:
         ./start_web_server_and_robot_browser.sh
         ```
 
-      - Open the Web Teleop interface as you normally do. You will see the same behavior where it will load indefinitely.
+      - Open the Web Teleop interface as you normally do.
 
       - In **Terminal 1**, press `Ctrl+C`.
 
