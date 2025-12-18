@@ -338,6 +338,7 @@ Stay tuned for instructions on using the web interface with a tablet as an end e
 If you run into issues with Stretch Web Teleop, please follow these steps:
 
 1. Most issues are resolved by re-creating your ROS2 workspace with the update script: [https://docs.hello-robot.com/latest/installation/ros_workspace/](https://docs.hello-robot.com/0.3/installation/ros_workspace/). Note that this will remove your existing `~/ament_ws` directory, so please back up your ROS2 Workspace if you have made changes to it.
+
    1. If you see an error mentioning `librealsense` try to run:
       ```
       curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp
@@ -353,47 +354,48 @@ If you run into issues with Stretch Web Teleop, please follow these steps:
       sudo npx playwright install-deps
       ```
 
-2. If your issue persists, please send **both** of the following log files to the Hello Robot Support team at `support@hello-robot.com` so we can further investigate the issue:
+1. If your issue persists, please send **both** of the following log files to the Hello Robot Support team at `support@hello-robot.com` so we can further investigate the issue:
 
-    1. **Web Teleop logs:** 
-    
-        * Open a file explorer and navigate to: `Home → stretch_user → log → web_teleop`
+   1. **Web Teleop logs:**
 
-        *  Or run:
-            ```bash
-            nautilus $HOME/stretch_user/log/web_teleop
-            ```
-        
-        * Locate the folder with the most recent timestamp, compress (zip) that folder, and send the resulting file named `stretch_web_teleop_logs.zip` to the support team.
+      - Open a file explorer and navigate to: `Home → stretch_user → log → web_teleop`
 
-    2. **Robot-side launch logs:**
+      - Or run:
 
-        * In **Terminal 1**, launch robot-side components and save logs:
+        ```bash
+        nautilus $HOME/stretch_user/log/web_teleop
+        ```
 
-            ```bash
-            ros2 launch stretch_web_teleop web_interface.launch.py >> log.txt
-            ```
+      - Locate the folder with the most recent timestamp, compress (zip) that folder, and send the resulting file named `stretch_web_teleop_logs.zip` to the support team.
 
-        * In **Terminal 2**, start the web server and robot browser:
+   1. **Robot-side launch logs:**
 
-            ```bash
-            cd ~/ament_ws/src/stretch_web_teleop/
-            ./start_web_server_and_robot_browser.sh
-            ```
+      - In **Terminal 1**, launch robot-side components and save logs:
 
-        * Open the Web Teleop interface as you normally do. You will see the same behavior where it will load indefinitely.
+        ```bash
+        ros2 launch stretch_web_teleop web_interface.launch.py >> log.txt
+        ```
 
-        * In **Terminal 1**, press `Ctrl+C`.
+      - In **Terminal 2**, start the web server and robot browser:
 
-        * In **Terminal 2**, run:
+        ```bash
+        cd ~/ament_ws/src/stretch_web_teleop/
+        ./start_web_server_and_robot_browser.sh
+        ```
 
-            ```bash
-            pm2 kill
-            ```
-        * A file named `log.txt` will be created in the directory where you ran the command in **Terminal 1**.
+      - Open the Web Teleop interface as you normally do. You will see the same behavior where it will load indefinitely.
 
+      - In **Terminal 1**, press `Ctrl+C`.
 
-    Attach this `log.txt` file and send it together with `stretch_web_teleop_logs.zip` to the support team at `support@hello-robot.com`.
+      - In **Terminal 2**, run:
+
+        ```bash
+        pm2 kill
+        ```
+
+      - A file named `log.txt` will be created in the directory where you ran the command in **Terminal 1**.
+
+   Attach this `log.txt` file and send it together with `stretch_web_teleop_logs.zip` to the support team at `support@hello-robot.com`.
 
 # Licenses
 
