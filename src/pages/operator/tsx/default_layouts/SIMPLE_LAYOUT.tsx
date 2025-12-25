@@ -88,23 +88,6 @@ export const BASIC_LAYOUT: LayoutDefinition = {
                         } as TabDefinition,
                     ],
                 } as PanelDefinition,
-                {
-                    type: ComponentType.Panel,
-                    children: [
-                        {
-                            type: ComponentType.SingleTab,
-                            label: "Safety",
-                            children: [
-                                {
-                                    type: ComponentType.RunStopButton,
-                                },
-                                {
-                                    type: ComponentType.BatteryGuage,
-                                },
-                            ],
-                        },
-                    ],
-                } as PanelDefinition,
             ],
         } as LayoutGridDefinition,
     ],

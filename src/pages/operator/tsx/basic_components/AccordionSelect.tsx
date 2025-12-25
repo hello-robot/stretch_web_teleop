@@ -30,7 +30,7 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
             <div
                 className="accordion-item"
                 key={idx}
-                onClick={() => {
+                onPointerDown={() => {
                     props.onChange(idx);
                     toggleAccordion();
                 }}
@@ -44,7 +44,7 @@ export const AccordionSelect = <T extends string | JSX.Element>(props: {
         <div className="accordion_section">
             <button
                 className={className("accordion", { active })}
-                onClick={toggleAccordion}
+                onPointerDown={toggleAccordion}
                 style={{ backgroundColor: props.backgroundColor }}
             >
                 {props.title}

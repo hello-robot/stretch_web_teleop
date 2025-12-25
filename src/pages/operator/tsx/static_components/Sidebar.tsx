@@ -21,6 +21,7 @@ import { storageHandler } from "operator/tsx/index";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { isTablet } from "react-device-detect";
 
 type SidebarProps = {
     hidden: boolean;
@@ -68,7 +69,7 @@ export const Sidebar = (props: SidebarProps) => {
                     disabled={deleteDisabled}
                     title={deleteTooltip}
                     className={className("btn-red", {})}
-                    onClick={
+                    onPointerDown={
                         deleteDisabled ? undefined : () => props.onDelete()
                     }
                 >
@@ -148,34 +149,55 @@ const SidebarGlobalOptions = (props: GlobalOptionsProps) => {
     return (
         <React.Fragment>
             <div id="global-settings">
-                {/* <p>Global settings:</p> */}
+                {/* <p>Global settings:</p>
                 <OnOffToggleButton
                     on={!props.displayLabels}
-                    onClick={() => props.setDisplayLabels(!props.displayLabels)}
+                    onPointerDown={() => props.setDisplayLabels(!props.displayLabels)}
                     label="Display button text labels"
-                />
+                />*/}
                 <OnOffToggleButton
                     on={!props.displayMovementRecorder}
-                    onClick={() =>
+                    onPointerDown={() =>
                         props.setDisplayMovementRecorder(
                             !props.displayMovementRecorder,
                         )
                     }
                     label="Display movement recorder"
                 />
-                <OnOffToggleButton
-                    on={!props.displayTextToSpeech}
-                    onClick={() =>
-                        props.setDisplayTextToSpeech(!props.displayTextToSpeech)
-                    }
-                    label="Display text-to-speech"
-                />
-                <button onClick={() => setShowLoadLayoutModal(true)}>
-                    Load layout
-                </button>
-                <button onClick={() => setShowSaveLayoutModal(true)}>
-                    Save layout
-                </button>
+                {isTablet ? <></> :
+                    <OnOffToggleButton
+                        on={!props.displayTextToSpeech}
+                        onPointerDown={() =>
+                            props.setDisplayTextToSpeech(!props.displayTextToSpeech)
+                        }
+                        label="Display text-to-speech"
+                    />
+                }
+                {isTablet ?
+                    <div className="inline-buttons">
+                        <button
+                            className="inline-button-max-width"
+                            onPointerDown={() => setShowLoadLayoutModal(true)}>
+                            Load layout
+                        </button>
+                        <button
+                            className="inline-button-max-width"
+                            onPointerDown={() => setShowSaveLayoutModal(true)}>
+                            Save layout
+                        </button>
+                    </div>
+                    :
+                    <>
+                        <button
+                            onPointerDown={() => setShowLoadLayoutModal(true)}>
+                            Load layout
+                        </button>
+                        <button
+                            onPointerDown={() => setShowSaveLayoutModal(true)}>
+                            Save layout
+                        </button>
+                    </>
+                }
             </div>
             <LoadLayoutModal
                 defaultLayouts={props.defaultLayouts}
@@ -314,6 +336,8 @@ const SidebarOptions = (props: OptionsProps) => {
     let contents: JSX.Element | null = null;
     switch (props.selectedDefinition.type) {
         case ComponentType.CameraView:
+            // Display the buttons under the camera views by default
+            (props.selectedDefinition as CameraViewDefinition).displayButtons = true;
             switch ((props.selectedDefinition as CameraViewDefinition).id!) {
                 case CameraViewId.overhead:
                     contents = <OverheadVideoStreamOptions {...props} />;
@@ -335,42 +359,22 @@ const SidebarOptions = (props: OptionsProps) => {
 /** Options for the overhead camera video stream layout component. */
 const OverheadVideoStreamOptions = (props: OptionsProps) => {
     const definition = props.selectedDefinition as CameraViewDefinition;
-    const pd =
-        definition.children.length > 0 &&
-        definition.children[0].type == ComponentType.PredictiveDisplay;
-    const [predictiveDisplayOn, setPredictiveDisplayOn] = React.useState(pd);
     const [showButtons, setShowButtons] = React.useState<boolean>(true);
 
-    function togglePredictiveDisplay() {
-        const newPdOn = !predictiveDisplayOn;
-        setPredictiveDisplayOn(newPdOn);
-        if (newPdOn) {
-            // Add predictive display to the stream
-            definition.children = [{ type: ComponentType.PredictiveDisplay }];
-        } else {
-            definition.children = [];
-        }
-        props.updateLayout();
-    }
-
     function toggleButtons() {
-        setShowButtons(!showButtons);
+        setShowButtons(showButtons);
         definition.displayButtons = showButtons;
         props.updateLayout();
     }
 
     return (
         <React.Fragment>
+            {/* Deprecating this feature due to non-use */}
             {/* <OnOffToggleButton
-                on={predictiveDisplayOn}
-                onClick={togglePredictiveDisplay}
-                label="Predictive Display"
-            /> */}
-            <OnOffToggleButton
-                on={!definition.displayButtons}
-                onClick={toggleButtons}
+                on={definition.displayButtons}
+                onPointerDown={toggleButtons}
                 label="Display Buttons"
-            />
+            /> */}
         </React.Fragment>
     );
 };
@@ -381,18 +385,19 @@ const VideoStreamOptions = (props: OptionsProps) => {
     const [showButtons, setShowButtons] = React.useState<boolean>(true);
 
     function toggleButtons() {
-        setShowButtons(!showButtons);
+        setShowButtons(showButtons);
         definition.displayButtons = showButtons;
         props.updateLayout();
     }
 
     return (
         <React.Fragment>
-            <OnOffToggleButton
-                on={!definition.displayButtons}
-                onClick={toggleButtons}
+            {/* Deprecating this feature due to non-use */}
+            {/* <OnOffToggleButton
+                on={definition.displayButtons}
+                onPointerDown={toggleButtons}
                 label="Display Buttons"
-            />
+            /> */}
         </React.Fragment>
     );
 };
@@ -412,7 +417,7 @@ const TabOptions = (props: OptionsProps) => {
     }
     return (
         <React.Fragment>
-            <button onClick={() => setShowRenameModal(true)}>Rename Tab</button>
+            <button onPointerDown={() => setShowRenameModal(true)}>Rename Tab</button>
             <PopupModal
                 show={showRenameModal}
                 setShow={setShowRenameModal}
@@ -442,7 +447,7 @@ const TabOptions = (props: OptionsProps) => {
 type OnOffToggleButtonProps = {
     on: boolean;
     /** Callback when the button is clicked */
-    onClick: () => void;
+    onPointerDown: () => void;
     /** Text label to display to the right of the on/off button. */
     label: string;
 };
@@ -455,7 +460,7 @@ const OnOffToggleButton = (props: OnOffToggleButtonProps) => {
         <div className="toggle-button-div">
             <button
                 className={"toggle-button " + colorClass}
-                onClick={props.onClick}
+                onPointerDown={props.onPointerDown}
             >
                 {text}
             </button>
@@ -490,6 +495,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
         { type: ComponentType.Map },
     ];
 
+    const sidebarRef = React.useRef<HTMLDivElement>(null);
+
     function handleSelect(type: ComponentType, id?: ComponentId) {
         const definition: ComponentDefinition = id ? { type, id } : { type };
 
@@ -499,15 +506,15 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             case ComponentType.CameraView:
                 (definition as ParentComponentDefinition).children = [];
                 break;
-            case ComponentType.Map:
-                (definition as MapDefinition).storageHandler = storageHandler;
-                break;
+            // case ComponentType.Map:
+            //     (definition as MapDefinition).storageHandler = storageHandler;
+            //     break;
         }
 
         props.onSelect(definition);
     }
 
-    function mapTabs(outline: ComponentProviderTabOutline) {
+    function mapTabs(outline: ComponentProviderTabOutline, index: number) {
         const expanded = outline.type === expandedType;
         const tabProps: ComponentProviderTabProps = {
             ...outline,
@@ -516,6 +523,8 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
             onExpand: () =>
                 setExpandedType(expanded ? undefined : outline.type),
             onSelect: (id?: ComponentId) => handleSelect(outline.type, id),
+            sidebarRef: sidebarRef,
+            index: index
         };
         return <ComponentProviderTab {...tabProps} key={outline.type} />;
     }
@@ -523,7 +532,7 @@ const SidebarComponentProvider = (props: SidebarComponentProviderProps) => {
     return (
         <div id="sidebar-component-provider">
             <p>Select a component to add:</p>
-            <div id="components-set">{outlines.map(mapTabs)}</div>
+            <div id="components-set" ref={sidebarRef}>{outlines.map((outline, index) => mapTabs(outline, index))}</div>
         </div>
     );
 };
@@ -545,6 +554,8 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
     selectedDefinition?: ComponentDefinition;
     onSelect: (id?: ComponentId) => void;
     onExpand: () => void;
+    sidebarRef: React.Ref<HTMLDivElement>;
+    index: number;
 };
 
 /**
@@ -554,12 +565,14 @@ type ComponentProviderTabProps = ComponentProviderTabOutline & {
  */
 const ComponentProviderTab = (props: ComponentProviderTabProps) => {
     const tabActive = props.type === props.selectedDefinition?.type;
+    const componentRef = React.useRef<HTMLButtonElement>(null);
+
     function mapIds(id: ComponentId) {
         const active = tabActive && id === props.selectedDefinition?.id;
         return (
             <button
                 key={id}
-                onClick={() => props.onSelect(id)}
+                onPointerDown={() => props.onSelect(id)}
                 className={className("id-button", { active })}
             >
                 {id}
@@ -569,20 +582,27 @@ const ComponentProviderTab = (props: ComponentProviderTabProps) => {
 
     function clickExpand() {
         console.log("click", props.type);
-        props.ids ? props.onExpand() : props.onSelect();
+        if (props.ids) {
+            props.onExpand();
+            props.sidebarRef!.current.scrollTop =
+                componentRef.current!.clientHeight * props.index;
+        } else {
+            props.onSelect();
+        }
     }
 
     return (
         <div className="provider-tab" key={props.type}>
             <button
-                onClick={clickExpand}
+                onPointerDown={clickExpand}
                 className={
                     tabActive && !props.ids
                         ? "active"
                         : props.expanded
-                          ? "expanded"
-                          : ""
+                            ? "expanded"
+                            : ""
                 }
+                ref={componentRef}
             >
                 {props.ids ? (
                     props.expanded ? (

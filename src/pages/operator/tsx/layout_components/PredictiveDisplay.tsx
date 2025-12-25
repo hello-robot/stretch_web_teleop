@@ -41,7 +41,7 @@ const distanceRatioForMaxSpeed = 0.9;
 /** Functions required for predictive display */
 export type PredictiveDisplayFunctions = {
     /** Callback function when mouse is clicked in predicitive display area */
-    onClick: (length: number, angle: number) => void;
+    onPointerDown: (length: number, angle: number) => void;
     /** Callback function when cursor is moved in predictive display area */
     onMove?: (length: number, angle: number) => void;
     /** Callback function for release */
@@ -84,8 +84,8 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
 
     function handleClick() {
         holding.current = true;
-        if (functions.onClick) {
-            functions.onClick(length.current, angle.current);
+        if (functions.onPointerDown) {
+            functions.onPointerDown(length.current, angle.current);
         }
     }
 
@@ -97,8 +97,19 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
     }
 
     /** Rerenders the trajectory based on the cursor location */
-    function handleMove(event: React.MouseEvent<SVGSVGElement>) {
-        const { clientX, clientY } = event;
+    function handleMove(event: React.TouchEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>) {
+        event.stopPropagation();
+        let clientX, clientY;
+        if (event.nativeEvent instanceof TouchEvent) {
+            event = event as React.TouchEvent<SVGSVGElement>
+            clientX = event.touches[0].clientX
+            clientY = event.touches[0].clientY
+        } else {
+            event = event as React.MouseEvent<SVGSVGElement>
+            clientX = event.clientX
+            clientY = event.clientY
+        }
+
         const svg = svgRef.current;
         if (!svg) return;
 
@@ -122,10 +133,10 @@ export const PredictiveDisplay = (props: CustomizableComponentProps) => {
     const controlProps = customizing
         ? {}
         : {
-              onMouseMove: handleMove,
-              onMouseLeave: handleLeave,
-              onMouseDown: handleClick,
-              onMouseUp: handleRelease,
+              onPointerMove: handleMove,
+              onPointerLeave: handleLeave,
+              onPointerDown: handleClick,
+              onPointerUp: handleRelease,
           };
 
     return (

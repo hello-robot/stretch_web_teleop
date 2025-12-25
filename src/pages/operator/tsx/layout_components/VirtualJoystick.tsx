@@ -53,7 +53,7 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
         if (!active) {
             setJoystickToMouse(event);
         }
-        if (functions.onClick) functions.onClick(length.current, angle.current);
+        if (functions.onPointerDown) functions.onPointerDown(length.current, angle.current);
     }
 
     function handleRelease() {
@@ -96,7 +96,7 @@ export const VirtualJoystick = (props: CustomizableComponentProps) => {
     }
 
     const controlProps = customizing
-        ? { onClick: handleSelect }
+        ? { onPointerDown: handleSelect }
         : {
               onPointerMove: active ? handleMove : undefined,
               onPointerLeave: handleLeave,

@@ -53,7 +53,7 @@ export const DropdownInput = <T extends string>(props: {
         return (
             <button
                 key={idx}
-                onClick={(e) => {
+                onPointerDown={(e) => {
                     e.stopPropagation();
                     setShowDropdown(false);
                     props.setText(option as string);
@@ -87,7 +87,7 @@ export const DropdownInput = <T extends string>(props: {
                 className="dropdown-input-textarea"
                 rows={props.rows}
                 value={props.text}
-                onClick={(e) => {
+                onPointerDown={(e) => {
                     e.stopPropagation();
                     setShowDropdown(false);
                 }}
@@ -110,7 +110,7 @@ export const DropdownInput = <T extends string>(props: {
                     top: props.placement == "top",
                     bottom: props.placement == "bottom",
                 })}
-                onClick={(e) => {
+                onPointerDown={(e) => {
                     e.stopPropagation();
                     setShowDropdown(!showDropdown);
                 }}

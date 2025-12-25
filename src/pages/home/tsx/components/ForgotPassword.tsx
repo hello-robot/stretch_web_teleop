@@ -49,7 +49,7 @@ export const ForgotPassword = (props: {
                 />
             </DialogContent>
             <DialogActions sx={{ pb: 3, px: 3 }}>
-                <Button onClick={props.handleClose}>Cancel</Button>
+                <Button onPointerDown={props.handleClose}>Cancel</Button>
                 <Button variant="contained" type="submit">
                     Continue
                 </Button>

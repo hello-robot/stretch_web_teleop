@@ -54,10 +54,13 @@ export const Panel = (props: CustomizableComponentProps) => {
     }
 
     // Should take up screen size proportional to number of children
-    const flex =
-        activeTabDef.label === "Safety"
-            ? 1
-            : Math.max(activeTabDef.children.length + 1, 1);
+    let flex = Math.max(activeTabDef.children.length + 1, 1);
+    if (activeTabDef.label === "Movement Recorder") flex = 0.7;
+    else if (
+        activeTabDef.children.some((c) => c.type === ComponentType.ButtonGrid)
+    ) {
+        flex = 3;
+    }
 
     /** Props for rendering the children elements inside the active tab */
     const componentListProps: ComponentListProps = {
@@ -109,11 +112,11 @@ export const Panel = (props: CustomizableComponentProps) => {
         props.sharedState.onSelect(props.definition, props.path);
     }
 
-    // Add onClick listener to tab content in customization mode
+    // Add onPointerDown listener to tab content in customization mode
     const selectProp = props.sharedState.customizing
         ? {
-              onClick: selectContent,
-          }
+            onPointerDown: selectContent,
+        }
         : {};
 
     /**
@@ -161,7 +164,7 @@ export const Panel = (props: CustomizableComponentProps) => {
                 <button
                     key={`${tabDef.label}-${idx}`}
                     className={className("tab-button", { active, selected })}
-                    onClick={() => clickTab(idx)}
+                    onPointerDown={() => clickTab(idx)}
                 >
                     {tabDef.label}
                 </button>
@@ -177,7 +180,9 @@ export const Panel = (props: CustomizableComponentProps) => {
                 customizing: props.sharedState.customizing,
                 selected: thisSelected,
             })}
-            style={{ flex: `${flex} ${flex} 0` }}
+            style={{
+                flex: `${flex} ${flex} 0`,
+            }}
         >
             <div className="tabs-header">
                 {definition.children.map(mapTabLabels)}
@@ -191,7 +196,7 @@ export const Panel = (props: CustomizableComponentProps) => {
                     props.sharedState.customizing ? (
                         <button
                             className="tab-button add-tab"
-                            onClick={() => setShowTabModal(true)}
+                            onPointerDown={() => setShowTabModal(true)}
                         >
                             <AddCircleIcon />
                         </button>

@@ -42,22 +42,24 @@
 /* Settings for the buttons on the button pad *********************************/
 
 /*When hovering over a child element of an svg*/
-.button-pads path:hover {
-    fill-opacity: 30%;
+@media (hover: hover) {
+    .button-pads path:hover {
+        fill-opacity: 30%;
+    }
 }
 
 @media (hover: none) {
-    .button-pads path.inactive:hover + image {
+    .button-pads path.inactive:hover+image {
         filter: none !important;
     }
 }
 
 .button-pads image {
     pointer-events: none;
+    touch-action: none;
 }
 
-/* Button pad <image> gets saturated while hovering */
-.button-pads path.inactive:hover + image {
+.button-pads path.inactive:hover+image {
     filter: brightness(50%) sepia(100%) saturate(10000%) hue-rotate(194deg);
 }
 
@@ -98,6 +100,7 @@
 /* Disable hover actions */
 .button-pads.customizing path {
     pointer-events: none;
+    touch-action: none;
 }
 
 .button-pads.selected {

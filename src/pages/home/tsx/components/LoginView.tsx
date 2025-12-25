@@ -213,7 +213,7 @@ export const LoginView = (props) => {
                             <Link
                                 component="button"
                                 type="button"
-                                onClick={handleClickOpen}
+                                onPointerDown={handleClickOpen}
                                 variant="body2"
                                 sx={{ alignSelf: "baseline" }}
                             >
@@ -254,7 +254,7 @@ export const LoginView = (props) => {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        onClick={validateInputs}
+                        onPointerDown={validateInputs}
                     >
                         Sign in
                     </Button>

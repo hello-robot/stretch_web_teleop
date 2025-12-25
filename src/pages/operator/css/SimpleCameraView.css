@@ -51,13 +51,13 @@
 .icon {
     border-radius: 60px;
     background-color: aliceblue;
-    font-size: 100px;
+    font-size: 3rem !important;
     opacity: 0.5;
     color: black;
 }
 
 .simple-overlay {
-    font-size: 50px;
+    font-size: 3rem;
     position: absolute;
     z-index: 4;
     /* margin-top: 75%; */

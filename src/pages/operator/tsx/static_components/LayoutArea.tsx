@@ -41,7 +41,7 @@ export const LayoutArea = (props: LayoutAreaProps) => {
                             sharedState={props.sharedState}
                             parentDef={props.layout}
                         />
-                        <div id="layout-area">
+                        <div className="layout-area">
                             <ComponentList
                                 key={"layout-grid-" + `${index}`}
                                 {...({

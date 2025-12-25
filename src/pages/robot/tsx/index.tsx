@@ -38,6 +38,7 @@ export const robot = new Robot({
     jointStateCallback: forwardJointStates,
     batteryStateCallback: forwardBatteryState,
     occupancyGridCallback: forwardOccupancyGrid,
+    detectObjectCallback: forwardDetectedObjects,
     moveBaseResultCallback: (goalState: ActionState) =>
         forwardActionState(goalState, "moveBaseState"),
     moveToPregraspResultCallback: (goalState: ActionState) =>
@@ -246,6 +247,15 @@ function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
     // } as OccupancyGridMessage);
 }
 
+function forwardDetectedObjects(objects: BoundingBox2D[]) {
+    if (!connection) throw "WebRTC connection undefined";
+
+    connection.sendData({
+        type: "detectedObjects",
+        message: objects,
+    } as DetectedObjectMessage);
+}
+
 function forwardAMCLPose(transform: ROSLIB.Transform) {
     if (!connection) throw "WebRTC connection undefined";
 
@@ -309,6 +319,12 @@ function handleMessage(message: WebRTCMessage) {
         case "setRealsenseBodyPoseEstimate":
             robot.setComputeBodyPose(message.toggle);
             robot.setRealsenseShowBodyPose(message.toggle);
+            break;
+        case "setDetectObjects":
+            robot.detectObjects(message.toggle);
+            break;
+        case "setFeedingMode":
+            robot.setFeedingMode(message.toggle);
             break;
         case "setRunStop":
             robot.setRunStop(message.toggle);

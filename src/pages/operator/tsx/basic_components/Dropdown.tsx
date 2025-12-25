@@ -40,7 +40,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
         return (
             <button
                 key={idx}
-                onClick={() => {
+                onPointerDown={() => {
                     setShowDropdown(false);
                     if (!active) props.onChange(idx);
                 }}
@@ -74,7 +74,7 @@ export const Dropdown = <T extends string | JSX.Element>(props: {
                     top: props.placement == "top",
                     bottom: props.placement == "bottom",
                 })}
-                onClick={() => setShowDropdown(!showDropdown)}
+                onPointerDown={() => setShowDropdown(!showDropdown)}
             >
                 {props.selectedIndex === undefined
                     ? props.placeholderText

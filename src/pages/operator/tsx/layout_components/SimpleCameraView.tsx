@@ -9,6 +9,7 @@ import {
 } from "../function_providers/ButtonFunctionProvider";
 import "operator/css/SimpleCameraView.css";
 import { getIcon } from "../utils/svg";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 
 /**
  * Displays a video stream with an optional button pad overlay
@@ -151,7 +152,7 @@ export const SimpleCameraView = (props: {
  */
 const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     const functs = buttonFunctionProvider.provideFunctions(props.direction);
-    const dir = props.direction.split(" ")[2];
+    const dir = props.direction.split(" ")[1];
     let rotation: string;
 
     // Specify button details based on the direction
@@ -175,17 +176,15 @@ const PanTiltButton = (props: { direction: ButtonPadButton }) => {
     return (
         <button
             className={"simple-overlay btn-" + dir}
-            onPointerDown={functs.onClick}
+            onPointerDown={functs.onPointerDown}
             onPointerUp={functs.onRelease}
             onPointerLeave={functs.onLeave}
         >
             {/* <img height={100} width={100} src={getIcon(props.direction)} className={ButtonState.Inactive} /> */}
-            <span
+            <ArrowRightIcon
                 className="material-icons icon"
                 style={{ transform: `rotate(${rotation}deg)` }}
-            >
-                arrow_right
-            </span>
+            />
         </button>
     );
 };

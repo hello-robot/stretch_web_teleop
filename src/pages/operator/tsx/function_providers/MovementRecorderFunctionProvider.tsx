@@ -3,13 +3,29 @@ import {
     MovementRecorderFunctions,
     MovementRecorderFunction,
 } from "../layout_components/MovementRecorder";
-import { RobotPose, ValidJoints } from "shared/util";
+import {
+    CENTER_WRIST,
+    POINT_WRIST_DOWN,
+    RobotPose,
+    STOW_WRIST_GRIPPER,
+    ValidJoints,
+} from "shared/util";
 import { StorageHandler } from "../storage_handler/StorageHandler";
 
 export class MovementRecorderFunctionProvider extends FunctionProvider {
     private recordPosesHeartbeat?: number; // ReturnType<typeof setInterval>
     private poses: RobotPose[];
     private storageHandler: StorageHandler;
+    private quickActionNames: string[] = [
+        "Center Wrist",
+        "Tuck Wrist",
+        "Point Wrist Down",
+    ];
+    private quickActionPoses: RobotPose[] = [
+        CENTER_WRIST,
+        STOW_WRIST_GRIPPER,
+        POINT_WRIST_DOWN,
+    ];
 
     constructor(storageHandler: StorageHandler) {
         super();
@@ -28,7 +44,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                     wrist_roll: boolean,
                     wrist_pitch: boolean,
                     wrist_yaw: boolean,
-                    gripper: boolean,
+                    gripper: boolean
                 ) => {
                     let prevJoint: ValidJoints | undefined;
                     let prevJointDirection: number | undefined;
@@ -42,7 +58,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                 wrist_roll,
                                 wrist_pitch,
                                 wrist_yaw,
-                                gripper,
+                                gripper
                             );
                         const prevPose =
                             this.poses.length == 0
@@ -53,7 +69,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                 if (
                                     Math.abs(
                                         currentPose[key as ValidJoints]! -
-                                            prevPose[key as ValidJoints]!,
+                                            prevPose[key as ValidJoints]!
                                     ) > 0.025
                                 ) {
                                     // If there is no prevJoint or the current joint moving has changed
@@ -63,7 +79,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                                             currentPose[key as ValidJoints] -
                                                 prevPose[
                                                     prevJoint as ValidJoints
-                                                ],
+                                                ]
                                         );
                                         this.poses.push(currentPose);
                                         return;
@@ -71,7 +87,7 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
 
                                     currJointDirection = Math.sign(
                                         currentPose[key as ValidJoints] -
-                                            prevPose[prevJoint as ValidJoints],
+                                            prevPose[prevJoint as ValidJoints]
                                     );
 
                                     // If the direction of joint movement has not been changed
@@ -117,14 +133,20 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                 };
             case MovementRecorderFunction.SavedRecordingNames:
                 return () => {
-                    return this.storageHandler.getRecordingNames();
+                    return [
+                        ...this.quickActionNames,
+                        ...this.storageHandler.getRecordingNames(),
+                    ];
                 };
             case MovementRecorderFunction.DeleteRecording:
                 return (recordingID: number) => {
+                    if (recordingID < this.quickActionNames.length) return;
                     let recordingNames =
                         this.storageHandler.getRecordingNames();
                     this.storageHandler.deleteRecording(
-                        recordingNames[recordingID],
+                        recordingNames[
+                            recordingID - this.quickActionNames.length
+                        ]
                     );
                 };
             case MovementRecorderFunction.DeleteRecordingName:
@@ -133,12 +155,20 @@ export class MovementRecorderFunctionProvider extends FunctionProvider {
                 };
             case MovementRecorderFunction.LoadRecording:
                 return (recordingID: number) => {
-                    let recordingNames =
-                        this.storageHandler.getRecordingNames();
-                    let recording = this.storageHandler.getRecording(
-                        recordingNames[recordingID],
-                    );
-                    FunctionProvider.remoteRobot?.playbackPoses(recording);
+                    if (recordingID < this.quickActionNames.length) {
+                        FunctionProvider.remoteRobot?.setRobotPose(
+                            this.quickActionPoses[recordingID]
+                        );
+                    } else {
+                        let recordingNames =
+                            this.storageHandler.getRecordingNames();
+                        let recording = this.storageHandler.getRecording(
+                            recordingNames[
+                                recordingID - this.quickActionNames.length
+                            ]
+                        );
+                        FunctionProvider.remoteRobot?.playbackPoses(recording);
+                    }
                 };
             case MovementRecorderFunction.LoadRecordingName:
                 return (name: string) => {

@@ -72,7 +72,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                 <Tooltip text="Play text" position="top">
                     <button
                         className="play-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             functions.Play(text);
                         }}
                     >
@@ -84,7 +84,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                 <Tooltip text="Stop text" position="top">
                     <button
                         className="stop-btn btn-label"
-                        onClick={() => {
+                        onPointerDown={() => {
                             functions.Stop();
                         }}
                     >
@@ -97,7 +97,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                     <Tooltip text="Delete text" position="top">
                         <button
                             className="delete-btn btn-label"
-                            onClick={() => {
+                            onPointerDown={() => {
                                 if (selectedIdx != undefined) {
                                     functions.DeleteText(text.trim());
                                 }
@@ -113,7 +113,7 @@ export const TextToSpeech = (props: { hideLabels: boolean }) => {
                     <Tooltip text={"Save text"} position="top">
                         <button
                             className="save-btn btn-label"
-                            onClick={() => {
+                            onPointerDown={() => {
                                 functions.SaveText(text.trim());
                                 setSavedTexts(functions.SavedTexts());
                             }}

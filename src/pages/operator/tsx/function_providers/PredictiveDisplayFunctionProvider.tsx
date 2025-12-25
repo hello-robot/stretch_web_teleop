@@ -27,7 +27,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
         switch (FunctionProvider.actionMode) {
             case ActionMode.StepActions:
                 return {
-                    onClick: (length: number, angle: number) => {
+                    onPointerDown: (length: number, angle: number) => {
                         this.incrementalBaseDrive(
                             baseLinVel * length,
                             baseAngVel * angle,
@@ -42,7 +42,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                 };
             case ActionMode.PressAndHold:
                 return {
-                    onClick: (length: number, angle: number) => {
+                    onPointerDown: (length: number, angle: number) => {
                         this.continuousBaseDrive(
                             baseLinVel * length,
                             baseAngVel * angle,
@@ -67,7 +67,7 @@ export class PredictiveDisplayFunctionProvider extends FunctionProvider {
                 };
             case ActionMode.ClickClick:
                 return {
-                    onClick: (length: number, angle: number) => {
+                    onPointerDown: (length: number, angle: number) => {
                         if (this.activeVelocityAction) {
                             this.stopCurrentAction();
                             setActiveCallback(false);
