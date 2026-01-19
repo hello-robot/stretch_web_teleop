@@ -1,3 +1,9 @@
+#velocity-control-container {
+    display: flex;
+    margin: 0 16px;
+    max-width: 50%;
+}
+
 #velocity-control-container button:first-of-type {
     border-radius: var(--btn-brdr-radius) 0 0 var(--btn-brdr-radius);
 }

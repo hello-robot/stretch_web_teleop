@@ -25,6 +25,7 @@ export enum ComponentType {
     Map = "Map",
     RunStopButton = "Run Stop Button",
     BatteryGuage = "Battery Gauge",
+    MovementRecorder = "Movement Recorder",
 }
 
 /**

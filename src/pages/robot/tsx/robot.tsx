@@ -20,11 +20,22 @@ import {
 
 export var robotMode: "navigation" | "position" | "unknown" = "position";
 export var rosConnected = false;
+export const movementStatesTerminal = [
+    "Movement canceled!",
+    "Movement succeeded!",
+    "Movement failed!",
+];
+export const movementStatesTransitory = ["Movement executing!"];
+export const movementStatesAll = [
+    ...movementStatesTransitory,
+    ...movementStatesTerminal
+];
 
 // Names of ROS actions
 const moveBaseActionName = "/navigate_to_pose";
 const moveToPregraspActionName = "/move_to_pregrasp";
 const showTabletActionName = "/show_tablet";
+const followJointTrajectoryActionName = "/stretch_controller/follow_joint_trajectory";
 
 export class Robot extends React.Component {
     private ros: ROSLIB.Ros;
@@ -34,7 +45,7 @@ export class Robot extends React.Component {
     private jointLimits: { [key in ValidJoints]?: [number, number] } = {};
     private jointState?: ROSJointState;
     private poseGoal?: ROSLIB.ActionGoal;
-    private poseGoalComplete?: boolean;
+    private poseGoalComplete?: boolean = true;
     private isRunStopped?: boolean;
     private moveBaseGoal?: ROSLIB.ActionGoal;
     private trajectoryClient?: ROSLIB.ActionClient;
@@ -69,6 +80,7 @@ export class Robot extends React.Component {
     private moveBaseResultCallback: (goalState: ActionState) => void;
     private moveToPregraspResultCallback: (goalState: ActionState) => void;
     private showTabletResultCallback: (goalState: ActionState) => void;
+    private playbackPosesResultCallback: (goalState: ActionState) => void;
     private amclPoseCallback: (pose: ROSLIB.Transform) => void;
     private modeCallback: (mode: string) => void;
     private isHomedCallback: (isHomed: boolean) => void;
@@ -93,6 +105,7 @@ export class Robot extends React.Component {
         moveBaseResultCallback: (goalState: ActionState) => void;
         moveToPregraspResultCallback: (goalState: ActionState) => void;
         showTabletResultCallback: (goalState: ActionState) => void;
+        playbackPosesResultCallback: (goalState: ActionState) => void;
         amclPoseCallback: (pose: ROSLIB.Transform) => void;
         modeCallback: (mode: string) => void;
         isHomedCallback: (isHomed: boolean) => void;
@@ -107,6 +120,7 @@ export class Robot extends React.Component {
         this.moveBaseResultCallback = props.moveBaseResultCallback;
         this.moveToPregraspResultCallback = props.moveToPregraspResultCallback;
         this.showTabletResultCallback = props.showTabletResultCallback;
+        this.playbackPosesResultCallback = props.playbackPosesResultCallback;
         this.amclPoseCallback = props.amclPoseCallback;
         this.modeCallback = props.modeCallback;
         this.isHomedCallback = props.isHomedCallback;
@@ -282,6 +296,11 @@ export class Robot extends React.Component {
             "Show Tablet succeeded!",
             "Show Tablet failed!",
         );
+        this.subscribeToActionResult(
+            followJointTrajectoryActionName,
+            this.playbackPosesResultCallback,
+            ...movementStatesAll
+        )
         this.createTrajectoryClient();
         this.createMoveBaseClient();
         this.createMoveToPregraspClient();
@@ -509,19 +528,23 @@ export class Robot extends React.Component {
     subscribeToActionResult(
         actionName: string,
         callback?: (goalState: ActionState) => void,
+        executingMsg?: string,
         cancelMsg?: string,
         successMsg?: string,
         failureMsg?: string,
     ) {
         // Get the messages
+        if (!executingMsg) {
+            executingMsg = "Action " + actionName + " is executing!";
+        }
         if (!cancelMsg) {
-            cancelMsg = "Action " + actionName + "canceled!";
+            cancelMsg = "Action " + actionName + " canceled!";
         }
         if (!successMsg) {
-            successMsg = "Action " + actionName + "succeeded!";
+            successMsg = "Action " + actionName + " succeeded!";
         }
         if (!failureMsg) {
-            failureMsg = "Action " + actionName + "failed!";
+            failureMsg = "Action " + actionName + " failed!";
         }
 
         // Create the topic
@@ -538,15 +561,20 @@ export class Robot extends React.Component {
             let status = msg.status_list.pop()?.status;
             console.log("For action ", actionName, "got status ", status);
             if (callback) {
-                if (status == 5)
+                if (status == 2)
                     callback({
-                        state: cancelMsg,
-                        alert_type: "error",
+                        state: executingMsg,
+                        alert_type: "info",
                     });
                 else if (status == 4)
                     callback({
                         state: successMsg,
                         alert_type: "success",
+                    });
+                else if (status == 5)
+                    callback({
+                        state: cancelMsg,
+                        alert_type: "error",
                     });
                 else if (status == 6)
                     callback({
@@ -560,7 +588,7 @@ export class Robot extends React.Component {
     createTrajectoryClient() {
         this.trajectoryClient = new ROSLIB.ActionHandle({
             ros: this.ros,
-            name: "/stretch_controller/follow_joint_trajectory",
+            name: followJointTrajectoryActionName,
             actionType: "control_msgs/action/FollowJointTrajectory",
         });
     }
@@ -741,13 +769,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -759,13 +787,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set gripper depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set gripper depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set gripper depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set gripper depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -777,9 +805,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set expanded gripper to",
-                          toggle,
-                      )
+                        "Successfully set expanded gripper to",
+                        toggle,
+                    )
                     : console.log("Failed to set expanded gripper to", toggle);
             },
         );
@@ -792,13 +820,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -810,9 +838,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set compute body pose to",
-                          toggle,
-                      )
+                        "Successfully set compute body pose to",
+                        toggle,
+                    )
                     : console.log("Failed to set compute body pose to", toggle);
             },
         );
@@ -820,7 +848,7 @@ export class Robot extends React.Component {
 
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
-        this.setRunStopService?.callService(request, (response: boolean) => {});
+        this.setRunStopService?.callService(request, (response: boolean) => { });
     }
 
     /**
@@ -1055,7 +1083,7 @@ export class Robot extends React.Component {
 
     async executePoseGoals(poses: RobotPose[], index: number) {
         this.switchToNavigationMode();
-        this.stopExecution();
+        // this.stopExecution();
         this.poseGoal = this.makePoseGoals(poses);
         this.trajectoryClient.createClient(this.poseGoal);
     }

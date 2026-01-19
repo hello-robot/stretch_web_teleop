@@ -45,11 +45,18 @@
     border-color: #d3d6d8;
 }
 
+.movement-recorder {
+    color: #41464b;
+    background-color: #e2e3e5;
+    border-color: #d3d6d8;
+}
+
 .secondary {
     color: #055160;
     background-color: #cff4fc;
     border-color: #b6effb;
 }
+
 /* The close button */
 .closebtn {
     margin-left: 15px;
@@ -66,6 +73,7 @@
 .closebtn:hover {
     color: black;
 }
+
 .hide {
     display: none;
 }
