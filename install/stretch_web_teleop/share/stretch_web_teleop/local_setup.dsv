@@ -1,0 +1,4 @@
+source;share/stretch_web_teleop/environment/ament_prefix_path.sh
+source;share/stretch_web_teleop/environment/library_path.sh
+source;share/stretch_web_teleop/environment/path.sh
+source;share/stretch_web_teleop/environment/pythonpath.sh

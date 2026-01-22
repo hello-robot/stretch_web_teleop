@@ -1,0 +1,402 @@
+.execution-monitor-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 200px;
+    min-width: 400px;
+    flex: 3 1 0;
+    width: auto;
+    max-width: 800px;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Responsive design for when sidebar is open */
+@media (max-width: 1600px) {
+    .execution-monitor-root {
+        min-width: 300px;
+        max-width: 600px;
+        font-size: 13px;
+    }
+    
+    .execution-monitor-header {
+        padding: 12px 16px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+    
+    .execution-monitor-stop-button,
+    .execution-monitor-done-button {
+        font-size: 13px;
+        padding: 5px 12px;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .execution-monitor-root {
+        min-width: 250px;
+        max-width: 500px;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+    
+    .execution-monitor-header {
+        padding: 10px 12px;
+        font-size: 11px;
+        min-height: 35px;
+    }
+    
+    .execution-monitor-stop-button,
+    .execution-monitor-done-button {
+        font-size: 12px;
+        padding: 4px 10px;
+        min-width: 70px;
+    }
+    
+    .line-numbers {
+        padding: 6px 10px;
+        min-width: 40px;
+    }
+    
+    .code-display {
+        padding: 6px 10px;
+        line-height: 1.45;
+        font-size: 12px;
+    }
+    
+    .line-number {
+        font-size: 12px;
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
+    }
+    
+    .code-line {
+        height: 19px;
+        line-height: 19px;
+        min-height: 19px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .execution-monitor-root {
+        min-width: 200px;
+        max-width: 400px;
+        font-size: 11px;
+        min-height: 150px;
+        line-height: 1.4;
+    }
+    
+    .execution-monitor-header {
+        padding: 8px 10px;
+        font-size: 10px;
+        min-height: 30px;
+    }
+    
+    .execution-monitor-stop-button,
+    .execution-monitor-done-button {
+        font-size: 11px;
+        padding: 3px 8px;
+        min-width: 60px;
+    }
+    
+    .line-numbers {
+        padding: 4px 8px;
+        min-width: 35px;
+    }
+    
+    .code-display {
+        padding: 4px 8px;
+        line-height: 1.4;
+        font-size: 11px;
+    }
+    
+    .line-number {
+        font-size: 11px;
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
+    }
+    
+    .code-line {
+        height: 16px;
+        line-height: 16px;
+        min-height: 16px;
+        font-size: 11px;
+    }
+}
+
+.execution-monitor-root.customizing {
+    cursor: pointer;
+}
+
+.execution-monitor-root.selected {
+    border: 2px solid var(--selected-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.execution-monitor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--secondary-background-color);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 50px;
+}
+
+.execution-monitor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.execution-monitor-language {
+    color: var(--secondary-text-color);
+    background: var(--tertiary-background-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.execution-monitor-title {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.execution-monitor-stop-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+}
+
+.execution-monitor-stop-button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+.execution-monitor-stop-button:active {
+    background: #c82333;
+}
+
+.execution-monitor-stop-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
+}
+
+.execution-monitor-done-button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+}
+
+.execution-monitor-done-button:hover {
+    filter: brightness(90%);
+    box-shadow: none;
+}
+
+.execution-monitor-done-button:active {
+    background: #45a049;
+}
+
+.execution-monitor-done-button:focus {
+    outline: 2px solid var(--focus-color, rgba(0, 123, 255, 0.5));
+    outline-offset: 2px;
+}
+
+.execution-monitor-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    background: var(--secondary-background-color);
+    border-right: 1px solid var(--border-color);
+    padding: 8px 12px;
+    min-width: 50px;
+    text-align: right;
+    user-select: none;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.line-number {
+    padding: 0;
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    line-height: 1.5;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    min-height: 21px;
+}
+
+.line-number.executing {
+    background-color: rgba(128, 128, 128, 0.2);
+    color: #666666;
+    font-weight: 600;
+}
+
+.monitor-wrapper {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+.code-display {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Syntax highlighting colors */
+.robot-function {
+    color: #ff8c00; 
+    font-weight: 600;
+}
+
+/* Code line styling */
+.code-line {
+    height: 21px;
+    line-height: 21px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+    min-height: 21px;
+    box-sizing: border-box;
+}
+
+/* Executing line highlighting */
+.code-line.executing {
+    background-color: rgba(128, 128, 128, 0.15);
+    border-left: 3px solid #666666;
+    padding-left: 9px; 
+}
+
+/* Error line highlighting */
+.code-line.error {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+    border-left: 3px solid #dc3545 !important;
+    padding-left: 9px !important; 
+}
+
+.line-number.error {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    color: #dc3545 !important;
+    font-weight: 600 !important;
+}
+
+/* Error banner */
+.execution-monitor-error-banner {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.execution-monitor-error-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+
+
+.human-function {
+    color: #28a745; 
+    font-weight: 600;
+}
+
+.saved-position {
+    color: #007bff; 
+    font-weight: normal;
+}
+
+.code-display::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.code-display::-webkit-scrollbar-track {
+    background: var(--secondary-background-color);
+}
+
+.code-display::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.code-display::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-text-color);
+} 

@@ -1,0 +1,52 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from stretch_web_teleop/action/MoveToPregrasp.action
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Duration.idl"
+
+module stretch_web_teleop {
+  module action {
+    module MoveToPregrasp_Goal_Constants {
+      const uint8 PREGRASP_DIRECTION_AUTO = 0;
+      const uint8 PREGRASP_DIRECTION_HORIZONTAL = 1;
+      const uint8 PREGRASP_DIRECTION_VERTICAL = 2;
+    };
+    @verbatim (language="comment", text=
+      "MoveToPregrasp takes in the scaled (u,v) coordinates of a click on the Realsense camera," "\n"
+      "as well as some configuration such as the direction of the pregrasp. It then moves" "\n"
+      "the robot to the pregrasp configuration, giving feedback on the way.")
+    struct MoveToPregrasp_Goal {
+      @verbatim (language="comment", text=
+        "These should be in the range [0.0, 1.0]")
+      double scaled_u;
+
+      double scaled_v;
+
+      uint8 pregrasp_direction;
+    };
+    module MoveToPregrasp_Result_Constants {
+      const uint8 STATUS_SUCCESS = 0;
+      const uint8 STATUS_FAILURE = 1;
+      const uint8 STATUS_CANCELLED = 2;
+      const uint8 STATUS_TIMEOUT = 3;
+      const uint8 STATUS_GOAL_NOT_REACHABLE = 4;
+      const uint8 STATUS_DEPROJECTION_FAILURE = 5;
+      const uint8 STATUS_STRETCH_DRIVER_FAILURE = 6;
+      const uint8 STATUS_JOINTS_IN_COLLISION = 7;
+    };
+    @verbatim (language="comment", text=
+      "Result")
+    struct MoveToPregrasp_Result {
+      uint8 status;
+    };
+    @verbatim (language="comment", text=
+      "Feedback")
+    struct MoveToPregrasp_Feedback {
+      float initial_distance_m;
+
+      float remaining_distance_m;
+
+      builtin_interfaces::msg::Duration elapsed_time;
+    };
+  };
+};

@@ -3,14 +3,54 @@
     align-items: center;
     justify-content: center;
     width: var(--header-btn-width);
+    padding: 6px 12px;
+    font-size: 14px;
 }
 
 #customize-button span {
-    margin-right: 2rem;
+    margin-right: 1rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     #customize-button {
-        width: var(--btn-header-width-med);
+        width: var(--header-btn-width);
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+    #customize-button span {
+        margin-right: 0.75rem;
+    }
+}
+
+@media (max-width: 1000px) {
+    #customize-button {
+        width: var(--header-btn-width-med);
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    #customize-button span {
+        margin-right: 0.5rem;
+    }
+}
+
+@media (max-width: 800px) {
+    #customize-button {
+        width: var(--header-btn-width-small);
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+    #customize-button span {
+        margin-right: 0.25rem;
+    }
+}
+
+@media (max-width: 600px) {
+    #customize-button {
+        width: var(--header-btn-width-xs);
+        padding: 2px 4px;
+        font-size: 10px;
+    }
+    #customize-button span {
+        margin-right: 0.1rem;
     }
 }

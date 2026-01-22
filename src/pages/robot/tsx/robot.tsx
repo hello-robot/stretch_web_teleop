@@ -771,10 +771,13 @@ export class Robot extends React.Component {
     }
 
     setExpandedGripper(toggle: boolean) {
+        console.log(`Robot: setExpandedGripper called with toggle: ${toggle}`);
+        console.log(`Robot: setExpandedGripperService exists:`, !!this.setExpandedGripperService);
         var request = new ROSLIB.ServiceRequest({ data: toggle });
         this.setExpandedGripperService?.callService(
             request,
             (response: boolean) => {
+                console.log(`Robot: setExpandedGripper service response:`, response);
                 response
                     ? console.log(
                           "Successfully set expanded gripper to",

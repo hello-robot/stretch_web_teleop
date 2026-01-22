@@ -4,6 +4,7 @@
     padding: var(--screen-padding);
     flex-direction: column;
     height: auto;
+    display: flex;
 }
 
 /* Remove margin for elements at edges of the layout area */
@@ -17,8 +18,9 @@
 #layout-area,
 .tabs-content {
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex: 1;
 }
 
 @media screen and (orientation: portrait) and (max-device-width: 900px) {

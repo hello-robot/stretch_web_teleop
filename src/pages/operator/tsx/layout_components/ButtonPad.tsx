@@ -99,8 +99,13 @@ export const ButtonPad = (props: ButtonPadProps) => {
             }
             : {};
 
+    const isDisabled = props.sharedState.isExecutingProgram;
+
     return (
-        <div className="button-pad">
+        <div
+            className={className("button-pad-root", { disabled: isDisabled })}
+            style={isDisabled ? { pointerEvents: "none", opacity: 0.5, filter: "grayscale(1)" } : {}}
+        >
             {/* {!overlay && !isMobile? <h4 className="title">{id}</h4> : <></>} */}
             <svg
                 ref={svgRef}
@@ -108,7 +113,7 @@ export const ButtonPad = (props: ButtonPadProps) => {
                     ? SVG_RESOLUTION / props.aspectRatio
                     : SVG_RESOLUTION
                     }`}
-                preserveAspectRatio="none"
+                preserveAspectRatio="xMidYMid meet"
                 className={className("button-pads", {
                     customizing,
                     selected,
@@ -151,14 +156,68 @@ const SingleButton = (props: SingleButtonProps) => {
         ButtonState.Inactive;
     const icon = getIcon(props.funct);
     const title = props.funct;
-    const height = isMobile ? 75 : 85;
-    const width = isMobile ? 75 : 85;
+    
+    // Reduce icon size for Base Forward/Reverse and Arm Lift/Lower buttons
+    const isReducedSizeIcon = props.funct === ButtonPadButton.BaseForward ||
+                              props.funct === ButtonPadButton.BaseReverse ||
+                              props.funct === ButtonPadButton.ArmLift ||
+                              props.funct === ButtonPadButton.ArmLower;
+    
+    const baseHeight = isMobile ? 75 : 85;
+    const baseWidth = isMobile ? 75 : 85;
+    const height = isReducedSizeIcon ? baseHeight * 0.8 : baseHeight;
+    const width = isReducedSizeIcon ? baseWidth * 0.8 : baseWidth;
     const x = props.iconPosition.x - width / 2;
     const y = props.iconPosition.y - height / 2;
+    
+    // Responsive label sizing 
+    const [screenWidth, setScreenWidth] = React.useState(window.innerWidth);
+    
+    React.useEffect(() => {
+        const handleResize = () => setScreenWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    const isSmallScreen = screenWidth < 1200;
+    const isMediumScreen = screenWidth >= 1200 && screenWidth < 1600;
+    
+    const labelWidth = isSmallScreen ? 110 : isMediumScreen ? 120 : 130;
+    const labelHeight = isSmallScreen ? 24 : isMediumScreen ? 28 : 32;
+    const labelFontSize = isSmallScreen ? "12px" : isMediumScreen ? "14px" : "16px";
+    const labelOffsetX = labelWidth / 2;
+    
+    let labelOffsetY = isSmallScreen ? 4 : isMediumScreen ? 5 : 6;
+    
+    // For SimpleButtonPad (Base and Arm), adjust positioning for better centering
+    const isSimpleButtonPad = props.funct === ButtonPadButton.BaseForward || 
+                              props.funct === ButtonPadButton.BaseReverse || 
+                              props.funct === ButtonPadButton.BaseRotateLeft || 
+                              props.funct === ButtonPadButton.BaseRotateRight ||
+                              props.funct === ButtonPadButton.ArmLift || 
+                              props.funct === ButtonPadButton.ArmLower || 
+                              props.funct === ButtonPadButton.ArmExtend || 
+                              props.funct === ButtonPadButton.ArmRetract;
+    
+    if (isSimpleButtonPad) {
+        const isBottomRow = props.iconPosition.y > 250; 
+        if (isBottomRow) {
+            labelOffsetY += 3; 
+        }
+    }
     const disabledDueToNotHomed =
         props.sharedState.robotNotHomed &&
         notHomedDisabledFunctions.has(props.funct);
-    const isDisabled = props.sharedState.customizing || disabledDueToNotHomed;
+    
+    // In Execution Monitor mode, disable teleoperation unless TakeControl is active
+    const disabledInExecutionMonitor = 
+        props.sharedState.programMode === "Execution Monitor" && 
+        !props.sharedState.isTakeControlActive;
+    
+    const isDisabled = props.sharedState.customizing || 
+                      disabledDueToNotHomed || 
+                      props.sharedState.isExecutingProgram ||
+                      disabledInExecutionMonitor;
 
     return (
         <React.Fragment>
@@ -181,7 +240,36 @@ const SingleButton = (props: SingleButtonProps) => {
                     disable: isDisabled,
                 })}
             />
-            <p>{title}</p>
+            <foreignObject
+                x={props.iconPosition.x - labelOffsetX}
+                y={props.iconPosition.y + height/2 + labelOffsetY}
+                width={labelWidth}
+                height={labelHeight}
+                style={{
+                    pointerEvents: "none"
+                }}
+            >
+                <div
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: labelFontSize,
+                        fontWeight: "600",
+                        color: isDisabled ? "#ccc" : "white",
+                        fontFamily: "Arial, sans-serif",
+                        textAlign: "center",
+                        lineHeight: "1.1",
+                        userSelect: "none",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                        whiteSpace: "nowrap"
+                    }}
+                >
+                    {title}
+                </div>
+            </foreignObject>
         </React.Fragment>
     );
 };

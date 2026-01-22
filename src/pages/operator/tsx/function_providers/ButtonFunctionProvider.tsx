@@ -90,12 +90,24 @@ export class ButtonFunctionProvider extends FunctionProvider {
     private operatorCallback?: (buttonStateMap: ButtonStateMap) => void =
         undefined;
 
+    /**
+     * Callback function to update the execution state in the operator.
+     */
+    private executionStateCallback?: (isExecuting: boolean) => void = undefined;
+
+    /**
+     * Current execution state
+     */
+    private isExecutingProgram: boolean = false;
+
     constructor() {
         super();
         this.provideFunctions = this.provideFunctions.bind(this);
         this.updateJointStates = this.updateJointStates.bind(this);
         this.setButtonActiveState = this.setButtonActiveState.bind(this);
         this.setButtonInactiveState = this.setButtonInactiveState.bind(this);
+        this.setExecutionState = this.setExecutionState.bind(this);
+        this.getExecutionState = this.getExecutionState.bind(this);
     }
 
     /**
@@ -189,6 +201,38 @@ export class ButtonFunctionProvider extends FunctionProvider {
         callback: (buttonStateMap: ButtonStateMap) => void,
     ) {
         this.operatorCallback = callback;
+    }
+
+    /**
+     * Sets the local pointer to the operator's execution state callback function.
+     *
+     * @param callback operator's callback function to update the execution state
+     */
+    public setExecutionStateCallback(
+        callback: (isExecuting: boolean) => void,
+    ) {
+        this.executionStateCallback = callback;
+    }
+
+    /**
+     * Sets the execution state and notifies the operator.
+     *
+     * @param isExecuting whether a program is currently executing
+     */
+    public setExecutionState(isExecuting: boolean) {
+        this.isExecutingProgram = isExecuting;
+        if (this.executionStateCallback) {
+            this.executionStateCallback(isExecuting);
+        }
+    }
+
+    /**
+     * Gets the current execution state.
+     *
+     * @returns whether a program is currently executing
+     */
+    public getExecutionState(): boolean {
+        return this.isExecutingProgram;
     }
 
     /**

@@ -1,0 +1,259 @@
+[INFO] [launch]: All log files can be found below /home/hello-robot/.ros/log/2025-07-23-15-01-02-069790-rocky-33083
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [realsense2_camera_node-1]: process started with pid [33105]
+[INFO] [realsense2_camera_node-2]: process started with pid [33107]
+[INFO] [usb_cam-4]: process started with pid [33111]
+[INFO] [stretch_driver-8]: process started with pid [33119]
+[INFO] [d435i_accel_correction-3]: process started with pid [33109]
+[INFO] [tf2_web_republisher-5]: process started with pid [33113]
+[INFO] [joint_state_publisher-6]: process started with pid [33115]
+[INFO] [robot_state_publisher-7]: process started with pid [33117]
+[INFO] [rosbridge_websocket-9]: process started with pid [33121]
+[INFO] [rosapi_node-10]: process started with pid [33123]
+[INFO] [configure_video_streams.py-11]: process started with pid [33125]
+[INFO] [configure_video_streams.py-12]: process started with pid [33127]
+[INFO] [configure_video_streams.py-13]: process started with pid [33129]
+[INFO] [Empty "{}"-14]: process started with pid [33131]
+[INFO] [Bool true-15]: process started with pid [33133]
+[INFO] [move_to_pregrasp.py-16]: process started with pid [33136]
+[INFO] [text_to_speech.py-17]: process started with pid [33139]
+[realsense2_camera_node-2] [0m[INFO] [1753308063.406884002] [gripper_camera]: RealSense ROS v4.55.1[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.407215822] [gripper_camera]: Built with LibRealSense v2.55.1[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.407238389] [gripper_camera]: Running with LibRealSense v2.55.1[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.474083357] [camera]: RealSense ROS v4.55.1[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.475520280] [camera]: Built with LibRealSense v2.55.1[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.480053213] [camera]: Running with LibRealSense v2.55.1[0m
+[rosbridge_websocket-9] registered capabilities (classes):
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.call_service.CallService'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.advertise.Advertise'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.publish.Publish'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.subscribe.Subscribe'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.defragmentation.Defragment'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.advertise_service.AdvertiseService'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.service_response.ServiceResponse'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.unadvertise_service.UnadvertiseService'>
+[rosbridge_websocket-9]  - <class 'rosbridge_library.capabilities.action_client.ActionClientRequests'>
+[realsense2_camera_node-2] [0m[INFO] [1753308063.695597062] [gripper_camera]: Device with serial number 239122073017 was found.
+[realsense2_camera_node-2] [0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.695934927] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2-1:1.0/video4linux/video0 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.695987141] [gripper_camera]: Device with name Intel RealSense D435I was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.696275804] [gripper_camera]: Device with port number 2-1 was found.[0m
+[rosbridge_websocket-9] Traceback (most recent call last):
+[rosbridge_websocket-9]   File "/home/hello-robot/ament_ws/install/rosbridge_server/lib/rosbridge_server/rosbridge_websocket", line 349, in <module>
+[rosbridge_websocket-9]     main()
+[rosbridge_websocket-9]   File "/home/hello-robot/ament_ws/install/rosbridge_server/lib/rosbridge_server/rosbridge_websocket", line 332, in main
+[rosbridge_websocket-9]     node = RosbridgeWebsocketNode()
+[rosbridge_websocket-9]   File "/home/hello-robot/ament_ws/install/rosbridge_server/lib/rosbridge_server/rosbridge_websocket", line 163, in __init__
+[rosbridge_websocket-9]     server = HTTPServer(application, ssl_options=ssl_options)
+[rosbridge_websocket-9]   File "/home/hello-robot/.local/lib/python3.10/site-packages/tornado/util.py", line 276, in __new__
+[rosbridge_websocket-9]     instance.initialize(*args, **init_kwargs)
+[rosbridge_websocket-9]   File "/home/hello-robot/.local/lib/python3.10/site-packages/tornado/httpserver.py", line 199, in initialize
+[rosbridge_websocket-9]     TCPServer.__init__(
+[rosbridge_websocket-9]   File "/home/hello-robot/.local/lib/python3.10/site-packages/tornado/tcpserver.py", line 149, in __init__
+[rosbridge_websocket-9]     raise ValueError(
+[rosbridge_websocket-9] ValueError: certfile "/home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/certificates/stretch-se3-3006+6.pem" does not exist
+[realsense2_camera_node-1] [0m[INFO] [1753308063.832921254] [camera]: Device with serial number 239122073017 was found.
+[realsense2_camera_node-1] [0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.833082706] [camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2-1:1.0/video4linux/video0 was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.833116456] [camera]: Device with name Intel RealSense D435I was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.833380306] [camera]: Device with port number 2-1 was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.833433767] [camera]: Device USB type: 3.2[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308063.833456096] [camera]: Resetting device...[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.887734589] [gripper_camera]: Device with serial number 130322274253 was found.
+[realsense2_camera_node-2] [0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.887881514] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:14.0/usb3/3-2/3-2.3/3-2.3.3/3-2.3.3.1/3-2.3.3.1:1.0/video4linux/video8 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.887899662] [gripper_camera]: Device with name Intel RealSense D405 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.888215486] [gripper_camera]: Device with port number 3-2.3.3.1 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.888238643] [gripper_camera]: Device USB type: 2.1[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308063.888252514] [gripper_camera]: Device 130322274253 is connected using a 2.1 port. Reduced performance is expected.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308063.888264361] [gripper_camera]: Resetting device...[0m
+[d435i_accel_correction-3] [INFO] [1753308064.049092192] [d435i_accel_correction_node]: d435i_accel_correction_node started
+[usb_cam-4] [0m[INFO] [1753308064.126738166] [navigation_camera]: Starting USB Camera Node...[0m
+[ERROR] [rosbridge_websocket-9]: process has died [pid 33121, exit code 1, cmd '/home/hello-robot/ament_ws/install/rosbridge_server/lib/rosbridge_server/rosbridge_websocket --ros-args -r __node:=rosbridge_websocket --params-file /tmp/launch_params_4oou9nvy --params-file /tmp/launch_params_f1tvhdsy --params-file /tmp/launch_params_264kbdff --params-file /tmp/launch_params_zfzr3ptj --params-file /tmp/launch_params_61s54szx --params-file /tmp/launch_params_0hv7izt3 --params-file /tmp/launch_params_ie8orav3 --params-file /tmp/launch_params__hnwjy7y --params-file /tmp/launch_params_x7q4z_2r --params-file /tmp/launch_params_obt3h5jm --params-file /tmp/launch_params_m2fatls0 --params-file /tmp/launch_params_00gn40sp --params-file /tmp/launch_params_3l1aqpmp --params-file /tmp/launch_params__w9ymak_'].
+[text_to_speech.py-17] [INFO] [1753308064.208161914] [text_to_speech]: Created!
+[text_to_speech.py-17] [INFO] [1753308064.211262706] [text_to_speech]: Running!
+[usb_cam-4] [0m[INFO] [1753308064.228849147] [navigation_camera]: Camera Port: /dev/hello-nav-head-camera[0m
+[usb_cam-4] [0m[INFO] [1753308064.229616662] [navigation_camera]: Published to topic: /navigation_camera/image_raw[0m
+[usb_cam-4] [0m[INFO] [1753308064.230246986] [navigation_camera]: Camera Properties Applied: {'format': 'MJPG', 'size': [800, 600], 'fps': 15, 'brightness': 10, 'contrast': 30, 'saturation': 80, 'hue': 0, 'gamma': 80, 'gain': 10, 'white_balence_temp': 4600, 'sharpness': 3, 'backlight': 1}[0m
+[stretch_driver-8] /usr/lib/python3/dist-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.17.3 and <1.25.0 is required for this version of SciPy (detected version 1.26.4
+[stretch_driver-8]   warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+[Bool true-15] Node not found
+[move_to_pregrasp.py-16] /usr/lib/python3/dist-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.17.3 and <1.25.0 is required for this version of SciPy (detected version 1.26.4
+[move_to_pregrasp.py-16]   warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+[ERROR] [Bool true-15]: process has died [pid 33133, exit code 1, cmd '/opt/ros/humble/bin/ros2 param set /rosbridge_websocket std_msgs/msg/Bool true'].
+[move_to_pregrasp.py-16] [INFO] [1753308066.030065542] [move_to_pregrasp]: Created!
+[move_to_pregrasp.py-16] [INFO] [1753308066.048648619] [move_to_pregrasp]: Waiting for the get joint states service...
+[stretch_driver-8] [0m[INFO] [1753308066.095422703] [stretch_driver]: For use with S T R E T C H (TM) RESEARCH EDITION from Hello Robot Inc.[0m
+[stretch_driver-8] [0m[INFO] [1753308066.095785717] [stretch_driver]: stretch_driver started[0m
+[stretch_driver-8] [33m[WARN] [1753308066.866001171] [stretch_driver]: Robot not homed. Call /home_the_robot service.[0m
+[stretch_driver-8] Key mapped to End-Of-Arm Tool: eoa_wrist_dw3_tool_sg3
+[stretch_driver-8] [0m[INFO] [1753308067.887488908] [stretch_driver]: broadcast_odom_tf = True[0m
+[stretch_driver-8] [0m[INFO] [1753308067.950762714] [stretch_driver]: rate = 30.0 Hz[0m
+[stretch_driver-8] [0m[INFO] [1753308067.952078751] [stretch_driver]: twist timeout = 0.5 s[0m
+[stretch_driver-8] [0m[INFO] [1753308067.952736775] [stretch_driver]: base_frame_id = base_link[0m
+[stretch_driver-8] [0m[INFO] [1753308067.959624915] [stretch_driver]: odom_frame_id = odom[0m
+[stretch_driver-8] [0m[INFO] [1753308068.067122949] [stretch_driver]: Changed to mode = position[0m
+[move_to_pregrasp.py-16] [INFO] [1753308068.074466771] [move_to_pregrasp]: Received the joint limits.
+[move_to_pregrasp.py-16] [ERROR] [1753308068.075153984] [move_to_pregrasp]: Failed to get velocity limits for joint name: Joint.WRIST_EXTENSION
+[realsense2_camera_node-1] [0m[INFO] [1753308070.002810528] [camera]: Device with serial number 239122073017 was found.
+[realsense2_camera_node-1] [0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.002937914] [camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2-1:1.0/video4linux/video0 was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.002962265] [camera]: Device with name Intel RealSense D435I was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.003183974] [camera]: Device with port number 2-1 was found.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.003232742] [camera]: Device USB type: 3.2[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.003309602] [camera]: getParameters...[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.003517240] [gripper_camera]: Device with serial number 239122073017 was found.
+[realsense2_camera_node-2] [0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.003603874] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2-1:1.0/video4linux/video0 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.003629389] [gripper_camera]: Device with name Intel RealSense D435I was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.003825095] [gripper_camera]: Device with port number 2-1 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056342625] [gripper_camera]: Device with serial number 130322274253 was found.
+[realsense2_camera_node-2] [0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056408772] [gripper_camera]: Device with physical ID /sys/devices/pci0000:00/0000:00:14.0/usb3/3-2/3-2.3/3-2.3.3/3-2.3.3.1/3-2.3.3.1:1.0/video4linux/video8 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056429279] [gripper_camera]: Device with name Intel RealSense D405 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056617075] [gripper_camera]: Device with port number 3-2.3.3.1 was found.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056641640] [gripper_camera]: Device USB type: 2.1[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.056655404] [gripper_camera]: Device 130322274253 is connected using a 2.1 port. Reduced performance is expected.[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.056701628] [gripper_camera]: getParameters...[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318462878] [camera]: JSON file is loaded! (/home/hello-robot/ament_ws/install/stretch_core/share/stretch_core/config/HighAccuracyPreset.json)[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318649148] [camera]: Device Name: Intel RealSense D435I[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318697811] [camera]: Device Serial No: 239122073017[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318707432] [camera]: Device physical port: /sys/devices/pci0000:00/0000:00:0d.0/usb2/2-1/2-1:1.0/video4linux/video0[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318714808] [camera]: Device FW version: 5.15.1[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318725844] [camera]: Device Product ID: 0x0B3A[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.318735516] [camera]: Sync Mode: On[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344237527] [gripper_camera]: JSON file is loaded! (/home/hello-robot/ament_ws/install/stretch_core/share/stretch_core/config/HighAccuracyPreset.json)[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344317012] [gripper_camera]: Device Name: Intel RealSense D405[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344325030] [gripper_camera]: Device Serial No: 130322274253[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344330613] [gripper_camera]: Device physical port: /sys/devices/pci0000:00/0000:00:14.0/usb3/3-2/3-2.3/3-2.3.3/3-2.3.3.1/3-2.3.3.1:1.0/video4linux/video8[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344337341] [gripper_camera]: Device FW version: 5.12.14.100[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344344646] [gripper_camera]: Device Product ID: 0x0B5B[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.344350705] [gripper_camera]: Sync Mode: On[0m
+[realsense2_camera_node-1] [33m[WARN] [1753308070.431335604] [camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [33m[WARN] [1753308070.431955624] [camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [33m[WARN] [1753308070.432384405] [camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [33m[WARN] [1753308070.437245095] [camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [33m[WARN] [1753308070.438024784] [camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.438792329] [camera]: Set ROS param gyro_fps to default: 200[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.438859202] [camera]: Set ROS param accel_fps to default: 100[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.448331996] [camera]: Stopping Sensor: Depth Module[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.448579475] [camera]: Stopping Sensor: RGB Camera[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.466782568] [camera]: Starting Sensor: Depth Module[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.468003714] [camera]: Open profile: stream_type: Depth(0), Format: Z16, Width: 424, Height: 240, FPS: 15[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.469464875] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.469560143] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.469624196] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.470529080] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.471311907] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-2] [33m[WARN] [1753308070.471991677] [gripper_camera]: re-enable the stream for the change to take effect.[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.479244655] [camera]: Starting Sensor: RGB Camera[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.480827398] [gripper_camera]: Stopping Sensor: Depth Module[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.481131928] [camera]: Open profile: stream_type: Color(0), Format: RGB8, Width: 424, Height: 240, FPS: 15[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308070.485451835] [camera]: RealSense Node Is Up![0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.510360457] [gripper_camera]: Starting Sensor: Depth Module[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.517325466] [gripper_camera]: Open profile: stream_type: Color(0), Format: RGB8, Width: 480, Height: 270, FPS: 15[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.517607650] [gripper_camera]: Open profile: stream_type: Depth(0), Format: Z16, Width: 480, Height: 270, FPS: 15[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308070.521007639] [gripper_camera]: RealSense Node Is Up![0m
+[realsense2_camera_node-2] [33m[WARN] [1753308071.016772799] [gripper_camera]: No stream match for pointcloud chosen texture Process - Color[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308101.960985736] [rclcpp]: signal_handler(signum=2)[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.962890470] [rclcpp]: signal_handler(signum=2)[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.966201835] [camera]: Stop Sensor: Depth Module[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.966297596] [camera]: Close Sensor. [0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.969765225] [camera]: Close Sensor - Done. [0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.969873296] [camera]: Stop Sensor: RGB Camera[0m
+[realsense2_camera_node-1] [0m[INFO] [1753308101.969891480] [camera]: Close Sensor. [0m
+[realsense2_camera_node-2] [0m[INFO] [1753308101.967536354] [gripper_camera]: Stop Sensor: Depth Module[0m
+[realsense2_camera_node-2] [0m[INFO] [1753308101.967645097] [gripper_camera]: Close Sensor. [0m
+[configure_video_streams.py-12] ['/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py', '/home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml', 'False', 'False', 'True', 'False', '--ros-args', '-r', '__node:=configure_video_streams_realsense', '--params-file', '/tmp/launch_params_uqi9cvnk']
+[configure_video_streams.py-12] Publishing reconfigured video stream
+[tf2_web_republisher-5] Traceback (most recent call last):
+[tf2_web_republisher-5]   File "/home/hello-robot/ament_ws/install/tf2_web_republisher_py/lib/tf2_web_republisher_py/tf2_web_republisher", line 33, in <module>
+[tf2_web_republisher-5]     sys.exit(load_entry_point('tf2-web-republisher-py', 'console_scripts', 'tf2_web_republisher')())
+[tf2_web_republisher-5]   File "/home/hello-robot/ament_ws/build/tf2_web_republisher_py/tf2_web_republisher_py/tf2_web_republisher_py.py", line 241, in main
+[tf2_web_republisher-5]     rclpy.spin(tf_republisher_node) #, executor)
+[tf2_web_republisher-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 226, in spin
+[tf2_web_republisher-5]     executor.spin_once()
+[tf2_web_republisher-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 751, in spin_once
+[tf2_web_republisher-5]     self._spin_once_impl(timeout_sec)
+[tf2_web_republisher-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 740, in _spin_once_impl
+[tf2_web_republisher-5]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[tf2_web_republisher-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 723, in wait_for_ready_callbacks
+[tf2_web_republisher-5]     return next(self._cb_iter)
+[tf2_web_republisher-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 620, in _wait_for_ready_callbacks
+[tf2_web_republisher-5]     wait_set.wait(timeout_nsec)
+[tf2_web_republisher-5] KeyboardInterrupt
+[d435i_accel_correction-3] interrupt received, so shutting down
+[move_to_pregrasp.py-16] Traceback (most recent call last):
+[move_to_pregrasp.py-16]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/move_to_pregrasp.py", line 1025, in <module>
+[move_to_pregrasp.py-16]     main(sys.argv[1:])
+[move_to_pregrasp.py-16]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/move_to_pregrasp.py", line 1018, in main
+[move_to_pregrasp.py-16]     spin_thread.join()
+[move_to_pregrasp.py-16]   File "/usr/lib/python3.10/threading.py", line 1096, in join
+[move_to_pregrasp.py-16]     self._wait_for_tstate_lock()
+[move_to_pregrasp.py-16]   File "/usr/lib/python3.10/threading.py", line 1116, in _wait_for_tstate_lock
+[move_to_pregrasp.py-16]     if lock.acquire(block, timeout):
+[move_to_pregrasp.py-16] KeyboardInterrupt
+[configure_video_streams.py-11] ['/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py', '/home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml', 'False', 'True', 'False', 'False', '--ros-args', '-r', '__node:=configure_video_streams_overhead', '--params-file', '/tmp/launch_params_gn9_lhob']
+[configure_video_streams.py-11] Publishing reconfigured video stream
+[stretch_driver-8] Caught signal 2
+[realsense2_camera_node-2] [0m[INFO] [1753308101.981503423] [gripper_camera]: Close Sensor - Done. [0m
+[configure_video_streams.py-13] ['/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py', '/home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml', 'False', 'False', 'False', 'True', '--ros-args', '-r', '__node:=configure_video_streams_gripper', '--params-file', '/tmp/launch_params_xf0uwwvy']
+[configure_video_streams.py-13] Publishing reconfigured video stream
+[realsense2_camera_node-1] [0m[INFO] [1753308102.028703575] [camera]: Close Sensor - Done. [0m
+[text_to_speech.py-17] Traceback (most recent call last):
+[text_to_speech.py-17]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/text_to_speech.py", line 181, in <module>
+[text_to_speech.py-17]     main()
+[text_to_speech.py-17]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/text_to_speech.py", line 177, in main
+[text_to_speech.py-17]     rclpy.shutdown()
+[text_to_speech.py-17]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[text_to_speech.py-17]     _shutdown(context=context)
+[text_to_speech.py-17]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[text_to_speech.py-17]     return context.shutdown()
+[text_to_speech.py-17]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[text_to_speech.py-17]     self.__context.shutdown()
+[text_to_speech.py-17] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[INFO] [robot_state_publisher-7]: process has finished cleanly [pid 33117]
+[configure_video_streams.py-13] Traceback (most recent call last):
+[configure_video_streams.py-13]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py", line 1110, in <module>
+[configure_video_streams.py-13]     rclpy.shutdown()
+[configure_video_streams.py-13]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[configure_video_streams.py-13]     _shutdown(context=context)
+[configure_video_streams.py-13]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[configure_video_streams.py-13]     return context.shutdown()
+[configure_video_streams.py-13]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[configure_video_streams.py-13]     self.__context.shutdown()
+[configure_video_streams.py-13] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[configure_video_streams.py-11] Traceback (most recent call last):
+[configure_video_streams.py-11]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py", line 1110, in <module>
+[configure_video_streams.py-11]     rclpy.shutdown()
+[configure_video_streams.py-11]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[configure_video_streams.py-11]     _shutdown(context=context)
+[configure_video_streams.py-11]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[configure_video_streams.py-11]     return context.shutdown()
+[configure_video_streams.py-11]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[configure_video_streams.py-11]     self.__context.shutdown()
+[configure_video_streams.py-11] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[configure_video_streams.py-12] Traceback (most recent call last):
+[configure_video_streams.py-12]   File "/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py", line 1110, in <module>
+[configure_video_streams.py-12]     rclpy.shutdown()
+[configure_video_streams.py-12]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[configure_video_streams.py-12]     _shutdown(context=context)
+[configure_video_streams.py-12]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[configure_video_streams.py-12]     return context.shutdown()
+[configure_video_streams.py-12]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[configure_video_streams.py-12]     self.__context.shutdown()
+[configure_video_streams.py-12] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[ERROR] [tf2_web_republisher-5]: process has died [pid 33113, exit code -2, cmd '/home/hello-robot/ament_ws/install/tf2_web_republisher_py/lib/tf2_web_republisher_py/tf2_web_republisher --ros-args -r __node:=tf2_web_republisher_node'].
+[ERROR] [Empty "{}"-14]: process has died [pid 33131, exit code -2, cmd '/opt/ros/humble/bin/ros2 service call /reinitialize_global_localization std_srvs/srv/Empty "{}"'].
+[INFO] [d435i_accel_correction-3]: process has finished cleanly [pid 33109]
+[INFO] [joint_state_publisher-6]: process has finished cleanly [pid 33115]
+[ERROR] [text_to_speech.py-17]: process has died [pid 33139, exit code 1, cmd '/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/text_to_speech.py gtts --ros-args'].
+[INFO] [usb_cam-4]: process has finished cleanly [pid 33111]
+[INFO] [rosapi_node-10]: process has finished cleanly [pid 33123]
+[ERROR] [move_to_pregrasp.py-16]: process has died [pid 33136, exit code -2, cmd '/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/move_to_pregrasp.py /home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml --ros-args'].
+[ERROR] [configure_video_streams.py-13]: process has died [pid 33129, exit code 1, cmd '/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py /home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml False False False True --ros-args -r __node:=configure_video_streams_gripper --params-file /tmp/launch_params_xf0uwwvy'].
+[ERROR] [configure_video_streams.py-11]: process has died [pid 33125, exit code 1, cmd '/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py /home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml False True False False --ros-args -r __node:=configure_video_streams_overhead --params-file /tmp/launch_params_gn9_lhob'].
+[ERROR] [configure_video_streams.py-12]: process has died [pid 33127, exit code 1, cmd '/home/hello-robot/dev_ws/install/stretch_web_teleop/lib/stretch_web_teleop/configure_video_streams.py /home/hello-robot/dev_ws/install/stretch_web_teleop/share/stretch_web_teleop/config/configure_video_streams_params.yaml False False True False --ros-args -r __node:=configure_video_streams_realsense --params-file /tmp/launch_params_uqi9cvnk'].
+[INFO] [realsense2_camera_node-1]: process has finished cleanly [pid 33105]
+[INFO] [realsense2_camera_node-2]: process has finished cleanly [pid 33107]
+[INFO] [stretch_driver-8]: process has finished cleanly [pid 33119]

@@ -256,6 +256,7 @@ function forwardAMCLPose(transform: ROSLIB.Transform) {
 }
 
 function handleMessage(message: WebRTCMessage) {
+    console.log(`Robot: received message:`, message);
     if (!("type" in message)) {
         console.error("Malformed message:", message);
         return;
@@ -304,6 +305,7 @@ function handleMessage(message: WebRTCMessage) {
             robot.setGripperDepthSensing(message.toggle);
             break;
         case "setExpandedGripper":
+            console.log(`Robot: received setExpandedGripper command with toggle: ${message.toggle}`);
             robot.setExpandedGripper(message.toggle);
             break;
         case "setRealsenseBodyPoseEstimate":
@@ -321,6 +323,7 @@ function handleMessage(message: WebRTCMessage) {
             break;
         case "getHasBetaTeleopKit":
             robot.getHasBetaTeleopKit();
+            break;
         case "moveToPregrasp":
             robot.executeMoveToPregraspGoal(
                 message.scaled_x,
@@ -366,9 +369,8 @@ window.onbeforeunload = () => {
     connection.hangup();
 };
 
-// New method of rendering in react 18
 const container = document.getElementById("root");
-const root = createRoot(container!); // createRoot(container!) if you use TypeScript
+const root = createRoot(container!); 
 root.render(
     <AllVideoStreamComponent
         streams={[navigationStream, realsenseStream, gripperStream]}

@@ -5,7 +5,7 @@
     height: 100%;
     background-color: var(--gray-bg);
     display: grid;
-    grid-template-rows: 5rem auto 7rem;
+    grid-template-rows: 5rem auto 4rem;
     transition: width 0.5s ease-out;
     /* Darken the gray background color from index.css */
     --header-bg: color-mix(in srgb, var(--gray-bg) 90%, black);
@@ -45,18 +45,18 @@
 }
 
 #delete-button {
-    font-size: 3rem;
-    padding: 1rem;
+    font-size: 2rem;
+    padding: 0.5rem;
     /* Center it */
     display: block;
     width: 90%;
-    margin: 0.8rem auto;
+    margin: 0.4rem auto;
 }
 
 /* Options ********************************************************************/
 
 #sidebar-options > button {
-    height: 5rem;
+    height: 2.5rem;
     width: 100%;
 }
 
@@ -68,7 +68,7 @@
     display: inline-block;
     margin-right: 1rem;
     width: 7rem;
-    height: 5rem;
+    height: 2.5rem;
     border-radius: var(--btn-brdr-radius);
 }
 
@@ -156,6 +156,40 @@
     margin-bottom: 0.4rem;
 }
 
+/* Responsive adjustments for global settings */
+@media (max-width: 1400px) {
+    #global-settings button {
+        height: 2.5rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.3rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    #global-settings button {
+        height: 2.2rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.2rem;
+    }
+}
+
+@media (max-width: 900px) {
+    #global-settings button {
+        height: 2rem;
+    }
+    
+    #global-settings > *,
+    .provider-tab {
+        margin-bottom: 0.15rem;
+    }
+}
+
 #load-layout-modal .dropdown p {
     margin: 0;
 }
@@ -179,18 +213,4 @@
     text-wrap: wrap;
 }
 
-@media (max-width: 900px) {
-    #sidebar {
-        grid-template-rows: auto;
-    }
 
-    #delete-button {
-        font-size: x-large;
-        padding: 0.1rem;
-    }
-
-    #sidebar-body {
-        display: block;
-        overflow: scroll;
-    }
-}

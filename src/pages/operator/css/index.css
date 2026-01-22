@@ -25,6 +25,12 @@
     --path-blue: hsl(170, 37%, 53%);
 
     --shadow-bottom: 3px 0px 0px var(--shadow-color);
+
+    --border-color: hsl(0, 0%, 80%);
+    --secondary-background-color: hsl(0, 0%, 95%);
+    --text-color: hsl(0, 0%, 20%);
+    --secondary-text-color: hsl(0, 0%, 60%);
+    --tertiary-background-color: hsl(0, 0%, 90%);
 }
 
 * {
