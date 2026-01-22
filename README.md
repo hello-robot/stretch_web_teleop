@@ -87,16 +87,16 @@ First, navigate to the folder containing the codebase using:
 colcon_cd stretch_web_teleop
 ```
 
-Next, launch the interface:
+Next, launch the interface and watch for file changes:
 
 ```
-./launch_interface
+./launch_interface.sh
 ```
 
-If you'd like to launch the interface with a map run:
+Alternatively, you can launch the interface with a map with:
 
 ```
-./launch_interface -m maps/<NAME_OF_MAP>.yaml
+./launch_interface.sh -m maps/<NAME_OF_MAP>.yaml
 ```
 
 In the terminal, you will see output similar to:
