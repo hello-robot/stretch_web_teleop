@@ -459,6 +459,7 @@ export class Robot extends React.Component {
                     "eoa_wrist_dw3_tool_sg3",
                     "tool_stretch_dex_wrist",
                     "tool_stretch_gripper",
+                    "eoa_wrist_dw3_aloha_gripper",
                 ].includes(value)
             ) {
                 this.subscribeToGripperFingerTF();
@@ -741,13 +742,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -759,13 +760,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set gripper depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set gripper depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set gripper depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set gripper depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -777,9 +778,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set expanded gripper to",
-                          toggle,
-                      )
+                        "Successfully set expanded gripper to",
+                        toggle,
+                    )
                     : console.log("Failed to set expanded gripper to", toggle);
             },
         );
@@ -792,13 +793,13 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set realsense depth sensing to",
-                          toggle,
-                      )
+                        "Successfully set realsense depth sensing to",
+                        toggle,
+                    )
                     : console.log(
-                          "Failed to set realsense depth sensing to",
-                          toggle,
-                      );
+                        "Failed to set realsense depth sensing to",
+                        toggle,
+                    );
             },
         );
     }
@@ -810,9 +811,9 @@ export class Robot extends React.Component {
             (response: boolean) => {
                 response
                     ? console.log(
-                          "Successfully set compute body pose to",
-                          toggle,
-                      )
+                        "Successfully set compute body pose to",
+                        toggle,
+                    )
                     : console.log("Failed to set compute body pose to", toggle);
             },
         );
@@ -820,7 +821,7 @@ export class Robot extends React.Component {
 
     setRunStop(toggle: boolean) {
         var request = new ROSLIB.ServiceRequest({ data: toggle });
-        this.setRunStopService?.callService(request, (response: boolean) => {});
+        this.setRunStopService?.callService(request, (response: boolean) => { });
     }
 
     /**
@@ -1278,6 +1279,9 @@ export class Robot extends React.Component {
         if (!jointLimits) return;
 
         var eps = 0.03;
+        if (jointName === "joint_gripper_finger_left" || jointName === "joint_gripper_finger_right") {
+            eps = 0.06; // More forgiving for gripper to account for physical hard stops
+        }
         let inLimits: [boolean, boolean] = [true, true];
         inLimits[0] = jointValue - eps >= jointLimits[0]; // Lower joint limit
         inLimits[1] = jointValue + eps <= jointLimits[1]; // Upper joint limit

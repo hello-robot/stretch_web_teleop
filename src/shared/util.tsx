@@ -63,7 +63,7 @@ export function getStretchTool(stretchTool: string) {
     if (stretchTool === "eoa_wrist_dw3_tool_tablet_12in") {
         return StretchTool.TABLET;
     } else if (
-        ["eoa_wrist_dw3_tool_sg3", "tool_stretch_dex_wrist"].includes(
+        ["eoa_wrist_dw3_tool_sg3", "tool_stretch_dex_wrist", "eoa_wrist_dw3_aloha_gripper"].includes(
             stretchTool,
         )
     ) {

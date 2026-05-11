@@ -245,7 +245,7 @@ class StretchIKControl:
             Joint.ARM_LIFT: ("lift", "vel_m"),
             Joint.ARM_L0: ("arm", "vel_m"),
             Joint.COMBINED_ARM: ("arm", "vel_m"),
-            Joint.WRIST_EXTENSION: ("arm", "vel"),
+            Joint.WRIST_EXTENSION: ("arm", "vel_m"),
             Joint.WRIST_YAW: ("wrist_yaw", "vel"),
             Joint.WRIST_PITCH: ("wrist_pitch", "vel"),
             Joint.WRIST_ROLL: ("wrist_roll", "vel"),
